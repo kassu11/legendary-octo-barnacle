@@ -1,9 +1,13 @@
+import * as querys from "./querys.js";
 
+console.log(querys.anilistAnime);
 const api = {
   anilist: {
     mediaId: anilistGetMediaById,
+    trendingAnime: anilistTrendingAnime,
   }
 };
+
 export default api;
 
 
@@ -17,10 +21,7 @@ class Fetch {
     this.method = method;
     this.headers = headers || defaultHeader;
     this.body = body;
-    this.rest = rest;
     this.cache = cache;
-
-    console.assert(Object.keys(rest).length <= 1, "Too many unknown fetch values");
 
     this.cacheKey = this.#generateCacheKey();
   }
@@ -40,7 +41,6 @@ class Fetch {
       method: this.method,
       headers: this.headers,
       body: JSON.stringify(this.body),
-      mode: this.rest?.mode,
     }
 
     const response = await fetch(this.url, opt);
@@ -81,9 +81,7 @@ async function cache(fetchObject) {
       const store = tx.objectStore(STORE_NAME);
       const getReg = store.get(fetchObject.cacheKey);
       getReg.onsuccess = async evt => {
-        console.log("clicked user:", evt.target.result);
         if(evt.target.result == null) {
-
           const data = await fetchObject.send();
 
           const tx = db.transaction(STORE_NAME, "readwrite");
@@ -95,7 +93,7 @@ async function cache(fetchObject) {
         } else {
           console.assert(evt.target.result.exspires, "Cache should have a expiration date");
           console.assert(evt.target.result.data, "Cache should always have data");
-          res(evt.target.result.data);
+          res(evt.target.result);
         }
       };
 
@@ -121,22 +119,19 @@ async function cache(fetchObject) {
 
 async function anilistGetMediaById(id) {
   console.assert(id, "No id given");
-  const query = `query media($id:Int, $type:MediaType) {
-  Media (id: $id, type: $type) {
-    id
-    genres
-    siteUrl
-    meanScore
-    title {
-      romaji
-      english
-      native
-      userPreferred
-    }
-  }
-}`;
+  const request = Fetch.anilist(querys.anilistAnime, { mediaId: id, perPage: 6 })
+  return await cache(request);
+}
 
-  const request = Fetch.anilist(query, { id })
+async function anilistTrendingAnime() {
+  const request = Fetch.anilist(querys.trendingAnime, {
+    "type": "ANIME",
+    "season": "WINTER",
+    "seasonYear": 2025,
+    "nextSeason": "SPRING",
+    "nextYear": 2025
+  });
+
   return await cache(request);
 }
 
