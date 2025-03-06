@@ -9,7 +9,7 @@ const root = document.getElementById('root')
 
 render(
   () => (
-    <Router root={App} base='/MyAniList'>
+    <Router root={App}>
       <Route path="/" component={Home} />
       <Route path="/search" component={() => <div>Search</div>} />
       <Route path="/anime">

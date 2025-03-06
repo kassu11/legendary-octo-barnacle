@@ -10,10 +10,13 @@ function App(props) {
   return (
     <>
       <nav>
-      <A href="/">Home</A>
-      <A href="/anime">Anime</A>
-      <A href="/manga">Manga</A>
-      <A href="/search">Search</A>
+        <ul>
+          <li><A href="/">Home</A></li>
+          <li><A href="/anime">Anime</A></li>
+          <li><A href="/manga">Manga</A></li>
+          <li><A href="/search">Search</A></li>
+          <li><a target="_blank" href="https://anilist.co/api/v2/oauth/authorize?client_id=7936&redirect_uri=https://kassu11.github.io/anilist-clone/&response_type=code">Log in</a></li>
+        </ul>
       </nav>
       {props.children}
     </>
