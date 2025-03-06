@@ -1,15 +1,15 @@
-import { render } from 'solid-js/web'
+import { render } from "solid-js/web"
 import { Router, Route } from "@solidjs/router";
-import './index.css'
-import App from './App.jsx'
-import Anime from './Anime.jsx'
-import Home from './Home.jsx'
+import "./index.css"
+import App from "./App.jsx"
+import Anime from "./Anime.jsx"
+import Home from "./Home.jsx"
 
-const root = document.getElementById('root')
+const root = document.getElementById("root")
 
 render(
   () => (
-    <Router root={App}>
+    <Router root={App} base="/MyAniList">
       <Route path="/" component={Home} />
       <Route path="/search" component={() => <div>Search</div>} />
       <Route path="/anime">
