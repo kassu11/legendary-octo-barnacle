@@ -25,12 +25,10 @@ function App(props) {
               <li><a href={loginUrl}>Login with AniList</a></li>
             </Match>
             <Match when={authUserData()}>
-              {console.log(authUserData().data.data.Viewer)}
               <li>{authUserData().data.data.Viewer.name}</li>
               <img src={authUserData().data.data.Viewer.avatar.large} alt="Profile avatar" />
             </Match>
           </Switch>
-          {console.log(authUserData())}
         </ul>
       </nav>
       {props.children}

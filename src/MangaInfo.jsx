@@ -35,7 +35,6 @@ function MangaInfo(props) {
   console.assert(props.data?.id, "Id missing");
 
   const anime = props.data;
-  console.log(anime);
   return (
     <ul>
       <li>
