@@ -172,12 +172,63 @@ fragment media on Media {
   }
 }`
 
+export const currentUser = format`query {
+  Viewer {
+    id
+    name
+    about
+    avatar {
+      large
+    }
+    bannerImage
+    unreadNotificationCount
+    donatorTier
+    donatorBadge
+    moderatorRoles
+    options {
+      titleLanguage
+      staffNameLanguage
+      restrictMessagesToFollowing
+      airingNotifications
+      displayAdultContent
+      profileColor
+      notificationOptions {
+        type
+        enabled
+      }
+      disabledListActivity {
+        type
+        disabled
+      }
+    }
+    mediaListOptions {
+      scoreFormat
+      rowOrder
+      animeList {
+        customLists
+        sectionOrder
+        splitCompletedSectionByFormat
+        advancedScoring
+        advancedScoringEnabled
+      }
+      mangaList {
+        customLists
+        sectionOrder
+        splitCompletedSectionByFormat
+        advancedScoring
+        advancedScoringEnabled
+      }
+    }
+  }
+}`
+
 function format(strings, ...templates) {
   const array = [];
   for (let i = 0; i < strings.length; i++) {
-    const string = strings[i].replace(/\n|\t|\r/gm, "").replace(/\s+/gm, " ");
-    array.push(string, templates[i] || "");
+    array.push(strings[i], templates[i] || "");
   }
 
-  return array.join("");
+  const whitespaceAroundChar = /\s*([{}():,])\s*/g;
+
+  return array.join("").replace(/\n|\r/g, " ").replace(whitespaceAroundChar, "$1").replace(/\s{2,}/g, " ");
 }

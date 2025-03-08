@@ -1,10 +1,10 @@
 import * as querys from "./querys.js";
 
-console.log(querys.anilistAnime);
 const api = {
   anilist: {
     mediaId: anilistGetMediaById,
     trendingAnime: anilistTrendingAnime,
+    getAuthUserData: anilistGetAuthUser,
   }
 };
 
@@ -50,12 +50,24 @@ class Fetch {
   }
 
   static anilist (query, variables = {}) {
+    return Fetch.authAnilist(null, query, variables);
+  }
+
+  static authAnilist(token, query, variables = {}) {
     console.assert(query.length > 10, "Query must be above of length 10");
+    const headers = { 
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = "Bearer " + token;
+    }
+
+    console.error("Token is not saved in anilist query cache, this might break behavior");
+
     return new Fetch("https://graphql.anilist.co", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: {
         query,
         variables,
@@ -119,6 +131,13 @@ async function anilistTrendingAnime() {
     "nextSeason": "SPRING",
     "nextYear": 2025
   });
+
+  return await cache(request);
+}
+
+async function anilistGetAuthUser(token) {
+  if (token == null) return null;
+  const request = Fetch.authAnilist(token, querys.currentUser);
 
   return await cache(request);
 }
