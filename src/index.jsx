@@ -9,6 +9,7 @@ import { AuthenticationProvider } from "./AuthenticationContext.jsx";
 import Anime from "./Anime.jsx";
 import Manga from "./Manga.jsx";
 import MangaInfo from "./MangaInfo.jsx";
+import Search from "./Search.jsx";
 
 const root = document.getElementById("root")
 
@@ -19,7 +20,7 @@ render(
         <Route path="/" component={Home} />
         <Route path="/authentication" component={Authentication} />
         <Route path="/search">
-          <Route path="/" component={() => <div>search</div>} />
+          <Route path="/" component={Search} />
           <Route path="/anime" component={Anime} />
           <Route path="/manga" component={Manga} />
         </Route>

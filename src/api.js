@@ -5,6 +5,7 @@ const api = {
     mediaId: anilistGetMediaById,
     trendingAnime: anilistTrendingAnime,
     getAuthUserData: anilistGetAuthUser,
+    searchMedia: anilistSearchMedia,
     topAnime: async () => { 
       return anilistSearchMedia({ "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
     },
@@ -18,7 +19,7 @@ export default api;
 
 
 class Fetch {
-  constructor(url, {method = "POST", headers, body, ...rest}, cache = true) {
+  constructor(url, { method = "POST", headers, body }, cache = true) {
     console.assert(url, "Url missing");
     console.assert(method, "Method missing");
     if (method === "POST") console.assert(body, "Body is missing");
@@ -34,13 +35,17 @@ class Fetch {
   }
 
   #generateCacheKey() {
+    let key = `${this.url}-${this.method}`;
     if (this.body) {
-      const body = JSON.stringify(this.body).replaceAll("\t", "").replaceAll("\n", "");
-      return `${this.url}-${this.method}-${body}`;
+      const body = JSON.stringify(this.body).replaceAll("\"", "");
+      key += body;
     }
-    else {
-      return `${this.url}-${this.method}`;
+    if (this.headers) {
+      const headers = JSON.stringify(this.headers).replaceAll("\"", "");
+      key += headers;
     }
+
+    return key;
   }
 
   async send() {
@@ -68,8 +73,6 @@ class Fetch {
     if (token) {
       headers["Authorization"] = "Bearer " + token;
     }
-
-    console.error("Token is not saved in anilist query cache, this might break behavior");
 
     return new Fetch("https://graphql.anilist.co", {
       method: "POST",
@@ -148,8 +151,9 @@ async function anilistGetAuthUser(token) {
   return await cache(request);
 }
 
-async function anilistSearchMedia(variables) {
-  const request = Fetch.anilist(querys.searchMedia, variables);
+async function anilistSearchMedia(token, variables) {
+  console.log(variables);
+  const request = Fetch.authAnilist(token, querys.searchMedia, variables);
   return await cache(request);
 }
 

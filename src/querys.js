@@ -176,7 +176,7 @@ export const searchMedia = format`query (
   $page: Int = 1
   $id: Int
   $type: MediaType
-  $isAdult: Boolean = false
+  $isAdult: Boolean
   $search: String
   $format: [MediaFormat]
   $status: MediaStatus
