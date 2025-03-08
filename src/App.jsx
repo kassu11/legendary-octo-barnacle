@@ -17,10 +17,10 @@ function App(props) {
       <nav>
         <ul>
           <li><A href="/">Home</A></li>
-          <li><A href="/anime">Anime</A></li>
-          <li><A href="/manga">Manga</A></li>
+          <li><A href="/search/anime">Anime</A></li>
+          <li><A href="/search/manga">Manga</A></li>
           <li><A href="/search">Search</A></li>
-        <Switch>
+          <Switch>
             <Match when={accessToken() === null}>
               <li><a href={loginUrl}>Login with AniList</a></li>
             </Match>
@@ -29,7 +29,7 @@ function App(props) {
               <li>{authUserData().data.data.Viewer.name}</li>
               <img src={authUserData().data.data.Viewer.avatar.large} alt="Profile avatar" />
             </Match>
-        </Switch>
+          </Switch>
           {console.log(authUserData())}
         </ul>
       </nav>

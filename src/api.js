@@ -5,6 +5,12 @@ const api = {
     mediaId: anilistGetMediaById,
     trendingAnime: anilistTrendingAnime,
     getAuthUserData: anilistGetAuthUser,
+    topAnime: async () => { 
+      return anilistSearchMedia({ "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
+    },
+    topManga: async () => { 
+      return anilistSearchMedia({ "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" });
+    },
   }
 };
 
@@ -139,6 +145,11 @@ async function anilistGetAuthUser(token) {
   if (token == null) return null;
   const request = Fetch.authAnilist(token, querys.currentUser);
 
+  return await cache(request);
+}
+
+async function anilistSearchMedia(variables) {
+  const request = Fetch.anilist(querys.searchMedia, variables);
   return await cache(request);
 }
 
