@@ -6,6 +6,8 @@ import api from "./api.js";
 import { A } from '@solidjs/router';
 
 function App(props) {
+  const clientId = location.hostname === "kassu11.github.io" ? 24951 : 7936;
+  const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${clientId}&response_type=token`;
 
   return (
     <>
@@ -15,7 +17,7 @@ function App(props) {
           <li><A href="/anime">Anime</A></li>
           <li><A href="/manga">Manga</A></li>
           <li><A href="/search">Search</A></li>
-          <li><a target="_blank" href="https://anilist.co/api/v2/oauth/authorize?client_id=7936&redirect_uri=https://kassu11.github.io/anilist-clone/&response_type=code">Log in</a></li>
+          <li><a href={loginUrl}>Login with AniList</a></li>
         </ul>
       </nav>
       {props.children}

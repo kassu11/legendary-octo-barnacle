@@ -58,7 +58,6 @@ function CardRow(props) {
 function Card(props) {
   const card = props.card;
 
-  console.log(card);
   return ( 
     <A href={"/anime/" + card.id + "/" + card.title.userPreferred}>
       <img src={card.coverImage.large} alt="" />

@@ -15,6 +15,7 @@ class Fetch {
   constructor(url, {method = "POST", headers, body, ...rest}, cache = true) {
     console.assert(url, "Url missing");
     console.assert(method, "Method missing");
+    if (method === "POST") console.assert(body, "Body is missing");
 
     const defaultHeader = { "Content-Type": "application/json" }
     this.url = url;
@@ -48,7 +49,8 @@ class Fetch {
     return this;
   }
 
-  static anilist (query, variables) {
+  static anilist (query, variables = {}) {
+    console.assert(query.length > 10, "Query must be above of length 10");
     return new Fetch("https://graphql.anilist.co", {
       method: "POST",
       headers: {
@@ -69,25 +71,18 @@ async function cache(fetchObject) {
   console.assert(fetchObject.cacheKey, "Cache key is missing");
   const STORE_NAME = "results";
   const promise = new Promise((res, rej) => {
-    const cacheReq = indexedDB.open("fetchCache", 1);
-    cacheReq.onerror = rej
+    const cacheReq = IndexedDB.fetchCache(rej)
 
     cacheReq.onsuccess = evt => {
       const db = evt.target.result;
 
-      const tx = db.transaction(STORE_NAME, "readonly");
-      tx.onerror = rej
-
-      const store = tx.objectStore(STORE_NAME);
+      const store = IndexedDB.store(db, STORE_NAME, "readonly", rej);
       const getReg = store.get(fetchObject.cacheKey);
       getReg.onsuccess = async evt => {
         if(evt.target.result == null) {
           const data = await fetchObject.send();
 
-          const tx = db.transaction(STORE_NAME, "readwrite");
-          tx.onerror = rej
-
-          const store = tx.objectStore(STORE_NAME);
+          const store = IndexedDB.store(db, STORE_NAME, "readwrite");
           store.add(data);
           res(data);
         } else {
@@ -99,21 +94,14 @@ async function cache(fetchObject) {
 
       getReg.onerror = rej;
     }
-
-    cacheReq.onupgradeneeded = evt => {
-      const db = evt.target.result;
-      let objectStore;
-      switch(evt.oldVersion) {
-        case 0: {
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            objectStore = db.createObjectStore(STORE_NAME, { keyPath: "cacheKey" });
-          }
-        }
-      }
-    };
   });
 
-  return await promise;
+  try {
+    return await promise;
+  } catch(err) {
+    console.error("Something went wrong with IndexedDB", err);
+    return await fetchObject.send();
+  }
 }
 
 
@@ -135,5 +123,52 @@ async function anilistTrendingAnime() {
   return await cache(request);
 }
 
+export class IndexedDB {
+  static #createStore(db, name, key) {
+    if (!db.objectStoreNames.contains(name)) {
+      db.createObjectStore(name, key);
+    }
+  }
+
+  static store(db, storeName, mode, error) {
+    const tx = db.transaction(storeName, mode);
+    if (error) { tx.onerror = error; }
+    else { tx.onerror = console.warn; }
+    const store = tx.objectStore(storeName);
+
+    return store;
+  }
+
+  static fetchCache(errorCallback) {
+    const request = indexedDB.open("MyAniList-cache", 1);
+    if (errorCallback) request.onerror = errorCallback;
+
+    request.onupgradeneeded = evt => {
+      const db = evt.target.result;
+      switch(evt.oldVersion) {
+        case 0: {
+          IndexedDB.#createStore(db, "results", { keyPath: "cacheKey" });
+        }
+      }
+    };
+
+    return request;
+  }
 
 
+  static user(errorCallback) {
+    const request = indexedDB.open("MyAniList-users", 1);
+    if (errorCallback) request.onerror = errorCallback;
+
+    request.onupgradeneeded = evt => {
+      const db = evt.target.result;
+      switch(evt.oldVersion) {
+        case 0: {
+          IndexedDB.#createStore(db, "data");
+        }
+      }
+    };
+
+    return request;
+  }
+}
