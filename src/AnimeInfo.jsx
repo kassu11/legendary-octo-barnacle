@@ -1,4 +1,5 @@
-import { A, useParams } from "@solidjs/router";
+import { useLocation, useParams } from "@solidjs/router";
+import { A } from "./CustomA";
 import api from "./api";
 import { createResource, Switch, Match, Show } from "solid-js";
 
@@ -34,6 +35,7 @@ function Anime() {
 function AnimeInfo(props) {
   console.assert(props.data, "Data missing");
   console.assert(props.data?.id, "Id missing");
+  const location = useLocation()
 
   const anime = props.data;
   return (
@@ -61,7 +63,7 @@ function AnimeInfo(props) {
       <li><b>Mean Score:</b> {anime.meanScore / 10}</li>
       <li><b>Average Score:</b> {anime.averageScore / 10}</li>
       <li>
-        <b><A href="characters">Characters:</A></b>
+        <b><A href={"characters"}>Characters:</A></b>
         <For each={anime.characterPreview.edges}>{char => (
           <div>
             <A href={"/ani/character/" + char.node.id}>

@@ -3,7 +3,8 @@ import solidLogo from './assets/solid.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import api from "./api.js";
-import { A, redirect } from '@solidjs/router';
+import { redirect } from '@solidjs/router';
+import { A } from "./CustomA";
 import { useAuthentication } from './AuthenticationContext.jsx';
 
 function App(props) {

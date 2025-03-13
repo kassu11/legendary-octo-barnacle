@@ -1,4 +1,4 @@
-import { A, useParams } from "@solidjs/router";
+import { A } from "./CustomA";
 import api from "./api";
 import { createResource, Switch, Match, Show } from "solid-js";
 
