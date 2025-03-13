@@ -1,4 +1,4 @@
-export const anilistAnime = format`query Media($mediaId: Int, $perPage: Int) {
+export const anilistMediaById = format`query Media($mediaId: Int, $perPage: Int) {
   Media(id: $mediaId) {
     id
     idMal
