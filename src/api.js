@@ -7,10 +7,10 @@ const api = {
     getAuthUserData: anilistGetAuthUser,
     searchMedia: anilistSearchMedia,
     topAnime: async () => { 
-      return anilistSearchMedia({ "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
+      return anilistSearchMedia(null, { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
     },
     topManga: async () => { 
-      return anilistSearchMedia({ "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" });
+      return anilistSearchMedia(null, { "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" });
     },
   }
 };
@@ -60,7 +60,7 @@ class Fetch {
     return this;
   }
 
-  static anilist (query, variables = {}) {
+  static anilist(query, variables = {}) {
     return Fetch.authAnilist(null, query, variables);
   }
 
