@@ -61,13 +61,14 @@ function Search() {
   return (
     <>
       <h1>Search</h1>
-      <button onClick={() => setSearchParams({page: +searchParams.page + 1, delete: undefined})}>Click me</button>
-      <form action="https://graphql.anilist.co" onChange={e => {
+      <button onClick={() => setSearchParams({page: +searchParams.page + 1 || 1, delete: undefined})}>Next page</button>
+      <form action="https://graphql.anilist.co" onInput={e => {
         const formData = new FormData(e.currentTarget);
         const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || undefined]));
         console.log("Form: ", { ...data });
         setSearchParams(data);
       }}>
+        <InputSearch type="search" id="search" name="search">Search </InputSearch>
         <div>
           <p>Type</p>
           <Input type="radio" name="type" id="type1" value="">Both</Input>
@@ -104,6 +105,19 @@ function Search() {
       </div>
     </>
   )
+
+  function InputSearch(props) {
+    const [otherProps, inputProps] = splitProps(props, ["children"]);
+    console.assert(inputProps.type, "Input type is missing");
+    console.assert(inputProps.name, "Input name is missing");
+
+    return (
+      <>
+        <label htmlFor={inputProps.id}>{otherProps.children}</label>
+        <input value={searchParams[props.name] || ""} {...inputProps} />
+      </>
+    )
+  }
 
   function Input(props) {
     const [otherProps, inputProps] = splitProps(props, ["children"]);
