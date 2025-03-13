@@ -1,22 +1,31 @@
 import api, { IndexedDB } from "./api";
-import { createSignal, createContext, useContext, createResource, Switch, Match, Show } from "solid-js";
+import { createContext, useContext, createResource, Show } from "solid-js";
 
 const AuthenticationContext = createContext();
 
 export function AuthenticationProvider(props) {
-  const [accessToken, setToken] = createSignal(null);
-  const [authUserData, setAuthUserData] = createResource(accessToken, api.anilist.getAuthUserData);
+  const [accessToken, { mutate: setToken }] = createResource(async () => {
+    return new Promise((resolve) => {
+      const error = () => resolve(null);
+      const dbReq = IndexedDB.user(error);
+      dbReq.onsuccess = (evt) => {
+        const db = evt.target.result;
+        const store = IndexedDB.store(db, "data", "readonly", error);
+        const getTokenReq = store.get("access_token");
+
+        getTokenReq.onsuccess = (evt) => resolve(evt.target.result || null);
+        getTokenReq.onerror = error;
+      };
+    });
+  });
+  const [authUserData, { mutate: setAuthUserData }] = createResource(accessToken, api.anilist.getAuthUserData);
 
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {
     const db = evt.target.result;
     const store = IndexedDB.store(db, "data", "readonly");
-    const getTokenReq = store.get("access_token");
     const getProfileReq = store.get("auth_profile_info");
-    getTokenReq.onsuccess = evt => {
-      if(evt.target.result == null) return;
-      setToken(evt.target.result);
-    };
+
     getProfileReq.onsuccess = evt => {
       if(evt.target.result == null) return;
       setAuthUserData(evt.target.result);
@@ -47,7 +56,9 @@ export function AuthenticationProvider(props) {
 
   return (
     <AuthenticationContext.Provider value={{ accessToken, setAccessToken, authUserData, logoutUser }}>
-      {props.children}
+      <Show when={!accessToken.loading}>
+        {props.children}
+      </Show>
     </AuthenticationContext.Provider>
   )
 }
