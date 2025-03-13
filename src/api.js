@@ -128,7 +128,7 @@ async function cache(fetchObject) {
 
 async function anilistGetMediaById(id) {
   console.assert(id, "No id given");
-  const request = Fetch.anilist(querys.anilistMediaById, { mediaId: id, perPage: 6 })
+  const request = Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 })
   return await cache(request);
 }
 
