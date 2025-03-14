@@ -1,5 +1,5 @@
 import { A } from "../CustomA";
-import api from "../api";
+import api from "../utils/api";
 import { createResource, Switch, Match, Show } from "solid-js";
 
 

@@ -1,4 +1,4 @@
-import * as querys from "./querys.js";
+import * as querys from "./querys";
 
 const api = {
   anilist: {
