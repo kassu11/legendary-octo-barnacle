@@ -2,15 +2,15 @@ import { render } from "solid-js/web"
 import { Router, Route } from "@solidjs/router";
 import "./index.css"
 import App from "./App.jsx"
-import AnimeInfo from "./AnimeInfo.jsx"
-import Home from "./Home.jsx"
-import Authentication from "./Authentication.jsx";
+import AnimeInfo from "./pages/AnimeInfo.jsx"
+import Home from "./pages/Home.jsx"
+import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./AuthenticationContext.jsx";
-import Anime from "./Anime.jsx";
-import Manga from "./Manga.jsx";
-import MangaInfo from "./MangaInfo.jsx";
-import Search from "./Search.jsx";
-import Character from "./Character.jsx";
+import Anime from "./pages/Anime.jsx";
+import Manga from "./pages/Manga.jsx";
+import MangaInfo from "./pages/MangaInfo.jsx";
+import Search from "./pages/Search.jsx";
+import Character from "./pages/Character.jsx";
 
 const root = document.getElementById("root")
 

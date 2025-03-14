@@ -1,29 +1,29 @@
-import { useParams } from "@solidjs/router";
-import { A } from "./CustomA";
-import api from "./api";
+import { useLocation, useParams } from "@solidjs/router";
+import { A } from "../CustomA";
+import api from "../api";
 import { createResource, Switch, Match, Show } from "solid-js";
 
 
-function Manga() {
+function Anime() {
   const params = useParams();
   const id = Number(params.id);
 
   console.assert(!Number.isNaN(id), "ID should not be NaN");
-  const [mangaData] = createResource(id, api.anilist.mediaId);
+  const [animeData] = createResource(id, api.anilist.mediaId);
 
   return (
     <>
       <h1>Anime {params.id}</h1>
       <div>
-        <Show when={mangaData.loading}>
+        <Show when={animeData.loading}>
           <p>Loading...</p>
         </Show>
         <Switch>
-          <Match when={mangaData.error}>
-            <span>Error: {mangaData.error}</span>
+          <Match when={animeData.error}>
+            <span>Error: {animeData.error}</span>
           </Match>
-          <Match when={mangaData()}>
-            <MangaInfo data={mangaData().data.data.Media}></MangaInfo>
+          <Match when={animeData()}>
+            <AnimeInfo data={animeData().data.data.Media}></AnimeInfo>
           </Match>
         </Switch>
       </div>
@@ -31,7 +31,7 @@ function Manga() {
   )
 }
 
-function MangaInfo(props) {
+function AnimeInfo(props) {
   console.assert(props.data, "Data missing");
   console.assert(props.data?.id, "Id missing");
 
@@ -61,7 +61,7 @@ function MangaInfo(props) {
       <li><b>Mean Score:</b> {anime.meanScore / 10}</li>
       <li><b>Average Score:</b> {anime.averageScore / 10}</li>
       <li>
-        <b><A href="characters">Characters:</A></b>
+        <b><A href={"characters"}>Characters:</A></b>
         <For each={anime.characterPreview.edges}>{char => (
           <div>
             <A href={"/ani/character/" + char.node.id}>
@@ -83,4 +83,4 @@ function MangaInfo(props) {
 }
 
 
-export default Manga
+export default Anime
