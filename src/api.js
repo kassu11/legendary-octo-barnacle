@@ -3,6 +3,7 @@ import * as querys from "./querys.js";
 const api = {
   anilist: {
     mediaId: anilistGetMediaById,
+    characterId: anilistGetCharacterById,
     trendingAnime: anilistTrendingAnime,
     getAuthUserData: anilistGetAuthUser,
     searchMedia: anilistSearchMedia,
@@ -129,6 +130,20 @@ async function cache(fetchObject) {
 async function anilistGetMediaById(id) {
   console.assert(id, "No id given");
   const request = Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 })
+  return await cache(request);
+}
+
+async function anilistGetCharacterById(id) {
+  console.assert(id, "No id given");
+
+  const request = Fetch.anilist(querys.anilistCharacterById, {
+    id,
+    "page": 1,
+    "sort": "POPULARITY_DESC",
+    "onList": null,
+    "withRoles": true
+  });
+
   return await cache(request);
 }
 
