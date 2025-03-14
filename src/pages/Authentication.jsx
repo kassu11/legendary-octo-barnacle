@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "@solidjs/router";
-import { useAuthentication } from "./AuthenticationContext";
+import { useAuthentication } from "../context/AuthenticationContext";
 
 function Authentication() {
   const location = useLocation();

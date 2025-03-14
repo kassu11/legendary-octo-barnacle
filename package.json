@@ -11,6 +11,8 @@
   "dependencies": {
     "@solid-primitives/scheduled": "^1.5.0",
     "@solidjs/router": "^0.15.3",
+    "dompurify": "^3.2.4",
+    "marked": "^15.0.7",
     "solid-js": "^1.9.5"
   },
   "devDependencies": {

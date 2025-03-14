@@ -1,24 +1,25 @@
-import { A } from "./CustomA";
-import api from "./api";
+import { useParams } from "@solidjs/router";
+import { A } from "../components/CustomA";
+import api from "../utils/api";
 import { createResource, Switch, Match, Show } from "solid-js";
 
 
-function Manga() {
-  const [mangaData] = createResource(api.anilist.topManga);
+function Anime() {
+  const [animeData] = createResource(api.anilist.topAnime);
 
   return (
     <>
       <h1>Anime</h1>
       <div>
-        <Show when={mangaData.loading}>
+        <Show when={animeData.loading}>
           <p>Loading...</p>
         </Show>
         <Switch>
-          <Match when={mangaData.error}>
-            <span>Error: {mangaData.error}</span>
+          <Match when={animeData.error}>
+            <span>Error: {animeData.error}</span>
           </Match>
-          <Match when={mangaData()}>
-            <CardRow data={mangaData().data.data.Page.media}/>
+          <Match when={animeData()}>
+            <CardRow data={animeData().data.data.Page.media}/>
           </Match>
         </Switch>
       </div>
@@ -40,11 +41,11 @@ function Card(props) {
   const card = props.card;
 
   return ( 
-    <A href={"/manga/" + card.id + "/" + card.title.userPreferred}>
+    <A href={"/anime/" + card.id + "/" + card.title.userPreferred}>
       <img src={card.coverImage.large} alt="" />
       <p>{card.title.userPreferred}</p>
     </A> 
   );
 }
 
-export default Manga
+export default Anime
