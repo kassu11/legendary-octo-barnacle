@@ -5,7 +5,7 @@ import App from "./App.jsx"
 import AnimeInfo from "./pages/AnimeInfo.jsx"
 import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
-import { AuthenticationProvider } from "./AuthenticationContext.jsx";
+import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import Anime from "./pages/Anime.jsx";
 import Manga from "./pages/Manga.jsx";
 import MangaInfo from "./pages/MangaInfo.jsx";

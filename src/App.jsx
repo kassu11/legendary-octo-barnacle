@@ -5,7 +5,7 @@ import './App.css'
 import api from "./api.js";
 import { redirect } from '@solidjs/router';
 import { A } from "./CustomA";
-import { useAuthentication } from './AuthenticationContext.jsx';
+import { useAuthentication } from './context/AuthenticationContext.jsx';
 
 function App(props) {
   const clientId = location.hostname === "kassu11.github.io" ? 24951 : 7936;

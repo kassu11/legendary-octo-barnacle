@@ -1,4 +1,4 @@
-import api, { IndexedDB } from "./api";
+import api, { IndexedDB } from "../api";
 import { createContext, useContext, createResource, Show } from "solid-js";
 
 const AuthenticationContext = createContext();

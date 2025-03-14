@@ -3,7 +3,7 @@ import { A } from "../CustomA";
 import api from "../api";
 import { createSignal, createResource, createEffect, Switch, Match, Show, splitProps } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
-import { useAuthentication } from "../AuthenticationContext";
+import { useAuthentication } from "../context/AuthenticationContext";
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
