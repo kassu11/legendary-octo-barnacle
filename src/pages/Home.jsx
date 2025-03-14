@@ -1,10 +1,10 @@
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show } from "solid-js";
 
 
 function Home() {
-  const [trendingAnime] = createResource(api.anilist.trendingAnime);
+  const [trendingAnime] = api.createResource(api.anilist.trendingAnime);
 
   return (
     <>
