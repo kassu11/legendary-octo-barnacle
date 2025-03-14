@@ -4,7 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import api from "./utils/api.js";
 import { redirect } from '@solidjs/router';
-import { A } from "./CustomA";
+import { A } from "./components/CustomA.jsx";
 import { useAuthentication } from './context/AuthenticationContext.jsx';
 
 function App(props) {

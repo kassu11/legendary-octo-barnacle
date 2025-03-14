@@ -1,8 +1,8 @@
 import { useParams } from "@solidjs/router";
-import { A } from "../CustomA";
+import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { createResource, Switch, Match, Show } from "solid-js";
-import { Markdown } from "../Markdown";
+import { Markdown } from "../components/Markdown";
 
 
 function Character() {

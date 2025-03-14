@@ -1,5 +1,5 @@
 import { useLocation, useParams } from "@solidjs/router";
-import { A } from "../CustomA";
+import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { createResource, Switch, Match, Show } from "solid-js";
 

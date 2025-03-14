@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { A } from "../CustomA";
+import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { createSignal, createResource, createEffect, Switch, Match, Show, splitProps } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
