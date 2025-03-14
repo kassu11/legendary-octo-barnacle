@@ -1,4 +1,6 @@
+import { createEffect, createResource } from "solid-js";
 import * as querys from "./querys";
+const DEBUG = location.origin.includes("localhost");
 
 const api = {
   anilist: {
@@ -13,6 +15,16 @@ const api = {
     topManga: async () => { 
       return anilistSearchMedia(null, { "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" });
     },
+  },
+  createResource: (getQuery, fetchData) => {
+    const data = createResource(getQuery, fetchData);
+    createEffect(() => {
+      if (!data[0].loading && data[0]?.()?.fromCache) {
+        data[0]()["mutate"] = data[1].mutate;
+      }
+    });
+
+    return data;
   }
 };
 
@@ -20,7 +32,7 @@ export default api;
 
 
 class Fetch {
-  constructor(url, { method = "POST", headers, body }, cache = true) {
+  constructor(url, { method = "POST", headers, body }) {
     console.assert(url, "Url missing");
     console.assert(method, "Method missing");
     if (method === "POST") console.assert(body, "Body is missing");
@@ -30,7 +42,7 @@ class Fetch {
     this.method = method;
     this.headers = headers || defaultHeader;
     this.body = body;
-    this.cache = cache;
+    this.fromCache = true;
 
     this.cacheKey = this.#generateCacheKey();
   }
@@ -49,7 +61,7 @@ class Fetch {
     return key;
   }
 
-  async send() {
+  async send(saveToLocalCache = false) {
     const opt = {
       method: this.method,
       headers: this.headers,
@@ -58,6 +70,10 @@ class Fetch {
 
     const response = await fetch(this.url, opt);
     this.data = await response.json();
+    this.fromCache = false;
+    if(saveToLocalCache) {
+      localFetchCacheStorage.set(this.cacheKey, this);
+    }
     return this;
   }
 
@@ -86,11 +102,18 @@ class Fetch {
   }
 }
 
+const localFetchCacheStorage = new Map();
+
 /**
  * @param {Fetch} fetchObject
  */
-async function cache(fetchObject) {
+async function cache(fetchObject, fetchOnce = false) {
   console.assert(fetchObject.cacheKey, "Cache key is missing");
+
+  if (fetchOnce && localFetchCacheStorage.has(fetchObject.cacheKey)) {
+    return localFetchCacheStorage.get(fetchObject.cacheKey);
+  }
+
   const STORE_NAME = "results";
   const promise = new Promise((res, rej) => {
     const cacheReq = IndexedDB.fetchCache(rej)
@@ -102,14 +125,28 @@ async function cache(fetchObject) {
       const getReg = store.get(fetchObject.cacheKey);
       getReg.onsuccess = async evt => {
         if(evt.target.result == null) {
-          const data = await fetchObject.send();
+          const data = await fetchObject.send(fetchOnce);
 
           const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-          store.add(data);
+          store.add({ ...data, fromCache: true });
           res(data);
         } else {
           console.assert(evt.target.result.exspires, "Cache should have a expiration date");
           console.assert(evt.target.result.data, "Cache should always have data");
+
+          if(fetchOnce) {
+            localFetchCacheStorage.set(fetchObject.cacheKey, evt.target.result);
+          }
+
+          if(DEBUG == false) {
+            fetchObject.send(fetchOnce).then(data => {
+              const store = IndexedDB.store(db, STORE_NAME, "readwrite");
+              store.put({ ...data, fromCache: true });
+              console.assert(evt.target.result?.["mutate"], "Fetch cache mutation is missing, which means this fetch was useless, because it will not update anywhere");
+              evt.target.result?.["mutate"]?.(data);
+            });
+          }
+
           res(evt.target.result);
         }
       };
@@ -122,7 +159,7 @@ async function cache(fetchObject) {
     return await promise;
   } catch(err) {
     console.error("Something went wrong with IndexedDB", err);
-    return await fetchObject.send();
+    return await fetchObject.send(fetchOnce);
   }
 }
 
@@ -169,7 +206,7 @@ async function anilistGetAuthUser(token) {
 async function anilistSearchMedia(token, variables) {
   console.log(variables);
   const request = Fetch.authAnilist(token, querys.searchMedia, variables);
-  return await cache(request);
+  return await cache(request, true);
 }
 
 export class IndexedDB {
