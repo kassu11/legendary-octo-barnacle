@@ -23,7 +23,6 @@ function Anime() {
             <span>Error: {animeData.error}</span>
           </Match>
           <Match when={animeData()}>
-            {console.log(animeData())}
             <AnimeInfo data={animeData().data.data.Media}></AnimeInfo>
           </Match>
         </Switch>
@@ -35,7 +34,6 @@ function Anime() {
 function AnimeInfo(props) {
   console.assert(props.data, "Data missing");
   console.assert(props.data?.id, "Id missing");
-  const location = useLocation()
 
   const anime = props.data;
   return (
