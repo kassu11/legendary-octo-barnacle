@@ -1,6 +1,6 @@
 import { render } from "solid-js/web"
 import { Router, Route } from "@solidjs/router";
-import "./index.css"
+import "./index.scss"
 import App from "./App.jsx"
 import AnimeInfo from "./pages/AnimeInfo.jsx"
 import Home from "./pages/Home.jsx"
