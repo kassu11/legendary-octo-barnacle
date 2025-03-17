@@ -231,6 +231,42 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const currentWachingMedia = format`query ($userId: Int, $type: MediaType, $perPage: Int) {
+  Page(perPage: $perPage) {
+    mediaList(
+      userId: $userId
+      type: $type
+      status_in: [CURRENT, REPEATING]
+      sort: UPDATED_TIME_DESC
+    ) {
+      id
+      status
+      score
+      progress
+      progressVolumes
+      media {
+        id
+        type
+        status(version: 2)
+        format
+        episodes
+        bannerImage
+        title {
+          userPreferred
+        }
+        coverImage {
+          large
+        }
+        nextAiringEpisode {
+          airingAt
+          timeUntilAiring
+          episode
+        }
+      }
+    }
+  }
+}`
+
 
 export const anilistCharacterById = format`query character(
   $id: Int

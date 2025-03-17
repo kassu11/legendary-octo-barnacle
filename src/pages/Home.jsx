@@ -1,69 +1,97 @@
 import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { createResource, Switch, Match, Show } from "solid-js";
-
+import style from "./Home.module.scss";
+import { useAuthentication } from "../context/AuthenticationContext";
 
 function Home() {
   const [trendingAnime] = createResource(api.anilist.trendingAnime);
+  const { authUserData } = useAuthentication();
 
   return (
-    <>
-      <h1>Home</h1>
-      <div>
-        <Show when={trendingAnime.loading}>
-          <p>Loading...</p>
-        </Show>
-        <Switch>
-          <Match when={trendingAnime.error}>
-            <span>Error: {trendingAnime.error}</span>
-          </Match>
-          <Match when={trendingAnime()}>
-            <AnimeInfo data={trendingAnime().data.data}></AnimeInfo>
-          </Match>
-        </Switch>
+    <Show when={authUserData()}>
+      {console.log(authUserData())}
+      <div class={style.container}>
+        <CurrentWatchingMedia userId={authUserData().data.data.Viewer.id} />
+        <div class={style.body}>
+          <div class={style.left}>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+          </div>
+          <div class={style.right}>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+            <div class={style.rowContainer}></div>
+          </div>
+        </div>
       </div>
-    </>
+    </Show>
   )
 }
 
-function AnimeInfo(props) {
+function CurrentWatchingMedia(props) {
+  const [animeData] = createResource(props.userId, api.anilist.wachingAnime);
+  const [mangaData] = createResource(props.userId, api.anilist.readingManga);
 
-  const trending = props.data;
-  return (
-    <ul>
-      <CardRow data={trending.nextSeason.media} title="Next Season" />
-      <CardRow data={trending.popular.media} title="Popular" />
-      <CardRow data={trending.season.media} title="Season" />
-      <CardRow data={trending.top.media} title="Top" />
-      <CardRow data={trending.trending.media} title="Trending" />
-    </ul>
-  )
-
-}
-
-function CardRow(props) {
-  const data = props.data;
+  const sortAiringTime = (a, b) => {
+    const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt == b.media.nextAiringEpisode?.airingAt];
+    if (aTime && bTime) { return aTime - bTime; } 
+    else if (aTime == bTime) { return 0; } 
+    else if (aTime == null) { return -1; } 
+    return 1;
+  };
 
   return (
-    <li style="display: flex; gap: 5px;">
-      <b>{props.title}:</b>
-      <For each={data}>
-        {card => <Card card={card} />}
-      </For>
-    </li>
+    <div class={style.header}>
+      {console.log(animeData(), mangaData())}
+      <Show when={animeData()}>
+        <div class={style.rowContainer}>
+          <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
+            <Show when={anime.media.status != "FINISHED"}>
+              {animeCard(anime)}
+            </Show>
+          )}</For>
+        </div>
+        <div class={style.rowContainer}>
+          <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
+            <Show when={anime.media.status == "FINISHED"}>
+              {animeCard(anime)}
+            </Show>
+          )}</For>
+        </div>
+      </Show>
+      <div class={style.rowContainer}></div>
+    </div>
   );
 }
 
-function Card(props) {
-  const card = props.card;
-
+function animeCard(anime) {
+  console.log(anime);
+  const isBehind = anime.media.nextAiringEpisode?.episode > anime.progress + 1;
   return (
-    <A href={"/anime/" + card.id + "/" + card.title.userPreferred}>
-      <img src={card.coverImage.large} alt="" />
-      <p>{card.title.userPreferred}</p>
+    <A 
+      href={"/anime/" + anime.media.id + "/" + anime.media.title.userPreferred} 
+      classList={{[style.card]: true, [style.behind]: isBehind}}
+    >
+      <img src={anime.media.coverImage.large} alt="Cover." />
+      <div class={style.cardRight}>
+        <Show when={anime.media.episodes}>
+          <Show when={isBehind} fallback={
+            <span>{anime.media.episodes - anime.progress} episodes left</span>
+          }>
+            <p>{anime.media.nextAiringEpisode.episode - anime.progress + 1} episodes behind</p>
+          </Show>
+        </Show>
+        <p>{anime.media.title.userPreferred}</p>
+        <p>Progress: {anime.progress}/{anime.media.episodes}</p>
+      </div>
     </A>
-  );
+  )
 }
-
 
 export default Home

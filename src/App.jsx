@@ -32,7 +32,10 @@ function App(props) {
           </Show>
         </ul>
       </nav>
-      {props.children}
+      <div class={style.pageContent}>
+        {props.children}
+      </div>
+      <footer></footer>
     </>
   )
 }

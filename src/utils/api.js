@@ -7,6 +7,12 @@ const api = {
     trendingAnime: anilistTrendingAnime,
     getAuthUserData: anilistGetAuthUser,
     searchMedia: anilistSearchMedia,
+    wachingAnime: async (id) => {
+      return anilistGetWatchingMedia({ "userId": id, "type": "ANIME", "perPage": 40 });
+    },
+    readingManga: async (id) => {
+      return anilistGetWatchingMedia({ "userId": id, "type": "MANGA", "perPage": 40 });
+    },
     topAnime: async () => { 
       return anilistSearchMedia(null, { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
     },
@@ -154,6 +160,15 @@ async function anilistTrendingAnime() {
     "seasonYear": 2025,
     "nextSeason": "SPRING",
     "nextYear": 2025
+  });
+
+  return await cache(request);
+}
+
+async function anilistGetWatchingMedia(variables) {
+  const request = Fetch.anilist(querys.currentWachingMedia, {
+    "perPage": 40,
+    ...variables,
   });
 
   return await cache(request);
