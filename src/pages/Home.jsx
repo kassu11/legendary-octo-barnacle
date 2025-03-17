@@ -108,7 +108,7 @@ function AnimeCard(props) {
           <Show when={isBehind()} fallback={
             <p>{props.anime.media.episodes - progress()} episodes left</p>
           }>
-            <p>{props.anime.media.nextAiringEpisode.episode - progress() + 1} episodes behind</p>
+            <p>{props.anime.media.nextAiringEpisode.episode - (progress() + 1)} episodes behind</p>
           </Show>
         </Show>
         <p>{props.anime.media.title.userPreferred}</p>
