@@ -35,10 +35,8 @@ function Home() {
 }
 
 function CurrentWatchingMedia(props) {
-  // const [animeData] = api.createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
   const [animeData, { mutateCache }] = api.anilist.wachingAnime(props.userId, props.token);
   const [mangaData] = api.anilist.readingManga(props.userId, props.token);
-  // const [mangaData] = api.createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
 
   createEffect(() => {
     console.log("effect", mangaData())
@@ -67,6 +65,13 @@ function CurrentWatchingMedia(props) {
             <Show when={anime.media.status == "FINISHED"}>
               <AnimeCard anime={anime} mutateCache={mutateCache} />
             </Show>
+          )}</For>
+        </div>
+      </Show>
+      <Show when={mangaData()}>
+        <div class={style.rowContainer}>
+          <For each={mangaData().data.data.Page.mediaList}>{manga => (
+            <AnimeCard anime={manga} mutateCache={mutateCache} />
           )}</For>
         </div>
       </Show>

@@ -5,7 +5,7 @@ import { Switch, Match, Show } from "solid-js";
 
 
 function Anime() {
-  const [animeData] = api.createResource(api.anilist.topAnime);
+  const [animeData] = api.anilist.topAnime();
 
   return (
     <>

@@ -1,5 +1,6 @@
 import { createEffect, createResource, createSignal } from "solid-js";
 import * as querys from "./querys";
+import { options } from "marked";
 const DEBUG = location.origin.includes("localhost");
 
 const normalCache = cacheBuilder({ storeName: "results" });
@@ -9,28 +10,46 @@ const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchO
 
 const api = {
   anilist: {
-    mediaId: anilistGetMediaById,
-    characterId: anilistGetCharacterById,
+    mediaId: normalCache(id => {
+      return Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 });
+    }),
+    characterId: normalCache(id => {
+      return Fetch.anilist(querys.anilistCharacterById, {
+        id,
+        "page": 1,
+        "sort": "POPULARITY_DESC",
+        "onList": null,
+        "withRoles": true
+      });
+    }),
     trendingAnime: anilistTrendingAnime,
-    getAuthUserData: anilistGetAuthUser,
-    searchMedia: anilistSearchMedia,
+    getAuthUserData: normalCache(token => {
+      return Fetch.authAnilist(token, querys.currentUser);
+    }),
+    searchMedia: fetchOnce((token, variables) => {
+      return Fetch.authAnilist(token, querys.searchMedia, variables);
+    }),
     mutateMedia: anilistMutateMedia,
     wachingAnime: normalCache((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "ANIME", "perPage": 40
       });
     }),
-    readingManga: debugCache((id, token) => {
+    readingManga: normalCache((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "MANGA", "perPage": 40
       });
     }),
-    topAnime: async () => { 
-      return anilistSearchMedia(null, { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
-    },
-    topManga: async () => { 
-      return anilistSearchMedia(null, { "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" });
-    },
+    topAnime: normalCache(() => {
+      return Fetch.anilist(querys.searchMedia, { 
+        "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" 
+      });
+    }),
+    topManga: normalCache(() => {
+      return Fetch.anilist(querys.searchMedia, { 
+        "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" 
+      });
+    }),
   },
   createResource: (getQuery, fetchData) => {
     const data = createResource(getQuery, fetchData);
@@ -194,8 +213,8 @@ function cacheBuilder(settings) {
   return function cache(fetchCallback) {
     return (...fetchOptions) => {
       const [data, setData] = createSignal(undefined);
+      let request = null;
       const fetchOnStart = DEBUG == false || settings.fetchOnDebug || settings.noCache;
-      const request = fetchCallback(...fetchOptions)
 
       const mutateCache = mutateData => {
         console.log("mutateCache");
@@ -230,41 +249,47 @@ function cacheBuilder(settings) {
         mutate(data);
       }
 
-      if (settings.fetchOnce) {
-        setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
-      }
+      createEffect(() => {
+        const options = fetchOptions.map(option => typeof option == "function" ? option() : option);
+        console.log(options);
+        if (options.some(option => option === undefined)) {
+          return;
+        };
+        request = fetchCallback(...options);
 
-      if (fetchOnStart) {
-        refetch();
-      }
-
-      if (settings.noCache == false) {
-        const cacheReq = IndexedDB.fetchCache();
-        cacheReq.onsuccess = evt => {
-          const db = evt.target.result;
-          const store = IndexedDB.store(db, settings.storeName, "readonly");
-          const getReg = store.get(request.cacheKey);
-          getReg.onsuccess = evt => {
-            if (evt.target.result != null) {
-              console.assert(evt.target.result.exspires, "Cache should have a expiration date");
-              console.assert(evt.target.result.data, "Cache should always have data");
-              setData({ ...evt.target.result, fromCache: true });
-            } else if (fetchOnStart) {
-              refetch();
-            }
-          };
+        if (settings.fetchOnce && localFetchCacheStorage.has(request.cacheKey)) {
+          setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
         }
-      }
+
+        if (fetchOnStart) {
+          refetch();
+        }
+
+        if (settings.noCache != true) {
+          console.log("before fetch");
+          const cacheReq = IndexedDB.fetchCache();
+          cacheReq.onerror = refetch;
+          cacheReq.onsuccess = evt => {
+            const db = evt.target.result;
+            const store = IndexedDB.store(db, settings.storeName, "readonly");
+            const getReg = store.get(request.cacheKey);
+            getReg.onerror = refetch;
+            getReg.onsuccess = evt => {
+              if (evt.target.result) {
+                console.assert(evt.target.result.exspires, "Cache should have a expiration date");
+                console.assert(evt.target.result.data, "Cache should always have data");
+                setData({ ...evt.target.result, fromCache: true });
+              } else if (fetchOnStart == false) {
+                refetch();
+              }
+            };
+          }
+        }
+      });
 
       return [data, { mutate, refetch, mutateCache }];
     }
   }
-}
-
-async function anilistGetMediaById(id) {
-  console.assert(id, "No id given");
-  const request = Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 })
-  return await cache(request);
 }
 
 async function anilistGetCharacterById(id) {

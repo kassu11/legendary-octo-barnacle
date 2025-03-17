@@ -9,7 +9,7 @@ function Manga() {
   const id = Number(params.id);
 
   console.assert(!Number.isNaN(id), "ID should not be NaN");
-  const [mangaData] = api.createResource(id, api.anilist.mediaId);
+  const [mangaData] = api.anilist.mediaId(id);
 
   return (
     <>
