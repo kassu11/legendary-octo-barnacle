@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show } from "solid-js";
 import { Markdown } from "../components/Markdown";
 
 
@@ -10,7 +10,7 @@ function Character() {
   const id = Number(params.id);
 
   console.assert(!Number.isNaN(id), "ID should not be NaN");
-  const [characterData] = createResource(id, api.anilist.characterId);
+  const [characterData] = api.createResource(id, api.anilist.characterId);
 
   return (
     <>

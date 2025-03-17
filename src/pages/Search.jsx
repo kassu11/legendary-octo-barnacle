@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createSignal, createResource, createEffect, Switch, Match, Show, splitProps } from "solid-js";
+import { createSignal, createEffect, Switch, Match, Show, splitProps } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 
@@ -11,7 +11,7 @@ function Search() {
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal({ "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
   const [searchParams, setSearchParams] = useSearchParams();
-  const [mediaData] = createResource(variables, (variables) => api.anilist.searchMedia(accessToken(), variables));
+  const [mediaData] = api.createResource(variables, (variables) => api.anilist.searchMedia(accessToken(), variables));
 
   createEffect(() => {
     const search = { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" };

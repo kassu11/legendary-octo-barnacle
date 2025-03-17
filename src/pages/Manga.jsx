@@ -1,10 +1,10 @@
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show } from "solid-js";
 
 
 function Manga() {
-  const [mangaData] = createResource(api.anilist.topManga);
+  const [mangaData] = api.createResource(api.anilist.topManga);
 
   return (
     <>

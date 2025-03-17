@@ -5,7 +5,7 @@ import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
 
 function Home() {
-  const [trendingAnime] = createResource(api.anilist.trendingAnime);
+  // const [trendingAnime] = api.createResource(api.anilist.trendingAnime);
   const { accessToken, authUserData } = useAuthentication();
 
   return (

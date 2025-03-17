@@ -1,11 +1,11 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show } from "solid-js";
 
 
 function Anime() {
-  const [animeData] = createResource(api.anilist.topAnime);
+  const [animeData] = api.createResource(api.anilist.topAnime);
 
   return (
     <>

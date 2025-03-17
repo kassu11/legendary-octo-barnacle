@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show } from "solid-js";
 
 
 function Manga() {
@@ -9,7 +9,7 @@ function Manga() {
   const id = Number(params.id);
 
   console.assert(!Number.isNaN(id), "ID should not be NaN");
-  const [mangaData] = createResource(id, api.anilist.mediaId);
+  const [mangaData] = api.createResource(id, api.anilist.mediaId);
 
   return (
     <>

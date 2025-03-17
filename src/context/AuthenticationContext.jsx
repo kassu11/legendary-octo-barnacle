@@ -18,7 +18,7 @@ export function AuthenticationProvider(props) {
       };
     });
   });
-  const [authUserData, { mutate: setAuthUserData }] = createResource(accessToken, api.anilist.getAuthUserData);
+  const [authUserData, { mutate: setAuthUserData }] = api.createResource(accessToken, api.anilist.getAuthUserData);
 
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {
