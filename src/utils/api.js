@@ -191,16 +191,13 @@ function cacheBuilder(settings) {
           return; // Don't fetch if you have undefined values
         };
 
+
         if (localFetchCacheStorage.has(request.cacheKey)) {
           setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
-          if (settings.fetchOnce) { return }
-        }
-
-        if (fetchOnStart) {
-          refetch();
-        }
-
-        if (settings.noCache != true) {
+          if (settings.fetchOnce) { 
+            return;
+          }
+        } else if (settings.noCache != true) {
           const cacheReq = IndexedDB.fetchCache();
           cacheReq.onerror = refetch;
           cacheReq.onsuccess = evt => {
@@ -218,6 +215,10 @@ function cacheBuilder(settings) {
               }
             };
           }
+        }
+
+        if (fetchOnStart) {
+          refetch();
         }
       });
 
