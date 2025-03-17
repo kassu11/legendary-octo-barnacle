@@ -1,38 +1,65 @@
-import { createEffect, createResource } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import * as querys from "./querys";
 const DEBUG = location.origin.includes("localhost");
 
+const normalCache = cacheBuilder({ storeName: "results" });
+const fetchOnce = cacheBuilder({ fetchOnce: true, storeName: "results" });
+const noCache = cacheBuilder({ noCache: true });
+const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchOnce: true });
+
 const api = {
   anilist: {
-    mediaId: anilistGetMediaById,
-    characterId: anilistGetCharacterById,
-    trendingAnime: anilistTrendingAnime,
-    getAuthUserData: anilistGetAuthUser,
-    searchMedia: anilistSearchMedia,
-    mutateMedia: anilistMutateMedia,
-    wachingAnime: async (id, token) => {
-      return anilistGetWatchingMedia(token, { "userId": id, "type": "ANIME", "perPage": 40 });
-    },
-    readingManga: async (id, token) => {
-      return anilistGetWatchingMedia(token, { "userId": id, "type": "MANGA", "perPage": 40 });
-    },
-    topAnime: async () => { 
-      return anilistSearchMedia(null, { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
-    },
-    topManga: async () => { 
-      return anilistSearchMedia(null, { "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" });
-    },
+    mediaId: normalCache(id => {
+      return Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 });
+    }),
+    characterId: normalCache(id => {
+      return Fetch.anilist(querys.anilistCharacterById, {
+        id,
+        "page": 1,
+        "sort": "POPULARITY_DESC",
+        "onList": null,
+        "withRoles": true
+      });
+    }),
+    trendingAnime: normalCache(() => {
+      return Fetch.anilist(querys.trendingAnime, {
+        "type": "ANIME",
+        "season": "WINTER",
+        "seasonYear": 2025,
+        "nextSeason": "SPRING",
+        "nextYear": 2025
+      });
+    }),
+    getAuthUserData: normalCache(token => {
+      return Fetch.authAnilist(token, querys.currentUser);
+    }),
+    searchMedia: fetchOnce((token, variables) => {
+      return Fetch.authAnilist(token, querys.searchMedia, variables);
+    }),
+    mutateMedia: noCache((token, variables) => {
+      return Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
+    }),
+    wachingAnime: normalCache((id, token) => {
+      return Fetch.authAnilist(token, querys.currentWachingMedia, {
+        "userId": id, "type": "ANIME", "perPage": 40
+      });
+    }),
+    readingManga: normalCache((id, token) => {
+      return Fetch.authAnilist(token, querys.currentWachingMedia, {
+        "userId": id, "type": "MANGA", "perPage": 40
+      });
+    }),
+    topAnime: normalCache(() => {
+      return Fetch.anilist(querys.searchMedia, { 
+        "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" 
+      });
+    }),
+    topManga: normalCache(() => {
+      return Fetch.anilist(querys.searchMedia, { 
+        "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" 
+      });
+    }),
   },
-  createResource: (getQuery, fetchData) => {
-    const data = createResource(getQuery, fetchData);
-    createEffect(() => {
-      if (!data[0].loading && data[0]?.()?.fromCache) {
-        data[0]()["mutate"] = data[1].mutate;
-      }
-    });
-
-    return data;
-  }
 };
 
 export default api;
@@ -68,7 +95,7 @@ class Fetch {
     return key;
   }
 
-  async send(saveToLocalCache = false) {
+  async send() {
     const opt = {
       method: this.method,
       headers: this.headers,
@@ -78,9 +105,6 @@ class Fetch {
     const response = await fetch(this.url, opt);
     this.data = await response.json();
     this.fromCache = false;
-    if(saveToLocalCache) {
-      localFetchCacheStorage.set(this.cacheKey, this);
-    }
     return this;
   }
 
@@ -112,124 +136,94 @@ class Fetch {
 const localFetchCacheStorage = new Map();
 
 /**
- * @param {Fetch} fetchObject
+ * @param {{ storeName: "results"|"debug", fetchOnce: boolean, fetchOnDebug: boolean, noCache: boolean }} settings
  */
-async function cache(fetchObject, fetchOnce = false) {
-  console.assert(fetchObject.cacheKey, "Cache key is missing");
+function cacheBuilder(settings) {
+  settings.storeName ??= "debug";
+  settings.fetchOnDebug ??= false;
+  settings.fetchOnce ??= false;
+  settings.noCache ??= false;
 
-  if (fetchOnce && localFetchCacheStorage.has(fetchObject.cacheKey)) {
-    return localFetchCacheStorage.get(fetchObject.cacheKey);
-  }
+  /**
+   * @param {(fetchOptions: any[]) => Fetch} fetchCallback
+   */
+  return function cache(fetchCallback) {
+    return (...fetchOptions) => {
+      const [data, setData] = createSignal(undefined);
+      let request = null;
+      const fetchOnStart = DEBUG == false || settings.fetchOnDebug || settings.noCache;
 
-  const STORE_NAME = "results";
-  const promise = new Promise((res, rej) => {
-    const cacheReq = IndexedDB.fetchCache(rej)
-
-    cacheReq.onsuccess = evt => {
-      const db = evt.target.result;
-
-      const store = IndexedDB.store(db, STORE_NAME, "readonly", rej);
-      const getReg = store.get(fetchObject.cacheKey);
-      getReg.onsuccess = async evt => {
-        if(evt.target.result == null) {
-          const data = await fetchObject.send(fetchOnce);
-
-          const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-          store.add({ ...data, fromCache: true });
-          res(data);
-        } else {
-          console.assert(evt.target.result.exspires, "Cache should have a expiration date");
-          console.assert(evt.target.result.data, "Cache should always have data");
-
-          if(fetchOnce) {
-            localFetchCacheStorage.set(fetchObject.cacheKey, evt.target.result);
-          }
-
-          if(DEBUG == false) {
-            fetchObject.send(fetchOnce).then(data => {
-              const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-              store.put({ ...data, fromCache: true });
-              console.assert(evt.target.result?.["mutate"], "Fetch cache mutation is missing, which means this fetch was useless, because it will not update anywhere");
-              evt.target.result?.["mutate"]?.(data);
-            });
-          }
-
-          res(evt.target.result);
+      const mutateCache = mutateData => {
+        if (typeof mutateData === "function") {
+          mutateData = mutateData(data());
         }
-      };
 
-      getReg.onerror = rej;
+
+        if (settings.noCache == false) {
+          localFetchCacheStorage.set(request.cacheKey, mutateData);
+          const cacheReq = IndexedDB.fetchCache();
+          cacheReq.onsuccess = evt => {
+            const db = evt.target.result;
+            const store = IndexedDB.store(db, settings.storeName, "readwrite");
+            store.put(mutateData);
+          }
+        }
+      }
+
+      const mutate = mutateData => {
+        if (typeof mutateData === "function") {
+          mutateData = mutateData(data());
+        }
+
+        mutateCache(mutateData);
+        setData(mutateData);
+      }
+
+      const refetch = async () => {
+        const data = await request.send();
+        mutate(data);
+      }
+
+      createEffect(() => {
+        const options = fetchOptions.map(option => typeof option == "function" ? option() : option);
+        request = fetchCallback(...options);
+        if (options.some(option => option === undefined)) {
+          return; // Don't fetch if you have undefined values
+        };
+
+        if (localFetchCacheStorage.has(request.cacheKey)) {
+          setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
+          if (settings.fetchOnce) { return }
+        }
+
+        if (fetchOnStart) {
+          refetch();
+        }
+
+        if (settings.noCache != true) {
+          const cacheReq = IndexedDB.fetchCache();
+          cacheReq.onerror = refetch;
+          cacheReq.onsuccess = evt => {
+            const db = evt.target.result;
+            const store = IndexedDB.store(db, settings.storeName, "readonly");
+            const getReg = store.get(request.cacheKey);
+            getReg.onerror = refetch;
+            getReg.onsuccess = evt => {
+              if (evt.target.result) {
+                console.assert(evt.target.result.exspires, "Cache should have a expiration date");
+                console.assert(evt.target.result.data, "Cache should always have data");
+                setData({ ...evt.target.result, fromCache: true });
+              } else if (fetchOnStart == false) {
+                refetch();
+              }
+            };
+          }
+        }
+      });
+
+      return [data, { mutate, refetch, mutateCache }];
     }
-  });
-
-  try {
-    return await promise;
-  } catch(err) {
-    console.error("Something went wrong with IndexedDB", err);
-    return await fetchObject.send(fetchOnce);
   }
-}
-
-
-async function anilistGetMediaById(id) {
-  console.assert(id, "No id given");
-  const request = Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 })
-  return await cache(request);
-}
-
-async function anilistGetCharacterById(id) {
-  console.assert(id, "No id given");
-
-  const request = Fetch.anilist(querys.anilistCharacterById, {
-    id,
-    "page": 1,
-    "sort": "POPULARITY_DESC",
-    "onList": null,
-    "withRoles": true
-  });
-
-  return await cache(request);
-}
-
-async function anilistTrendingAnime() {
-  const request = Fetch.anilist(querys.trendingAnime, {
-    "type": "ANIME",
-    "season": "WINTER",
-    "seasonYear": 2025,
-    "nextSeason": "SPRING",
-    "nextYear": 2025
-  });
-
-  return await cache(request);
-}
-
-async function anilistGetWatchingMedia(token, variables) {
-  const request = Fetch.authAnilist(token, querys.currentWachingMedia, {
-    "perPage": 40,
-    ...variables,
-  });
-
-  return await cache(request);
-}
-
-async function anilistMutateMedia(token, variables) {
-  console.assert(variables.mediaId, "MediaId is missing from variables");
-  const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
-
-  return await request.send();
-}
-
-async function anilistGetAuthUser(token) {
-  if (token == null) return null;
-  const request = Fetch.authAnilist(token, querys.currentUser);
-
-  return await cache(request);
-}
-
-async function anilistSearchMedia(token, variables) {
-  console.log(variables);
-  const request = Fetch.authAnilist(token, querys.searchMedia, variables);
-  return await cache(request, true);
 }
 
 export class IndexedDB {
@@ -249,7 +243,7 @@ export class IndexedDB {
   }
 
   static fetchCache(errorCallback) {
-    const request = indexedDB.open("MyAniList-cache", 1);
+    const request = indexedDB.open("MyAniList-cache", 2);
     if (errorCallback) request.onerror = errorCallback;
 
     request.onupgradeneeded = evt => {
@@ -257,6 +251,9 @@ export class IndexedDB {
       switch(evt.oldVersion) {
         case 0: {
           IndexedDB.#createStore(db, "results", { keyPath: "cacheKey" });
+        }
+        case 1: {
+          IndexedDB.#createStore(db, "debug", { keyPath: "cacheKey" });
         }
       }
     };

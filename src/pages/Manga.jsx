@@ -4,7 +4,7 @@ import { Switch, Match, Show } from "solid-js";
 
 
 function Manga() {
-  const [mangaData] = api.createResource(api.anilist.topManga);
+  const [mangaData] = api.anilist.topManga();
 
   return (
     <>

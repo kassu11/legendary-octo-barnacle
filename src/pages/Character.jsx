@@ -10,7 +10,7 @@ function Character() {
   const id = Number(params.id);
 
   console.assert(!Number.isNaN(id), "ID should not be NaN");
-  const [characterData] = api.createResource(id, api.anilist.characterId);
+  const [characterData] = api.anilist.characterId(id);
 
   return (
     <>

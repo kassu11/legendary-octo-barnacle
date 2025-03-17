@@ -11,7 +11,7 @@ function Search() {
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal({ "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
   const [searchParams, setSearchParams] = useSearchParams();
-  const [mediaData] = api.createResource(variables, (variables) => api.anilist.searchMedia(accessToken(), variables));
+  const [mediaData] = api.anilist.searchMedia(accessToken, variables);
 
   createEffect(() => {
     const search = { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" };

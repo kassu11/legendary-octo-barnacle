@@ -9,7 +9,7 @@ function Anime() {
   const id = Number(params.id);
 
   console.assert(!Number.isNaN(id), "ID should not be NaN");
-  const [animeData] = api.createResource(id, api.anilist.mediaId);
+  const [animeData] = api.anilist.mediaId(id);
 
   return (
     <>

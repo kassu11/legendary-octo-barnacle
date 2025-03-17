@@ -35,9 +35,12 @@ function Home() {
 }
 
 function CurrentWatchingMedia(props) {
-  const [animeData] = api.createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
-  const [mangaData] = api.createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
+  const [animeData, { mutateCache }] = api.anilist.wachingAnime(props.userId, props.token);
+  const [mangaData] = api.anilist.readingManga(props.userId, props.token);
 
+  createEffect(() => {
+    console.log("effect", mangaData())
+  });
   const sortAiringTime = (a, b) => {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
     if (aTime && bTime) { return aTime - bTime; } 
@@ -53,15 +56,22 @@ function CurrentWatchingMedia(props) {
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
             <Show when={anime.media.status != "FINISHED"}>
-              <AnimeCard anime={anime} />
+              <AnimeCard anime={anime} mutateCache={mutateCache} />
             </Show>
           )}</For>
         </div>
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList}>{anime => (
             <Show when={anime.media.status == "FINISHED"}>
-              <AnimeCard anime={anime} />
+              <AnimeCard anime={anime} mutateCache={mutateCache} />
             </Show>
+          )}</For>
+        </div>
+      </Show>
+      <Show when={mangaData()}>
+        <div class={style.rowContainer}>
+          <For each={mangaData().data.data.Page.mediaList}>{manga => (
+            <AnimeCard anime={manga} mutateCache={mutateCache} />
           )}</For>
         </div>
       </Show>
@@ -97,6 +107,8 @@ function AnimeCard(props) {
           e.preventDefault();
           if (progress() < props.anime.media.episodes) {
             api.anilist.mutateMedia(accessToken(), {mediaId: props.anime.media.id, progress: progress() + 1});
+            props.anime.progress += 1;
+            props.mutateCache(data => data);
             setProgress(val => val + 1);
           }
         }}>
