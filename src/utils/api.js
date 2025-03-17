@@ -7,6 +7,7 @@ const api = {
     trendingAnime: anilistTrendingAnime,
     getAuthUserData: anilistGetAuthUser,
     searchMedia: anilistSearchMedia,
+    mutateMedia: anilistMutateMedia,
     wachingAnime: async (id, token) => {
       return anilistGetWatchingMedia(token, { "userId": id, "type": "ANIME", "perPage": 40 });
     },
@@ -172,6 +173,13 @@ async function anilistGetWatchingMedia(token, variables) {
   });
 
   return await cache(request);
+}
+
+async function anilistMutateMedia(token, variables) {
+  console.assert(variables.mediaId, "MediaId is missing from variables");
+  const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
+
+  return await request.send();
 }
 
 async function anilistGetAuthUser(token) {

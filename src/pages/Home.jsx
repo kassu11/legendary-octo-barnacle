@@ -53,14 +53,14 @@ function CurrentWatchingMedia(props) {
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
             <Show when={anime.media.status != "FINISHED"}>
-              {animeCard(anime)}
+              <AnimeCard anime={anime} />
             </Show>
           )}</For>
         </div>
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList}>{anime => (
             <Show when={anime.media.status == "FINISHED"}>
-              {animeCard(anime)}
+              <AnimeCard anime={anime} />
             </Show>
           )}</For>
         </div>
@@ -70,38 +70,49 @@ function CurrentWatchingMedia(props) {
   );
 }
 
-function animeCard(anime) {
-  // console.log(anime);
-  // console.log(anime.media.nextAiringEpisode.timeUntilAiring);
-  const isBehind = anime.media.nextAiringEpisode?.episode > anime.progress + 1;
+function AnimeCard(props) {
+  const { accessToken } = useAuthentication();
+  const [progress, setProgress] = createSignal(props.anime.progress);
+  const [isBehind, setIsBehind] = createSignal(props.anime.media.nextAiringEpisode?.episode > progress() + 1);
+
+  createEffect(() => {
+    setIsBehind(props.anime.media.nextAiringEpisode?.episode > progress() + 1);
+  })
+
   return (
     <A 
-      href={"/anime/" + anime.media.id + "/" + anime.media.title.userPreferred} 
-      classList={{[style.card]: true, [style.behind]: isBehind}}
-    >
-      <img src={anime.media.coverImage.large} alt="Cover." />
-      <Show when={anime.media.nextAiringEpisode?.airingAt}>
+      href={"/anime/" + props.anime.media.id + "/" + props.anime.media.title.userPreferred} class={style.card} >
+      <img src={props.anime.media.coverImage.large} alt="Cover." />
+      <Show when={props.anime.media.nextAiringEpisode?.airingAt}>
         <div class={style.normalInfo}>
-          <p>Ep {anime.media.nextAiringEpisode.episode}</p>
-          <EpisodeTime airingAt={anime.media.nextAiringEpisode.airingAt} />
-          <Show when={isBehind}>
+          <p>Ep {props.anime.media.nextAiringEpisode.episode}</p>
+          <EpisodeTime airingAt={props.anime.media.nextAiringEpisode.airingAt} />
+          <Show when={isBehind()}>
             <div class={style.isBehind}></div>
           </Show>
         </div>
       </Show>
-      <div class={style.hoverInfo}>
-        <p>{anime.progress} <span class={style.plus}>+</span></p>
-      </div>
+      <Show when={props.anime.media.episodes - progress()}>
+        <div class={style.hoverInfo} onClick={e => {
+          e.preventDefault();
+          if (progress() < props.anime.media.episodes) {
+            api.anilist.mutateMedia(accessToken(), {mediaId: anime.media.id, progress: progress() + 1});
+            setProgress(val => val + 1);
+          }
+        }}>
+          <p>{progress} <span class={style.plus}>+</span></p>
+        </div>
+      </Show>
       <div class={style.cardRight}>
-        <Show when={anime.media.episodes}>
-          <Show when={isBehind} fallback={
-            <p>{anime.media.episodes - anime.progress} episodes left</p>
+        <Show when={props.anime.media.episodes - progress()}>
+          <Show when={isBehind()} fallback={
+            <p>{props.anime.media.episodes - progress()} episodes left</p>
           }>
-            <p>{anime.media.nextAiringEpisode.episode - anime.progress + 1} episodes behind</p>
+            <p>{props.anime.media.nextAiringEpisode.episode - progress() + 1} episodes behind</p>
           </Show>
         </Show>
-        <p>{anime.media.title.userPreferred}</p>
-        <p>Progress: {anime.progress}/{anime.media.episodes}</p>
+        <p>{props.anime.media.title.userPreferred}</p>
+        <p>Progress: {progress()}/{props.anime.media.episodes}</p>
       </div>
     </A>
   )
