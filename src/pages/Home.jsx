@@ -35,8 +35,8 @@ function Home() {
 }
 
 function CurrentWatchingMedia(props) {
-  const [animeData] = createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
-  const [mangaData] = createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
+  const [animeData] = api.createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
+  const [mangaData] = api.createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
 
   const sortAiringTime = (a, b) => {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
@@ -96,7 +96,7 @@ function AnimeCard(props) {
         <div class={style.hoverInfo} onClick={e => {
           e.preventDefault();
           if (progress() < props.anime.media.episodes) {
-            api.anilist.mutateMedia(accessToken(), {mediaId: anime.media.id, progress: progress() + 1});
+            api.anilist.mutateMedia(accessToken(), {mediaId: props.anime.media.id, progress: progress() + 1});
             setProgress(val => val + 1);
           }
         }}>
@@ -104,10 +104,10 @@ function AnimeCard(props) {
         </div>
       </Show>
       <div class={style.cardRight}>
-        <Show when={props.anime.media.episodes - progress()}>
-          <Show when={isBehind()} fallback={
-            <p>{props.anime.media.episodes - progress()} episodes left</p>
-          }>
+        <Show when={props.anime.media.nextAiringEpisode?.episode} fallback={
+          <p>{props.anime.media.episodes - progress()} episodes left</p>
+        }>
+          <Show when={isBehind()}>
             <p>{props.anime.media.nextAiringEpisode.episode - (progress() + 1)} episodes behind</p>
           </Show>
         </Show>
