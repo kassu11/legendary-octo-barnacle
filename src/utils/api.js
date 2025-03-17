@@ -2,6 +2,11 @@ import { createEffect, createResource, createSignal } from "solid-js";
 import * as querys from "./querys";
 const DEBUG = location.origin.includes("localhost");
 
+const normalCache = cacheBuilder({ storeName: "results" });
+const fetchOnce = cacheBuilder({ fetchOnce: true, storeName: "results" });
+const noCache = cacheBuilder({ noCache: true });
+const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchOnce: true });
+
 const api = {
   anilist: {
     mediaId: anilistGetMediaById,
@@ -10,12 +15,16 @@ const api = {
     getAuthUserData: anilistGetAuthUser,
     searchMedia: anilistSearchMedia,
     mutateMedia: anilistMutateMedia,
-    wachingAnime: async (id, token) => {
-      return anilistGetWatchingMedia(token, { "userId": id, "type": "ANIME", "perPage": 40 });
-    },
-    readingManga: async (id, token) => {
-      return anilistGetWatchingMedia(token, { "userId": id, "type": "MANGA", "perPage": 40 });
-    },
+    wachingAnime: normalCache((id, token) => {
+      return Fetch.authAnilist(token, querys.currentWachingMedia, {
+        "userId": id, "type": "ANIME", "perPage": 40
+      });
+    }),
+    readingManga: debugCache((id, token) => {
+      return Fetch.authAnilist(token, querys.currentWachingMedia, {
+        "userId": id, "type": "MANGA", "perPage": 40
+      });
+    }),
     topAnime: async () => { 
       return anilistSearchMedia(null, { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
     },
@@ -170,191 +179,87 @@ async function cache(fetchObject, fetchOnce = false) {
   }
 }
 
-
-export const api2 = {
-  // wachingAnime: (id, token) => {
-  //   const [data, setData] = createSignal(undefined);
-  //
-  //   const request = Fetch.authAnilist(token, querys.currentWachingMedia, {
-  //     "userId": id, "type": "ANIME", "perPage": 40
-  //   });
-  //
-  //   const STORE_NAME = "results";
-  //   const mutate = (data) => {
-  //     // if(fetchOnce) {
-  //     //   localFetchCacheStorage.set(fetchObject.cacheKey, evt.target.result);
-  //     // }
-  //
-  //     const cacheReq = IndexedDB.fetchCache();
-  //     cacheReq.onsuccess = evt => {
-  //       const db = evt.target.result;
-  //       const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-  //       store.put(data);
-  //     }
-  //
-  //     setData(data);
-  //   }
-  //
-  //
-  //   const refetch = async () => {
-  //     const data = await request.send();
-  //     mutate(data);
-  //   }
-  //
-  //   const cacheReq = IndexedDB.fetchCache();
-  //   cacheReq.onsuccess = evt => {
-  //     const db = evt.target.result;
-  //     const store = IndexedDB.store(db, STORE_NAME, "readonly");
-  //     const getReg = store.get(fetchObject.cacheKey);
-  //     getReg.onsuccess = evt => {
-  //       if(evt.target.result != null) {
-  //         console.assert(evt.target.result.exspires, "Cache should have a expiration date");
-  //         console.assert(evt.target.result.data, "Cache should always have data");
-  //         setData(evt.target.result);
-  //       } 
-  //     };
-  //   }
-  //
-  //   return [data, { mutate, refetch }];
-  // },
-  currentlyWaching: aniCache((id, token) => {
-    return Fetch.authAnilist(token, querys.currentWachingMedia, {
-      "userId": id, "type": "ANIME", "perPage": 40
-    });
-  }),
-}
-
 /**
- * @param {(fetchOptions: any[]) => Fetch} fetchCallback
- * @returns {(fetchOptions: any[]) => [any, { mutate: (data: any) => void, mutateCache: (data: any) => void, refetch: () => void }]}
+ * @param {{ storeName: "results"|"debug", fetchOnce: boolean, fetchOnDebug: boolean, noCache: boolean }} settings
  */
-function aniCache(fetchCallback) {
-  const STORE_NAME = "results";
-  const fetchOnce = false;
-  const fetchOnDebug = false;
-  
-  return (...fetchOptions) => {
-    const [data, setData] = createSignal(undefined);
-    const fetchOnStart = DEBUG == false || fetchOnDebug;
-    const request = fetchCallback(...fetchOptions)
+function cacheBuilder(settings) {
+  settings.storeName ??= "debug";
+  settings.fetchOnDebug ??= false;
+  settings.fetchOnce ??= false;
+  settings.noCache ??= false;
 
-    const mutateCache = mutateData => {
-      console.log("mutateCache");
-      if (typeof mutateData === "function") {
-        mutateData = mutateData(data());
-      }
-      if(fetchOnce) {
-        localFetchCacheStorage.set(request.cacheKey, mutateData);
-      }
+  /**
+   * @param {(fetchOptions: any[]) => Fetch} fetchCallback
+   */
+  return function cache(fetchCallback) {
+    return (...fetchOptions) => {
+      const [data, setData] = createSignal(undefined);
+      const fetchOnStart = DEBUG == false || settings.fetchOnDebug || settings.noCache;
+      const request = fetchCallback(...fetchOptions)
 
-      const cacheReq = IndexedDB.fetchCache();
-      cacheReq.onsuccess = evt => {
-        const db = evt.target.result;
-        const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-        store.put(mutateData);
-      }
-    }
-
-    const mutate = mutateData => {
-      if (typeof mutateData === "function") {
-        mutateData = mutateData(data());
-      }
-      mutateCache(mutateData);
-      setData(mutateData);
-    }
-
-    const refetch = async () => {
-      const data = await request.send();
-      mutate(data);
-    }
-
-    if(fetchOnce) {
-      setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
-    }
-
-    if (fetchOnStart) {
-      refetch();
-    }
-
-    const cacheReq = IndexedDB.fetchCache();
-    cacheReq.onsuccess = evt => {
-      const db = evt.target.result;
-      const store = IndexedDB.store(db, STORE_NAME, "readonly");
-      const getReg = store.get(request.cacheKey);
-      getReg.onsuccess = evt => {
-        if(evt.target.result != null) {
-          console.assert(evt.target.result.exspires, "Cache should have a expiration date");
-          console.assert(evt.target.result.data, "Cache should always have data");
-          setData({ ...evt.target.result, fromCache: true });
-        } else if (fetchOnStart) {
-          refetch();
+      const mutateCache = mutateData => {
+        console.log("mutateCache");
+        if (typeof mutateData === "function") {
+          mutateData = mutateData(data());
         }
-      };
-    }
+        if (settings.fetchOnce) {
+          localFetchCacheStorage.set(request.cacheKey, mutateData);
+        }
 
-    return [data, { mutate, refetch, mutateCache }];
+        if (settings.noCache == false) {
+          const cacheReq = IndexedDB.fetchCache();
+          cacheReq.onsuccess = evt => {
+            const db = evt.target.result;
+            const store = IndexedDB.store(db, settings.storeName, "readwrite");
+            store.put(mutateData);
+          }
+        }
+      }
+
+      const mutate = mutateData => {
+        if (typeof mutateData === "function") {
+          mutateData = mutateData(data());
+        }
+
+        mutateCache(mutateData);
+        setData(mutateData);
+      }
+
+      const refetch = async () => {
+        const data = await request.send();
+        mutate(data);
+      }
+
+      if (settings.fetchOnce) {
+        setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
+      }
+
+      if (fetchOnStart) {
+        refetch();
+      }
+
+      if (settings.noCache == false) {
+        const cacheReq = IndexedDB.fetchCache();
+        cacheReq.onsuccess = evt => {
+          const db = evt.target.result;
+          const store = IndexedDB.store(db, settings.storeName, "readonly");
+          const getReg = store.get(request.cacheKey);
+          getReg.onsuccess = evt => {
+            if (evt.target.result != null) {
+              console.assert(evt.target.result.exspires, "Cache should have a expiration date");
+              console.assert(evt.target.result.data, "Cache should always have data");
+              setData({ ...evt.target.result, fromCache: true });
+            } else if (fetchOnStart) {
+              refetch();
+            }
+          };
+        }
+      }
+
+      return [data, { mutate, refetch, mutateCache }];
+    }
   }
 }
-
-/**
- * @param {Fetch} fetchObject
- */
-async function cache2(fetchObject, mutate, refetch, fetchOnce = false) {
-  console.assert(fetchObject.cacheKey, "Cache key is missing");
-
-  if (fetchOnce && localFetchCacheStorage.has(fetchObject.cacheKey)) {
-    return localFetchCacheStorage.get(fetchObject.cacheKey);
-  }
-
-  const STORE_NAME = "results";
-  const promise = new Promise((res, rej) => {
-    const cacheReq = IndexedDB.fetchCache(rej)
-
-    cacheReq.onsuccess = evt => {
-      const db = evt.target.result;
-
-      const store = IndexedDB.store(db, STORE_NAME, "readonly", rej);
-      const getReg = store.get(fetchObject.cacheKey);
-      getReg.onsuccess = async evt => {
-        if(evt.target.result == null) {
-          const data = await fetchObject.send(fetchOnce);
-
-          const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-          store.add({ ...data, fromCache: true });
-          res(data);
-        } else {
-          console.assert(evt.target.result.exspires, "Cache should have a expiration date");
-          console.assert(evt.target.result.data, "Cache should always have data");
-
-          if(fetchOnce) {
-            localFetchCacheStorage.set(fetchObject.cacheKey, evt.target.result);
-          }
-
-          if(DEBUG == false) {
-            fetchObject.send(fetchOnce).then(data => {
-              const store = IndexedDB.store(db, STORE_NAME, "readwrite");
-              store.put({ ...data, fromCache: true });
-              console.assert(evt.target.result?.["mutate"], "Fetch cache mutation is missing, which means this fetch was useless, because it will not update anywhere");
-              evt.target.result?.["mutate"]?.(data);
-            });
-          }
-
-          res(evt.target.result);
-        }
-      };
-
-      getReg.onerror = rej;
-    }
-  });
-
-  try {
-    return await promise;
-  } catch(err) {
-    console.error("Something went wrong with IndexedDB", err);
-    return await fetchObject.send(fetchOnce);
-  }
-}
-
 
 async function anilistGetMediaById(id) {
   console.assert(id, "No id given");
@@ -383,15 +288,6 @@ async function anilistTrendingAnime() {
     "seasonYear": 2025,
     "nextSeason": "SPRING",
     "nextYear": 2025
-  });
-
-  return await cache(request);
-}
-
-async function anilistGetWatchingMedia(token, variables) {
-  const request = Fetch.authAnilist(token, querys.currentWachingMedia, {
-    "perPage": 40,
-    ...variables,
   });
 
   return await cache(request);
@@ -434,7 +330,7 @@ export class IndexedDB {
   }
 
   static fetchCache(errorCallback) {
-    const request = indexedDB.open("MyAniList-cache", 1);
+    const request = indexedDB.open("MyAniList-cache", 2);
     if (errorCallback) request.onerror = errorCallback;
 
     request.onupgradeneeded = evt => {
@@ -442,6 +338,9 @@ export class IndexedDB {
       switch(evt.oldVersion) {
         case 0: {
           IndexedDB.#createStore(db, "results", { keyPath: "cacheKey" });
+        }
+        case 1: {
+          IndexedDB.#createStore(db, "debug", { keyPath: "cacheKey" });
         }
       }
     };

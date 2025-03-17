@@ -1,5 +1,5 @@
 import { A } from "../components/CustomA";
-import api, {api2} from "../utils/api";
+import api from "../utils/api";
 import { createResource, Switch, Match, Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
@@ -36,11 +36,12 @@ function Home() {
 
 function CurrentWatchingMedia(props) {
   // const [animeData] = api.createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
-  const [animeData, { mutateCache }] = api2.currentlyWaching(props.userId, props.token);
-  const [mangaData] = api.createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
+  const [animeData, { mutateCache }] = api.anilist.wachingAnime(props.userId, props.token);
+  const [mangaData] = api.anilist.readingManga(props.userId, props.token);
+  // const [mangaData] = api.createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
 
   createEffect(() => {
-    console.log("effect", animeData())
+    console.log("effect", mangaData())
   });
   const sortAiringTime = (a, b) => {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
