@@ -9,6 +9,13 @@ const api = {
     trendingAnime: anilistTrendingAnime,
     getAuthUserData: anilistGetAuthUser,
     searchMedia: anilistSearchMedia,
+    mutateMedia: anilistMutateMedia,
+    wachingAnime: async (id, token) => {
+      return anilistGetWatchingMedia(token, { "userId": id, "type": "ANIME", "perPage": 40 });
+    },
+    readingManga: async (id, token) => {
+      return anilistGetWatchingMedia(token, { "userId": id, "type": "MANGA", "perPage": 40 });
+    },
     topAnime: async () => { 
       return anilistSearchMedia(null, { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
     },
@@ -194,6 +201,22 @@ async function anilistTrendingAnime() {
   });
 
   return await cache(request);
+}
+
+async function anilistGetWatchingMedia(token, variables) {
+  const request = Fetch.authAnilist(token, querys.currentWachingMedia, {
+    "perPage": 40,
+    ...variables,
+  });
+
+  return await cache(request);
+}
+
+async function anilistMutateMedia(token, variables) {
+  console.assert(variables.mediaId, "MediaId is missing from variables");
+  const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
+
+  return await request.send();
 }
 
 async function anilistGetAuthUser(token) {
