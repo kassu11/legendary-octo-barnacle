@@ -1,0 +1,35 @@
+.spoiler {
+  display: inline;
+  background-color: #333;
+
+  .text {
+    background-color: #3333;
+  }
+
+  &:not([open]) {
+    * {
+      color: transparent;
+    }
+
+    .text {
+      background-color: #333;
+    }
+
+    summary * {
+      pointer-events: none;
+    }
+  }
+
+  &[open] {
+    color: inherit;
+  }
+
+  > summary {
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}
