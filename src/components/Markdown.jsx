@@ -19,11 +19,7 @@ const spoilerExtension = {
     }
   },
   renderer(token) {
-    // return `<span class="spoiler">${marked.parseInline(token.text)}</span>`;
-    return `
-<details class="${style.spoiler}">
-  <summary><span class="${style.text}">${marked.parseInline(token.text)}</span></summary>
-</details>`;
+    return `<details class="${style.spoiler}"><summary><span class="${style.text}">${marked.parseInline(token.text)}</span></summary></details>`;
   }
 };
 
