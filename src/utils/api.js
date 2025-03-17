@@ -1,4 +1,4 @@
-import { createEffect, createResource } from "solid-js";
+import { createEffect, createResource, createSignal } from "solid-js";
 import * as querys from "./querys";
 const DEBUG = location.origin.includes("localhost");
 
@@ -115,6 +115,191 @@ const localFetchCacheStorage = new Map();
  * @param {Fetch} fetchObject
  */
 async function cache(fetchObject, fetchOnce = false) {
+  console.assert(fetchObject.cacheKey, "Cache key is missing");
+
+  if (fetchOnce && localFetchCacheStorage.has(fetchObject.cacheKey)) {
+    return localFetchCacheStorage.get(fetchObject.cacheKey);
+  }
+
+  const STORE_NAME = "results";
+  const promise = new Promise((res, rej) => {
+    const cacheReq = IndexedDB.fetchCache(rej)
+
+    cacheReq.onsuccess = evt => {
+      const db = evt.target.result;
+
+      const store = IndexedDB.store(db, STORE_NAME, "readonly", rej);
+      const getReg = store.get(fetchObject.cacheKey);
+      getReg.onsuccess = async evt => {
+        if(evt.target.result == null) {
+          const data = await fetchObject.send(fetchOnce);
+
+          const store = IndexedDB.store(db, STORE_NAME, "readwrite");
+          store.add({ ...data, fromCache: true });
+          res(data);
+        } else {
+          console.assert(evt.target.result.exspires, "Cache should have a expiration date");
+          console.assert(evt.target.result.data, "Cache should always have data");
+
+          if(fetchOnce) {
+            localFetchCacheStorage.set(fetchObject.cacheKey, evt.target.result);
+          }
+
+          if(DEBUG == false) {
+            fetchObject.send(fetchOnce).then(data => {
+              const store = IndexedDB.store(db, STORE_NAME, "readwrite");
+              store.put({ ...data, fromCache: true });
+              console.assert(evt.target.result?.["mutate"], "Fetch cache mutation is missing, which means this fetch was useless, because it will not update anywhere");
+              evt.target.result?.["mutate"]?.(data);
+            });
+          }
+
+          res(evt.target.result);
+        }
+      };
+
+      getReg.onerror = rej;
+    }
+  });
+
+  try {
+    return await promise;
+  } catch(err) {
+    console.error("Something went wrong with IndexedDB", err);
+    return await fetchObject.send(fetchOnce);
+  }
+}
+
+
+export const api2 = {
+  // wachingAnime: (id, token) => {
+  //   const [data, setData] = createSignal(undefined);
+  //
+  //   const request = Fetch.authAnilist(token, querys.currentWachingMedia, {
+  //     "userId": id, "type": "ANIME", "perPage": 40
+  //   });
+  //
+  //   const STORE_NAME = "results";
+  //   const mutate = (data) => {
+  //     // if(fetchOnce) {
+  //     //   localFetchCacheStorage.set(fetchObject.cacheKey, evt.target.result);
+  //     // }
+  //
+  //     const cacheReq = IndexedDB.fetchCache();
+  //     cacheReq.onsuccess = evt => {
+  //       const db = evt.target.result;
+  //       const store = IndexedDB.store(db, STORE_NAME, "readwrite");
+  //       store.put(data);
+  //     }
+  //
+  //     setData(data);
+  //   }
+  //
+  //
+  //   const refetch = async () => {
+  //     const data = await request.send();
+  //     mutate(data);
+  //   }
+  //
+  //   const cacheReq = IndexedDB.fetchCache();
+  //   cacheReq.onsuccess = evt => {
+  //     const db = evt.target.result;
+  //     const store = IndexedDB.store(db, STORE_NAME, "readonly");
+  //     const getReg = store.get(fetchObject.cacheKey);
+  //     getReg.onsuccess = evt => {
+  //       if(evt.target.result != null) {
+  //         console.assert(evt.target.result.exspires, "Cache should have a expiration date");
+  //         console.assert(evt.target.result.data, "Cache should always have data");
+  //         setData(evt.target.result);
+  //       } 
+  //     };
+  //   }
+  //
+  //   return [data, { mutate, refetch }];
+  // },
+  currentlyWaching: aniCache((id, token) => {
+    return Fetch.authAnilist(token, querys.currentWachingMedia, {
+      "userId": id, "type": "ANIME", "perPage": 40
+    });
+  }),
+}
+
+/**
+ * @param {(fetchOptions: any[]) => Fetch} fetchCallback
+ * @returns {(fetchOptions: any[]) => [any, { mutate: (data: any) => void, mutateCache: (data: any) => void, refetch: () => void }]}
+ */
+function aniCache(fetchCallback) {
+  const STORE_NAME = "results";
+  const fetchOnce = false;
+  const fetchOnDebug = false;
+  
+  return (...fetchOptions) => {
+    const [data, setData] = createSignal(undefined);
+    const fetchOnStart = DEBUG == false || fetchOnDebug;
+    const request = fetchCallback(...fetchOptions)
+
+    const mutateCache = mutateData => {
+      console.log("mutateCache");
+      if (typeof mutateData === "function") {
+        mutateData = mutateData(data());
+      }
+      if(fetchOnce) {
+        localFetchCacheStorage.set(request.cacheKey, mutateData);
+      }
+
+      const cacheReq = IndexedDB.fetchCache();
+      cacheReq.onsuccess = evt => {
+        const db = evt.target.result;
+        const store = IndexedDB.store(db, STORE_NAME, "readwrite");
+        store.put(mutateData);
+      }
+    }
+
+    const mutate = mutateData => {
+      if (typeof mutateData === "function") {
+        mutateData = mutateData(data());
+      }
+      mutateCache(mutateData);
+      setData(mutateData);
+    }
+
+    const refetch = async () => {
+      const data = await request.send();
+      mutate(data);
+    }
+
+    if(fetchOnce) {
+      setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
+    }
+
+    if (fetchOnStart) {
+      refetch();
+    }
+
+    const cacheReq = IndexedDB.fetchCache();
+    cacheReq.onsuccess = evt => {
+      const db = evt.target.result;
+      const store = IndexedDB.store(db, STORE_NAME, "readonly");
+      const getReg = store.get(request.cacheKey);
+      getReg.onsuccess = evt => {
+        if(evt.target.result != null) {
+          console.assert(evt.target.result.exspires, "Cache should have a expiration date");
+          console.assert(evt.target.result.data, "Cache should always have data");
+          setData({ ...evt.target.result, fromCache: true });
+        } else if (fetchOnStart) {
+          refetch();
+        }
+      };
+    }
+
+    return [data, { mutate, refetch, mutateCache }];
+  }
+}
+
+/**
+ * @param {Fetch} fetchObject
+ */
+async function cache2(fetchObject, mutate, refetch, fetchOnce = false) {
   console.assert(fetchObject.cacheKey, "Cache key is missing");
 
   if (fetchOnce && localFetchCacheStorage.has(fetchObject.cacheKey)) {

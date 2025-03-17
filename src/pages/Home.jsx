@@ -1,5 +1,5 @@
 import { A } from "../components/CustomA";
-import api from "../utils/api";
+import api, {api2} from "../utils/api";
 import { createResource, Switch, Match, Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
@@ -35,9 +35,13 @@ function Home() {
 }
 
 function CurrentWatchingMedia(props) {
-  const [animeData] = api.createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
+  // const [animeData] = api.createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
+  const [animeData, { mutateCache }] = api2.currentlyWaching(props.userId, props.token);
   const [mangaData] = api.createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
 
+  createEffect(() => {
+    console.log("effect", animeData())
+  });
   const sortAiringTime = (a, b) => {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
     if (aTime && bTime) { return aTime - bTime; } 
@@ -53,14 +57,14 @@ function CurrentWatchingMedia(props) {
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
             <Show when={anime.media.status != "FINISHED"}>
-              <AnimeCard anime={anime} />
+              <AnimeCard anime={anime} mutateCache={mutateCache} />
             </Show>
           )}</For>
         </div>
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList}>{anime => (
             <Show when={anime.media.status == "FINISHED"}>
-              <AnimeCard anime={anime} />
+              <AnimeCard anime={anime} mutateCache={mutateCache} />
             </Show>
           )}</For>
         </div>
@@ -97,6 +101,8 @@ function AnimeCard(props) {
           e.preventDefault();
           if (progress() < props.anime.media.episodes) {
             api.anilist.mutateMedia(accessToken(), {mediaId: props.anime.media.id, progress: progress() + 1});
+            props.anime.progress += 1;
+            props.mutateCache(data => data);
             setProgress(val => val + 1);
           }
         }}>
