@@ -26,6 +26,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: .5rem;
   }
 }
 
@@ -52,13 +53,56 @@
 }
 
 .behind {
-  background-color: red;
+
+}
+
+.normal-info {
+  background-color: #333;
+  padding-block: .75em;
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  text-align: center;
+  font-size: .75rem;
+}
+
+.hover-info {
+  background-color: #333;
+  padding-block: .75em;
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0;
+  font-weight: 700;
+
+  &:hover {
+    background-color: black;
+  }
+
+  .plus {
+    font-size: 1rem;
+  }
 }
 
 .card {
   position: relative;
-  width: 5rem;
-  height: 7rem;
+  width: 5.5rem;
+  height: 8rem;
+  color: white;
+  border-radius: .5rem;
+  text-decoration: none;
+
+  &:hover {
+    .normal-info {
+      opacity: 0;
+    }
+
+    .hover-info {
+      opacity: 1;
+    }
+  }
 }
 
 .card-right {
@@ -66,12 +110,13 @@
   top: 0px;
   bottom: 0px;
   left: 100%;
-  width: 14rem;
+  width: 16rem;
   background-color: green;
   z-index: 1;
-  // display: none;
+  display: none;
+  pointer-events: none;
 }
 
 .card:hover .card-right{
-  // display: block;
+  display: block;
 }

@@ -1,18 +1,18 @@
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { createResource, Switch, Match, Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
 
 function Home() {
   const [trendingAnime] = createResource(api.anilist.trendingAnime);
-  const { authUserData } = useAuthentication();
+  const { accessToken, authUserData } = useAuthentication();
 
   return (
     <Show when={authUserData()}>
       {console.log(authUserData())}
       <div class={style.container}>
-        <CurrentWatchingMedia userId={authUserData().data.data.Viewer.id} />
+        <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.data.Viewer.id} />
         <div class={style.body}>
           <div class={style.left}>
             <div class={style.rowContainer}></div>
@@ -35,11 +35,11 @@ function Home() {
 }
 
 function CurrentWatchingMedia(props) {
-  const [animeData] = createResource(props.userId, api.anilist.wachingAnime);
-  const [mangaData] = createResource(props.userId, api.anilist.readingManga);
+  const [animeData] = createResource(props.userId, async (id) => api.anilist.wachingAnime(id, props.token));
+  const [mangaData] = createResource(props.userId, async (id) => api.anilist.readingManga(id, props.token));
 
   const sortAiringTime = (a, b) => {
-    const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt == b.media.nextAiringEpisode?.airingAt];
+    const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
     if (aTime && bTime) { return aTime - bTime; } 
     else if (aTime == bTime) { return 0; } 
     else if (aTime == null) { return -1; } 
@@ -58,7 +58,7 @@ function CurrentWatchingMedia(props) {
           )}</For>
         </div>
         <div class={style.rowContainer}>
-          <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
+          <For each={animeData().data.data.Page.mediaList}>{anime => (
             <Show when={anime.media.status == "FINISHED"}>
               {animeCard(anime)}
             </Show>
@@ -71,7 +71,8 @@ function CurrentWatchingMedia(props) {
 }
 
 function animeCard(anime) {
-  console.log(anime);
+  // console.log(anime);
+  // console.log(anime.media.nextAiringEpisode.timeUntilAiring);
   const isBehind = anime.media.nextAiringEpisode?.episode > anime.progress + 1;
   return (
     <A 
@@ -79,10 +80,22 @@ function animeCard(anime) {
       classList={{[style.card]: true, [style.behind]: isBehind}}
     >
       <img src={anime.media.coverImage.large} alt="Cover." />
+      <Show when={anime.media.nextAiringEpisode?.airingAt}>
+        <div class={style.normalInfo}>
+          <p>Ep {anime.media.nextAiringEpisode.episode}</p>
+          <EpisodeTime airingAt={anime.media.nextAiringEpisode.airingAt} />
+          <Show when={isBehind}>
+            <div class={style.isBehind}></div>
+          </Show>
+        </div>
+      </Show>
+      <div class={style.hoverInfo}>
+        <p>{anime.progress} <span class={style.plus}>+</span></p>
+      </div>
       <div class={style.cardRight}>
         <Show when={anime.media.episodes}>
           <Show when={isBehind} fallback={
-            <span>{anime.media.episodes - anime.progress} episodes left</span>
+            <p>{anime.media.episodes - anime.progress} episodes left</p>
           }>
             <p>{anime.media.nextAiringEpisode.episode - anime.progress + 1} episodes behind</p>
           </Show>
@@ -91,6 +104,25 @@ function animeCard(anime) {
         <p>Progress: {anime.progress}/{anime.media.episodes}</p>
       </div>
     </A>
+  )
+}
+
+const [currentTime, setCurentTime] = createSignal((new Date()) / 1000);
+
+setInterval(() => setCurentTime((new Date()) / 1000), 1000 * 60);
+
+function EpisodeTime(props) {
+  const [time, setTime] = createSignal(Math.abs(props.airingAt - currentTime()));
+  createEffect(() => {
+    setTime(Math.abs(props.airingAt - currentTime()));
+  });
+
+  return (
+    <p>
+      <Show when={Math.floor(time() / 3600 / 24)} children={days => (<>{days}d </>)} />
+      <Show when={Math.floor((time() / 3600) % 24)} children={hours => (<>{hours}h </>)} />
+      <Show when={Math.floor((time() % 3600) / 60)} children={minutes => (<>{minutes}m </>)} />
+    </p>
   )
 }
 
