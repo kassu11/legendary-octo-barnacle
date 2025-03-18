@@ -167,14 +167,16 @@ function AnimeCard(props) {
       </Show>
       <div class={style.cardRight}>
         <Show when={props.anime.media.nextAiringEpisode?.episode} fallback={
-          <p>{props.anime.media.episodes - progress()} episodes left</p>
+          <Show when={props.anime.media.episodes}>
+            <p>{props.anime.media.episodes - progress()} episodes left</p>
+          </Show>
         }>
           <Show when={isBehind()}>
             <p>{props.anime.media.nextAiringEpisode.episode - (progress() + 1)} episodes behind</p>
           </Show>
         </Show>
         <p>{props.anime.media.title.userPreferred}</p>
-        <p>Progress: {progress()}/{props.anime.media.episodes}</p>
+        <p>Progress: {progress()}<Show when={props.anime.media.episodes}>{e => (<>/{e()}</>)}</Show></p>
       </div>
     </A>
   )
