@@ -3,7 +3,7 @@ $radius: .2rem;
 .container {
   background-color: yellow;
   margin-inline: auto;
-  width: 60em;
+  width: min(100%, 80rem);
   display: grid;
   gap: 10px;
 }
@@ -34,22 +34,23 @@ $radius: .2rem;
 
 
 .body {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  align-items: start;
+  grid-template-columns: 4fr 3fr;
   gap: 5px;
   background-color: wheat;
 }
 
 .left {
   background-color: skyblue;
-  width: 30em;
+  width: 100%;
   display: grid;
   gap: 5px;
 }
 
 .right {
   background-color: steelblue;
-  width: 30em;
+  width: 100%;
   display: grid;
   gap: 5px;
 }
