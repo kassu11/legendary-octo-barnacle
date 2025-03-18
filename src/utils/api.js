@@ -33,6 +33,9 @@ const api = {
     getAuthUserData: normalCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
     }),
+    getActivity: normalCache((token, variables) => {
+      return Fetch.authAnilist(token, querys.anilistActivity, variables);
+    }),
     searchMedia: fetchOnce((token, variables) => {
       return Fetch.authAnilist(token, querys.searchMedia, variables);
     }),

@@ -231,6 +231,88 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const anilistActivity = format`query (
+  $isFollowing: Boolean = true
+  $hasReplies: Boolean = false
+  $activityType: ActivityType
+  $page: Int
+) {
+  Page(page: $page, perPage: 25) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    activities(
+      isFollowing: $isFollowing
+      type: $activityType
+      hasRepliesOrTypeText: $hasReplies
+      type_in: [TEXT, ANIME_LIST, MANGA_LIST]
+      sort: ID_DESC
+    ) {
+      ... on TextActivity {
+        id
+        userId
+        type
+        replyCount
+        text
+        isLocked
+        isSubscribed
+        isLiked
+        likeCount
+        createdAt
+        user {
+          id
+          name
+          donatorTier
+          donatorBadge
+          moderatorRoles
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ListActivity {
+        id
+        userId
+        type
+        status
+        progress
+        replyCount
+        isLocked
+        isSubscribed
+        isLiked
+        likeCount
+        createdAt
+        user {
+          id
+          name
+          donatorTier
+          donatorBadge
+          avatar {
+            large
+          }
+        }
+        media {
+          id
+          type
+          status
+          isAdult
+          title {
+            userPreferred
+          }
+          bannerImage
+          coverImage {
+            large
+          }
+        }
+      }
+    }
+  }
+}`
+
 export const currentWachingMedia = format`query ($userId: Int, $type: MediaType, $perPage: Int) {
   Page(perPage: $perPage) {
     mediaList(

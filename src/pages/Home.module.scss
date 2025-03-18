@@ -139,3 +139,29 @@ $radius: .2rem;
 .card:hover .card-right{
   display: block;
 }
+
+
+.activity-card {
+  display: flex;
+  background-color: limegreen;
+  border-radius: .5rem;
+  overflow: hidden;
+}
+
+.profile {
+  height: 3rem;
+  width: 3rem;
+  margin-top: auto;
+}
+
+.activity-right {
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-cover {
+  height: 100%;
+  width: 6rem;
+  object-fit: cover;
+}

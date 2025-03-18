@@ -1,27 +1,23 @@
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createResource, Switch, Match, Show, createSignal, createEffect } from "solid-js";
+import { Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
 
 function Home() {
-  // const [trendingAnime] = api.createResource(api.anilist.trendingAnime);
   const { accessToken, authUserData } = useAuthentication();
 
   return (
     <Show when={authUserData()}>
-      {console.log(authUserData())}
       <div class={style.container}>
         <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.data.Viewer.id} />
         <div class={style.body}>
           <div class={style.left}>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
+            <h2>Activity</h2>
+            <button>Filters</button>
+            <button>Following</button>
+            <button>Global</button>
+            <Activity token={accessToken()}/>
           </div>
           <div class={style.right}>
             <div class={style.rowContainer}></div>
@@ -34,13 +30,41 @@ function Home() {
   )
 }
 
+function Activity(props) {
+  const [activityData] = api.anilist.getActivity(props.token, {
+    "page": 1,
+    "type": "following",
+    "filter": "all"
+  });
+
+  return (
+    <>
+      <p>Actibity thing...</p>
+      {console.log(activityData())}
+      <For each={activityData()?.data.data.Page.activities}>{activity => (
+        <div class={style.activityCard}>
+          <Show when={activity.media}>{media => (
+            <img class={style.activityCover} src={media().coverImage.large} alt="Cover" />
+          )}</Show>
+          <div class={style.activityRight}>
+            <A href={"/profile/" + activity.user.name}>{activity.user.name}</A>
+            <p>
+              {activity.status}{" "}
+              <Show when={activity.progress}>{activity.progress} of </Show>
+              <A href={"/anime/" + activity.media.id + "/" + activity.media.title.userPreferred}>{activity.media.title.userPreferred}</A>
+            </p>
+            <img class={style.profile} src={activity.user.avatar.large} alt="Profile" />
+          </div>
+        </div>
+      )}</For>
+    </>
+  )
+}
+
 function CurrentWatchingMedia(props) {
   const [animeData, { mutateCache }] = api.anilist.wachingAnime(props.userId, props.token);
   const [mangaData] = api.anilist.readingManga(props.userId, props.token);
 
-  createEffect(() => {
-    console.log("effect", mangaData())
-  });
   const sortAiringTime = (a, b) => {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
     if (aTime && bTime) { return aTime - bTime; } 
@@ -51,7 +75,6 @@ function CurrentWatchingMedia(props) {
 
   return (
     <div class={style.header}>
-      {console.log(animeData(), mangaData())}
       <Show when={animeData()}>
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
@@ -75,7 +98,6 @@ function CurrentWatchingMedia(props) {
           )}</For>
         </div>
       </Show>
-      <div class={style.rowContainer}></div>
     </div>
   );
 }
