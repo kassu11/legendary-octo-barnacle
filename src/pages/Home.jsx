@@ -3,6 +3,7 @@ import api from "../utils/api";
 import { Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
+import { Markdown } from "../components/Markdown.jsx";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -13,10 +14,6 @@ function Home() {
         <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.data.Viewer.id} />
         <div class={style.body}>
           <div class={style.left}>
-            <h2>Activity</h2>
-            <button>Filters</button>
-            <button>Following</button>
-            <button>Global</button>
             <Activity token={accessToken()}/>
           </div>
           <div class={style.right}>
@@ -31,14 +28,40 @@ function Home() {
 }
 
 function Activity(props) {
-  const [activityData] = api.anilist.getActivity(props.token, {
+  const [activityType, setActivityType] = createSignal(undefined);
+  const [isFollowing, setIsFollowing] = createSignal(true);
+  const [hasReplies, setHasReplies] = createSignal(undefined);
+  const [variables, setVariables] = createSignal({
     "page": 1,
-    "type": "following",
-    "filter": "all"
+    "isFollowing": true,
+  });
+  const [activityData] = api.anilist.getActivity(props.token, variables);
+
+  createEffect(() => {
+    setVariables(v => ({
+      ...v,
+      activityType: activityType(),
+      isFollowing: isFollowing(),
+      hasReplies: hasReplies(),
+    }));
   });
 
   return (
     <>
+      <h2>Activity</h2>
+      <div>
+        <button onClick={() => setActivityType(undefined)}>All</button>
+        <button onClick={() => setActivityType("TEXT")}>Text Status</button>
+        <button onClick={() => setActivityType("MEDIA_LIST")}>List Progress</button>
+      </div>
+      <button onClick={() => {
+        setIsFollowing(true); 
+        setHasReplies(undefined);
+      }}>Following</button>
+      <button onClick={() => {
+        setIsFollowing(false);
+        setHasReplies(true);
+      }}>Global</button>
       <p>Actibity thing...</p>
       {console.log(activityData())}
       <For each={activityData()?.data.data.Page.activities}>{activity => (
@@ -48,11 +71,16 @@ function Activity(props) {
           )}</Show>
           <div class={style.activityRight}>
             <A href={"/profile/" + activity.user.name}>{activity.user.name}</A>
-            <p>
-              {activity.status}{" "}
-              <Show when={activity.progress}>{activity.progress} of </Show>
-              <A href={"/anime/" + activity.media.id + "/" + activity.media.title.userPreferred}>{activity.media.title.userPreferred}</A>
-            </p>
+            <Show when={activity.media}>
+              <p>
+                {activity.status}{" "}
+                <Show when={activity.progress}>{activity.progress} of </Show>
+                <A href={"/anime/" + activity.media.id + "/" + activity.media.title.userPreferred}>{activity.media.title.userPreferred}</A>
+              </p>
+            </Show>
+            <Show when={activity.text}>
+              <Markdown children={activity.text} />
+            </Show>
             <img class={style.profile} src={activity.user.avatar.large} alt="Profile" />
           </div>
         </div>
