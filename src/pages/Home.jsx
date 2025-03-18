@@ -45,8 +45,8 @@ function CurrentWatchingMedia(props) {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
     if (aTime && bTime) { return aTime - bTime; } 
     else if (aTime == bTime) { return 0; } 
-    else if (aTime == null) { return -1; } 
-    return 1;
+    else if (aTime == null) { return 1; } 
+    return -1;
   };
 
   return (
