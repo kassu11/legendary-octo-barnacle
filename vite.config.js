@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [solid()],
   base: "/MyAniList",
   css: {
+    devSourcemap: true,
     modules: {
       localsConvention: 'camelCaseOnly'
     }
