@@ -9,10 +9,10 @@ const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchO
 
 const api = {
   anilist: {
-    mediaId: normalCache(id => {
+    mediaId: fetchOnce(id => {
       return Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 });
     }),
-    characterId: normalCache(id => {
+    characterId: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, {
         id,
         "page": 1,
@@ -21,7 +21,7 @@ const api = {
         "withRoles": true
       });
     }),
-    trendingAnime: normalCache(() => {
+    trendingAnime: fetchOnce(() => {
       return Fetch.anilist(querys.trendingAnime, {
         "type": "ANIME",
         "season": "WINTER",
@@ -52,12 +52,12 @@ const api = {
         "userId": id, "type": "MANGA", "perPage": 40
       });
     }),
-    topAnime: normalCache(() => {
+    topAnime: fetchOnce(() => {
       return Fetch.anilist(querys.searchMedia, { 
         "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" 
       });
     }),
-    topManga: normalCache(() => {
+    topManga: fetchOnce(() => {
       return Fetch.anilist(querys.searchMedia, { 
         "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" 
       });
@@ -139,13 +139,20 @@ class Fetch {
 const localFetchCacheStorage = new Map();
 
 /**
- * @param {{ storeName: "results"|"debug", fetchOnce: boolean, fetchOnDebug: boolean, noCache: boolean }} settings
+ * @param {Object} settings - Cache settings
+ * @param {string} settings.storeName - Name of the store in IndexedDB, if not provided it will not be stored in IndexedDB
+ * @param {boolean} settings.fetchOnDebug - Fetches data on debug mode
+ * @param {boolean} settings.fetchOnce - Always fetches data once per page load
+ * @param {boolean} settings.noCache - Never caches the data
+ * @param {number} settings.expiresInSeconds - How long to keep the data in cache. If cache expires it will not be given, because outdaded data is worse than having to wait for fresh data
  */
 function cacheBuilder(settings) {
-  settings.storeName ??= "debug";
+  settings.storeName ??= "";
   settings.fetchOnDebug ??= false;
   settings.fetchOnce ??= false;
-  settings.noCache ??= false;
+  settings.noCache ??= false; 
+  console.assert(Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
+  settings.expiresInSeconds ??= 60 * 60 * 24 * 365; // 1 year
 
   /**
    * @param {(fetchOptions: any[]) => Fetch} fetchCallback
@@ -154,7 +161,7 @@ function cacheBuilder(settings) {
     return (...fetchOptions) => {
       const [data, setData] = createSignal(undefined);
       let request = null;
-      const fetchOnStart = DEBUG == false || settings.fetchOnDebug || settings.noCache;
+      const fetchOnStart = DEBUG == false || settings.fetchOnDebug || settings.noCache || !settings.storeName;
 
       const mutateCache = mutateData => {
         if (typeof mutateData === "function") {
@@ -164,11 +171,14 @@ function cacheBuilder(settings) {
 
         if (settings.noCache == false) {
           localFetchCacheStorage.set(request.cacheKey, mutateData);
-          const cacheReq = IndexedDB.fetchCache();
-          cacheReq.onsuccess = evt => {
-            const db = evt.target.result;
-            const store = IndexedDB.store(db, settings.storeName, "readwrite");
-            store.put(mutateData);
+
+          if (settings.storeName) {
+            const cacheReq = IndexedDB.fetchCache();
+            cacheReq.onsuccess = evt => {
+              const db = evt.target.result;
+              const store = IndexedDB.store(db, settings.storeName, "readwrite");
+              store.put(mutateData);
+            }
           }
         }
       }
@@ -200,7 +210,7 @@ function cacheBuilder(settings) {
           if (settings.fetchOnce) { 
             return;
           }
-        } else if (settings.noCache != true) {
+        } else if (settings.noCache == false && settings.storeName) {
           const cacheReq = IndexedDB.fetchCache();
           cacheReq.onerror = refetch;
           cacheReq.onsuccess = evt => {
