@@ -133,10 +133,11 @@ function CurrentWatchingMedia(props) {
 function AnimeCard(props) {
   const { accessToken } = useAuthentication();
   const [progress, setProgress] = createSignal(props.anime.progress);
+  const [airingEpisode, setAiringEpisode] = createSignal(props.anime.media.nextAiringEpisode?.episode);
   const [isBehind, setIsBehind] = createSignal(props.anime.media.nextAiringEpisode?.episode > progress() + 1);
 
   createEffect(() => {
-    setIsBehind(props.anime.media.nextAiringEpisode?.episode > progress() + 1);
+    setIsBehind(airingEpisode() > progress() + 1);
   })
 
   return (
@@ -145,8 +146,8 @@ function AnimeCard(props) {
       <img src={props.anime.media.coverImage.large} alt="Cover." />
       <Show when={props.anime.media.nextAiringEpisode?.airingAt}>
         <div class={style.normalInfo}>
-          <p>Ep {props.anime.media.nextAiringEpisode.episode}</p>
-          <EpisodeTime airingAt={props.anime.media.nextAiringEpisode.airingAt} />
+          <p>Ep {props.anime.media.nextAiringEpisode?.episode}</p>
+          <EpisodeTime airingAt={props.anime.media.nextAiringEpisode.airingAt} setAiringEpisode={setAiringEpisode}/>
           <Show when={isBehind()}>
             <div class={style.isBehind}></div>
           </Show>
@@ -172,7 +173,7 @@ function AnimeCard(props) {
           </Show>
         }>
           <Show when={isBehind()}>
-            <p>{props.anime.media.nextAiringEpisode.episode - (progress() + 1)} episodes behind</p>
+            <p>{airingEpisode() - (progress() + 1)} episodes behind</p>
           </Show>
         </Show>
         <p>{props.anime.media.title.userPreferred}</p>
@@ -184,20 +185,29 @@ function AnimeCard(props) {
 
 const [currentTime, setCurentTime] = createSignal((new Date()) / 1000);
 
-setInterval(() => setCurentTime((new Date()) / 1000), 1000 * 60);
+setInterval(() => setCurentTime((new Date()) / 1000), 1000 * 30);
 
 function EpisodeTime(props) {
   const [time, setTime] = createSignal(Math.abs(props.airingAt - currentTime()));
+  const [timeLimitReached, setTimeLimitReached] = createSignal(false);
+
   createEffect(() => {
     setTime(Math.abs(props.airingAt - currentTime()));
+    if (props.airingAt < currentTime() && timeLimitReached() == false) {
+      props.setAiringEpisode(ep => ep + 1);
+      setTimeLimitReached(true);
+    }
   });
 
   return (
-    <p>
-      <Show when={Math.floor(time() / 3600 / 24)} children={days => (<>{days}d </>)} />
-      <Show when={Math.floor((time() / 3600) % 24)} children={hours => (<>{hours}h </>)} />
-      <Show when={Math.floor((time() % 3600) / 60)} children={minutes => (<>{minutes}m </>)} />
-    </p>
+    <>
+      <Show when={timeLimitReached()}>aired in</Show>
+      <p>
+        <Show when={Math.floor(time() / 3600 / 24)} children={days => (<>{days}d </>)} />
+        <Show when={Math.floor((time() / 3600) % 24)} children={hours => (<>{hours}h </>)} />
+        <Show when={Math.floor((time() % 3600) / 60)} children={minutes => (<>{minutes}m </>)} />
+      </p>
+    </>
   )
 }
 
