@@ -38,12 +38,22 @@ function Activity(props) {
   const [activityData] = api.anilist.getActivity(props.token, variables);
 
   createEffect(() => {
-    setVariables(v => ({
-      ...v,
-      activityType: activityType(),
-      isFollowing: isFollowing(),
-      hasReplies: hasReplies(),
-    }));
+    setVariables(current => {
+      const base = {
+        ...current,
+        activityType: activityType(),
+        isFollowing: isFollowing(),
+        hasReplies: hasReplies(),
+      };
+
+      for (const key of Object.keys(base)) {
+        if (base[key] !== current[key]) {
+          return base;
+        }
+      }
+
+      return current;
+    });
   });
 
   return (
