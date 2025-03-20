@@ -3,7 +3,7 @@ import api from "../utils/api";
 import { Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
-import { Markdown } from "../components/Markdown.jsx";
+import { ActivityCard } from "../components/Activity.jsx";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -62,32 +62,14 @@ function Activity(props) {
         setIsFollowing(false);
         setHasReplies(true);
       }}>Global</button>
-      <p>Actibity thing...</p>
       {console.log(activityData())}
       <For each={activityData()?.data.data.Page.activities}>{activity => (
-        <div class={style.activityCard}>
-          <Show when={activity.media}>{media => (
-            <img class={style.activityCover} src={media().coverImage.large} alt="Cover" />
-          )}</Show>
-          <div class={style.activityRight}>
-            <A href={"/profile/" + activity.user.name}>{activity.user.name}</A>
-            <Show when={activity.media}>
-              <p>
-                {activity.status}{" "}
-                <Show when={activity.progress}>{activity.progress} of </Show>
-                <A href={"/anime/" + activity.media.id + "/" + activity.media.title.userPreferred}>{activity.media.title.userPreferred}</A>
-              </p>
-            </Show>
-            <Show when={activity.text}>
-              <Markdown children={activity.text} />
-            </Show>
-            <img class={style.profile} src={activity.user.avatar.large} alt="Profile" />
-          </div>
-        </div>
+        <ActivityCard activity={activity} />
       )}</For>
     </>
   )
 }
+
 
 function CurrentWatchingMedia(props) {
   const [animeData, { mutateCache }] = api.anilist.wachingAnime(props.userId, props.token);
