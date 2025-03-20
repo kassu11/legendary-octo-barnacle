@@ -62,11 +62,16 @@ export function ActivityCard(props) {
             api.anilist.likeActivity(accessToken(), { id: props.activity.id })
             if (liked) {
               setLikeCount(v => v - 1);
+              props.activity.likeCount -= 1;
             } else {
               setLikeCount(v => v + 1);
+              props.activity.likeCount += 1;
             }
+            props.activity.isLiked = !liked
             return !liked
           });
+          console.log(props.mutateCache);
+          props.mutateCache(data => data);
         }}>Like {likeCount()}</button>
         <button>Reply {props.activity.replyCount}</button>
       </div>
