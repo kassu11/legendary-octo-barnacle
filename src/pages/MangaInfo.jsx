@@ -45,8 +45,8 @@ function MangaInfo(props) {
       <li><b>Title EN:</b> {anime.title.english}</li>
       <li><b>Title native:</b> {anime.title.native}</li>
       <li><b>Title romaji:</b> {anime.title.romaji}</li>
-      <li><a target="_blank" href={`https://myanimelist.net/anime/${anime.idMal}/`}>MyAnimeList</a></li>
-      <li><a target="_blank" href={`https://anilist.co/anime/${anime.id}/`}>AniList</a></li>
+      <li><a target="_blank" href={`https://myanimelist.net/manga/${anime.idMal}/`}>MyAnimeList</a></li>
+      <li><a target="_blank" href={`https://anilist.co/manga/${anime.id}/`}>AniList</a></li>
       <li>
         <b>Cover:</b>
         <img src={anime.coverImage.large} alt="Cover" />
