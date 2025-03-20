@@ -1,24 +1,47 @@
-.activity-card {
-  display: flex;
+.activity-card-text {
   min-height: 5rem;
-  background-color: limegreen;
-  border-radius: .5rem;
-  overflow: hidden;
+  background-color: orange;
+  border-radius: .25rem;
+  padding: .5rem;
 }
+
+.content {
+  margin-top: .5rem;
+}
+
+.footer {
+  margin-top: .5rem;
+  gap: .5rem;
+  display: flex;
+  justify-content: end;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.profileHeader {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+
+
 
 .activity-card-media {
   position: relative;
   display: grid;
-  gap: 5px;
+  gap: .75rem;
   grid-template-columns: 5.5rem 1fr auto;
   background-color: limegreen;
   border-radius: .25rem;
-  overflow: hidden;
 }
 
 
 .right {
-  padding: 5px;
+  padding: .5rem;
+  padding-left: 0;
   display: flex;
   flex-direction: column;
 }
@@ -31,7 +54,7 @@
 }
 
 .main {
-  padding-block: 5px;
+  padding-block: .5rem;
 }
 
 .profile {
@@ -41,9 +64,13 @@
 }
 
 
+
+
+
 .created-at {
   margin-bottom: auto;
 }
+
 button.active {
   background-color: pink;
 }
