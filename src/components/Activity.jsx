@@ -2,19 +2,22 @@ import { Switch, Show, Match, createSignal, onCleanup } from "solid-js";
 import { Markdown } from "../components/Markdown.jsx";
 import style from "./Activity.module.scss";
 import { A } from "./CustomA.jsx";
+import api from "../utils/api.js";
+import { useAuthentication } from "../context/AuthenticationContext.jsx";
 
 const plural = num => num !== 1 ? "s" : "";
 
 export function ActivityCard(props) {
+  const { accessToken } = useAuthentication();
   const [isLiked, setIsLiked] = createSignal(props.activity.isLiked);
   const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
-  const [time, setTime] = createSignal(new Date() / 1000 - props.activity.createdAt);
+  const [time, setTime] = createSignal(Math.max(1, Math.abs(new Date() / 1000 - props.activity.createdAt)));
 
   let interval = null;
   if (time() < 60) {
-    interval = setInterval(() => setTime(new Date() / 1000 - props.activity.createdAt), 1000);
+    interval = setInterval(() => setTime(Math.max(1, Math.abs(new Date() / 1000 - props.activity.createdAt))), 1000);
   } else if (time() < 3600) {
-    interval = setInterval(() => setTime(new Date() / 1000 - props.activity.createdAt), 1000 * 60);
+    interval = setInterval(() => setTime(Math.max(1, Math.abs(new Date() / 1000 - props.activity.createdAt))), 1000 * 60);
   }
 
   onCleanup(() => clearInterval(interval));
@@ -33,7 +36,9 @@ export function ActivityCard(props) {
 
   return (
     <div class={style.activityCardMedia}>
-      <img class={style.cover} src={props.activity.media.coverImage.large} alt="Cover" />
+      <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>
+        <img class={style.cover} src={props.activity.media.coverImage.large} alt="Cover" />
+      </A>
       <div class={style.main}>
         <A href={"/profile/" + props.activity.user.name}>{props.activity.user.name}</A>
         <p>
@@ -54,6 +59,7 @@ export function ActivityCard(props) {
         </p>
         <button classList={{[style.active]: isLiked()}} onClick={() => {
           setIsLiked(liked => {
+            api.anilist.likeActivity(accessToken(), { id: props.activity.id })
             if (liked) {
               setLikeCount(v => v - 1);
             } else {

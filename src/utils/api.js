@@ -42,6 +42,9 @@ const api = {
     mutateMedia: noCache((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
     }),
+    likeActivity: noCache((token, variables) => {
+      return Fetch.authAnilist(token, querys.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
+    }),
     wachingAnime: normalCache((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "ANIME", "perPage": 40
