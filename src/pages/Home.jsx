@@ -35,7 +35,7 @@ function Activity(props) {
     "page": 1,
     "isFollowing": true,
   });
-  const [activityData] = api.anilist.getActivity(props.token, variables);
+  const [activityData, { mutateCache }] = api.anilist.getActivity(props.token, variables);
 
   createEffect(() => {
     setVariables(current => {
@@ -74,7 +74,7 @@ function Activity(props) {
       }}>Global</button>
       {console.log(activityData())}
       <For each={activityData()?.data.data.Page.activities}>{activity => (
-        <ActivityCard activity={activity} />
+        <ActivityCard activity={activity} mutateCache={mutateCache} />
       )}</For>
     </>
   )
