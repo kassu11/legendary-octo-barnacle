@@ -27,9 +27,9 @@ const spoilerExtension = {
 marked.use({ extensions: [spoilerExtension] });
 
 export function Markdown(props) {
+  if (!props.children) return null;
   const dirty = marked(props.children)
   const clean = DOMPurify.sanitize(dirty);
   const elem = <div innerHTML={clean}></div>; 
-  console.log(dirty);
   return <For each={elem.childNodes}>{e => e}</For>
 }
