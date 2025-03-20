@@ -122,15 +122,39 @@ function CurrentWatchingMedia(props) {
   );
 }
 
+const leadingAndTrailingDebounce = (callback, ms) => {
+  let timeout = null;
+  return function trigger(...callbackArgs) {
+    if (timeout === null) {
+      callback(...callbackArgs);
+      timeout = setTimeout(() => {
+        clearTimeout(timeout);
+        timeout = null;
+      }, ms);
+    } else {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        clearTimeout(timeout);
+        timeout = null;
+        callback(...callbackArgs);
+      }, ms);
+    }
+  }
+}
+
 function AnimeCard(props) {
   const { accessToken } = useAuthentication();
   const [progress, setProgress] = createSignal(props.anime.progress);
   const [airingEpisode, setAiringEpisode] = createSignal(props.anime.media.nextAiringEpisode?.episode);
   const [isBehind, setIsBehind] = createSignal(props.anime.media.nextAiringEpisode?.episode > progress() + 1);
 
+  const triggerMutation = leadingAndTrailingDebounce((token, mediaId, progress) => {
+    api.anilist.mutateMedia(token, {mediaId, progress});
+  }, 250);
+
   createEffect(() => {
     setIsBehind(airingEpisode() > progress() + 1);
-  })
+  });
 
   return (
     <A 
@@ -149,7 +173,7 @@ function AnimeCard(props) {
         <div class={style.hoverInfo} onClick={e => {
           e.preventDefault();
           if (progress() < props.anime.media.episodes) {
-            api.anilist.mutateMedia(accessToken(), {mediaId: props.anime.media.id, progress: progress() + 1});
+            triggerMutation(accessToken(), props.anime.media.id, progress() + 1);
             props.anime.progress += 1;
             props.mutateCache(data => data);
             setProgress(val => val + 1);
