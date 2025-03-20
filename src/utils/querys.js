@@ -231,6 +231,41 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const anilistMutateToggleLike = format`mutation ($id: Int, $type: LikeableType) {
+  ToggleLike: ToggleLikeV2(id: $id, type: $type) {
+    ... on ListActivity {
+      id
+      likeCount
+      isLiked
+    }
+    ... on MessageActivity {
+      id
+      likeCount
+      isLiked
+    }
+    ... on TextActivity {
+      id
+      likeCount
+      isLiked
+    }
+    ... on ActivityReply {
+      id
+      likeCount
+      isLiked
+    }
+    ... on Thread {
+      id
+      likeCount
+      isLiked
+    }
+    ... on ThreadComment {
+      id
+      likeCount
+      isLiked
+    }
+  }
+}`
+
 export const anilistActivity = format`query (
   $isFollowing: Boolean = true
   $hasReplies: Boolean = false
