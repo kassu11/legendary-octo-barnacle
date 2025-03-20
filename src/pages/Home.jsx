@@ -4,6 +4,7 @@ import { Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { ActivityCard } from "../components/Activity.jsx";
+import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -122,26 +123,6 @@ function CurrentWatchingMedia(props) {
   );
 }
 
-const leadingAndTrailingDebounce = (callback, ms) => {
-  let timeout = null;
-  return function trigger(...callbackArgs) {
-    if (timeout === null) {
-      callback(...callbackArgs);
-      timeout = setTimeout(() => {
-        clearTimeout(timeout);
-        timeout = null;
-      }, ms);
-    } else {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        clearTimeout(timeout);
-        timeout = null;
-        callback(...callbackArgs);
-      }, ms);
-    }
-  }
-}
-
 function AnimeCard(props) {
   const { accessToken } = useAuthentication();
   const [progress, setProgress] = createSignal(props.anime.progress);
@@ -150,7 +131,7 @@ function AnimeCard(props) {
 
   const triggerMutation = leadingAndTrailingDebounce((token, mediaId, progress) => {
     api.anilist.mutateMedia(token, {mediaId, progress});
-  }, 250);
+  }, 250, 2);
 
   createEffect(() => {
     setIsBehind(airingEpisode() > progress() + 1);
