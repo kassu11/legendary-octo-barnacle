@@ -183,3 +183,38 @@
   grid-template-columns: 1fr 3.5rem;
   text-align: right;
 }
+
+.friend-container {
+  background-color: lightcoral;
+
+  ul {
+    list-style: none;
+    display: grid;
+    gap: .5rem;
+  }
+}
+
+.friend {
+  display: grid;
+  background-color: magenta;
+  border-radius: .25rem;
+  grid-template-columns: 2rem 1fr auto 5rem;
+  gap: .25rem;
+  padding: .5rem;
+  align-items: center;
+  color: white;
+
+  img {
+    aspect-ratio: 1/1;
+    border-radius: .25rem;
+  }
+}
+
+.scoreContainer {
+  display: flex;
+  gap: .25rem;
+  padding-left: 1.25rem;
+}
+.scoreStar {
+  width: 1.5rem;
+}

@@ -231,6 +231,34 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $perPage: Int) {
+  Page(page: $page, perPage: $perPage) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    mediaList(mediaId: $id, isFollowing: true, sort: UPDATED_TIME_DESC) {
+      id
+      status
+      score
+      progress
+      user {
+        id
+        name
+        avatar {
+          large
+        }
+        mediaListOptions {
+          scoreFormat
+        }
+      }
+    }
+  }
+}`
+
 export const anilistMutateToggleLike = format`mutation ($id: Int, $type: LikeableType) {
   ToggleLike: ToggleLikeV2(id: $id, type: $type) {
     ... on ListActivity {
