@@ -39,6 +39,9 @@ const api = {
     searchMedia: fetchOnce((token, variables) => {
       return Fetch.authAnilist(token, querys.searchMedia, variables);
     }),
+    friendsMediaScore: fetchOnce((token, id, variables) => {
+      return Fetch.authAnilist(token, querys.anilistGetFriendMediaScore, {id, ...variables});
+    }),
     mutateMedia: noCache((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
     }),
