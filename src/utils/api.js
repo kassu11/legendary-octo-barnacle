@@ -9,8 +9,8 @@ const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchO
 
 const api = {
   anilist: {
-    mediaId: fetchOnce(id => {
-      return Fetch.anilist(querys.anilistMediaById, { id, perPage: 6 });
+    mediaId: fetchOnce((id, token) => {
+      return Fetch.authAnilist(token, querys.anilistMediaById, { id, perPage: 6 });
     }),
     characterId: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, {
