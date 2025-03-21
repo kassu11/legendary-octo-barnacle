@@ -53,7 +53,7 @@ function AnimeInfo(props) {
 
 
   console.log(props.anime.type);
-  console.log(props.anime.relations.edges[0]);
+  console.log(props.anime.characterPreview.edges[0]);
 
   return (
     <>
@@ -109,7 +109,7 @@ function AnimeInfo(props) {
                     <img src={relation.node.coverImage.large} alt="Cover" />
                     <div class={style.content}>
                       <p class={style.type}>{relation.relationType}</p>
-                      <p class={style.title}>{relation.node.title.userPreferred}</p>
+                      <p class={style.lineClamp}>{relation.node.title.userPreferred}</p>
                       <p class={style.format}>{relation.node.format} - {relation.node.status}</p>
                     </div>
                   </A>
@@ -117,65 +117,33 @@ function AnimeInfo(props) {
               )}</For>
             </ol>
           </div>
-          <div>
-            <For each={props.anime.characterPreview.edges}>{char => (
-              <div>
-                <A href={"/ani/character/" + char.node.id}>
-                  <span>{char.node.name.userPreferred}</span><br />
-                  <img src={char.node.image.large} alt="character" /><br />
-                </A>
-                <For each={char.voiceActors}>{actor => (
-                  <A href={"/ani/staff/" + actor.id}>
-                    <span>{actor.name.userPreferred}</span><br />
-                    <img src={actor.image.large} alt="character" /><br />
+          <div class={style.characterContainer}>
+            <h2>Characters</h2>
+            <ol>
+              <For each={props.anime.characterPreview.edges}>{char => (
+                <li class={style.character}>
+                  <A href={"/ani/character/" + char.node.id} class={style.characterLeft}>
+                    <img src={char.node.image.large} alt="Character" />
+                    <div class={style.content}>
+                      <p class={style.lineClamp}>{char.node.name.userPreferred}</p>
+                      <p>{char.role}</p>
+                    </div>
                   </A>
-                )}</For>
-              </div>
-            )}</For>
+                  <Show when={char.voiceActors[0]}>{actor => (
+                    <A href={"/ani/staff/" + actor().id} class={style.characterRight}>
+                      <div class={style.content}>
+                        <p class={style.lineClamp}>{actor().name.userPreferred}</p>
+                        <p>{actor().language}</p>
+                      </div>
+                      <img src={actor().image.large} alt="Voice actor" />
+                    </A>
+                  )}</Show>
+                </li>
+              )}</For>
+            </ol>
           </div>
         </div>
       </div>
-      {/* <ul> */}
-      {/*   <li> */}
-      {/*     <b>Banner:</b> */}
-      {/*     <img src={props.anime.bannerImage} alt="Banner" /> */}
-      {/*   </li> */}
-      {/*   <li><b>Title EN:</b> {props.anime.title.english}</li> */}
-      {/*   <li><b>Title native:</b> {props.anime.title.native}</li> */}
-      {/*   <li><b>Title romaji:</b> {props.anime.title.romaji}</li> */}
-      {/*   <li><a target="_blank" href={`https://myanimelist.net/anime/${props.anime.idMal}/`}>MyAnimeList</a></li> */}
-      {/*   <li><a target="_blank" href={`https://anilist.co/anime/${props.anime.id}/`}>AniList</a></li> */}
-      {/*   <li> */}
-      {/*     <b>Cover:</b> */}
-      {/*     <img src={props.anime.coverImage.large} alt="Cover" /> */}
-      {/*   </li> */}
-      {/*   <li><b>Description:</b> {props.anime.description}</li> */}
-      {/*   <li><b>Type:</b> {props.anime.type}</li> */}
-      {/*   <li><b>Season:</b> {props.anime.season}</li> */}
-      {/*   <li><b>SeasonYear:</b> {props.anime.seasonYear}</li> */}
-      {/*   <li><b>status:</b> {props.anime.status}</li> */}
-      {/*   <li><b>format:</b> {props.anime.format}</li> */}
-      {/*   <li><b>date:</b> {JSON.stringify(props.anime.startDate)}</li> */}
-      {/*   <li><b>Mean Score:</b> {props.anime.meanScore / 10}</li> */}
-      {/*   <li><b>Average Score:</b> {props.anime.averageScore / 10}</li> */}
-      {/*   <li> */}
-      {/*     <b><A href={"characters"}>Characters:</A></b> */}
-      {/*     <For each={props.anime.characterPreview.edges}>{char => ( */}
-      {/*       <div> */}
-      {/*         <A href={"/ani/character/" + char.node.id}> */}
-      {/*           <span>{char.node.name.userPreferred}</span><br /> */}
-      {/*           <img src={char.node.image.large} alt="character" /><br /> */}
-      {/*         </A> */}
-      {/*         <For each={char.voiceActors}>{actor => ( */}
-      {/*           <A href={"/ani/staff/" + actor.id}> */}
-      {/*             <span>{actor.name.userPreferred}</span><br /> */}
-      {/*             <img src={actor.image.large} alt="character" /><br /> */}
-      {/*           </A> */}
-      {/*         )}</For> */}
-      {/*       </div> */}
-      {/*     )}</For> */}
-      {/*   </li> */}
-      {/* </ul> */}
     </>
   )
 
