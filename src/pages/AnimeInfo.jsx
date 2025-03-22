@@ -6,13 +6,14 @@ import style from "./AnimeInfo.module.scss";
 import { Markdown } from "../components/Markdown";
 import { binaryMediaType } from "../utils/mediaTypes";
 import { useAuthentication } from "../context/AuthenticationContext";
-import Star from "../assets/Star.jsx";
 import Banner from "../components/media/Banner";
 import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
 import Scores from "../components/media/Scores";
 import Stats from "../components/media/Stats";
+import Score from "../components/media/Score";
+import Status from "../components/media/Status";
 
 
 function Anime() {
@@ -146,59 +147,5 @@ function AnimeInfo(props) {
     </>
   )
 }
-
-function Status(props) {
-  return (
-    <p>
-      <Switch fallback={props.friend.status}>
-        <Match when={props.friend.status === "COMPLETED"}>Completed</Match>
-        <Match when={props.friend.status === "CURRENT"}>
-          <Switch>
-            <Match when={props.type === "anime"}>Watching</Match>
-            <Match when={props.type === "manga"}>Reading</Match>
-          </Switch>
-        </Match>
-        <Match when={props.friend.status === "DROPPED"}>Dropped</Match>
-        <Match when={props.friend.status === "PAUSED"}>Paused</Match>
-        <Match when={props.friend.status === "PLANNING"}>Planning</Match>
-        <Match when={props.friend.status === "REPEATING"}>
-          <Switch>
-            <Match when={props.type === "anime"}>Rewatching</Match>
-            <Match when={props.type === "manga"}>Rereading</Match>
-          </Switch>
-        </Match>
-      </Switch>
-      <Show when={props.friend.progress !== 0 && props.friend.progress !== props.media.episodes}>
-        <Switch>
-          <Match when={props.type === "anime"}> Ep {props.friend.progress}</Match>
-          <Match when={props.type === "manga"}> Ch {props.friend.progress}</Match>
-        </Switch>
-      </Show>
-    </p>
-  );
-}
-
-function Score(props) {
-  return (
-    <Show when={props.score !== 0}>
-      <div class={style.scoreContainer}>
-        <Switch>
-          <Match when={props.format === "POINT_10"}>{props.score}/10</Match>
-          <Match when={props.format === "POINT_100"}>{props.score}/100</Match>
-          <Match when={props.format === "POINT_10_DECIMAL"}>{props.score}/10</Match>
-          <Match when={props.format === "POINT_5"}>{props.score}/5 <Star class={style.scoreStar} /></Match>
-          <Match when={props.format === "POINT_3"}>
-            <Switch>
-              <Match when={props.score === 1}>😟</Match>
-              <Match when={props.score === 2}>😐</Match>
-              <Match when={props.score === 3}>😁</Match>
-            </Switch>
-          </Match>
-        </Switch>
-      </div>
-    </Show>
-  );
-}
-
 
 export default Anime
