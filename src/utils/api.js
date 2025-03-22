@@ -33,7 +33,7 @@ const api = {
     getAuthUserData: normalCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
     }),
-    getActivity: normalCache((token, variables) => {
+    getActivity: fetchOnce((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistActivity, variables);
     }),
     searchMedia: fetchOnce((token, variables) => {
@@ -48,12 +48,12 @@ const api = {
     likeActivity: noCache((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
     }),
-    wachingAnime: normalCache((id, token) => {
+    wachingAnime: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "ANIME", "perPage": 40
       });
     }),
-    readingManga: normalCache((id, token) => {
+    readingManga: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "MANGA", "perPage": 40
       });
