@@ -1,5 +1,5 @@
 import { For } from "solid-js";
-import style from "../../pages/AnimeInfo.module.scss";
+import style from "./Tags.module.scss";
 
 export function Tags(props) {
   return (
