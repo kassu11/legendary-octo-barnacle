@@ -10,8 +10,7 @@ import Banner from "../components/media/Banner";
 import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
-import Scores from "../components/media/Scores";
-import Stats from "../components/media/Stats";
+import Header from "../components/media/Header";
 import Score from "../components/media/Score";
 import Status from "../components/media/Status";
 
@@ -65,11 +64,9 @@ function AnimeInfo(props) {
         </div>
         <div class={style.main}>
           <div class={style.mainScoreContainer}>
-            <Scores 
+            <Header 
               meanScore={props.anime.meanScore} 
               averageScore={props.anime.averageScore} 
-            />
-            <Stats 
               stats={props.anime.stats}
               source={props.anime.source}
               popularity={props.anime.popularity}
