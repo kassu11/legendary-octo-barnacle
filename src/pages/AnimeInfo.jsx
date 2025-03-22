@@ -55,13 +55,10 @@ function AnimeInfo(props) {
 
 
   console.log(props.anime);
-  console.log(props.friend);
-  console.log(props.anime.characterPreview.edges[0]);
 
   return (
     <>
       <Banner src={props.anime.bannerImage}></Banner>
-      {  console.log(props.friend)}
       <div class={style.container}>
         <div class={style.left}>
           <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
@@ -93,9 +90,47 @@ function AnimeInfo(props) {
           </div>
         </div>
         <div class={style.main}>
-          <div>
-            mean score
-            {(props.anime.meanScore || 0) / 10}
+          <div class={style.mainScoreContainer}>
+            <div class={style.scoresWrapper}>
+              <div class={style.scoreBox}>
+                <p class={style.scoreLabel}>Mean</p>
+                <span class={style.scoreValue}>{((props.anime.meanScore || 0) / 10).toFixed(1)}</span>
+              </div>
+              <div class={style.scoreBox}>
+                <p class={style.scoreLabel}>Average</p>
+                <span class={style.scoreValue}>{((props.anime.averageScore || 0) / 10).toFixed(1)}</span>
+              </div>
+            </div>
+            <div class={style.statsWrapper}>
+              <div class={style.statColumn}>
+                <p class={style.statRow}>
+                  <span>Total Users</span>
+                  <span>{Intl.NumberFormat("ja-JP").format(props.anime.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0))}</span>
+                </p>
+                <p class={style.statRow}>
+                  <span>Source</span>
+                  <span>{props.anime.source}</span>
+                </p>
+                <p class={style.statRow}>
+                  <span>Members</span>
+                  <span>{Intl.NumberFormat("ja-JP").format(props.anime.popularity)}</span>
+                </p>
+              </div>
+              <div class={style.statColumn}>
+                <p class={style.statRow}>
+                  <span>Episodes</span>
+                  <span>{props.anime.episodes}</span>
+                </p>
+                <p class={style.statRow}>
+                  <span>Season</span>
+                  <span>{props.anime.season} {props.anime.seasonYear}</span>
+                </p>
+                <p class={style.statRow}>
+                  <span>Format</span>
+                  <span>{props.anime.format}</span>
+                </p>
+              </div>
+            </div>
           </div>
           <div>
             <h1>{props.anime.title.userPreferred}</h1>
