@@ -1,6 +1,6 @@
 import style from "../../pages/AnimeInfo.module.scss";
 
-export function Scores(props) {
+const Scores = (props) => {
   return (
     <div class={style.scoresWrapper}>
       <div class={style.scoreBox}>
@@ -13,4 +13,6 @@ export function Scores(props) {
       </div>
     </div>
   );
-} 
+};
+
+export default Scores; 

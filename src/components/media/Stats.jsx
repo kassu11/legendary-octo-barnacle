@@ -1,6 +1,6 @@
 import style from "../../pages/AnimeInfo.module.scss";
 
-export function Stats(props) {
+const Stats = (props) => {
   return (
     <div class={style.statsWrapper}>
       <div class={style.statColumn}>
@@ -33,4 +33,6 @@ export function Stats(props) {
       </div>
     </div>
   );
-} 
+};
+
+export default Stats; 

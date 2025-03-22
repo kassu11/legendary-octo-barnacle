@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 import style from "./Rankings.module.scss";
 
-export function Rankings(props) {
+const Rankings = (props) => {
   return (
     <div class={style.rankingContainer}>
       <h2>Ranking</h2>
@@ -12,4 +12,6 @@ export function Rankings(props) {
       </ul>
     </div>
   );
-} 
+};
+
+export default Rankings; 

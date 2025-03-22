@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 import style from "./Tags.module.scss";
 
-export function Tags(props) {
+const Tags = (props) => {
   return (
     <div class={style.tagContainer}>
       <h2>Tags</h2>
@@ -14,4 +14,6 @@ export function Tags(props) {
       </ol>
     </div>
   );
-} 
+};
+
+export default Tags; 

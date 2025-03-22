@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 import style from "./Genres.module.scss";
 
-export function Genres(props) {
+const Genres = (props) => {
   return (
     <div class={style.genreContainer}>
       <h2>Genres</h2>
@@ -12,4 +12,6 @@ export function Genres(props) {
       </ul>
     </div>
   );
-} 
+};
+
+export default Genres; 

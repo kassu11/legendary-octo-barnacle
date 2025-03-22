@@ -7,12 +7,12 @@ import { Markdown } from "../components/Markdown";
 import { binaryMediaType } from "../utils/mediaTypes";
 import { useAuthentication } from "../context/AuthenticationContext";
 import Star from "../assets/Star.jsx";
-import { Banner } from "../components/media/Banner";
-import { Rankings } from "../components/media/Rankings";
-import { Genres } from "../components/media/Genres";
-import { Tags } from "../components/media/Tags";
-import { Scores } from "../components/media/Scores";
-import { Stats } from "../components/media/Stats";
+import Banner from "../components/media/Banner";
+import Rankings from "../components/media/Rankings";
+import Genres from "../components/media/Genres";
+import Tags from "../components/media/Tags";
+import Scores from "../components/media/Scores";
+import Stats from "../components/media/Stats";
 
 
 function Anime() {
