@@ -1,7 +1,7 @@
 import style from "../../pages/AnimeInfo.module.scss";
 import { Show } from "solid-js";
 
-export function Banner(props) {
+const Banner = (props) => {
   return (
     <Show when={props.src}>
       <div class={style.banner}>
@@ -9,4 +9,6 @@ export function Banner(props) {
       </div>
     </Show>
   );
-} 
+};
+
+export default Banner; 
