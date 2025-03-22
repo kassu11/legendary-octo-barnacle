@@ -63,19 +63,19 @@ function AnimeInfo(props) {
           <Tags tags={props.anime.tags} />
         </div>
         <div class={style.main}>
-          <div class={style.mainScoreContainer}>
-            <Header 
-              meanScore={props.anime.meanScore} 
-              averageScore={props.anime.averageScore} 
-              stats={props.anime.stats}
-              source={props.anime.source}
-              popularity={props.anime.popularity}
-              episodes={props.anime.episodes}
-              season={props.anime.season}
-              seasonYear={props.anime.seasonYear}
-              format={props.anime.format}
-            />
-          </div>
+          <Header 
+            averageScore={props.anime.averageScore} 
+            favourites={props.anime.favourites}
+            format={props.anime.format}
+            meanScore={props.anime.meanScore} 
+            popularity={props.anime.popularity}
+            season={props.anime.season}
+            seasonYear={props.anime.seasonYear}
+            source={props.anime.source}
+            ratingUsers={props.anime.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0)}
+            stats={props.anime.stats}
+            status={props.anime.status}
+          />
           <div>
             <h1>{props.anime.title.userPreferred}</h1>
             <Markdown children={props.anime.description}/>
