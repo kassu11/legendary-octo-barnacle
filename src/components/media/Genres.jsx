@@ -1,5 +1,5 @@
 import { For } from "solid-js";
-import style from "../../pages/AnimeInfo.module.scss";
+import style from "./Genres.module.scss";
 
 export function Genres(props) {
   return (

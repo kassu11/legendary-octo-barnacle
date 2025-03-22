@@ -34,37 +34,6 @@
   }
 }
 
-.ranking-container ul {
-  list-style: none;
-}
-.tag-container ol {
-  list-style: none;
-}
-
-.tag span {
-  float: right;
-}
-
-.tag.spoiler {
-  background-color: #ff8686;
-}
-
-
-.genre-container {
-  ul {
-    list-style: none;
-    display: flex;
-    gap: .5rem;
-    flex-wrap: wrap;
-  }
-}
-.genre {
-  background-color: gray;
-  flex-grow: 1;
-  text-align: center;
-  padding-inline: .25rem;
-  border-radius: .25rem;
-}
 
 .cover {
   width: 100%;
