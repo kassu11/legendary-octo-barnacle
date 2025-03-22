@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { Switch, Match, Show, createEffect, createSignal } from "solid-js";
@@ -7,6 +7,12 @@ import { Markdown } from "../components/Markdown";
 import { binaryMediaType } from "../utils/mediaTypes";
 import { useAuthentication } from "../context/AuthenticationContext";
 import Star from "../assets/Star.jsx";
+import { Banner } from "../components/media/Banner";
+import { Rankings } from "../components/media/Rankings";
+import { Genres } from "../components/media/Genres";
+import { Tags } from "../components/media/Tags";
+import { Scores } from "../components/media/Scores";
+import { Stats } from "../components/media/Stats";
 
 
 function Anime() {
@@ -39,16 +45,6 @@ function Anime() {
   )
 }
 
-function Banner(props) {
-  return (
-    <Show when={props.src}>
-      <div class={style.banner}>
-        <img src={props.src} alt="Banner" />
-      </div>
-    </Show>
-  );
-}
-
 function AnimeInfo(props) {
   console.assert(props.data, "Data missing");
   console.assert(props.data?.id, "Id missing");
@@ -58,79 +54,29 @@ function AnimeInfo(props) {
 
   return (
     <>
-      <Banner src={props.anime.bannerImage}></Banner>
+      <Banner src={props.anime.bannerImage} />
       <div class={style.container}>
         <div class={style.left}>
           <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
-          <div class={style.rankingContainer}>
-            <h2>Ranking</h2>
-            <ul>
-            <For each={props.anime.rankings}>{ranking => (
-              <li class={style.ranking}>#{ranking.rank} {ranking.context} {ranking.season} {ranking.year}</li>
-            )}</For>
-            </ul>
-          </div>
-          <div class={style.genreContainer}>
-            <h2>Genres</h2>
-            <ul>
-              <For each={props.anime.genres}>{genre => (
-                <li class={style.genre}>{genre}</li>
-              )}</For>
-            </ul>
-          </div>
-          <div class={style.tagContainer}>
-            <h2>Tags</h2>
-            <ol>
-              <For each={props.anime.tags}>{tag => (
-                <li 
-                  classList={{[style.tag]: true, [style.spoiler]: tag.isMediaSpoiler || tag.isGeneralSpoiler}} 
-                  title={tag.description}>{tag.name} <span>{tag.rank}%</span></li>
-              )}</For>
-            </ol>
-          </div>
+          <Rankings rankings={props.anime.rankings} />
+          <Genres genres={props.anime.genres} />
+          <Tags tags={props.anime.tags} />
         </div>
         <div class={style.main}>
           <div class={style.mainScoreContainer}>
-            <div class={style.scoresWrapper}>
-              <div class={style.scoreBox}>
-                <p class={style.scoreLabel}>Mean</p>
-                <span class={style.scoreValue}>{((props.anime.meanScore || 0) / 10).toFixed(1)}</span>
-              </div>
-              <div class={style.scoreBox}>
-                <p class={style.scoreLabel}>Average</p>
-                <span class={style.scoreValue}>{((props.anime.averageScore || 0) / 10).toFixed(1)}</span>
-              </div>
-            </div>
-            <div class={style.statsWrapper}>
-              <div class={style.statColumn}>
-                <p class={style.statRow}>
-                  <span>Total Users</span>
-                  <span>{Intl.NumberFormat("ja-JP").format(props.anime.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0))}</span>
-                </p>
-                <p class={style.statRow}>
-                  <span>Source</span>
-                  <span>{props.anime.source}</span>
-                </p>
-                <p class={style.statRow}>
-                  <span>Members</span>
-                  <span>{Intl.NumberFormat("ja-JP").format(props.anime.popularity)}</span>
-                </p>
-              </div>
-              <div class={style.statColumn}>
-                <p class={style.statRow}>
-                  <span>Episodes</span>
-                  <span>{props.anime.episodes}</span>
-                </p>
-                <p class={style.statRow}>
-                  <span>Season</span>
-                  <span>{props.anime.season} {props.anime.seasonYear}</span>
-                </p>
-                <p class={style.statRow}>
-                  <span>Format</span>
-                  <span>{props.anime.format}</span>
-                </p>
-              </div>
-            </div>
+            <Scores 
+              meanScore={props.anime.meanScore} 
+              averageScore={props.anime.averageScore} 
+            />
+            <Stats 
+              stats={props.anime.stats}
+              source={props.anime.source}
+              popularity={props.anime.popularity}
+              episodes={props.anime.episodes}
+              season={props.anime.season}
+              seasonYear={props.anime.seasonYear}
+              format={props.anime.format}
+            />
           </div>
           <div>
             <h1>{props.anime.title.userPreferred}</h1>
