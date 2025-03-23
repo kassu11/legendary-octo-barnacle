@@ -13,6 +13,7 @@ import Tags from "../components/media/Tags";
 import Header from "../components/media/Header";
 import Score from "../components/media/Score";
 import Status from "../components/media/Status";
+import Characters from "../components/media/Characters";
 
 
 function Anime() {
@@ -100,31 +101,7 @@ function AnimeInfo(props) {
               )}</For>
             </ol>
           </div>
-          <div class={style.characterContainer}>
-            <h2>Characters</h2>
-            <ol>
-              <For each={props.anime.characterPreview.edges}>{char => (
-                <li class={style.character}>
-                  <A href={"/ani/character/" + char.node.id} class={style.characterLeft}>
-                    <img src={char.node.image.large} alt="Character" />
-                    <div class={style.content}>
-                      <p class={style.lineClamp}>{char.node.name.userPreferred}</p>
-                      <p>{char.role}</p>
-                    </div>
-                  </A>
-                  <Show when={char.voiceActors[0]}>{actor => (
-                    <A href={"/ani/staff/" + actor().id} class={style.characterRight}>
-                      <div class={style.content}>
-                        <p class={style.lineClamp}>{actor().name.userPreferred}</p>
-                        <p>{actor().language}</p>
-                      </div>
-                      <img src={actor().image.large} alt="Voice actor" />
-                    </A>
-                  )}</Show>
-                </li>
-              )}</For>
-            </ol>
-          </div>
+          <Characters characters={props.anime.characterPreview.edges} />
           <Show when={props.friend}>
             <div class={style.friendContainer}>
               <ul>

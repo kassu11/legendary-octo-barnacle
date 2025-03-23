@@ -103,55 +103,6 @@
   -webkit-box-orient: vertical;
 }
 
-.character-container {
-  background-color: sienna;
-
-  ol {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-    gap: .5rem;
-  }
-}
-
-.character {
-  background-color: orange;
-  display: flex;
-  gap: .5rem;
-  text-decoration: none;
-  color: white;
-  word-break: break-all;
-  word-break: break-word;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    aspect-ratio: 3.5/5;
-  }
-}
-
-.character-left, .character-right {
-  width: 100%;
-  background-color: lightsteelblue;
-  display: grid;
-  gap: .5rem;
-
-  .content {
-    padding-block: .5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-}
-
-.character-left {
-  grid-template-columns: 3.5rem 1fr;
-}
-.character-right {
-  grid-template-columns: 1fr 3.5rem;
-  text-align: right;
-}
 
 .friend-container {
   background-color: lightcoral;
