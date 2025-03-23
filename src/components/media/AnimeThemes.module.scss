@@ -1,0 +1,24 @@
+.theme-container {
+  background-color: slateblue;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 4rem 1fr auto;
+  gap: .5rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 4rem 1fr auto;
+  gap: .5rem;
+}
+
+.play-button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.play-button {
+  display: flex;
+}

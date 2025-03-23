@@ -30,6 +30,9 @@ const api = {
         "nextYear": 2025
       });
     }),
+    animeThemeById: fetchOnce(id => {
+      return Fetch.animeThemes(querys.animeThemesById(id));
+    }),
     getAuthUserData: normalCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
     }),
@@ -138,6 +141,14 @@ class Fetch {
         query,
         variables,
       },
+    });
+  }
+
+  static animeThemes(url) {
+    return new Fetch(url, {
+      method: "GET",
+      cache: "default",
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
