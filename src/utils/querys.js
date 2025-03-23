@@ -231,6 +231,8 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const animeThemesById = id => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=AniList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
+
 export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {

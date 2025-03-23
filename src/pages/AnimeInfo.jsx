@@ -13,6 +13,7 @@ import Tags from "../components/media/Tags";
 import Header from "../components/media/Header";
 import Characters from "../components/media/Characters";
 import Friends from "../components/media/Friends";
+import AnimeThemes from "../components/media/AnimeThemes.jsx";
 
 
 function Anime() {
@@ -23,6 +24,7 @@ function Anime() {
   console.assert(!Number.isNaN(id()), "ID should not be NaN");
   const [animeData] = api.anilist.mediaId(id, accessToken);
   const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, id, {page: 1, perPage: 8});
+  const [themeData] = api.anilist.animeThemeById(id);
 
   createEffect(() => {
     setId(Number(params.id))
@@ -38,7 +40,7 @@ function Anime() {
           <span>Error: {animeData.error}</span>
         </Match>
         <Match when={animeData()}>
-          <AnimeInfo anime={animeData().data.data.Media} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
+          <AnimeInfo anime={animeData().data.data.Media} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
         </Match>
       </Switch>
     </>
@@ -102,6 +104,7 @@ function AnimeInfo(props) {
           </div>
           <Characters characters={props.anime.characterPreview.edges} />
           <Friends friend={props.friend} media={props.anime} type="anime" />
+          <AnimeThemes theme={props.theme} />
         </div>
       </div>
     </>
