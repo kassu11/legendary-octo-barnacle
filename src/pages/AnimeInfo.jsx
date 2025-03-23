@@ -11,9 +11,8 @@ import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
 import Header from "../components/media/Header";
-import Score from "../components/media/Score";
-import Status from "../components/media/Status";
 import Characters from "../components/media/Characters";
+import Friends from "../components/media/Friends";
 
 
 function Anime() {
@@ -102,20 +101,7 @@ function AnimeInfo(props) {
             </ol>
           </div>
           <Characters characters={props.anime.characterPreview.edges} />
-          <Show when={props.friend}>
-            <div class={style.friendContainer}>
-              <ul>
-                <For each={props.friend.mediaList}>{friend => (
-                  <li class={style.friend}>
-                    <img src={friend.user.avatar.large} alt="User profile" />
-                    <p>{friend.user.name}</p>
-                    <Status friend={friend} media={props.anime} type="anime" />
-                    <Score format={friend.user.mediaListOptions.scoreFormat} score={friend.score} />
-                  </li>
-                )}</For>
-              </ul>
-            </div>
-          </Show>
+          <Friends friend={props.friend} media={props.anime} type="anime" />
         </div>
       </div>
     </>
