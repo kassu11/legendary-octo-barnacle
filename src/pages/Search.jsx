@@ -4,6 +4,7 @@ import api from "../utils/api";
 import { createSignal, createEffect, Switch, Match, Show, splitProps } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
+import { assert } from "../utils/assert";
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
@@ -109,8 +110,8 @@ function Search() {
 
   function InputSearch(props) {
     const [otherProps, inputProps] = splitProps(props, ["children"]);
-    console.assert(inputProps.type, "Input type is missing");
-    console.assert(inputProps.name, "Input name is missing");
+    assert(inputProps.type, "Input type is missing");
+    assert(inputProps.name, "Input name is missing");
 
     return (
       <>
@@ -122,9 +123,9 @@ function Search() {
 
   function Input(props) {
     const [otherProps, inputProps] = splitProps(props, ["children"]);
-    console.assert(inputProps.type, "Input type is missing");
-    console.assert(inputProps.name, "Input name is missing");
-    console.assert(!(inputProps.value === undefined), "Input value is missing");
+    assert(inputProps.type, "Input type is missing");
+    assert(inputProps.name, "Input name is missing");
+    assert(!(inputProps.value === undefined), "Input value is missing");
 
     return (
       <>

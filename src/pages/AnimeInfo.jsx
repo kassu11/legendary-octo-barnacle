@@ -14,6 +14,7 @@ import Header from "../components/media/Header";
 import Characters from "../components/media/Characters";
 import Friends from "../components/media/Friends";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
+import { assert } from "../utils/assert.js";
 
 
 function Anime() {
@@ -21,7 +22,7 @@ function Anime() {
   const { accessToken } = useAuthentication();
   const [id, setId]= createSignal(Number(params.id));
 
-  console.assert(!Number.isNaN(id()), "ID should not be NaN");
+  assert(!Number.isNaN(id()), "ID should not be NaN");
   const [animeData] = api.anilist.mediaId(id, accessToken);
   const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, id, {page: 1, perPage: 8});
   const [themeData] = api.anilist.animeThemeById(id);
@@ -48,8 +49,8 @@ function Anime() {
 }
 
 function AnimeInfo(props) {
-  console.assert(props.data, "Data missing");
-  console.assert(props.data?.id, "Id missing");
+  assert(props.anime, "Data missing");
+  assert(props.anime?.id, "Id missing");
 
 
   console.log(props.anime);
