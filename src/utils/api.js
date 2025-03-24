@@ -34,6 +34,9 @@ const api = {
     animeThemeById: fetchOnce(id => {
       return Fetch.animeThemes(querys.animeThemesById(id));
     }),
+    animeThemeByArtisSlug: fetchOnce(slug => {
+      return Fetch.animeThemes(querys.animeThemesByArtisSlug(slug));
+    }),
     getAuthUserData: normalCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
     }),
