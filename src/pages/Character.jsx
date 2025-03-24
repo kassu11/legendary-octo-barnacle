@@ -3,13 +3,14 @@ import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
 import { Markdown } from "../components/Markdown";
+import { assert } from "../utils/assert";
 
 
 function Character() {
   const params = useParams();
   const id = Number(params.id);
 
-  console.assert(!Number.isNaN(id), "ID should not be NaN");
+  assert(!Number.isNaN(id), "ID should not be NaN");
   const [characterData] = api.anilist.characterId(id);
 
   return (
@@ -33,8 +34,8 @@ function Character() {
 }
 
 function CharacterInfo(props) {
-  console.assert(props.data, "Data missing");
-  console.assert(props.data?.id, "Id missing");
+  assert(props.data, "Data missing");
+  assert(props.data?.id, "Id missing");
 
   console.log(props.data);
   return (

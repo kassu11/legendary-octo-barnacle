@@ -1,11 +1,12 @@
 import { createEffect, createSignal } from "solid-js";
 import * as querys from "./querys";
+import { assert } from "./assert";
 const DEBUG = location.origin.includes("localhost");
 
-const normalCache = cacheBuilder({ storeName: "results" });
-const fetchOnce = cacheBuilder({ fetchOnce: true, storeName: "results" });
+const normalCache = cacheBuilder({ storeName: "results", expiresInSeconds: 60 * 60 * 24 * 365 });
+const fetchOnce = cacheBuilder({ fetchOnce: true, storeName: "results", expiresInSeconds: 60 * 60 * 24 * 365 });
 const noCache = cacheBuilder({ noCache: true });
-const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchOnce: true });
+const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchOnce: true, expiresInSeconds: 60 });
 
 const api = {
   anilist: {
@@ -78,10 +79,12 @@ export default api;
 
 
 class Fetch {
+  /** @type {number} - Date.getTime() of when to expire the cache data */
+  expires;
   constructor(url, { method = "POST", headers, body }) {
-    console.assert(url, "Url missing");
-    console.assert(method, "Method missing");
-    if (method === "POST") console.assert(body, "Body is missing");
+    assert(url, "Url missing");
+    assert(method, "Method missing");
+    if (method === "POST") assert(body, "Body is missing");
 
     const defaultHeader = { "Content-Type": "application/json" }
     this.url = url;
@@ -125,7 +128,7 @@ class Fetch {
   }
 
   static authAnilist(token, query, variables = {}) {
-    console.assert(query.length > 10, "Query must be above of length 10");
+    assert(query.length > 10, "Query must be above of length 10");
     const headers = { 
       "Content-Type": "application/json",
     };
@@ -168,8 +171,9 @@ function cacheBuilder(settings) {
   settings.fetchOnDebug ??= false;
   settings.fetchOnce ??= false;
   settings.noCache ??= false; 
-  console.assert(Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
-  settings.expiresInSeconds ??= 60 * 60 * 24 * 365; // 1 year
+  assert(settings.noCache || Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
+  assert(settings.noCache || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
+  assert(!settings.noCache || !settings.storeName, "StoreName is not used because noCache is on");
 
   /**
    * @param {(fetchOptions: any[]) => Fetch} fetchCallback
@@ -184,6 +188,8 @@ function cacheBuilder(settings) {
         if (typeof mutateData === "function") {
           mutateData = mutateData(data());
         }
+
+        assert(typeof mutateData === "object", "Data should always be JSON object data");
 
 
         if (settings.noCache == false) {
@@ -211,6 +217,10 @@ function cacheBuilder(settings) {
 
       const refetch = async () => {
         const data = await request.send();
+        if (settings.expiresInSeconds) {
+          const time = new Date();
+          data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
+        }
         mutate(data);
       }
 
@@ -221,9 +231,9 @@ function cacheBuilder(settings) {
           return; // Don't fetch if you have undefined values
         };
 
-
-        if (localFetchCacheStorage.has(request.cacheKey)) {
-          setData({ ...localFetchCacheStorage.get(request.cacheKey), fromCache: true });
+        const data = localFetchCacheStorage.get(request.cacheKey);
+        if (data && data.expires > new Date()) {
+          setData({ ...data, fromCache: true });
           if (settings.fetchOnce) { 
             return;
           }
@@ -237,10 +247,15 @@ function cacheBuilder(settings) {
             getReg.onerror = refetch;
             getReg.onsuccess = evt => {
               if (evt.target.result) {
-                console.assert(evt.target.result.exspires, "Cache should have a expiration date");
-                console.assert(evt.target.result.data, "Cache should always have data");
-                setData({ ...evt.target.result, fromCache: true });
-              } else if (fetchOnStart == false) {
+                assert(evt.target.result.expires, "Cache should have a expiration date");
+                assert(evt.target.result.data, "Cache should always have data");
+
+                if (evt.target.result.expires > new Date()) {
+                  return setData({ ...evt.target.result, fromCache: true });
+                }
+              } 
+
+              if (fetchOnStart == false) {
                 refetch();
               }
             };

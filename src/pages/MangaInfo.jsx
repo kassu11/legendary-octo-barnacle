@@ -2,13 +2,14 @@ import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
+import { assert } from "../utils/assert";
 
 
 function Manga() {
   const params = useParams();
   const id = Number(params.id);
 
-  console.assert(!Number.isNaN(id), "ID should not be NaN");
+  assert(!Number.isNaN(id), "ID should not be NaN");
   const [mangaData] = api.anilist.mediaId(id);
 
   return (
@@ -32,8 +33,8 @@ function Manga() {
 }
 
 function MangaInfo(props) {
-  console.assert(props.data, "Data missing");
-  console.assert(props.data?.id, "Id missing");
+  assert(props.data, "Data missing");
+  assert(props.data?.id, "Id missing");
 
   const anime = props.data;
   return (
