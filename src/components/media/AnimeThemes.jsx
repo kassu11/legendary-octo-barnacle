@@ -20,6 +20,7 @@ function AnimeThemes(props) {
 export function AnimeTheme(props) {
   assert(props.video, "Missing video element for playback");
   assert(props.theme, "Theme data is missing");
+  let artistAndCharacter = false;
 
   return (
     <div class={style.themeContainer}>
@@ -34,6 +35,7 @@ export function AnimeTheme(props) {
           </Switch>
           <For each={props.theme.song.artists}>{artist => (
             <Show when={!props.mainArtist || artist.slug !== props.mainArtist}>
+              <Show when={artistAndCharacter} fallback={artistAndCharacter = true}> & </Show>
               <A href={"/artist/" + artist.slug}>{artist.name}</A>
             </Show>
           )}</For>
@@ -43,14 +45,14 @@ export function AnimeTheme(props) {
         <div class={style.details}>
           <p>v{row.version || 1}</p>
           <p>Ep: {row.episodes || "-"}</p>
-          <Show when={row.spoilers}><p>Spilers</p></Show>
+          <Show when={row.spoiler}><p class={style.spoiler}>Spoilers</p></Show>
           <div class={style.playButtonContainer}>
             <For each={row.videos}>{video => (
               <div class={style.playButton}>
                 <button onClick={() => props.video.src = video.link}>play</button>
-                <p>{video.resolution}</p>
-                <p>{video.source}</p>
-                <p>{video.nc && "NC"}</p>
+                <span>{video.resolution}</span>
+                <span>{video.source}</span>
+                <span>{video.nc && "NC"}</span>
               </div>
             )}</For>
           </div>

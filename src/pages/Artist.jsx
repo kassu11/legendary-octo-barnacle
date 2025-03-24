@@ -3,6 +3,7 @@ import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
 import { AnimeTheme } from "../components/media/AnimeThemes.jsx";
+import style from "./Artist.module.scss";
 
 function Artist() {
   const params = useParams();
@@ -15,11 +16,15 @@ function Artist() {
       <Show when={artistData()}>
         <p>{artistData().data.artist.name}</p>
         <img src={artistData().data.artist.images[0].link} alt="Artist" />
-        <For each={artistData().data.artist.songs}>{theme => (
-          <For each={theme.animethemes}>{theme => (
-            <AnimeTheme theme={theme} video={video} mainArtist={params.name} />
+        <div class={style.themes}>
+          <For each={artistData().data.artist.songs}>{theme => (
+            <div class={style.episode}>
+              <For each={theme.animethemes}>{theme => (
+                <AnimeTheme theme={theme} video={video} mainArtist={params.name} />
+              )}</For>
+            </div>
           )}</For>
-        )}</For>
+        </div>
         {video}
       </Show>
     </>
