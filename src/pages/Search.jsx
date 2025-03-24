@@ -10,7 +10,7 @@ function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
 
   const { accessToken } = useAuthentication();
-  const [variables, setVariables] = createSignal({ "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" });
+  const [variables, setVariables] = createSignal(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
   const [mediaData] = api.anilist.searchMedia(accessToken, variables);
 

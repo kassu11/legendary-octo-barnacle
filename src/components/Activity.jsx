@@ -8,8 +8,29 @@ import { useAuthentication } from "../context/AuthenticationContext.jsx";
 const plural = num => num !== 1 ? "s" : "";
 
 export function ActivityCard(props) {
-  if (props.activity.type === "TEXT") {
-    return (
+  return (
+    <Show when={props.activity.type === "TEXT"} fallback={
+      <div class={style.activityCardMedia}>
+        <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>
+          <img class={style.cover} src={props.activity.media.coverImage.large} alt="Cover" />
+        </A>
+        <div class={style.main}>
+          <A href={"/profile/" + props.activity.user.name}>{props.activity.user.name}</A>
+          <p>
+            {props.activity.status}{" "}
+            <Show when={props.activity.progress}>{props.activity.progress} of </Show>
+            <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>{props.activity.media.title.userPreferred}</A>
+            <A href={"/profile/" + props.activity.user.name}>
+              <img class={style.profile} src={props.activity.user.avatar.large} alt="Profile" />
+            </A>
+          </p>
+        </div>
+        <div class={style.right}>
+          <CreatedAt createdAt={props.activity.createdAt} />
+          <Footer mutateCache={props.mutateCache} activity={props.activity}/>
+        </div>
+      </div>
+    }>
       <div class={style.activityCardText}>
         <div class={style.header}>
           <A href={"/profile/" + props.activity.user.name} class={style.profileHeader}>
@@ -22,59 +43,36 @@ export function ActivityCard(props) {
           <Markdown children={props.activity.text} />
         </div>
         <div class={style.footer}>
-          <Footer mutateCache={props.mutateCache} {...props.activity}/>
+          <Footer mutateCache={props.mutateCache} activity={props.activity}/>
         </div>
       </div>
-    )
-  }
-
-  return (
-    <div class={style.activityCardMedia}>
-      <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>
-        <img class={style.cover} src={props.activity.media.coverImage.large} alt="Cover" />
-      </A>
-      <div class={style.main}>
-        <A href={"/profile/" + props.activity.user.name}>{props.activity.user.name}</A>
-        <p>
-          {props.activity.status}{" "}
-          <Show when={props.activity.progress}>{props.activity.progress} of </Show>
-          <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>{props.activity.media.title.userPreferred}</A>
-          <A href={"/profile/" + props.activity.user.name}>
-            <img class={style.profile} src={props.activity.user.avatar.large} alt="Profile" />
-          </A>
-        </p>
-      </div>
-      <div class={style.right}>
-        <CreatedAt createdAt={props.activity.createdAt} />
-        <Footer mutateCache={props.mutateCache} {...props.activity}/>
-      </div>
-    </div>
+    </Show>
   );
 }
 
 function Footer(props) {
-  const [isLiked, setIsLiked] = createSignal(props.isLiked);
-  const [likeCount, setLikeCount] = createSignal(props.likeCount);
+  const [isLiked, setIsLiked] = createSignal(props.activity.isLiked);
+  const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
 
   const { accessToken } = useAuthentication();
   return (
     <>
       <button classList={{[style.active]: isLiked()}} onClick={() => {
+        api.anilist.likeActivity(accessToken(), { id: props.activity.id })
         setIsLiked(liked => {
-          api.anilist.likeActivity(accessToken(), { id: props.id })
           if (liked) {
             setLikeCount(v => v - 1);
-            props.likeCount -= 1;
+            props.activity.likeCount -= 1;
           } else {
             setLikeCount(v => v + 1);
-            props.likeCount += 1;
+            props.activity.likeCount += 1;
           }
-          props.isLiked = !liked
+          props.activity.isLiked = !liked
           return !liked
         });
         props.mutateCache(data => data);
       }}>Like {likeCount()}</button>
-      <button>Reply {props.replyCount}</button>
+      <button>Reply {props.activity.replyCount}</button>
     </>
   )
 }
