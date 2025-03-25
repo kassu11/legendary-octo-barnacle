@@ -4,6 +4,8 @@ import style from "./Activity.module.scss";
 import { A } from "./CustomA.jsx";
 import api from "../utils/api.js";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
+import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
+import { assert } from "../utils/assert.js";
 
 const plural = num => num !== 1 ? "s" : "";
 
@@ -53,24 +55,31 @@ export function ActivityCard(props) {
 function Footer(props) {
   const [isLiked, setIsLiked] = createSignal(props.activity.isLiked);
   const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
-
   const { accessToken } = useAuthentication();
+
+  let serverIsLiked = props.activity.isLiked;
+  const triggerLikeToggle = leadingAndTrailingDebounce(async (token, id, liked) => {
+    if (liked !== serverIsLiked) {
+      const data = await api.anilist.toggleActivityLike(token, { id });
+      assert(!data.fromCache, "Mutation should never be cached");
+      assert(likeCount() === props.activity.likeCount, "Like counts are mismatched");
+      props.mutateCache(data => data);
+    }
+    serverIsLiked = liked;
+  }, 500);
+
   return (
     <>
       <button classList={{[style.active]: isLiked()}} onClick={() => {
-        api.anilist.likeActivity(accessToken(), { id: props.activity.id })
         setIsLiked(liked => {
-          if (liked) {
-            setLikeCount(v => v - 1);
-            props.activity.likeCount -= 1;
-          } else {
-            setLikeCount(v => v + 1);
-            props.activity.likeCount += 1;
-          }
+          assert(typeof liked === "boolean");
+          const change = Number(!liked) * 2 - 1;
+          setLikeCount(v => v + change);
+          props.activity.likeCount += change;
           props.activity.isLiked = !liked
+          triggerLikeToggle(accessToken(), props.activity.id, !liked);
           return !liked
         });
-        props.mutateCache(data => data);
       }}>Like {likeCount()}</button>
       <button>Reply {props.activity.replyCount}</button>
     </>
