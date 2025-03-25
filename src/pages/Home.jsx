@@ -5,6 +5,7 @@ import style from "./Home.module.scss";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
+import { assert } from "../utils/assert.js";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -129,8 +130,11 @@ function AnimeCard(props) {
   const [airingEpisode, setAiringEpisode] = createSignal(props.data.media.nextAiringEpisode?.episode);
   const [isBehind, setIsBehind] = createSignal(props.data.media.nextAiringEpisode?.episode > progress() + 1);
 
-  const triggerMutation = leadingAndTrailingDebounce((token, mediaId, progress) => {
-    api.anilist.mutateMedia(token, {mediaId, progress});
+  const triggerProgressIncrease = leadingAndTrailingDebounce(async (token, mediaId, newProgress) => {
+    const data = await api.anilist.mutateMedia(token, {mediaId, progress: newProgress});
+    if (triggerProgressIncrease.bufferSize() === 0) {
+      assert(data.data.data.SaveMediaListEntry.progress === progress(), "Episode count is out of sync");
+    }
   }, 250, 2);
 
   createEffect(() => {
@@ -154,7 +158,7 @@ function AnimeCard(props) {
         <div class={style.hoverInfo} onClick={e => {
           e.preventDefault();
           if (progress() < props.data.media.episodes) {
-            triggerMutation(accessToken(), props.data.media.id, progress() + 1);
+            triggerProgressIncrease(accessToken(), props.data.media.id, progress() + 1);
             props.data.progress += 1;
             props.mutateCache(data => data);
             setProgress(val => val + 1);
