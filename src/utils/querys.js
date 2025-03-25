@@ -810,6 +810,56 @@ export const searchMedia = format`query (
   }
 }`;
 
+
+export const mediaListEntry = format`query ($mediaId: Int) {
+  Media(id: $mediaId) {
+    id
+    title {
+      userPreferred
+    }
+    coverImage {
+      large
+    }
+    bannerImage
+    type
+    status(version: 2)
+    episodes
+    chapters
+    volumes
+    isFavourite
+    mediaListEntry {
+      id
+      mediaId
+      status
+      score
+      advancedScores
+      progress
+      progressVolumes
+      repeat
+      priority
+      private
+      hiddenFromStatusLists
+      customLists
+      notes
+      updatedAt
+      startedAt {
+        year
+        month
+        day
+      }
+      completedAt {
+        year
+        month
+        day
+      }
+      user {
+        id
+        name
+      }
+    }
+  }
+}`;
+
 export const currentUser = format`query {
   Viewer {
     id

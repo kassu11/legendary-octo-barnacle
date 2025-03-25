@@ -15,6 +15,7 @@ import Characters from "../components/media/Characters";
 import Friends from "../components/media/Friends";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
+import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 
 
 function Anime() {
@@ -32,26 +33,17 @@ function Anime() {
   });
 
   return (
-    <>
-      <Show when={animeData.loading}>
-        <p>Loading...</p>
-      </Show>
-      <Switch>
-        <Match when={animeData.error}>
-          <span>Error: {animeData.error}</span>
-        </Match>
-        <Match when={animeData()}>
-          <AnimeInfo anime={animeData().data.data.Media} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
-        </Match>
-      </Switch>
-    </>
+    <Show when={animeData()}>
+      <AnimeInfo anime={animeData().data.data.Media} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
+    </Show>
   )
 }
 
 function AnimeInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
-
+  const { accessToken } = useAuthentication();
+  const { setMediaListEntry } = useEditMediaEntries();
 
   console.log(props.anime);
 
@@ -61,6 +53,16 @@ function AnimeInfo(props) {
       <div class={style.container}>
         <div class={style.left}>
           <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
+          <Show when={accessToken()}>
+            <button onClick={() => {
+              const [data] = api.anilist.mediaListEntry(accessToken, props.anime.id);
+              createEffect(() => {
+                if (data()) {
+                  setMediaListEntry(data().data.data.Media);
+                }
+              })
+            }}>{props.anime.mediaListEntry?.status || "Edit"}</button>
+          </Show>
           <Rankings rankings={props.anime.rankings} />
           <Genres genres={props.anime.genres} />
           <Tags tags={props.anime.tags} />

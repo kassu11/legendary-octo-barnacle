@@ -34,6 +34,10 @@ const api = {
     animeThemeById: fetchOnce(id => {
       return Fetch.animeThemes(querys.animeThemesById(id));
     }),
+    mediaListEntry: normalCache((token, mediaId) => {
+      assert(mediaId, "MediaId missing");
+      return Fetch.authAnilist(token, querys.mediaListEntry, { mediaId });
+    }),
     animeThemeByArtisSlug: fetchOnce(slug => {
       return Fetch.animeThemes(querys.animeThemesByArtisSlug(slug));
     }),
@@ -51,6 +55,7 @@ const api = {
     }),
     mutateMedia: async (token, variables) => {
       assert(token, "Token is missing");
+      assert(typeof token !== "function", "This specific api doesnt support signals");
       assert(variables, "Variables missing");
       assert(variables.id || variables.mediaId, "No mutation id given");
       const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
@@ -59,6 +64,7 @@ const api = {
     toggleActivityLike: async (token, variables) => {
       assert(token, "Token is missing");
       assert(variables, "Variables missing");
+      assert(typeof token !== "function", "This specific api doesnt support signals");
       assert(variables.id || variables.mediaId, "No mutation id given");
       const request = Fetch.authAnilist(token, querys.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
       return await request.send();
