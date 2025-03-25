@@ -49,9 +49,13 @@ const api = {
     friendsMediaScore: fetchOnce((token, id, variables) => {
       return Fetch.authAnilist(token, querys.anilistGetFriendMediaScore, {id, ...variables});
     }),
-    mutateMedia: noCache((token, variables) => {
-      return Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
-    }),
+    mutateMedia: async (token, variables) => {
+      assert(token, "Token is missing");
+      assert(variables, "Variables missing");
+      assert(variables.id || variables.mediaId, "No mutation id given");
+      const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
+      return await request.send();
+    },
     likeActivity: noCache((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
     }),

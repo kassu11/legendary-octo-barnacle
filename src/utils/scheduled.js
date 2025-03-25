@@ -1,7 +1,7 @@
 export const leadingAndTrailingDebounce = (callback, ms, bufferSize = 1) => {
   const buffer = [];
   let timeout = null;
-  return function trigger(...callbackArgs) {
+  function trigger(...callbackArgs) {
     if (timeout === null) {
       callback(...callbackArgs);
       timeout = setTimeout(addFromBuffer, ms);
@@ -19,6 +19,10 @@ export const leadingAndTrailingDebounce = (callback, ms, bufferSize = 1) => {
       addFromBuffer();
     }
   }
+
+  trigger.bufferSize = () => buffer.length;
+
+  return trigger;
 
   function addFromBuffer() {
     const bufCallback = buffer[0];
