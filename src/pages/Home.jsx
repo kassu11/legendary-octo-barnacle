@@ -157,7 +157,7 @@ function AnimeCard(props) {
       <Show when={props.data.media.episodes - progress()}>
         <div class={style.hoverInfo} onClick={e => {
           e.preventDefault();
-          if (progress() < props.data.media.episodes) {
+          if (progress() < props.data.media.episodes || props.data.media.episodes == null) {
             triggerProgressIncrease(accessToken(), props.data.media.id, progress() + 1);
             props.data.progress += 1;
             props.mutateCache(data => data);
