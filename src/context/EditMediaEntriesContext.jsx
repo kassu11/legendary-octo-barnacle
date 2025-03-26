@@ -14,7 +14,7 @@ export function EditMediaEntriesProvider(props) {
       <Show when={mediaListEntry()}>
         <form method="dialog" onSubmit={e => {
           const formData = new FormData(e.currentTarget);
-          const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || undefined]));
+          const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || null]));
 
           const changes = {}
           if (!((data.progress == "0" && mediaListEntry().mediaListEntry?.progress == null) || data.progress == mediaListEntry().mediaListEntry?.progress)) {
@@ -23,15 +23,30 @@ export function EditMediaEntriesProvider(props) {
           if (!((data.score == "0" && mediaListEntry().mediaListEntry?.score == null) || data.score == mediaListEntry().mediaListEntry?.score)) {
             changes.score = Number(data.score);
           }
+          if (!((data.repeat == "0" && mediaListEntry().mediaListEntry?.repeat == null) || data.repeat == mediaListEntry().mediaListEntry?.repeat)) {
+            changes.repeat = Number(data.repeat);
+          }
+          assert(data.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
+
+          if (!(data.status == "none" || mediaListEntry().mediaListEntry?.status == data.status)) {
+            changes.status = data.status;
+          }
+          if ((data.startedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)) {
+            changes.startedAt = data.startedAt;
+          }
+          if ((data.completedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)) {
+            changes.completedAt = data.completedAt;
+          }
+          if (data.notes != mediaListEntry().mediaListEntry?.notes) {
+            changes.notes = data.notes;
+          }
 
 
 
 
 
 
-          if (e.submitter?.getAttribute("formmethod") === "dialog") {
-            // Closin animation
-          } else if (e.submitter.type === "submit") {
+          if (e.submitter.type === "submit") {
             // Send changes to anilist
             if (Object.keys(changes).length > 0) {
               changes.mediaId = mediaListEntry().id;
@@ -43,9 +58,7 @@ export function EditMediaEntriesProvider(props) {
             } else {
               console.log("No changes");
             }
-          } else {
-            e.preventDefault();
-          }
+          } 
 
           console.log("Data: ", { ...data });
           console.log("Changes: ", changes);
@@ -55,7 +68,25 @@ export function EditMediaEntriesProvider(props) {
           <h2>{mediaListEntry().title.userPreferred}</h2>
           <div>
             <label htmlFor="status">Status</label>
-            <input type="text" id="status" name="status" value={mediaListEntry().mediaListEntry?.status || ""} />
+            <select name="status" id="status">
+              <option value="none" selected={mediaListEntry().mediaListEntry?.status == null} disabled hidden>Select status</option>
+              <option value="COMPLETED" selected={mediaListEntry().mediaListEntry?.status === "COMPLETED"}>Completed</option>
+              <option value="CURRENT" selected={mediaListEntry().mediaListEntry?.status === "CURRENT"}>
+                <Switch>
+                  <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
+                  <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
+                </Switch>
+              </option>
+              <option value="DROPPED" selected={mediaListEntry().mediaListEntry?.status === "DROPPED"}>Dropped</option>
+              <option value="PAUSED" selected={mediaListEntry().mediaListEntry?.status === "PAUSED"}>Paused</option>
+              <option value="PLANNING" selected={mediaListEntry().mediaListEntry?.status === "PLANNING"}>Planning</option>
+              <option value="REPEATING" selected={mediaListEntry().mediaListEntry?.status === "REPEATING"}>
+                <Switch>
+                  <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
+                  <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
+                </Switch>
+              </option>
+            </select>
           </div>
           <div>
             <label htmlFor="score">Score</label>
@@ -67,11 +98,11 @@ export function EditMediaEntriesProvider(props) {
           </div>
           <div>
             <label htmlFor="start-date">Start date</label>
-            <input type="date" id="start-date" name="start-date" value={mediaListEntry().mediaListEntry?.score || 0} />
+            <input type="date" id="start-date" name="startedAt" value={formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)} />
           </div>
           <div>
             <label htmlFor="end-date">Finish date</label>
-            <input type="date" id="end-date" name="end-date" value={mediaListEntry().mediaListEntry?.score || 0} />
+            <input type="date" id="end-date" name="completedAt" value={formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)} />
           </div>
           <div>
             <label htmlFor="repeat">Total Rewatches</label>
@@ -79,10 +110,10 @@ export function EditMediaEntriesProvider(props) {
           </div>
           <div>
             <label htmlFor="notes">Notes</label>
-            <input type="text" id="notes" name="notes" value={mediaListEntry().mediaListEntry?.notes || ""} />
+            <textarea type="text" id="notes" name="notes" value={mediaListEntry().mediaListEntry?.notes || ""} />
           </div>
           <h3>Advanced Scores</h3>
-          <button>Delete</button>
+          <button type="button">Delete</button>
           <button type="submit">Save</button>
           <h3>Custom Lists</h3>
           <div>
@@ -97,7 +128,9 @@ export function EditMediaEntriesProvider(props) {
             <input type="checkbox" name="private" id="private" />
             <label htmlFor="private"> Private</label>
           </div>
-          <button formMethod="dialog">close</button>
+        </form>
+        <form method="dialog">
+          <button>Close</button>
         </form>
       </Show>
     </dialog>
@@ -118,6 +151,16 @@ export function EditMediaEntriesProvider(props) {
       {props.children}
     </EditMediaEntriesContext.Provider>
   );
+}
+
+function formatDateToInput(date) {
+  if (!date || !date.day || !date.month || !date.year) {
+    return "";
+  }
+
+  const day = String(date.day).padStart(2, "0");
+  const month = String(date.month).padStart(2, "0");
+  return `${date.year}-${month}-${day}`;
 }
 
 export function useEditMediaEntries() {
