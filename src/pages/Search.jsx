@@ -11,8 +11,8 @@ function Search() {
   let _lastTimeHistoryChanged = performance.now()
 
   const { accessToken } = useAuthentication();
-  const [variables, setVariables] = createSignal(undefined);
   const [searchParams, _setSearchParams] = useSearchParams();
+  const [variables, setVariables] = createSignal(getSearchParamObject());
   const [mediaData] = api.anilist.searchMedia(accessToken, variables);
 
   function setSearchParams(params, opt) {
@@ -21,42 +21,42 @@ function Search() {
     _lastTimeHistoryChanged = performance.now();
   }
 
-  createEffect(() => {
+  function getSearchParamObject() {
     const search = { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" };
     if (Number(searchParams.page) > 1) {
       search.page = Number(searchParams.page);
     }
 
-    search.id = searchParams.id;
-    search.type = searchParams.type;
-    search.isAdult = searchParams.isAdult;
-    search.search = searchParams.search;
-    search.format = searchParams.format;
-    search.status = searchParams.status;
+    search.chapterGreater = searchParams.chapterGreater;
+    search.chapterLesser = searchParams.chapterLesser;
     search.countryOfOrigin = searchParams.countryOfOrigin;
-    search.source = searchParams.source;
+    search.durationGreater = searchParams.durationGreater;
+    search.durationLesser = searchParams.durationLesser;
+    search.episodeGreater = searchParams.episodeGreater;
+    search.episodeLesser = searchParams.episodeLesser;
+    search.excludedGenres = searchParams.excludedGenres;
+    search.excludedTags = searchParams.excludedTags;
+    search.format = searchParams.format;
+    search.genres = searchParams.genres;
+    search.id = searchParams.id;
+    search.isAdult = searchParams.isAdult;
+    search.isLicensed = searchParams.isLicensed;
+    search.licensedBy = searchParams.licensedBy;
+    search.minimumTagRank = searchParams.minimumTagRank;
+    search.onList = searchParams.onList;
+    search.search = searchParams.search;
     search.season = searchParams.season;
     search.seasonYear = searchParams.seasonYear;
-    search.year = searchParams.year;
-    search.onList = searchParams.onList;
-    search.yearLesser = searchParams.yearLesser;
-    search.yearGreater = searchParams.yearGreater;
-    search.episodeLesser = searchParams.episodeLesser;
-    search.episodeGreater = searchParams.episodeGreater;
-    search.durationLesser = searchParams.durationLesser;
-    search.durationGreater = searchParams.durationGreater;
-    search.chapterLesser = searchParams.chapterLesser;
-    search.chapterGreater = searchParams.chapterGreater;
-    search.volumeLesser = searchParams.volumeLesser;
-    search.volumeGreater = searchParams.volumeGreater;
-    search.licensedBy = searchParams.licensedBy;
-    search.isLicensed = searchParams.isLicensed;
-    search.genres = searchParams.genres;
-    search.excludedGenres = searchParams.excludedGenres;
-    search.tags = searchParams.tags;
-    search.excludedTags = searchParams.excludedTags;
-    search.minimumTagRank = searchParams.minimumTagRank;
     search.sort = searchParams.sort;
+    search.source = searchParams.source;
+    search.status = searchParams.status;
+    search.tags = searchParams.tags;
+    search.type = searchParams.type;
+    search.volumeGreater = searchParams.volumeGreater;
+    search.volumeLesser = searchParams.volumeLesser;
+    search.year = searchParams.year;
+    search.yearGreater = searchParams.yearGreater;
+    search.yearLesser = searchParams.yearLesser;
 
     for(const [key, value] of Object.entries(search)) {
       if (value == null) { delete search[key]; }
@@ -64,8 +64,14 @@ function Search() {
       if (value === "true") { search[key] = true; }
     }
 
+    return search;
+  }
+
+  createEffect(() => {
+    searchParams;
+    const search = getSearchParamObject()
     triggerVariable(search);
-  })
+  });
 
   return (
     <>
