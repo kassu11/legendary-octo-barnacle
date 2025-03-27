@@ -3,10 +3,11 @@ import * as querys from "./querys";
 import { assert } from "./assert";
 const DEBUG = location.origin.includes("localhost");
 
-const normalCache = cacheBuilder({ storeName: "results", expiresInSeconds: 60 * 60 * 24 * 365 });
-const fetchOnce = cacheBuilder({ fetchOnce: true, storeName: "results", expiresInSeconds: 60 * 60 * 24 * 365 });
-const noCache = cacheBuilder({ noCache: true });
-const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, fetchOnce: true, expiresInSeconds: 60 });
+const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
+const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
+const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached", expiresInSeconds: 60 * 60 * 24 * 365 });
+// const noCache = cacheBuilder({ type: "no-store" });
+// const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
 const api = {
   anilist: {
@@ -34,14 +35,14 @@ const api = {
     animeThemeById: fetchOnce(id => {
       return Fetch.animeThemes(querys.animeThemesById(id));
     }),
-    mediaListEntry: normalCache((token, mediaId) => {
+    mediaListEntry: reloadCache((token, mediaId) => {
       assert(mediaId, "MediaId missing");
       return Fetch.authAnilist(token, querys.mediaListEntry, { mediaId });
     }),
     animeThemeByArtisSlug: fetchOnce(slug => {
       return Fetch.animeThemes(querys.animeThemesByArtisSlug(slug));
     }),
-    getAuthUserData: normalCache(token => {
+    getAuthUserData: reloadCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
     }),
     getActivity: fetchOnce((token, variables) => {
@@ -176,21 +177,24 @@ class Fetch {
 const localFetchCacheStorage = new Map();
 
 /**
- * @param {Object} settings - Cache settings
- * @param {string} settings.storeName - Name of the store in IndexedDB, if not provided it will not be stored in IndexedDB
- * @param {boolean} settings.fetchOnDebug - Fetches data on debug mode
- * @param {boolean} settings.fetchOnce - Always fetches data once per page load
- * @param {boolean} settings.noCache - Never caches the data
- * @param {number} settings.expiresInSeconds - How long to keep the data in cache. If cache expires it will not be given, because outdaded data is worse than having to wait for fresh data
+ * @param {Object} settings - Cache settings.
+ * @param {"results"|"debug"} settings.storeName - The name of the store in IndexedDB. If not provided, data will not be stored in IndexedDB.
+ * @param {boolean} settings.fetchOnDebug - Determines whether data should be fetched in debug mode.
+ * @param {number} settings.expiresInSeconds - The duration (in seconds) before cached data expires. Once expired, the data will not be served from cache, as outdated data is considered worse than waiting for fresh data.
+ * @param {"default"|"fetch-once"|"no-store"|"only-if-cached"|"reload"} settings.type - A cache strategy inspired by the Fetch API's {@link https://developer.mozilla.org/en-US/docs/Web/API/Request/cache Request.cache} property. Unlike fetch, expired cache entries are never returned.
+ *     - `"default"`: Uses the cache if data exists; otherwise, fetches from the server.
+ *     - `"fetch-once"`: Always fetches fresh data once and after that use the cache.
+ *     - `"no-store"`: Skips cache entirely and fetches fresh data.
+ *     - `"only-if-cached"`: Serves data from cache only; returns null if no cache exists.
+ *     - `"reload"`: Always fetches fresh data and updates the cache.
  */
 function cacheBuilder(settings) {
   settings.storeName ??= "";
   settings.fetchOnDebug ??= false;
-  settings.fetchOnce ??= false;
-  settings.noCache ??= false; 
-  assert(settings.noCache || Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
-  assert(settings.noCache || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
-  assert(!settings.noCache || !settings.storeName, "StoreName is not used because noCache is on");
+  settings.type ??= "default"; 
+  assert(settings.type === "no-store" || Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
+  assert(settings.type === "no-store" || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
+  assert(settings.type !== "no-store" || !settings.storeName, "StoreName is not used because cache type is no-store");
 
   /**
    * @param {(fetchOptions: any[]) => Fetch} fetchCallback
@@ -199,7 +203,8 @@ function cacheBuilder(settings) {
     return (...fetchOptions) => {
       const [data, setData] = createSignal(undefined);
       let request = null;
-      const fetchOnStart = DEBUG == false || settings.fetchOnDebug || settings.noCache || !settings.storeName;
+      const checkCacheBeforeFetch = settings.type == "default" || settings.type == "only-if-cached";
+      const fetchOnStart = (DEBUG == false || settings.fetchOnDebug || settings.type == "no-store" || !settings.storeName) && checkCacheBeforeFetch == false;
 
       const mutateCache = mutateData => {
         if (typeof mutateData === "function") {
@@ -209,7 +214,7 @@ function cacheBuilder(settings) {
         assert(typeof mutateData === "object", "Data should always be JSON object data");
 
 
-        if (settings.noCache == false) {
+        if (settings.type !== "no-store") {
           localFetchCacheStorage.set(request.cacheKey, mutateData);
 
           if (settings.storeName) {
@@ -251,10 +256,10 @@ function cacheBuilder(settings) {
         const data = localFetchCacheStorage.get(request.cacheKey);
         if (data && data.expires > new Date()) {
           setData({ ...data, fromCache: true });
-          if (settings.fetchOnce) { 
+          if (settings.type === "fetch-once") { 
             return;
           }
-        } else if (settings.noCache == false && settings.storeName) {
+        } else if (settings.type !== "no-store" && settings.storeName) {
           const cacheReq = IndexedDB.fetchCache();
           cacheReq.onerror = refetch;
           cacheReq.onsuccess = evt => {
@@ -277,7 +282,9 @@ function cacheBuilder(settings) {
               }
             };
           }
-        }
+        } else if (fetchOnStart == false) {
+          refetch();
+        } 
 
         if (fetchOnStart) {
           refetch();
