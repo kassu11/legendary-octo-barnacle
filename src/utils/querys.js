@@ -692,7 +692,6 @@ export const searchMedia = format`query (
   $countryOfOrigin: CountryCode
   $source: MediaSource
   $season: MediaSeason
-  $seasonYear: Int
   $year: String
   $onList: Boolean
   $yearLesser: FuzzyDateInt
@@ -732,7 +731,6 @@ export const searchMedia = format`query (
       source: $source
       search: $search
       onList: $onList
-      seasonYear: $seasonYear
       startDate_like: $year
       startDate_lesser: $yearLesser
       startDate_greater: $yearGreater

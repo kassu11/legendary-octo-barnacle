@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createSignal, createEffect, Switch, Match, Show, splitProps, on } from "solid-js";
+import { createSignal, createEffect, Show, splitProps, on } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -38,6 +38,22 @@ function Search() {
       search.page = Number(searchParams.page);
     }
 
+    switch(searchParams.age) {
+      case "adult": 
+        search.isAdult = true;
+        break;
+      case "all": 
+        break;
+      default: 
+        search.isAdult = false;
+    }
+
+    if (searchParams.year) {
+      search.year = searchParams.year + "%";
+    }
+
+
+
     search.chapterGreater = searchParams.chapterGreater;
     search.chapterLesser = searchParams.chapterLesser;
     search.countryOfOrigin = searchParams.countryOfOrigin;
@@ -50,14 +66,13 @@ function Search() {
     search.format = searchParams.format;
     search.genres = searchParams.genres;
     search.id = searchParams.id;
-    search.isAdult = searchParams.isAdult;
+    // search.isAdult = searchParams.isAdult;
     search.isLicensed = searchParams.isLicensed;
     search.licensedBy = searchParams.licensedBy;
     search.minimumTagRank = searchParams.minimumTagRank;
     search.onList = searchParams.onList;
     search.search = searchParams.search;
     search.season = searchParams.season;
-    search.seasonYear = searchParams.seasonYear;
     search.sort = searchParams.sort;
     search.source = searchParams.source;
     search.status = searchParams.status;
@@ -65,7 +80,7 @@ function Search() {
     search.type = searchParams.type;
     search.volumeGreater = searchParams.volumeGreater;
     search.volumeLesser = searchParams.volumeLesser;
-    search.year = searchParams.year;
+    // search.year = searchParams.year;
     search.yearGreater = searchParams.yearGreater;
     search.yearLesser = searchParams.yearLesser;
 
@@ -89,30 +104,82 @@ function Search() {
     <>
       <h1>Search</h1>
       <button onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
-      <form action="https://graphql.anilist.co" onInput={e => {
+      <form action="https://graphql.anilist.co" class={style.form} onInput={e => {
         const formData = new FormData(e.currentTarget);
-        const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || undefined]));
+        const data = formData.entries().reduce((acc, [key, val]) => {
+          if (Array.isArray(acc[key])) {
+            acc[key].push(val);
+          } else if(acc[key] && val) {
+            acc[key] = [acc[key], val];
+          } else {
+            acc[key] = val || undefined;
+          }
+
+          return acc;
+        }, {});
+        const keysToManuallyReset = ["format"]; 
+        keysToManuallyReset.forEach(key => data[key] ??= undefined);
         console.log("Form: ", { ...data });
         setSearchParams(data);
       }}>
-        <InputSearch type="search" id="search" name="search">Search </InputSearch>
         <div>
-          <p>Type</p>
-          <Input type="radio" name="type" id="type1" value="">Both</Input>
-          <Input type="radio" name="type" id="type2" value="ANIME">Anime</Input>
-          <Input type="radio" name="type" id="type3" value="MANGA">Manga</Input>
+          <InputSearch type="search" id="search" name="search">Search </InputSearch>
         </div>
         <div>
-          <p>IsAdult</p>
-          <Input type="radio" name="isAdult" id="isAdult1" value="">Both</Input>
-          <Input type="radio" name="isAdult" id="isAdult2" value="false">Off</Input>
-          <Input type="radio" name="isAdult" id="isAdult3" value="true">On</Input>
+          <p>Media Type</p>
+          <select name="type">
+            <Option name="type" value="">Both</Option>
+            <Option name="type" value="ANIME">Anime</Option>
+            <Option name="type" value="MANGA">Manga</Option>
+          </select>
         </div>
         <div>
-          <p>onList</p>
-          <Input type="radio" name="onList" id="onList1" value="">Both</Input>
-          <Input type="radio" name="onList" id="onList2" value="false">Off</Input>
-          <Input type="radio" name="onList" id="onList3" value="true">On</Input>
+          <p>Rating</p>
+          <select name="age">
+            <Option name="age" value="">R-17+</Option>
+            <Option name="age" value="adult">R-18</Option>
+            <Option name="age" value="all">All ratings</Option>
+          </select>
+        </div>
+        <div>
+          <p>On my list</p>
+          <select name="onList">
+            <Option name="onList" value="">Default</Option>
+            <Option name="onList" value="false">Exclude</Option>
+            <Option name="onList" value="true">Include</Option>
+          </select>
+        </div>
+        <div>
+          <InputSearch type="number" name="year" id="year" maxlength="4" size="4">Year</InputSearch>
+        </div>
+        <div>
+          <p>Season</p>
+          <select name="season">
+            <Option name="season" value="">Select season</Option>
+            <Option name="season" value="WINTER">Winter</Option>
+            <Option name="season" value="SPRING">Spring</Option>
+            <Option name="season" value="SUMMER">Summer</Option>
+            <Option name="season" value="FALL">Fall</Option>
+          </select>
+        </div>
+        <div>
+          <p>Format</p>
+          <select name="format" multiple>
+            <Show when={searchParams.type !== "ANIME"}>
+              <Option name="format" value="MANGA">Manga</Option>
+              <Option name="format" value="NOVEL">Novel</Option>
+              <Option name="format" value="ONE_SHOT">One shot</Option>
+            </Show>
+            <Show when={searchParams.type !== "MANGA"}>
+              <Option name="format" value="MOVIE">Movie</Option>
+              <Option name="format" value="MUSIC">Music</Option>
+              <Option name="format" value="ONA">Ona</Option>
+              <Option name="format" value="OVA">Ova</Option>
+              <Option name="format" value="SPECIAL">Special</Option>
+              <Option name="format" value="TV">TV</Option>
+              <Option name="format" value="TV_SHORT">TV short</Option>
+            </Show>
+          </select>
         </div>
       </form>
       <br />
@@ -132,7 +199,7 @@ function Search() {
 
     return (
       <>
-        <label htmlFor={inputProps.id}>{otherProps.children}</label>
+        <label htmlFor={inputProps.id}>{otherProps.children}</label><br />
         <input value={searchParams[props.name] || ""} {...inputProps} />
       </>
     )
@@ -142,13 +209,22 @@ function Search() {
     const [otherProps, inputProps] = splitProps(props, ["children"]);
     assert(inputProps.type, "Input type is missing");
     assert(inputProps.name, "Input name is missing");
-    assert(!(inputProps.value === undefined), "Input value is missing");
+    assert(!inputProps.value !== undefined, "Input value is missing");
 
     return (
       <>
         <input checked={(searchParams[props.name] || "") === props.value} {...inputProps} />
         <label htmlFor={inputProps.id}>{otherProps.children}</label>
       </>
+    )
+  }
+
+  function Option(props) {
+    assert(props.name, "Option name is missing");
+    assert(props.value !== undefined, "Option value is missing");
+
+    return (
+      <option selected={(searchParams[props.name] || "").includes(props.value)} {...props} />
     )
   }
 }
