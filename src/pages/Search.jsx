@@ -5,6 +5,7 @@ import { createSignal, createEffect, Switch, Match, Show, splitProps, on } from 
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
+import style from "./Search.module.scss";
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
@@ -116,19 +117,11 @@ function Search() {
       </form>
       <br />
       <br />
-      <div>
-        <Show when={mediaData.loading}>
-          <p>Loading...</p>
+      <ol class={style.cards}>
+        <Show when={mediaData()}>
+          <CardRow data={mediaData().data.data.Page.media}/>
         </Show>
-        <Switch>
-          <Match when={mediaData.error}>
-            <span>Error: {mediaData.error}</span>
-          </Match>
-          <Match when={mediaData()}>
-            <CardRow data={mediaData().data.data.Page.media}/>
-          </Match>
-        </Switch>
-      </div>
+      </ol>
     </>
   )
 
@@ -171,10 +164,12 @@ function CardRow(props) {
 
 function Card(props) {
   return ( 
-    <A href={"/anime/" + props.card.id + "/" + props.card.title.userPreferred}>
-      <img src={props.card.coverImage.large} alt="" />
-      <p>{props.card.title.userPreferred}</p>
-    </A> 
+    <li class={style.card}>
+      <A href={"/anime/" + props.card.id + "/" + props.card.title.userPreferred}>
+        <img src={props.card.coverImage.large} class={style.cover} alt="Cover." />
+        <p>{props.card.title.userPreferred}</p>
+      </A> 
+    </li>
   );
 }
 
