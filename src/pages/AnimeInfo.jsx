@@ -42,8 +42,21 @@ function Anime() {
 function AnimeInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
+
+  const [malId, setMalId]= createSignal(undefined);
+  const [malData] = api.anilist.myAnimeListAnimeById(malId);
   const { accessToken } = useAuthentication();
   const { setMediaListEntry } = useEditMediaEntries();
+  
+  createEffect(() => {
+    if (props.anime.idMal) {
+      setMalId(props.anime.idMal);
+    }
+  });
+
+  createEffect(() => {
+    console.log(malData());
+  })
 
   console.log(props.anime);
 
@@ -62,6 +75,12 @@ function AnimeInfo(props) {
                 }
               })
             }}>{props.anime.mediaListEntry?.status || "Edit"}</button>
+          </Show>
+          <Show when={props.anime.idMal}>
+            {console.log("ID", props.anime.idMal, malData())}
+            <Show when={malData()} fallback={<p>MAL score: loading</p>}>
+              <p>MAL score: {malData().data.data.score}</p>
+            </Show>
           </Show>
           <Rankings rankings={props.anime.rankings} />
           <Genres genres={props.anime.genres} />
