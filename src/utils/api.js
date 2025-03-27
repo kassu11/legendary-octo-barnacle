@@ -51,6 +51,9 @@ const api = {
     searchMedia: fetchOnce((token, variables) => {
       return Fetch.authAnilist(token, querys.searchMedia, variables);
     }),
+    searchMediaCache: onlyIfCache((token, variables) => {
+      return Fetch.authAnilist(token, querys.searchMedia, variables);
+    }),
     friendsMediaScore: fetchOnce((token, id, variables) => {
       return Fetch.authAnilist(token, querys.anilistGetFriendMediaScore, {id, ...variables});
     }),
@@ -211,6 +214,7 @@ function cacheBuilder(settings) {
           mutateData = mutateData(data());
         }
 
+        assert(data() !== null || settings.type !== "only-if-cached", "Can't mutate null data");
         assert(typeof mutateData === "object", "Data should always be JSON object data");
 
 
@@ -233,17 +237,21 @@ function cacheBuilder(settings) {
           mutateData = mutateData(data());
         }
 
-        mutateCache(mutateData);
         setData(mutateData);
       }
 
       const refetch = async () => {
+        if (settings.type === "only-if-cached") {
+          return setData(null);
+        }
+
         const data = await request.send();
         if (settings.expiresInSeconds) {
           const time = new Date();
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
         }
         mutate(data);
+        mutateCache(data);
       }
 
       createEffect(() => {
