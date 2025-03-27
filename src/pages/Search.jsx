@@ -8,11 +8,18 @@ import { assert } from "../utils/assert";
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
+  let _lastTimeHistoryChanged = performance.now()
 
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [mediaData] = api.anilist.searchMedia(accessToken, variables);
+
+  function setSearchParams(params, opt) {
+    const time = performance.now() - _lastTimeHistoryChanged < 1000;
+    _setSearchParams(params, { replace: time, ...opt });
+    _lastTimeHistoryChanged = performance.now();
+  }
 
   createEffect(() => {
     const search = { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" };
@@ -63,7 +70,7 @@ function Search() {
   return (
     <>
       <h1>Search</h1>
-      <button onClick={() => setSearchParams({page: +searchParams.page + 1 || 1, delete: undefined})}>Next page</button>
+      <button onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
       <form action="https://graphql.anilist.co" onInput={e => {
         const formData = new FormData(e.currentTarget);
         const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || undefined]));
