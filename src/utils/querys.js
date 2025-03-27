@@ -233,6 +233,7 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
 
 export const animeThemesById = id => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=AniList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
 export const animeThemesByArtisSlug = slug => `https://api.animethemes.moe/artist/${slug}?include=songs.animethemes.anime,songs.animethemes.animethemeentries.videos.audio,songs.animethemes.song.artists,resources,images`;
+export const myAnimeListAnimeById = id => `https://api.jikan.moe/v4/anime/${id}/full`;
 
 export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {

@@ -33,14 +33,17 @@ const api = {
       });
     }),
     animeThemeById: fetchOnce(id => {
-      return Fetch.animeThemes(querys.animeThemesById(id));
+      return Fetch.getJson(querys.animeThemesById(id));
+    }),
+    myAnimeListAnimeById: fetchOnce(id => {
+      return Fetch.getJson(querys.myAnimeListAnimeById(id));
     }),
     mediaListEntry: reloadCache((token, mediaId) => {
       assert(mediaId, "MediaId missing");
       return Fetch.authAnilist(token, querys.mediaListEntry, { mediaId });
     }),
     animeThemeByArtisSlug: fetchOnce(slug => {
-      return Fetch.animeThemes(querys.animeThemesByArtisSlug(slug));
+      return Fetch.getJson(querys.animeThemesByArtisSlug(slug));
     }),
     getAuthUserData: reloadCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
@@ -168,7 +171,7 @@ class Fetch {
     });
   }
 
-  static animeThemes(url) {
+  static getJson(url) {
     return new Fetch(url, {
       method: "GET",
       cache: "default",
