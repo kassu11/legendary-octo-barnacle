@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { createSignal, createEffect, Switch, Match, Show, splitProps } from "solid-js";
+import { createSignal, createEffect, Switch, Match, Show, splitProps, on } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -12,8 +12,18 @@ function Search() {
 
   const { accessToken } = useAuthentication();
   const [searchParams, _setSearchParams] = useSearchParams();
-  const [variables, setVariables] = createSignal(getSearchParamObject());
-  const [mediaData] = api.anilist.searchMedia(accessToken, variables);
+  const _initVariables = getSearchParamObject();
+  const [variables, setVariables] = createSignal(_initVariables);
+  const [cacheVariables, setCacheVariables] = createSignal(_initVariables);
+  const [mediaData, { mutate: mutateMediaData }] = api.anilist.searchMedia(accessToken, variables);
+  const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
+
+  createEffect(on(cacheData, data => {
+    if (data) {
+      triggerVariable.clear();
+      mutateMediaData(data);
+    }
+  }));
 
   function setSearchParams(params, opt) {
     const time = performance.now() - _lastTimeHistoryChanged < 1000;
@@ -71,6 +81,7 @@ function Search() {
     searchParams;
     const search = getSearchParamObject()
     triggerVariable(search);
+    setCacheVariables(search);
   });
 
   return (
