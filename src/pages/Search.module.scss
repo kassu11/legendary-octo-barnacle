@@ -1,0 +1,21 @@
+.cards {
+  list-style: none;
+  padding: 0px;
+  display: grid;
+  gap: 1rem;
+  justify-content: center;
+  grid-template-columns: repeat(auto-fit, 15rem);
+}
+
+.card {
+  background-color: green;
+  a {
+    color: white;
+    text-decoration: none;
+  }
+}
+.cover {
+  width: 100%;
+  aspect-ratio: 5.5/8;
+  object-fit: cover;
+}
