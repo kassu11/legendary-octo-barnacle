@@ -10,6 +10,7 @@ import Banner from "../components/media/Banner";
 import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
+import ScoreInput from "../components/media/ScoreInput.jsx";
 import Header from "../components/media/Header";
 import Characters from "../components/media/Characters";
 import Friends from "../components/media/Friends";
@@ -100,6 +101,16 @@ function AnimeInfo(props) {
             stats={props.anime.stats}
             status={props.anime.status}
           />
+          <ScoreInput value="2" format="POINT_10"></ScoreInput>
+          <ScoreInput value="2" format="POINT_100"></ScoreInput>
+          <ScoreInput value="2" format="POINT_10_DECIMAL"></ScoreInput>
+          <ScoreInput value="2" name="start" format="POINT_5"></ScoreInput>
+          <ScoreInput value="2" name="emoji" format="POINT_3"></ScoreInput>
+
+
+
+
+
           <div>
             <h1>{props.anime.title.userPreferred}</h1>
             <Markdown children={props.anime.description}/>
