@@ -14,10 +14,10 @@ function ScoreInput(props) {
           <input type="number" value={merged.value} min="0" max="10" name={merged.name} id={merged.id} />
         </Match>
         <Match when={props.format === "POINT_100"}>
-          <input type="number" value={merged.value} min="0" max="10" name={merged.name} id={merged.id} />
+          <input type="number" value={merged.value} min="0" max="100" name={merged.name} id={merged.id} />
         </Match>
         <Match when={props.format === "POINT_10_DECIMAL"}>
-          <input type="number" value={merged.value} min="0" max="10" name={merged.name} id={merged.id} />
+          <input type="number" value={merged.value} min="0" max="10" step=".1" name={merged.name} id={merged.id} />
         </Match>
         <Match when={props.format === "POINT_5"}>
           <StarRadioRange name={merged.name} id={merged.id} value={merged.value} />
