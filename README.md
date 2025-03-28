@@ -6,6 +6,9 @@ This project does not currently have any real name, but it's supposed to combine
 2. Make it good
 3. Make it fast
 
+> [!IMPORTANT]
+> This project is currently under works, and has a lot of bugs and missing features
+
 ## Usage
 
 ```bash
