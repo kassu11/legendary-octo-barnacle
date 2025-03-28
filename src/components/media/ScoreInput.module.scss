@@ -1,0 +1,32 @@
+.score-input {
+  display: flex;
+  background-color: green;
+  gap: .25rem;
+}
+
+.radio-container {
+  cursor: pointer;
+  font-size: 2rem;
+}
+
+.radio {
+  all: unset;
+  position: absolute;
+  pointer-events: none;
+
+}
+.selected {
+  color: gold;
+
+  .emoji {
+   filter: grayscale(0%);
+ }
+}
+
+.emoji {
+  filter: grayscale(100%);
+}
+
+.score-star {
+  width: 2rem;
+}
