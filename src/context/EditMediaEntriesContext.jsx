@@ -6,9 +6,23 @@ import ScoreInput from "../components/media/ScoreInput";
 
 const EditMediaEntriesContext = createContext();
 
+function formState(initialData) {
+  const [score, setScore] = createSignal();
+
+  function setState(data) {
+    setScore(data?.mediaListEntry?.score || 0);
+  }
+
+  setState(initialData);
+
+  return [{ score, setScore }, setState];
+}
+
 export function EditMediaEntriesProvider(props) {
   const [mediaListEntry, setMediaListEntry] = createSignal(undefined);
   const { accessToken, authUserData } = useAuthentication()
+
+  const [state, setState] = formState();
 
   let editor;
 
@@ -17,6 +31,7 @@ export function EditMediaEntriesProvider(props) {
       assert(authUserData(), "Should not be able to edit if not authenticated");
       console.log("mediaListData", mediaListEntry());
       console.log("authUserData", authUserData());
+      setState(mediaListEntry());
       editor.showModal();
     }
   });
@@ -104,7 +119,7 @@ export function EditMediaEntriesProvider(props) {
             </div>
             <div>
               <label htmlFor="score">Score</label>
-              <ScoreInput value={mediaListEntry().mediaListEntry?.score || 0} format={authUserData().data.data.Viewer.mediaListOptions.scoreFormat} />
+              <ScoreInput value={state.score()} onChange={state.setScore} format={authUserData().data.data.Viewer.mediaListOptions.scoreFormat} />
             </div>
             <div>
               <label htmlFor="progress">Episode Progress</label>
