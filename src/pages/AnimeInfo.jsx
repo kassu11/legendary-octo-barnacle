@@ -61,9 +61,6 @@ function AnimeInfo(props) {
 
   console.log(props.anime);
 
-
-  const [score, setScore] = createSignal(1);
-
   return (
     <>
       <Banner src={props.anime.bannerImage} />
@@ -104,16 +101,6 @@ function AnimeInfo(props) {
             stats={props.anime.stats}
             status={props.anime.status}
           />
-          <ScoreInput value={score()} onChange={setScore} format="POINT_10"></ScoreInput>
-          <ScoreInput value={score()} onChange={setScore} format="POINT_100"></ScoreInput>
-          <ScoreInput value={score()} onChange={setScore} format="POINT_10_DECIMAL"></ScoreInput>
-          <ScoreInput value={score()} onChange={setScore} name="start" format="POINT_5"></ScoreInput>
-          <ScoreInput value={score()} onChange={setScore} name="emoji" format="POINT_3"></ScoreInput>
-
-
-
-
-
           <div>
             <h1>{props.anime.title.userPreferred}</h1>
             <Markdown children={props.anime.description}/>
