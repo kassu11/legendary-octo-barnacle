@@ -6,6 +6,7 @@ import api from "../utils/api.js";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
+import { formatTitleToUrl } from "../utils/formating.js";
 
 const plural = num => num !== 1 ? "s" : "";
 
@@ -13,7 +14,7 @@ export function ActivityCard(props) {
   return (
     <Show when={props.activity.type === "TEXT"} fallback={
       <div class={style.activityCardMedia}>
-        <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>
+        <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>
           <img class={style.cover} src={props.activity.media.coverImage.large} alt="Cover" />
         </A>
         <div class={style.main}>
@@ -21,7 +22,7 @@ export function ActivityCard(props) {
           <p>
             {props.activity.status}{" "}
             <Show when={props.activity.progress}>{props.activity.progress} of </Show>
-            <A href={"/anime/" + props.activity.media.id + "/" + props.activity.media.title.userPreferred}>{props.activity.media.title.userPreferred}</A>
+            <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
             <A href={"/profile/" + props.activity.user.name}>
               <img class={style.profile} src={props.activity.user.avatar.large} alt="Profile" />
             </A>

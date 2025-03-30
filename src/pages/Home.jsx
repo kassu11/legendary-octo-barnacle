@@ -6,6 +6,7 @@ import { useAuthentication } from "../context/AuthenticationContext";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
+import { formatTitleToUrl } from "../utils/formating.js";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -101,14 +102,14 @@ function CurrentWatchingMedia(props) {
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
             <Show when={anime.media.status != "FINISHED"}>
-              <AnimeCard data={anime} dataType="anime" mutateCache={mutateCache} />
+              <CurrentCard data={anime} mutateCache={mutateCache} />
             </Show>
           )}</For>
         </div>
         <div class={style.rowContainer}>
           <For each={animeData().data.data.Page.mediaList}>{anime => (
             <Show when={anime.media.status == "FINISHED"}>
-              <AnimeCard data={anime} dataType="anime" mutateCache={mutateCache} />
+              <CurrentCard data={anime} mutateCache={mutateCache} />
             </Show>
           )}</For>
         </div>
@@ -116,7 +117,7 @@ function CurrentWatchingMedia(props) {
       <Show when={mangaData()}>
         <div class={style.rowContainer}>
           <For each={mangaData().data.data.Page.mediaList}>{manga => (
-            <AnimeCard data={manga} dataType="manga" mutateCache={mutateCache} />
+            <CurrentCard data={manga} mutateCache={mutateCache} />
           )}</For>
         </div>
       </Show>
@@ -124,7 +125,7 @@ function CurrentWatchingMedia(props) {
   );
 }
 
-function AnimeCard(props) {
+function CurrentCard(props) {
   const { accessToken } = useAuthentication();
   const [progress, setProgress] = createSignal(props.data.progress);
   const [airingEpisode, setAiringEpisode] = createSignal(props.data.media.nextAiringEpisode?.episode);
@@ -142,8 +143,7 @@ function AnimeCard(props) {
   });
 
   return (
-    <A 
-      href={"/" + props.dataType + "/" + props.data.media.id + "/" + props.data.media.title.userPreferred} class={style.card} >
+    <A href={"/" + props.data.media.type.toLowerCase() + "/" + props.data.media.id + "/" + formatTitleToUrl(props.data.media.title.userPreferred)} class={style.card} >
       <img src={props.data.media.coverImage.large} alt="Cover." />
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class={style.normalInfo}>
