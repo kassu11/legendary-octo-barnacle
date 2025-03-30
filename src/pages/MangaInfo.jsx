@@ -6,6 +6,8 @@ import style from "./AnimeInfo.module.scss";
 import { Markdown } from "../components/Markdown";
 import { useAuthentication } from "../context/AuthenticationContext";
 import Banner from "../components/media/Banner";
+import ExternalLinks from "../components/media/ExternalLinks.jsx";
+import ExtraInfo from "../components/media/ExtraInfo.jsx";
 import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
@@ -80,6 +82,8 @@ function MangaInfo(props) {
               <p>MAL score: {malData().data.data.score}</p>
             </Show>
           </Show>
+          <ExternalLinks media={props.anime}/>
+          <ExtraInfo media={props.anime}/>
           <Rankings rankings={props.anime.rankings} />
           <Genres genres={props.anime.genres} />
           <Tags tags={props.anime.tags} />

@@ -14,12 +14,12 @@ const ExtraInfo = (props) => {
         <Show when={props.media.duration}>
           <li>Duration: {props.media.duration} mins</li>
         </Show>
-        <Show when={props.media.startDate}>
-          <li>Start Date: {formatAnilistDate(props.media.startDate)}</li>
-        </Show>
-        <Show when={props.media.endDate}>
-          <li>End Date: {formatAnilistDate(props.media.endDate)}</li>
-        </Show>
+        <Show when={formatAnilistDate(props.media.startDate)}>{date => (
+          <li>Start Date: {date()}</li>
+        )}</Show>
+        <Show when={formatAnilistDate(props.media.endDate)}>{date => (
+          <li>End Date: {date()}</li>
+        )}</Show>
         <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "ENGLISH"}>
           <li>English: {props.media.title.english}</li>
         </Show>
