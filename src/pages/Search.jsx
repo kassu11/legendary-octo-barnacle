@@ -6,6 +6,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import style from "./Search.module.scss";
+import { formatTitleToUrl } from "../utils/formating";
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
@@ -241,7 +242,7 @@ function CardRow(props) {
 function Card(props) {
   return ( 
     <li class={style.card}>
-      <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + props.card.title.userPreferred}>
+      <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + formatTitleToUrl(props.card.title.userPreferred)}>
         <img src={props.card.coverImage.large} class={style.cover} alt="Cover." />
         <p>{props.card.title.userPreferred}</p>
       </A> 
