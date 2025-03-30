@@ -4,6 +4,7 @@ import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
 import { Markdown } from "../components/Markdown";
 import { assert } from "../utils/assert";
+import { formatAnilistDate, formatTitleToUrl } from "../utils/formating";
 
 
 function Character() {
@@ -62,9 +63,17 @@ function CharacterInfo(props) {
         </ul>
       </li>
       <li><a target="_blank" href={`https://anilist.co/character/${props.data.id}/${props.data.name.full}`}>AniList</a></li>
-      <li><b>age:</b> {props.data.age}</li>
-      <li><b>Age:</b> {props.data.age}</li>
-      <li><b>DateOfBirth:</b> {JSON.stringify(props.data.dateOfBirth)}</li>
+      <Switch>
+        <Match when={props.data.age?.endsWith("-")}>
+          <li>
+            <b>Initial Age:</b> {props.data.age.substring(0, props.data.age.length - 1)}
+          </li>
+        </Match>
+        <Match when={props.data.age}>
+          <li><b>Age:</b> {props.data.age}</li>
+        </Match>
+      </Switch>
+      <li><b>Birthday:</b> {formatAnilistDate(props.data.dateOfBirth)}</li>
       <li><b>Gender:</b> {props.data.gender}</li>
       <li><b>Description:</b> <Markdown children={props.data.description} /></li>
       <li><b>Series character is in:</b><br/>
@@ -85,7 +94,7 @@ function CardRow(props) {
 
 function Card(props) {
   return ( 
-    <A href={"/anime/" + props.card.node.id + "/" + props.card.node.title.userPreferred}>
+    <A href={"/" + props.card.node.type.toLowerCase() + "/" + props.card.node.id + "/" + formatTitleToUrl(props.card.node.title.userPreferred)}>
       <img src={props.card.node.coverImage.large} alt="" />
       <p>{props.card.node.title.userPreferred}</p>
     </A> 
