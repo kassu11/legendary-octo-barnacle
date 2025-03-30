@@ -7,7 +7,7 @@ import style from "./Artist.module.scss";
 
 function Artist() {
   const params = useParams();
-  const [artistData] = api.anilist.animeThemeByArtisSlug(params.name);
+  const [artistData] = api.animeThemes.artisBySlug(params.name);
   const video = <video src="" controls autoPlay />;
 
   return (
