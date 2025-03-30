@@ -10,6 +10,22 @@ const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached",
 // const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
 const api = {
+  animeThemes: {
+    themesByAniListId: fetchOnce(id => {
+      return Fetch.getJson(querys.animeThemesById(id));
+    }),
+    artisBySlug: fetchOnce(slug => {
+      return Fetch.getJson(querys.animeThemesByArtisSlug(slug));
+    }),
+  },
+  myAnimeList: {
+    animeById: fetchOnce(id => {
+      return Fetch.getJson(querys.myAnimeListAnimeById(id));
+    }),
+    mangaById: fetchOnce(id => {
+      return Fetch.getJson(querys.myAnimeListMangaById(id));
+    }),
+  },
   anilist: {
     mediaId: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.anilistMediaById, { id, perPage: 6 });
@@ -32,18 +48,9 @@ const api = {
         "nextYear": 2025
       });
     }),
-    animeThemeById: fetchOnce(id => {
-      return Fetch.getJson(querys.animeThemesById(id));
-    }),
-    myAnimeListAnimeById: fetchOnce(id => {
-      return Fetch.getJson(querys.myAnimeListAnimeById(id));
-    }),
     mediaListEntry: reloadCache((token, mediaId) => {
       assert(mediaId, "MediaId missing");
       return Fetch.authAnilist(token, querys.mediaListEntry, { mediaId });
-    }),
-    animeThemeByArtisSlug: fetchOnce(slug => {
-      return Fetch.getJson(querys.animeThemesByArtisSlug(slug));
     }),
     getAuthUserData: reloadCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
@@ -247,14 +254,17 @@ function cacheBuilder(settings) {
         if (settings.type === "only-if-cached") {
           return setData(null);
         }
-
+        const requestCopy = request;
         const data = await request.send();
         if (settings.expiresInSeconds) {
           const time = new Date();
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
         }
-        mutate(data);
-        mutateCache(data);
+
+        if (requestCopy === request) {
+          mutate(data);
+          mutateCache(data);
+        }
       }
 
       createEffect(() => {

@@ -1,16 +1,14 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { Switch, Match, Show, createEffect, createSignal } from "solid-js";
+import { Show, createEffect, createSignal } from "solid-js";
 import style from "./AnimeInfo.module.scss";
 import { Markdown } from "../components/Markdown";
-import { binaryMediaType } from "../utils/mediaTypes";
 import { useAuthentication } from "../context/AuthenticationContext";
 import Banner from "../components/media/Banner";
 import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
-import ScoreInput from "../components/media/ScoreInput.jsx";
 import Header from "../components/media/Header";
 import Characters from "../components/media/Characters";
 import Friends from "../components/media/Friends";
@@ -27,7 +25,7 @@ function Anime() {
   assert(!Number.isNaN(id()), "ID should not be NaN");
   const [animeData] = api.anilist.mediaId(id, accessToken);
   const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, id, {page: 1, perPage: 8});
-  const [themeData] = api.anilist.animeThemeById(id);
+  const [themeData] = api.animeThemes.themesByAniListId(id);
 
   createEffect(() => {
     setId(Number(params.id))
@@ -45,7 +43,7 @@ function AnimeInfo(props) {
   assert(props.anime?.id, "Id missing");
 
   const [malId, setMalId]= createSignal(undefined);
-  const [malData] = api.anilist.myAnimeListAnimeById(malId);
+  const [malData] = api.myAnimeList.animeById(malId);
   const { accessToken } = useAuthentication();
   const { setMediaListEntry } = useEditMediaEntries();
   
@@ -111,7 +109,7 @@ function AnimeInfo(props) {
               <For each={props.anime.relations.edges}>{relation => (
                 <li>
                   <A 
-                    href={"/" + binaryMediaType(relation.node.type) + "/" + relation.node.id + "/" + relation.node.title.userPreferred}
+                    href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + relation.node.title.userPreferred}
                     class={style.relation}
                   >
                     <img src={relation.node.coverImage.large} alt="Cover" />

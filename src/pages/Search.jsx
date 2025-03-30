@@ -241,7 +241,7 @@ function CardRow(props) {
 function Card(props) {
   return ( 
     <li class={style.card}>
-      <A href={"/anime/" + props.card.id + "/" + props.card.title.userPreferred}>
+      <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + props.card.title.userPreferred}>
         <img src={props.card.coverImage.large} class={style.cover} alt="Cover." />
         <p>{props.card.title.userPreferred}</p>
       </A> 
