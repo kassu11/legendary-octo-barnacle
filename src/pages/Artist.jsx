@@ -1,14 +1,19 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show, createEffect, createSignal } from "solid-js";
 import { AnimeTheme } from "../components/media/AnimeThemes.jsx";
 import style from "./Artist.module.scss";
 
 function Artist() {
   const params = useParams();
-  const [artistData] = api.animeThemes.artisBySlug(params.name);
+  const [name, setName] = createSignal(params.name);
+  const [artistData] = api.animeThemes.artisBySlug(name);
   const video = <video src="" controls autoPlay />;
+
+  createEffect(() => {
+    setName(params.name);
+  });
 
   return (
     <>
