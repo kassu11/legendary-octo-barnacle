@@ -5,7 +5,7 @@ import style from "./Friends.module.scss";
 
 function Friends(props) {
   return (
-    <Show when={props.friend}>
+    <Show when={props.friend?.mediaList.length}>
       <div class={style.friendContainer}>
         <ul>
           <For each={props.friend.mediaList}>{friend => (
