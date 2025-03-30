@@ -2,6 +2,7 @@ import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
+import { formatTitleToUrl } from "../utils/formating";
 
 
 function Anime() {
@@ -41,7 +42,7 @@ function Card(props) {
   const card = props.card;
 
   return ( 
-    <A href={"/anime/" + card.id + "/" + card.title.userPreferred}>
+    <A href={"/anime/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
       <img src={card.coverImage.large} alt="" />
       <p>{card.title.userPreferred}</p>
     </A> 
