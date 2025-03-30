@@ -53,6 +53,12 @@ function Search() {
       search.year = searchParams.year + "%";
     }
 
+    if (searchParams.search && !searchParams.sort) {
+      search.sort = "SEARCH_MATCH"
+    } else {
+      search.sort = searchParams.sort;
+    }
+
 
 
     search.chapterGreater = searchParams.chapterGreater;
@@ -74,7 +80,6 @@ function Search() {
     search.onList = searchParams.onList;
     search.search = searchParams.search;
     search.season = searchParams.season;
-    search.sort = searchParams.sort;
     search.source = searchParams.source;
     search.status = searchParams.status;
     search.tags = searchParams.tags;
