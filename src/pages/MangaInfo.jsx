@@ -14,6 +14,7 @@ import Characters from "../components/media/Characters";
 import Friends from "../components/media/Friends";
 import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
+import { formatTitleToUrl } from "../utils/formating.js";
 
 
 function Manga() {
@@ -107,7 +108,7 @@ function MangaInfo(props) {
               <For each={props.anime.relations.edges}>{relation => (
                 <li>
                   <A 
-                    href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + relation.node.title.userPreferred}
+                    href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + formatTitleToUrl(relation.node.title.userPreferred)}
                     class={style.relation}
                   >
                     <img src={relation.node.coverImage.large} alt="Cover" />

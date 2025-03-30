@@ -1,4 +1,4 @@
-import { capitalize, numberCommas } from "../../utils/stringAndNums";
+import { capitalize, numberCommas } from "../../utils/formating";
 import style from "./Header.module.scss";
 
 const Header = (props) => {
