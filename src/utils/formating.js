@@ -16,16 +16,20 @@ export const formatTitleToUrl = (title) => {
 }
 
 export const formatAnilistDate = (dateObject) => {
-  assert(dateObject.year, "No year found");
-  assert(dateObject.month, "No month found");
-  assert(dateObject.day, "No day found");
+  assert("year" in dateObject, "No year found");
+  assert("month" in dateObject, "No month found");
+  assert("day" in dateObject, "No day found");
 
-  const event = new Date(dateObject.year, dateObject.month, dateObject.day);
-  const options = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  };
+  if (!dateObject.year && !dateObject.month && !dateObject.day) {
+    return "";
+  }
+
+  const options = {};
+  if(dateObject.year) { options["year"] = "numeric"; };
+  if(dateObject.month) { options["month"] = "short"; };
+  if(dateObject.day) { options["day"] = "numeric"; };
+
+  const event = new Date(dateObject.year || 1970, dateObject.month || 1, dateObject.day || 1);
 
   return event.toLocaleDateString("us-US", options);
 }
