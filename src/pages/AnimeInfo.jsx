@@ -7,6 +7,7 @@ import { Markdown } from "../components/Markdown";
 import { useAuthentication } from "../context/AuthenticationContext";
 import Banner from "../components/media/Banner";
 import ExternalLinks from "../components/media/ExternalLinks.jsx";
+import ExtraInfo from "../components/media/ExtraInfo.jsx";
 import Rankings from "../components/media/Rankings";
 import Genres from "../components/media/Genres";
 import Tags from "../components/media/Tags";
@@ -16,7 +17,7 @@ import Friends from "../components/media/Friends";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
-import { formatAnilistDate, formatTitleToUrl } from "../utils/formating.js";
+import { formatTitleToUrl } from "../utils/formating.js";
 
 
 function Anime() {
@@ -46,7 +47,7 @@ function AnimeInfo(props) {
 
   const [malId, setMalId]= createSignal(undefined);
   const [malData] = api.myAnimeList.animeById(malId);
-  const { accessToken, authUserData } = useAuthentication();
+  const { accessToken } = useAuthentication();
   const { setMediaListEntry } = useEditMediaEntries();
   
   createEffect(() => {
@@ -84,42 +85,7 @@ function AnimeInfo(props) {
             </Show>
           </Show>
           <ExternalLinks media={props.anime}/>
-          <div>
-            <h2>Extra info</h2>
-            <ul>
-              <Show when={props.anime.episodes}>
-                <li>Episodes: {props.anime.episodes}</li>
-              </Show>
-              <Show when={props.anime.duration}>
-                <li>Duration: {props.anime.duration} mins</li>
-              </Show>
-              <Show when={props.anime.startDate}>
-                <li>Start Date: {formatAnilistDate(props.anime.startDate)}</li>
-              </Show>
-              <Show when={props.anime.endDate}>
-                <li>End Date: {formatAnilistDate(props.anime.endDate)}</li>
-              </Show>
-              <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "ENGLISH"}>
-                <li>English: {props.anime.title.english}</li>
-              </Show>
-              <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "ROMAJI"}>
-                <li>Romaji: {props.anime.title.romaji}</li>
-              </Show>
-              <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "NATIVE"}>
-                <li>Native: {props.anime.title.native}</li>
-              </Show>
-              <Show when={props.anime.synonyms.length}>
-                <li>
-                  Synonyms:
-                  <ul>
-                    <For each={props.anime.synonyms}>{synonym => (
-                      <li>{synonym}</li>
-                    )}</For>
-                  </ul>
-                </li>
-              </Show>
-            </ul>
-          </div>
+          <ExtraInfo media={props.anime}/>
           <Rankings rankings={props.anime.rankings} />
           <Genres genres={props.anime.genres} />
           <Tags tags={props.anime.tags} />
