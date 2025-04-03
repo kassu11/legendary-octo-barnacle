@@ -3,6 +3,7 @@ import { useAuthentication } from "./AuthenticationContext";
 import { assert } from "../utils/assert";
 import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
+import style from "./EditMediaEntriesContext.module.scss";
 
 const EditMediaEntriesContext = createContext();
 
@@ -12,6 +13,7 @@ function formState(auth, initialData) {
   const [status, setStatus] = createSignal();
   const [format, setFormat] = createSignal();
   const [progress, setProgress] = createSignal()
+  const [volumeProgress, setvolumeProgress] = createSignal()
   const [maxProgress, setMaxProgress] = createSignal()
   const [startedAt, setStartedAt] = createSignal()
   const [completedAt, setCompletedAt] = createSignal()
@@ -26,13 +28,13 @@ function formState(auth, initialData) {
 
     console.log(auth);
 
-    setScore(data?.mediaListEntry?.score || 0);
-    setStatus(data?.mediaListEntry?.status || "none");
-    setProgress(data?.mediaListEntry?.progress || 0);
-    setMaxProgress(data?.episodes || data?.chapters || null);
+    setScore(data?.mediaListEntry?.score ?? "");
+    setStatus(data?.mediaListEntry?.status ?? "none");
+    setProgress(data?.mediaListEntry?.progress ?? "");
+    setMaxProgress(data?.episodes ?? data?.chapters ?? null);
     setStartedAt(formatDateToInput(data?.mediaListEntry?.startedAt));
     setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
-    setRepeat(data?.mediaListEntry?.repeat || 0);
+    setRepeat(data?.mediaListEntry?.repeat ?? "");
     setNotes(data?.mediaListEntry?.notes || "");
   }
 
@@ -43,6 +45,7 @@ function formState(auth, initialData) {
     status, setStatus,
     format, setFormat,
     progress, setProgress,
+    volumeProgress, setvolumeProgress,
     maxProgress, setMaxProgress,
     startedAt, setStartedAt,
     completedAt, setCompletedAt,
@@ -70,65 +73,82 @@ export function EditMediaEntriesProvider(props) {
     }
   });
 
+  const handleSubmit = e => {
+    const formData = new FormData(e.currentTarget);
+    const form = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || null]));
+
+    const changes = {}
+    if (form.progress != (mediaListEntry().mediaListEntry?.progress || 0)) {
+      changes.progress = Number(form.progress);
+    }
+    if (form.progressVolume != (mediaListEntry().mediaListEntry?.progressVolume || 0)) {
+      changes.progressVolume = Number(form.progressVolume);
+    }
+    if (form.score != (mediaListEntry().mediaListEntry?.score || 0)) {
+      changes.score = Number(form.score);
+    }
+    if (form.repeat != (mediaListEntry().mediaListEntry?.repeat || 0)) {
+      changes.repeat = Number(form.repeat);
+    }
+
+    assert(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
+
+    if (!(form.status == "none" || mediaListEntry().mediaListEntry?.status == form.status)) {
+      changes.status = form.status;
+    }
+    if ((form.startedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)) {
+      const [year, month, day] = form.startedAt.split("-");
+      changes.startedAt = { year, month, day };
+    }
+    if ((form.completedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)) {
+      const [year, month, day] = form.completedAt.split("-");
+      changes.completedAt = { year, month, day };
+    }
+    if (form.notes != mediaListEntry().mediaListEntry?.notes) {
+      changes.notes = form.notes;
+    }
+
+
+
+
+
+
+    if (e.submitter.type === "submit") {
+      // Send changes to anilist
+      if (Object.keys(changes).length > 0) {
+        changes.mediaId = mediaListEntry().id;
+        api.anilist.mutateMedia(accessToken(), changes).then(data => {
+          console.log(data);
+        }).catch(err => {
+            console.error(err);
+          });
+      } else {
+        console.log("No changes");
+      }
+    } 
+
+    console.log("Data: ", { ...form });
+    console.log("Changes: ", changes);
+  } 
+
   return (
     <EditMediaEntriesContext.Provider value={{ mediaListEntry, setMediaListEntry }}>
-      <dialog ref={editor}>
+      <dialog ref={editor} class={style.editor}>
         <Show when={mediaListEntry()}>
           {console.log(mediaListEntry())}
-          <form method="dialog" onSubmit={e => {
-            const formData = new FormData(e.currentTarget);
-            const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || null]));
-
-            const changes = {}
-            if (!((data.progress == "0" && mediaListEntry().mediaListEntry?.progress == null) || data.progress == mediaListEntry().mediaListEntry?.progress)) {
-              changes.progress = Number(data.progress);
-            }
-            if (!((data.score == "0" && mediaListEntry().mediaListEntry?.score == null) || data.score == mediaListEntry().mediaListEntry?.score)) {
-              changes.score = Number(data.score);
-            }
-            if (!((data.repeat == "0" && mediaListEntry().mediaListEntry?.repeat == null) || data.repeat == mediaListEntry().mediaListEntry?.repeat)) {
-              changes.repeat = Number(data.repeat);
-            }
-            assert(data.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
-
-            if (!(data.status == "none" || mediaListEntry().mediaListEntry?.status == data.status)) {
-              changes.status = data.status;
-            }
-            if ((data.startedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)) {
-              changes.startedAt = data.startedAt;
-            }
-            if ((data.completedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)) {
-              changes.completedAt = data.completedAt;
-            }
-            if (data.notes != mediaListEntry().mediaListEntry?.notes) {
-              changes.notes = data.notes;
-            }
-
-
-
-
-
-
-            if (e.submitter.type === "submit") {
-              // Send changes to anilist
-              if (Object.keys(changes).length > 0) {
-                changes.mediaId = mediaListEntry().id;
-                api.anilist.mutateMedia(accessToken(), changes).then(data => {
-                  console.log(data);
-                }).catch(err => {
-                    console.error(err);
-                  });
-              } else {
-                console.log("No changes");
-              }
-            } 
-
-            console.log("Data: ", { ...data });
-            console.log("Changes: ", changes);
-          }}>
-            <img src={mediaListEntry().bannerImage} alt="Banner" />
-            <img src={mediaListEntry().coverImage.large} alt="Cover" />
-            <h2>{mediaListEntry().title.userPreferred}</h2>
+          <form method="dialog" onSubmit={handleSubmit}>
+            <header class={style.header}>
+              <Show when={mediaListEntry().bannerImage}>
+                <img src={mediaListEntry().bannerImage} class={style.banner} alt="Banner" />
+              </Show>
+              <img src={mediaListEntry().coverImage.large} class={style.cover} alt="Cover" />
+              <h2 class={style.lineClamp}>{mediaListEntry().title.userPreferred}</h2>
+              <div>
+                <input type="checkbox" name="like" id="like" />
+                <label htmlFor="like"> Like</label>
+                <button type="submit">Save</button>
+              </div>
+            </header>
             <div>
               <label htmlFor="status">Status</label>
               <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
@@ -157,7 +177,12 @@ export function EditMediaEntriesProvider(props) {
               <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} />
             </div>
             <div>
-              <label htmlFor="progress">Episode Progress</label>
+              <label htmlFor="progress">
+                <Switch>
+                  <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
+                  <Match when={mediaListEntry().type === "MANGA"}>Chapter Progress</Match>
+                </Switch>
+              </label>
               <input 
                 type="number" 
                 inputMode="numeric" 
@@ -175,6 +200,26 @@ export function EditMediaEntriesProvider(props) {
                 }}
               />
             </div>
+            <Show when={mediaListEntry().type === "MANGA"}>
+              <div>
+                <label htmlFor="volume-progress">Volume Progress</label>
+                <input 
+                  type="number" 
+                  inputMode="numeric" 
+                  id="volume-progress" 
+                  name="volumeProgress" 
+                  min="0" 
+                  value={state.volumeProgress()} 
+                  onChange={e => state.setvolumeProgress(e.target.value)} 
+                  onBlur={e => e.target.value = state.volumeProgress()} 
+                  onBeforeInput={e => {
+                    if (e.data?.toLowerCase().includes("e")) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+              </div>
+            </Show>
             <div>
               <label htmlFor="start-date">Start date</label>
               <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
@@ -207,12 +252,7 @@ export function EditMediaEntriesProvider(props) {
             </div>
             <h3>Advanced Scores</h3>
             <button type="button">Delete</button>
-            <button type="submit">Save</button>
             <h3>Custom Lists</h3>
-            <div>
-              <input type="checkbox" name="like" id="like" />
-              <label htmlFor="like"> Like</label>
-            </div>
             <div>
               <input type="checkbox" name="hide-from-status" id="hide-from-status" />
               <label htmlFor="hide-from-status"> Hide from status lists</label>

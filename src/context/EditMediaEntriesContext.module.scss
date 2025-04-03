@@ -1,0 +1,43 @@
+.editor {
+  margin: auto;
+  padding: 0px;
+  max-width: 64rem;
+  width: 100%;
+
+  &::backdrop {
+    background-color: #000000b0;
+  }
+}
+
+.header {
+  position: relative;
+  display: grid;
+  background-color: orange;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  align-content: center;
+  isolation: isolate;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.banner {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.cover {
+  height: 12rem;
+  aspect-ratio: 5.5/8;
+}
+
+.lineClamp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+}
