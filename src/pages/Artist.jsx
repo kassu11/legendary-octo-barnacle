@@ -7,13 +7,8 @@ import style from "./Artist.module.scss";
 
 function Artist() {
   const params = useParams();
-  const [name, setName] = createSignal(params.name);
-  const [artistData] = api.animeThemes.artisBySlug(name);
+  const [artistData] = api.animeThemes.artisBySlug(() => params.name);
   const video = <video src="" controls autoPlay />;
-
-  createEffect(() => {
-    setName(params.name);
-  });
 
   return (
     <>

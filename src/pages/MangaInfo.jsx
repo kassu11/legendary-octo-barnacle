@@ -22,15 +22,8 @@ import { formatTitleToUrl } from "../utils/formating.js";
 function Manga() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [id, setId]= createSignal(Number(params.id));
-
-  assert(!Number.isNaN(id()), "ID should not be NaN");
-  const [animeData] = api.anilist.mediaId(id, accessToken);
-  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, id, {page: 1, perPage: 8});
-
-  createEffect(() => {
-    setId(Number(params.id))
-  });
+  const [animeData] = api.anilist.mediaId(() => params.id, accessToken);
+  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
 
   return (
     <Show when={animeData()}>
@@ -43,17 +36,10 @@ function MangaInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
 
-  const [malId, setMalId]= createSignal(undefined);
-  const [malData] = api.myAnimeList.mangaById(malId);
+  const [malData] = api.myAnimeList.mangaById(() => props.anime?.idMal);
   const { accessToken } = useAuthentication();
   const { setMediaListEntry } = useEditMediaEntries();
   
-  createEffect(() => {
-    if (props.anime.idMal) {
-      setMalId(props.anime.idMal);
-    }
-  });
-
   createEffect(() => {
     console.log(malData());
   })

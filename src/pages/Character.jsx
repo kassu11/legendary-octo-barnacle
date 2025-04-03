@@ -9,10 +9,7 @@ import { formatAnilistDate, formatTitleToUrl } from "../utils/formating";
 
 function Character() {
   const params = useParams();
-  const id = Number(params.id);
-
-  assert(!Number.isNaN(id), "ID should not be NaN");
-  const [characterData] = api.anilist.characterId(id);
+  const [characterData] = api.anilist.characterId(() => params.id);
 
   return (
     <>

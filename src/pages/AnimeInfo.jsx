@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { Show, createEffect, createSignal } from "solid-js";
+import { Show, createEffect, createResource, createSignal } from "solid-js";
 import style from "./AnimeInfo.module.scss";
 import { Markdown } from "../components/Markdown";
 import { useAuthentication } from "../context/AuthenticationContext";
@@ -23,16 +23,9 @@ import { formatTitleToUrl } from "../utils/formating.js";
 function Anime() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [id, setId]= createSignal(Number(params.id));
-
-  assert(!Number.isNaN(id()), "ID should not be NaN");
-  const [animeData] = api.anilist.mediaId(id, accessToken);
-  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, id, {page: 1, perPage: 8});
-  const [themeData] = api.animeThemes.themesByAniListId(id);
-
-  createEffect(() => {
-    setId(Number(params.id))
-  });
+  const [animeData] = api.anilist.mediaId(() => params.id, accessToken);
+  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
+  const [themeData] = api.animeThemes.themesByAniListId(() => params.id);
 
   return (
     <Show when={animeData()}>
@@ -45,17 +38,10 @@ function AnimeInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
 
-  const [malId, setMalId]= createSignal(undefined);
-  const [malData] = api.myAnimeList.animeById(malId);
+  const [malData] = api.myAnimeList.animeById(() => props.anime?.idMal);
   const { accessToken } = useAuthentication();
   const { setMediaListEntry } = useEditMediaEntries();
   
-  createEffect(() => {
-    if (props.anime.idMal) {
-      setMalId(props.anime.idMal);
-    }
-  });
-
   createEffect(() => {
     console.log(malData());
   })
