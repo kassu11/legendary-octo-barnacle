@@ -40,7 +40,7 @@ function AnimeInfo(props) {
 
   const [malData] = api.myAnimeList.animeById(() => props.anime?.idMal);
   const { accessToken } = useAuthentication();
-  const { setMediaListEntry } = useEditMediaEntries();
+  const { openEditor } = useEditMediaEntries();
   
   createEffect(() => {
     console.log(malData());
@@ -56,12 +56,7 @@ function AnimeInfo(props) {
           <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
           <Show when={accessToken()}>
             <button onClick={() => {
-              const [data] = api.anilist.mediaListEntry(accessToken, props.anime.id);
-              createEffect(() => {
-                if (data()) {
-                  setMediaListEntry(data().data.data.Media);
-                }
-              })
+              openEditor({ id: props.anime.id });
             }}>{props.anime.mediaListEntry?.status || "Edit"}</button>
           </Show>
           <Show when={props.anime.idMal}>

@@ -1,8 +1,9 @@
-import { createContext, createEffect, createSignal, useContext } from "solid-js";
+import { batch, createContext, createEffect, createSignal, Match, useContext } from "solid-js";
 import { useAuthentication } from "./AuthenticationContext";
 import { assert } from "../utils/assert";
 import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
+import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import style from "./EditMediaEntriesContext.module.scss";
 
 const EditMediaEntriesContext = createContext();
@@ -12,6 +13,7 @@ function formState(auth, initialData) {
   const [score, setScore] = createSignal();
   const [status, setStatus] = createSignal();
   const [format, setFormat] = createSignal();
+  const [isFavourite, setIsFavourite] = createSignal();
   const [progress, setProgress] = createSignal()
   const [volumeProgress, setvolumeProgress] = createSignal()
   const [maxProgress, setMaxProgress] = createSignal()
@@ -36,6 +38,7 @@ function formState(auth, initialData) {
     setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
     setRepeat(data?.mediaListEntry?.repeat ?? "");
     setNotes(data?.mediaListEntry?.notes || "");
+    setIsFavourite(data?.isFavourite || false);
   }
 
   setState(auth, initialData);
@@ -49,6 +52,7 @@ function formState(auth, initialData) {
     maxProgress, setMaxProgress,
     startedAt, setStartedAt,
     completedAt, setCompletedAt,
+    isFavourite, setIsFavourite,
     repeat, setRepeat,
     notes, setNotes,
     like, setLike,
@@ -59,19 +63,11 @@ function formState(auth, initialData) {
 
 export function EditMediaEntriesProvider(props) {
   const [mediaListEntry, setMediaListEntry] = createSignal(undefined);
+  const [mutates, setMutates] = createSignal(undefined);
   const { accessToken, authUserData } = useAuthentication()
   const [state, setState] = formState();
 
   let editor;
-
-  createEffect(() => {
-    setState(authUserData(), mediaListEntry());
-    if (mediaListEntry()) {
-      console.log("mediaListData", mediaListEntry());
-      console.log("authUserData", authUserData());
-      editor.showModal();
-    }
-  });
 
   const handleSubmit = e => {
     const formData = new FormData(e.currentTarget);
@@ -131,8 +127,39 @@ export function EditMediaEntriesProvider(props) {
     console.log("Changes: ", changes);
   } 
 
+  /**
+   * @param {Object} defaultData - Default filler values for media editor
+   * @param {number} defaultData.id - Media id
+   * @param {undefined|number} defaultData.score - Default score
+   * @param {Object} mutate - Default score
+   * @param {undefined|Function} mutate.setIsFavourite
+   */
+  async function openEditor(defaultData, mutate) {
+    assert("id" in defaultData, "Missing editor id");
+
+    batch(() => {
+      setMediaListEntry(defaultData);
+      setMutates(mutate);
+      setState(authUserData(), defaultData);
+    });
+
+    editor.showModal();
+
+    const [data] = api.anilist.mediaListEntry(accessToken, defaultData.id);
+    createEffect(() => {
+      // TODO: refactor this
+      if (data()) {
+        console.log("Updating mediaListData");
+        batch(() => {
+          setMediaListEntry(data().data.data.Media);
+          setState(authUserData(), data().data.data.Media);
+        });
+      }
+    });
+  }
+
   return (
-    <EditMediaEntriesContext.Provider value={{ mediaListEntry, setMediaListEntry }}>
+    <EditMediaEntriesContext.Provider value={{ openEditor }}>
       <dialog ref={editor} class={style.editor}>
         <Show when={mediaListEntry()}>
           {console.log(mediaListEntry())}
@@ -141,11 +168,22 @@ export function EditMediaEntriesProvider(props) {
               <Show when={mediaListEntry().bannerImage}>
                 <img src={mediaListEntry().bannerImage} class={style.banner} alt="Banner" />
               </Show>
-              <img src={mediaListEntry().coverImage.large} class={style.cover} alt="Cover" />
-              <h2 class={style.lineClamp}>{mediaListEntry().title.userPreferred}</h2>
+              <img src={mediaListEntry().coverImage?.large} class={style.cover} alt="Cover" />
+              <h2 class={style.lineClamp}>{mediaListEntry().title?.userPreferred}</h2>
               <div>
-                <input type="checkbox" name="like" id="like" />
-                <label htmlFor="like"> Like</label>
+                <Switch>
+                  <Match when={mediaListEntry().type === "MANGA"}>
+                    <FavouriteToggle 
+                      checked={state.isFavourite()} 
+                      mangaId={mediaListEntry().id} 
+                      onChange={state.setIsFavourite} 
+                      mutateCache={(isFavourite) => {
+                        setMediaListEntry(v => ({ ...v, isFavourite }))
+                        mutates()?.setIsFavourite?.(isFavourite);
+                      }} />
+                  </Match>
+                  <Match when={mediaListEntry().type === "ANIME"}> favorite missing</Match>
+                </Switch>
                 <button type="submit">Save</button>
               </div>
             </header>
