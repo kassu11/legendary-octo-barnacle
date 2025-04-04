@@ -83,6 +83,13 @@ const api = {
       const request = Fetch.authAnilist(token, querys.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
       return await request.send();
     },
+    toggleFavourite: async (token, variables) => {
+      assert(token, "Token is missing");
+      assert(variables, "Variables missing");
+      assert(typeof token !== "function", "This specific api doesnt support signals");
+      const request = Fetch.authAnilist(token, querys.anilistMutateToggleFavourite, variables);
+      return await request.send();
+    },
     wachingAnime: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "ANIME", "perPage": 40

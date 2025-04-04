@@ -1,0 +1,15 @@
+.favourite {
+  input {
+    all: unset;
+    position: absolute;
+
+    &:checked + svg {
+      color: red;
+    }
+  }
+
+  svg {
+    width: 2rem;
+    height: 2rem;
+  }
+}

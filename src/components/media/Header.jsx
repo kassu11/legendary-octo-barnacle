@@ -21,7 +21,7 @@ const Header = (props) => {
       <div class={style.right}>
         <ul class={style.top}>
           <li>Source {capitalize(props.source)}</li>
-          <li>Favorites {numberCommas(props.favourites)}</li>
+          <li>Favourites {numberCommas(props.favourites)}</li>
           <li>Members {numberCommas(props.popularity)}</li>
         </ul>
         <ul class={style.bottom}>
