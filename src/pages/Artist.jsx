@@ -10,6 +10,10 @@ function Artist() {
   const [artistData] = api.animeThemes.artisBySlug(() => params.name);
   const video = <video src="" controls autoPlay />;
 
+  createEffect(() => {
+    setName(params.name);
+  });
+
   return (
     <>
       <h1>Artist</h1>
