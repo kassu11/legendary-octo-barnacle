@@ -170,7 +170,7 @@ export function EditMediaEntriesProvider(props) {
               </Show>
               <img src={mediaListEntry().coverImage?.large} class={style.cover} alt="Cover" />
               <h2 class={style.lineClamp}>{mediaListEntry().title?.userPreferred}</h2>
-              <div>
+              <div class={style.headerAction}>
                 <Switch>
                   <Match when={mediaListEntry().type === "MANGA"}>
                     <FavouriteToggle 
@@ -194,69 +194,51 @@ export function EditMediaEntriesProvider(props) {
                 <button type="submit">Save</button>
               </div>
             </header>
-            <div>
-              <label htmlFor="status">Status</label>
-              <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
-                <option value="none" disabled hidden>Select status</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CURRENT">
-                  <Switch>
-                    <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
-                    <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
-                  </Switch>
-                </option>
-                <option value="DROPPED">Dropped</option>
-                <option value="PAUSED">Paused</option>
-                <option value="PLANNING">Planning</option>
-                <option value="REPEATING">
-                  <Switch>
-                    <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
-                    <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
-                  </Switch>
-                </option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="score">Score</label>
-              {console.log(state.format())}
-              <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} />
-            </div>
-            <div>
-              <label htmlFor="progress">
-                <Switch>
-                  <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
-                  <Match when={mediaListEntry().type === "MANGA"}>Chapter Progress</Match>
-                </Switch>
-              </label>
-              <input 
-                type="number" 
-                inputMode="numeric" 
-                id="progress" 
-                name="progress" 
-                min="0" 
-                max={state.maxProgress()}
-                value={state.progress()} 
-                onChange={e => state.setProgress(e.target.value)} 
-                onBlur={e => e.target.value = state.progress()} 
-                onBeforeInput={e => {
-                  if (e.data?.toLowerCase().includes("e")) {
-                    e.preventDefault();
-                  }
-                }}
-              />
-            </div>
-            <Show when={mediaListEntry().type === "MANGA"}>
+            <div class={style.container}>
               <div>
-                <label htmlFor="volume-progress">Volume Progress</label>
+                <label htmlFor="status">Status</label>
+                <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
+                  <option value="none" disabled hidden>Select status</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CURRENT">
+                    <Switch>
+                      <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
+                      <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
+                    </Switch>
+                  </option>
+                  <option value="DROPPED">Dropped</option>
+                  <option value="PAUSED">Paused</option>
+                  <option value="PLANNING">Planning</option>
+                  <option value="REPEATING">
+                    <Switch>
+                      <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
+                      <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
+                    </Switch>
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="score">Score</label>
+                {console.log(state.format())}
+                <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} />
+              </div>
+              <div>
+                <label htmlFor="progress">
+                  <Switch>
+                    <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
+                    <Match when={mediaListEntry().type === "MANGA"}>Chapter Progress</Match>
+                  </Switch>
+                </label>
                 <input 
                   type="number" 
                   inputMode="numeric" 
-                  id="volume-progress" 
-                  name="volumeProgress" 
+                  id="progress" 
+                  name="progress" 
                   min="0" 
-                  value={state.volumeProgress()} 
-                  onChange={e => state.setvolumeProgress(e.target.value)} 
-                  onBlur={e => e.target.value = state.volumeProgress()} 
+                  max={state.maxProgress()}
+                  value={state.progress()} 
+                  onChange={e => state.setProgress(e.target.value)} 
+                  onBlur={e => e.target.value = state.progress()} 
                   onBeforeInput={e => {
                     if (e.data?.toLowerCase().includes("e")) {
                       e.preventDefault();
@@ -264,36 +246,56 @@ export function EditMediaEntriesProvider(props) {
                   }}
                 />
               </div>
-            </Show>
-            <div>
-              <label htmlFor="start-date">Start date</label>
-              <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
-            </div>
-            <div>
-              <label htmlFor="end-date">Finish date</label>
-              <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
-            </div>
-            <div>
-              <label htmlFor="repeat">Total Rewatches</label>
-              <input 
-                type="number" 
-                inputMode="numeric" 
-                id="repeat" 
-                name="repeat" 
-                min="0" 
-                value={state.repeat()} 
-                onChange={e => state.setRepeat(e.target.value)} 
-                onBlur={e => e.target.value = state.repeat()} 
-                onBeforeInput={e => {
-                  if (e.data?.toLowerCase().includes("e")) {
-                    e.preventDefault();
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label htmlFor="notes">Notes</label>
-              <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+              <Show when={mediaListEntry().type === "MANGA"}>
+                <div>
+                  <label htmlFor="volume-progress">Volume Progress</label>
+                  <input 
+                    type="number" 
+                    inputMode="numeric" 
+                    id="volume-progress" 
+                    name="volumeProgress" 
+                    min="0" 
+                    value={state.volumeProgress()} 
+                    onChange={e => state.setvolumeProgress(e.target.value)} 
+                    onBlur={e => e.target.value = state.volumeProgress()} 
+                    onBeforeInput={e => {
+                      if (e.data?.toLowerCase().includes("e")) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+              </Show>
+              <div>
+                <label htmlFor="start-date">Start date</label>
+                <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
+              </div>
+              <div>
+                <label htmlFor="end-date">Finish date</label>
+                <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
+              </div>
+              <div>
+                <label htmlFor="repeat">Total Rewatches</label>
+                <input 
+                  type="number" 
+                  inputMode="numeric" 
+                  id="repeat" 
+                  name="repeat" 
+                  min="0" 
+                  value={state.repeat()} 
+                  onChange={e => state.setRepeat(e.target.value)} 
+                  onBlur={e => e.target.value = state.repeat()} 
+                  onBeforeInput={e => {
+                    if (e.data?.toLowerCase().includes("e")) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label htmlFor="notes">Notes</label>
+                <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+              </div>
             </div>
             <h3>Advanced Scores</h3>
             <button type="button">Delete</button>

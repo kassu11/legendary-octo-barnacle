@@ -41,3 +41,13 @@
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;
 }
+
+.header-action {
+  display: flex;
+  gap: .5rem;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
