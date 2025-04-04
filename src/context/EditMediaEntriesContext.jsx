@@ -178,11 +178,18 @@ export function EditMediaEntriesProvider(props) {
                       mangaId={mediaListEntry().id} 
                       onChange={state.setIsFavourite} 
                       mutateCache={(isFavourite) => {
-                        setMediaListEntry(v => ({ ...v, isFavourite }))
                         mutates()?.setIsFavourite?.(isFavourite);
                       }} />
                   </Match>
-                  <Match when={mediaListEntry().type === "ANIME"}> favorite missing</Match>
+                  <Match when={mediaListEntry().type === "ANIME"}>
+                    <FavouriteToggle 
+                      checked={state.isFavourite()} 
+                      animeId={mediaListEntry().id} 
+                      onChange={state.setIsFavourite} 
+                      mutateCache={(isFavourite) => {
+                        mutates()?.setIsFavourite?.(isFavourite);
+                      }} />
+                  </Match>
                 </Switch>
                 <button type="submit">Save</button>
               </div>

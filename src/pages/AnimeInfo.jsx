@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { A } from "../components/CustomA";
 import api from "../utils/api";
-import { Show, createEffect, createResource, createSignal } from "solid-js";
+import { Show, createEffect, createSignal } from "solid-js";
 import style from "./AnimeInfo.module.scss";
 import { Markdown } from "../components/Markdown";
 import { useAuthentication } from "../context/AuthenticationContext";
@@ -18,18 +18,19 @@ import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { formatTitleToUrl } from "../utils/formating.js";
+import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 
 
 function Anime() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [animeData] = api.anilist.mediaId(() => params.id, accessToken);
+  const [animeData, { mutateCache: setAnimeData }] = api.anilist.mediaId(() => params.id, accessToken);
   const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
   const [themeData] = api.animeThemes.themesByAniListId(() => params.id);
 
   return (
     <Show when={animeData()}>
-      <AnimeInfo anime={animeData().data.data.Media} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
+      <AnimeInfo anime={animeData().data.data.Media} setAnimeData={setAnimeData} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
     </Show>
   )
 }
@@ -41,10 +42,15 @@ function AnimeInfo(props) {
   const [malData] = api.myAnimeList.animeById(() => props.anime?.idMal);
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
+  const [isFavourite, setIsFavourite] = createSignal(props.anime?.isFavourite ?? false);
   
   createEffect(() => {
     console.log(malData());
   })
+
+  createEffect(() => {
+    setIsFavourite(props.anime?.isFavourite ?? false);
+  });
 
   console.log(props.anime);
 
@@ -56,8 +62,27 @@ function AnimeInfo(props) {
           <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
           <Show when={accessToken()}>
             <button onClick={() => {
-              openEditor({ id: props.anime.id });
+              openEditor(
+                { id: props.anime.id }, 
+                {
+                  setIsFavourite: (isFavourite) => {
+                    setIsFavourite(isFavourite);
+                    props.setAnimeData(v => {
+                      v.data.data.Media.isFavourite = isFavourite;
+                      return v;
+                    });
+                  }
+                }
+              );
             }}>{props.anime.mediaListEntry?.status || "Edit"}</button>
+            <FavouriteToggle 
+              checked={isFavourite()} 
+              onChange={setIsFavourite} 
+              animeId={props.anime.id}
+              mutateCache={(isFavourite) => props.setAnimeData(v => {
+                v.data.data.Media.isFavourite = isFavourite;
+                return v;
+              })} />
           </Show>
           <Show when={props.anime.idMal}>
             {console.log("ID", props.anime.idMal, malData())}
