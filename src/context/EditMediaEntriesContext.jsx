@@ -1,8 +1,10 @@
-import { createContext, createEffect, createSignal, useContext } from "solid-js";
+import { batch, createContext, createEffect, createSignal, Match, useContext } from "solid-js";
 import { useAuthentication } from "./AuthenticationContext";
 import { assert } from "../utils/assert";
 import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
+import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
+import style from "./EditMediaEntriesContext.module.scss";
 
 const EditMediaEntriesContext = createContext();
 
@@ -11,7 +13,9 @@ function formState(auth, initialData) {
   const [score, setScore] = createSignal();
   const [status, setStatus] = createSignal();
   const [format, setFormat] = createSignal();
+  const [isFavourite, setIsFavourite] = createSignal();
   const [progress, setProgress] = createSignal()
+  const [volumeProgress, setvolumeProgress] = createSignal()
   const [maxProgress, setMaxProgress] = createSignal()
   const [startedAt, setStartedAt] = createSignal()
   const [completedAt, setCompletedAt] = createSignal()
@@ -26,14 +30,15 @@ function formState(auth, initialData) {
 
     console.log(auth);
 
-    setScore(data?.mediaListEntry?.score || 0);
-    setStatus(data?.mediaListEntry?.status || "none");
-    setProgress(data?.mediaListEntry?.progress || 0);
-    setMaxProgress(data?.episodes || data?.chapters || null);
+    setScore(data?.mediaListEntry?.score ?? "");
+    setStatus(data?.mediaListEntry?.status ?? "none");
+    setProgress(data?.mediaListEntry?.progress ?? "");
+    setMaxProgress(data?.episodes ?? data?.chapters ?? null);
     setStartedAt(formatDateToInput(data?.mediaListEntry?.startedAt));
     setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
-    setRepeat(data?.mediaListEntry?.repeat || 0);
+    setRepeat(data?.mediaListEntry?.repeat ?? "");
     setNotes(data?.mediaListEntry?.notes || "");
+    setIsFavourite(data?.isFavourite || false);
   }
 
   setState(auth, initialData);
@@ -43,9 +48,11 @@ function formState(auth, initialData) {
     status, setStatus,
     format, setFormat,
     progress, setProgress,
+    volumeProgress, setvolumeProgress,
     maxProgress, setMaxProgress,
     startedAt, setStartedAt,
     completedAt, setCompletedAt,
+    isFavourite, setIsFavourite,
     repeat, setRepeat,
     notes, setNotes,
     like, setLike,
@@ -56,163 +63,243 @@ function formState(auth, initialData) {
 
 export function EditMediaEntriesProvider(props) {
   const [mediaListEntry, setMediaListEntry] = createSignal(undefined);
+  const [mutates, setMutates] = createSignal(undefined);
   const { accessToken, authUserData } = useAuthentication()
   const [state, setState] = formState();
 
   let editor;
 
-  createEffect(() => {
-    setState(authUserData(), mediaListEntry());
-    if (mediaListEntry()) {
-      console.log("mediaListData", mediaListEntry());
-      console.log("authUserData", authUserData());
-      editor.showModal();
+  const handleSubmit = e => {
+    const formData = new FormData(e.currentTarget);
+    const form = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || null]));
+
+    const changes = {}
+    if (form.progress != (mediaListEntry().mediaListEntry?.progress || 0)) {
+      changes.progress = Number(form.progress);
     }
-  });
+    if (form.progressVolume != (mediaListEntry().mediaListEntry?.progressVolume || 0)) {
+      changes.progressVolume = Number(form.progressVolume);
+    }
+    if (form.score != (mediaListEntry().mediaListEntry?.score || 0)) {
+      changes.score = Number(form.score);
+    }
+    if (form.repeat != (mediaListEntry().mediaListEntry?.repeat || 0)) {
+      changes.repeat = Number(form.repeat);
+    }
+
+    assert(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
+
+    if (!(form.status == "none" || mediaListEntry().mediaListEntry?.status == form.status)) {
+      changes.status = form.status;
+    }
+    if ((form.startedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)) {
+      const [year, month, day] = form.startedAt.split("-");
+      changes.startedAt = { year, month, day };
+    }
+    if ((form.completedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)) {
+      const [year, month, day] = form.completedAt.split("-");
+      changes.completedAt = { year, month, day };
+    }
+    if (form.notes != mediaListEntry().mediaListEntry?.notes) {
+      changes.notes = form.notes;
+    }
+
+
+
+
+
+
+    if (e.submitter.type === "submit") {
+      // Send changes to anilist
+      if (Object.keys(changes).length > 0) {
+        changes.mediaId = mediaListEntry().id;
+        api.anilist.mutateMedia(accessToken(), changes).then(data => {
+          console.log(data);
+        }).catch(err => {
+            console.error(err);
+          });
+      } else {
+        console.log("No changes");
+      }
+    } 
+
+    console.log("Data: ", { ...form });
+    console.log("Changes: ", changes);
+  } 
+
+  /**
+   * @param {Object} defaultData - Default filler values for media editor
+   * @param {number} defaultData.id - Media id
+   * @param {undefined|number} defaultData.score - Default score
+   * @param {Object} mutate - Default score
+   * @param {undefined|Function} mutate.setIsFavourite
+   */
+  async function openEditor(defaultData, mutate) {
+    assert("id" in defaultData, "Missing editor id");
+
+    batch(() => {
+      setMediaListEntry(defaultData);
+      setMutates(mutate);
+      setState(authUserData(), defaultData);
+    });
+
+    editor.showModal();
+
+    const [data] = api.anilist.mediaListEntry(accessToken, defaultData.id);
+    createEffect(() => {
+      // TODO: refactor this
+      if (data()) {
+        console.log("Updating mediaListData");
+        batch(() => {
+          setMediaListEntry(data().data.data.Media);
+          setState(authUserData(), data().data.data.Media);
+        });
+      }
+    });
+  }
 
   return (
-    <EditMediaEntriesContext.Provider value={{ mediaListEntry, setMediaListEntry }}>
-      <dialog ref={editor}>
+    <EditMediaEntriesContext.Provider value={{ openEditor }}>
+      <dialog ref={editor} class={style.editor}>
         <Show when={mediaListEntry()}>
           {console.log(mediaListEntry())}
-          <form method="dialog" onSubmit={e => {
-            const formData = new FormData(e.currentTarget);
-            const data = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || null]));
-
-            const changes = {}
-            if (!((data.progress == "0" && mediaListEntry().mediaListEntry?.progress == null) || data.progress == mediaListEntry().mediaListEntry?.progress)) {
-              changes.progress = Number(data.progress);
-            }
-            if (!((data.score == "0" && mediaListEntry().mediaListEntry?.score == null) || data.score == mediaListEntry().mediaListEntry?.score)) {
-              changes.score = Number(data.score);
-            }
-            if (!((data.repeat == "0" && mediaListEntry().mediaListEntry?.repeat == null) || data.repeat == mediaListEntry().mediaListEntry?.repeat)) {
-              changes.repeat = Number(data.repeat);
-            }
-            assert(data.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
-
-            if (!(data.status == "none" || mediaListEntry().mediaListEntry?.status == data.status)) {
-              changes.status = data.status;
-            }
-            if ((data.startedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)) {
-              changes.startedAt = data.startedAt;
-            }
-            if ((data.completedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)) {
-              changes.completedAt = data.completedAt;
-            }
-            if (data.notes != mediaListEntry().mediaListEntry?.notes) {
-              changes.notes = data.notes;
-            }
-
-
-
-
-
-
-            if (e.submitter.type === "submit") {
-              // Send changes to anilist
-              if (Object.keys(changes).length > 0) {
-                changes.mediaId = mediaListEntry().id;
-                api.anilist.mutateMedia(accessToken(), changes).then(data => {
-                  console.log(data);
-                }).catch(err => {
-                    console.error(err);
-                  });
-              } else {
-                console.log("No changes");
-              }
-            } 
-
-            console.log("Data: ", { ...data });
-            console.log("Changes: ", changes);
-          }}>
-            <img src={mediaListEntry().bannerImage} alt="Banner" />
-            <img src={mediaListEntry().coverImage.large} alt="Cover" />
-            <h2>{mediaListEntry().title.userPreferred}</h2>
-            <div>
-              <label htmlFor="status">Status</label>
-              <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
-                <option value="none" disabled hidden>Select status</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CURRENT">
+          <form method="dialog" onSubmit={handleSubmit}>
+            <header class={style.header}>
+              <Show when={mediaListEntry().bannerImage}>
+                <img src={mediaListEntry().bannerImage} class={style.banner} alt="Banner" />
+              </Show>
+              <img src={mediaListEntry().coverImage?.large} class={style.cover} alt="Cover" />
+              <h2 class={style.lineClamp}>{mediaListEntry().title?.userPreferred}</h2>
+              <div class={style.headerAction}>
+                <Switch>
+                  <Match when={mediaListEntry().type === "MANGA"}>
+                    <FavouriteToggle 
+                      checked={state.isFavourite()} 
+                      mangaId={mediaListEntry().id} 
+                      onChange={state.setIsFavourite} 
+                      mutateCache={(isFavourite) => {
+                        mutates()?.setIsFavourite?.(isFavourite);
+                      }} />
+                  </Match>
+                  <Match when={mediaListEntry().type === "ANIME"}>
+                    <FavouriteToggle 
+                      checked={state.isFavourite()} 
+                      animeId={mediaListEntry().id} 
+                      onChange={state.setIsFavourite} 
+                      mutateCache={(isFavourite) => {
+                        mutates()?.setIsFavourite?.(isFavourite);
+                      }} />
+                  </Match>
+                </Switch>
+                <button type="submit">Save</button>
+              </div>
+            </header>
+            <div class={style.container}>
+              <div>
+                <label htmlFor="status">Status</label>
+                <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
+                  <option value="none" disabled hidden>Select status</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CURRENT">
+                    <Switch>
+                      <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
+                      <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
+                    </Switch>
+                  </option>
+                  <option value="DROPPED">Dropped</option>
+                  <option value="PAUSED">Paused</option>
+                  <option value="PLANNING">Planning</option>
+                  <option value="REPEATING">
+                    <Switch>
+                      <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
+                      <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
+                    </Switch>
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="score">Score</label>
+                {console.log(state.format())}
+                <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} />
+              </div>
+              <div>
+                <label htmlFor="progress">
                   <Switch>
-                    <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
-                    <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
+                    <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
+                    <Match when={mediaListEntry().type === "MANGA"}>Chapter Progress</Match>
                   </Switch>
-                </option>
-                <option value="DROPPED">Dropped</option>
-                <option value="PAUSED">Paused</option>
-                <option value="PLANNING">Planning</option>
-                <option value="REPEATING">
-                  <Switch>
-                    <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
-                    <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
-                  </Switch>
-                </option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="score">Score</label>
-              {console.log(state.format())}
-              <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} />
-            </div>
-            <div>
-              <label htmlFor="progress">Episode Progress</label>
-              <input 
-                type="number" 
-                inputMode="numeric" 
-                id="progress" 
-                name="progress" 
-                min="0" 
-                max={state.maxProgress()}
-                value={state.progress()} 
-                onChange={e => state.setProgress(e.target.value)} 
-                onBlur={e => e.target.value = state.progress()} 
-                onBeforeInput={e => {
-                  if (e.data?.toLowerCase().includes("e")) {
-                    e.preventDefault();
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label htmlFor="start-date">Start date</label>
-              <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
-            </div>
-            <div>
-              <label htmlFor="end-date">Finish date</label>
-              <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
-            </div>
-            <div>
-              <label htmlFor="repeat">Total Rewatches</label>
-              <input 
-                type="number" 
-                inputMode="numeric" 
-                id="repeat" 
-                name="repeat" 
-                min="0" 
-                value={state.repeat()} 
-                onChange={e => state.setRepeat(e.target.value)} 
-                onBlur={e => e.target.value = state.repeat()} 
-                onBeforeInput={e => {
-                  if (e.data?.toLowerCase().includes("e")) {
-                    e.preventDefault();
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label htmlFor="notes">Notes</label>
-              <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+                </label>
+                <input 
+                  type="number" 
+                  inputMode="numeric" 
+                  id="progress" 
+                  name="progress" 
+                  min="0" 
+                  max={state.maxProgress()}
+                  value={state.progress()} 
+                  onChange={e => state.setProgress(e.target.value)} 
+                  onBlur={e => e.target.value = state.progress()} 
+                  onBeforeInput={e => {
+                    if (e.data?.toLowerCase().includes("e")) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+              </div>
+              <Show when={mediaListEntry().type === "MANGA"}>
+                <div>
+                  <label htmlFor="volume-progress">Volume Progress</label>
+                  <input 
+                    type="number" 
+                    inputMode="numeric" 
+                    id="volume-progress" 
+                    name="volumeProgress" 
+                    min="0" 
+                    value={state.volumeProgress()} 
+                    onChange={e => state.setvolumeProgress(e.target.value)} 
+                    onBlur={e => e.target.value = state.volumeProgress()} 
+                    onBeforeInput={e => {
+                      if (e.data?.toLowerCase().includes("e")) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+              </Show>
+              <div>
+                <label htmlFor="start-date">Start date</label>
+                <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
+              </div>
+              <div>
+                <label htmlFor="end-date">Finish date</label>
+                <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
+              </div>
+              <div>
+                <label htmlFor="repeat">Total Rewatches</label>
+                <input 
+                  type="number" 
+                  inputMode="numeric" 
+                  id="repeat" 
+                  name="repeat" 
+                  min="0" 
+                  value={state.repeat()} 
+                  onChange={e => state.setRepeat(e.target.value)} 
+                  onBlur={e => e.target.value = state.repeat()} 
+                  onBeforeInput={e => {
+                    if (e.data?.toLowerCase().includes("e")) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label htmlFor="notes">Notes</label>
+                <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+              </div>
             </div>
             <h3>Advanced Scores</h3>
             <button type="button">Delete</button>
-            <button type="submit">Save</button>
             <h3>Custom Lists</h3>
-            <div>
-              <input type="checkbox" name="like" id="like" />
-              <label htmlFor="like"> Like</label>
-            </div>
             <div>
               <input type="checkbox" name="hide-from-status" id="hide-from-status" />
               <label htmlFor="hide-from-status"> Hide from status lists</label>

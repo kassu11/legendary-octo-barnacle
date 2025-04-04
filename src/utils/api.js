@@ -83,6 +83,13 @@ const api = {
       const request = Fetch.authAnilist(token, querys.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
       return await request.send();
     },
+    toggleFavourite: async (token, variables) => {
+      assert(token, "Token is missing");
+      assert(variables, "Variables missing");
+      assert(typeof token !== "function", "This specific api doesnt support signals");
+      const request = Fetch.authAnilist(token, querys.anilistMutateToggleFavourite, variables);
+      return await request.send();
+    },
     wachingAnime: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "ANIME", "perPage": 40
@@ -270,7 +277,7 @@ function cacheBuilder(settings) {
       createEffect(() => {
         const options = fetchOptions.map(option => typeof option == "function" ? option() : option);
         request = fetchCallback(...options);
-        if (options.some(option => option === undefined)) {
+        if (options.some(option => option == undefined)) {
           return; // Don't fetch if you have undefined values
         };
 

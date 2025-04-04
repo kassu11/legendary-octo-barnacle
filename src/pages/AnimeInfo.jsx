@@ -18,25 +18,19 @@ import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { formatTitleToUrl } from "../utils/formating.js";
+import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 
 
 function Anime() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [id, setId]= createSignal(Number(params.id));
-
-  assert(!Number.isNaN(id()), "ID should not be NaN");
-  const [animeData] = api.anilist.mediaId(id, accessToken);
-  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, id, {page: 1, perPage: 8});
-  const [themeData] = api.animeThemes.themesByAniListId(id);
-
-  createEffect(() => {
-    setId(Number(params.id))
-  });
+  const [animeData, { mutateCache: setAnimeData }] = api.anilist.mediaId(() => params.id, accessToken);
+  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
+  const [themeData] = api.animeThemes.themesByAniListId(() => params.id);
 
   return (
     <Show when={animeData()}>
-      <AnimeInfo anime={animeData().data.data.Media} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
+      <AnimeInfo anime={animeData().data.data.Media} setAnimeData={setAnimeData} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page}></AnimeInfo>
     </Show>
   )
 }
@@ -45,20 +39,18 @@ function AnimeInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
 
-  const [malId, setMalId]= createSignal(undefined);
-  const [malData] = api.myAnimeList.animeById(malId);
+  const [malData] = api.myAnimeList.animeById(() => props.anime?.idMal);
   const { accessToken } = useAuthentication();
-  const { setMediaListEntry } = useEditMediaEntries();
+  const { openEditor } = useEditMediaEntries();
+  const [isFavourite, setIsFavourite] = createSignal(props.anime?.isFavourite ?? false);
   
-  createEffect(() => {
-    if (props.anime.idMal) {
-      setMalId(props.anime.idMal);
-    }
-  });
-
   createEffect(() => {
     console.log(malData());
   })
+
+  createEffect(() => {
+    setIsFavourite(props.anime?.isFavourite ?? false);
+  });
 
   console.log(props.anime);
 
@@ -70,13 +62,27 @@ function AnimeInfo(props) {
           <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
           <Show when={accessToken()}>
             <button onClick={() => {
-              const [data] = api.anilist.mediaListEntry(accessToken, props.anime.id);
-              createEffect(() => {
-                if (data()) {
-                  setMediaListEntry(data().data.data.Media);
+              openEditor(
+                { id: props.anime.id }, 
+                {
+                  setIsFavourite: (isFavourite) => {
+                    setIsFavourite(isFavourite);
+                    props.setAnimeData(v => {
+                      v.data.data.Media.isFavourite = isFavourite;
+                      return v;
+                    });
+                  }
                 }
-              })
+              );
             }}>{props.anime.mediaListEntry?.status || "Edit"}</button>
+            <FavouriteToggle 
+              checked={isFavourite()} 
+              onChange={setIsFavourite} 
+              animeId={props.anime.id}
+              mutateCache={(isFavourite) => props.setAnimeData(v => {
+                v.data.data.Media.isFavourite = isFavourite;
+                return v;
+              })} />
           </Show>
           <Show when={props.anime.idMal}>
             {console.log("ID", props.anime.idMal, malData())}

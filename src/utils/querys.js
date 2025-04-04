@@ -264,6 +264,48 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
   }
 }`
 
+export const anilistMutateToggleFavourite = format`mutation (
+  $animeId: Int
+  $mangaId: Int
+  $characterId: Int
+  $staffId: Int
+  $studioId: Int
+) {
+  ToggleFavourite(
+    animeId: $animeId
+    mangaId: $mangaId
+    characterId: $characterId
+    staffId: $staffId
+    studioId: $studioId
+  ) {
+    anime {
+      pageInfo {
+        total
+      }
+    }
+    manga {
+      pageInfo {
+        total
+      }
+    }
+    characters {
+      pageInfo {
+        total
+      }
+    }
+    staff {
+      pageInfo {
+        total
+      }
+    }
+    studios {
+      pageInfo {
+        total
+      }
+    }
+  }
+}`;
+
 export const anilistMutateToggleLike = format`mutation ($id: Int, $type: LikeableType) {
   ToggleLike: ToggleLikeV2(id: $id, type: $type) {
     ... on ListActivity {
