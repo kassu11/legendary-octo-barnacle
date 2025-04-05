@@ -2,8 +2,12 @@
   display: flex;
   background-color: green;
   gap: .25rem;
-  width: max-content;
   padding: .25rem;
+  justify-content: space-around;
+
+  .selected {
+    color: gold;
+  }
 }
 
 .radio-container {
@@ -15,18 +19,15 @@
   all: unset;
   position: absolute;
   pointer-events: none;
-
-}
-.selected {
-  color: gold;
-
-  .emoji {
-   filter: grayscale(0%);
- }
 }
 
-.emoji {
+.score-emoji {
   filter: grayscale(100%);
+  user-select: none;
+
+  .selected & {
+    filter: grayscale(0%);
+  }
 }
 
 .score-star {

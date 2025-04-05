@@ -4,7 +4,7 @@ import { assert } from "../utils/assert";
 import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
-import style from "./EditMediaEntriesContext.module.scss";
+import "./EditMediaEntriesContext.scss";
 
 const EditMediaEntriesContext = createContext();
 
@@ -160,17 +160,20 @@ export function EditMediaEntriesProvider(props) {
 
   return (
     <EditMediaEntriesContext.Provider value={{ openEditor }}>
-      <dialog ref={editor} class={style.editor}>
+      <dialog ref={editor} class="editor">
         <Show when={mediaListEntry()}>
           {console.log(mediaListEntry())}
+          <form method="dialog" class="close">
+            <button>Close</button>
+          </form>
           <form method="dialog" onSubmit={handleSubmit}>
-            <header class={style.header}>
+            <header class="header">
               <Show when={mediaListEntry().bannerImage}>
-                <img src={mediaListEntry().bannerImage} class={style.banner} alt="Banner" />
+                <img src={mediaListEntry().bannerImage} class="banner" alt="Banner" />
               </Show>
-              <img src={mediaListEntry().coverImage?.large} class={style.cover} alt="Cover" />
-              <h2 class={style.lineClamp}>{mediaListEntry().title?.userPreferred}</h2>
-              <div class={style.headerAction}>
+              <img src={mediaListEntry().coverImage?.large} class="cover" alt="Cover" />
+              <h2 class="line-clamp">{mediaListEntry().title?.userPreferred}</h2>
+              <div class="header-action">
                 <Switch>
                   <Match when={mediaListEntry().type === "MANGA"}>
                     <FavouriteToggle 
@@ -194,70 +197,52 @@ export function EditMediaEntriesProvider(props) {
                 <button type="submit">Save</button>
               </div>
             </header>
-            <div class={style.container}>
-              <div>
-                <label htmlFor="status">Status</label>
-                <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
-                  <option value="none" disabled hidden>Select status</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CURRENT">
+            <div class="main">
+              <div class={"input-grid " + mediaListEntry().type?.toLowerCase()}>
+                <div class="form status">
+                  <label htmlFor="status">Status</label>
+                  <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
+                    <option value="none" disabled hidden>Select status</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CURRENT">
+                      <Switch>
+                        <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
+                        <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
+                      </Switch>
+                    </option>
+                    <option value="DROPPED">Dropped</option>
+                    <option value="PAUSED">Paused</option>
+                    <option value="PLANNING">Planning</option>
+                    <option value="REPEATING">
+                      <Switch>
+                        <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
+                        <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
+                      </Switch>
+                    </option>
+                  </select>
+                </div>
+                <div class="form score">
+                  {console.log(state.format())}
+                  <ScoreInput value={state.score()} label="Score" onChange={state.setScore} format={"POINT_5"} />
+                  {/* <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} /> */}
+                </div>
+                <div class="form progress">
+                  <label htmlFor="progress">
                     <Switch>
-                      <Match when={mediaListEntry().type === "MANGA"}> Reading</Match>
-                      <Match when={mediaListEntry().type === "ANIME"}> Watching</Match>
+                      <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
+                      <Match when={mediaListEntry().type === "MANGA"}>Chapter Progress</Match>
                     </Switch>
-                  </option>
-                  <option value="DROPPED">Dropped</option>
-                  <option value="PAUSED">Paused</option>
-                  <option value="PLANNING">Planning</option>
-                  <option value="REPEATING">
-                    <Switch>
-                      <Match when={mediaListEntry().type === "MANGA"}>Rereading</Match>
-                      <Match when={mediaListEntry().type === "ANIME"}>Rewatching</Match>
-                    </Switch>
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="score">Score</label>
-                {console.log(state.format())}
-                <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} />
-              </div>
-              <div>
-                <label htmlFor="progress">
-                  <Switch>
-                    <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
-                    <Match when={mediaListEntry().type === "MANGA"}>Chapter Progress</Match>
-                  </Switch>
-                </label>
-                <input 
-                  type="number" 
-                  inputMode="numeric" 
-                  id="progress" 
-                  name="progress" 
-                  min="0" 
-                  max={state.maxProgress()}
-                  value={state.progress()} 
-                  onChange={e => state.setProgress(e.target.value)} 
-                  onBlur={e => e.target.value = state.progress()} 
-                  onBeforeInput={e => {
-                    if (e.data?.toLowerCase().includes("e")) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-              </div>
-              <Show when={mediaListEntry().type === "MANGA"}>
-                <div>
-                  <label htmlFor="volume-progress">Volume Progress</label>
+                  </label>
                   <input 
                     type="number" 
                     inputMode="numeric" 
-                    id="volume-progress" 
-                    name="volumeProgress" 
+                    id="progress" 
+                    name="progress" 
                     min="0" 
-                    value={state.volumeProgress()} 
-                    onChange={e => state.setvolumeProgress(e.target.value)} 
-                    onBlur={e => e.target.value = state.volumeProgress()} 
+                    max={state.maxProgress()}
+                    value={state.progress()} 
+                    onChange={e => state.setProgress(e.target.value)} 
+                    onBlur={e => e.target.value = state.progress()} 
                     onBeforeInput={e => {
                       if (e.data?.toLowerCase().includes("e")) {
                         e.preventDefault();
@@ -265,52 +250,70 @@ export function EditMediaEntriesProvider(props) {
                     }}
                   />
                 </div>
-              </Show>
-              <div>
-                <label htmlFor="start-date">Start date</label>
-                <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
+                <Show when={mediaListEntry().type === "MANGA"}>
+                  <div class="form volume-progress">
+                    <label htmlFor="volume-progress">Volume Progress</label>
+                    <input 
+                      type="number" 
+                      inputMode="numeric" 
+                      id="volume-progress" 
+                      name="volumeProgress" 
+                      min="0" 
+                      value={state.volumeProgress()} 
+                      onChange={e => state.setvolumeProgress(e.target.value)} 
+                      onBlur={e => e.target.value = state.volumeProgress()} 
+                      onBeforeInput={e => {
+                        if (e.data?.toLowerCase().includes("e")) {
+                          e.preventDefault();
+                        }
+                      }}
+                    />
+                  </div>
+                </Show>
+                <div class="form start-date">
+                  <label htmlFor="start-date">Start date</label>
+                  <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
+                </div>
+                <div class="form finish-date">
+                  <label htmlFor="end-date">Finish date</label>
+                  <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
+                </div>
+                <div class="form repeat">
+                  <label htmlFor="repeat">Total Rewatches</label>
+                  <input 
+                    type="number" 
+                    inputMode="numeric" 
+                    id="repeat" 
+                    name="repeat" 
+                    min="0" 
+                    value={state.repeat()} 
+                    onChange={e => state.setRepeat(e.target.value)} 
+                    onBlur={e => e.target.value = state.repeat()} 
+                    onBeforeInput={e => {
+                      if (e.data?.toLowerCase().includes("e")) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
+                <div class="form notes">
+                  <label htmlFor="notes">Notes</label>
+                  <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+                </div>
               </div>
               <div>
-                <label htmlFor="end-date">Finish date</label>
-                <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
-              </div>
-              <div>
-                <label htmlFor="repeat">Total Rewatches</label>
-                <input 
-                  type="number" 
-                  inputMode="numeric" 
-                  id="repeat" 
-                  name="repeat" 
-                  min="0" 
-                  value={state.repeat()} 
-                  onChange={e => state.setRepeat(e.target.value)} 
-                  onBlur={e => e.target.value = state.repeat()} 
-                  onBeforeInput={e => {
-                    if (e.data?.toLowerCase().includes("e")) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <label htmlFor="notes">Notes</label>
-                <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+                <h3>Custom Lists</h3>
+                <div>
+                  <input type="checkbox" name="hide-from-status" id="hide-from-status" />
+                  <label htmlFor="hide-from-status"> Hide from status lists</label>
+                </div>
+                <div>
+                  <input type="checkbox" name="private" id="private" />
+                  <label htmlFor="private"> Private</label>
+                </div>
+                <button type="button">Delete</button>
               </div>
             </div>
-            <h3>Advanced Scores</h3>
-            <button type="button">Delete</button>
-            <h3>Custom Lists</h3>
-            <div>
-              <input type="checkbox" name="hide-from-status" id="hide-from-status" />
-              <label htmlFor="hide-from-status"> Hide from status lists</label>
-            </div>
-            <div>
-              <input type="checkbox" name="private" id="private" />
-              <label htmlFor="private"> Private</label>
-            </div>
-          </form>
-          <form method="dialog">
-            <button>Close</button>
           </form>
         </Show>
       </dialog>
