@@ -29,35 +29,36 @@ function formState(auth, initialData) {
   const [mediaPrivate, setMediaPrivate] = createSignal()
 
   function setState(auth, data) {
-    setFormat(auth?.data.data.Viewer.mediaListOptions.scoreFormat);
+    batch(() => {
+      setFormat(auth?.data.data.Viewer.mediaListOptions.scoreFormat);
+      setAdvancedScoresEnabled(() => {
+        if (data?.type === "ANIME") {
+          return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoringEnabled;
+        } else if (data?.type === "MANGA") {
+          return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoringEnabled;
+        }
+      });
+      setAdvancedScoring(() => {
+        if (data?.type === "ANIME") {
+          return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoring || [];
+        } else if (data?.type === "MANGA") {
+          return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoring || [];
+        }
+      });
 
-    setAdvancedScoresEnabled(() => {
-      if (data?.type === "ANIME") {
-        return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoringEnabled;
-      } else if (data?.type === "MANGA") {
-        return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoringEnabled;
-      }
+      console.log(auth);
+
+      setScore(data?.mediaListEntry?.score ?? "");
+      setAdvancedScores(data?.mediaListEntry?.advancedScores ?? {});
+      setStatus(data?.mediaListEntry?.status ?? "none");
+      setProgress(data?.mediaListEntry?.progress ?? "");
+      setMaxProgress(data?.episodes ?? data?.chapters ?? null);
+      setStartedAt(formatDateToInput(data?.mediaListEntry?.startedAt));
+      setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
+      setRepeat(data?.mediaListEntry?.repeat ?? "");
+      setNotes(data?.mediaListEntry?.notes || "");
+      setIsFavourite(data?.isFavourite || false);
     });
-    setAdvancedScoring(() => {
-      if (data?.type === "ANIME") {
-        return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoring || [];
-      } else if (data?.type === "MANGA") {
-        return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoring || [];
-      }
-    });
-
-    console.log(auth);
-
-    setScore(data?.mediaListEntry?.score ?? "");
-    setAdvancedScores(data?.mediaListEntry?.advancedScores ?? {});
-    setStatus(data?.mediaListEntry?.status ?? "none");
-    setProgress(data?.mediaListEntry?.progress ?? "");
-    setMaxProgress(data?.episodes ?? data?.chapters ?? null);
-    setStartedAt(formatDateToInput(data?.mediaListEntry?.startedAt));
-    setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
-    setRepeat(data?.mediaListEntry?.repeat ?? "");
-    setNotes(data?.mediaListEntry?.notes || "");
-    setIsFavourite(data?.isFavourite || false);
   }
 
   setState(auth, initialData);
