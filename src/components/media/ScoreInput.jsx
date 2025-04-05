@@ -30,34 +30,36 @@ function ScoreInput(props) {
           </Match>
         </Switch>
       </Show>
-      <div class="score-input">
-        <Switch>
-          <Match when={props.format === "POINT_10"}>
-            <input type="number" inputMode="numeric" min="0" max="10" {...info} {...updateValue} onChange={e => {
-              const num = Math.floor(Number(e.target.value) || 0);
-              props.onChange(Math.max(0, Math.min(num, 10)));
-            }} />
-          </Match>
-          <Match when={props.format === "POINT_100"}>
-            <input type="number" inputMode="numeric" min="0" max="100" {...info} {...updateValue} onChange={e => {
-              const num = Math.floor(Number(e.target.value) || 0);
-              props.onChange(Math.max(0, Math.min(num, 100)));
-            }} />
-          </Match>
-          <Match when={props.format === "POINT_10_DECIMAL"}>
-            <input type="number" inputMode="decimal" min="0" max="10" step=".1" {...info} {...updateValue} onChange={e => {
-              const num = Number((Number(e.target.value) || 0).toFixed(1));
-              props.onChange(Math.max(0, Math.min(num, 10)));
-            }} />
-          </Match>
-          <Match when={props.format === "POINT_5"}>
+      <Switch>
+        <Match when={props.format === "POINT_10"}>
+          <input type="number" inputMode="numeric" min="0" max="10" {...info} {...updateValue} onChange={e => {
+            const num = Math.floor(Number(e.target.value) || 0);
+            props.onChange(Math.max(0, Math.min(num, 10)));
+          }} />
+        </Match>
+        <Match when={props.format === "POINT_100"}>
+          <input type="number" inputMode="numeric" min="0" max="100" {...info} {...updateValue} onChange={e => {
+            const num = Math.floor(Number(e.target.value) || 0);
+            props.onChange(Math.max(0, Math.min(num, 100)));
+          }} />
+        </Match>
+        <Match when={props.format === "POINT_10_DECIMAL"}>
+          <input type="number" inputMode="decimal" min="0" max="10" step=".1" {...info} {...updateValue} onChange={e => {
+            const num = Number((Number(e.target.value) || 0).toFixed(1));
+            props.onChange(Math.max(0, Math.min(num, 10)));
+          }} />
+        </Match>
+        <Match when={props.format === "POINT_5"}>
+          <div class="score-input">
             <StarRadioRange {...info} onChange={props.onChange} />
-          </Match>
-          <Match when={props.format === "POINT_3"}>
+          </div>
+        </Match>
+        <Match when={props.format === "POINT_3"}>
+          <div class="score-input">
             <EmojiRadioRange {...info} onChange={props.onChange} />
-          </Match>
-        </Switch>
-      </div>
+          </div>
+        </Match>
+      </Switch>
     </>
   );
 }

@@ -149,13 +149,14 @@ export function EditMediaEntriesProvider(props) {
     createEffect(() => {
       // TODO: refactor this
       if (data()) {
-        console.log("Updating mediaListData");
+        console.log("Updating mediaListData", data());
         batch(() => {
           setMediaListEntry(data().data.data.Media);
           setState(authUserData(), data().data.data.Media);
         });
       }
     });
+
   }
 
   return (
@@ -223,8 +224,7 @@ export function EditMediaEntriesProvider(props) {
                 </div>
                 <div class="form score">
                   {console.log(state.format())}
-                  <ScoreInput value={state.score()} label="Score" onChange={state.setScore} format={"POINT_5"} />
-                  {/* <ScoreInput value={state.score()} onChange={state.setScore} format={state.format()} /> */}
+                  <ScoreInput value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
                 </div>
                 <div class="form progress">
                   <label htmlFor="progress">
@@ -303,6 +303,14 @@ export function EditMediaEntriesProvider(props) {
               </div>
               <div>
                 <h3>Custom Lists</h3>
+                <Switch>
+                  <Match when={mediaListEntry().type === "ANIME"}>
+                    <CustomLists list={authUserData().data.data.Viewer.mediaListOptions.animeList.customLists}/>
+                  </Match>
+                  <Match when={mediaListEntry().type === "MANGA"}>
+                    <CustomLists list={authUserData().data.data.Viewer.mediaListOptions.mangaList.customLists}/>
+                  </Match>
+                </Switch>
                 <div>
                   <input type="checkbox" name="hide-from-status" id="hide-from-status" />
                   <label htmlFor="hide-from-status"> Hide from status lists</label>
@@ -319,6 +327,24 @@ export function EditMediaEntriesProvider(props) {
       </dialog>
       {props.children}
     </EditMediaEntriesContext.Provider>
+  );
+}
+
+function CustomLists(props) {
+  assert("list" in props, "List is missing");
+
+  return (
+    <Show when={props.list?.length}>
+      <ul>
+        <For each={props.list}>{(listName, i) => ( 
+          <li>
+            <input type="checkbox" name="customLists" id={"custom-list-" + i()} />
+            <label htmlFor={"custom-list-" + i()}> {listName}</label>
+          </li>
+        )}</For>
+      </ul>
+      <hr />
+    </Show>
   );
 }
 
