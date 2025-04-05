@@ -11,6 +11,9 @@ const EditMediaEntriesContext = createContext();
 function formState(auth, initialData) {
   assert(!initialData || auth, "Should not be able to edit if not authenticated");
   const [score, setScore] = createSignal();
+  const [advancedScores, setAdvancedScores] = createSignal();
+  const [advancedScoresEnabled, setAdvancedScoresEnabled] = createSignal();
+  const [advancedScoring, setAdvancedScoring] = createSignal();
   const [status, setStatus] = createSignal();
   const [format, setFormat] = createSignal();
   const [isFavourite, setIsFavourite] = createSignal();
@@ -28,9 +31,25 @@ function formState(auth, initialData) {
   function setState(auth, data) {
     setFormat(auth?.data.data.Viewer.mediaListOptions.scoreFormat);
 
+    setAdvancedScoresEnabled(() => {
+      if (data?.type === "ANIME") {
+        return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoringEnabled;
+      } else if (data?.type === "MANGA") {
+        return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoringEnabled;
+      }
+    });
+    setAdvancedScoring(() => {
+      if (data?.type === "ANIME") {
+        return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoring || [];
+      } else if (data?.type === "MANGA") {
+        return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoring || [];
+      }
+    });
+
     console.log(auth);
 
     setScore(data?.mediaListEntry?.score ?? "");
+    setAdvancedScores(data?.mediaListEntry?.advancedScores ?? {});
     setStatus(data?.mediaListEntry?.status ?? "none");
     setProgress(data?.mediaListEntry?.progress ?? "");
     setMaxProgress(data?.episodes ?? data?.chapters ?? null);
@@ -45,6 +64,9 @@ function formState(auth, initialData) {
 
   return [{ 
     score, setScore, 
+    advancedScores, setAdvancedScores,
+    advancedScoresEnabled, setAdvancedScoresEnabled,
+    advancedScoring, setAdvancedScoring,
     status, setStatus,
     format, setFormat,
     progress, setProgress,
@@ -71,20 +93,41 @@ export function EditMediaEntriesProvider(props) {
 
   const handleSubmit = e => {
     const formData = new FormData(e.currentTarget);
-    const form = Object.fromEntries(formData.entries().map(([k, v]) => [k, v || null]));
+    const form = formData.entries().reduce((acc, [key, val]) => {
+      if (Array.isArray(acc[key])) {
+        acc[key].push(val || null);
+      } else if(key in acc) {
+        acc[key] = [acc[key], val || null];
+      } else {
+        acc[key] = val || null;
+      }
+
+      return acc;
+    }, {});
 
     const changes = {}
-    if (form.progress != (mediaListEntry().mediaListEntry?.progress || 0)) {
+    if (Number.isNaN(+form.progress) === false && form.progress != (mediaListEntry().mediaListEntry?.progress || 0)) {
       changes.progress = Number(form.progress);
     }
-    if (form.progressVolume != (mediaListEntry().mediaListEntry?.progressVolume || 0)) {
+    if (Number.isNaN(+form.progressVolume) === false && form.progressVolume != (mediaListEntry().mediaListEntry?.progressVolume || 0)) {
       changes.progressVolume = Number(form.progressVolume);
     }
-    if (form.score != (mediaListEntry().mediaListEntry?.score || 0)) {
+    if (Number.isNaN(+form.score) === false && form.score != (mediaListEntry().mediaListEntry?.score || 0)) {
       changes.score = Number(form.score);
     }
-    if (form.repeat != (mediaListEntry().mediaListEntry?.repeat || 0)) {
+    if (Number.isNaN(+form.repeat) === false && form.repeat != (mediaListEntry().mediaListEntry?.repeat || 0)) {
       changes.repeat = Number(form.repeat);
+    }
+
+    if (state.advancedScoresEnabled()) {
+      const inputValues = state.advancedScoring().map((_, i) => form["advanced-scores-" + i]);
+      const numbers = inputValues.map(val => Number(val || 0));
+      const valid = !numbers.some(Number.isNaN);
+      const serverValues = Object.values(mediaListEntry().mediaListEntry.advancedScores)
+      const hasChanges = numbers.some((num, i) => num != serverValues[i]);
+      if (valid && hasChanges) {
+        changes.advancedScores = numbers;
+      }
     }
 
     assert(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
@@ -113,11 +156,14 @@ export function EditMediaEntriesProvider(props) {
       // Send changes to anilist
       if (Object.keys(changes).length > 0) {
         changes.mediaId = mediaListEntry().id;
+        for(const [key, value] of Object.entries(changes)) {
+          assert(Number.isNaN(value) === false, `Key "${key}" is NaN`);
+        }
         api.anilist.mutateMedia(accessToken(), changes).then(data => {
           console.log(data);
         }).catch(err => {
             console.error(err);
-          });
+        });
       } else {
         console.log("No changes");
       }
@@ -300,6 +346,29 @@ export function EditMediaEntriesProvider(props) {
                   <label htmlFor="notes">Notes</label>
                   <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
                 </div>
+                <Show when={state.advancedScoresEnabled() && state.advancedScoring().length}>
+                  <p class="advanced-scoring-header">Advanced scoring</p>
+                  <For each={state.advancedScoring()}>{(scoreFieldName, i) => ( 
+                    <div class="form advanced-score">
+                      <ScoreInput 
+                        value={state.advancedScores()[scoreFieldName] ?? ""} 
+                        id={"advanced-score-" + i()} 
+                        name={"advanced-scores-" + i()}
+                        label={scoreFieldName} 
+                        onChange={(score) => {
+                          state.setAdvancedScores(aScore => {
+                            const newScores = ({...aScore, [scoreFieldName]: score});
+                            const total = Object.values(newScores).reduce((acc, v) => acc + (v || 0), 0);
+                            if (Number.isNaN(total) === false && typeof total === "number") {
+                              state.setScore(total / Object.values(newScores).length);
+                            }
+                            return newScores;
+                          })
+                        }} 
+                        format={state.format()} />
+                    </div>
+                  )}</For>
+                </Show>
               </div>
               <div>
                 <h3>Custom Lists</h3>

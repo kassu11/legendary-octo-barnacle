@@ -106,6 +106,15 @@
   }
 }
 
+
+.advanced-scoring-header {
+  order: 3;
+  grid-column: 1/-1;
+}
+.advanced-score {
+  order: 3;
+}
+
 @container media-editor (max-width: 56em) {
   .input-grid {
     grid-template-columns: 1fr 1fr;
