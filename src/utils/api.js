@@ -277,7 +277,7 @@ function cacheBuilder(settings) {
       createEffect(() => {
         const options = fetchOptions.map(option => typeof option == "function" ? option() : option);
         request = fetchCallback(...options);
-        if (options.some(option => option == undefined)) {
+        if (options.some(option => option === undefined)) {
           return; // Don't fetch if you have undefined values
         };
 
