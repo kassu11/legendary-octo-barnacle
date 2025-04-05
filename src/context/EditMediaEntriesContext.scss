@@ -4,6 +4,7 @@
   max-width: 64rem;
   width: 100%;
   container-type: inline-size;
+  container-name: media-editor;
 
   &::backdrop {
     background-color: #000000b0;
@@ -85,83 +86,64 @@
   }
 }
 
-
-
-.status {
-
-}
-.score {
-
-}
-.progress {
-
-}
-.start-date {
-
-}
-.finish-date {
-
-}
-
-// .manga .finish-date {
-//   order: 1;
-// }
-
-.repeat {
-
-}
-.volume-progress {
-
-}
-
 .notes {
   background-color: steelblue;
   order: 2;
-}
 
-.anime {
-  .notes {
+  .anime & {
     grid-column: 1/-1;
     background-color: steelblue;
   }
+
+  .manga & {
+    grid-column: 2/-1;
+  }
 }
 
-//
-// .manga .notes {
-//   grid-column: 2/-1;
-// }
-//
-// .anime .notes {
-//   grid-column: 1/-1;
-// }
+.volume-progress, .repeat {
+  .manga & {
+    order: 2;
+  }
+}
 
-@container (max-width: 56em) {
+@container media-editor (max-width: 56em) {
   .input-grid {
     grid-template-columns: 1fr 1fr;
     background-color: tomato;
   }
 
-  .anime {
+  .anime, .manga {
     .finish-date {
       order: 2;
     }
   }
 }
 
-@container (max-width: 42em) {
+@container media-editor (max-width: 42em) {
   .main {
     grid-template-columns: 1fr;
     background-color: pink;
   }
 }
 
-@container (max-width: 28em) {
+@container media-editor (max-width: 28em) {
   .input-grid {
     grid-template-columns: 1fr;
     background-color: purple;
   }
 
-  .anime {
+
+  .manga {
+    .volume-progress {
+      order: 1;
+    }
+
+    .notes {
+      grid-column: 1/-1;
+    }
+  }
+
+  .anime, .manga {
     .finish-date {
       order: 1;
     }
