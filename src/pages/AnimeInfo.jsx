@@ -39,7 +39,7 @@ function AnimeInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
 
-  const [malData] = api.myAnimeList.animeById(() => props.anime?.idMal);
+  const [malData] = api.myAnimeList.animeById(() => (props.anime?.idMal ?? undefined));
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
   const [isFavourite, setIsFavourite] = createSignal(props.anime?.isFavourite ?? false);
