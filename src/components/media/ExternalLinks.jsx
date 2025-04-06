@@ -35,6 +35,7 @@ const ExternalLinks = (props) => {
               <sup>
                 <Switch fallback={link.language}>
                   <Match when={link.language === "Japanese"}>JP</Match>
+                  <Match when={link.language === "English"}>EN</Match>
                 </Switch>
               </sup>
             </Show>
