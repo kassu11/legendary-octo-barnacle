@@ -74,9 +74,9 @@ function StarRadioRange(props) {
           onClick={e => {
             if (props.value == e.target.value) {
               e.target.checked = false;
-              props.onChange("0");
+              props.onChange(0);
             } else {
-              props.onChange(e.target.value);
+              props.onChange(+e.target.value);
             }
           }}
           name={props.name} id={props.id} value={i} checked={props.value == i}/>
@@ -97,9 +97,9 @@ function EmojiRadioRange(props) {
           onClick={e => {
             if (props.value == e.target.value) {
               e.target.checked = false;
-              props.onChange("0");
+              props.onChange(0);
             } else {
-              props.onChange(e.target.value);
+              props.onChange(+e.target.value);
             }
           }}
           name={props.name} id={props.id} value={i} checked={props.value == i}/>

@@ -31,6 +31,11 @@ function formState(auth, initialData) {
   function setState(auth, data) {
     batch(() => {
       setFormat(auth?.data.data.Viewer.mediaListOptions.scoreFormat);
+      // setFormat("POINT_10")
+      // setFormat("POINT_100")
+      // setFormat("POINT_10_DECIMAL")
+      // setFormat("POINT_5")
+      // setFormat("POINT_3")
       setAdvancedScoresEnabled(() => {
         if (data?.type === "ANIME") {
           return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoringEnabled;
@@ -359,12 +364,35 @@ export function EditMediaEntriesProvider(props) {
                         onChange={(score) => {
                           state.setAdvancedScores(aScore => {
                             const newScores = ({...aScore, [scoreFieldName]: score});
-                            const total = Object.values(newScores).reduce((acc, v) => acc + (v || 0), 0);
-                            if (Number.isNaN(total) === false && typeof total === "number") {
-                              state.setScore(total / Object.values(newScores).length);
+                            let scoresCounted = 0;
+                            let total = 0;
+                            Object.values(newScores).forEach(v => {
+                              scoresCounted += v > 0;
+                              total += v || 0;
+                            });
+
+                            assert(scoresCounted !== 0 || total === 0, "Total is 0");
+
+                            if (Number.isNaN(total) === false && typeof total === "number" && scoresCounted > 0) {
+                              state.setScore(() => {
+                                switch(state.format()) {
+                                  case "POINT_10": 
+                                    return Math.max(0, Math.min(Math.round(total / scoresCounted), 10));
+                                  case "POINT_100": 
+                                    return Math.max(0, Math.min(Math.round(total / scoresCounted), 100));
+                                  case "POINT_10_DECIMAL": 
+                                    return Math.max(0, Math.min(Number((total / scoresCounted).toFixed(1)), 10));
+                                  case "POINT_5": 
+                                    return Math.max(0, Math.min(Math.round(total / scoresCounted), 5));
+                                  case "POINT_3": 
+                                    return Math.max(0, Math.min(Math.round(total / scoresCounted), 3));
+                                  default:
+                                    assert(false, `Format "${state.format()}" not found`);
+                                }
+                              });
                             }
                             return newScores;
-                          })
+                          });
                         }} 
                         format={state.format()} />
                     </div>
