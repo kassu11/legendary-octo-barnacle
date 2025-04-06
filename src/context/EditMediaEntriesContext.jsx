@@ -14,6 +14,8 @@ function formState(auth, initialData) {
   const [advancedScores, setAdvancedScores] = createSignal();
   const [advancedScoresEnabled, setAdvancedScoresEnabled] = createSignal();
   const [advancedScoring, setAdvancedScoring] = createSignal();
+  const [customLists, setCustomLists] = createSignal();
+  const [mediaCustomLists, setMediaCustomLists] = createSignal();
   const [status, setStatus] = createSignal();
   const [format, setFormat] = createSignal();
   const [isFavourite, setIsFavourite] = createSignal();
@@ -42,6 +44,7 @@ function formState(auth, initialData) {
         } else if (data?.type === "MANGA") {
           return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoringEnabled;
         }
+        return false;
       });
       setAdvancedScoring(() => {
         if (data?.type === "ANIME") {
@@ -49,6 +52,15 @@ function formState(auth, initialData) {
         } else if (data?.type === "MANGA") {
           return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoring || [];
         }
+        return [];
+      });
+      setCustomLists(() => {
+        if (data?.type === "ANIME") {
+          return auth?.data.data.Viewer.mediaListOptions.animeList.customLists || [];
+        } else if (data?.type === "MANGA") {
+          return auth?.data.data.Viewer.mediaListOptions.mangaList.customLists || [];
+        } 
+        return [];
       });
 
       console.log(auth);
@@ -63,6 +75,9 @@ function formState(auth, initialData) {
       setRepeat(data?.mediaListEntry?.repeat ?? "");
       setNotes(data?.mediaListEntry?.notes || "");
       setIsFavourite(data?.isFavourite || false);
+      setMediaPrivate(data?.mediaListEntry?.private || false);
+      setHideFromStatus(data?.mediaListEntry?.hiddenFromStatusLists || false);
+      setMediaCustomLists(data?.mediaListEntry?.customLists || {});
     });
   }
 
@@ -73,6 +88,8 @@ function formState(auth, initialData) {
     advancedScores, setAdvancedScores,
     advancedScoresEnabled, setAdvancedScoresEnabled,
     advancedScoring, setAdvancedScoring,
+    customLists, setCustomLists,
+    mediaCustomLists, setMediaCustomLists,
     status, setStatus,
     format, setFormat,
     progress, setProgress,
@@ -129,7 +146,7 @@ export function EditMediaEntriesProvider(props) {
       const inputValues = state.advancedScoring().map((_, i) => form["advanced-scores-" + i]);
       const numbers = inputValues.map(val => Number(val || 0));
       const valid = !numbers.some(Number.isNaN);
-      const serverValues = Object.values(mediaListEntry().mediaListEntry.advancedScores)
+      const serverValues = Object.values(mediaListEntry().mediaListEntry?.advancedScores || {})
       const hasChanges = numbers.some((num, i) => num != serverValues[i]);
       if (valid && hasChanges) {
         changes.advancedScores = numbers;
@@ -151,6 +168,22 @@ export function EditMediaEntriesProvider(props) {
     }
     if (form.notes != mediaListEntry().mediaListEntry?.notes) {
       changes.notes = form.notes;
+    }
+    if (form.customLists || mediaListEntry().mediaListEntry?.customLists) {
+      const val = form.customLists || [];
+      const list = Array.isArray(val) ? val : [val];
+
+      if (list.length > 0 && mediaListEntry().mediaListEntry?.customLists == null) {
+        changes.customLists = list;
+      } else if (mediaListEntry().mediaListEntry?.customLists) {
+        const hasChanges = Object.entries(mediaListEntry().mediaListEntry?.customLists).some(([key, val]) => {
+          return list.includes(key) !== val;
+        });
+
+        if (hasChanges) {
+          changes.customLists = list;
+        }
+      }
     }
 
 
@@ -401,16 +434,27 @@ export function EditMediaEntriesProvider(props) {
               </div>
               <div>
                 <h3>Custom Lists</h3>
-                <Switch>
-                  <Match when={mediaListEntry().type === "ANIME"}>
-                    <CustomLists list={authUserData().data.data.Viewer.mediaListOptions.animeList.customLists}/>
-                  </Match>
-                  <Match when={mediaListEntry().type === "MANGA"}>
-                    <CustomLists list={authUserData().data.data.Viewer.mediaListOptions.mangaList.customLists}/>
-                  </Match>
-                </Switch>
+                <Show when={state.customLists()?.length}>
+                  <ul>
+                      {console.log("CustomLists", state.mediaCustomLists())}
+                    <For each={state.customLists()}>{(listName, i) => ( 
+                      <li>
+                        <input 
+                          type="checkbox" 
+                          name="customLists" 
+                          id={"custom-list-" + i()} 
+                          value={listName} 
+                          checked={state.mediaCustomLists()?.[listName]}
+                          onChange={e => state.setMediaCustomLists(lists => ({...lists, [listName]: e.target.checked }))}
+                        />
+                        <label htmlFor={"custom-list-" + i()}> {listName}</label>
+                      </li>
+                    )}</For>
+                  </ul>
+                  <hr />
+                </Show>
                 <div>
-                  <input type="checkbox" name="hide-from-status" id="hide-from-status" />
+                  <input type="checkbox" name="hiddenFromStatusLists" id="hide-from-status" />
                   <label htmlFor="hide-from-status"> Hide from status lists</label>
                 </div>
                 <div>
@@ -425,24 +469,6 @@ export function EditMediaEntriesProvider(props) {
       </dialog>
       {props.children}
     </EditMediaEntriesContext.Provider>
-  );
-}
-
-function CustomLists(props) {
-  assert("list" in props, "List is missing");
-
-  return (
-    <Show when={props.list?.length}>
-      <ul>
-        <For each={props.list}>{(listName, i) => ( 
-          <li>
-            <input type="checkbox" name="customLists" id={"custom-list-" + i()} />
-            <label htmlFor={"custom-list-" + i()}> {listName}</label>
-          </li>
-        )}</For>
-      </ul>
-      <hr />
-    </Show>
   );
 }
 
