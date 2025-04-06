@@ -133,7 +133,7 @@ function MangaInfo(props) {
             </ol>
           </div>
           <Characters characters={props.anime.characterPreview.edges} />
-          <Friends friend={props.friend} media={props.anime} type="anime" />
+          <Friends friend={props.friend} media={props.anime} type={props.anime.type} />
         </div>
       </div>
     </>

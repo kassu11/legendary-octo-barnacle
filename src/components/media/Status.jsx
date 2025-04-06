@@ -7,8 +7,8 @@ function Status(props) {
         <Match when={props.friend.status === "COMPLETED"}>Completed</Match>
         <Match when={props.friend.status === "CURRENT"}>
           <Switch>
-            <Match when={props.type === "anime"}>Watching</Match>
-            <Match when={props.type === "manga"}>Reading</Match>
+            <Match when={props.type === "ANIME"}>Watching</Match>
+            <Match when={props.type === "MANGA"}>Reading</Match>
           </Switch>
         </Match>
         <Match when={props.friend.status === "DROPPED"}>Dropped</Match>
@@ -16,15 +16,15 @@ function Status(props) {
         <Match when={props.friend.status === "PLANNING"}>Planning</Match>
         <Match when={props.friend.status === "REPEATING"}>
           <Switch>
-            <Match when={props.type === "anime"}>Rewatching</Match>
-            <Match when={props.type === "manga"}>Rereading</Match>
+            <Match when={props.type === "ANIME"}>Rewatching</Match>
+            <Match when={props.type === "MANGA"}>Rereading</Match>
           </Switch>
         </Match>
       </Switch>
-      <Show when={props.friend.progress !== 0 && props.friend.progress !== props.media.episodes}>
+      <Show when={props.friend.progress !== 0 && props.friend.progress !== props.media.episodes && props.friend.progress !== props.media.chapters}>
         <Switch>
-          <Match when={props.type === "anime"}> Ep {props.friend.progress}</Match>
-          <Match when={props.type === "manga"}> Ch {props.friend.progress}</Match>
+          <Match when={props.type === "ANIME"}> Ep {props.friend.progress}</Match>
+          <Match when={props.type === "MANGA"}> Ch {props.friend.progress}</Match>
         </Switch>
       </Show>
     </p>
