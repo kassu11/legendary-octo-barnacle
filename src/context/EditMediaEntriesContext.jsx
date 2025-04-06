@@ -63,8 +63,6 @@ function formState(auth, initialData) {
         return [];
       });
 
-      console.log(auth);
-
       setScore(data?.mediaListEntry?.score ?? "");
       setAdvancedScores(data?.mediaListEntry?.advancedScores ?? {});
       setStatus(data?.mediaListEntry?.status ?? "none");
@@ -113,8 +111,9 @@ export function EditMediaEntriesProvider(props) {
   const [state, setState] = formState();
 
   let editor;
+  let warning;
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     const formData = new FormData(e.currentTarget);
     const form = formData.entries().reduce((acc, [key, val]) => {
       if (Array.isArray(acc[key])) {
@@ -185,7 +184,12 @@ export function EditMediaEntriesProvider(props) {
         }
       }
     }
-
+    if ((form.hiddenFromStatusLists === "on") != (mediaListEntry().mediaListEntry?.hiddenFromStatusLists ?? false)) {
+      changes.hiddenFromStatusLists = form.hiddenFromStatusLists === "on";
+    }
+    if ((form.private === "on") != (mediaListEntry().mediaListEntry?.private ?? false)) {
+      changes.private = form.private === "on";
+    }
 
 
 
@@ -198,11 +202,8 @@ export function EditMediaEntriesProvider(props) {
         for(const [key, value] of Object.entries(changes)) {
           assert(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
-        api.anilist.mutateMedia(accessToken(), changes).then(data => {
-          console.log(data);
-        }).catch(err => {
-            console.error(err);
-        });
+        const response = await api.anilist.mutateMedia(accessToken(), changes);
+        console.log("Response", response);
       } else {
         console.log("No changes");
       }
@@ -230,25 +231,17 @@ export function EditMediaEntriesProvider(props) {
 
     editor.showModal();
 
-    const [data] = api.anilist.mediaListEntry(accessToken, defaultData.id);
-    createEffect(() => {
-      // TODO: refactor this
-      if (data()) {
-        console.log("Updating mediaListData", data());
-        batch(() => {
-          setMediaListEntry(data().data.data.Media);
-          setState(authUserData(), data().data.data.Media);
-        });
-      }
+    const data = await api.anilist.mediaListEntry(accessToken(), defaultData.id);
+    batch(() => {
+      setMediaListEntry(data.data.data.Media);
+      setState(authUserData(), data.data.data.Media);
     });
-
   }
 
   return (
     <EditMediaEntriesContext.Provider value={{ openEditor }}>
       <dialog ref={editor} class="editor">
         <Show when={mediaListEntry()}>
-          {console.log(mediaListEntry())}
           <form method="dialog" class="close">
             <button>Close</button>
           </form>
@@ -308,7 +301,6 @@ export function EditMediaEntriesProvider(props) {
                   </select>
                 </div>
                 <div class="form score">
-                  {console.log(state.format())}
                   <ScoreInput value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
                 </div>
                 <div class="form progress">
@@ -326,7 +318,7 @@ export function EditMediaEntriesProvider(props) {
                     min="0" 
                     max={state.maxProgress()}
                     value={state.progress()} 
-                    onChange={e => state.setProgress(e.target.value)} 
+                    onChange={e => state.setProgress(Math.max(0, Math.min(+e.target.value, state.maxProgress() ?? Infinity)))} 
                     onBlur={e => e.target.value = state.progress()} 
                     onBeforeInput={e => {
                       if (e.data?.toLowerCase().includes("e")) {
@@ -344,8 +336,9 @@ export function EditMediaEntriesProvider(props) {
                       id="volume-progress" 
                       name="volumeProgress" 
                       min="0" 
+                      max={mediaListEntry().volumes}
                       value={state.volumeProgress()} 
-                      onChange={e => state.setvolumeProgress(e.target.value)} 
+                      onChange={e => state.setvolumeProgress(Math.max(0, Math.min(+e.target.value, mediaListEntry().volumes ?? Infinity)))} 
                       onBlur={e => e.target.value = state.volumeProgress()} 
                       onBeforeInput={e => {
                         if (e.data?.toLowerCase().includes("e")) {
@@ -364,7 +357,12 @@ export function EditMediaEntriesProvider(props) {
                   <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
                 </div>
                 <div class="form repeat">
-                  <label htmlFor="repeat">Total Rewatches</label>
+                  <label htmlFor="repeat">
+                    <Switch>
+                      <Match when={mediaListEntry().type === "ANIME"}>Total Rewatches</Match>
+                      <Match when={mediaListEntry().type === "MANGA"}>Total Rereads</Match>
+                    </Switch>
+                  </label>
                   <input 
                     type="number" 
                     inputMode="numeric" 
@@ -372,7 +370,7 @@ export function EditMediaEntriesProvider(props) {
                     name="repeat" 
                     min="0" 
                     value={state.repeat()} 
-                    onChange={e => state.setRepeat(e.target.value)} 
+                    onChange={e => state.setRepeat(Math.max(0, Math.min(+e.target.value, Number.MAX_SAFE_INTEGER)))} 
                     onBlur={e => e.target.value = state.repeat()} 
                     onBeforeInput={e => {
                       if (e.data?.toLowerCase().includes("e")) {
@@ -436,7 +434,6 @@ export function EditMediaEntriesProvider(props) {
                 <h3>Custom Lists</h3>
                 <Show when={state.customLists()?.length}>
                   <ul>
-                      {console.log("CustomLists", state.mediaCustomLists())}
                     <For each={state.customLists()}>{(listName, i) => ( 
                       <li>
                         <input 
@@ -454,17 +451,30 @@ export function EditMediaEntriesProvider(props) {
                   <hr />
                 </Show>
                 <div>
-                  <input type="checkbox" name="hiddenFromStatusLists" id="hide-from-status" />
+                  <input type="checkbox" name="hiddenFromStatusLists" id="hide-from-status" checked={state.hideFromStatus()} onChange={e => state.setHideFromStatus(e.target.checked)} />
                   <label htmlFor="hide-from-status"> Hide from status lists</label>
                 </div>
                 <div>
-                  <input type="checkbox" name="private" id="private" />
+                  <input type="checkbox" name="private" id="private" checked={state.mediaPrivate()} onChange={e => state.setMediaPrivate(e.target.checked)} />
                   <label htmlFor="private"> Private</label>
                 </div>
-                <button type="button">Delete</button>
+                <Show when={mediaListEntry().mediaListEntry?.id}>
+                  <button type="button" onClick={() => warning.showModal()}>Delete</button>
+                </Show>
               </div>
             </div>
           </form>
+          <dialog ref={warning}>
+            <p>Are you sure you want to delete this media entry</p>
+            <form method="dialog">
+              <button onClick={async () => {
+                const response = api.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
+                console.log("Detele", response);
+                editor.close();
+              }}>Yes</button>
+              <button>No</button>
+            </form>
+          </dialog>
         </Show>
       </dialog>
       {props.children}

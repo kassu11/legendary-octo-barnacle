@@ -264,6 +264,13 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
   }
 }`
 
+
+export const anilistDeleteMediaListEntry = format`mutation ($id: Int) {
+  DeleteMediaListEntry(id: $id) {
+    deleted
+  }
+}`;
+
 export const anilistMutateToggleFavourite = format`mutation (
   $animeId: Int
   $mangaId: Int

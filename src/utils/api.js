@@ -48,10 +48,12 @@ const api = {
         "nextYear": 2025
       });
     }),
-    mediaListEntry: reloadCache((token, mediaId) => {
+    mediaListEntry: async (token, mediaId) => {
       assert(mediaId, "MediaId missing");
-      return Fetch.authAnilist(token, querys.mediaListEntry, { mediaId });
-    }),
+      assert(typeof token !== "function", "This specific api doesnt support signals");
+      const request = Fetch.authAnilist(token, querys.mediaListEntry, { mediaId });
+      return await request.send();
+    },
     getAuthUserData: reloadCache(token => {
       return Fetch.authAnilist(token, querys.currentUser);
     }),
@@ -73,6 +75,13 @@ const api = {
       assert(variables, "Variables missing");
       assert(variables.id || variables.mediaId, "No mutation id given");
       const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
+      return await request.send();
+    },
+    deleteMediaListEntry: async (token, id) => {
+      assert(token, "Token is missing");
+      assert(typeof token !== "function", "This specific api doesnt support signals");
+      assert(id !== undefined, "Variables missing");
+      const request = Fetch.authAnilist(token, querys.anilistDeleteMediaListEntry, { id });
       return await request.send();
     },
     toggleActivityLike: async (token, variables) => {
