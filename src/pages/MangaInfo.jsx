@@ -37,7 +37,7 @@ function MangaInfo(props) {
   assert(props.anime, "Data missing");
   assert(props.anime?.id, "Id missing");
 
-  const [malData] = api.myAnimeList.mangaById(() => props.anime?.idMal);
+  const [malData] = api.myAnimeList.mangaById(() => (props.anime?.idMal ?? undefined));
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
   const [isFavourite, setIsFavourite] = createSignal(props.anime?.isFavourite ?? false);
@@ -133,7 +133,7 @@ function MangaInfo(props) {
             </ol>
           </div>
           <Characters characters={props.anime.characterPreview.edges} />
-          <Friends friend={props.friend} media={props.anime} type="anime" />
+          <Friends friend={props.friend} media={props.anime} type={props.anime.type} />
         </div>
       </div>
     </>
