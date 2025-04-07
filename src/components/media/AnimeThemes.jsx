@@ -8,7 +8,6 @@ function AnimeThemes(props) {
   return (
     <div>
       <h2>Themes</h2>
-      {console.log(props.theme)}
       <For each={props.theme?.animethemes}>{theme => (
         <AnimeTheme theme={theme} video={videoPlayer} />
       )}</For>
