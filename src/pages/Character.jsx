@@ -35,7 +35,6 @@ function CharacterInfo(props) {
   assert(props.data, "Data missing");
   assert(props.data?.id, "Id missing");
 
-  console.log(props.data);
   return (
     <ul>
       <li>

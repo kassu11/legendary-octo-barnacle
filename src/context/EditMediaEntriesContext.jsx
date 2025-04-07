@@ -204,8 +204,6 @@ export function EditMediaEntriesProvider(props) {
         }
         const response = await api.anilist.mutateMedia(accessToken(), changes);
         console.log("Response", response);
-      } else {
-        console.log("No changes");
       }
     } 
 

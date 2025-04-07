@@ -45,14 +45,8 @@ function AnimeInfo(props) {
   const [isFavourite, setIsFavourite] = createSignal(props.anime?.isFavourite ?? false);
   
   createEffect(() => {
-    console.log(malData());
-  })
-
-  createEffect(() => {
     setIsFavourite(props.anime?.isFavourite ?? false);
   });
-
-  console.log(props.anime);
 
   return (
     <>
@@ -85,7 +79,6 @@ function AnimeInfo(props) {
               })} />
           </Show>
           <Show when={props.anime.idMal}>
-            {console.log("ID", props.anime.idMal, malData())}
             <Show when={malData()} fallback={<p>MAL score: loading</p>}>
               <p>MAL score: {malData().data.data.score}</p>
             </Show>

@@ -75,7 +75,6 @@ function Activity(props) {
         setIsFollowing(false);
         setHasReplies(true);
       }}>Global</button>
-      {console.log(activityData())}
       <For each={activityData()?.data.data.Page.activities}>{activity => (
         <ActivityCard activity={activity} mutateCache={mutateCache} />
       )}</For>
