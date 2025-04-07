@@ -18,7 +18,7 @@ export function AuthenticationProvider(props) {
       };
     });
   });
-  const [authUserData, { mutate: setAuthUserData }] = api.anilist.getAuthUserData(accessToken);
+  const [authUserData, { mutate: setAuthUserData }] = api.anilist.getAuthUserData(() => accessToken() ?? undefined);
 
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {
