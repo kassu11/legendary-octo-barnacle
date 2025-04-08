@@ -293,6 +293,10 @@ function cacheBuilder(settings) {
           return; // Don't fetch if you have undefined values
         };
 
+        if (DEBUG) {
+          console.log("Fetching");
+        }
+
         const data = localFetchCacheStorage.get(request.cacheKey);
         if (data && data.expires > new Date()) {
           setData({ ...data, fromCache: true });

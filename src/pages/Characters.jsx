@@ -1,15 +1,31 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import "./Characters.scss";
 
 function Characters() {
   const params = useParams();
+  const [languages, setLanguages] = createSignal([]);
+  const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
+  
+  createEffect(() => {
+    console.log(languages());
+  });
 
   return (
-    <ol class="character-container">
-      <CharactersPage id={params.id} page={1}/>
-    </ol>
+    <>
+      <select onChange={e => setLanguage(languages()[e.target.value])}>
+        <For each={languages()}>{(lang, i) => (
+          <option value={i()}>
+            {lang.language}
+            <Show when={lang.dubGroup}> ({lang.dubGroup})</Show>
+          </option>
+        )}</For>
+      </select>
+      <ol class="character-container">
+        <CharactersPage id={params.id} page={1} setLanguages={setLanguages} language={language().language} dubGroup={language().dubGroup} />
+      </ol>
+    </>
   )
 }
 
@@ -17,7 +33,7 @@ function CharactersPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
   const [characters] = api.anilist.characters(() => props.id, page);
   const [loadingAnimation, setLoadingAnimation] = createSignal(false);
-  const language = "Japanese";
+  const newLanguages = new Map();
   let loading;
 
   const intersectionObserver = new IntersectionObserver((entries) => {
@@ -49,21 +65,27 @@ function CharactersPage(props) {
           return (
             <>
               <Show when={edge.voiceActorRoles.length}>
-                <For each={edge.voiceActorRoles}>{actorRole => (
-                  <>
-                    <Show when={actorRole.voiceActor.language === language}>
+                <For each={edge.voiceActorRoles}>{actorRole => {
+                  if (props.page === 1) {
+                    const key = actorRole.voiceActor.language + actorRole.dubGroup;
+                    if (newLanguages.has(key) === false) {
+                      newLanguages.set(key, { language: actorRole.voiceActor.language, dubGroup: actorRole.dubGroup });
+                    }
+                  }
+                  return (
+                    <Show when={actorRole.voiceActor.language === props.language && actorRole.dubGroup === props.dubGroup}>
                       {filterNotFound = false}
                       <Card edge={edge} actorRole={actorRole} />
                     </Show>
-                  </>
-                )}</For>
+                  )}}</For>
               </Show>
               <Show when={filterNotFound} children={<Card edge={edge} />} />
             </>
           )
         }}</For>
+        {props.page === 1 && props.setLanguages([...newLanguages.values()]) && true}
         <Show when={characters().data.data.Media.characters.pageInfo.hasNextPage}>
-          <CharactersPage id={props.id} page={props.page + 1}/>
+          <CharactersPage id={props.id} page={props.page + 1} language={props.language} dubGroup={props.dubGroup} />
         </Show>
       </Match>
       <Match when={loadingAnimation()}>
