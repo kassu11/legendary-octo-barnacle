@@ -350,7 +350,7 @@ export class IndexedDB {
   }
 
   static fetchCache(errorCallback) {
-    const request = indexedDB.open("MyAniList-cache", 2);
+    const request = indexedDB.open("legendary-octo-barnacle-cache", 2);
     if (errorCallback) request.onerror = errorCallback;
 
     request.onupgradeneeded = evt => {
@@ -370,7 +370,7 @@ export class IndexedDB {
 
 
   static user(errorCallback) {
-    const request = indexedDB.open("MyAniList-users", 1);
+    const request = indexedDB.open("legendary-octo-barnacle-users", 1);
     if (errorCallback) request.onerror = errorCallback;
 
     request.onupgradeneeded = evt => {

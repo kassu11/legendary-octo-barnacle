@@ -3,7 +3,7 @@ import solid from 'vite-plugin-solid'
 
 export default defineConfig({
   plugins: [solid()],
-  base: "/MyAniList",
+  base: "/legendary-octo-barnacle",
   css: {
     devSourcemap: true,
     modules: {

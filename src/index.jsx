@@ -26,7 +26,7 @@ render(
     <AuthenticationProvider>
       <ResponsiveProvider>
         <EditMediaEntriesProvider>
-          <Router root={App} base="/MyAniList">
+          <Router root={App} base="/legendary-octo-barnacle">
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
             <Route path="/search">

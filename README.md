@@ -1,4 +1,4 @@
-# MyAniList
+# Legendary Octo Barnacle
 This project does not currently have any real name, but it's supposed to combine AniList and MyAnimeList APIs to one simple site.
 
 ## Current progress

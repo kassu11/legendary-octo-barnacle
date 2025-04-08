@@ -6,7 +6,7 @@ export function A(props) {
 
   return (
     <Show when={props.href.startsWith("/") === false} fallback={<A2 {...props} />}>
-      <A2 {...props} href={location.pathname.replace("/MyAniList", "") + "/" + props.href} />
+      <A2 {...props} href={location.pathname.replace("/legendary-octo-barnacle", "") + "/" + props.href} />
     </Show>
   );
 }
