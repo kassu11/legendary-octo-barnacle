@@ -1,4 +1,3 @@
-import { A } from "../components/CustomA";
 import api from "../utils/api";
 import { Show, createSignal, createEffect } from "solid-js";
 import style from "./Home.module.scss";
@@ -7,6 +6,7 @@ import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
+import { A } from "@solidjs/router";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();

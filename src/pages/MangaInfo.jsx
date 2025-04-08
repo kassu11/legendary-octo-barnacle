@@ -1,5 +1,4 @@
-import { useParams } from "@solidjs/router";
-import { A } from "../components/CustomA";
+import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, createEffect, createSignal } from "solid-js";
 import style from "./AnimeInfo.module.scss";

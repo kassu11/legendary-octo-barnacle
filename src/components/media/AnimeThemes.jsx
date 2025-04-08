@@ -1,4 +1,4 @@
-import { A } from "../../components/CustomA.jsx";
+import { A } from "@solidjs/router";
 import { assert } from "../../utils/assert.js";
 import style from "./AnimeThemes.module.scss";
 

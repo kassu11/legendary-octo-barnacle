@@ -1,5 +1,5 @@
+import { A } from "@solidjs/router";
 import style from "./App.module.scss"
-import { A } from "./components/CustomA.jsx";
 import { useAuthentication } from "./context/AuthenticationContext.jsx";
 
 function App(props) {

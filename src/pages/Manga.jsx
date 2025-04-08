@@ -1,4 +1,4 @@
-import { A } from "../components/CustomA";
+import { A } from "@solidjs/router";
 import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
 

@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
-import { A } from "../CustomA";
 import style from "./Characters.module.scss";
+import { A } from "@solidjs/router";
 
 function Characters(props) {
   return (
