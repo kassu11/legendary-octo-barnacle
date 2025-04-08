@@ -46,6 +46,7 @@ render(
             </Route>
             <Route path="/manga">
               <Route path="/:id/:name?" matchFilters={filter} component={MangaInfo} />
+              <Route path="/:id/:name?/characters" matchFilters={filter} component={Characters} />
             </Route>
             <Route path="/users" component={() => <div>users</div>} />
             <Route path="*404" component={() => <div>Not fould 404</div>} />
