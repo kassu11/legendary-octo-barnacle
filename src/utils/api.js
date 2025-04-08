@@ -39,6 +39,9 @@ const api = {
         "withRoles": true
       });
     }),
+    characters: fetchOnce((id, page = 1) => {
+      return Fetch.anilist(querys.anilistCharacters, { id, page });
+    }),
     trendingAnime: fetchOnce(() => {
       return Fetch.anilist(querys.trendingAnime, {
         "type": "ANIME",
