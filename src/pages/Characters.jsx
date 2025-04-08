@@ -23,7 +23,13 @@ function Characters() {
         )}</For>
       </select>
       <ol class="character-container">
-        <CharactersPage id={params.id} page={1} setLanguages={setLanguages} language={language().language} dubGroup={language().dubGroup} />
+        <CharactersPage 
+          id={params.id} 
+          page={1} 
+          setLanguages={setLanguages} 
+          language={language().language} 
+          dubGroup={language().dubGroup} 
+        />
       </ol>
     </>
   )
@@ -67,7 +73,10 @@ function CharactersPage(props) {
       for(const actorRole of edge.voiceActorRoles) {
         const key = actorRole.voiceActor.language + actorRole.dubGroup;
         if (newLanguages.has(key) === false) {
-          newLanguages.set(key, { language: actorRole.voiceActor.language, dubGroup: actorRole.dubGroup });
+          newLanguages.set(key, { 
+            language: actorRole.voiceActor.language, 
+            dubGroup: actorRole.dubGroup 
+          });
         }
       }
     }
@@ -80,7 +89,9 @@ function CharactersPage(props) {
       <Match when={characters()}>
         {console.log(characters())}
         <For each={characters().data.data.Media.characters.edges}>{edge => (
-          <Show when={edge.voiceActorRoles.filter(actorRole => actorRole.voiceActor.language === props.language && actorRole.dubGroup === props.dubGroup)}>{voiceActorRoles => (
+          <Show when={edge.voiceActorRoles.filter(role => 
+            role.voiceActor.language === props.language && role.dubGroup === props.dubGroup
+          )}>{voiceActorRoles => (
             <Show when={voiceActorRoles().length} fallback={<Card edge={edge}></Card>}>
               <For each={voiceActorRoles()}>{actorRole => (
                 <Card edge={edge} actorRole={actorRole} />
@@ -89,7 +100,12 @@ function CharactersPage(props) {
           )}</Show>
         )}</For>
         <Show when={characters().data.data.Media.characters.pageInfo.hasNextPage}>
-          <CharactersPage id={props.id} page={props.page + 1} language={props.language} dubGroup={props.dubGroup} />
+          <CharactersPage 
+            id={props.id} 
+            page={props.page + 1} 
+            language={props.language} 
+            dubGroup={props.dubGroup} 
+          />
         </Show>
       </Match>
       <Match when={loadingAnimation()}>
