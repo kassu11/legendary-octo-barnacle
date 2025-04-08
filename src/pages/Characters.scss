@@ -1,0 +1,64 @@
+.character-container {
+  background-color: sienna;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
+  gap: .5rem;
+  padding: 0px;
+  max-width: 180rem;
+  margin-inline: auto;
+}
+
+.character {
+  background-color: orange;
+  display: flex;
+  gap: .5rem;
+  text-decoration: none;
+  color: white;
+  word-break: break-all;
+  word-break: break-word;
+
+  &.loading {
+    background-color: gray;
+    opacity: .4;
+  }
+}
+
+.character-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 3.5/5;
+
+  .loading & {
+    background-color: darkgrey;
+  }
+}
+
+.character-left, .character-right {
+  width: 100%;
+  background-color: lightsteelblue;
+  display: grid;
+  gap: .5rem;
+
+  .loading & {
+    background-color: #333;
+  }
+
+  .content {
+    padding-block: .5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+
+.character-left {
+  grid-template-columns: 3.5rem 1fr;
+}
+.character-right {
+  grid-template-columns: 1fr 3.5rem;
+  text-align: right;
+}
+
+

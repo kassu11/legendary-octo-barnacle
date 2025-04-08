@@ -14,6 +14,7 @@ import MangaInfo from "./pages/MangaInfo.jsx";
 import Search from "./pages/Search.jsx";
 import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
+import Characters from "./pages/Characters.jsx";
 
 const root = document.getElementById("root")
 
@@ -41,6 +42,7 @@ render(
             </Route>
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={filter} component={AnimeInfo} />
+              <Route path="/:id/:name?/characters" matchFilters={filter} component={Characters} />
             </Route>
             <Route path="/manga">
               <Route path="/:id/:name?" matchFilters={filter} component={MangaInfo} />

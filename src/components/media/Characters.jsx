@@ -5,7 +5,9 @@ import { A } from "@solidjs/router";
 function Characters(props) {
   return (
     <div class={style.characterContainer}>
-      <h2>Characters</h2>
+      <A href="characters">
+        <h2>Characters</h2>
+      </A>
       <ol>
         <For each={props.characters}>{char => (
           <li class={style.character}>
