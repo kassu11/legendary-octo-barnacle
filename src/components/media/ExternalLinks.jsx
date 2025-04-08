@@ -29,16 +29,18 @@ const ExternalLinks = (props) => {
                 <img src={link.icon} alt="Site favicon." />
               </Show>
             </div>
-            <a href={link.url} target="_blank">{link.site}</a>
-            <Show when={link.language}>
-              <sup>
-                <Switch fallback={link.language}>
-                  <Match when={link.language === "Japanese"}>JP</Match>
-                  <Match when={link.language === "English"}>EN</Match>
-                </Switch>
-              </sup>
-            </Show>
-            <Show when={link.notes}>({link.notes})</Show>
+            <span>
+              <a href={link.url} target="_blank">{link.site}</a>
+              <Show when={link.language}>
+                <sup>
+                  <Switch fallback={link.language}>
+                    <Match when={link.language === "Japanese"}>JP</Match>
+                    <Match when={link.language === "English"}>EN</Match>
+                  </Switch>
+                </sup>
+              </Show>
+              <Show when={link.notes}> ({link.notes})</Show>
+            </span>
           </li>
         )}</For>
       </ul>
