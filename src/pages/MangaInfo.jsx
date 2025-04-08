@@ -28,34 +28,34 @@ function Manga() {
 
   return (
     <Show when={mangaData()}>
-      <MangaInfo anime={mangaData().data.data.Media} setMangaData={setMangaData} friend={friendScoreData()?.data.data.Page}></MangaInfo>
+      <MangaInfo media={mangaData().data.data.Media} setMangaData={setMangaData} friend={friendScoreData()?.data.data.Page} />
     </Show>
   )
 }
 
 function MangaInfo(props) {
-  assert(props.anime, "Data missing");
-  assert(props.anime?.id, "Id missing");
+  assert(props.media, "Data missing");
+  assert(props.media?.id, "Id missing");
 
-  const [malData] = api.myAnimeList.mangaById(() => (props.anime?.idMal ?? undefined));
+  const [malData] = api.myAnimeList.mangaById(() => (props.media?.idMal ?? undefined));
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
-  const [isFavourite, setIsFavourite] = createSignal(props.anime?.isFavourite ?? false);
+  const [isFavourite, setIsFavourite] = createSignal(props.media?.isFavourite ?? false);
   
   createEffect(() => {
-    setIsFavourite(props.anime?.isFavourite ?? false);
+    setIsFavourite(props.media?.isFavourite ?? false);
   });
 
   return (
     <>
-      <Banner src={props.anime.bannerImage} />
+      <Banner src={props.media.bannerImage} />
       <div class={style.container}>
         <div class={style.left}>
-          <img src={props.anime.coverImage.large} alt="Cover" class={style.cover} />
+          <img src={props.media.coverImage.large} alt="Cover" class={style.cover} />
           <Show when={accessToken()}>
             <button onClick={() => {
               openEditor(
-                { id: props.anime.id }, 
+                { id: props.media.id }, 
                 {
                   setIsFavourite: (isFavourite) => {
                     setIsFavourite(isFavourite);
@@ -66,49 +66,49 @@ function MangaInfo(props) {
                   }
                 }
               );
-            }}>{props.anime.mediaListEntry?.status || "Edit"}</button>
+            }}>{props.media.mediaListEntry?.status || "Edit"}</button>
             <FavouriteToggle 
               checked={isFavourite()} 
               onChange={setIsFavourite} 
-              mangaId={props.anime.id}
+              mangaId={props.media.id}
               mutateCache={(isFavourite) => props.setMangaData(v => {
                 v.data.data.Media.isFavourite = isFavourite;
                 return v;
               })} />
           </Show>
-          <Show when={props.anime.idMal}>
+          <Show when={props.media.idMal}>
             <Show when={malData()} fallback={<p>MAL score: loading</p>}>
               <p>MAL score: {malData().data.data.score}</p>
             </Show>
           </Show>
-          <ExternalLinks media={props.anime}/>
-          <ExtraInfo media={props.anime}/>
-          <Rankings rankings={props.anime.rankings} />
-          <Genres genres={props.anime.genres} />
-          <Tags tags={props.anime.tags} />
+          <ExternalLinks media={props.media}/>
+          <ExtraInfo media={props.media}/>
+          <Rankings rankings={props.media.rankings} />
+          <Genres genres={props.media.genres} />
+          <Tags tags={props.media.tags} />
         </div>
         <div class={style.main}>
           <Header 
-            averageScore={props.anime.averageScore} 
-            favourites={props.anime.favourites}
-            format={props.anime.format}
-            meanScore={props.anime.meanScore} 
-            popularity={props.anime.popularity}
-            season={props.anime.season}
-            seasonYear={props.anime.seasonYear}
-            source={props.anime.source}
-            ratingUsers={props.anime.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0)}
-            stats={props.anime.stats}
-            status={props.anime.status}
+            averageScore={props.media.averageScore} 
+            favourites={props.media.favourites}
+            format={props.media.format}
+            meanScore={props.media.meanScore} 
+            popularity={props.media.popularity}
+            season={props.media.season}
+            seasonYear={props.media.seasonYear}
+            source={props.media.source}
+            ratingUsers={props.media.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0)}
+            stats={props.media.stats}
+            status={props.media.status}
           />
           <div>
-            <h1>{props.anime.title.userPreferred}</h1>
-            <Markdown children={props.anime.description}/>
+            <h1>{props.media.title.userPreferred}</h1>
+            <Markdown children={props.media.description}/>
           </div>
           <div class={style.relationContainer}>
             <h2>Relations</h2>
             <ol>
-              <For each={props.anime.relations.edges}>{relation => (
+              <For each={props.media.relations.edges}>{relation => (
                 <li>
                   <A 
                     href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + formatTitleToUrl(relation.node.title.userPreferred)}
@@ -125,8 +125,8 @@ function MangaInfo(props) {
               )}</For>
             </ol>
           </div>
-          <Characters characters={props.anime.characterPreview.edges} />
-          <Friends friend={props.friend} media={props.anime} type={props.anime.type} />
+          <Characters characters={props.media.characterPreview.edges} />
+          <Friends friend={props.friend} media={props.media} type={props.media.type} />
         </div>
       </div>
     </>
