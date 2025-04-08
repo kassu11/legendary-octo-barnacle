@@ -1,5 +1,4 @@
-import { useParams } from "@solidjs/router";
-import { A } from "../components/CustomA";
+import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Switch, Match, Show } from "solid-js";
 import { formatTitleToUrl } from "../utils/formating";

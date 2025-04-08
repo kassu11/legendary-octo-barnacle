@@ -1,12 +1,12 @@
 import { Switch, Show, Match, createSignal, onCleanup } from "solid-js";
 import { Markdown } from "../components/Markdown.jsx";
 import style from "./Activity.module.scss";
-import { A } from "./CustomA.jsx";
 import api from "../utils/api.js";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
+import { A } from "@solidjs/router";
 
 const plural = num => num !== 1 ? "s" : "";
 
