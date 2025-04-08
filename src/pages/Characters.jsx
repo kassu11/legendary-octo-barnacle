@@ -33,11 +33,12 @@ function CharactersPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
   const [characters] = api.anilist.characters(() => props.id, page);
   const [loadingAnimation, setLoadingAnimation] = createSignal(false);
-  const newLanguages = new Map();
   let loading;
 
   const intersectionObserver = new IntersectionObserver((entries) => {
-    if (entries[0].intersectionRatio <= 0) return;
+    if (entries[0].intersectionRatio <= 0) {
+      return;
+    }
 
     intersectionObserver.unobserve(entries[0].target);
     window.addEventListener("scroll", () => {
@@ -56,34 +57,37 @@ function CharactersPage(props) {
     intersectionObserver.disconnect();
   });
 
+  createEffect(() => {
+    if (props.page !== 1 || characters() == null) {
+      return;
+    }
+
+    const newLanguages = new Map();
+    for(const edge of characters().data.data.Media.characters.edges) {
+      for(const actorRole of edge.voiceActorRoles) {
+        const key = actorRole.voiceActor.language + actorRole.dubGroup;
+        if (newLanguages.has(key) === false) {
+          newLanguages.set(key, { language: actorRole.voiceActor.language, dubGroup: actorRole.dubGroup });
+        }
+      }
+    }
+
+    props.setLanguages([...newLanguages.values()]);
+  });
+
   return (
     <Switch fallback={<div ref={loading}>loading...</div>}>
       <Match when={characters()}>
         {console.log(characters())}
-        <For each={characters().data.data.Media.characters.edges}>{edge => {
-          let filterNotFound = true;
-          return (
-            <>
-              <Show when={edge.voiceActorRoles.length}>
-                <For each={edge.voiceActorRoles}>{actorRole => {
-                  if (props.page === 1) {
-                    const key = actorRole.voiceActor.language + actorRole.dubGroup;
-                    if (newLanguages.has(key) === false) {
-                      newLanguages.set(key, { language: actorRole.voiceActor.language, dubGroup: actorRole.dubGroup });
-                    }
-                  }
-                  return (
-                    <Show when={actorRole.voiceActor.language === props.language && actorRole.dubGroup === props.dubGroup}>
-                      {filterNotFound = false}
-                      <Card edge={edge} actorRole={actorRole} />
-                    </Show>
-                  )}}</For>
-              </Show>
-              <Show when={filterNotFound} children={<Card edge={edge} />} />
-            </>
-          )
-        }}</For>
-        {props.page === 1 && props.setLanguages([...newLanguages.values()]) && true}
+        <For each={characters().data.data.Media.characters.edges}>{edge => (
+          <Show when={edge.voiceActorRoles.filter(actorRole => actorRole.voiceActor.language === props.language && actorRole.dubGroup === props.dubGroup)}>{voiceActorRoles => (
+            <Show when={voiceActorRoles().length} fallback={<Card edge={edge}></Card>}>
+              <For each={voiceActorRoles()}>{actorRole => (
+                <Card edge={edge} actorRole={actorRole} />
+              )}</For>
+            </Show>
+          )}</Show>
+        )}</For>
         <Show when={characters().data.data.Media.characters.pageInfo.hasNextPage}>
           <CharactersPage id={props.id} page={props.page + 1} language={props.language} dubGroup={props.dubGroup} />
         </Show>
