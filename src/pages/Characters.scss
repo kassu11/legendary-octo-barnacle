@@ -1,3 +1,11 @@
+.characters-page {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1rem .5rem;
+  display: grid;
+  gap: 1rem;
+  background-color: blue;
+}
 .character-container {
   background-color: sienna;
   list-style: none;
@@ -5,8 +13,6 @@
   grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
   gap: .5rem;
   padding: 0px;
-  max-width: 100rem;
-  margin-inline: auto;
 }
 
 .character {
