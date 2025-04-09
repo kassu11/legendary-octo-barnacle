@@ -54,18 +54,19 @@
     width: 1px;
   }
 
-  [class^="line-clamp"] {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-  }
   .line-clamp {
-    &-2 {
-      -webkit-line-clamp: 2;
+    @at-root [class^="line-clamp"] {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
     }
-    &-3 {
-      -webkit-line-clamp: 3;
-    }
+
+    &-2 { -webkit-line-clamp: 2; }
+    &-3 { -webkit-line-clamp: 3; }
+  }
+
+  main#page-content {
+    min-height: 100vh;
   }
 }

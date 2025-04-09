@@ -27,9 +27,9 @@ function App(props) {
           </Show>
         </ul>
       </nav>
-      <div class={style.pageContent}>
+      <main id="page-content">
         {props.children}
-      </div>
+      </main>
       <footer></footer>
     </>
   )

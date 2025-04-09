@@ -8,17 +8,25 @@ function Characters() {
   const params = useParams();
   const [languages, setLanguages] = createSignal([]);
   const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
+
+  createEffect(() => {
+    if (languages().length) {
+      setLanguage(languages()[0]);
+    }
+  });
   
   return (
-    <>
-      <select onChange={e => setLanguage(languages()[e.target.value])}>
-        <For each={languages()}>{(lang, i) => (
-          <option value={i()}>
-            {lang.language}
-            <Show when={lang.dubGroup}> ({lang.dubGroup})</Show>
-          </option>
-        )}</For>
-      </select>
+    <div class="characters-page">
+      <Show when={languages().length}>
+        <select onChange={e => setLanguage(languages()[e.target.value])}>
+          <For each={languages()}>{(lang, i) => (
+            <option value={i()}>
+              {lang.language}
+              <Show when={lang.dubGroup}> ({lang.dubGroup})</Show>
+            </option>
+          )}</For>
+        </select>
+      </Show>
       <ol class="character-container">
         <CharactersPage 
           id={params.id} 
@@ -28,7 +36,7 @@ function Characters() {
           dubGroup={language().dubGroup} 
         />
       </ol>
-    </>
+    </div>
   )
 }
 
