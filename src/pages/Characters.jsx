@@ -2,16 +2,13 @@ import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import "./Characters.scss";
+import { capitalize } from "../utils/formating";
 
 function Characters() {
   const params = useParams();
   const [languages, setLanguages] = createSignal([]);
   const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
   
-  createEffect(() => {
-    console.log(languages());
-  });
-
   return (
     <>
       <select onChange={e => setLanguage(languages()[e.target.value])}>
@@ -42,7 +39,7 @@ function CharactersPage(props) {
   let loading;
 
   const intersectionObserver = new IntersectionObserver((entries) => {
-    if (entries[0].intersectionRatio <= 0) {
+    if (entries[0].isIntersecting === false) {
       return;
     }
 
@@ -123,15 +120,20 @@ function Card(props) {
       <A href={"/ani/character/" + props.edge.node.id} class="character-left">
         <img class="character-image" src={props.edge.node.image.large} alt="Character" />
         <div class="content">
-          <p class="line-clamp">{props.edge.node.name.userPreferred}</p>
-          <p>{props.edge.role}</p>
+          <p class="line-clamp-3">{props.edge.node.name.userPreferred}</p>
+          <p>{capitalize(props.edge.role)}</p>
         </div>
       </A>
       <Show when={props.actorRole}>
         <A href={"/ani/staff/" + props.actorRole.voiceActor.id} class="character-right">
           <div class="content">
-            <p class="line-clamp">{props.actorRole.voiceActor.name.userPreferred}</p>
-            <p>{props.actorRole.voiceActor.language}</p>
+            <Show when={props.actorRole.roleNotes} fallback={
+              <p class="line-clamp-3">{props.actorRole.voiceActor.name.userPreferred}</p>
+            }>
+              <p class="line-clamp-2">{props.actorRole.voiceActor.name.userPreferred}<br/></p>
+              <span class="role-notes">({props.actorRole.roleNotes})</span>
+            </Show>
+            <p class="voice-actor-language">{props.actorRole.voiceActor.language}</p>
           </div>
           <img class="character-image" src={props.actorRole.voiceActor.image.large} alt="Voice actor" />
         </A>

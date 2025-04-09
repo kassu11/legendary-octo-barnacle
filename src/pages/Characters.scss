@@ -17,6 +17,8 @@
   color: white;
   word-break: break-all;
   word-break: break-word;
+  font-size: .9rem;
+  line-height: 120%;
 
   &.loading {
     background-color: gray;
@@ -37,9 +39,11 @@
 
 .character-left, .character-right {
   width: 100%;
-  background-color: lightsteelblue;
+  background-color: darkorchid;
   display: grid;
   gap: .5rem;
+  text-decoration: none;
+  color: white;
 
   .loading & {
     background-color: #333;
@@ -49,16 +53,26 @@
     padding-block: .5rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
   }
 }
 
+.character-left .content {
+  justify-content: space-between;
+}
+
 .character-left {
-  grid-template-columns: 3.5rem 1fr;
+  grid-template-columns: 4rem 1fr;
 }
 .character-right {
-  grid-template-columns: 1fr 3.5rem;
+  grid-template-columns: 1fr 4rem;
   text-align: right;
 }
 
 
+.voice-actor-language {
+  margin-top: auto;
+}
+
+.role-notes {
+  color: wheat;
+}
