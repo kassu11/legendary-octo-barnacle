@@ -19,26 +19,53 @@ import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 
-
-function Anime() {
+export function AnimeInfo() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [animeData, { mutateCache: setAnimeData }] = api.anilist.mediaId(() => params.id, accessToken);
-  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
+  const [idMal, setIdMal] = createSignal();
+  const [malData] = api.myAnimeList.animeById(idMal);
   const [themeData] = api.animeThemes.themesByAniListId(() => params.id);
 
   return (
-    <Show when={animeData()}>
-      <AnimeInfo media={animeData().data.data.Media} setAnimeData={setAnimeData} theme={themeData()?.data.anime[0]} friend={friendScoreData()?.data.data.Page} />
+    <MediaProvider setIdMal={setIdMal} theme={themeData()?.data.anime[0]} malData={malData()} />
+  )
+}
+
+export function MangaInfo() {
+  const [idMal, setIdMal] = createSignal();
+  const [malData] = api.myAnimeList.mangaById(idMal);
+
+  return (
+    <MediaProvider setIdMal={setIdMal} malData={malData()} />
+  )
+}
+
+function MediaProvider(props) {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [mediaData, { mutateCache: setMediaData }] = api.anilist.mediaId(() => params.id, accessToken);
+  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
+
+  createEffect(() => {
+    props.setIdMal(mediaData()?.data.data.Media.idMal ?? undefined);
+  });
+
+  return (
+    <Show when={mediaData()}>
+      <MediaInfo 
+        media={mediaData().data.data.Media} 
+        setMediaData={setMediaData} 
+        theme={props.theme} 
+        friend={friendScoreData()?.data.data.Page} 
+        malData={props.malData}
+      />
     </Show>
   )
 }
 
-function AnimeInfo(props) {
+function MediaInfo(props) {
   assert(props.media, "Data missing");
   assert(props.media?.id, "Id missing");
 
-  const [malData] = api.myAnimeList.animeById(() => (props.media?.idMal ?? undefined));
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
   const [isFavourite, setIsFavourite] = createSignal(props.media?.isFavourite ?? false);
@@ -60,7 +87,7 @@ function AnimeInfo(props) {
                 {
                   setIsFavourite: (isFavourite) => {
                     setIsFavourite(isFavourite);
-                    props.setAnimeData(v => {
+                    props.setMediaData(v => {
                       v.data.data.Media.isFavourite = isFavourite;
                       return v;
                     });
@@ -71,15 +98,16 @@ function AnimeInfo(props) {
             <FavouriteToggle 
               checked={isFavourite()} 
               onChange={setIsFavourite} 
-              animeId={props.media.id}
-              mutateCache={(isFavourite) => props.setAnimeData(v => {
+              animeId={props.media.type === "ANIME" ? props.media.id : undefined}
+              mangaId={props.media.type === "MANGA" ? props.media.id : undefined}
+              mutateCache={(isFavourite) => props.setMediaData(v => {
                 v.data.data.Media.isFavourite = isFavourite;
                 return v;
               })} />
           </Show>
           <Show when={props.media.idMal}>
-            <Show when={malData()} fallback={<p>MAL score: loading</p>}>
-              <p>MAL score: {malData().data.data.score}</p>
+            <Show when={props.malData} fallback={<p>MAL score: loading</p>}>
+              <p>MAL score: {props.malData.data.data.score}</p>
             </Show>
           </Show>
           <ExternalLinks media={props.media}/>
@@ -128,11 +156,9 @@ function AnimeInfo(props) {
           </div>
           <Characters characters={props.media.characterPreview.edges} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
-          <AnimeThemes theme={props.theme} />
+          <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
         </div>
       </div>
     </>
   )
 }
-
-export default Anime
