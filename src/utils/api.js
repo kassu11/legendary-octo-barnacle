@@ -48,8 +48,8 @@ const api = {
     characters: fetchOnce((id, page = 1) => {
       return Fetch.anilist(querys.anilistCharacters, { id, page });
     }),
-    trendingAnime: fetchOnce(() => {
-      return Fetch.anilist(querys.trendingAnime, {
+    trendingAnime: fetchOnce((token) => {
+      return Fetch.authAnilist(token, querys.trendingAnime, {
         "type": "ANIME",
         "season": "WINTER",
         "seasonYear": 2025,
