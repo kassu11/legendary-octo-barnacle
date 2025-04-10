@@ -1,4 +1,4 @@
-import { batch, createContext, createEffect, createSignal, Match, useContext } from "solid-js";
+import { batch, createContext, createSignal, Match, useContext } from "solid-js";
 import { useAuthentication } from "./AuthenticationContext";
 import { assert } from "../utils/assert";
 import api from "../utils/api";
@@ -278,7 +278,19 @@ export function EditMediaEntriesProvider(props) {
               <div class={"input-grid " + mediaListEntry().type?.toLowerCase()}>
                 <div class="form status">
                   <label htmlFor="status">Status</label>
-                  <select name="status" id="status" value={state.status()} onChange={e => state.setStatus(e.target.value)}>
+                  <select name="status" id="status" value={state.status()} onChange={e => {
+                    state.setStatus(e.target.value)
+                    if (e.target.value === "CURRENT" || e.target.value === "COMPLETED") {
+                      if (state.startedAt() === "") {
+                        state.setStartedAt(new Date().toISOString().substring(0, 10));
+                      }
+                    }
+                    if (e.target.value === "COMPLETED") {
+                      if (state.completedAt() === "") {
+                        state.setCompletedAt(new Date().toISOString().substring(0, 10));
+                      }
+                    }
+                  }}>
                     <option value="none" disabled hidden>Select status</option>
                     <option value="COMPLETED">Completed</option>
                     <option value="CURRENT">
