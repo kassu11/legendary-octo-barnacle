@@ -235,6 +235,8 @@ export const animeThemesById = id => `https://api.animethemes.moe/anime?filter[h
 export const animeThemesByArtisSlug = slug => `https://api.animethemes.moe/artist/${slug}?include=songs.animethemes.anime,songs.animethemes.animethemeentries.videos.audio,songs.animethemes.song.artists,resources,images`;
 export const myAnimeListAnimeById = id => `https://api.jikan.moe/v4/anime/${id}/full`;
 export const myAnimeListMangaById = id => `https://api.jikan.moe/v4/manga/${id}/full`;
+export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/anime/${id}/characters`;
+export const myAnimeListMangaCharactersById = id => `https://api.jikan.moe/v4/manga/${id}/characters`;
 
 export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
@@ -267,6 +269,7 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
 export const anilistCharacters = format`query media($id: Int, $page: Int) {
   Media(id: $id) {
     id
+    idMal
     characters(page: $page, sort: [ROLE, RELEVANCE, ID]) {
       pageInfo {
         total

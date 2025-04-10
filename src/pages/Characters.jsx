@@ -4,7 +4,25 @@ import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import "./Characters.scss";
 import { capitalize } from "../utils/formating";
 
-function Characters() {
+export function AnimeCharacters() {
+  const [idMal, setIdMal] = createSignal();
+  const [malCharacters] = api.myAnimeList.animeCharactersById(idMal);
+  
+  return (
+    <Characters setIdMal={setIdMal} malCharacters={malCharacters} />
+  );
+}
+
+export function MangaCharacters() {
+  const [idMal, setIdMal] = createSignal();
+  const [malCharacters] = api.myAnimeList.mangaCharactersById(idMal);
+  
+  return (
+    <Characters setIdMal={setIdMal} malCharacters={malCharacters} />
+  );
+}
+
+function Characters(props) {
   const params = useParams();
   const [languages, setLanguages] = createSignal([]);
   const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
@@ -13,6 +31,10 @@ function Characters() {
     if (languages().length) {
       setLanguage(languages()[0]);
     }
+  });
+
+  createEffect(() => {
+    console.log("MalCharacters:", props.malCharacters());
   });
   
   return (
@@ -34,6 +56,7 @@ function Characters() {
           setLanguages={setLanguages} 
           language={language().language} 
           dubGroup={language().dubGroup} 
+          setIdMal={props.setIdMal} 
         />
       </ol>
     </div>
@@ -87,6 +110,7 @@ function CharactersPage(props) {
     }
 
     props.setLanguages([...newLanguages.values()]);
+    props.setIdMal(characters().data.data.Media.idMal ?? undefined);
   });
 
   return (
@@ -168,5 +192,3 @@ function LoadingCard() {
     </li>
   );
 }
-
-export default Characters

@@ -25,6 +25,12 @@ const api = {
     mangaById: fetchOnce(id => {
       return Fetch.getJson(querys.myAnimeListMangaById(id));
     }),
+    animeCharactersById: fetchOnce(id => {
+      return Fetch.getJson(querys.myAnimeListAnimeCharactersById(id));
+    }),
+    mangaCharactersById: fetchOnce(id => {
+      return Fetch.getJson(querys.myAnimeListMangaCharactersById(id));
+    }),
   },
   anilist: {
     mediaId: fetchOnce((id, token) => {

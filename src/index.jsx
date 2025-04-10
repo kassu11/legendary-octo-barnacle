@@ -14,7 +14,7 @@ import MangaInfo from "./pages/MangaInfo.jsx";
 import Search from "./pages/Search.jsx";
 import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
-import Characters from "./pages/Characters.jsx";
+import { MangaCharacters, AnimeCharacters } from "./pages/Characters.jsx";
 
 const root = document.getElementById("root")
 
@@ -42,11 +42,11 @@ render(
             </Route>
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={filter} component={AnimeInfo} />
-              <Route path="/:id/:name?/characters" matchFilters={filter} component={Characters} />
+              <Route path="/:id/:name?/characters" matchFilters={filter} component={AnimeCharacters} />
             </Route>
             <Route path="/manga">
               <Route path="/:id/:name?" matchFilters={filter} component={MangaInfo} />
-              <Route path="/:id/:name?/characters" matchFilters={filter} component={Characters} />
+              <Route path="/:id/:name?/characters" matchFilters={filter} component={MangaCharacters} />
             </Route>
             <Route path="/users" component={() => <div>users</div>} />
             <Route path="*404" component={() => <div>Not fould 404</div>} />
