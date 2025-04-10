@@ -20,6 +20,9 @@ const root = document.getElementById("root")
 const filter = {
   id: /^\d+$/,
 }
+const search = {
+  type: ["anime", "manga"],
+}
 
 render(
   () => (
@@ -29,11 +32,7 @@ render(
           <Router root={App} base="/legendary-octo-barnacle">
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
-            <Route path="/search">
-              <Route path="/" component={Search} />
-              <Route path="/anime" component={Anime} />
-              <Route path="/manga" component={Manga} />
-            </Route>
+            <Route path="/search/:type?" matchFilters={search} component={Search} />
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">
               <Route path="/character/:id" matchFilters={filter} component={Character} />

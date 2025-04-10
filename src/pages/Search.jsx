@@ -1,6 +1,6 @@
-import { A, useSearchParams } from "@solidjs/router";
+import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, splitProps, on } from "solid-js";
+import { createSignal, createEffect, Show, splitProps, on, For } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -12,6 +12,9 @@ function Search() {
   let _lastTimeHistoryChanged = performance.now()
 
   const { accessToken } = useAuthentication();
+  const params = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, _setSearchParams] = useSearchParams();
   const _initVariables = getSearchParamObject();
   const [variables, setVariables] = createSignal(_initVariables);
@@ -33,7 +36,7 @@ function Search() {
   }
 
   function getSearchParamObject() {
-    const search = { "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" };
+    const search = { "page": 1, "sort": "POPULARITY_DESC" };
     if (Number(searchParams.page) > 1) {
       search.page = Number(searchParams.page);
     }
@@ -56,6 +59,12 @@ function Search() {
       search.sort = "SEARCH_MATCH"
     } else {
       search.sort = searchParams.sort;
+    }
+
+    if (params.type === "anime") {
+      search.type = "ANIME";
+    } else if (params.type === "manga") {
+      search.type = "MANGA";
     }
 
 
@@ -82,7 +91,7 @@ function Search() {
     search.source = searchParams.source;
     search.status = searchParams.status;
     search.tags = searchParams.tags;
-    search.type = searchParams.type;
+    // search.type = searchParams.type;
     search.volumeGreater = searchParams.volumeGreater;
     search.volumeLesser = searchParams.volumeLesser;
     // search.year = searchParams.year;
@@ -108,7 +117,6 @@ function Search() {
   return (
     <>
       <h1>Search</h1>
-      <button onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
       <form action="https://graphql.anilist.co" class={style.form} onInput={e => {
         const formData = new FormData(e.currentTarget);
         const data = formData.entries().reduce((acc, [key, val]) => {
@@ -124,18 +132,29 @@ function Search() {
         }, {});
         const keysToManuallyReset = ["format"]; 
         keysToManuallyReset.forEach(key => data[key] ??= undefined);
+
+        if (data.type === "anime" && params.type !== "anime") {
+          navigate("/search/anime" + location.search);
+        } else if (data.type === "manga" && params.type !== "manga") { 
+          navigate("/search/manga" + location.search);
+        } else if (params.type !== undefined) {
+          navigate("/search" + location.search);
+        }
+        delete data.type;
+
         console.log("Form: ", { ...data });
         setSearchParams(data);
       }}>
+        <button type="button" onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
         <div>
           <InputSearch type="search" id="search" name="search">Search </InputSearch>
         </div>
         <div>
           <p>Media Type</p>
           <select name="type">
-            <Option name="type" value="">Both</Option>
-            <Option name="type" value="ANIME">Anime</Option>
-            <Option name="type" value="MANGA">Manga</Option>
+            <TypeOption name="type" value="">Both</TypeOption>
+            <TypeOption name="type" value="anime">Anime</TypeOption>
+            <TypeOption name="type" value="manga">Manga</TypeOption>
           </select>
         </div>
         <div>
@@ -230,6 +249,15 @@ function Search() {
 
     return (
       <option selected={(searchParams[props.name] || "").includes(props.value)} {...props} />
+    )
+  }
+
+  function TypeOption(props) {
+    assert(props.name, "Option name is missing");
+    assert(props.value !== undefined, "Option value is missing");
+
+    return (
+      <option selected={(params.type || "") === props.value} {...props} />
     )
   }
 }
