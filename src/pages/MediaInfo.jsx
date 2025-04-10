@@ -83,7 +83,22 @@ function MediaInfo(props) {
           <Show when={accessToken()}>
             <button onClick={() => {
               openEditor(
-                { id: props.media.id }, 
+                { 
+                  id: props.media.id,
+                  type: props.media.type,
+                  bannerImage: props.media.bannerImage,
+                  coverImage: {
+                    large: props.media.coverImage.large,
+                  },
+                  mediaListEntry: {
+                    score: props.media.mediaListEntry?.score,
+                    id: props.media.mediaListEntry?.id,
+                    status: props.media.mediaListEntry?.status,
+                  },
+                  title: {
+                    userPreferred: props.media.title.userPreferred,
+                  },
+                }, 
                 {
                   setIsFavourite: (isFavourite) => {
                     setIsFavourite(isFavourite);
@@ -103,7 +118,8 @@ function MediaInfo(props) {
               mutateCache={(isFavourite) => props.setMediaData(v => {
                 v.data.data.Media.isFavourite = isFavourite;
                 return v;
-              })} />
+              })} 
+            />
           </Show>
           <Show when={props.media.idMal}>
             <Show when={props.malData} fallback={<p>MAL score: loading</p>}>
