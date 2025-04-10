@@ -494,6 +494,7 @@ export const currentWachingMedia = format`query ($userId: Int, $type: MediaType,
         status(version: 2)
         format
         episodes
+        chapters
         bannerImage
         title {
           userPreferred

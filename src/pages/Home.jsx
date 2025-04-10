@@ -84,8 +84,8 @@ function Activity(props) {
 
 
 function CurrentWatchingMedia(props) {
-  const [animeData, { mutateCache }] = api.anilist.wachingAnime(props.userId, props.token);
-  const [mangaData] = api.anilist.readingManga(props.userId, props.token);
+  const [animeData, { mutateCache: mutateAnimeCache }] = api.anilist.wachingAnime(props.userId, props.token);
+  const [mangaData, { mutateCache: mutateMangaCache }] = api.anilist.readingManga(props.userId, props.token);
 
   const sortAiringTime = (a, b) => {
     const [aTime, bTime] = [a.media.nextAiringEpisode?.airingAt, b.media.nextAiringEpisode?.airingAt];
@@ -98,29 +98,31 @@ function CurrentWatchingMedia(props) {
   return (
     <div class={style.header}>
       <Show when={animeData()}>
-        <div class={style.rowContainer}>
-          <For each={animeData().data.data.Page.mediaList.toSorted(sortAiringTime)}>{anime => (
-            <Show when={anime.media.status != "FINISHED"}>
-              <CurrentCard data={anime} mutateCache={mutateCache} />
-            </Show>
-          )}</For>
-        </div>
-        <div class={style.rowContainer}>
-          <For each={animeData().data.data.Page.mediaList}>{anime => (
-            <Show when={anime.media.status == "FINISHED"}>
-              <CurrentCard data={anime} mutateCache={mutateCache} />
-            </Show>
-          )}</For>
-        </div>
+        <CurrentCards 
+          cards={animeData().data.data.Page.mediaList.filter(anime => anime.media.status !== "FINISHED").toSorted(sortAiringTime)} 
+          mutateCache={mutateAnimeCache} 
+        />
+        <CurrentCards 
+          cards={animeData().data.data.Page.mediaList.filter(anime => anime.media.status === "FINISHED")} 
+          mutateCache={mutateAnimeCache} 
+        />
       </Show>
       <Show when={mangaData()}>
-        <div class={style.rowContainer}>
-          <For each={mangaData().data.data.Page.mediaList}>{manga => (
-            <CurrentCard data={manga} mutateCache={mutateCache} />
-          )}</For>
-        </div>
+        <CurrentCards cards={mangaData().data.data.Page.mediaList} mutateCache={mutateMangaCache} />
       </Show>
     </div>
+  );
+}
+
+function CurrentCards(props) {
+  return (
+    <Show when={props.cards.length}>
+      <div class={style.rowContainer}>
+        <For each={props.cards}>{cardData => (
+          <CurrentCard data={cardData} mutateCache={props.mutateCache} />
+        )}</For>
+      </div>
+    </Show>
   );
 }
 
@@ -132,9 +134,10 @@ function CurrentCard(props) {
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (token, mediaId, newProgress) => {
     const data = await api.anilist.mutateMedia(token, {mediaId, progress: newProgress});
-    if (triggerProgressIncrease.bufferSize() === 0) {
-      assert(data.data.data.SaveMediaListEntry.progress === progress(), "Episode count is out of sync");
-    }
+    assert(data.data.data.SaveMediaListEntry.progress, "No progress found");
+
+    props.data.progress = data.data.data.SaveMediaListEntry.progress;
+    props.mutateCache(data => data);
   }, 250, 2);
 
   createEffect(() => {
@@ -153,36 +156,46 @@ function CurrentCard(props) {
           </Show>
         </div>
       </Show>
-      <Show when={props.data.media.episodes - progress()} fallback={
-        <div class={style.hoverInfo + " " + style.normal} onClick={e => e.preventDefault()}>
-          <p>Completed</p>
-        </div>
-      }>
+      <Switch fallback={
         <div class={style.hoverInfo} onClick={e => {
           e.preventDefault();
-          if (progress() < props.data.media.episodes || props.data.media.episodes == null) {
-            triggerProgressIncrease(accessToken(), props.data.media.id, progress() + 1);
-            props.data.progress += 1;
-            props.mutateCache(data => data);
-            setProgress(val => val + 1);
-          }
+          triggerProgressIncrease(accessToken(), props.data.media.id, progress() + 1);
+          setProgress(val => val + 1);
         }}>
           <p>{progress} <span class={style.plus}>+</span></p>
         </div>
-      </Show>
+      }>
+        <Match when={
+          props.data.media.episodes === progress() || props.data.media.chapters === progress()
+        }>
+          <div class={style.hoverInfo + " " + style.normal} onClick={e => e.preventDefault()}>
+            <p>Completed</p>
+          </div>
+        </Match>
+      </Switch>
       <div class={style.cardRight}>
         <Switch>
           <Match when={props.data.media.nextAiringEpisode?.episode && isBehind()}>
-            <p>{airingEpisode() - (progress() + 1)} episodes behind</p>
+            <p>{airingEpisode() - (progress() + 1)} episode
+              <Show when={airingEpisode() - (progress() + 1) > 1}>s</Show> behind
+            </p>
           </Match>
-          <Match when={props.data.media.nextAiringEpisode?.episode == null && props.data.media.episodes}>
-            <p>{props.data.media.episodes - progress()} episodes left</p>
+          <Match when={props.data.media.nextAiringEpisode?.episode == null && props.data.media.episodes - progress() > 0}>
+            <p>{props.data.media.episodes - progress()} episode
+              <Show when={props.data.media.episodes - progress() > 1}>s</Show> left
+            </p>
+          </Match>
+          <Match when={props.data.media.chapters - progress() > 0}>
+            <p>{props.data.media.chapters - progress()} chapter
+              <Show when={props.data.media.chapters - progress() > 1}>s</Show> left
+            </p>
           </Match>
         </Switch>
         <p>{props.data.media.title.userPreferred}</p>
-        <p>
+        <p class={style.progressStatus}>
           Progress: {progress()}
           <Show when={props.data.media.episodes}>/{props.data.media.episodes}</Show>
+          <Show when={props.data.media.chapters}>/{props.data.media.chapters}</Show>
         </p>
       </div>
     </A>

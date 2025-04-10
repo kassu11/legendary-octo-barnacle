@@ -129,6 +129,10 @@ $radius: .2rem;
   }
 }
 
+.progress-status {
+  margin-top: auto;
+}
+
 .card-right {
   position: absolute;
   top: 0px;
@@ -143,7 +147,8 @@ $radius: .2rem;
 }
 
 .card:hover .card-right{
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 
