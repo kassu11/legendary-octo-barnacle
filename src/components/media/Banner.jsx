@@ -1,4 +1,4 @@
-import style from "../../pages/AnimeInfo.module.scss";
+import style from "../../pages/MediaInfo.module.scss";
 import { Show } from "solid-js";
 
 const Banner = (props) => {

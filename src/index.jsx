@@ -2,7 +2,7 @@ import { render } from "solid-js/web"
 import { Router, Route } from "@solidjs/router";
 import "./index.scss"
 import App from "./App.jsx"
-import { MangaInfo, AnimeInfo } from "./pages/AnimeInfo.jsx"
+import { MangaInfo, AnimeInfo } from "./pages/MediaInfo.jsx"
 import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
@@ -10,7 +10,6 @@ import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Anime from "./pages/Anime.jsx";
 import Manga from "./pages/Manga.jsx";
-// import MangaInfo from "./pages/MangaInfo.jsx";
 import Search from "./pages/Search.jsx";
 import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
