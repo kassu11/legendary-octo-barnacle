@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, splitProps, on, For } from "solid-js";
+import { createSignal, createEffect, Show, splitProps, on, For, untrack } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -36,6 +36,10 @@ function Search() {
   }
 
   function getSearchParamObject() {
+    if (location.search.length === 0) {
+      return undefined;
+    }
+
     const search = { "page": 1, "sort": "POPULARITY_DESC" };
     if (Number(searchParams.page) > 1) {
       search.page = Number(searchParams.page);
@@ -110,8 +114,14 @@ function Search() {
   createEffect(() => {
     searchParams;
     const search = getSearchParamObject()
-    triggerVariable(search);
-    setCacheVariables(search);
+    untrack(() => {
+      if(search) {
+        triggerVariable(search);
+        setCacheVariables(search);
+      } else {
+        mutateMediaData(undefined);
+      }
+    });
   });
 
   return (
@@ -208,11 +218,29 @@ function Search() {
       </form>
       <br />
       <br />
-      <ol class={style.cards}>
-        <Show when={mediaData()}>
-          <CardRow data={mediaData().data.data.Page.media}/>
-        </Show>
-      </ol>
+      {console.log(mediaData())}
+      <Switch>
+        <Match when={location.search.length}>
+          <ol class={style.cards}>
+            <Show when={mediaData()}>
+              <CardRow data={mediaData().data.data.Page.media}/>
+            </Show>
+          </ol>
+        </Match>
+        <Match when={location.search.length === 0}>
+          <Switch>
+            <Match when={params.type === "anime"}>
+              <AnimeSearch />
+            </Match>
+            <Match when={params.type === "manga"}>
+              manga
+            </Match>
+            <Match when={params.type === undefined}>
+              Both
+            </Match>
+          </Switch>
+        </Match>
+      </Switch>
     </>
   )
 
@@ -260,6 +288,34 @@ function Search() {
       <option selected={(params.type || "") === props.value} {...props} />
     )
   }
+}
+
+function AnimeSearch(props) {
+  const {accessToken} = useAuthentication();
+  const [animeData] = api.anilist.trendingAnime(accessToken);
+
+  return (
+    <Show when={animeData()}>
+
+      <div>{console.log(animeData())}</div>
+      <h2>Trending now</h2>
+      <ol class={style.cards}>
+        <CardRow data={animeData().data.data.trending.media}/>
+      </ol>
+      <h2>Popular this season</h2>
+      <ol class={style.cards}>
+        <CardRow data={animeData().data.data.season.media}/>
+      </ol>
+      <h2>Upcoming next season</h2>
+      <ol class={style.cards}>
+        <CardRow data={animeData().data.data.nextSeason.media}/>
+      </ol>
+      <h2>All time popular</h2>
+      <ol class={style.cards}>
+        <CardRow data={animeData().data.data.popular.media}/>
+      </ol>
+    </Show>
+  );
 }
 
 
