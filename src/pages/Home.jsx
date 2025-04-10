@@ -153,7 +153,11 @@ function CurrentCard(props) {
           </Show>
         </div>
       </Show>
-      <Show when={props.data.media.episodes - progress()}>
+      <Show when={props.data.media.episodes - progress()} fallback={
+        <div class={style.hoverInfo + " " + style.normal} onClick={e => e.preventDefault()}>
+          <p>Completed</p>
+        </div>
+      }>
         <div class={style.hoverInfo} onClick={e => {
           e.preventDefault();
           if (progress() < props.data.media.episodes || props.data.media.episodes == null) {
@@ -167,17 +171,19 @@ function CurrentCard(props) {
         </div>
       </Show>
       <div class={style.cardRight}>
-        <Show when={props.data.media.nextAiringEpisode?.episode} fallback={
-          <Show when={props.data.media.episodes}>
-            <p>{props.data.media.episodes - progress()} episodes left</p>
-          </Show>
-        }>
-          <Show when={isBehind()}>
+        <Switch>
+          <Match when={props.data.media.nextAiringEpisode?.episode && isBehind()}>
             <p>{airingEpisode() - (progress() + 1)} episodes behind</p>
-          </Show>
-        </Show>
+          </Match>
+          <Match when={props.data.media.nextAiringEpisode?.episode == null && props.data.media.episodes}>
+            <p>{props.data.media.episodes - progress()} episodes left</p>
+          </Match>
+        </Switch>
         <p>{props.data.media.title.userPreferred}</p>
-        <p>Progress: {progress()}<Show when={props.data.media.episodes}>{e => (<>/{e()}</>)}</Show></p>
+        <p>
+          Progress: {progress()}
+          <Show when={props.data.media.episodes}>/{props.data.media.episodes}</Show>
+        </p>
       </div>
     </A>
   )
