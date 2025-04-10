@@ -67,6 +67,7 @@ function formState(auth, initialData) {
       setAdvancedScores(data?.mediaListEntry?.advancedScores ?? {});
       setStatus(data?.mediaListEntry?.status ?? "none");
       setProgress(data?.mediaListEntry?.progress ?? "");
+      setvolumeProgress(data?.mediaListEntry?.volumeProgress ?? "")
       setMaxProgress(data?.episodes ?? data?.chapters ?? null);
       setStartedAt(formatDateToInput(data?.mediaListEntry?.startedAt));
       setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
@@ -286,6 +287,12 @@ export function EditMediaEntriesProvider(props) {
                       }
                     }
                     if (e.target.value === "COMPLETED") {
+                      if ((state.progress() === "" || state.progress() == 0) && state.maxProgress() > 0) {
+                        state.setProgress(state.maxProgress());
+                      }
+                      if ((state.volumeProgress() === "" || state.volumeProgress() == 0) && mediaListEntry().volumes > 0) {
+                        state.setvolumeProgress(mediaListEntry().volumes);
+                      }
                       if (state.completedAt() === "") {
                         state.setCompletedAt(new Date().toISOString().substring(0, 10));
                       }
