@@ -1,4 +1,4 @@
-.editor {
+.media-editor {
   margin: auto;
   padding: 0px;
   max-width: 64rem;
@@ -11,7 +11,14 @@
   }
 }
 
-.header {
+.exit-media-editor {
+  position: absolute;
+  z-index: 1;
+  right: 0px;
+  margin: 1rem;
+}
+
+.media-editor-header {
   position: relative;
   display: grid;
   background-color: orange;
@@ -21,42 +28,27 @@
   isolation: isolate;
   padding: 1rem;
   gap: 1rem;
+
+  .banner {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+  .cover {
+    max-height: 12rem;
+    aspect-ratio: 5.5/8;
+  }
+
+  .container {
+    display: flex;
+    gap: .5rem;
+  }
 }
 
-.close {
-  position: absolute;
-  z-index: 1;
-  right: 0px;
-  margin: 1rem;
-}
-
-.banner {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  z-index: -1;
-}
-
-.cover {
-  max-height: 12rem;
-  aspect-ratio: 5.5/8;
-}
-
-.lineClamp {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  -webkit-box-orient: vertical;
-}
-
-.header-action {
-  display: flex;
-  gap: .5rem;
-}
-
-.main {
+.media-editor-body {
   display: grid;
   grid-template-columns: 1fr 15rem;
   padding: 1rem;
@@ -64,27 +56,28 @@
 }
 
 
-.input-grid {
+.media-editor-input-grid  {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 2rem;
   background-color: red;
 }
 
-
-.form {
+.media-editor-input {
   background-color: skyblue;
   display: flex;
   flex-direction: column;
   order: 1;
-  
-  > input, > select, > textarea {
+
+  > :is(input, select, textarea) {
     padding: 1rem;
     background-color: green;
     border: unset;
     field-sizing: content;
   }
 }
+
+
 
 .notes {
   background-color: steelblue;
@@ -116,7 +109,7 @@
 }
 
 @container media-editor (max-width: 56em) {
-  .input-grid {
+  .media-editor-input-grid  {
     grid-template-columns: 1fr 1fr;
     background-color: tomato;
   }
@@ -129,14 +122,14 @@
 }
 
 @container media-editor (max-width: 42em) {
-  .main {
+  .media-editor-body {
     grid-template-columns: 1fr;
     background-color: pink;
   }
 }
 
 @container media-editor (max-width: 28em) {
-  .input-grid {
+  .media-editor-input-grid  {
     grid-template-columns: 1fr;
     background-color: purple;
   }
