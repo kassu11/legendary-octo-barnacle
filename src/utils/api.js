@@ -49,12 +49,19 @@ const api = {
       return Fetch.anilist(querys.anilistCharacters, { id, page });
     }),
     trendingAnime: fetchOnce((token) => {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      const year = date.getFullYear();
+      const seasons = ["WINTER", "SPRING", "SUMMER", "FALL", "WINTER"];
+      const years = [year, year, year, year, year + 1];
+      const index = Math.floor(date.getMonth() / 3);
+
       return Fetch.authAnilist(token, querys.trendingAnime, {
         "type": "ANIME",
-        "season": "WINTER",
-        "seasonYear": 2025,
-        "nextSeason": "SPRING",
-        "nextYear": 2025
+        "season": seasons[index],
+        "seasonYear": years[index],
+        "nextSeason":seasons[index + 1], 
+        "nextYear": years[index + 1],
       });
     }),
     mediaListEntry: async (token, mediaId) => {

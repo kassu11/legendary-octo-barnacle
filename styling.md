@@ -125,12 +125,12 @@ by the file they are in.
 - .form
 - .header
 - .input-grid
-- .selected
 
 ### 4. Generic State Classes
 
 - .anime
 - .loading
 - .manga
+- .selected
 
 
