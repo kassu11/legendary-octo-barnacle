@@ -4,7 +4,7 @@ import { createSignal, createEffect, Show, splitProps, on, For, untrack } from "
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
-import style from "./Search.module.scss";
+import "./Search.scss";
 import { formatTitleToUrl } from "../utils/formating";
 
 function Search() {
@@ -125,9 +125,8 @@ function Search() {
   });
 
   return (
-    <>
-      <h1>Search</h1>
-      <form action="https://graphql.anilist.co" class={style.form} onInput={e => {
+    <div class="search-page">
+      <form action="https://graphql.anilist.co" class="media-search-header" onInput={e => {
         const formData = new FormData(e.currentTarget);
         const data = formData.entries().reduce((acc, [key, val]) => {
           if (Array.isArray(acc[key])) {
@@ -216,12 +215,10 @@ function Search() {
           </select>
         </div>
       </form>
-      <br />
-      <br />
       {console.log(mediaData())}
       <Switch>
         <Match when={location.search.length}>
-          <ol class={style.cards}>
+          <ol class="cards">
             <Show when={mediaData()}>
               <CardRow data={mediaData().data.data.Page.media}/>
             </Show>
@@ -241,7 +238,7 @@ function Search() {
           </Switch>
         </Match>
       </Switch>
-    </>
+    </div>
   )
 
   function InputSearch(props) {
@@ -290,31 +287,65 @@ function Search() {
   }
 }
 
-function AnimeSearch(props) {
+function AnimeSearch() {
   const {accessToken} = useAuthentication();
   const [animeData] = api.anilist.trendingAnime(accessToken);
 
   return (
     <Show when={animeData()}>
-
       <div>{console.log(animeData())}</div>
-      <h2>Trending now</h2>
-      <ol class={style.cards}>
-        <CardRow data={animeData().data.data.trending.media}/>
-      </ol>
-      <h2>Popular this season</h2>
-      <ol class={style.cards}>
-        <CardRow data={animeData().data.data.season.media}/>
-      </ol>
-      <h2>Upcoming next season</h2>
-      <ol class={style.cards}>
-        <CardRow data={animeData().data.data.nextSeason.media}/>
-      </ol>
-      <h2>All time popular</h2>
-      <ol class={style.cards}>
-        <CardRow data={animeData().data.data.popular.media}/>
-      </ol>
+      <div class="search-home-content">
+        <HorizontalCardRow data={animeData().data.data.trending.media} title="Trending now" />
+        <HorizontalCardRow data={animeData().data.data.season.media} title="Popular this season" />
+        <HorizontalCardRow data={animeData().data.data.nextSeason.media} title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.popular.media} title="All time popular" />
+        <HorizontalCardRow data={animeData().data.data.top.media} title="Top 100 anime" />
+      </div>
     </Show>
+  );
+}
+
+function VerticalCardRow(props) {
+  return (
+    <section class="vertical-search-card-section">
+      <div class="vertical-search-card-header">
+        <h2>{props.title}</h2>
+        <A href="">View all</A>
+      </div>
+      <ol class="vertical-search-card-row">
+        <For each={props.data}>
+          {card => (
+            <li class="vertical-search-card">
+              <A href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+                <img src={card.coverImage.large} class="cover" alt="Cover." />
+                <p class="line-clamp-2">{card.title.userPreferred}</p>
+              </A> 
+            </li>
+          )}
+        </For>
+      </ol>
+    </section>
+  );
+}
+
+function HorizontalCardRow(props) {
+  return (
+    <section class="horizontal-search-card-section">
+      <div class="horizontal-search-card-header">
+        <h2>{props.title}</h2>
+        <A href="">View all</A>
+      </div>
+      <ol class="horizontal-search-card-row">
+        <For each={props.data}>{card => (
+          <li class="horizontal-search-card">
+            <A href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+              <img src={card.coverImage.large} class="cover" alt="Cover." />
+              <p class="line-clamp-2">{card.title.userPreferred}</p>
+            </A> 
+          </li>
+        )}</For>
+      </ol>
+    </section>
   );
 }
 
@@ -329,9 +360,9 @@ function CardRow(props) {
 
 function Card(props) {
   return ( 
-    <li class={style.card}>
+    <li class="card">
       <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + formatTitleToUrl(props.card.title.userPreferred)}>
-        <img src={props.card.coverImage.large} class={style.cover} alt="Cover." />
+        <img src={props.card.coverImage.large} class="cover" alt="Cover." />
         <p>{props.card.title.userPreferred}</p>
       </A> 
     </li>

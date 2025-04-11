@@ -1,0 +1,84 @@
+.search-page {
+  max-width: 85rem;
+  padding: 2rem 1rem;
+  margin-inline: auto;
+  background-color: purple;
+}
+
+.media-search-header {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: .5rem;
+  justify-content: center;
+}
+
+.cards {
+  list-style: none;
+  padding: 0px;
+  display: grid;
+  gap: 1rem;
+  justify-content: center;
+  grid-template-columns: repeat(auto-fit, 15rem);
+}
+
+.card {
+  background-color: green;
+  a {
+    color: white;
+    text-decoration: none;
+  }
+
+  .cover {
+    width: 100%;
+    aspect-ratio: 5.5/8;
+    object-fit: cover;
+  }
+}
+.search-home-content {
+  display: grid;
+  gap: 3rem;
+  background-color: mediumvioletred;
+}
+.horizontal-search-card-section {
+  display: grid;
+  gap: .25rem;
+  background-color: tomato;
+
+  a {
+    text-decoration: none;
+    color: black;
+  }
+}
+
+.horizontal-search-card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  padding: 0;
+  list-style: none;
+  gap: 0 2rem;
+  grid-template-rows: repeat(1, 1fr);
+  grid-auto-rows: 0;
+  overflow-y: hidden;
+  background-color: azure;
+}
+
+.horizontal-search-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background-color: springgreen;
+}
+
+.horizontal-search-card {
+  background-color: orange;
+  a {
+    color: white;
+    text-decoration: none;
+  }
+
+  .cover {
+    width: 100%;
+    aspect-ratio: 5.5/8;
+    object-fit: cover;
+  }
+}
