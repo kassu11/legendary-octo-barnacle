@@ -239,19 +239,19 @@ export function EditMediaEntriesProvider(props) {
 
   return (
     <EditMediaEntriesContext.Provider value={{ openEditor }}>
-      <dialog ref={editor} class="editor">
+      <dialog ref={editor} class="media-editor">
         <Show when={mediaListEntry()}>
-          <form method="dialog" class="close">
+          <form class="exit-media-editor" method="dialog">
             <button>Close</button>
           </form>
           <form method="dialog" onSubmit={handleSubmit}>
-            <header class="header">
+            <header class="media-editor-header">
               <Show when={mediaListEntry().bannerImage}>
                 <img src={mediaListEntry().bannerImage} class="banner" alt="Banner" />
               </Show>
               <img src={mediaListEntry().coverImage?.large} class="cover" alt="Cover" />
-              <h2 class="line-clamp">{mediaListEntry().title?.userPreferred}</h2>
-              <div class="header-action">
+              <h2 class="line-clamp-6">{mediaListEntry().title?.userPreferred}</h2>
+              <div class="container">
                 <Switch>
                   <Match when={mediaListEntry().type === "MANGA"}>
                     <FavouriteToggle 
@@ -275,9 +275,9 @@ export function EditMediaEntriesProvider(props) {
                 <button type="submit">Save</button>
               </div>
             </header>
-            <div class="main">
-              <div class={"input-grid " + mediaListEntry().type?.toLowerCase()}>
-                <div class="form status">
+            <div class="media-editor-body">
+              <div class={"media-editor-input-grid " + mediaListEntry().type?.toLowerCase() || ""}>
+                <div class="media-editor-input status">
                   <label htmlFor="status">Status</label>
                   <select name="status" id="status" value={state.status()} onChange={e => {
                     state.setStatus(e.target.value)
@@ -317,10 +317,10 @@ export function EditMediaEntriesProvider(props) {
                     </option>
                   </select>
                 </div>
-                <div class="form score">
+                <div class="media-editor-input score">
                   <ScoreInput value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
                 </div>
-                <div class="form progress">
+                <div class="media-editor-input progress">
                   <label htmlFor="progress">
                     <Switch>
                       <Match when={mediaListEntry().type === "ANIME"}>Episode Progress</Match>
@@ -345,7 +345,7 @@ export function EditMediaEntriesProvider(props) {
                   />
                 </div>
                 <Show when={mediaListEntry().type === "MANGA"}>
-                  <div class="form volume-progress">
+                  <div class="media-editor-input volume-progress">
                     <label htmlFor="volume-progress">Volume Progress</label>
                     <input 
                       type="number" 
@@ -365,15 +365,15 @@ export function EditMediaEntriesProvider(props) {
                     />
                   </div>
                 </Show>
-                <div class="form start-date">
+                <div class="media-editor-input start-date">
                   <label htmlFor="start-date">Start date</label>
                   <input type="date" id="start-date" name="startedAt" value={state.startedAt()} onChange={e => state.setStartedAt(e.target.value)}/>
                 </div>
-                <div class="form finish-date">
+                <div class="media-editor-input finish-date">
                   <label htmlFor="end-date">Finish date</label>
                   <input type="date" id="end-date" name="completedAt" value={state.completedAt()} onChange={e => state.setCompletedAt(e.target.value)}/>
                 </div>
-                <div class="form repeat">
+                <div class="media-editor-input repeat">
                   <label htmlFor="repeat">
                     <Switch>
                       <Match when={mediaListEntry().type === "ANIME"}>Total Rewatches</Match>
@@ -396,14 +396,14 @@ export function EditMediaEntriesProvider(props) {
                     }}
                   />
                 </div>
-                <div class="form notes">
+                <div class="media-editor-input notes">
                   <label htmlFor="notes">Notes</label>
                   <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
                 </div>
                 <Show when={state.advancedScoresEnabled() && state.advancedScoring().length}>
                   <p class="advanced-scoring-header">Advanced scoring</p>
                   <For each={state.advancedScoring()}>{(scoreFieldName, i) => ( 
-                    <div class="form advanced-score">
+                    <div class="media-editor-input advanced-score">
                       <ScoreInput 
                         value={state.advancedScores()[scoreFieldName] ?? ""} 
                         id={"advanced-score-" + i()} 

@@ -95,3 +95,42 @@ own and are used in combination with other classes.
     font-weight: bold;
   }
   ```
+
+---
+
+## Exhaustive list of all classes
+
+List of all the classes currently in use inside the project.
+
+### 1. Single-Use Descriptive Classes
+
+Not listing these, because they are by far the most used and should be obvious
+by the file they are in.
+
+### 2. Multi-Use Utility Classes
+
+- .line-clamp
+- .line-clamp-2
+- .line-clamp-3
+- .line-clamp-6
+- .visually-hidden
+- main#page-content
+
+### 3. Generic Decorator Classes
+
+- .banner
+- .container
+- .content
+- .cover
+- .form
+- .header
+- .input-grid
+- .selected
+
+### 4. Generic State Classes
+
+- .anime
+- .loading
+- .manga
+
+
