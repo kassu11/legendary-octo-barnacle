@@ -1,18 +1,24 @@
-.score-input {
+.score-star-input, .score-emoji-input {
   display: flex;
   background-color: green;
   gap: .25rem;
   padding: .25rem;
   justify-content: space-around;
+}
 
-  .selected {
+.selected {
+  .score-star-input & {
     color: gold;
+  }
+
+  .score-emoji-input:has(&) .radio-container:not(&) svg {
+    color: #333;
   }
 }
 
 .radio-container {
   cursor: pointer;
-  font-size: 2rem;
+  user-select: none;
 }
 
 .radio {
@@ -21,15 +27,14 @@
   pointer-events: none;
 }
 
-.score-emoji {
-  filter: grayscale(100%);
-  user-select: none;
-
-  .selected & {
-    filter: grayscale(0%);
-  }
-}
-
 .score-star {
   width: 2rem;
 }
+
+.score-emoji-input {
+  svg {
+    height: 2.5rem;
+    transition: .2s color;
+  }
+}
+

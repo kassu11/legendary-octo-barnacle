@@ -1,6 +1,7 @@
 import Star from "../../assets/Star";
 import { Show, Switch, Match } from "solid-js";
 import style from "./Score.module.scss";
+import Emoji from "../../assets/Emoji";
 
 function Score(props) {
   return (
@@ -13,9 +14,9 @@ function Score(props) {
           <Match when={props.format === "POINT_5"}>{props.score}/5 <Star class={style.scoreStar} /></Match>
           <Match when={props.format === "POINT_3"}>
             <Switch>
-              <Match when={props.score === 1}>😟</Match>
-              <Match when={props.score === 2}>😐</Match>
-              <Match when={props.score === 3}>😁</Match>
+              <Match when={props.score === 1}><Emoji class={style.scoreEmoji} score={80} /></Match>
+              <Match when={props.score === 2}><Emoji class={style.scoreEmoji} score={70} /></Match>
+              <Match when={props.score === 3}><Emoji class={style.scoreEmoji} score={0} /></Match>
             </Switch>
           </Match>
         </Switch>
