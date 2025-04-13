@@ -47,7 +47,17 @@
     background-color: azure;
   }
   .horizontal-search-card {
-    background-color: orange;
+    background-color: grey;
+
+    .list-status {
+      width: 0.8em;
+      height: 0.8em;
+      margin-right: .25rem;
+      border-radius: 50%;
+      display: inline-block;
+      text-align: center;
+      background-color: var(--status-color, purple);
+    }
     a {
       color: white;
       text-decoration: none;

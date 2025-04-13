@@ -124,6 +124,7 @@ by the file they are in.
 - .content
 - .cover
 - .cover-container
+- .list-status
 - .form
 - .header
 - .input-grid

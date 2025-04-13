@@ -379,7 +379,12 @@ function HorizontalCardRow(props) {
           <li class="horizontal-search-card">
             <A href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
               <img src={card.coverImage.large} class="cover" alt="Cover." />
-              <p class="line-clamp-2">{card.title.userPreferred}</p>
+              <p class="line-clamp-2">
+                <Show when={card.mediaListEntry?.status}>
+                  <div class="list-status" attr:data-status={card.mediaListEntry.status}></div>
+                </Show>
+                {card.title.userPreferred}
+              </p>
             </A> 
           </li>
         )}</For>
