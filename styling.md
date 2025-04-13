@@ -119,12 +119,15 @@ by the file they are in.
 ### 3. Generic Decorator Classes
 
 - .banner
+- .clamp
 - .container
 - .content
 - .cover
+- .cover-container
 - .form
 - .header
 - .input-grid
+- .ranking
 
 ### 4. Generic State Classes
 

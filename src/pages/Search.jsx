@@ -5,7 +5,8 @@ import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
+import Emoji from "../assets/Emoji";
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
@@ -299,7 +300,7 @@ function AnimeSearch() {
         <HorizontalCardRow data={animeData().data.data.season.media} title="Popular this season" />
         <HorizontalCardRow data={animeData().data.data.nextSeason.media} title="Upcoming next season" />
         <HorizontalCardRow data={animeData().data.data.popular.media} title="All time popular" />
-        <HorizontalCardRow data={animeData().data.data.top.media} title="Top 100 anime" />
+        <VerticalCardRow data={animeData().data.data.top.media} title="Top 100 anime" />
       </div>
     </Show>
   );
@@ -308,18 +309,56 @@ function AnimeSearch() {
 function VerticalCardRow(props) {
   return (
     <section class="vertical-search-card-section">
-      <div class="vertical-search-card-header">
+      <div class="search-cards-header">
         <h2>{props.title}</h2>
         <A href="">View all</A>
       </div>
       <ol class="vertical-search-card-row">
         <For each={props.data}>
-          {card => (
-            <li class="vertical-search-card">
-              <A href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
-                <img src={card.coverImage.large} class="cover" alt="Cover." />
-                <p class="line-clamp-2">{card.title.userPreferred}</p>
-              </A> 
+          {(card, i) => (
+            <li class="vertical-search-card" style={{"--media-background-color": card.coverImage.color}}>
+              <p class="ranking">
+                #
+                <span>{i() + 1}</span>
+              </p>
+              <div class="vertical-search-card-body">
+                <A 
+                  class="cover-container"
+                  href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+                  <img src={card.coverImage.large} class="cover" alt="Cover." />
+                </A> 
+                <div class="vertical-search-card-content clamp">
+                  <A class="line-clamp-2" href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+                    {card.title.userPreferred}
+                  </A> 
+                  <ol class="vertical-search-card-genre-list">
+                    <For each={card.genres}>{genre => (
+                      <li class="vertical-search-card-genre">
+                        <A href={"/search/anime?genres=" + genre.toLowerCase()}>{genre}</A>
+                      </li>
+                    )}</For>
+                  </ol>
+                </div>
+                <div class="vertical-search-card-info">
+                  <div class="vertical-search-card-score">
+                    <Emoji score={card.averageScore} />
+                    <div class="clamp">
+                      <p>{card.averageScore}%</p>
+                      <p>{numberCommas(card.popularity)} users</p>
+                    </div>
+                  </div>
+                  <div class="clamp">
+                    <p>{formatMediaFormat(card.format)}</p>
+                    <p>{numberCommas(card.episodes)} Episode
+                      <Show when={card.episodes > 1}>s</Show>
+                    </p>
+                  </div>
+                  <div class="clamp">
+                    <p>{capitalize(card.season)} {card.seasonYear}</p>
+                    <p>{capitalize(card.status)}</p>
+                  </div>
+                </div>
+              </div>
             </li>
           )}
         </For>
@@ -331,7 +370,7 @@ function VerticalCardRow(props) {
 function HorizontalCardRow(props) {
   return (
     <section class="horizontal-search-card-section">
-      <div class="horizontal-search-card-header">
+      <div class="search-cards-header">
         <h2>{props.title}</h2>
         <A href="">View all</A>
       </div>

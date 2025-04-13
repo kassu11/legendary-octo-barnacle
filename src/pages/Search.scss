@@ -1,16 +1,219 @@
-.search-page {
-  max-width: 85rem;
-  padding: 2rem 1rem;
-  margin-inline: auto;
-  background-color: purple;
+@layer layout {
+  .search-page {
+    max-width: 85rem;
+    padding: 2rem 1rem;
+    margin-inline: auto;
+    background-color: purple;
+  }
+
+  .media-search-header {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: .5rem;
+    justify-content: center;
+  }
+
+  .search-home-content {
+    display: grid;
+    gap: 3rem;
+    background-color: mediumvioletred;
+  }
+
+  .horizontal-search-card-section {
+    display: grid;
+    gap: .25rem;
+    background-color: tomato;
+
+    a {
+      text-decoration: none;
+      color: black;
+    }
+  }
+  .search-cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    background-color: springgreen;
+  }
+  .horizontal-search-card-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    padding: 0;
+    list-style: none;
+    gap: 0 2rem;
+    grid-template-rows: repeat(1, 1fr);
+    grid-auto-rows: 0;
+    overflow-y: hidden;
+    background-color: azure;
+  }
+  .horizontal-search-card {
+    background-color: orange;
+    a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .cover {
+      width: 100%;
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+    }
+  }
+
+
+  .vertical-search-card-row {
+    background-color: slateblue;
+    display: grid;
+    grid-template-columns: auto 4rem 1fr repeat(3, auto);
+    gap: 1rem;
+    padding: 0;
+    container-type: inline-size;
+    container-name: vertical-search-cards;
+    
+    .ranking {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+  }
+  .vertical-search-card {
+    background-color: brown;
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-items: end;
+  }
+  .vertical-search-card-body {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 2 / -1;
+    background-color: tomato;
+    padding: .5rem;
+
+    .clamp {
+      display: grid;
+      align-content: center;
+    }
+
+    .cover {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+    }
+  }
+  .vertical-search-card-content {
+    gap: .5rem;
+
+    > a {
+      text-decoration: none;
+      color: white;
+    }
+  }
+  .vertical-search-card-info {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: span 3;
+  }
+  .vertical-search-card-genre-list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    gap: .5rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    height: 1.75em;
+    overflow: hidden;
+  }
+  .vertical-search-card-genre {
+    list-style: none;
+    padding: .1em .75em;
+    border-radius: 2em;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background-color: var(--media-background-color, orange);
+
+    a {
+      text-decoration: none;
+      color: rgb(0 0 0 / 80%);
+    }
+  }
+
+  .vertical-search-card-score {
+    display: grid;
+    grid-template-columns: 2rem auto;
+    gap: .5rem;
+    align-items: center;
+  }
+
 }
 
-.media-search-header {
-  display: grid;
-  grid-template-columns: repeat(4, auto);
-  gap: .5rem;
-  justify-content: center;
+
+@layer resize {
+  @container vertical-search-cards (width < 42em) {
+    .vertical-search-card {
+      position: relative;
+      justify-items: unset;
+      display: block;
+
+      .ranking {
+        position: absolute;
+        transform: translate(-10%, -10%);
+        width: max-content;
+        min-width: 2em;
+        height: auto;
+        aspect-ratio: 1/1;
+        background-color: var(--media-background-color, orange);
+        padding: .25em;
+        border-radius: 100%;
+        display: grid;
+        align-items: center;
+        justify-content: center;
+        grid-template-columns: auto auto;
+        font-size: 1.25rem;
+        pointer-events: none;
+      }
+    }
+
+    .vertical-search-card-body {
+      background-color: red;
+      grid-column: 1;
+      grid-template-columns: 4rem 1fr;
+      gap: .5rem;
+
+      .cover-container {
+        grid-row: span 2;
+      }
+    }
+
+
+    .vertical-search-card-info {
+      display: flex;
+      flex-wrap: wrap;
+      grid-column: 2;
+      gap: 0 1rem;
+
+      .clamp {
+        display: flex;
+        gap: 1rem;
+      }
+
+      * {
+        white-space: nowrap;
+      }
+    }
+
+    .vertical-search-card-score {
+      grid-template-columns: 1.1em auto;
+      gap: .5rem;
+    }
+  }
 }
+
+
+
+
 
 .cards {
   list-style: none;
@@ -23,54 +226,6 @@
 
 .card {
   background-color: green;
-  a {
-    color: white;
-    text-decoration: none;
-  }
-
-  .cover {
-    width: 100%;
-    aspect-ratio: 5.5/8;
-    object-fit: cover;
-  }
-}
-.search-home-content {
-  display: grid;
-  gap: 3rem;
-  background-color: mediumvioletred;
-}
-.horizontal-search-card-section {
-  display: grid;
-  gap: .25rem;
-  background-color: tomato;
-
-  a {
-    text-decoration: none;
-    color: black;
-  }
-}
-
-.horizontal-search-card-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  padding: 0;
-  list-style: none;
-  gap: 0 2rem;
-  grid-template-rows: repeat(1, 1fr);
-  grid-auto-rows: 0;
-  overflow-y: hidden;
-  background-color: azure;
-}
-
-.horizontal-search-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  background-color: springgreen;
-}
-
-.horizontal-search-card {
-  background-color: orange;
   a {
     color: white;
     text-decoration: none;
