@@ -116,17 +116,8 @@ function MediaInfo(props) {
         </div>
         <div class={style.main}>
           <Header 
-            averageScore={props.media.averageScore} 
-            favourites={props.media.favourites}
-            format={props.media.format}
-            meanScore={props.media.meanScore} 
-            popularity={props.media.popularity}
-            season={props.media.season}
-            seasonYear={props.media.seasonYear}
-            source={props.media.source}
+            {...props.media} 
             ratingUsers={props.media.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0)}
-            stats={props.media.stats}
-            status={props.media.status}
           />
           <div>
             <h1>{props.media.title.userPreferred}</h1>
@@ -152,7 +143,7 @@ function MediaInfo(props) {
               )}</For>
             </ol>
           </div>
-          <Characters characters={props.media.characterPreview.edges} />
+          <Characters characters={props.media.characterPreview.edges} countryOfOrigin={props.media.countryOfOrigin} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
         </div>

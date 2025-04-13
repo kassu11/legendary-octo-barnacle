@@ -1,4 +1,5 @@
-import { capitalize, numberCommas } from "../../utils/formating";
+import { Match, Show, Switch } from "solid-js";
+import { capitalize, formatMediaFormat, numberCommas } from "../../utils/formating";
 import style from "./Header.module.scss";
 
 const Header = (props) => {
@@ -26,7 +27,13 @@ const Header = (props) => {
         </ul>
         <ul class={style.bottom}>
           <li>{capitalize(props.season) || "TBA"} {props.seasonYear}</li>
-          <li>{props.format}</li>
+          <li>
+            {formatMediaFormat(props.format)}
+            <Switch>
+              <Match when={props.countryOfOrigin === "CN"}> (Chinese)</Match>
+              <Match when={props.countryOfOrigin === "TW"}> (Taiwanese)</Match>
+            </Switch>
+          </li>
           <li>{capitalize(props.status)}</li>
         </ul>
       </div>

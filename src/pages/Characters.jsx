@@ -1,8 +1,8 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { batch, createEffect, createSignal, Match, onCleanup, onMount, Show } from "solid-js";
 import "./Characters.scss";
-import { capitalize } from "../utils/formating";
+import { capitalize, languageFromCountry } from "../utils/formating";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();
@@ -26,10 +26,15 @@ function Characters(props) {
   const params = useParams();
   const [languages, setLanguages] = createSignal([]);
   const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
+  const [countryOfOrigin, setCountryOfOrigin] = createSignal("JP");
+
 
   createEffect(() => {
     if (languages().length) {
-      setLanguage(languages()[0]);
+      const language = languageFromCountry(countryOfOrigin());
+      const countryOfOriginIndex = languages().findIndex(lang => lang.language === language);
+      const defaultLanguage = countryOfOriginIndex !== -1 ? countryOfOriginIndex : languages().findIndex(lang => lang.language === "Japanese");
+      setLanguage(languages()[defaultLanguage === -1 ? 0 : defaultLanguage]);
     }
   });
 
@@ -40,7 +45,7 @@ function Characters(props) {
   return (
     <div class="characters-page">
       <Show when={languages().length}>
-        <select onChange={e => setLanguage(languages()[e.target.value])}>
+        <select onChange={e => setLanguage(languages()[e.target.value])} value={languages().findIndex(v => v === language())}>
           <For each={languages()}>{(lang, i) => (
             <option value={i()}>
               {lang.language}
@@ -54,6 +59,7 @@ function Characters(props) {
           id={params.id} 
           page={1} 
           setLanguages={setLanguages} 
+          setCountryOfOrigin={setCountryOfOrigin} 
           language={language().language} 
           dubGroup={language().dubGroup} 
           setIdMal={props.setIdMal} 
@@ -109,8 +115,11 @@ function CharactersPage(props) {
       }
     }
 
-    props.setLanguages([...newLanguages.values()]);
-    props.setIdMal(characters().data.data.Media.idMal ?? undefined);
+    batch(() => {
+      props.setCountryOfOrigin(characters().data.data.Media.countryOfOrigin || "JP");
+      props.setLanguages([...newLanguages.values()]);
+      props.setIdMal(characters().data.data.Media.idMal ?? undefined);
+    });
   });
 
   return (
@@ -121,12 +130,12 @@ function CharactersPage(props) {
           <Show when={edge.voiceActorRoles.filter(role => 
             role.voiceActor.language === props.language && role.dubGroup === props.dubGroup
           )}>{voiceActorRoles => (
-            <Show when={voiceActorRoles().length} fallback={<Card edge={edge}></Card>}>
-              <For each={voiceActorRoles()}>{actorRole => (
-                <Card edge={edge} actorRole={actorRole} />
-              )}</For>
-            </Show>
-          )}</Show>
+              <Show when={voiceActorRoles().length} fallback={<Card edge={edge}></Card>}>
+                <For each={voiceActorRoles()}>{actorRole => (
+                  <Card edge={edge} actorRole={actorRole} />
+                )}</For>
+              </Show>
+            )}</Show>
         )}</For>
         <Show when={characters().data.data.Media.characters.pageInfo.hasNextPage}>
           <CharactersPage 

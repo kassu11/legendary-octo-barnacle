@@ -5,6 +5,22 @@ export const capitalize = text => {
   return text[0].toUpperCase() + text.substring(1).toLowerCase();
 }
 
+
+export const languageFromCountry = country => {
+  if (!country?.length) {
+    return "";
+  }
+
+  switch(country) {
+    case "CN":
+      return "Chinese";
+    case "TW":
+      return "Taiwanese";
+    default:
+      return "Japanese";
+  }
+}
+
 export const formatMediaFormat = text => {
   if (!text?.length) {
     return "";
