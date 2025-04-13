@@ -76,4 +76,23 @@
   main#page-content {
     min-height: 100vh;
   }
+
+  [data-status="COMPLETED"] {
+    --status-color: lime;
+  }
+  [data-status="CURRENT"] {
+    --status-color: skyblue;
+  }
+  [data-status="DROPPED"] {
+    --status-color: red;
+  }
+  [data-status="PAUSED"] {
+    --status-color: crimson;
+  }
+  [data-status="PLANNING"] {
+    --status-color: orange;
+  }
+  [data-status="REPEATING"] {
+    --status-color: blue;
+  }
 }
