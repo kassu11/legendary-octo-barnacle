@@ -2,6 +2,7 @@ import Star from "../../assets/Star";
 import { Switch, Match, mergeProps, splitProps } from "solid-js";
 import "./ScoreInput.scss";
 import { assert } from "../../utils/assert.js";
+import Emoji from "../../assets/Emoji.jsx";
 
 function ScoreInput(props) {
   assert(props.format, "Score format is missing");
@@ -50,12 +51,12 @@ function ScoreInput(props) {
           }} />
         </Match>
         <Match when={props.format === "POINT_5"}>
-          <div class="score-input">
+          <div class="score-star-input">
             <StarRadioRange {...info} onChange={props.onChange} />
           </div>
         </Match>
         <Match when={props.format === "POINT_3"}>
-          <div class="score-input">
+          <div class="score-emoji-input">
             <EmojiRadioRange {...info} onChange={props.onChange} />
           </div>
         </Match>
@@ -87,7 +88,7 @@ function StarRadioRange(props) {
 }
 
 function EmojiRadioRange(props) {
-  const values = ["", "😟", "😐", "😁"];
+  const values = ["", 0, 60, 80];
   return (
     <For each={[1,2,3]}>{i => (
       <label classList={{"radio-container": true, selected: i == props.value}}>
@@ -103,7 +104,7 @@ function EmojiRadioRange(props) {
             }
           }}
           name={props.name} id={props.id} value={i} checked={props.value == i}/>
-        <span class="score-emoji">{values[i]}</span>
+        <Emoji score={values[i]} />
       </label>
     )}</For>
   );
