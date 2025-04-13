@@ -79,7 +79,7 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
         id
         role
         name
-        voiceActors(language: JAPANESE, sort: [RELEVANCE, ID]) {
+        voiceActors(sort: [RELEVANCE, ID]) {
           id
           name {
             userPreferred
@@ -270,6 +270,7 @@ export const anilistCharacters = format`query media($id: Int, $page: Int) {
   Media(id: $id) {
     id
     idMal
+    countryOfOrigin,
     characters(page: $page, sort: [ROLE, RELEVANCE, ID]) {
       pageInfo {
         total
