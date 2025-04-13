@@ -5,6 +5,30 @@ export const capitalize = text => {
   return text[0].toUpperCase() + text.substring(1).toLowerCase();
 }
 
+export const formatMediaFormat = text => {
+  if (!text?.length) {
+    return "";
+  }
+
+  switch(text) {
+    case "TV":
+    case "ONA":
+    case "OVA":
+      return text;
+    case "MANGA":
+    case "MOVIE":
+    case "MUSIC":
+    case "NOVEL":
+    case "SPECIAL":
+    case "ONE_SHOT":
+    case "TV_SHORT":
+      return capitalize(text.replace("_", " "))
+    default:
+      console.error("Unknown media format");
+      return text;
+  }
+}
+
 export const numberCommas = num => {
   if (num == undefined) return;
   return Intl.NumberFormat("ja-JP").format(num)
