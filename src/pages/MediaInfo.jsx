@@ -82,33 +82,15 @@ function MediaInfo(props) {
           <img src={props.media.coverImage.large} alt="Cover" class={style.cover} />
           <Show when={accessToken()}>
             <button onClick={() => {
-              openEditor(
-                { 
-                  id: props.media.id,
-                  type: props.media.type,
-                  bannerImage: props.media.bannerImage,
-                  coverImage: {
-                    large: props.media.coverImage.large,
-                  },
-                  mediaListEntry: {
-                    score: props.media.mediaListEntry?.score,
-                    id: props.media.mediaListEntry?.id,
-                    status: props.media.mediaListEntry?.status,
-                  },
-                  title: {
-                    userPreferred: props.media.title.userPreferred,
-                  },
-                }, 
-                {
-                  setIsFavourite: (isFavourite) => {
-                    setIsFavourite(isFavourite);
-                    props.setMediaData(v => {
-                      v.data.data.Media.isFavourite = isFavourite;
-                      return v;
-                    });
-                  }
+              openEditor(props.media, {
+                setIsFavourite: (isFavourite) => {
+                  setIsFavourite(isFavourite);
+                  props.setMediaData(v => {
+                    v.data.data.Media.isFavourite = isFavourite;
+                    return v;
+                  });
                 }
-              );
+              });
             }}>{props.media.mediaListEntry?.status || "Edit"}</button>
             <FavouriteToggle 
               checked={isFavourite()} 
