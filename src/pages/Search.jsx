@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, splitProps, on, For, untrack } from "solid-js";
+import { createSignal, createEffect, Show, splitProps, on, For, untrack, Match } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -10,77 +10,123 @@ import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { getDates } from "../utils/dates";
 
-const joinIfArray = (arrayOrString, char = "&") => {
-  if (Array.isArray(arrayOrString)) {
-    return arrayOrString.join(char);
+function toArray(value) {
+  if (value == null || Array.isArray(value)) {
+    return value;
   }
 
-  return arrayOrString;
+  return [value];
 }
 
-function getSearchQueryFromObject(obj) {
-  const search = [];
-  if (obj.sort && obj.sort !== "POPULARITY_DESC" && obj !== "SEARCH_MATCH") {
-    search.push("sort=" + obj.sort);
+function parseUrl(type, header, search) {
+  const variables = { page: 1, sort: ["POPULARITY_DESC", "SCORE_DESC"] };
+  if (search.length === 0 && header === undefined) {
+    return undefined;
   }
 
-  if(obj.isAdult) {
-    search.push("age=adult");
-  } else if (obj.isAdult === undefined) {
-    search.push("age=all");
+  const searchObject = new URLSearchParams(search).entries().reduce((acc, [key, val]) => {
+    if (Array.isArray(acc[key])) {
+      acc[key].push(val);
+    } else if(acc[key] && val) {
+      acc[key] = [acc[key], val];
+    } else {
+      acc[key] = val || undefined;
+    }
+
+    return acc;
+  }, {});
+
+  if (Number(searchObject.page) > 1) {
+    variables.page = Number(searchObject.page);
   }
 
-  if (obj.year) {
-    search.push("year=" + parseInt(obj.year));
+  switch(searchObject.age) {
+    case "adult": 
+      variables.isAdult = true;
+      break;
+    case "all": 
+      break;
+    default: 
+      variables.isAdult = false;
   }
 
-  if ("chapterGreater" in obj) { search.push("chapterGreater=" + joinIfArray(obj.chapterGreater)); }
-  if ("chapterLesser" in obj) { search.push("chapterLesser=" + joinIfArray(obj.chapterLesser)); }
-  if ("countryOfOrigin" in obj) { search.push("countryOfOrigin=" + joinIfArray(obj.countryOfOrigin)); }
-  if ("durationGreater" in obj) { search.push("durationGreater=" + joinIfArray(obj.durationGreater)); }
-  if ("durationLesser" in obj) { search.push("durationLesser=" + joinIfArray(obj.durationLesser)); }
-  if ("episodeGreater" in obj) { search.push("episodeGreater=" + joinIfArray(obj.episodeGreater)); }
-  if ("episodeLesser" in obj) { search.push("episodeLesser=" + joinIfArray(obj.episodeLesser)); }
-  if ("excludedGenres" in obj) { search.push("excludedGenres=" + joinIfArray(obj.excludedGenres)); }
-  if ("excludedTags" in obj) { search.push("excludedTags=" + joinIfArray(obj.excludedTags)); }
-  if ("format" in obj) { search.push("format=" + joinIfArray(obj.format)); }
-  if ("genres" in obj) { search.push("genres=" + joinIfArray(obj.genres)); }
-  if ("id" in obj) { search.push("id=" + joinIfArray(obj.id)); }
-  if ("isLicensed" in obj) { search.push("isLicensed=" + joinIfArray(obj.isLicensed)); }
-  if ("licensedBy" in obj) { search.push("licensedBy=" + joinIfArray(obj.licensedBy)); }
-  if ("minimumTagRank" in obj) { search.push("minimumTagRank=" + joinIfArray(obj.minimumTagRank)); }
-  if ("onList" in obj) { search.push("onList=" + joinIfArray(obj.onList)); }
-  if ("search" in obj) { search.push("search=" + joinIfArray(obj.search)); }
-  if ("season" in obj) { search.push("season=" + joinIfArray(obj.season)); }
-  if ("source" in obj) { search.push("source=" + joinIfArray(obj.source)); }
-  if ("status" in obj) { search.push("status=" + joinIfArray(obj.status)); }
-  if ("tags" in obj) { search.push("tags=" + joinIfArray(obj.tags)); }
-  if ("volumeGreater" in obj) { search.push("volumeGreater=" + joinIfArray(obj.volumeGreater)); }
-  if ("volumeLesser" in obj) { search.push("volumeLesser=" + joinIfArray(obj.volumeLesser)); }
-  if ("yearGreater" in obj) { search.push("yearGreater=" + joinIfArray(obj.yearGreater)); }
-  if ("yearLesser" in obj) { search.push("yearLesser=" + joinIfArray(obj.yearLesser)); }
+  if (searchObject.search && !searchObject.sort) {
+    variables.sort = "SEARCH_MATCH"; 
+  } else {
+    variables.sort = searchObject.sort;
+  }
 
-  if (search.length) {
-    return "?" + search.join("&");
-  } 
+  if (searchObject.year) {
+    variables.year = searchObject.year + "%";
+  }
 
-  return "";
-}
+  if (type === "anime") {
+    variables.type = "ANIME";
+  } else if (type === "manga") {
+    variables.type = "MANGA";
+  }
+
+  if (header === "this-season") {
+    const dates = getDates();
+    variables.year = dates.seasonYear + "%";
+    variables.season = dates.season;
+  }
+
+  variables.chapterGreater ??= searchObject.chapterGreater;
+  variables.chapterLesser ??= searchObject.chapterLesser;
+  variables.countryOfOrigin ??= searchObject.countryOfOrigin;
+  variables.durationGreater ??= searchObject.durationGreater;
+  variables.durationLesser ??= searchObject.durationLesser;
+  variables.episodeGreater ??= searchObject.episodeGreater;
+  variables.episodeLesser ??= searchObject.episodeLesser;
+  variables.excludedGenres ??= searchObject.excludedGenres;
+  variables.excludedTags ??= searchObject.excludedTags;
+  variables.format ??= toArray(searchObject.format);
+  variables.genres ??= searchObject.genres;
+  variables.id ??= searchObject.id;
+  // variables.isAdult ??= searchObject.isAdult;
+  variables.isLicensed ??= searchObject.isLicensed;
+  variables.licensedBy ??= searchObject.licensedBy;
+  variables.minimumTagRank ??= searchObject.minimumTagRank;
+  variables.onList ??= searchObject.onList;
+  variables.search ??= searchObject.search;
+  variables.season ??= searchObject.season;
+  variables.source ??= searchObject.source;
+  variables.status ??= searchObject.status;
+  variables.tags ??= searchObject.tags;
+  // variables.type ??= searchObject.type;
+  variables.volumeGreater ??= searchObject.volumeGreater;
+  variables.volumeLesser ??= searchObject.volumeLesser;
+  variables.year ??= searchObject.year;
+  variables.yearGreater ??= searchObject.yearGreater;
+  variables.yearLesser ??= searchObject.yearLesser;
+
+  for(const [key, value] of Object.entries(variables)) {
+    if (value == null) { delete variables[key]; }
+    if (value === "false") { variables[key] = false; }
+    if (value === "true") { variables[key] = true; }
+  }
+
+  return variables;
+};
 
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
   let _lastTimeHistoryChanged = performance.now()
+  let form;
 
   const { accessToken } = useAuthentication();
   const params = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, _setSearchParams] = useSearchParams();
-  const _initVariables = getSearchParamObject();
+  const _initVariables = parseUrl(params.type, params.header, location.search);
   const [variables, setVariables] = createSignal(_initVariables);
   const [cacheVariables, setCacheVariables] = createSignal(_initVariables);
   const [mediaData, { mutate: mutateMediaData }] = api.anilist.searchMedia(accessToken, variables);
   const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
+
+  const [formStateObject, setFormStateObject] = createSignal({});
 
   createEffect(on(cacheData, data => {
     if (data) {
@@ -95,102 +141,33 @@ function Search() {
     _lastTimeHistoryChanged = performance.now();
   }
 
-  function getSearchParamObject() {
-    if (location.search.length === 0 && params.header === undefined) {
-      return undefined;
-    }
-
-    const search = { "page": 1, "sort": "POPULARITY_DESC" };
-    if (Number(searchParams.page) > 1) {
-      search.page = Number(searchParams.page);
-    }
-
-    switch(searchParams.age) {
-      case "adult": 
-        search.isAdult = true;
-        break;
-      case "all": 
-        break;
-      default: 
-        search.isAdult = false;
-    }
-
-    if (searchParams.year) {
-      search.year = searchParams.year + "%";
-    }
-
-    if (searchParams.search && !searchParams.sort) {
-      search.sort = "SEARCH_MATCH"
-    } else {
-      search.sort = searchParams.sort;
-    }
-
-    if (params.type === "anime") {
-      search.type = "ANIME";
-    } else if (params.type === "manga") {
-      search.type = "MANGA";
-    }
-
-    if (params.header === "this-season") {
-      const dates = getDates();
-      search.year = dates.seasonYear + "%";
-      search.season = dates.season;
-    }
-
-
-
-    search.chapterGreater ??= searchParams.chapterGreater;
-    search.chapterLesser ??= searchParams.chapterLesser;
-    search.countryOfOrigin ??= searchParams.countryOfOrigin;
-    search.durationGreater ??= searchParams.durationGreater;
-    search.durationLesser ??= searchParams.durationLesser;
-    search.episodeGreater ??= searchParams.episodeGreater;
-    search.episodeLesser ??= searchParams.episodeLesser;
-    search.excludedGenres ??= searchParams.excludedGenres;
-    search.excludedTags ??= searchParams.excludedTags;
-    search.format ??= searchParams.format;
-    search.genres ??= searchParams.genres;
-    search.id ??= searchParams.id;
-    // search.isAdult ??= searchParams.isAdult;
-    search.isLicensed ??= searchParams.isLicensed;
-    search.licensedBy ??= searchParams.licensedBy;
-    search.minimumTagRank ??= searchParams.minimumTagRank;
-    search.onList ??= searchParams.onList;
-    search.search ??= searchParams.search;
-    search.season ??= searchParams.season;
-    search.source ??= searchParams.source;
-    search.status ??= searchParams.status;
-    search.tags ??= searchParams.tags;
-    // search.type ??= searchParams.type;
-    search.volumeGreater ??= searchParams.volumeGreater;
-    search.volumeLesser ??= searchParams.volumeLesser;
-    // search.year ??= searchParams.year;
-    search.yearGreater ??= searchParams.yearGreater;
-    search.yearLesser ??= searchParams.yearLesser;
-
-    for(const [key, value] of Object.entries(search)) {
-      if (value == null) { delete search[key]; }
-      if (value === "false") { search[key] = false; }
-      if (value === "true") { search[key] = true; }
-    }
-
-    return search;
-  }
-
-
   createEffect(() => {
-    searchParams;
-    const search = getSearchParamObject()
+    const variables = parseUrl(params.type, params.header, location.search);
+    const state = {};
+    for(const [key, val] of Object.entries(variables || {})) {
+      if (Array.isArray(val)) {
+        state[key] = Object.fromEntries(val.map(k => ([k, true])));
+      } else {
+        state[key] = val;
+      }
+    }
+    setFormStateObject(state);
+
     untrack(() => {
-      if(search) {
+      if(variables) {
         if (params.header && location.search.length) {
-          const newSearchQuery = getSearchQueryFromObject(search);
-          console.log("newSearchQuery:", newSearchQuery);
-          navigate("/search" + (!params.type || ("/" + params.type)) + newSearchQuery);
+          const formData = new FormData(form);
+          const search = [];
+          new URLSearchParams(formData).entries().forEach(([key, val]) => {
+            if (val && key !== "type") {
+              search.push(key + "=" + val);
+            }
+          });
+          navigate("/search" + (!params.type || ("/" + params.type)) + "?" + search.join("&"));
           return;
         }
-        triggerVariable(search);
-        setCacheVariables(search);
+        triggerVariable(variables);
+        setCacheVariables(variables);
       } else {
         mutateMediaData(undefined);
       }
@@ -199,7 +176,7 @@ function Search() {
 
   return (
     <div class="search-page">
-      <form action="https://graphql.anilist.co" class="media-search-header" onInput={e => {
+      <form ref={form} action="https://graphql.anilist.co" class="media-search-header" onInput={e => {
         const formData = new FormData(e.currentTarget);
         const data = formData.entries().reduce((acc, [key, val]) => {
           if (Array.isArray(acc[key])) {
@@ -229,44 +206,51 @@ function Search() {
       }}>
         <button type="button" onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
         <div>
-          <InputSearch type="search" id="search" name="search">Search </InputSearch>
+          <label htmlFor="search">Search</label><br />
+          <input type="search" name="search" id="search" value={formStateObject().search || ""} />
         </div>
         <div>
           <p>Media Type</p>
           <select name="type">
-            <TypeOption name="type" value="">Both</TypeOption>
-            <TypeOption name="type" value="anime">Anime</TypeOption>
-            <TypeOption name="type" value="manga">Manga</TypeOption>
+            <option selected={params.type === undefined} value="">Both</option>
+            <option selected={params.type === "anime"} value="anime">Anime</option>
+            <option selected={params.type === "manga"} value="manga">Manga</option>
           </select>
         </div>
         <div>
           <p>Rating</p>
           <select name="age">
-            <Option name="age" value="">R-17+</Option>
-            <Option name="age" value="adult">R-18</Option>
-            <Option name="age" value="all">All ratings</Option>
+            <option selected={formStateObject().isAdult === false} value="">R-17+</option>
+            <option selected={formStateObject().isAdult === true} value="adult">R-18</option>
+            <option selected={formStateObject().isAdult === undefined} value="all">All ratings</option>
           </select>
         </div>
         <div>
           <p>On my list</p>
-          <select name="onList">
-            <Option name="onList" value="">Default</Option>
-            <Option name="onList" value="false">Exclude</Option>
-            <Option name="onList" value="true">Include</Option>
+          <select name="onList" value={formStateObject().onList?.toString() || ""}>
+            <option value="">Default</option>
+            <option value="false">Exclude</option>
+            <option value="true">Include</option>
           </select>
         </div>
         <div>
-          <InputSearch type="number" name="year" id="year" maxlength="4" size="4">Year</InputSearch>
+          <label htmlFor="year">Year</label><br />
+          <input 
+            type="number" 
+            name="year" 
+            id="year" 
+            value={formStateObject().year?.substring(0, formStateObject().year.length - 1) || ""} 
+          />
         </div>
         <Show when={params.type === "anime"}>
           <div>
             <p>Season</p>
             <select name="season">
-              <Option name="season" value="">Select season</Option>
-              <Option name="season" value="WINTER">Winter</Option>
-              <Option name="season" value="SPRING">Spring</Option>
-              <Option name="season" value="SUMMER">Summer</Option>
-              <Option name="season" value="FALL">Fall</Option>
+              <option selected={formStateObject().season === ""} value="">Select season</option>
+              <option selected={formStateObject().season === "WINTER"} value="WINTER">Winter</option>
+              <option selected={formStateObject().season === "SPRING"} value="SPRING">Spring</option>
+              <option selected={formStateObject().season === "SUMMER"} value="SUMMER">Summer</option>
+              <option selected={formStateObject().season === "FALL"} value="FALL">Fall</option>
             </select>
           </div>
         </Show>
@@ -274,18 +258,18 @@ function Search() {
           <p>Format</p>
           <select name="format" multiple>
             <Show when={searchParams.type !== "ANIME"}>
-              <Option name="format" value="MANGA">Manga</Option>
-              <Option name="format" value="NOVEL">Novel</Option>
-              <Option name="format" value="ONE_SHOT">One shot</Option>
+              <option selected={formStateObject().format?.MANGA} value="MANGA">Manga</option>
+              <option selected={formStateObject().format?.NOVEL} value="NOVEL">Novel</option>
+              <option selected={formStateObject().format?.ONE_SHOT} value="ONE_SHOT">One shot</option>
             </Show>
             <Show when={searchParams.type !== "MANGA"}>
-              <Option name="format" value="MOVIE">Movie</Option>
-              <Option name="format" value="MUSIC">Music</Option>
-              <Option name="format" value="ONA">Ona</Option>
-              <Option name="format" value="OVA">Ova</Option>
-              <Option name="format" value="SPECIAL">Special</Option>
-              <Option name="format" value="TV">TV</Option>
-              <Option name="format" value="TV_SHORT">TV short</Option>
+              <option selected={formStateObject().format?.MOVIE} value="MOVIE">Movie</option>
+              <option selected={formStateObject().format?.MUSIC} value="MUSIC">Music</option>
+              <option selected={formStateObject().format?.ONA} value="ONA">Ona</option>
+              <option selected={formStateObject().format?.OVA} value="OVA">Ova</option>
+              <option selected={formStateObject().format?.SPECIAL} value="SPECIAL">Special</option>
+              <option selected={formStateObject().format?.TV} value="TV">TV</option>
+              <option selected={formStateObject().format?.TV_SHORT} value="TV_SHORT">TV short</option>
             </Show>
           </select>
         </div>
@@ -311,51 +295,6 @@ function Search() {
       </Switch>
     </div>
   )
-
-  function InputSearch(props) {
-    const [otherProps, inputProps] = splitProps(props, ["children"]);
-    assert(inputProps.type, "Input type is missing");
-    assert(inputProps.name, "Input name is missing");
-
-    return (
-      <>
-        <label htmlFor={inputProps.id}>{otherProps.children}</label><br />
-        <input value={searchParams[props.name] || ""} {...inputProps} />
-      </>
-    )
-  }
-
-  function Input(props) {
-    const [otherProps, inputProps] = splitProps(props, ["children"]);
-    assert(inputProps.type, "Input type is missing");
-    assert(inputProps.name, "Input name is missing");
-    assert(!inputProps.value !== undefined, "Input value is missing");
-
-    return (
-      <>
-        <input checked={(searchParams[props.name] || "") === props.value} {...inputProps} />
-        <label htmlFor={inputProps.id}>{otherProps.children}</label>
-      </>
-    )
-  }
-
-  function Option(props) {
-    assert(props.name, "Option name is missing");
-    assert(props.value !== undefined, "Option value is missing");
-
-    return (
-      <option selected={(searchParams[props.name] || "").includes(props.value)} {...props} />
-    )
-  }
-
-  function TypeOption(props) {
-    assert(props.name, "Option name is missing");
-    assert(props.value !== undefined, "Option value is missing");
-
-    return (
-      <option selected={(params.type || "") === props.value} {...props} />
-    )
-  }
 }
 
 function AnimeSearch() {
