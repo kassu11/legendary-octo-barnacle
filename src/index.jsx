@@ -8,8 +8,6 @@ import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
-import Anime from "./pages/Anime.jsx";
-import Manga from "./pages/Manga.jsx";
 import Search from "./pages/Search.jsx";
 import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
