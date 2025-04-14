@@ -9,6 +9,63 @@ import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from ".
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 
+const joinIfArray = (arrayOrString, char = "&") => {
+  if (Array.isArray(arrayOrString)) {
+    return arrayOrString.join(char);
+  }
+
+  return arrayOrString;
+}
+
+function getSearchQueryFromObject(obj) {
+  const search = [];
+  if (obj.sort && obj.sort !== "POPULARITY_DESC" && obj !== "SEARCH_MATCH") {
+    search.push("sort=" + obj.sort);
+  }
+
+  if(obj.isAdult) {
+    search.push("age=adult");
+  } else if (obj.isAdult === undefined) {
+    search.push("age=all");
+  }
+
+  if (obj.year) {
+    search.push("year=" + parseInt(obj.year));
+  }
+
+  if ("chapterGreater" in obj) { search.push("chapterGreater=" + joinIfArray(obj.chapterGreater)); }
+  if ("chapterLesser" in obj) { search.push("chapterLesser=" + joinIfArray(obj.chapterLesser)); }
+  if ("countryOfOrigin" in obj) { search.push("countryOfOrigin=" + joinIfArray(obj.countryOfOrigin)); }
+  if ("durationGreater" in obj) { search.push("durationGreater=" + joinIfArray(obj.durationGreater)); }
+  if ("durationLesser" in obj) { search.push("durationLesser=" + joinIfArray(obj.durationLesser)); }
+  if ("episodeGreater" in obj) { search.push("episodeGreater=" + joinIfArray(obj.episodeGreater)); }
+  if ("episodeLesser" in obj) { search.push("episodeLesser=" + joinIfArray(obj.episodeLesser)); }
+  if ("excludedGenres" in obj) { search.push("excludedGenres=" + joinIfArray(obj.excludedGenres)); }
+  if ("excludedTags" in obj) { search.push("excludedTags=" + joinIfArray(obj.excludedTags)); }
+  if ("format" in obj) { search.push("format=" + joinIfArray(obj.format)); }
+  if ("genres" in obj) { search.push("genres=" + joinIfArray(obj.genres)); }
+  if ("id" in obj) { search.push("id=" + joinIfArray(obj.id)); }
+  if ("isLicensed" in obj) { search.push("isLicensed=" + joinIfArray(obj.isLicensed)); }
+  if ("licensedBy" in obj) { search.push("licensedBy=" + joinIfArray(obj.licensedBy)); }
+  if ("minimumTagRank" in obj) { search.push("minimumTagRank=" + joinIfArray(obj.minimumTagRank)); }
+  if ("onList" in obj) { search.push("onList=" + joinIfArray(obj.onList)); }
+  if ("search" in obj) { search.push("search=" + joinIfArray(obj.search)); }
+  if ("season" in obj) { search.push("season=" + joinIfArray(obj.season)); }
+  if ("source" in obj) { search.push("source=" + joinIfArray(obj.source)); }
+  if ("status" in obj) { search.push("status=" + joinIfArray(obj.status)); }
+  if ("tags" in obj) { search.push("tags=" + joinIfArray(obj.tags)); }
+  if ("volumeGreater" in obj) { search.push("volumeGreater=" + joinIfArray(obj.volumeGreater)); }
+  if ("volumeLesser" in obj) { search.push("volumeLesser=" + joinIfArray(obj.volumeLesser)); }
+  if ("yearGreater" in obj) { search.push("yearGreater=" + joinIfArray(obj.yearGreater)); }
+  if ("yearLesser" in obj) { search.push("yearLesser=" + joinIfArray(obj.yearLesser)); }
+
+  if (search.length) {
+    return "?" + search.join("&");
+  } 
+
+  return "";
+}
+
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
   let _lastTimeHistoryChanged = performance.now()
@@ -38,7 +95,7 @@ function Search() {
   }
 
   function getSearchParamObject() {
-    if (location.search.length === 0) {
+    if (location.search.length === 0 && params.header === undefined) {
       return undefined;
     }
 
@@ -73,36 +130,41 @@ function Search() {
       search.type = "MANGA";
     }
 
+    if (params.header === "this-season") {
+      search.year = "2025%";
+      search.season = "SPRING";
+    }
 
 
-    search.chapterGreater = searchParams.chapterGreater;
-    search.chapterLesser = searchParams.chapterLesser;
-    search.countryOfOrigin = searchParams.countryOfOrigin;
-    search.durationGreater = searchParams.durationGreater;
-    search.durationLesser = searchParams.durationLesser;
-    search.episodeGreater = searchParams.episodeGreater;
-    search.episodeLesser = searchParams.episodeLesser;
-    search.excludedGenres = searchParams.excludedGenres;
-    search.excludedTags = searchParams.excludedTags;
-    search.format = searchParams.format;
-    search.genres = searchParams.genres;
-    search.id = searchParams.id;
-    // search.isAdult = searchParams.isAdult;
-    search.isLicensed = searchParams.isLicensed;
-    search.licensedBy = searchParams.licensedBy;
-    search.minimumTagRank = searchParams.minimumTagRank;
-    search.onList = searchParams.onList;
-    search.search = searchParams.search;
-    search.season = searchParams.season;
-    search.source = searchParams.source;
-    search.status = searchParams.status;
-    search.tags = searchParams.tags;
-    // search.type = searchParams.type;
-    search.volumeGreater = searchParams.volumeGreater;
-    search.volumeLesser = searchParams.volumeLesser;
-    // search.year = searchParams.year;
-    search.yearGreater = searchParams.yearGreater;
-    search.yearLesser = searchParams.yearLesser;
+
+    search.chapterGreater ??= searchParams.chapterGreater;
+    search.chapterLesser ??= searchParams.chapterLesser;
+    search.countryOfOrigin ??= searchParams.countryOfOrigin;
+    search.durationGreater ??= searchParams.durationGreater;
+    search.durationLesser ??= searchParams.durationLesser;
+    search.episodeGreater ??= searchParams.episodeGreater;
+    search.episodeLesser ??= searchParams.episodeLesser;
+    search.excludedGenres ??= searchParams.excludedGenres;
+    search.excludedTags ??= searchParams.excludedTags;
+    search.format ??= searchParams.format;
+    search.genres ??= searchParams.genres;
+    search.id ??= searchParams.id;
+    // search.isAdult ??= searchParams.isAdult;
+    search.isLicensed ??= searchParams.isLicensed;
+    search.licensedBy ??= searchParams.licensedBy;
+    search.minimumTagRank ??= searchParams.minimumTagRank;
+    search.onList ??= searchParams.onList;
+    search.search ??= searchParams.search;
+    search.season ??= searchParams.season;
+    search.source ??= searchParams.source;
+    search.status ??= searchParams.status;
+    search.tags ??= searchParams.tags;
+    // search.type ??= searchParams.type;
+    search.volumeGreater ??= searchParams.volumeGreater;
+    search.volumeLesser ??= searchParams.volumeLesser;
+    // search.year ??= searchParams.year;
+    search.yearGreater ??= searchParams.yearGreater;
+    search.yearLesser ??= searchParams.yearLesser;
 
     for(const [key, value] of Object.entries(search)) {
       if (value == null) { delete search[key]; }
@@ -113,11 +175,18 @@ function Search() {
     return search;
   }
 
+
   createEffect(() => {
     searchParams;
     const search = getSearchParamObject()
     untrack(() => {
       if(search) {
+        if (params.header && location.search.length) {
+          const newSearchQuery = getSearchQueryFromObject(search);
+          console.log("newSearchQuery:", newSearchQuery);
+          navigate("/search" + (!params.type || ("/" + params.type)) + newSearchQuery);
+          return;
+        }
         triggerVariable(search);
         setCacheVariables(search);
       } else {
@@ -187,16 +256,18 @@ function Search() {
         <div>
           <InputSearch type="number" name="year" id="year" maxlength="4" size="4">Year</InputSearch>
         </div>
-        <div>
-          <p>Season</p>
-          <select name="season">
-            <Option name="season" value="">Select season</Option>
-            <Option name="season" value="WINTER">Winter</Option>
-            <Option name="season" value="SPRING">Spring</Option>
-            <Option name="season" value="SUMMER">Summer</Option>
-            <Option name="season" value="FALL">Fall</Option>
-          </select>
-        </div>
+        <Show when={params.type === "anime"}>
+          <div>
+            <p>Season</p>
+            <select name="season">
+              <Option name="season" value="">Select season</Option>
+              <Option name="season" value="WINTER">Winter</Option>
+              <Option name="season" value="SPRING">Spring</Option>
+              <Option name="season" value="SUMMER">Summer</Option>
+              <Option name="season" value="FALL">Fall</Option>
+            </select>
+          </div>
+        </Show>
         <div>
           <p>Format</p>
           <select name="format" multiple>
@@ -217,9 +288,9 @@ function Search() {
           </select>
         </div>
       </form>
-      {console.log(mediaData())}
+      {/* {console.log(mediaData())} */}
       <Switch>
-        <Match when={location.search.length}>
+        <Match when={location.search.length || params.header}>
           <SearchContent content={mediaData()}/>
         </Match>
         <Match when={location.search.length === 0}>
@@ -291,13 +362,13 @@ function AnimeSearch() {
 
   return (
     <Show when={animeData()}>
-      <div>{console.log(animeData())}</div>
+      {/* <div>{console.log(animeData())}</div> */}
       <div class="search-home-content">
-        <HorizontalCardRow data={animeData().data.data.trending.media} title="Trending now" />
-        <HorizontalCardRow data={animeData().data.data.season.media} title="Popular this season" />
-        <HorizontalCardRow data={animeData().data.data.nextSeason.media} title="Upcoming next season" />
-        <HorizontalCardRow data={animeData().data.data.popular.media} title="All time popular" />
-        <VerticalCardRow data={animeData().data.data.top.media} title="Top 100 anime" />
+        <HorizontalCardRow data={animeData().data.data.trending.media} href="" title="Trending now" />
+        <HorizontalCardRow data={animeData().data.data.season.media} href="this-season" title="Popular this season" />
+        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="" title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.popular.media} href="" title="All time popular" />
+        <VerticalCardRow data={animeData().data.data.top.media} href="" title="Top 100 anime" />
       </div>
     </Show>
   );
@@ -375,11 +446,13 @@ function VerticalCardRow(props) {
 }
 
 function HorizontalCardRow(props) {
+  assert("href" in props, "Link is missing");
+
   return (
     <section class="horizontal-search-card-section">
       <div class="search-cards-header">
         <h2>{props.title}</h2>
-        <A href="">View all</A>
+        <A href={props.href}>View all</A>
       </div>
       <ol class="horizontal-search-card-row">
         <For each={props.data}>{card => (
