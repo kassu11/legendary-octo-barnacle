@@ -22,6 +22,7 @@ const filter = {
 }
 const search = {
   type: ["anime", "manga"],
+  header: ["this-season", "next-season"],
 }
 
 render(
@@ -32,7 +33,7 @@ render(
           <Router root={App} base="/legendary-octo-barnacle">
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
-            <Route path="/search/:type?" matchFilters={search} component={Search} />
+            <Route path="/search/:type?/:header?" matchFilters={search} component={Search} />
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">
               <Route path="/character/:id" matchFilters={filter} component={Character} />
