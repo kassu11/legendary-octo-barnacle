@@ -8,6 +8,7 @@ import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
+import { getDates } from "../utils/dates";
 
 const joinIfArray = (arrayOrString, char = "&") => {
   if (Array.isArray(arrayOrString)) {
@@ -131,8 +132,9 @@ function Search() {
     }
 
     if (params.header === "this-season") {
-      search.year = "2025%";
-      search.season = "SPRING";
+      const dates = getDates();
+      search.year = dates.seasonYear + "%";
+      search.season = dates.season;
     }
 
 
