@@ -75,17 +75,18 @@ function CharactersPage(props) {
   const [loadingAnimation, setLoadingAnimation] = createSignal(false);
   let loading;
 
-  const intersectionObserver = new IntersectionObserver((entries) => {
+  const options = { rootMargin: "300px" }
+  const callback = (entries) => {
     if (entries[0].isIntersecting === false) {
       return;
     }
 
     intersectionObserver.unobserve(entries[0].target);
-    window.addEventListener("scroll", () => {
-      setLoadingAnimation(true);
-      setPage(props.page);
-    }, {once: true});
-  });
+    setLoadingAnimation(true);
+    setPage(props.page);
+  };
+
+  const intersectionObserver = new IntersectionObserver(callback, options);
 
   onMount(() => {
     if (props.page > 1) {

@@ -811,7 +811,7 @@ export const searchMedia = format`query (
   $minimumTagRank: Int
   $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
 ) {
-  Page(page: $page, perPage: 20) {
+  Page(page: $page) {
     pageInfo {
       total
       perPage
