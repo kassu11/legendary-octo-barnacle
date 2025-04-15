@@ -420,11 +420,13 @@ function AnimeSearch() {
 
 function SearchContent(props) {
   return (
-    <ol class="search-page-content">
-      <Show when={props.content}>
-        <CardRow data={props.content.data.data.Page.media}/>
-      </Show>
-    </ol>
+    <div class="search-result-container">
+      <ol class="search-page-content">
+        <Show when={props.content}>
+          <CardRow data={props.content.data.data.Page.media}/>
+        </Show>
+      </ol>
+    </div>
   );
 }
 

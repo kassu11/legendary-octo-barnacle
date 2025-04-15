@@ -1,11 +1,14 @@
 @layer layout {
+  .search-result-container {
+    container-type: inline-size;
+    container-name: media-search-results;
+  }
   .search-page-content {
     list-style: none;
     padding: 0px;
     display: grid;
     gap: 1rem;
-    justify-content: center;
-    grid-template-columns: repeat(auto-fit, 15rem);
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
   }
 
 
@@ -72,6 +75,10 @@
     a {
       color: white;
       text-decoration: none;
+
+      &:not(:hover) .search-card-quick-action {
+        display: none;
+      }
     }
 
     .cover {
@@ -82,10 +89,6 @@
 
     .container {
       position: relative;
-
-      &:not(:hover) .search-card-quick-action {
-        display: none;
-      }
     }
   }
   .search-card-quick-action {
@@ -93,6 +96,11 @@
     right: 0px;
     bottom: 0px;
     display: grid;
+    padding: .25rem;
+
+    &:not(:hover) li:nth-child(n + 2) {
+      display: none;
+    }
   }
   .search-card-quick-action-items {
     display: flex;
@@ -104,10 +112,6 @@
 
     .item {
       position: relative;
-
-      button {
-        cursor: pointer;
-      }
       
       &:hover {
         .horizontal-search-card:not(:first-child) &::before {
@@ -137,10 +141,6 @@
       width: 100%;
       height: 100%;
     }
-    
-    &:not(:hover) li:nth-child(n + 2) {
-      display: none;
-    }
 
     button {
       height: 2rem;
@@ -148,6 +148,11 @@
       padding: .5rem;
       border-radius: 50%;
       border: none;
+      cursor: pointer;
+
+      &:hover {
+        background-color: grey;
+      }
     }
   }
 
@@ -299,6 +304,14 @@
     .vertical-search-card-score {
       grid-template-columns: 1.1em auto;
       gap: .5rem;
+    }
+  }
+
+  @container media-search-results (width < 42em) {
+    .search-page-content {
+      background-color: orange;
+      gap: .5rem;
+      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
     }
   }
 }
