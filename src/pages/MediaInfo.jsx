@@ -117,7 +117,7 @@ function MediaInfo(props) {
         <div class={style.main}>
           <Header 
             {...props.media} 
-            ratingUsers={props.media.stats.scoreDistribution.reduce((acc, v) => v.amount + acc, 0)}
+            ratingUsers={props.media.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)}
           />
           <div>
             <h1>{props.media.title.userPreferred}</h1>
