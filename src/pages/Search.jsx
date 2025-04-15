@@ -80,7 +80,7 @@ function parseUrl(type, header, search) {
   } else if (header === "trending") {
     variables.sort = ["TRENDING_DESC", "SCORE_DESC"];
   } else if (header === "popular") {
-    variables.sort = ["POPULARITY_DESC", "SCORE_DESC"];
+    variables.sort = null;
   } else if (header === "top-100") {
     variables.sort = ["SCORE_DESC", "POPULARITY_DESC"];
   }
@@ -289,52 +289,91 @@ function Search() {
           </select>
         </div>
         <div>
-          <p>Sort</p>
-          <select name="sort" ref={sortInput}>
-            <option selected={formStateObject().sort === "CHAPTERS"}            value="CHAPTERS"          >CHAPTERS</option>
-            <option selected={formStateObject().sort === "CHAPTERS_DESC"}       value="CHAPTERS_DESC"     >CHAPTERS_DESC</option>
-            <option selected={formStateObject().sort === "DURATION"}            value="DURATION"          >DURATION</option>
-            <option selected={formStateObject().sort === "DURATION_DESC"}       value="DURATION_DESC"     >DURATION_DESC</option>
-            <option selected={formStateObject().sort === "END_DATE"}            value="END_DATE"          >END_DATE</option>
-            <option selected={formStateObject().sort === "END_DATE_DESC"}       value="END_DATE_DESC"     >END_DATE_DESC</option>
-            <option selected={formStateObject().sort === "EPISODES"}            value="EPISODES"          >EPISODES</option>
-            <option selected={formStateObject().sort === "EPISODES_DESC"}       value="EPISODES_DESC"     >EPISODES_DESC</option>
-            <option selected={formStateObject().sort === "FAVOURITES"}          value="FAVOURITES"        >FAVOURITES</option>
-            <option selected={formStateObject().sort === "FAVOURITES_DESC"}     value="FAVOURITES_DESC"   >FAVOURITES_DESC</option>
-            <option selected={formStateObject().sort === "FORMAT"}              value="FORMAT"            >FORMAT</option>
-            <option selected={formStateObject().sort === "FORMAT_DESC"}         value="FORMAT_DESC"       >FORMAT_DESC</option>
-            <option selected={formStateObject().sort === "ID"}                  value="ID"                >ID</option>
-            <option selected={formStateObject().sort === "ID_DESC"}             value="ID_DESC"           >ID_DESC</option>
-            <option selected={formStateObject().sort === "POPULARITY"}          value="POPULARITY"        >POPULARITY</option>
+          <p>Sort Order</p>
+          <select onInput={e => {
+            const value = e.target.value;
+            const sort = formStateObject().sort;
+            if (sort === undefined) {
+              setFormStateObject(v => ({...v, sort: "POPULARITY"}));
+            } else if (value === "ASC") {
+              setFormStateObject(v => ({...v, sort: sort.substring(0, sort.length - 5)}));
+            } else {
+              setFormStateObject(v => ({...v, sort: sort + "_DESC"}));
+            }
+          }}>
             <Switch>
+              <Match when={formStateObject().sort === "SEARCH_MATCH"}>
+                <option selected value="desc">DESC</option>
+              </Match>
               <Match when={formStateObject().sort === undefined}>
-                <option selected={formStateObject().sort === undefined}         value=""                  >POPULARITY_DESC (default)</option>
+                <option selected value="desc">DESC</option>
+                <option value="asc">ASC</option>
               </Match>
               <Match when={formStateObject().sort !== undefined}>
-                <option selected={formStateObject().sort === "POPULARITY_DESC"} value="POPULARITY_DESC"   >POPULARITY_DESC</option>
+                <option selected={formStateObject().sort.endsWith("_DESC") === true} value="DESC">DESC</option>
+                <option selected={formStateObject().sort.endsWith("_DESC") === false} value="ASC">ASC</option>
               </Match>
             </Switch>
-            <option selected={formStateObject().sort === "SCORE"}               value="SCORE"             >SCORE</option>
-            <option selected={formStateObject().sort === "SCORE_DESC"}          value="SCORE_DESC"        >SCORE_DESC</option>
-            <option selected={formStateObject().sort === "SEARCH_MATCH"}        value=""                  >SEARCH_MATCH</option>
-            <option selected={formStateObject().sort === "START_DATE"}          value="START_DATE"        >START_DATE</option>
-            <option selected={formStateObject().sort === "START_DATE_DESC"}     value="START_DATE_DESC"   >START_DATE_DESC</option>
-            <option selected={formStateObject().sort === "STATUS"}              value="STATUS"            >STATUS</option>
-            <option selected={formStateObject().sort === "STATUS_DESC"}         value="STATUS_DESC"       >STATUS_DESC</option>
-            <option selected={formStateObject().sort === "TITLE_ENGLISH"}       value="TITLE_ENGLISH"     >TITLE_ENGLISH</option>
-            <option selected={formStateObject().sort === "TITLE_ENGLISH_DESC"}  value="TITLE_ENGLISH_DESC">TITLE_ENGLISH_DESC</option>
-            <option selected={formStateObject().sort === "TITLE_NATIVE"}        value="TITLE_NATIVE"      >TITLE_NATIVE</option>
-            <option selected={formStateObject().sort === "TITLE_NATIVE_DESC"}   value="TITLE_NATIVE_DESC" >TITLE_NATIVE_DESC</option>
-            <option selected={formStateObject().sort === "TITLE_ROMAJI"}        value="TITLE_ROMAJI"      >TITLE_ROMAJI</option>
-            <option selected={formStateObject().sort === "TITLE_ROMAJI_DESC"}   value="TITLE_ROMAJI_DESC" >TITLE_ROMAJI_DESC</option>
-            <option selected={formStateObject().sort === "TRENDING"}            value="TRENDING"          >TRENDING</option>
-            <option selected={formStateObject().sort === "TRENDING_DESC"}       value="TRENDING_DESC"     >TRENDING_DESC</option>
-            <option selected={formStateObject().sort === "TYPE"}                value="TYPE"              >TYPE</option>
-            <option selected={formStateObject().sort === "TYPE_DESC"}           value="TYPE_DESC"         >TYPE_DESC</option>
-            <option selected={formStateObject().sort === "UPDATED_AT"}          value="UPDATED_AT"        >UPDATED_AT</option>
-            <option selected={formStateObject().sort === "UPDATED_AT_DESC"}     value="UPDATED_AT_DESC"   >UPDATED_AT_DESC</option>
-            <option selected={formStateObject().sort === "VOLUMES"}             value="VOLUMES"           >VOLUMES</option>
-            <option selected={formStateObject().sort === "VOLUMES_DESC"}        value="VOLUMES_DESC"      >VOLUMES_DESC</option>
+          </select>
+        </div>
+        <div>
+          <p>Sort</p>
+          <select name="sort" ref={sortInput}>
+            <Switch>
+              <Match when={
+                formStateObject().sort === "SEARCH_MATCH" ||
+                formStateObject().sort === undefined ||
+                formStateObject().sort.endsWith("_DESC") === true 
+              }>
+                <option selected={formStateObject().sort === "CHAPTERS_DESC"}       value="CHAPTERS_DESC"     >CHAPTERS_DESC</option>
+                <option selected={formStateObject().sort === "DURATION_DESC"}       value="DURATION_DESC"     >DURATION_DESC</option>
+                <option selected={formStateObject().sort === "END_DATE_DESC"}       value="END_DATE_DESC"     >END_DATE_DESC</option>
+                <option selected={formStateObject().sort === "EPISODES_DESC"}       value="EPISODES_DESC"     >EPISODES_DESC</option>
+                <option selected={formStateObject().sort === "FAVOURITES_DESC"}     value="FAVOURITES_DESC"   >FAVOURITES_DESC</option>
+                <option selected={formStateObject().sort === "FORMAT_DESC"}         value="FORMAT_DESC"       >FORMAT_DESC</option>
+                <option selected={formStateObject().sort === "ID_DESC"}             value="ID_DESC"           >ID_DESC</option>
+                <option selected={formStateObject().sort === "SCORE_DESC"}          value="SCORE_DESC"        >SCORE_DESC</option>
+                <option selected={formStateObject().sort === "SEARCH_MATCH"}        value=""                  >SEARCH_MATCH</option>
+                <option selected={formStateObject().sort === "START_DATE_DESC"}     value="START_DATE_DESC"   >START_DATE_DESC</option>
+                <option selected={formStateObject().sort === "STATUS_DESC"}         value="STATUS_DESC"       >STATUS_DESC</option>
+                <option selected={formStateObject().sort === "TITLE_ENGLISH_DESC"}  value="TITLE_ENGLISH_DESC">TITLE_ENGLISH_DESC</option>
+                <option selected={formStateObject().sort === "TITLE_NATIVE_DESC"}   value="TITLE_NATIVE_DESC" >TITLE_NATIVE_DESC</option>
+                <option selected={formStateObject().sort === "TITLE_ROMAJI_DESC"}   value="TITLE_ROMAJI_DESC" >TITLE_ROMAJI_DESC</option>
+                <option selected={formStateObject().sort === "TRENDING_DESC"}       value="TRENDING_DESC"     >TRENDING_DESC</option>
+                <option selected={formStateObject().sort === "TYPE_DESC"}           value="TYPE_DESC"         >TYPE_DESC</option>
+                <option selected={formStateObject().sort === "UPDATED_AT_DESC"}     value="UPDATED_AT_DESC"   >UPDATED_AT_DESC</option>
+                <option selected={formStateObject().sort === "VOLUMES_DESC"}        value="VOLUMES_DESC"      >VOLUMES_DESC</option>
+                <Switch>
+                  <Match when={formStateObject().sort === undefined}>
+                    <option selected={formStateObject().sort === undefined}         value=""                  >POPULARITY_DESC (default)</option>
+                  </Match>
+                  <Match when={formStateObject().sort !== undefined}>
+                    <option selected={formStateObject().sort === "POPULARITY_DESC"} value="POPULARITY_DESC"   >POPULARITY_DESC</option>
+                  </Match>
+                </Switch>
+              </Match>
+              <Match when={formStateObject().sort.endsWith("_DESC") === false}>
+                <option selected={formStateObject().sort === "CHAPTERS"}            value="CHAPTERS"          >CHAPTERS</option>
+                <option selected={formStateObject().sort === "DURATION"}            value="DURATION"          >DURATION</option>
+                <option selected={formStateObject().sort === "END_DATE"}            value="END_DATE"          >END_DATE</option>
+                <option selected={formStateObject().sort === "EPISODES"}            value="EPISODES"          >EPISODES</option>
+                <option selected={formStateObject().sort === "FAVOURITES"}          value="FAVOURITES"        >FAVOURITES</option>
+                <option selected={formStateObject().sort === "FORMAT"}              value="FORMAT"            >FORMAT</option>
+                <option selected={formStateObject().sort === "ID"}                  value="ID"                >ID</option>
+                <option selected={formStateObject().sort === "POPULARITY"}          value="POPULARITY"        >POPULARITY</option>
+                <option selected={formStateObject().sort === "SCORE"}               value="SCORE"             >SCORE</option>
+                <option selected={formStateObject().sort === "SEARCH_MATCH"}        value=""                  >SEARCH_MATCH</option>
+                <option selected={formStateObject().sort === "START_DATE"}          value="START_DATE"        >START_DATE</option>
+                <option selected={formStateObject().sort === "STATUS"}              value="STATUS"            >STATUS</option>
+                <option selected={formStateObject().sort === "TITLE_ENGLISH"}       value="TITLE_ENGLISH"     >TITLE_ENGLISH</option>
+                <option selected={formStateObject().sort === "TITLE_NATIVE"}        value="TITLE_NATIVE"      >TITLE_NATIVE</option>
+                <option selected={formStateObject().sort === "TITLE_ROMAJI"}        value="TITLE_ROMAJI"      >TITLE_ROMAJI</option>
+                <option selected={formStateObject().sort === "TRENDING"}            value="TRENDING"          >TRENDING</option>
+                <option selected={formStateObject().sort === "TYPE"}                value="TYPE"              >TYPE</option>
+                <option selected={formStateObject().sort === "UPDATED_AT"}          value="UPDATED_AT"        >UPDATED_AT</option>
+                <option selected={formStateObject().sort === "VOLUMES"}             value="VOLUMES"           >VOLUMES</option>
+              </Match>
+            </Switch>
           </select>
         </div>
       </form>
