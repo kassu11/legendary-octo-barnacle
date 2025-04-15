@@ -302,7 +302,7 @@ function cacheBuilder(settings) {
         };
 
         if (DEBUG) {
-          console.log("Fetching");
+          console.log("Fetching", settings.type, request.body);
         }
 
         const data = localFetchCacheStorage.get(request.cacheKey);

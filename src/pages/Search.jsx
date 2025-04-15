@@ -51,9 +51,9 @@ function parseUrl(type, header, search) {
   }
 
   if (searchObject.search && !searchObject.sort) {
-    variables.sort = "SEARCH_MATCH"; 
+    variables.sort = ["SEARCH_MATCH"]; 
   } else {
-    variables.sort = searchObject.sort;
+    variables.sort = toArray(searchObject.sort);
   }
 
   if (searchObject.year) {
@@ -70,6 +70,16 @@ function parseUrl(type, header, search) {
     const dates = getDates();
     variables.year = dates.seasonYear + "%";
     variables.season = dates.season;
+  } else if (header === "next-season") {
+    const dates = getDates();
+    variables.year = dates.nextYear + "%";
+    variables.season = dates.nextSeason;
+  } else if (header === "trending") {
+    variables.sort = ["TRENDING_DESC", "SCORE_DESC"];
+  } else if (header === "popular") {
+    variables.sort = ["POPULARITY_DESC", "SCORE_DESC"];
+  } else if (header === "top-100") {
+    variables.sort = ["SCORE_DESC", "POPULARITY_DESC"];
   }
 
   variables.chapterGreater ??= searchObject.chapterGreater;
@@ -117,12 +127,11 @@ function Search() {
 
   const { accessToken } = useAuthentication();
   const params = useParams();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const location = useLocation();
   const [searchParams, _setSearchParams] = useSearchParams();
-  const _initVariables = parseUrl(params.type, params.header, location.search);
-  const [variables, setVariables] = createSignal(_initVariables);
-  const [cacheVariables, setCacheVariables] = createSignal(_initVariables);
+  const [variables, setVariables] = createSignal();
+  const [cacheVariables, setCacheVariables] = createSignal();
   const [mediaData, { mutate: mutateMediaData }] = api.anilist.searchMedia(accessToken, variables);
   const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
 
@@ -138,6 +147,12 @@ function Search() {
   function setSearchParams(params, opt) {
     const time = performance.now() - _lastTimeHistoryChanged < 1000;
     _setSearchParams(params, { replace: time, ...opt });
+    _lastTimeHistoryChanged = performance.now();
+  }
+  
+  function navigate(string, opt) {
+    const time = performance.now() - _lastTimeHistoryChanged < 1000;
+    _navigate(string, { replace: time, ...opt });
     _lastTimeHistoryChanged = performance.now();
   }
 
@@ -196,7 +211,7 @@ function Search() {
           navigate("/search/anime" + location.search);
         } else if (data.type === "manga" && params.type !== "manga") { 
           navigate("/search/manga" + location.search);
-        } else if (params.type !== undefined) {
+        } else if (data.type === undefined && params.type !== undefined) {
           navigate("/search" + location.search);
         }
         delete data.type;
@@ -257,12 +272,12 @@ function Search() {
         <div>
           <p>Format</p>
           <select name="format" multiple>
-            <Show when={searchParams.type !== "ANIME"}>
+            <Show when={params.type !== "anime"}>
               <option selected={formStateObject().format?.MANGA} value="MANGA">Manga</option>
               <option selected={formStateObject().format?.NOVEL} value="NOVEL">Novel</option>
               <option selected={formStateObject().format?.ONE_SHOT} value="ONE_SHOT">One shot</option>
             </Show>
-            <Show when={searchParams.type !== "MANGA"}>
+            <Show when={params.type !== "manga"}>
               <option selected={formStateObject().format?.MOVIE} value="MOVIE">Movie</option>
               <option selected={formStateObject().format?.MUSIC} value="MUSIC">Music</option>
               <option selected={formStateObject().format?.ONA} value="ONA">Ona</option>
@@ -271,6 +286,13 @@ function Search() {
               <option selected={formStateObject().format?.TV} value="TV">TV</option>
               <option selected={formStateObject().format?.TV_SHORT} value="TV_SHORT">TV short</option>
             </Show>
+          </select>
+        </div>
+        <div>
+          <p>Sort</p>
+          <select name="sort">
+            <option selected={formStateObject().sort?.TRENDING} value="TRENDING">Trending</option>
+            <option selected={formStateObject().sort?.TRENDING_DESC} value="TRENDING_DESC">Trending desc</option>
           </select>
         </div>
       </form>
@@ -305,11 +327,11 @@ function AnimeSearch() {
     <Show when={animeData()}>
       {/* <div>{console.log(animeData())}</div> */}
       <div class="search-home-content">
-        <HorizontalCardRow data={animeData().data.data.trending.media} href="" title="Trending now" />
+        <HorizontalCardRow data={animeData().data.data.trending.media} href="trending" title="Trending now" />
         <HorizontalCardRow data={animeData().data.data.season.media} href="this-season" title="Popular this season" />
-        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="" title="Upcoming next season" />
-        <HorizontalCardRow data={animeData().data.data.popular.media} href="" title="All time popular" />
-        <VerticalCardRow data={animeData().data.data.top.media} href="" title="Top 100 anime" />
+        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="next-season" title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.popular.media} href="popular" title="All time popular" />
+        <VerticalCardRow data={animeData().data.data.top.media} href="top-100" title="Top 100 anime" />
       </div>
     </Show>
   );
@@ -326,11 +348,13 @@ function SearchContent(props) {
 }
 
 function VerticalCardRow(props) {
+  assert("href" in props, "Link is missing");
+
   return (
     <section class="vertical-search-card-section">
       <div class="search-cards-header">
         <h2>{props.title}</h2>
-        <A href="">View all</A>
+        <A href={props.href}>View all</A>
       </div>
       <ol class="vertical-search-card-row">
         <For each={props.data}>
