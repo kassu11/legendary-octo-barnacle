@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, splitProps, on, For, untrack, Match } from "solid-js";
+import { createSignal, createEffect, Show, on, For, untrack, Match } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -10,19 +10,20 @@ import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { getDates } from "../utils/dates";
 
-function toArray(value) {
-  if (value == null || Array.isArray(value)) {
-    return value;
+function toObject(value) {
+  if (value == null) {
+    return {};
   }
 
-  return [value];
+  if (Array.isArray(value)) {
+    return Object.fromEntries(val.map(k => ([k, true])));
+  }
+
+  return { [value]: true };
 }
 
 function parseUrl(type, header, search) {
-  const variables = { page: 1, sort: ["POPULARITY_DESC", "SCORE_DESC"] };
-  if (search.length === 0 && header === undefined) {
-    return undefined;
-  }
+  const variables = {};
 
   const searchObject = new URLSearchParams(search).entries().reduce((acc, [key, val]) => {
     if (Array.isArray(acc[key])) {
@@ -51,9 +52,11 @@ function parseUrl(type, header, search) {
   }
 
   if (searchObject.search && !searchObject.sort) {
-    variables.sort = ["SEARCH_MATCH"]; 
-  } else {
-    variables.sort = toArray(searchObject.sort);
+    variables.sort = "SEARCH_MATCH"; 
+  } else if (searchObject.sort === "TRENDING_DESC") {
+    variables.sort = ["TRENDING_DESC", "SCORE_DESC"];
+  } else if (searchObject.sort) { 
+    variables.sort = searchObject.sort;
   }
 
   if (searchObject.year) {
@@ -91,7 +94,7 @@ function parseUrl(type, header, search) {
   variables.episodeLesser ??= searchObject.episodeLesser;
   variables.excludedGenres ??= searchObject.excludedGenres;
   variables.excludedTags ??= searchObject.excludedTags;
-  variables.format ??= toArray(searchObject.format);
+  variables.format ??= searchObject.format;
   variables.genres ??= searchObject.genres;
   variables.id ??= searchObject.id;
   // variables.isAdult ??= searchObject.isAdult;
@@ -123,7 +126,7 @@ function parseUrl(type, header, search) {
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
   let _lastTimeHistoryChanged = performance.now()
-  let form;
+  let form, sortInput;
 
   const { accessToken } = useAuthentication();
   const params = useParams();
@@ -158,33 +161,28 @@ function Search() {
 
   createEffect(() => {
     const variables = parseUrl(params.type, params.header, location.search);
-    const state = {};
-    for(const [key, val] of Object.entries(variables || {})) {
-      if (Array.isArray(val)) {
-        state[key] = Object.fromEntries(val.map(k => ([k, true])));
-      } else {
-        state[key] = val;
-      }
-    }
-    setFormStateObject(state);
-
     untrack(() => {
-      if(variables) {
-        if (params.header && location.search.length) {
-          const formData = new FormData(form);
-          const search = [];
-          new URLSearchParams(formData).entries().forEach(([key, val]) => {
-            if (val && key !== "type") {
-              search.push(key + "=" + val);
-            }
-          });
-          navigate("/search" + (!params.type || ("/" + params.type)) + "?" + search.join("&"));
-          return;
-        }
+      setFormStateObject({
+        ...variables,
+        format: toObject(variables.format),
+        sort: Array.isArray(variables.sort) ? variables.sort[0] : variables.sort,
+      });
+
+      if (location.search.length === 0 && params.header === undefined) {
+        mutateMediaData(undefined);
+      } else if (params.header && location.search.length) {
+        const formData = new FormData(form);
+        const search = [];
+        new URLSearchParams(formData).entries().forEach(([key, val]) => {
+          if (val && key !== "type") {
+            search.push(key + "=" + val);
+          }
+        });
+
+        navigate("/search" + (!params.type || ("/" + params.type)) + "?" + search.join("&"));
+      } else {
         triggerVariable(variables);
         setCacheVariables(variables);
-      } else {
-        mutateMediaData(undefined);
       }
     });
   });
@@ -222,7 +220,9 @@ function Search() {
         <button type="button" onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
         <div>
           <label htmlFor="search">Search</label><br />
-          <input type="search" name="search" id="search" value={formStateObject().search || ""} />
+          <input type="search" name="search" id="search" value={formStateObject().search || ""} onInput={() => {
+            sortInput.value = "";
+          }}/>
         </div>
         <div>
           <p>Media Type</p>
@@ -290,9 +290,51 @@ function Search() {
         </div>
         <div>
           <p>Sort</p>
-          <select name="sort">
-            <option selected={formStateObject().sort?.TRENDING} value="TRENDING">Trending</option>
-            <option selected={formStateObject().sort?.TRENDING_DESC} value="TRENDING_DESC">Trending desc</option>
+          <select name="sort" ref={sortInput}>
+            <option selected={formStateObject().sort === "CHAPTERS"}            value="CHAPTERS"          >CHAPTERS</option>
+            <option selected={formStateObject().sort === "CHAPTERS_DESC"}       value="CHAPTERS_DESC"     >CHAPTERS_DESC</option>
+            <option selected={formStateObject().sort === "DURATION"}            value="DURATION"          >DURATION</option>
+            <option selected={formStateObject().sort === "DURATION_DESC"}       value="DURATION_DESC"     >DURATION_DESC</option>
+            <option selected={formStateObject().sort === "END_DATE"}            value="END_DATE"          >END_DATE</option>
+            <option selected={formStateObject().sort === "END_DATE_DESC"}       value="END_DATE_DESC"     >END_DATE_DESC</option>
+            <option selected={formStateObject().sort === "EPISODES"}            value="EPISODES"          >EPISODES</option>
+            <option selected={formStateObject().sort === "EPISODES_DESC"}       value="EPISODES_DESC"     >EPISODES_DESC</option>
+            <option selected={formStateObject().sort === "FAVOURITES"}          value="FAVOURITES"        >FAVOURITES</option>
+            <option selected={formStateObject().sort === "FAVOURITES_DESC"}     value="FAVOURITES_DESC"   >FAVOURITES_DESC</option>
+            <option selected={formStateObject().sort === "FORMAT"}              value="FORMAT"            >FORMAT</option>
+            <option selected={formStateObject().sort === "FORMAT_DESC"}         value="FORMAT_DESC"       >FORMAT_DESC</option>
+            <option selected={formStateObject().sort === "ID"}                  value="ID"                >ID</option>
+            <option selected={formStateObject().sort === "ID_DESC"}             value="ID_DESC"           >ID_DESC</option>
+            <option selected={formStateObject().sort === "POPULARITY"}          value="POPULARITY"        >POPULARITY</option>
+            <Switch>
+              <Match when={formStateObject().sort === undefined}>
+                <option selected={formStateObject().sort === undefined}         value=""                  >POPULARITY_DESC (default)</option>
+              </Match>
+              <Match when={formStateObject().sort !== undefined}>
+                <option selected={formStateObject().sort === "POPULARITY_DESC"} value="POPULARITY_DESC"   >POPULARITY_DESC</option>
+              </Match>
+            </Switch>
+            <option selected={formStateObject().sort === "SCORE"}               value="SCORE"             >SCORE</option>
+            <option selected={formStateObject().sort === "SCORE_DESC"}          value="SCORE_DESC"        >SCORE_DESC</option>
+            <option selected={formStateObject().sort === "SEARCH_MATCH"}        value=""                  >SEARCH_MATCH</option>
+            <option selected={formStateObject().sort === "START_DATE"}          value="START_DATE"        >START_DATE</option>
+            <option selected={formStateObject().sort === "START_DATE_DESC"}     value="START_DATE_DESC"   >START_DATE_DESC</option>
+            <option selected={formStateObject().sort === "STATUS"}              value="STATUS"            >STATUS</option>
+            <option selected={formStateObject().sort === "STATUS_DESC"}         value="STATUS_DESC"       >STATUS_DESC</option>
+            <option selected={formStateObject().sort === "TITLE_ENGLISH"}       value="TITLE_ENGLISH"     >TITLE_ENGLISH</option>
+            <option selected={formStateObject().sort === "TITLE_ENGLISH_DESC"}  value="TITLE_ENGLISH_DESC">TITLE_ENGLISH_DESC</option>
+            <option selected={formStateObject().sort === "TITLE_NATIVE"}        value="TITLE_NATIVE"      >TITLE_NATIVE</option>
+            <option selected={formStateObject().sort === "TITLE_NATIVE_DESC"}   value="TITLE_NATIVE_DESC" >TITLE_NATIVE_DESC</option>
+            <option selected={formStateObject().sort === "TITLE_ROMAJI"}        value="TITLE_ROMAJI"      >TITLE_ROMAJI</option>
+            <option selected={formStateObject().sort === "TITLE_ROMAJI_DESC"}   value="TITLE_ROMAJI_DESC" >TITLE_ROMAJI_DESC</option>
+            <option selected={formStateObject().sort === "TRENDING"}            value="TRENDING"          >TRENDING</option>
+            <option selected={formStateObject().sort === "TRENDING_DESC"}       value="TRENDING_DESC"     >TRENDING_DESC</option>
+            <option selected={formStateObject().sort === "TYPE"}                value="TYPE"              >TYPE</option>
+            <option selected={formStateObject().sort === "TYPE_DESC"}           value="TYPE_DESC"         >TYPE_DESC</option>
+            <option selected={formStateObject().sort === "UPDATED_AT"}          value="UPDATED_AT"        >UPDATED_AT</option>
+            <option selected={formStateObject().sort === "UPDATED_AT_DESC"}     value="UPDATED_AT_DESC"   >UPDATED_AT_DESC</option>
+            <option selected={formStateObject().sort === "VOLUMES"}             value="VOLUMES"           >VOLUMES</option>
+            <option selected={formStateObject().sort === "VOLUMES_DESC"}        value="VOLUMES_DESC"      >VOLUMES_DESC</option>
           </select>
         </div>
       </form>
