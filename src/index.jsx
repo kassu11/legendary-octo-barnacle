@@ -20,7 +20,7 @@ const filter = {
 }
 const search = {
   type: ["anime", "manga"],
-  header: ["this-season", "next-season"],
+  header: ["this-season", "next-season", "trending", "popular", "top-100"],
 }
 
 render(
