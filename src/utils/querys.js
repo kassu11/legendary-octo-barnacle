@@ -913,6 +913,7 @@ export const searchMedia = format`query (
 }`;
 
 export const anilistGenresAndTags = format`query{genres:GenreCollection tags:MediaTagCollection{name description category isAdult}}`;
+export const anilistExternalSources = format`query($type:ExternalLinkMediaType){ExternalLinkSourceCollection(mediaType:$type,type:STREAMING){id url site type language color icon}}`;
 
 
 export const mediaListEntry = format`query ($mediaId: Int) {
