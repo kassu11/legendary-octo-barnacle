@@ -325,7 +325,6 @@ function Search() {
             </Show>
           </select>
         </div>
-        {console.log(genresAndTags())}
         <div>
           <p>Genres</p>
           <select name="genres" multiple>
@@ -436,6 +435,16 @@ function Search() {
                 <option selected={formStateObject().sort.endsWith("_DESC") === false} value="ASC">ASC</option>
               </Match>
             </Switch>
+          </select>
+        </div>
+        <div>
+          <p>Airing Status</p>
+          <select name="status" value={formStateObject().status || ""}>
+            <option value="">All Status</option>
+            <option value="RELEASING">Releasing</option>
+            <option value="FINISHED">Finished</option>
+            <option value="NOT_YET_RELEASED">Not Yet Released</option>
+            <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
         <SortSelect sort={formStateObject().sort} ref={sortInput} />
