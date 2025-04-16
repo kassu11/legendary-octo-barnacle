@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, on, For, untrack, Match } from "solid-js";
+import { createSignal, createEffect, Show, on, For, untrack, Match, Switch } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -16,7 +16,7 @@ function toObject(value) {
   }
 
   if (Array.isArray(value)) {
-    return Object.fromEntries(val.map(k => ([k, true])));
+    return Object.fromEntries(value.map(k => ([k, true])));
   }
 
   return { [value]: true };
@@ -157,6 +157,7 @@ function Search() {
   const [cacheVariables, setCacheVariables] = createSignal();
   const [mediaData, { mutate: mutateMediaData }] = api.anilist.searchMedia(accessToken, variables);
   const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
+  const [genresAndTags] = api.anilist.genresAndTags();
 
   const [formStateObject, setFormStateObject] = createSignal({});
 
@@ -185,6 +186,7 @@ function Search() {
       setFormStateObject({
         ...variables,
         format: toObject(variables.format),
+        genres: toObject(variables.genres),
         sort: Array.isArray(variables.sort) ? variables.sort[0] : variables.sort,
       });
 
@@ -222,7 +224,7 @@ function Search() {
 
           return acc;
         }, {});
-        const keysToManuallyReset = ["format"]; 
+        const keysToManuallyReset = ["format", "genres"]; 
         keysToManuallyReset.forEach(key => data[key] ??= undefined);
 
         if (data.type === "anime" && params.type !== "anime") {
@@ -306,6 +308,22 @@ function Search() {
               <option selected={formStateObject().format?.TV} value="TV">TV</option>
               <option selected={formStateObject().format?.TV_SHORT} value="TV_SHORT">TV short</option>
             </Show>
+          </select>
+        </div>
+        {console.log(genresAndTags())}
+        <div>
+          <p>Genres</p>
+          <select name="genres" multiple>
+            <For each={genresAndTags()?.data.data.genres}>{genre => (
+              <Switch>
+                <Match when={genre !== "Hentai"}>
+                  <option selected={formStateObject().genres[genre]} value={genre}>{genre}</option>
+                </Match>
+                <Match when={formStateObject().isAdult !== false}>
+                  <option selected={formStateObject().genres[genre]} value={genre}>{genre}</option>
+                </Match>
+              </Switch>
+            )}</For>
           </select>
         </div>
         <div>
@@ -518,7 +536,7 @@ function VerticalCardRow(props) {
                   <ol class="vertical-search-card-genre-list">
                     <For each={card.genres}>{genre => (
                       <li class="vertical-search-card-genre">
-                        <A href={"/search/anime?genres=" + genre.toLowerCase()}>{genre}</A>
+                        <A href={"/search/anime?genres=" + genre}>{genre}</A>
                       </li>
                     )}</For>
                   </ol>
