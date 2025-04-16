@@ -143,6 +143,18 @@ function parseUrl(type, header, search) {
   return variables;
 };
 
+function groupTagsByCategory(tags) {
+  if (!tags) return {}
+  const group = {};
+
+  for(const tag of tags) {
+    group[tag.category] ??= [];
+    group[tag.category].push(tag);
+  }
+
+  return group;
+}
+
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
   let _lastTimeHistoryChanged = performance.now()
@@ -324,7 +336,7 @@ function Search() {
                     <option selected={formStateObject().genres?.[genre]} value={genre}>{genre}</option>
                   </Match>
                   <Match when={formStateObject().isAdult !== false}>
-                    <option selected={formStateObject().genres?.[genre]} value={genre}>{genre}</option>
+                    <option selected={formStateObject().genres?.[genre]} value={genre}>{genre} (+18)</option>
                   </Match>
                 </Switch>
               </Show>
@@ -341,11 +353,61 @@ function Search() {
                     <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre}</option>
                   </Match>
                   <Match when={formStateObject().isAdult !== false}>
-                    <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre}</option>
+                    <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre} (+18)</option>
                   </Match>
                 </Switch>
               </Show>
             )}</For>
+          </select>
+        </div>
+        <div>
+          <p>Tags</p>
+          <select name="tags" multiple>
+            <For each={Object.entries(groupTagsByCategory(genresAndTags()?.data.data.tags))}>
+              {([category, tags]) => (
+                <Show when={tags.some(tag => !tag.isAdult || formStateObject().isAdult !== false)}>
+                  <optgroup label={category}>
+                    <For each={tags}>{tag => (
+                      <Show when={formStateObject().excludedTags[tag.name] !== true}>
+                        <Switch>
+                          <Match when={!tag.isAdult}>
+                            <option selected={formStateObject().tags?.[tag.name]} value={tag.name}>{tag.name}</option>
+                          </Match>
+                          <Match when={(formStateObject().isAdult !== false)}>
+                            <option selected={formStateObject().tags?.[tag.name]} value={tag.name}>{tag.name} (+18)</option>
+                          </Match>
+                        </Switch>
+                      </Show>
+                    )}</For>
+                  </optgroup>
+                </Show>
+              )}
+            </For>
+          </select>
+        </div>
+        <div>
+          <p>Exclude Tags</p>
+          <select name="excludedTags" multiple>
+            <For each={Object.entries(groupTagsByCategory(genresAndTags()?.data.data.tags))}>
+              {([category, tags]) => (
+                <Show when={tags.some(tag => !tag.isAdult || formStateObject().isAdult !== false)}>
+                  <optgroup label={category}>
+                    <For each={tags}>{tag => (
+                      <Show when={formStateObject().tags[tag.name] !== true}>
+                        <Switch>
+                          <Match when={!tag.isAdult}>
+                            <option selected={formStateObject().excludedTags?.[tag.name]} value={tag.name}>{tag.name}</option>
+                          </Match>
+                          <Match when={(formStateObject().isAdult !== false)}>
+                            <option selected={formStateObject().excludedTags?.[tag.name]} value={tag.name}>{tag.name} (+18)</option>
+                          </Match>
+                        </Switch>
+                      </Show>
+                    )}</For>
+                  </optgroup>
+                </Show>
+              )}
+            </For>
           </select>
         </div>
         <div>
