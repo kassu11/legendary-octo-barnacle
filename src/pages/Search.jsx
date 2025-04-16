@@ -187,6 +187,9 @@ function Search() {
         ...variables,
         format: toObject(variables.format),
         genres: toObject(variables.genres),
+        excludedGenres: toObject(variables.excludedGenres),
+        tags: toObject(variables.tags),
+        excludedTags: toObject(variables.excludedTags),
         sort: Array.isArray(variables.sort) ? variables.sort[0] : variables.sort,
       });
 
@@ -224,7 +227,7 @@ function Search() {
 
           return acc;
         }, {});
-        const keysToManuallyReset = ["format", "genres"]; 
+        const keysToManuallyReset = ["format", "genres", "excludedGenres", "tags", "excludedTags"]; 
         keysToManuallyReset.forEach(key => data[key] ??= undefined);
 
         if (data.type === "anime" && params.type !== "anime") {
@@ -315,14 +318,33 @@ function Search() {
           <p>Genres</p>
           <select name="genres" multiple>
             <For each={genresAndTags()?.data.data.genres}>{genre => (
-              <Switch>
-                <Match when={genre !== "Hentai"}>
-                  <option selected={formStateObject().genres[genre]} value={genre}>{genre}</option>
-                </Match>
-                <Match when={formStateObject().isAdult !== false}>
-                  <option selected={formStateObject().genres[genre]} value={genre}>{genre}</option>
-                </Match>
-              </Switch>
+              <Show when={formStateObject().excludedGenres[genre] !== true}>
+                <Switch>
+                  <Match when={genre !== "Hentai"}>
+                    <option selected={formStateObject().genres?.[genre]} value={genre}>{genre}</option>
+                  </Match>
+                  <Match when={formStateObject().isAdult !== false}>
+                    <option selected={formStateObject().genres?.[genre]} value={genre}>{genre}</option>
+                  </Match>
+                </Switch>
+              </Show>
+            )}</For>
+          </select>
+        </div>
+        <div>
+          <p>Exclude Genres</p>
+          <select name="excludedGenres" multiple>
+            <For each={genresAndTags()?.data.data.genres}>{genre => (
+              <Show when={formStateObject().genres[genre] !== true}>
+                <Switch>
+                  <Match when={genre !== "Hentai"}>
+                    <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre}</option>
+                  </Match>
+                  <Match when={formStateObject().isAdult !== false}>
+                    <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre}</option>
+                  </Match>
+                </Switch>
+              </Show>
             )}</For>
           </select>
         </div>
