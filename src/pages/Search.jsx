@@ -64,6 +64,12 @@ function parseUrl(type, header, search) {
     variables.sort = [searchObject.sort, "POPULARITY_DESC"];
     variables.durationGreater = 0;
     variables.volumeGreater = 0;
+  } else if (searchObject.sort === "END_DATE_DESC" || searchObject.sort === "END_DATE") {
+    variables.sort = [searchObject.sort, "POPULARITY_DESC"];
+    variables.endDateGreater = 0;
+  } else if (searchObject.sort === "START_DATE_DESC" || searchObject.sort === "START_DATE") {
+    variables.sort = [searchObject.sort, "POPULARITY_DESC"];
+    variables.yearGreater = 0;
   } 
 
   if (searchObject.sort) { 
@@ -124,6 +130,9 @@ function parseUrl(type, header, search) {
   variables.year ??= searchObject.year;
   variables.yearGreater ??= searchObject.yearGreater;
   variables.yearLesser ??= searchObject.yearLesser;
+  variables.endDateLike ??= searchObject.endDateLike;
+  variables.endDateLesser ??= searchObject.endDateLesser;
+  variables.endDateGreater ??= searchObject.endDateGreater;
 
   for(const [key, value] of Object.entries(variables)) {
     if (value == null) { delete variables[key]; }
@@ -355,6 +364,7 @@ function Search() {
 function SortSelect(props) {
   assert("sort" in props, "key \"sort\" is missing");
   const params = useParams();
+  const [searchParams] = useSearchParams();
 
   return (
     <div>
@@ -366,73 +376,80 @@ function SortSelect(props) {
             props.sort === undefined ||
             props.sort.endsWith("_DESC") === true 
           }>
-            <option selected={props.sort === "CHAPTERS_DESC"}       value="CHAPTERS_DESC"     >
-              <Switch>
-                <Match when={params.type === "anime"}>Episodes</Match>
-                <Match when={params.type === "manga"}>Chapters</Match>
-                <Match when={params.type === undefined}>Episodes / Chapters</Match>
-              </Switch>
-            </option>
-            <option selected={props.sort === "DURATION_DESC"}       value="DURATION_DESC"     >
-              <Switch>
-                <Match when={params.type === "anime"}>Duration</Match>
-                <Match when={params.type === "manga"}>Volumes</Match>
-                <Match when={params.type === undefined}>Duration / Volumes</Match>
-              </Switch>
-            </option>
-            <option selected={props.sort === "END_DATE_DESC"}       value="END_DATE_DESC"     >END_DATE_DESC</option>
-            <option selected={props.sort === "FAVOURITES_DESC"}     value="FAVOURITES_DESC"   >FAVOURITES_DESC</option>
-            <option selected={props.sort === "FORMAT_DESC"}         value="FORMAT_DESC"       >FORMAT_DESC</option>
-            <option selected={props.sort === "ID_DESC"}             value="ID_DESC"           >ID_DESC</option>
-            <option selected={props.sort === "SCORE_DESC"}          value="SCORE_DESC"        >SCORE_DESC</option>
-            <option selected={props.sort === "SEARCH_MATCH"}        value=""                  >SEARCH_MATCH</option>
-            <option selected={props.sort === "START_DATE_DESC"}     value="START_DATE_DESC"   >START_DATE_DESC</option>
-            <option selected={props.sort === "STATUS_DESC"}         value="STATUS_DESC"       >STATUS_DESC</option>
-            <option selected={props.sort === "TITLE_ENGLISH_DESC"}  value="TITLE_ENGLISH_DESC">TITLE_ENGLISH_DESC</option>
-            <option selected={props.sort === "TITLE_NATIVE_DESC"}   value="TITLE_NATIVE_DESC" >TITLE_NATIVE_DESC</option>
-            <option selected={props.sort === "TITLE_ROMAJI_DESC"}   value="TITLE_ROMAJI_DESC" >TITLE_ROMAJI_DESC</option>
-            <option selected={props.sort === "TRENDING_DESC"}       value="TRENDING_DESC"     >TRENDING_DESC</option>
-            <option selected={props.sort === "TYPE_DESC"}           value="TYPE_DESC"         >TYPE_DESC</option>
-            <option selected={props.sort === "UPDATED_AT_DESC"}     value="UPDATED_AT_DESC"   >UPDATED_AT_DESC</option>
+            <Show when={params.type === "manga"}>
+              <option selected={props.sort === "CHAPTERS_DESC"} value="CHAPTERS_DESC">Chapters</option>
+            </Show>
+            <Show when={params.type === "anime"}>
+              <option selected={props.sort === "DURATION_DESC"} value="DURATION_DESC">Duration</option>
+            </Show>
+            <Show when={params.type === undefined}>
+              <option selected={props.sort === "DURATION_DESC"} value="DURATION_DESC">Duration / Volumes</option>
+            </Show>
+            <option selected={props.sort === "END_DATE_DESC"} value="END_DATE_DESC">End date</option>
+            <Show when={params.type === "anime"}>
+              <option selected={props.sort === "CHAPTERS_DESC"} value="CHAPTERS_DESC">Episodes</option>
+            </Show>
+            <Show when={params.type === undefined}>
+              <option selected={props.sort === "CHAPTERS_DESC"} value="CHAPTERS_DESC">Episodes / Chapters</option>
+            </Show>
+            <option selected={props.sort === "FAVOURITES_DESC"} value="FAVOURITES_DESC">Favourites</option>
+            <option selected={props.sort === "ID_DESC"} value="ID_DESC">ID</option>
+            <option selected={props.sort === "UPDATED_AT_DESC"} value="UPDATED_AT_DESC">Last updated</option>
             <Switch>
-              <Match when={props.sort === undefined}>
-                <option selected={props.sort === undefined}         value=""                  >POPULARITY_DESC (default)</option>
-              </Match>
               <Match when={props.sort !== undefined}>
-                <option selected={props.sort === "POPULARITY_DESC"} value="POPULARITY_DESC"   >POPULARITY_DESC</option>
+                <option selected={props.sort === "POPULARITY_DESC"} value="POPULARITY_DESC">Popularity</option>
+              </Match>
+              <Match when={props.sort === undefined}>
+                <option selected={props.sort === undefined} value="">Popularity (default)</option>
               </Match>
             </Switch>
+            <option selected={props.sort === "SCORE_DESC"} value="SCORE_DESC">Score</option>
+            <Show when={searchParams.search?.length}>
+              <option selected={props.sort === "SEARCH_MATCH"} value="">Search match</option>
+            </Show>
+            <option selected={props.sort === "START_DATE_DESC"} value="START_DATE_DESC">Start date</option>
+            <option selected={props.sort === "TITLE_ENGLISH_DESC"} value="TITLE_ENGLISH_DESC">Title English</option>
+            <option selected={props.sort === "TITLE_NATIVE_DESC"} value="TITLE_NATIVE_DESC">Title Native</option>
+            <option selected={props.sort === "TITLE_ROMAJI_DESC"} value="TITLE_ROMAJI_DESC">Title Romaji</option>
+            <option selected={props.sort === "TRENDING_DESC"} value="TRENDING_DESC">Trending</option>
+            <Show when={params.type === "manga"}>
+              <option selected={props.sort === "DURATION_DESC"} value="DURATION_DESC">Volumes</option>
+            </Show>
           </Match>
+
           <Match when={props.sort.endsWith("_DESC") === false}>
-            <option selected={props.sort === "CHAPTERS"}            value="CHAPTERS"          >
-              <Switch>
-                <Match when={params.type === "anime"}>Episodes</Match>
-                <Match when={params.type === "manga"}>Chapters</Match>
-                <Match when={params.type === undefined}>Episodes / Chapters</Match>
-              </Switch>
-            </option>
-            <option selected={props.sort === "DURATION"}            value="DURATION"          >
-              <Switch>
-                <Match when={params.type === "anime"}>Duration</Match>
-                <Match when={params.type === "manga"}>Volumes</Match>
-                <Match when={params.type === undefined}>Duration / Volumes</Match>
-              </Switch>
-            </option>
-            <option selected={props.sort === "END_DATE"}            value="END_DATE"          >END_DATE</option>
-            <option selected={props.sort === "FAVOURITES"}          value="FAVOURITES"        >FAVOURITES</option>
-            <option selected={props.sort === "FORMAT"}              value="FORMAT"            >FORMAT</option>
-            <option selected={props.sort === "ID"}                  value="ID"                >ID</option>
-            <option selected={props.sort === "POPULARITY"}          value="POPULARITY"        >POPULARITY</option>
-            <option selected={props.sort === "SCORE"}               value="SCORE"             >SCORE</option>
-            <option selected={props.sort === "SEARCH_MATCH"}        value=""                  >SEARCH_MATCH</option>
-            <option selected={props.sort === "START_DATE"}          value="START_DATE"        >START_DATE</option>
-            <option selected={props.sort === "STATUS"}              value="STATUS"            >STATUS</option>
-            <option selected={props.sort === "TITLE_ENGLISH"}       value="TITLE_ENGLISH"     >TITLE_ENGLISH</option>
-            <option selected={props.sort === "TITLE_NATIVE"}        value="TITLE_NATIVE"      >TITLE_NATIVE</option>
-            <option selected={props.sort === "TITLE_ROMAJI"}        value="TITLE_ROMAJI"      >TITLE_ROMAJI</option>
-            <option selected={props.sort === "TRENDING"}            value="TRENDING"          >TRENDING</option>
-            <option selected={props.sort === "TYPE"}                value="TYPE"              >TYPE</option>
-            <option selected={props.sort === "UPDATED_AT"}          value="UPDATED_AT"        >UPDATED_AT</option>
+            <Show when={params.type === "manga"}>
+              <option selected={props.sort === "CHAPTERS"} value="CHAPTERS">Chapters</option>
+            </Show>
+            <Show when={params.type === "anime"}>
+              <option selected={props.sort === "DURATION"} value="DURATION">Duration</option>
+            </Show>
+            <Show when={params.type === undefined}>
+              <option selected={props.sort === "DURATION"} value="DURATION">Duration / Volumes</option>
+            </Show>
+            <option selected={props.sort === "END_DATE"} value="END_DATE">End date</option>
+            <Show when={params.type === "anime"}>
+              <option selected={props.sort === "CHAPTERS"} value="CHAPTERS">Episodes</option>
+            </Show>
+            <Show when={params.type === undefined}>
+              <option selected={props.sort === "CHAPTERS"} value="CHAPTERS">Episodes / Chapters</option>
+            </Show>
+            <option selected={props.sort === "FAVOURITES"} value="FAVOURITES">Favourites</option>
+            <option selected={props.sort === "ID"} value="ID">ID</option>
+            <option selected={props.sort === "UPDATED_AT"} value="UPDATED_AT">Last updated</option>
+            <option selected={props.sort === "POPULARITY"} value="POPULARITY">Popularity</option>
+            <option selected={props.sort === "SCORE"} value="SCORE">Score</option>
+            <Show when={searchParams.search?.length}>
+              <option selected={props.sort === "SEARCH_MATCH"} value="">Search match</option>
+            </Show>
+            <option selected={props.sort === "START_DATE"} value="START_DATE">Start date</option>
+            <option selected={props.sort === "TITLE_ENGLISH"} value="TITLE_ENGLISH">Title English</option>
+            <option selected={props.sort === "TITLE_NATIVE"} value="TITLE_NATIVE">Title Native</option>
+            <option selected={props.sort === "TITLE_ROMAJI"} value="TITLE_ROMAJI">Title Romaji</option>
+            <option selected={props.sort === "TRENDING"} value="TRENDING">Trending</option>
+            <Show when={params.type === "manga"}>
+              <option selected={props.sort === "DURATION"} value="DURATION">Volumes</option>
+            </Show>
           </Match>
         </Switch>
       </select>
