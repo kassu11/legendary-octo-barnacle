@@ -482,6 +482,14 @@ function Search() {
           </select>
         </div>
         <div>
+          <p>License Status</p>
+          <select name="isLicensed" value={formStateObject().isLicensed?.toString() || ""}>
+            <option value="">All</option>
+            <option value="true">Licensed</option>
+            <option value="false">Unlicensed</option>
+          </select>
+        </div>
+        <div>
           <p>Streaming/Licensed On</p>
           <select name="licensedBy" multiple>
             <Show when={externalSources()}>
