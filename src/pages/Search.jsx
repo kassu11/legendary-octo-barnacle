@@ -450,7 +450,16 @@ function Search() {
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
-        
+        <div>
+          <p>Country of Origin</p>
+          <select name="countryOfOrigin" value={formStateObject().countryOfOrigin || ""}>
+            <option value="">All Countries</option>
+            <option value="JP">Japan</option>
+            <option value="KR">South Korea</option>
+            <option value="CN">China</option>
+            <option value="TW">Taiwan</option>
+          </select>
+        </div>
         <div>
           <p>Streaming/Licensed On</p>
           <select name="licensedBy" multiple>
