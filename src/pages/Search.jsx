@@ -482,6 +482,33 @@ function Search() {
           </select>
         </div>
         <div>
+          <p>Episode Range</p>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div>
+              <label htmlFor="episodeGreater">Min</label><br />
+              <input 
+                type="number" 
+                inputMode="numeric" 
+                name="episodeGreater" 
+                id="episodeGreater"
+                min="0"
+                value={formStateObject().episodeGreater || ""}
+              />
+            </div>
+            <div>
+              <label htmlFor="episodeLesser">Max</label><br />
+              <input 
+                type="number" 
+                inputMode="numeric" 
+                name="episodeLesser" 
+                id="episodeLesser"
+                min="0"
+                value={formStateObject().episodeLesser || ""}
+              />
+            </div>
+          </div>
+        </div>
+        <div>
           <p>License Status</p>
           <select name="isLicensed" value={formStateObject().isLicensed?.toString() || ""}>
             <option value="">All</option>
