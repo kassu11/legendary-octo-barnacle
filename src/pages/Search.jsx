@@ -454,10 +454,31 @@ function Search() {
           <p>Country of Origin</p>
           <select name="countryOfOrigin" value={formStateObject().countryOfOrigin || ""}>
             <option value="">All Countries</option>
+            <option value="CN">China</option>
             <option value="JP">Japan</option>
             <option value="KR">South Korea</option>
-            <option value="CN">China</option>
             <option value="TW">Taiwan</option>
+          </select>
+        </div>
+        <div>
+          <p>Source</p>
+          <select name="source" value={formStateObject().source || ""}>
+            <option value="">All Sources</option>
+            <option value="ANIME">Anime</option>
+            <option value="COMIC">Comic</option>
+            <option value="DOUJINSHI">Doujinshi</option>
+            <option value="GAME">Game</option>
+            <option value="LIGHT_NOVEL">Light Novel</option>
+            <option value="LIVE_ACTION">Live Action</option>
+            <option value="MANGA">Manga</option>
+            <option value="MULTIMEDIA_PROJECT">Multimedia Project</option>
+            <option value="NOVEL">Novel</option>
+            <option value="ORIGINAL">Original</option>
+            <option value="OTHER">Other</option>
+            <option value="PICTURE_BOOK">Picture Book</option>
+            <option value="VIDEO_GAME">Video Game</option>
+            <option value="VISUAL_NOVEL">Visual Novel</option>
+            <option value="WEB_NOVEL">Web Novel</option>
           </select>
         </div>
         <div>
