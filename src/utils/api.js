@@ -46,6 +46,9 @@ const api = {
         "withRoles": true
       });
     }),
+    genresAndTags: fetchOnce(() => {
+      return Fetch.anilist(querys.anilistGenresAndTags);
+    }),
     characters: fetchOnce((id, page = 1) => {
       return Fetch.anilist(querys.anilistCharacters, { id, page });
     }),

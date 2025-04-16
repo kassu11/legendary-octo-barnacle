@@ -912,6 +912,8 @@ export const searchMedia = format`query (
   }
 }`;
 
+export const anilistGenresAndTags = format`query{genres:GenreCollection tags:MediaTagCollection{name description category isAdult}}`;
+
 
 export const mediaListEntry = format`query ($mediaId: Int) {
   Media(id: $mediaId) {
