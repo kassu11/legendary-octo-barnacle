@@ -64,12 +64,16 @@ export const formatAnilistDate = (dateObject) => {
     return "";
   }
 
+  if (dateObject.year && !dateObject.month && !dateObject.day) {
+    return dateObject.year.toString();
+  }
+
   const options = {};
   if(dateObject.year) { options["year"] = "numeric"; };
   if(dateObject.month) { options["month"] = "short"; };
   if(dateObject.day) { options["day"] = "numeric"; };
 
-  const event = new Date(dateObject.year || 1970, dateObject.month || 1, dateObject.day || 1);
+  const event = new Date(dateObject.year || 1970, dateObject.month - 1 || 1, dateObject.day || 1);
 
   return event.toLocaleDateString("us-US", options);
 }
