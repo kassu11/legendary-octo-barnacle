@@ -257,12 +257,12 @@ function Search() {
         console.log("Form: ", { ...data });
         setSearchParams(data);
       }}>
-        <button type="button" onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
         <div>
           <label htmlFor="search">Search</label><br />
           <input type="search" name="search" id="search" value={formStateObject().search || ""} onInput={() => {
             sortInput.value = "";
           }}/>
+          <button type="button" onClick={() => setSearchParams({page: +searchParams.page + 1 || 1})}>Next page</button>
         </div>
         <div>
           <p>Media Type</p>
@@ -288,15 +288,6 @@ function Search() {
             <option value="true">Include</option>
           </select>
         </div>
-        <div>
-          <label htmlFor="year">Year</label><br />
-          <input 
-            type="number" 
-            name="year" 
-            id="year" 
-            value={formStateObject().year?.substring(0, formStateObject().year.length - 1) || ""} 
-          />
-        </div>
         <Show when={params.type === "anime"}>
           <div>
             <p>Season</p>
@@ -309,6 +300,15 @@ function Search() {
             </select>
           </div>
         </Show>
+        <div>
+          <label htmlFor="year">Year</label><br />
+          <input 
+            type="number" 
+            name="year" 
+            id="year" 
+            value={formStateObject().year?.substring(0, formStateObject().year.length - 1) || ""} 
+          />
+        </div>
         <div>
           <p>Format</p>
           <select name="format" multiple>
@@ -328,117 +328,124 @@ function Search() {
             </Show>
           </select>
         </div>
-        <div>
-          <p>Genres</p>
-          <select name="genres" multiple>
-            <For each={genresAndTags()?.data.data.genres}>{genre => (
-              <Show when={formStateObject().excludedGenres[genre] !== true}>
-                <Switch>
-                  <Match when={genre !== "Hentai"}>
-                    <option selected={formStateObject().genres?.[genre]} value={genre}>{genre}</option>
-                  </Match>
-                  <Match when={formStateObject().isAdult !== false}>
-                    <option selected={formStateObject().genres?.[genre]} value={genre}>{genre} (+18)</option>
-                  </Match>
-                </Switch>
-              </Show>
-            )}</For>
-          </select>
-        </div>
-        <div>
-          <p>Exclude Genres</p>
-          <select name="excludedGenres" multiple>
-            <For each={genresAndTags()?.data.data.genres}>{genre => (
-              <Show when={formStateObject().genres[genre] !== true}>
-                <Switch>
-                  <Match when={genre !== "Hentai"}>
-                    <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre}</option>
-                  </Match>
-                  <Match when={formStateObject().isAdult !== false}>
-                    <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre} (+18)</option>
-                  </Match>
-                </Switch>
-              </Show>
-            )}</For>
-          </select>
-        </div>
-        <div>
-          <p>Tags</p>
-          <select name="tags" multiple>
-            <For each={Object.entries(groupTagsByCategory(genresAndTags()?.data.data.tags))}>
-              {([category, tags]) => (
-                <Show when={tags.some(tag => !tag.isAdult || formStateObject().isAdult !== false)}>
-                  <optgroup label={category}>
-                    <For each={tags}>{tag => (
-                      <Show when={formStateObject().excludedTags[tag.name] !== true}>
-                        <Switch>
-                          <Match when={!tag.isAdult}>
-                            <option selected={formStateObject().tags?.[tag.name]} value={tag.name}>{tag.name}</option>
-                          </Match>
-                          <Match when={(formStateObject().isAdult !== false)}>
-                            <option selected={formStateObject().tags?.[tag.name]} value={tag.name}>{tag.name} (+18)</option>
-                          </Match>
-                        </Switch>
-                      </Show>
-                    )}</For>
-                  </optgroup>
+        <div style={{display: "flex", gap: ".5rem" }}>
+          <div>
+            <p>Genres</p>
+            <select name="genres" multiple>
+              <For each={genresAndTags()?.data.data.genres}>{genre => (
+                <Show when={formStateObject().excludedGenres[genre] !== true}>
+                  <Switch>
+                    <Match when={genre !== "Hentai"}>
+                      <option selected={formStateObject().genres?.[genre]} value={genre}>{genre}</option>
+                    </Match>
+                    <Match when={formStateObject().isAdult !== false}>
+                      <option selected={formStateObject().genres?.[genre]} value={genre}>{genre} (+18)</option>
+                    </Match>
+                  </Switch>
                 </Show>
-              )}
-            </For>
-          </select>
-        </div>
-        <div>
-          <p>Exclude Tags</p>
-          <select name="excludedTags" multiple>
-            <For each={Object.entries(groupTagsByCategory(genresAndTags()?.data.data.tags))}>
-              {([category, tags]) => (
-                <Show when={tags.some(tag => !tag.isAdult || formStateObject().isAdult !== false)}>
-                  <optgroup label={category}>
-                    <For each={tags}>{tag => (
-                      <Show when={formStateObject().tags[tag.name] !== true}>
-                        <Switch>
-                          <Match when={!tag.isAdult}>
-                            <option selected={formStateObject().excludedTags?.[tag.name]} value={tag.name}>{tag.name}</option>
-                          </Match>
-                          <Match when={(formStateObject().isAdult !== false)}>
-                            <option selected={formStateObject().excludedTags?.[tag.name]} value={tag.name}>{tag.name} (+18)</option>
-                          </Match>
-                        </Switch>
-                      </Show>
-                    )}</For>
-                  </optgroup>
+              )}</For>
+            </select>
+          </div>
+          <div>
+            <p>Exclude Genres</p>
+            <select name="excludedGenres" multiple>
+              <For each={genresAndTags()?.data.data.genres}>{genre => (
+                <Show when={formStateObject().genres[genre] !== true}>
+                  <Switch>
+                    <Match when={genre !== "Hentai"}>
+                      <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre}</option>
+                    </Match>
+                    <Match when={formStateObject().isAdult !== false}>
+                      <option selected={formStateObject().excludedGenres?.[genre]} value={genre}>{genre} (+18)</option>
+                    </Match>
+                  </Switch>
                 </Show>
-              )}
-            </For>
-          </select>
+              )}</For>
+            </select>
+          </div>
         </div>
-        <div>
-          <p>Sort Order</p>
-          <select onInput={e => {
-            const value = e.target.value;
-            const sort = formStateObject().sort;
-            if (sort === undefined) {
-              setFormStateObject(v => ({...v, sort: "POPULARITY"}));
-            } else if (value === "ASC") {
-              setFormStateObject(v => ({...v, sort: sort.substring(0, sort.length - 5)}));
-            } else {
-              setFormStateObject(v => ({...v, sort: sort + "_DESC"}));
-            }
-          }}>
-            <Switch>
-              <Match when={formStateObject().sort === "SEARCH_MATCH"}>
-                <option selected value="desc">DESC</option>
-              </Match>
-              <Match when={formStateObject().sort === undefined}>
-                <option selected value="desc">DESC</option>
-                <option value="asc">ASC</option>
-              </Match>
-              <Match when={formStateObject().sort !== undefined}>
-                <option selected={formStateObject().sort.endsWith("_DESC") === true} value="DESC">DESC</option>
-                <option selected={formStateObject().sort.endsWith("_DESC") === false} value="ASC">ASC</option>
-              </Match>
-            </Switch>
-          </select>
+        <div style={{display: "flex", gap: ".5rem" }}>
+          <div>
+            <p>Tags</p>
+            <select name="tags" multiple>
+              <For each={Object.entries(groupTagsByCategory(genresAndTags()?.data.data.tags))}>
+                {([category, tags]) => (
+                  <Show when={tags.some(tag => !tag.isAdult || formStateObject().isAdult !== false)}>
+                    <optgroup label={category}>
+                      <For each={tags}>{tag => (
+                        <Show when={formStateObject().excludedTags[tag.name] !== true}>
+                          <Switch>
+                            <Match when={!tag.isAdult}>
+                              <option selected={formStateObject().tags?.[tag.name]} value={tag.name}>{tag.name}</option>
+                            </Match>
+                            <Match when={(formStateObject().isAdult !== false)}>
+                              <option selected={formStateObject().tags?.[tag.name]} value={tag.name}>{tag.name} (+18)</option>
+                            </Match>
+                          </Switch>
+                        </Show>
+                      )}</For>
+                    </optgroup>
+                  </Show>
+                )}
+              </For>
+            </select>
+          </div>
+          <div>
+            <p>Exclude Tags</p>
+            <select name="excludedTags" multiple>
+              <For each={Object.entries(groupTagsByCategory(genresAndTags()?.data.data.tags))}>
+                {([category, tags]) => (
+                  <Show when={tags.some(tag => !tag.isAdult || formStateObject().isAdult !== false)}>
+                    <optgroup label={category}>
+                      <For each={tags}>{tag => (
+                        <Show when={formStateObject().tags[tag.name] !== true}>
+                          <Switch>
+                            <Match when={!tag.isAdult}>
+                              <option selected={formStateObject().excludedTags?.[tag.name]} value={tag.name}>{tag.name}</option>
+                            </Match>
+                            <Match when={(formStateObject().isAdult !== false)}>
+                              <option selected={formStateObject().excludedTags?.[tag.name]} value={tag.name}>{tag.name} (+18)</option>
+                            </Match>
+                          </Switch>
+                        </Show>
+                      )}</For>
+                    </optgroup>
+                  </Show>
+                )}
+              </For>
+            </select>
+          </div>
+        </div>
+        <div style={{display: "flex", gap: ".5rem" }}>
+          <div>
+            <p>Sort Order</p>
+            <select onInput={e => {
+              const value = e.target.value;
+              const sort = formStateObject().sort;
+              if (sort === undefined) {
+                setFormStateObject(v => ({...v, sort: "POPULARITY"}));
+              } else if (value === "ASC") {
+                setFormStateObject(v => ({...v, sort: sort.substring(0, sort.length - 5)}));
+              } else {
+                setFormStateObject(v => ({...v, sort: sort + "_DESC"}));
+              }
+            }}>
+              <Switch>
+                <Match when={formStateObject().sort === "SEARCH_MATCH"}>
+                  <option selected value="desc">DESC</option>
+                </Match>
+                <Match when={formStateObject().sort === undefined}>
+                  <option selected value="desc">DESC</option>
+                  <option value="asc">ASC</option>
+                </Match>
+                <Match when={formStateObject().sort !== undefined}>
+                  <option selected={formStateObject().sort.endsWith("_DESC") === true} value="DESC">DESC</option>
+                  <option selected={formStateObject().sort.endsWith("_DESC") === false} value="ASC">ASC</option>
+                </Match>
+              </Switch>
+            </select>
+          </div>
+          <SortSelect sort={formStateObject().sort} ref={sortInput} />
         </div>
         <div>
           <p>Airing Status</p>
@@ -460,30 +467,56 @@ function Search() {
             <option value="TW">Taiwan</option>
           </select>
         </div>
-        <div>
-          <p>Source</p>
-          <select name="source" value={formStateObject().source || ""}>
-            <option value="">All Sources</option>
-            <option value="ANIME">Anime</option>
-            <option value="COMIC">Comic</option>
-            <option value="DOUJINSHI">Doujinshi</option>
-            <option value="GAME">Game</option>
-            <option value="LIGHT_NOVEL">Light Novel</option>
-            <option value="LIVE_ACTION">Live Action</option>
-            <option value="MANGA">Manga</option>
-            <option value="MULTIMEDIA_PROJECT">Multimedia Project</option>
-            <option value="NOVEL">Novel</option>
-            <option value="ORIGINAL">Original</option>
-            <option value="OTHER">Other</option>
-            <option value="PICTURE_BOOK">Picture Book</option>
-            <option value="VIDEO_GAME">Video Game</option>
-            <option value="VISUAL_NOVEL">Visual Novel</option>
-            <option value="WEB_NOVEL">Web Novel</option>
-          </select>
+        <div style={{ display: "flex", gap: ".5rem" }}>
+          <div>
+            <p>Source</p>
+            <select name="source" value={formStateObject().source || ""}>
+              <option value="">All Sources</option>
+              <option value="ANIME">Anime</option>
+              <option value="COMIC">Comic</option>
+              <option value="DOUJINSHI">Doujinshi</option>
+              <option value="GAME">Game</option>
+              <option value="LIGHT_NOVEL">Light Novel</option>
+              <option value="LIVE_ACTION">Live Action</option>
+              <option value="MANGA">Manga</option>
+              <option value="MULTIMEDIA_PROJECT">Multimedia Project</option>
+              <option value="NOVEL">Novel</option>
+              <option value="ORIGINAL">Original</option>
+              <option value="OTHER">Other</option>
+              <option value="PICTURE_BOOK">Picture Book</option>
+              <option value="VIDEO_GAME">Video Game</option>
+              <option value="VISUAL_NOVEL">Visual Novel</option>
+              <option value="WEB_NOVEL">Web Novel</option>
+            </select>
+          </div>
+          <div>
+            <p>Streaming/Licensed On</p>
+            <select name="licensedBy" multiple>
+              <Show when={externalSources()}>
+                <For each={externalSources().data.data.ExternalLinkSourceCollection}>{source => (
+                  <option 
+                    selected={formStateObject().licensedBy?.[source.id]} 
+                    value={source.id}
+                    style={{
+                      ...(source.icon ? {
+                        "background-image": `url(${source.icon}), linear-gradient(90deg, ${source.color} 0%, ${source.color} 100%)`,
+                        "background-size": "16px, 24px",
+                        "background-position": "4px center, 0px",
+                        "background-repeat": "no-repeat",
+                        "padding-left": "28px",
+                      } : {})
+                    }}
+                  >
+                    {source.site}
+                  </option>
+                )}</For>
+              </Show>
+            </select>
+          </div>
         </div>
         <div>
           <p>Episode Range</p>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: "flex", gap: ".5rem" }}>
             <div>
               <label htmlFor="episodeGreater">Min</label><br />
               <input 
@@ -516,32 +549,6 @@ function Search() {
             <option value="false">Unlicensed</option>
           </select>
         </div>
-        <div>
-          <p>Streaming/Licensed On</p>
-          <select name="licensedBy" multiple>
-            <Show when={externalSources()}>
-              <For each={externalSources().data.data.ExternalLinkSourceCollection}>{source => (
-                <option 
-                  selected={formStateObject().licensedBy?.[source.id]} 
-                  value={source.id}
-                  style={{
-                    ...(source.icon ? {
-                      "background-image": `url(${source.icon}), linear-gradient(90deg, ${source.color} 0%, ${source.color} 100%)`,
-                      "background-size": "16px, 24px",
-                      "background-position": "4px center, 0px",
-                      "background-repeat": "no-repeat",
-                      "padding-left": "28px",
-                    } : {})
-                  }}
-                >
-                  {source.site}
-                </option>
-              )}</For>
-            </Show>
-          </select>
-        </div>
-
-        <SortSelect sort={formStateObject().sort} ref={sortInput} />
       </form>
       {/* {console.log(mediaData())} */}
       <Switch>
