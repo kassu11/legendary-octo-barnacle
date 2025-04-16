@@ -21,10 +21,9 @@
   }
 
   .media-search-header {
-    display: grid;
-    grid-template-columns: repeat(4, auto);
+    display: flex;
+    flex-wrap: wrap;
     gap: .5rem;
-    justify-content: center;
   }
 
   .search-home-content {
