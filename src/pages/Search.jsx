@@ -170,6 +170,7 @@ function Search() {
   const [mediaData, { mutate: mutateMediaData }] = api.anilist.searchMedia(accessToken, variables);
   const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
   const [genresAndTags] = api.anilist.genresAndTags();
+  const [externalSources] = api.anilist.externalSources(() => (params.type?.toUpperCase() || null));
 
   const [formStateObject, setFormStateObject] = createSignal({});
 
@@ -201,6 +202,7 @@ function Search() {
         genres: toObject(variables.genres),
         excludedGenres: toObject(variables.excludedGenres),
         tags: toObject(variables.tags),
+        licensedBy: toObject(variables.licensedBy),
         excludedTags: toObject(variables.excludedTags),
         sort: Array.isArray(variables.sort) ? variables.sort[0] : variables.sort,
       });
@@ -226,6 +228,7 @@ function Search() {
 
   return (
     <div class="search-page">
+      {console.log(externalSources())}
       <form ref={form} action="https://graphql.anilist.co" class="media-search-header" onInput={e => {
         const formData = new FormData(e.currentTarget);
         const data = formData.entries().reduce((acc, [key, val]) => {
@@ -239,7 +242,7 @@ function Search() {
 
           return acc;
         }, {});
-        const keysToManuallyReset = ["format", "genres", "excludedGenres", "tags", "excludedTags"]; 
+        const keysToManuallyReset = ["format", "genres", "excludedGenres", "tags", "excludedTags", "licensedBy"]; 
         keysToManuallyReset.forEach(key => data[key] ??= undefined);
 
         if (data.type === "anime" && params.type !== "anime") {
@@ -447,6 +450,32 @@ function Search() {
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
+        
+        <div>
+          <p>Streaming/Licensed On</p>
+          <select name="licensedBy" multiple>
+            <Show when={externalSources()}>
+              <For each={externalSources().data.data.ExternalLinkSourceCollection}>{source => (
+                <option 
+                  selected={formStateObject().licensedBy?.[source.id]} 
+                  value={source.id}
+                  style={{
+                    ...(source.icon ? {
+                      "background-image": `url(${source.icon}), linear-gradient(90deg, ${source.color} 0%, ${source.color} 100%)`,
+                      "background-size": "16px, 24px",
+                      "background-position": "4px center, 0px",
+                      "background-repeat": "no-repeat",
+                      "padding-left": "28px",
+                    } : {})
+                  }}
+                >
+                  {source.site}
+                </option>
+              )}</For>
+            </Show>
+          </select>
+        </div>
+
         <SortSelect sort={formStateObject().sort} ref={sortInput} />
       </form>
       {/* {console.log(mediaData())} */}
