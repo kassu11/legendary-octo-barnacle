@@ -66,6 +66,16 @@ const api = {
         "nextYear": dates.nextYear,
       });
     }),
+    trendingManga: fetchOnce((token) => {
+      const dates = getDates();
+      return Fetch.authAnilist(token, querys.trendingManga, {
+        "type": "MANGA",
+        "season": dates.season,
+        "seasonYear": dates.seasonYear,
+        "nextSeason": dates.nextSeason,
+        "nextYear": dates.nextYear,
+      });
+    }),
     mediaListEntry: async (token, mediaId) => {
       assert(mediaId, "MediaId missing");
       assert(typeof token !== "function", "This specific api doesnt support signals");
