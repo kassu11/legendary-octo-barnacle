@@ -143,6 +143,22 @@ function parseUrl(type, header, search) {
   return variables;
 };
 
+function searchQueryFromForm(form) {
+  const formData = new FormData(form);
+  const search = [];
+  new URLSearchParams(formData).entries().forEach(([key, val]) => {
+    if (val && key !== "type") {
+      search.push(key + "=" + val);
+    }
+  });
+
+  if (search.length) {
+    return "?" + search.join("&");
+  }
+
+  return "";
+}
+
 function groupTagsByCategory(tags) {
   if (!tags) return {}
   const group = {};
@@ -210,15 +226,7 @@ function Search() {
       if (location.search.length === 0 && params.header === undefined) {
         mutateMediaData(undefined);
       } else if (params.header && location.search.length) {
-        const formData = new FormData(form);
-        const search = [];
-        new URLSearchParams(formData).entries().forEach(([key, val]) => {
-          if (val && key !== "type") {
-            search.push(key + "=" + val);
-          }
-        });
-
-        navigate("/search" + (!params.type || ("/" + params.type)) + "?" + search.join("&"));
+        navigate("/search" + (!params.type || ("/" + params.type)) + searchQueryFromForm(form));
       } else {
         triggerVariable(variables);
         setCacheVariables(variables);
@@ -231,31 +239,32 @@ function Search() {
       {console.log(externalSources())}
       <form ref={form} action="https://graphql.anilist.co" class="media-search-header" onInput={e => {
         const formData = new FormData(e.currentTarget);
-        const data = formData.entries().reduce((acc, [key, val]) => {
-          if (Array.isArray(acc[key])) {
-            acc[key].push(val);
-          } else if(acc[key] && val) {
-            acc[key] = [acc[key], val];
-          } else {
-            acc[key] = val || undefined;
-          }
 
-          return acc;
-        }, {});
-        const keysToManuallyReset = ["format", "genres", "excludedGenres", "tags", "excludedTags", "licensedBy"]; 
-        keysToManuallyReset.forEach(key => data[key] ??= undefined);
+        if (formData.get("type") === "anime" && params.type !== "anime") {
+          navigate("/search/anime" + searchQueryFromForm(e.currentTarget));
+        } else if (formData.get("type") === "manga" && params.type !== "manga") { 
+          navigate("/search/manga" + searchQueryFromForm(e.currentTarget));
+        } else if (formData.get("type") === "" && params.type !== undefined) {
+          navigate("/search" + searchQueryFromForm(e.currentTarget));
+        } else {
+          const data = formData.entries().reduce((acc, [key, val]) => {
+            if (Array.isArray(acc[key])) {
+              acc[key].push(val);
+            } else if(acc[key] && val) {
+              acc[key] = [acc[key], val];
+            } else {
+              acc[key] = val || undefined;
+            }
 
-        if (data.type === "anime" && params.type !== "anime") {
-          navigate("/search/anime" + location.search);
-        } else if (data.type === "manga" && params.type !== "manga") { 
-          navigate("/search/manga" + location.search);
-        } else if (data.type === undefined && params.type !== undefined) {
-          navigate("/search" + location.search);
+            return acc;
+          }, {});
+          delete data.type;
+          const keysToManuallyReset = ["format", "genres", "excludedGenres", "tags", "excludedTags", "licensedBy"]; 
+          keysToManuallyReset.forEach(key => data[key] ??= undefined);
+
+          console.log("Form: ", { ...data });
+          setSearchParams(data);
         }
-        delete data.type;
-
-        console.log("Form: ", { ...data });
-        setSearchParams(data);
       }}>
         <div>
           <label htmlFor="search">Search</label><br />
@@ -266,10 +275,10 @@ function Search() {
         </div>
         <div>
           <p>Media Type</p>
-          <select name="type">
-            <option selected={params.type === undefined} value="">Both</option>
-            <option selected={params.type === "anime"} value="anime">Anime</option>
-            <option selected={params.type === "manga"} value="manga">Manga</option>
+          <select name="type" value={params.type || ""}>
+            <option value="">Both</option>
+            <option value="anime">Anime</option>
+            <option value="manga">Manga</option>
           </select>
         </div>
         <div>
