@@ -18,9 +18,13 @@ const root = document.getElementById("root")
 const filter = {
   id: /^\d+$/,
 }
-const search = {
-  type: ["anime", "manga"],
+const animeSearch = {
+  type: ["anime"],
   header: ["this-season", "next-season", "trending", "popular", "top-100"],
+}
+const mangaSearch = {
+  type: ["manga"],
+  header: ["novel", "manwha", "trending", "popular", "top-100"],
 }
 
 render(
@@ -31,7 +35,10 @@ render(
           <Router root={App} base="/legendary-octo-barnacle">
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
-            <Route path="/search/:type?/:header?" matchFilters={search} component={Search} />
+            <Route path="/search" component={Search}>
+              <Route path="/:type?/:header?" matchFilters={animeSearch} />
+              <Route path="/:type?/:header?" matchFilters={mangaSearch} />
+            </Route>
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">
               <Route path="/character/:id" matchFilters={filter} component={Character} />

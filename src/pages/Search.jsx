@@ -100,6 +100,12 @@ function parseUrl(type, header, search) {
     variables.sort = null;
   } else if (header === "top-100") {
     variables.sort = ["SCORE_DESC", "POPULARITY_DESC"];
+  } else if (header === "manwha") {
+    variables.countryOfOrigin = "KR";
+    variables.sort = null;
+  } else if (header === "novel") {
+    variables.format = "NOVEL"
+    variables.sort = null;
   }
 
   variables.chapterGreater ??= searchObject.chapterGreater;
@@ -143,7 +149,8 @@ function parseUrl(type, header, search) {
   return variables;
 };
 
-function searchQueryFromForm(form) {
+function searchQueryFromForm(form, fallbackToDefaultSort) {
+  assert(typeof fallbackToDefaultSort === "boolean", "Set value for default sorting");
   const formData = new FormData(form);
   const search = [];
   new URLSearchParams(formData).entries().forEach(([key, val]) => {
@@ -154,6 +161,8 @@ function searchQueryFromForm(form) {
 
   if (search.length) {
     return "?" + search.join("&");
+  } else if(fallbackToDefaultSort) {
+    return "?sort=POPULARITY_DESC"
   }
 
   return "";
@@ -226,7 +235,7 @@ function Search() {
       if (location.search.length === 0 && params.header === undefined) {
         mutateMediaData(undefined);
       } else if (params.header && location.search.length) {
-        navigate("/search" + (!params.type || ("/" + params.type)) + searchQueryFromForm(form));
+        navigate("/search" + (!params.type || ("/" + params.type)) + searchQueryFromForm(form, false));
       } else {
         triggerVariable(variables);
         setCacheVariables(variables);
@@ -241,11 +250,11 @@ function Search() {
         const formData = new FormData(e.currentTarget);
 
         if (formData.get("type") === "anime" && params.type !== "anime") {
-          navigate("/search/anime" + searchQueryFromForm(e.currentTarget));
+          navigate("/search/anime" + searchQueryFromForm(e.currentTarget, params.header !== undefined));
         } else if (formData.get("type") === "manga" && params.type !== "manga") { 
-          navigate("/search/manga" + searchQueryFromForm(e.currentTarget));
+          navigate("/search/manga" + searchQueryFromForm(e.currentTarget, params.header !== undefined));
         } else if (formData.get("type") === "" && params.type !== undefined) {
-          navigate("/search" + searchQueryFromForm(e.currentTarget));
+          navigate("/search" + searchQueryFromForm(e.currentTarget, params.header !== undefined));
         } else {
           const data = formData.entries().reduce((acc, [key, val]) => {
             if (Array.isArray(acc[key])) {
@@ -559,10 +568,9 @@ function Search() {
           </select>
         </div>
       </form>
-      {/* {console.log(mediaData())} */}
       <Switch>
         <Match when={location.search.length || params.header}>
-          <SearchContent content={mediaData()}/>
+          <SearchContentCards content={mediaData()}/>
         </Match>
         <Match when={location.search.length === 0}>
           <Switch>
@@ -570,7 +578,7 @@ function Search() {
               <AnimeSearch />
             </Match>
             <Match when={params.type === "manga"}>
-              manga
+              <MangaSearch />
             </Match>
             <Match when={params.type === undefined}>
               Both
@@ -687,17 +695,35 @@ function AnimeSearch() {
     <Show when={animeData()}>
       {/* <div>{console.log(animeData())}</div> */}
       <div class="search-home-content">
-        <HorizontalCardRow data={animeData().data.data.trending.media} href="trending" title="Trending now" />
-        <HorizontalCardRow data={animeData().data.data.season.media} href="this-season" title="Popular this season" />
-        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="next-season" title="Upcoming next season" />
-        <HorizontalCardRow data={animeData().data.data.popular.media} href="popular" title="All time popular" />
-        <VerticalCardRow data={animeData().data.data.top.media} href="top-100" title="Top 100 anime" />
+        <HorizontalCardRow data={animeData().data.data.trending.media} href="anime/trending" title="Trending now" />
+        <HorizontalCardRow data={animeData().data.data.season.media} href="anime/this-season" title="Popular this season" />
+        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="anime/next-season" title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.popular.media} href="anime/popular" title="All time popular" />
+        <VerticalCardRow data={animeData().data.data.top.media} type="manga" href="anime/top-100" title="Top 100 anime" />
       </div>
     </Show>
   );
 }
 
-function SearchContent(props) {
+function MangaSearch() {
+  const {accessToken} = useAuthentication();
+  const [mangaData] = api.anilist.trendingManga(accessToken);
+
+  return (
+    <Show when={mangaData()}>
+      <div>{console.log(mangaData())}</div>
+      <div class="search-home-content">
+        <HorizontalCardRow data={mangaData().data.data.trending.media} href="manga/trending" title="Trending now" />
+        <HorizontalCardRow data={mangaData().data.data.novel.media} href="manga/novel" title="Popular Light Novels" />
+        <HorizontalCardRow data={mangaData().data.data.manhwa.media} href="manga/manwha" title="Popular Manwhas" />
+        <HorizontalCardRow data={mangaData().data.data.popular.media} href="manga/popular" title="All time popular" />
+        <VerticalCardRow data={mangaData().data.data.top.media} type="manga" href="manga/top-100" title="Top 100 manga" />
+      </div>
+    </Show>
+  );
+}
+
+function SearchContentCards(props) {
   return (
     <div class="search-result-container">
       <ol class="search-page-content">
@@ -739,7 +765,7 @@ function VerticalCardRow(props) {
                   <ol class="vertical-search-card-genre-list">
                     <For each={card.genres}>{genre => (
                       <li class="vertical-search-card-genre">
-                        <A href={"/search/anime?genres=" + genre}>{genre}</A>
+                        <A href={`/search/${props.type || ""}?genres=` + genre}>{genre}</A>
                       </li>
                     )}</For>
                   </ol>
