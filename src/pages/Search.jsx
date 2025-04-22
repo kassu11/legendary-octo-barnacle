@@ -768,10 +768,10 @@ function HorizontalCardRow(props) {
 
   return (
     <section class="horizontal-search-card-section">
-      <div class="search-cards-header">
+      <A href={props.href} class="search-cards-header">
         <h2>{props.title}</h2>
-        <A href={props.href}>View all</A>
-      </div>
+        <span>View all</span>
+      </A>
       <ol class="horizontal-search-card-row">
         <For each={props.data}>{card => (
           <Card card={card} />
