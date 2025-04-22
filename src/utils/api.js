@@ -180,11 +180,30 @@ class Fetch {
       method: this.method,
       headers: this.headers,
       body: JSON.stringify(this.body),
+      cache: "default",
     }
 
-    const response = await fetch(this.url, opt);
-    this.data = await response.json();
-    this.fromCache = false;
+    try {
+      const response = await fetch(this.url, opt);
+      this.status = response.status;
+      // console.log("headers Retry-After:", response.headers.get("Retry-After"));
+      // console.log("headers X-RateLimit-Limit:", response.headers.get("X-RateLimit-Limit"));
+      // console.log("headers X-RateLimit-Remaining:", response.headers.get("X-RateLimit-Remaining"));
+      // console.log("headers X-RateLimit-Reset:", response.headers.get("X-RateLimit-Reset"));
+      // for(const [key, val] of response.headers.entries()) {
+      //   console.log(`Header "${key}" value:`, val);
+      // }
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      this.data = await response.json();
+      this.fromCache = false;
+    }
+    catch(err) {
+      this.error = true;
+      console.assert(!DEBUG, err);
+    }
     return this;
   }
 
@@ -288,16 +307,21 @@ function cacheBuilder(settings) {
         if (settings.type === "only-if-cached") {
           return setData(null);
         }
-        const requestCopy = request;
+
         const data = await request.send();
         if (settings.expiresInSeconds) {
           const time = new Date();
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
         }
 
-        if (requestCopy === request) {
+        if (data.cacheKey && data.cacheKey === request.cacheKey) {
           mutate(data);
-          mutateCache(data);
+
+          if (!data.error) {
+            mutateCache(data);
+          } else if (DEBUG) {
+            console.error("Fetch error, not saving data to cache");
+          }
         }
       }
 
