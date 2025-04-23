@@ -37,6 +37,10 @@ const api = {
     mediaId: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.anilistMediaById, { id, perPage: 6 });
     }),
+    userByName: fetchOnce((name, token) => {
+      assert(name, "Name is missing");
+      return Fetch.authAnilist(token, querys.getUserByName, { name });
+    }),
     characterId: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, {
         id,

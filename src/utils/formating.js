@@ -95,3 +95,9 @@ export const formatAnilistDate = (dateObject) => {
 
   return event.toLocaleDateString("us-US", options);
 }
+
+export const formatTimeToDate = (time) => {
+  const date = new Date(time);
+  const options = { "year" : "numeric", "month" : "short", "day" : "numeric" };
+  return date.toLocaleDateString("us-US", options);
+}
