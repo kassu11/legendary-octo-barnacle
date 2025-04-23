@@ -34,27 +34,47 @@ function Content(props) {
   return (
     <div class="user-page">
       {console.log(props.user)}
-      <Show when={props.user.bannerImage}>
-        <div class="profile-banner">
-          <img src={props.user.bannerImage} alt="Banner" />
+      <div class="profile-banner-container">
+        <Show when={props.user.bannerImage} fallback={<div class="banner"></div>}>
+          <img src={props.user.bannerImage} class="banner" alt="Banner" />
+        </Show>
+        <div class="user-profile-container">
+          <img src={props.user.avatar.large} class="profile" alt="Profile" />
+          <div class="content">
+            <h2>{props.user.name}</h2>
+            <p>Joined {formatTimeToDate(props.user.createdAt * 1000)} ({Math.floor((new Date() - (props.user.createdAt * 1000)) / 1000 / 60 / 60 / 24)} days)</p>
+          </div>
         </div>
-      </Show>
-      <Switch>
-        <Match when={props.user.donatorTier === 1}>
-          <p>{props.user.donatorBadge}</p>
-        </Match>
-        <Match when={props.user.donatorTier === 2}>
-          <p>{props.user.donatorBadge} (fancy)</p>
-        </Match>
-        <Match when={props.user.donatorTier === 3}>
-          <p>{props.user.donatorBadge} (extra fancy)</p>
-        </Match>
-      </Switch>
-      <img src={props.user.avatar.large} alt="Profile" />
-      <h2>{props.user.name}</h2>
-      <p>Joined {formatTimeToDate(props.user.createdAt * 1000)} ({Math.floor((new Date() - (props.user.createdAt * 1000)) / 1000 / 60 / 60 / 24)} days)</p>
-      activity
-      <ActivityHistory history={props.user.stats?.activityHistory || []} />
+      </div>
+      <nav class="profile-navigation">
+        <ul>
+          <li><A href="">Overview</A></li>
+          <li><A href="anime">Anime list</A></li>
+          <li><A href="manga">Manga list</A></li>
+          <li><A href="favourites">Favourites</A></li>
+          <li><A href="stats">Stats</A></li>
+          <li><A href="socials">Socials</A></li>
+        </ul>
+      </nav>
+      <div class="body">
+        <div class="user-info-container">
+          <Switch>
+            <Match when={props.user.donatorTier === 1}>
+              <p>{props.user.donatorBadge}</p>
+            </Match>
+            <Match when={props.user.donatorTier === 2}>
+              <p>{props.user.donatorBadge} (fancy)</p>
+            </Match>
+            <Match when={props.user.donatorTier === 3}>
+              <p>{props.user.donatorBadge} (extra fancy)</p>
+            </Match>
+          </Switch>
+          <ActivityHistory history={props.user.stats?.activityHistory || []} />
+        </div>
+        <div class="user-activity-container">
+          content
+        </div>
+      </div>
     </div>
   );
 }
@@ -67,22 +87,22 @@ function ActivityHistory(props) {
   start.setDate(start.getDate() - amount);
   start /= 1000;
 
-  console.log(new Date(start * 1000));
-
   return (
-    <div class="activity-history-container">
-      <For each={props.history}>{(activity, i) => (
-        <Show when={activity.date > start}>
-          {console.log(Math.floor((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)}
-          <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-            <div>_</div>
-          )}</For>
-          <div>X</div>
-        </Show>
-      )}</For>
-      <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-        <div>_</div>
-      )}</For>
-    </div>
+    <Show when={props.history.at(-1).date > start}>
+      activity
+      <div class="activity-history-container">
+        <For each={props.history}>{(activity, i) => (
+          <Show when={activity.date > start}>
+            <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
+              <div>_</div>
+            )}</For>
+            <div>X</div>
+          </Show>
+        )}</For>
+        <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
+          <div>_</div>
+        )}</For>
+      </div>
+    </Show>
   );
 }
