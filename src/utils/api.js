@@ -318,6 +318,12 @@ function cacheBuilder(settings) {
         }
       }
 
+      const saveMutate = mutateData => {
+        if (mutateData.cacheKey === request.cacheKey) {
+          setData(mutateData);
+        }
+      }
+
       const mutate = mutateData => {
         if (typeof mutateData === "function") {
           mutateData = mutateData(data());
@@ -337,14 +343,12 @@ function cacheBuilder(settings) {
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
         }
 
-        if (data.cacheKey && data.cacheKey === request.cacheKey) {
-          mutate(data);
+        saveMutate(data);
 
-          if (!data.error) {
-            mutateCache(data);
-          } else if (DEBUG) {
-            console.error("Fetch error, not saving data to cache");
-          }
+        if (!data.error) {
+          mutateCache(data);
+        } else if (DEBUG) {
+          console.error("Fetch error, not saving data to cache");
         }
       }
 
@@ -359,9 +363,10 @@ function cacheBuilder(settings) {
           console.log("Fetching", settings.type, request.body);
         }
 
+
         const data = localFetchCacheStorage.get(request.cacheKey);
         if (data && data.expires > new Date()) {
-          setData({ ...data, fromCache: true });
+          saveMutate({ ...data, fromCache: true });
           if (settings.type === "fetch-once") { 
             return;
           }
@@ -379,7 +384,7 @@ function cacheBuilder(settings) {
                 assert(evt.target.result.data, "Cache should always have data");
 
                 if (evt.target.result.expires > new Date()) {
-                  return setData({ ...evt.target.result, fromCache: true });
+                  return saveMutate({ ...evt.target.result, fromCache: true });
                 }
               } 
 
