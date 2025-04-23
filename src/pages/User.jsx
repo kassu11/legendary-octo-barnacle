@@ -119,6 +119,18 @@ function Content(props) {
               )}</For>
             </ol>
           </div>
+          <div class="user-favourites-studio">
+            <h3>Favourite studio</h3>
+            <ol>
+              <For each={props.user.favourites.studios.edges}>{studio => (
+                <li class="item">
+                  <A href={"/ani/studio/" + studio.node.id + "/" + formatTitleToUrl(studio.node.name)}>
+                    {studio.node.name}
+                  </A>
+                </li>
+              )}</For>
+            </ol>
+          </div>
         </div>
         <div class="user-activity-container">
           <div class="user-profile-progress">

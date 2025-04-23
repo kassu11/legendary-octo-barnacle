@@ -149,3 +149,13 @@
     object-fit: cover;
   }
 }
+
+.user-favourites-studio {
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
