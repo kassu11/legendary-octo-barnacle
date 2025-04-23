@@ -129,6 +129,7 @@ by the file they are in.
 - .input-grid
 - .item
 - .list-status
+- .profile
 - .ranking
 
 ### 4. Generic State Classes
