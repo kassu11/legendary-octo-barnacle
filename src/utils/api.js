@@ -56,6 +56,15 @@ const api = {
     characters: fetchOnce((id, page = 1) => {
       return Fetch.anilist(querys.anilistCharacters, { id, page });
     }),
+    trendingMedia: fetchOnce((token) => {
+      const dates = getDates();
+      return Fetch.authAnilist(token, querys.trendingMedia, {
+        "season": dates.season,
+        "seasonYear": dates.seasonYear,
+        "nextSeason": dates.nextSeason,
+        "nextYear": dates.nextYear,
+      });
+    }),
     trendingAnime: fetchOnce((token) => {
       const dates = getDates();
       return Fetch.authAnilist(token, querys.trendingAnime, {
@@ -204,6 +213,10 @@ class Fetch {
       //   console.log(`Header "${key}" value:`, val);
       // }
       if (!response.ok) {
+        if (DEBUG && response.url === "https://graphql.anilist.co/") {
+          const data = await response.json();
+          console.error(...data.errors);
+        }
         throw new Error(`Response status: ${response.status}`);
       }
 
