@@ -5,7 +5,7 @@
 
   .body {
     display: grid;
-    grid-template-columns: 40rem 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
     background-color: slategrey;
   }
@@ -122,5 +122,23 @@
     span {
       float: right;
     }
+  }
+}
+
+.user-favourite-anime {
+  ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, calc(100%/6)));
+    list-style: none;
+    padding: 0;
+    justify-content: space-around;
+    gap: 1.5rem .5rem;
+  }
+
+  .item img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 5.5/8;
+    object-fit: cover;
   }
 }

@@ -21,7 +21,8 @@ import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 
 export default function User() {
   const params = useParams();
-  const [userData] = api.anilist.userByName(() => params.name);
+  const {accessToken} = useAuthentication();
+  const [userData] = api.anilist.userByName(() => params.name, accessToken);
 
   return (
     <Show when={userData()}>
@@ -70,6 +71,18 @@ function Content(props) {
             </Match>
           </Switch>
           <ActivityHistory history={props.user.stats?.activityHistory || []} />
+          <div class="user-favourite-anime">
+            <h3>Favourite animes</h3>
+            <ol>
+              <For each={props.user.favourites.anime.edges}>{anime => (
+                <li class="item">
+                  <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
+                    <img src={anime.node.coverImage.large} alt="Cover" />
+                  </A>
+                </li>
+              )}</For>
+            </ol>
+          </div>
         </div>
         <div class="user-activity-container">
           <div class="user-profile-progress">
