@@ -5,7 +5,7 @@
 
   .body {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 3fr;
     gap: 1rem;
     background-color: slategrey;
     align-items: start;
@@ -74,7 +74,13 @@
 .user-activity-container {
   background-color: aqua;
   display: grid;
-  gap: 1rem;
+  gap: 2rem;
+}
+
+.user-profile-activity {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: .5rem 1rem;
 }
 
 

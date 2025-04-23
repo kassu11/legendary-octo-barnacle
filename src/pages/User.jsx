@@ -18,10 +18,11 @@ import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
+import { ActivityCard } from "../components/Activity.jsx";
 
 export default function User() {
   const params = useParams();
-  const {accessToken} = useAuthentication();
+  const { accessToken } = useAuthentication();
   const [userData] = api.anilist.userByName(() => params.name, accessToken);
 
   return (
@@ -32,9 +33,12 @@ export default function User() {
 }
 
 function Content(props) {
+  const { accessToken } = useAuthentication();
+  const [activity, { mutate: mutateActivity }] = api.anilist.activityByUserId(() => props.user.id || undefined, accessToken);
+
   return (
     <div class="user-page" style={{"--user-color": props.user.options.profileColor}}>
-      {console.log(props.user)}
+      {console.log(activity())}
       <div class="profile-banner-container">
         <Show when={props.user.bannerImage} fallback={<div class="banner"></div>}>
           <img src={props.user.bannerImage} class="banner" alt="Banner" />
@@ -170,6 +174,11 @@ function Content(props) {
           <div class="user-profile-genres">
             <GenrePreview title="Anime genre overview" genres={props.user.statistics.anime.genrePreview} total={props.user.statistics.anime.count}/>
             <GenrePreview title="Manga genre overview" genres={props.user.statistics.manga.genrePreview} total={props.user.statistics.manga.count}/>
+          </div>
+          <div class="user-profile-activity">
+            <For each={activity()?.data.data.Page.activities}>{activity => (
+              <ActivityCard activity={activity} mutateCache={mutateActivity} />
+            )}</For>
           </div>
         </div>
       </div>

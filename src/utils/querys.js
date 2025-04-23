@@ -1260,6 +1260,96 @@ export const getUserByName = format`query ($id: Int, $name: String) {
   }
 }`;
 
+export const profileActivity = format`query ($id: Int, $type: ActivityType, $page: Int) {
+  Page(page: $page, perPage: 25) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    activities(userId: $id, type: $type, sort: [PINNED, ID_DESC]) {
+      ... on ListActivity {
+        id
+        type
+        replyCount
+        status
+        progress
+        isLocked
+        isSubscribed
+        isLiked
+        isPinned
+        likeCount
+        createdAt
+        user {
+          id
+          name
+          avatar {
+            large
+          }
+        }
+        media {
+          id
+          type
+          status(version: 2)
+          isAdult
+          bannerImage
+          title {
+            userPreferred
+          }
+          coverImage {
+            large
+          }
+        }
+      }
+      ... on TextActivity {
+        id
+        type
+        text
+        replyCount
+        isLocked
+        isSubscribed
+        isLiked
+        isPinned
+        likeCount
+        createdAt
+        user {
+          id
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on MessageActivity {
+        id
+        type
+        message
+        replyCount
+        isPrivate
+        isLocked
+        isSubscribed
+        isLiked
+        likeCount
+        createdAt
+        user: recipient {
+          id
+        }
+        messenger {
+          id
+          name
+          donatorTier
+          donatorBadge
+          moderatorRoles
+          avatar {
+            large
+          }
+        }
+      }
+    }
+  }
+}`;
 export const currentUser = format`query {
   Viewer {
     id
