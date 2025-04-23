@@ -1,6 +1,6 @@
 import { Switch, Show, Match, createSignal, onCleanup } from "solid-js";
 import { Markdown } from "../components/Markdown.jsx";
-import style from "./Activity.module.scss";
+import "./Activity.scss";
 import api from "../utils/api.js";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
@@ -13,39 +13,39 @@ const plural = num => num !== 1 ? "s" : "";
 export function ActivityCard(props) {
   return (
     <Show when={props.activity.type === "TEXT"} fallback={
-      <div class={style.activityCardMedia}>
+      <div class="activity-card-media">
         <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>
-          <img class={style.cover} src={props.activity.media.coverImage.large} alt="Cover" />
+          <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
         </A>
-        <div class={style.main}>
+        <div class="main">
           <A href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
           <p>
             {props.activity.status}{" "}
             <Show when={props.activity.progress}>{props.activity.progress} of </Show>
             <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
             <A href={"/user/" + props.activity.user.name}>
-              <img class={style.profile} src={props.activity.user.avatar.large} alt="Profile" />
+              <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
             </A>
           </p>
         </div>
-        <div class={style.right}>
+        <div class="right">
           <CreatedAt createdAt={props.activity.createdAt} />
           <Footer mutateCache={props.mutateCache} activity={props.activity}/>
         </div>
       </div>
     }>
-      <div class={style.activityCardText}>
-        <div class={style.header}>
-          <A href={"/user/" + props.activity.user.name} class={style.profileHeader}>
-            <img class={style.profile} src={props.activity.user.avatar.large} alt="Profile" />
+      <div class="activity-card-text">
+        <div class="header">
+          <A href={"/user/" + props.activity.user.name} class="activity-profile-header">
+            <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
             {props.activity.user.name}
           </A>
           <CreatedAt createdAt={props.activity.createdAt} />
         </div>
-        <div class={style.content}>
+        <div class="content">
           <Markdown children={props.activity.text} />
         </div>
-        <div class={style.footer}>
+        <div class="footer">
           <Footer mutateCache={props.mutateCache} activity={props.activity}/>
         </div>
       </div>
@@ -80,7 +80,7 @@ function Footer(props) {
 
   return (
     <>
-      <button classList={{[style.active]: isLiked()}} onClick={() => {
+      <button classList={{active: isLiked()}} onClick={() => {
         setIsLiked(liked => {
           assert(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
@@ -107,7 +107,7 @@ function CreatedAt(props) {
   onCleanup(() => clearInterval(interval));
   return (
     <time
-      class={style.createdAt}
+      class="activity-created-at"
       dateTime={(new Date(props.createdAt * 1000)).toISOString()}
       title={(new Date(props.createdAt * 1000)).toLocaleString()}>
       <Switch>
