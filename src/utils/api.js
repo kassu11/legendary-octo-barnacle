@@ -41,6 +41,10 @@ const api = {
       assert(name, "Name is missing");
       return Fetch.authAnilist(token, querys.getUserByName, { name });
     }),
+    activityByUserId: fetchOnce((id, token) => {
+      assert(id, "Id is missing");
+      return Fetch.authAnilist(token, querys.profileActivity, { id });
+    }),
     characterId: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, {
         id,
