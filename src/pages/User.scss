@@ -72,3 +72,28 @@
   background-color: aqua;
 }
 
+
+
+.user-profile-progress {
+  background-color: sienna;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+  gap: 1rem;
+
+  .container {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-around;
+    flex-grow: 1;
+    background-color: tomato;
+  }
+
+  .header {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+}
+.profile-progress-item {
+  text-align: center;
+}
