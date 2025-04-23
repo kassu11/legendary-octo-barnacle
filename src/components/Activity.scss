@@ -1,0 +1,74 @@
+.activity-card-text {
+  min-height: 5rem;
+  background-color: orange;
+  border-radius: .25rem;
+  padding: .5rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+  }
+  .content {
+    margin-top: .5rem;
+  }
+  .footer {
+    margin-top: .5rem;
+    gap: .5rem;
+    display: flex;
+    justify-content: end;
+  }
+}
+
+
+.activity-profile-header {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+
+
+
+.activity-card-media {
+  position: relative;
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: 5.5rem 1fr auto;
+  background-color: limegreen;
+  border-radius: .25rem;
+
+
+  .cover {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    aspect-ratio: 5.5/8;
+  }
+
+  .main {
+    padding-block: .5rem;
+  }
+
+  .right {
+    padding: .5rem;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+
+.activity-created-at {
+  margin-bottom: auto;
+}
+
+.activity-card-media, .activity-card-text {
+  .profile {
+    margin-top: .5rem;
+    height: 3rem;
+    width: 3rem;
+  }
+
+  button.active {
+    background-color: pink;
+  }
+}

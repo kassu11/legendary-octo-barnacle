@@ -124,13 +124,16 @@ by the file they are in.
 - .content
 - .cover
 - .cover-container
+- .footer
 - .form
 - .header
 - .input-grid
 - .item
 - .list-status
+- .main
 - .profile
 - .ranking
+- .right
 
 ### 4. Generic State Classes
 
