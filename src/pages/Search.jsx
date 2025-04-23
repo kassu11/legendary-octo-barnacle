@@ -203,7 +203,7 @@ function Search() {
 
   createEffect(on(cacheData, data => {
     if (data) {
-      triggerVariable.clear();
+      setVariables(cacheVariables());
       mutateMediaData(data);
     }
   }));
