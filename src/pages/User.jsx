@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal, on } from "solid-js";
 import "./User.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
@@ -16,7 +16,7 @@ import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
-import { formatTimeToDate, formatTitleToUrl } from "../utils/formating.js";
+import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 
 export default function User() {
@@ -73,38 +73,64 @@ function Content(props) {
         </div>
         <div class="user-activity-container">
           <div class="user-profile-progress">
-            <div class="container">
-              <div class="profile-progress-item">
-                <p class="header">{props.user.statistics.anime.count}</p>
-                <p>Total anime</p>
+            <Show when={props.user.statistics.anime.count}>
+              <div class="container">
+                <div class="profile-progress-item">
+                  <p class="header">{numberCommas(props.user.statistics.anime.count)}</p>
+                  <p>Total anime</p>
+                </div>
+                <div class="profile-progress-item">
+                  <p class="header">{(props.user.statistics.anime.minutesWatched / 60 / 24).toFixed(1)}</p>
+                  <p>Days watched</p>
+                </div>
+                <div class="profile-progress-item">
+                  <p class="header">{props.user.statistics.anime.meanScore}</p>
+                  <p>Mean score</p>
+                </div>
               </div>
-              <div class="profile-progress-item">
-                <p class="header">{(props.user.statistics.anime.minutesWatched / 60 / 24).toFixed(1)}</p>
-                <p>Days watched</p>
+            </Show>
+            <Show when={props.user.statistics.manga.count}>
+              <div class="container">
+                <div class="profile-progress-item">
+                  <p class="header">{numberCommas(props.user.statistics.manga.count)}</p>
+                  <p>Total manga</p>
+                </div>
+                <div class="profile-progress-item">
+                  <p class="header">{numberCommas(props.user.statistics.manga.chaptersRead)}</p>
+                  <p>Chapters read</p>
+                </div>
+                <div class="profile-progress-item">
+                  <p class="header">{props.user.statistics.manga.meanScore}</p>
+                  <p>Mean score</p>
+                </div>
               </div>
-              <div class="profile-progress-item">
-                <p class="header">{props.user.statistics.anime.meanScore}</p>
-                <p>Mean score</p>
-              </div>
-            </div>
-            <div class="container">
-              <div class="profile-progress-item">
-                <p class="header">{props.user.statistics.manga.count}</p>
-                <p>Total manga</p>
-              </div>
-              <div class="profile-progress-item">
-                <p class="header">{(props.user.statistics.manga.chaptersRead)}</p>
-                <p>Chapters read</p>
-              </div>
-              <div class="profile-progress-item">
-                <p class="header">{props.user.statistics.manga.meanScore}</p>
-                <p>Mean score</p>
-              </div>
-            </div>
+            </Show>
+          </div>
+          <div class="user-profile-genres">
+            <GenrePreview title="Anime genre overview" genres={props.user.statistics.anime.genrePreview} total={props.user.statistics.anime.count}/>
+            <GenrePreview title="Manga genre overview" genres={props.user.statistics.manga.genrePreview} total={props.user.statistics.manga.count}/>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function GenrePreview(props) {
+  assert(props.genres, "Genres missing");
+  assert(props.title, "Title missing");
+
+  return (
+    <Show when={props.total}>
+      <div class="user-genres-overview">
+        <h3>{props.title}</h3>
+        <ol>
+          <For each={props.genres}>{genre => (
+            <li class="item">{genre.genre} <span>{Math.round(genre.count / props.total * 100)}%</span></li>
+          )}</For>
+        </ol>
+      </div>
+    </Show>
   );
 }
 
@@ -118,7 +144,7 @@ function ActivityHistory(props) {
 
   return (
     <Show when={props.history.at(-1).date > start}>
-      activity
+      <h3>Activity</h3>
       <div class="activity-history-container">
         <For each={props.history}>{(activity, i) => (
           <Show when={activity.date > start}>

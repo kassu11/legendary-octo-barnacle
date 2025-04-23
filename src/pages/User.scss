@@ -5,7 +5,7 @@
 
   .body {
     display: grid;
-    grid-template-columns: 30rem 1fr;
+    grid-template-columns: 40rem 1fr;
     gap: 1rem;
     background-color: slategrey;
   }
@@ -42,10 +42,6 @@
     max-height: 15rem;
     object-fit: cover;
   }
-
-  .content {
-  }
-
 }
 
 .profile-navigation ul {
@@ -70,6 +66,8 @@
 }
 .user-activity-container {
   background-color: aqua;
+  display: grid;
+  gap: 1rem;
 }
 
 
@@ -78,7 +76,6 @@
   background-color: sienna;
   display: flex;
   flex-wrap: wrap;
-  padding: 1rem;
   gap: 1rem;
 
   .container {
@@ -87,6 +84,7 @@
     justify-content: space-around;
     flex-grow: 1;
     background-color: tomato;
+    padding: .5rem;
   }
 
   .header {
@@ -96,4 +94,33 @@
 }
 .profile-progress-item {
   text-align: center;
+}
+
+
+.user-profile-genres {
+  background-color: springgreen;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.user-genres-overview {
+  flex-grow: 1;
+  background-color: steelblue;
+
+  ol {
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: .25rem;
+  }
+
+  .item {
+    background-color: green;
+    padding-inline: .5rem;
+
+    span {
+      float: right;
+    }
+  }
 }
