@@ -9,13 +9,14 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Search from "./pages/Search.jsx";
+import User from "./pages/User.jsx";
 import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
 import { MangaCharacters, AnimeCharacters } from "./pages/Characters.jsx";
 
 const root = document.getElementById("root")
 
-const filter = {
+const idFilter = {
   id: /^\d+$/,
 }
 const animeSearch = {
@@ -46,18 +47,18 @@ render(
             </Route>
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">
-              <Route path="/character/:id" matchFilters={filter} component={Character} />
-              <Route path="/staff/:id" matchFilters={filter} component={Search} />
+              <Route path="/character/:id" matchFilters={idFilter} component={Character} />
+              <Route path="/staff/:id" matchFilters={idFilter} component={Search} />
             </Route>
             <Route path="/anime">
-              <Route path="/:id/:name?" matchFilters={filter} component={AnimeInfo} />
-              <Route path="/:id/:name?/characters" matchFilters={filter} component={AnimeCharacters} />
+              <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />
+              <Route path="/:id/:name?/characters" matchFilters={idFilter} component={AnimeCharacters} />
             </Route>
             <Route path="/manga">
-              <Route path="/:id/:name?" matchFilters={filter} component={MangaInfo} />
-              <Route path="/:id/:name?/characters" matchFilters={filter} component={MangaCharacters} />
+              <Route path="/:id/:name?" matchFilters={idFilter} component={MangaInfo} />
+              <Route path="/:id/:name?/characters" matchFilters={idFilter} component={MangaCharacters} />
             </Route>
-            <Route path="/users" component={() => <div>users</div>} />
+            <Route path="/user/:name" component={User} />
             <Route path="*404" component={() => <div>Not fould 404</div>} />
           </Router>
         </EditMediaEntriesProvider>
