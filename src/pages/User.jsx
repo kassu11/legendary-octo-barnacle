@@ -71,13 +71,25 @@ function Content(props) {
             </Match>
           </Switch>
           <ActivityHistory history={props.user.stats?.activityHistory || []} />
-          <div class="user-favourite-anime">
+          <div class="user-favourites">
             <h3>Favourite animes</h3>
             <ol>
               <For each={props.user.favourites.anime.edges}>{anime => (
                 <li class="item">
                   <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
                     <img src={anime.node.coverImage.large} alt="Cover" />
+                  </A>
+                </li>
+              )}</For>
+            </ol>
+          </div>
+          <div class="user-favourites">
+            <h3>Favourite manga</h3>
+            <ol>
+              <For each={props.user.favourites.manga.edges}>{manga => (
+                <li class="item">
+                  <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
+                    <img src={manga.node.coverImage.large} alt="Cover" />
                   </A>
                 </li>
               )}</For>
@@ -157,19 +169,21 @@ function ActivityHistory(props) {
 
   return (
     <Show when={props.history.at(-1).date > start}>
-      <h3>Activity</h3>
-      <div class="activity-history-container">
-        <For each={props.history}>{(activity, i) => (
-          <Show when={activity.date > start}>
-            <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-              <div>_</div>
-            )}</For>
-            <div>X</div>
-          </Show>
-        )}</For>
-        <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-          <div>_</div>
-        )}</For>
+      <div>
+        <h3>Activity</h3>
+        <div class="activity-history-container">
+          <For each={props.history}>{(activity, i) => (
+            <Show when={activity.date > start}>
+              <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
+                <div>_</div>
+              )}</For>
+              <div>X</div>
+            </Show>
+          )}</For>
+          <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
+            <div>_</div>
+          )}</For>
+        </div>
       </div>
     </Show>
   );
