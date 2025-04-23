@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
 import style from "./Characters.module.scss";
 import { A } from "@solidjs/router";
-import { languageFromCountry } from "../../utils/formating";
+import { formatTitleToUrl, languageFromCountry } from "../../utils/formating";
 
 const countryOfOriginToLanguage = (characters, country) => {
   const language = languageFromCountry(country);
@@ -28,7 +28,7 @@ function Characters(props) {
       <ol>
         <For each={props.characters}>{char => (
           <li class={style.character}>
-            <A href={"/ani/character/" + char.node.id} class={style.characterLeft}>
+            <A href={"/ani/character/" + char.node.id + "/" + formatTitleToUrl(char.node.name.userPreferred)} class={style.characterLeft}>
               <img src={char.node.image.large} alt="Character" />
               <div class={style.content}>
                 <p class={style.lineClamp}>{char.node.name.userPreferred}</p>
@@ -36,7 +36,7 @@ function Characters(props) {
               </div>
             </A>
             <Show when={char.voiceActors.find(actor => actor.language === language())}>{actor => (
-              <A href={"/ani/staff/" + actor().id} class={style.characterRight}>
+              <A href={"/ani/staff/" + actor().id + "/" + formatTitleToUrl(actor().name.userPreferred)} class={style.characterRight}>
                 <div class={style.content}>
                   <p class={style.lineClamp}>{actor().name.userPreferred}</p>
                   <p>{actor().language}</p>
