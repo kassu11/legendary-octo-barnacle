@@ -45,6 +45,24 @@ export const formatMediaFormat = text => {
   }
 }
 
+export const formatMediaStatus = status => {
+  if (!status?.length) {
+    return "";
+  }
+
+  switch(status) {
+    case "CANCELLED": 
+    case "FINISHED": 
+    case "HIATUS": 
+    case "NOT_YET_RELEASED": 
+    case "RELEASING": 
+      return capitalize(status.replace("_", " "))
+    default:
+      console.error("Unknown media format");
+      return status;
+  }
+}
+
 export const numberCommas = num => {
   if (num == undefined) return;
   return Intl.NumberFormat("ja-JP").format(num)

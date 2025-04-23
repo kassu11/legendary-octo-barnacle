@@ -20,11 +20,15 @@ const filter = {
 }
 const animeSearch = {
   type: ["anime"],
-  header: ["this-season", "next-season", "trending", "popular", "top-100"],
+  header: ["this-season", "new", "next-season", "trending", "popular", "top-100"],
 }
 const mangaSearch = {
   type: ["manga"],
-  header: ["novel", "manwha", "trending", "popular", "top-100"],
+  header: ["novel", "new", "manwha", "trending", "popular", "top-100"],
+}
+
+const bothSearch = {
+  header: ["trending", "popular", "top-100"],
 }
 
 render(
@@ -38,6 +42,7 @@ render(
             <Route path="/search" component={Search}>
               <Route path="/:type?/:header?" matchFilters={animeSearch} />
               <Route path="/:type?/:header?" matchFilters={mangaSearch} />
+              <Route path="/:header" matchFilters={bothSearch} />
             </Route>
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">

@@ -5,7 +5,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { getDates } from "../utils/dates";
@@ -106,6 +106,8 @@ function parseUrl(type, header, search) {
   } else if (header === "novel") {
     variables.format = "NOVEL"
     variables.sort = null;
+  } else if (header === "new") {
+    variables.sort = "ID_DESC";
   }
 
   variables.chapterGreater ??= searchObject.chapterGreater;
@@ -581,7 +583,7 @@ function Search() {
               <MangaSearch />
             </Match>
             <Match when={params.type === undefined}>
-              Both
+              <SearchHome />
             </Match>
           </Switch>
         </Match>
@@ -686,6 +688,23 @@ function SortSelect(props) {
   );
 }
 
+function SearchHome() {
+  const { accessToken } = useAuthentication();
+  const [homeData] = api.anilist.trendingMedia(accessToken);
+
+  return (
+    <Show when={homeData()}>
+      <div>{console.log("Search Home Data:", homeData())}</div>
+      <div class="search-home-content">
+        <HorizontalCardRow data={homeData().data.data.trending.media} href="anime/trending" title="Trending anime and manga" />
+        <HorizontalCardRow data={homeData().data.data.newAnime.media} href="anime/new" title="Newly added anime" />
+        <HorizontalCardRow data={homeData().data.data.newManga.media} href="manga/new" title="Newly added manga" />
+        <HorizontalCardRow data={homeData().data.data.popular.media} href="popular" title="All time popular anime and manga" />
+        <VerticalCardRow data={homeData().data.data.top.media} href="top-100" title="Top 100 anime and manga" />
+      </div>
+    </Show>
+  );
+}
 
 function AnimeSearch() {
   const {accessToken} = useAuthentication();
@@ -693,7 +712,6 @@ function AnimeSearch() {
 
   return (
     <Show when={animeData()}>
-      {/* <div>{console.log(animeData())}</div> */}
       <div class="search-home-content">
         <HorizontalCardRow data={animeData().data.data.trending.media} href="anime/trending" title="Trending now" />
         <HorizontalCardRow data={animeData().data.data.season.media} href="anime/this-season" title="Popular this season" />
@@ -711,7 +729,6 @@ function MangaSearch() {
 
   return (
     <Show when={mangaData()}>
-      <div>{console.log(mangaData())}</div>
       <div class="search-home-content">
         <HorizontalCardRow data={mangaData().data.data.trending.media} href="manga/trending" title="Trending now" />
         <HorizontalCardRow data={mangaData().data.data.novel.media} href="manga/novel" title="Popular Light Novels" />
@@ -765,7 +782,7 @@ function VerticalCardRow(props) {
                   <ol class="vertical-search-card-genre-list">
                     <For each={card.genres}>{genre => (
                       <li class="vertical-search-card-genre">
-                        <A href={`/search/${props.type || ""}?genres=` + genre}>{genre}</A>
+                        <A href={`/search${props.type ? ("/" + props.type) : ""}?genres=` + genre}>{genre}</A>
                       </li>
                     )}</For>
                   </ol>
@@ -780,8 +797,21 @@ function VerticalCardRow(props) {
                   </div>
                   <div class="clamp">
                     <p>{formatMediaFormat(card.format)}</p>
-                    <p>{numberCommas(card.episodes)} Episode
-                      <Show when={card.episodes > 1}>s</Show>
+                    <p>
+                      <Switch>
+                        <Match when={card.type === "ANIME"}>
+                          <Show when={card.episodes} fallback="Ongoing">
+                            {numberCommas(card.episodes)} Episode
+                            <Show when={card.episodes > 1}>s</Show>
+                          </Show>
+                        </Match>
+                        <Match when={card.type === "MANGA"}>
+                          <Show when={card.chapters} fallback="Ongoing">
+                            {numberCommas(card.chapters)} Chapter
+                            <Show when={card.chapters > 1}>s</Show>
+                          </Show>
+                        </Match>
+                      </Switch>
                     </p>
                   </div>
                   <div class="clamp">
