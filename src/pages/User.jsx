@@ -174,7 +174,7 @@ function Content(props) {
           </div>
           <div class="user-profile-activity">
             <For each={activity()?.data.data.Page.activities}>{activity => (
-              <ActivityCard activity={activity} mutateCache={mutateActivityCache} />
+              <ActivityCard activity={activity} mutateCache={mutateActivityCache} hideProfile={true} small={true}/>
             )}</For>
           </div>
         </div>

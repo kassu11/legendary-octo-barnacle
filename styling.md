@@ -141,5 +141,6 @@ by the file they are in.
 - .loading
 - .manga
 - .selected
+- .small
 
 

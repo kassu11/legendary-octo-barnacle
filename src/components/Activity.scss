@@ -36,6 +36,10 @@
   background-color: limegreen;
   border-radius: .25rem;
 
+  &.small {
+    grid-template-columns: 3.5rem 1fr auto;
+  }
+
 
   .cover {
     height: 100%;

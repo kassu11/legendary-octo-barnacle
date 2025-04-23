@@ -1,55 +1,76 @@
-import { Switch, Show, Match, createSignal, onCleanup } from "solid-js";
+import { Switch, Show, Match, createSignal, onCleanup, mergeProps } from "solid-js";
 import { Markdown } from "../components/Markdown.jsx";
 import "./Activity.scss";
 import api from "../utils/api.js";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
-import { formatTitleToUrl } from "../utils/formating.js";
+import { capitalize, formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 
 const plural = num => num !== 1 ? "s" : "";
 
-export function ActivityCard(props) {
+export function ActivityCard(_props) {
+  const props = mergeProps({ hideProfile: false, small: false }, _props);
+  assert(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
+  assert(typeof props.small === "boolean", "small needs to be boolean");
+
   return (
-    <Show when={props.activity.type === "TEXT"} fallback={
-      <div class="activity-card-media">
-        <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>
-          <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
-        </A>
-        <div class="main">
-          <A href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
-          <p>
-            {props.activity.status}{" "}
-            <Show when={props.activity.progress}>{props.activity.progress} of </Show>
-            <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
-            <A href={"/user/" + props.activity.user.name}>
+    <Switch>
+      <Match when={props.activity.type === "TEXT"}>
+        <div class="activity-card-text">
+          <div class="header">
+            <A href={"/user/" + props.activity.user.name} class="activity-profile-header">
               <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
+              {props.activity.user.name}
             </A>
-          </p>
+            <CreatedAt createdAt={props.activity.createdAt} />
+          </div>
+          <div class="content">
+            <Markdown children={props.activity.text} />
+          </div>
+          <div class="footer">
+            <Footer mutateCache={props.mutateCache} activity={props.activity}/>
+          </div>
         </div>
-        <div class="right">
-          <CreatedAt createdAt={props.activity.createdAt} />
-          <Footer mutateCache={props.mutateCache} activity={props.activity}/>
-        </div>
-      </div>
-    }>
-      <div class="activity-card-text">
-        <div class="header">
-          <A href={"/user/" + props.activity.user.name} class="activity-profile-header">
-            <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
-            {props.activity.user.name}
+      </Match>
+      <Match when={props.activity.type === "ANIME_LIST" || props.activity.type === "MANGA_LIST"}>
+        <div class="activity-card-media" classList={{small: props.small}}>
+          <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>
+            <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
           </A>
-          <CreatedAt createdAt={props.activity.createdAt} />
+          <div class="main">
+            <Switch>
+              <Match when={props.hideProfile === true}>
+                <p>
+                  {capitalize(props.activity.status)}{" "}
+                  <Show when={props.activity.progress}>{props.activity.progress} of </Show>
+                  <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
+                </p>
+              </Match>
+              <Match when={props.hideProfile === false}>
+                <A href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
+                <p>
+                  {capitalize(props.activity.status)}{" "}
+                  <Show when={props.activity.progress}>{props.activity.progress} of </Show>
+                  <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
+                  <A href={"/user/" + props.activity.user.name}>
+                    <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
+                  </A>
+                </p>
+              </Match>
+            </Switch>
+          </div>
+          <div class="right">
+            <CreatedAt createdAt={props.activity.createdAt} />
+            <Footer mutateCache={props.mutateCache} activity={props.activity}/>
+          </div>
         </div>
-        <div class="content">
-          <Markdown children={props.activity.text} />
-        </div>
-        <div class="footer">
-          <Footer mutateCache={props.mutateCache} activity={props.activity}/>
-        </div>
-      </div>
-    </Show>
+      </Match>
+      <Match when={props.activity.type === "MESSAGE"}>
+        <div>message</div>
+      </Match>
+    </Switch>
   );
 }
 
