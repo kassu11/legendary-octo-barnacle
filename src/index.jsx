@@ -47,8 +47,8 @@ render(
             </Route>
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">
-              <Route path="/character/:id" matchFilters={idFilter} component={Character} />
-              <Route path="/staff/:id" matchFilters={idFilter} component={Search} />
+              <Route path="/character/:id/:name?" matchFilters={idFilter} component={Character} />
+              <Route path="/staff/:id/:name?" matchFilters={idFilter} component={() => <div>Staff</div>} />
             </Route>
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />

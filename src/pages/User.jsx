@@ -95,6 +95,30 @@ function Content(props) {
               )}</For>
             </ol>
           </div>
+          <div class="user-favourites">
+            <h3>Favourite characters</h3>
+            <ol>
+              <For each={props.user.favourites.characters.edges}>{character => (
+                <li class="item">
+                  <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>
+                    <img src={character.node.image.large} alt="Cover" />
+                  </A>
+                </li>
+              )}</For>
+            </ol>
+          </div>
+          <div class="user-favourites">
+            <h3>Favourite staff</h3>
+            <ol>
+              <For each={props.user.favourites.staff.edges}>{staff => (
+                <li class="item">
+                  <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
+                    <img src={staff.node.image.large} alt="Cover" />
+                  </A>
+                </li>
+              )}</For>
+            </ol>
+          </div>
         </div>
         <div class="user-activity-container">
           <div class="user-profile-progress">
