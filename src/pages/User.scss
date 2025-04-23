@@ -43,6 +43,19 @@
     max-height: 15rem;
     object-fit: cover;
   }
+
+  .content a{
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.user-profile-following-badge {
+  background-color: red;
+  font-size: 1rem;
+  padding: .25em .5em;
+  margin-left: 1em;
+  border-radius: .25em;
 }
 
 .profile-navigation ul {
@@ -81,6 +94,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
   gap: .5rem 1rem;
+
+  .activity-card-text {
+    grid-column: 1/-1;
+  }
 }
 
 

@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { For, Show, createEffect, createSignal, on } from "solid-js";
+import { For, Show } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -30,7 +30,7 @@ function Content(props) {
 
   return (
     <div class="user-page" style={{"--user-color": props.user.options.profileColor}}>
-      {console.log(activity())}
+      {console.log(props.user)}
       <div class="profile-banner-container">
         <Show when={props.user.bannerImage} fallback={<div class="banner"></div>}>
           <img src={props.user.bannerImage} class="banner" alt="Banner" />
@@ -38,7 +38,12 @@ function Content(props) {
         <div class="user-profile-container">
           <img src={props.user.avatar.large} class="profile" alt="Profile" />
           <div class="content">
-            <h2>{props.user.name}</h2>
+            <h2>
+              <a href={"https://anilist.co/user/" + props.user.name} target="_blank">{props.user.name}</a>
+              <Show when={props.user.isFollower}>
+                <span class="user-profile-following-badge">Follows you</span>
+              </Show>
+            </h2>
             <p>Joined {formatTimeToDate(props.user.createdAt * 1000)} ({Math.floor((new Date() - (props.user.createdAt * 1000)) / 1000 / 60 / 60 / 24)} days)</p>
           </div>
         </div>
