@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import style from "./App.module.scss"
+import "./App.scss"
 import { useAuthentication } from "./context/AuthenticationContext.jsx";
 
 function App(props) {
@@ -10,19 +10,23 @@ function App(props) {
 
   return (
     <>
-      <nav class={style.navigation}>
-        <ul class={style.list}>
+      <nav class="main-navigation">
+        <ul>
           <li><A href="/">Home</A></li>
           <li><A href="/search/anime">Anime</A></li>
           <li><A href="/search/manga">Manga</A></li>
           <li><A href="/search">Search</A></li>
           <Show when={accessToken()} fallback={<li><a href={loginUrl}>Login with AniList</a></li>}>
-            <li><button onClick={() => {
-              logoutUser();
-            }}>Logout</button></li>
+            <li>
+              <button onClick={() => logoutUser()}>Logout</button>
+            </li>
             <Show when={authUserData()}>
-              <li>{authUserData().data.data.Viewer.name}</li>
-              <img class={style.profileIcon} src={authUserData().data.data.Viewer.avatar.large} alt="Profile avatar" />
+              <li class="main-navigation-profile">
+                <A href={"/user/" + authUserData().data.data.Viewer.name}>
+                  {authUserData().data.data.Viewer.name}
+                  <img class="main-navigation-profile-icon" src={authUserData().data.data.Viewer.avatar.large} alt="Profile avatar" />
+                </A>
+              </li>
             </Show>
           </Show>
         </ul>
@@ -30,7 +34,7 @@ function App(props) {
       <main id="page-content">
         {props.children}
       </main>
-      <footer></footer>
+      <footer class="main-footer"></footer>
     </>
   )
 }
