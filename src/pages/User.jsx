@@ -32,7 +32,7 @@ export default function User() {
 
 function Content(props) {
   return (
-    <div class="user-page">
+    <div class="user-page" style={{"--user-color": props.user.options.profileColor}}>
       {console.log(props.user)}
       <div class="profile-banner-container">
         <Show when={props.user.bannerImage} fallback={<div class="banner"></div>}>
@@ -72,7 +72,36 @@ function Content(props) {
           <ActivityHistory history={props.user.stats?.activityHistory || []} />
         </div>
         <div class="user-activity-container">
-          content
+          <div class="user-profile-progress">
+            <div class="container">
+              <div class="profile-progress-item">
+                <p class="header">{props.user.statistics.anime.count}</p>
+                <p>Total anime</p>
+              </div>
+              <div class="profile-progress-item">
+                <p class="header">{(props.user.statistics.anime.minutesWatched / 60 / 24).toFixed(1)}</p>
+                <p>Days watched</p>
+              </div>
+              <div class="profile-progress-item">
+                <p class="header">{props.user.statistics.anime.meanScore}</p>
+                <p>Mean score</p>
+              </div>
+            </div>
+            <div class="container">
+              <div class="profile-progress-item">
+                <p class="header">{props.user.statistics.manga.count}</p>
+                <p>Total manga</p>
+              </div>
+              <div class="profile-progress-item">
+                <p class="header">{(props.user.statistics.manga.chaptersRead)}</p>
+                <p>Chapters read</p>
+              </div>
+              <div class="profile-progress-item">
+                <p class="header">{props.user.statistics.manga.meanScore}</p>
+                <p>Mean score</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
