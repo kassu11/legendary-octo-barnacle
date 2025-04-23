@@ -63,10 +63,19 @@ function Footer(props) {
     if (liked !== serverIsLiked) {
       const data = await api.anilist.toggleActivityLike(token, { id });
       assert(!data.fromCache, "Mutation should never be cached");
-      assert(likeCount() === props.activity.likeCount, "Like counts are mismatched");
-      props.mutateCache(data => data);
+
+      if (data.status === 200) {
+        props.activity.likeCount = data.data.data.ToggleLike.likeCount;
+        props.activity.isLiked = data.data.data.ToggleLike.isLiked;
+        props.mutateCache(data => data);
+        // This only triggers if cache had old like data in which case we want to update the visuals
+        if (serverIsLiked === data.data.data.ToggleLike.isLiked) {
+          setLikeCount(data.data.data.ToggleLike.likeCount);
+          setIsLiked(data.data.data.ToggleLike.isLiked);
+        }
+        serverIsLiked = liked;
+      }
     }
-    serverIsLiked = liked;
   }, 500);
 
   return (
@@ -76,8 +85,6 @@ function Footer(props) {
           assert(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
           setLikeCount(v => v + change);
-          props.activity.likeCount += change;
-          props.activity.isLiked = !liked
           triggerLikeToggle(accessToken(), props.activity.id, !liked);
           return !liked
         });
