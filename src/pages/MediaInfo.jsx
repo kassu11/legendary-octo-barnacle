@@ -111,7 +111,7 @@ function MediaInfo(props) {
           <ExternalLinks media={props.media}/>
           <ExtraInfo media={props.media}/>
           <Rankings rankings={props.media.rankings} />
-          <Genres genres={props.media.genres} />
+          <Genres genres={props.media.genres} type={props.media.type} />
           <Tags tags={props.media.tags} />
         </aside>
         <section class="media-page-main">
