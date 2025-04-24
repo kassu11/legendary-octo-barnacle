@@ -1,10 +1,10 @@
-import style from "../../pages/MediaInfo.module.scss";
+import "../../pages/MediaInfo.scss";
 import { Show } from "solid-js";
 
 const Banner = (props) => {
   return (
     <Show when={props.src}>
-      <div class={style.banner}>
+      <div class="media-page-banner">
         <img src={props.src} alt="Banner" />
       </div>
     </Show>
