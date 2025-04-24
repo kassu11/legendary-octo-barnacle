@@ -1,5 +1,5 @@
 import { Match, Show, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, numberCommas } from "../../utils/formating";
+import { capitalize, formatMediaFormat, formatMediaSource, numberCommas } from "../../utils/formating";
 import style from "./Header.module.scss";
 
 const Header = (props) => {
@@ -21,7 +21,7 @@ const Header = (props) => {
       </div>
       <div class={style.right}>
         <ul class={style.top}>
-          <li>Source {capitalize(props.source)}</li>
+          <li>Source {formatMediaSource(props.source)}</li>
           <li>Favourites {numberCommas(props.favourites)}</li>
           <li>Members {numberCommas(props.popularity)}</li>
         </ul>
