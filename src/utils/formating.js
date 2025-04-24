@@ -35,7 +35,7 @@ export const formatMediaSource = source => {
     case "NOVEL":
     case "ORIGINAL":
     case "OTHER":
-      return source;
+      return capitalize(source);
     case "LIGHT_NOVEL":
     case "LIVE_ACTION":
     case "MULTIMEDIA_PROJECT":
@@ -85,7 +85,7 @@ export const formatMediaStatus = status => {
     case "HIATUS": 
     case "NOT_YET_RELEASED": 
     case "RELEASING": 
-      return capitalize(status.replace("_", " "))
+      return capitalize(status.replaceAll("_", " "))
     default:
       console.error("Unknown media format");
       return status;
@@ -95,6 +95,16 @@ export const formatMediaStatus = status => {
 export const numberCommas = num => {
   if (num == undefined) return;
   return Intl.NumberFormat("ja-JP").format(num)
+}
+
+export const compactNumber = num => {
+  if (num == undefined) return;
+  assert(typeof num === "number", "Number is not typeof number");
+
+  return Intl.NumberFormat('en-US', {
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(num);
 }
 
 export const formatTitleToUrl = (title) => {
