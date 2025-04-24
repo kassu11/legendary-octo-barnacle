@@ -1,7 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
 import { Show, createEffect, createSignal } from "solid-js";
-import style from "./MediaInfo.module.scss";
+import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import Banner from "../components/media/Banner.jsx";
@@ -77,9 +77,9 @@ function MediaInfo(props) {
   return (
     <>
       <Banner src={props.media.bannerImage} />
-      <div class={style.container}>
-        <div class={style.left}>
-          <img src={props.media.coverImage.large} alt="Cover" class={style.cover} />
+      <div class="media-page-content">
+        <aside class="media-page-left-aside">
+          <img src={props.media.coverImage.large} alt="Cover" class="media-page-cover" />
           <Show when={accessToken()}>
             <button onClick={() => {
               openEditor(props.media, {
@@ -113,8 +113,8 @@ function MediaInfo(props) {
           <Rankings rankings={props.media.rankings} />
           <Genres genres={props.media.genres} />
           <Tags tags={props.media.tags} />
-        </div>
-        <div class={style.main}>
+        </aside>
+        <section class="media-page-main">
           <Header 
             {...props.media} 
             ratingUsers={props.media.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)}
@@ -123,20 +123,20 @@ function MediaInfo(props) {
             <h1>{props.media.title.userPreferred}</h1>
             <Markdown children={props.media.description}/>
           </div>
-          <div class={style.relationContainer}>
+          <div class="media-page-relation-container">
             <h2>Relations</h2>
             <ol>
               <For each={props.media.relations.edges}>{relation => (
                 <li>
                   <A 
                     href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + formatTitleToUrl(relation.node.title.userPreferred)}
-                    class={style.relation}
+                    class="media-page-relation"
                   >
                     <img src={relation.node.coverImage.large} alt="Cover" />
-                    <div class={style.content}>
-                      <p class={style.type}>{relation.relationType}</p>
-                      <p class={style.lineClamp}>{relation.node.title.userPreferred}</p>
-                      <p class={style.format}>{relation.node.format} - {relation.node.status}</p>
+                    <div class="content">
+                      <p class="type">{relation.relationType}</p>
+                      <p class="line-clamp-3">{relation.node.title.userPreferred}</p>
+                      <p class="format">{relation.node.format} - {relation.node.status}</p>
                     </div>
                   </A>
                 </li>
@@ -146,7 +146,7 @@ function MediaInfo(props) {
           <Characters characters={props.media.characterPreview.edges} countryOfOrigin={props.media.countryOfOrigin} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
-        </div>
+        </section>
       </div>
     </>
   )

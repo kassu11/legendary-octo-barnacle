@@ -1,4 +1,4 @@
-.banner {
+.media-page-banner {
   background-color: black;
 
   img {
@@ -9,7 +9,7 @@
   }
 }
 
-.container {
+.media-page-content {
   position: relative;
   background-color: green;
   max-width: 80rem;
@@ -18,31 +18,32 @@
   gap: 1rem;
   margin-top: 1rem;
   margin-inline: auto;
+
 }
 
-.left {
-  .banner + .container & {
-    margin-top: -8rem;
-  }
+.media-page-left-aside {
   background-color: pink;
   display: grid;
   height: fit-content;
   gap: 1rem;
+
+  .media-page-banner + .media-page-content & {
+    margin-top: -8rem;
+  }
 
   > div {
     background-color: gold;
   }
 }
 
-
-.cover {
+.media-page-cover {
   width: 100%;
   aspect-ratio: 5.5/8;
   object-fit: cover;
   border-radius: .25rem;
 }
 
-.main {
+.media-page-main {
   background-color: purple;
   display: grid;
   gap: 1rem;
@@ -54,7 +55,7 @@
 }
 
 
-.relation-container {
+.media-page-relation-container {
   background-color: pink;
 
   ol {
@@ -66,7 +67,7 @@
   }
 }
 
-.relation {
+.media-page-relation {
   background-color: orange;
   display: grid;
   grid-template-columns: 5.5rem 1fr;
@@ -95,13 +96,3 @@
     margin-top: auto;
   }
 }
-
-.lineClamp {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-
