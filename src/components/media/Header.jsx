@@ -26,7 +26,14 @@ const Header = (props) => {
           <li>Members {numberCommas(props.popularity)}</li>
         </ul>
         <ul class={style.bottom}>
-          <li>{capitalize(props.season) || "TBA"} {props.seasonYear}</li>
+          <Switch>
+            <Match when={props.type === "MANGA"}>
+              <li>{(props.startDate?.year) || "TBA"}</li>
+            </Match>
+            <Match when={props.type === "ANIME"}>
+              <li>{capitalize(props.season) || "TBA"} {props.seasonYear}</li>
+            </Match>
+          </Switch>
           <li>
             {formatMediaFormat(props.format)}
             <Switch>
