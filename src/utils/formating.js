@@ -21,6 +21,35 @@ export const languageFromCountry = country => {
   }
 }
 
+export const formatMediaSource = source => {
+  if (!source?.length) {
+    return "";
+  }
+
+  switch(source) {
+    case "ANIME":
+    case "COMIC":
+    case "DOUJINSHI":
+    case "GAME":
+    case "MANGA":
+    case "NOVEL":
+    case "ORIGINAL":
+    case "OTHER":
+      return source;
+    case "LIGHT_NOVEL":
+    case "LIVE_ACTION":
+    case "MULTIMEDIA_PROJECT":
+    case "PICTURE_BOOK":
+    case "VISUAL_NOVEL":
+    case "VIDEO_GAME":
+    case "WEB_NOVEL":
+      return capitalize(source.replace("_", " "))
+    default:
+      console.error("Unknown media format");
+      return source;
+  }
+}
+
 export const formatMediaFormat = text => {
   if (!text?.length) {
     return "";
