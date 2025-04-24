@@ -1,4 +1,14 @@
 .favourite {
+  display: flex;
+  background-color: springgreen;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem;
+
+  &:has(:checked) {
+    background-color: green;
+  }
+
   input {
     all: unset;
     position: absolute;
