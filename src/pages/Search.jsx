@@ -108,6 +108,15 @@ function parseUrl(type, header, search) {
     variables.sort = null;
   } else if (header === "new") {
     variables.sort = "ID_DESC";
+  } else if (header === "finished" || header === "finished-manga" || header === "finished-novel") {
+    variables.sort = "END_DATE_DESC";
+    variables.status = "FINISHED";
+
+    if (header === "finished-manga" ) {
+      variables.format = "MANGA";
+    } else if (header === "finished-novel") {
+      variables.format = "NOVEL";
+    }
   }
 
   variables.chapterGreater ??= searchObject.chapterGreater;
@@ -198,6 +207,7 @@ function Search() {
   const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
   const [genresAndTags] = api.anilist.genresAndTags();
   const [externalSources] = api.anilist.externalSources(() => (params.type?.toUpperCase() || null));
+  let skipFirstDebounce = true;
 
   const [formStateObject, setFormStateObject] = createSignal({});
 
@@ -236,10 +246,16 @@ function Search() {
 
       if (location.search.length === 0 && params.header === undefined) {
         mutateMediaData(undefined);
+        skipFirstDebounce = true;
       } else if (params.header && location.search.length) {
         navigate("/search" + (!params.type || ("/" + params.type)) + searchQueryFromForm(form, false));
       } else {
-        triggerVariable(variables);
+        if (skipFirstDebounce) {
+          skipFirstDebounce = false;
+          setVariables(variables);
+        } else {
+          triggerVariable(variables);
+        }
         setCacheVariables(variables);
       }
     });
@@ -696,10 +712,11 @@ function SearchHome() {
     <Show when={homeData()}>
       <div>{console.log("Search Home Data:", homeData())}</div>
       <div class="search-home-content">
-        <HorizontalCardRow data={homeData().data.data.trending.media} href="anime/trending" title="Trending anime and manga" />
+        <HorizontalCardRow data={homeData().data.data.trending.media} href="trending" title="Trending anime and manga" />
         <HorizontalCardRow data={homeData().data.data.newAnime.media} href="anime/new" title="Newly added anime" />
         <HorizontalCardRow data={homeData().data.data.newManga.media} href="manga/new" title="Newly added manga" />
-        <HorizontalCardRow data={homeData().data.data.popular.media} href="popular" title="All time popular anime and manga" />
+        <HorizontalCardRow data={homeData().data.data.finishedAnime.media} href="anime/finished" title="Recently finished anime" />
+        <HorizontalCardRow data={homeData().data.data.finishedManga.media} href="manga/finished" title="Recently finished manga" />
         <VerticalCardRow data={homeData().data.data.top.media} href="top-100" title="Top 100 anime and manga" />
       </div>
     </Show>
@@ -716,6 +733,7 @@ function AnimeSearch() {
         <HorizontalCardRow data={animeData().data.data.trending.media} href="anime/trending" title="Trending now" />
         <HorizontalCardRow data={animeData().data.data.season.media} href="anime/this-season" title="Popular this season" />
         <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="anime/next-season" title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.finished.media} href="anime/finished" title="Recently finished" />
         <HorizontalCardRow data={animeData().data.data.popular.media} href="anime/popular" title="All time popular" />
         <VerticalCardRow data={animeData().data.data.top.media} type="manga" href="anime/top-100" title="Top 100 anime" />
       </div>
@@ -731,8 +749,10 @@ function MangaSearch() {
     <Show when={mangaData()}>
       <div class="search-home-content">
         <HorizontalCardRow data={mangaData().data.data.trending.media} href="manga/trending" title="Trending now" />
-        <HorizontalCardRow data={mangaData().data.data.novel.media} href="manga/novel" title="Popular Light Novels" />
+        <HorizontalCardRow data={mangaData().data.data.novel.media} href="manga/novel" title="Popular light novels" />
         <HorizontalCardRow data={mangaData().data.data.manhwa.media} href="manga/manwha" title="Popular Manwhas" />
+        <HorizontalCardRow data={mangaData().data.data.finishedManga.media} href="manga/finished-manga" title="Recently finished mangas" />
+        <HorizontalCardRow data={mangaData().data.data.finishedNovel.media} href="manga/finished-novel" title="Recently finished light novels" />
         <HorizontalCardRow data={mangaData().data.data.popular.media} href="manga/popular" title="All time popular" />
         <VerticalCardRow data={mangaData().data.data.top.media} type="manga" href="manga/top-100" title="Top 100 manga" />
       </div>

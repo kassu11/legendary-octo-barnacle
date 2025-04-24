@@ -21,15 +21,15 @@ const idFilter = {
 }
 const animeSearch = {
   type: ["anime"],
-  header: ["this-season", "new", "next-season", "trending", "popular", "top-100"],
+  header: ["finished", "this-season", "new", "next-season", "trending", "popular", "top-100"],
 }
 const mangaSearch = {
   type: ["manga"],
-  header: ["novel", "new", "manwha", "trending", "popular", "top-100"],
+  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manwha", "trending", "popular", "top-100"],
 }
 
 const bothSearch = {
-  header: ["trending", "popular", "top-100"],
+  header: ["finished", "trending", "popular", "top-100"],
 }
 
 render(
