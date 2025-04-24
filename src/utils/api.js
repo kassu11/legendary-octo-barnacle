@@ -58,7 +58,6 @@ const api = {
       return Fetch.anilist(querys.anilistGenresAndTags);
     }),
     externalSources: fetchOnce(type => {
-      console.log("type:", type);
       return Fetch.anilist(querys.anilistExternalSources, { type: type || undefined });
     }),
     characters: fetchOnce((id, page = 1) => {

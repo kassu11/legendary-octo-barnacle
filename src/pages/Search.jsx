@@ -191,6 +191,20 @@ function groupTagsByCategory(tags) {
   return group;
 }
 
+
+function createFormStateObject(variables) {
+  return {
+    ...variables,
+    format: toObject(variables.format),
+    genres: toObject(variables.genres),
+    excludedGenres: toObject(variables.excludedGenres),
+    tags: toObject(variables.tags),
+    licensedBy: toObject(variables.licensedBy),
+    excludedTags: toObject(variables.excludedTags),
+    sort: Array.isArray(variables.sort) ? variables.sort[0] : variables.sort,
+  };
+}
+
 function Search() {
   const triggerVariable = debounce((variables) => setVariables(variables), 250);
   let _lastTimeHistoryChanged = performance.now()
@@ -209,7 +223,7 @@ function Search() {
   const [externalSources] = api.anilist.externalSources(() => (params.type?.toUpperCase() || null));
   let skipFirstDebounce = true;
 
-  const [formStateObject, setFormStateObject] = createSignal({});
+  const [formStateObject, setFormStateObject] = createSignal(createFormStateObject(parseUrl(params.type, params.header, location.search)));
 
   createEffect(on(cacheData, data => {
     if (data) {
@@ -233,22 +247,13 @@ function Search() {
   createEffect(() => {
     const variables = parseUrl(params.type, params.header, location.search);
     untrack(() => {
-      setFormStateObject({
-        ...variables,
-        format: toObject(variables.format),
-        genres: toObject(variables.genres),
-        excludedGenres: toObject(variables.excludedGenres),
-        tags: toObject(variables.tags),
-        licensedBy: toObject(variables.licensedBy),
-        excludedTags: toObject(variables.excludedTags),
-        sort: Array.isArray(variables.sort) ? variables.sort[0] : variables.sort,
-      });
+      setFormStateObject(createFormStateObject(variables));
 
       if (location.search.length === 0 && params.header === undefined) {
         mutateMediaData(undefined);
         skipFirstDebounce = true;
       } else if (params.header && location.search.length) {
-        navigate("/search" + (!params.type || ("/" + params.type)) + searchQueryFromForm(form, false));
+        navigate("/search" + (params.type ? ("/" + params.type) : "") + searchQueryFromForm(form, false));
       } else {
         if (skipFirstDebounce) {
           skipFirstDebounce = false;
@@ -263,7 +268,6 @@ function Search() {
 
   return (
     <div class="search-page">
-      {console.log(externalSources())}
       <form ref={form} action="https://graphql.anilist.co" class="media-search-header" onInput={e => {
         const formData = new FormData(e.currentTarget);
 
