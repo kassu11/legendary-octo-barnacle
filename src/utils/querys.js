@@ -696,8 +696,13 @@ export const trendingMedia = format`query {
       ...media
     }
   }
-  popular: Page(page: 1, perPage: 6) {
-    media(sort: POPULARITY_DESC, isAdult: false) {
+  finishedAnime: Page(page: 1, perPage: 6) {
+    media(sort: END_DATE_DESC, type: ANIME, isAdult: false, status: FINISHED) {
+      ...media
+    }
+  }
+  finishedManga: Page(page: 1, perPage: 6) {
+    media(sort: END_DATE_DESC, type: MANGA, isAdult: false, status: FINISHED) {
       ...media
     }
   }
@@ -771,6 +776,16 @@ export const trendingManga = format`query {
   }
   popular: Page(page: 1, perPage: 6) {
     media(sort: POPULARITY_DESC, type: MANGA, isAdult: false) {
+      ...media
+    }
+  }
+  finishedManga: Page(page: 1, perPage: 6) {
+    media(sort: END_DATE_DESC, type: MANGA, isAdult: false, status: FINISHED, format: MANGA) {
+      ...media
+    }
+  }
+  finishedNovel: Page(page: 1, perPage: 6) {
+    media(sort: END_DATE_DESC, type: MANGA, isAdult: false, status: FINISHED, format: NOVEL) {
       ...media
     }
   }
@@ -860,6 +875,11 @@ export const trendingAnime = format`query (
       type: ANIME
       isAdult: false
     ) {
+      ...media
+    }
+  }
+  finished: Page(page: 1, perPage: 6) {
+    media(sort: END_DATE_DESC, type: ANIME, isAdult: false, status: FINISHED) {
       ...media
     }
   }
