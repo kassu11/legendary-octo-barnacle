@@ -41,6 +41,12 @@
       text-decoration: none;
       color: black;
     }
+
+    .horizontal-search-card:first-child .item::before {
+      right: calc(-1 * var(--tooltip-padding)); 
+      left: unset;
+      transform: translateX(100%);
+    } 
   }
   .search-cards-header {
     display: flex;
