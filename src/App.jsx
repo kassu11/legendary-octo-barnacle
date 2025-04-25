@@ -22,9 +22,9 @@ function App(props) {
             </li>
             <Show when={authUserData()}>
               <li class="main-navigation-profile">
-                <A href={"/user/" + authUserData().data.data.Viewer.name}>
-                  {authUserData().data.data.Viewer.name}
-                  <img class="main-navigation-profile-icon" src={authUserData().data.data.Viewer.avatar.large} alt="Profile avatar" />
+                <A href={"/user/" + authUserData().data.name}>
+                  {authUserData().data.name}
+                  <img class="main-navigation-profile-icon" src={authUserData().data.avatar.large} alt="Profile avatar" />
                 </A>
               </li>
             </Show>
