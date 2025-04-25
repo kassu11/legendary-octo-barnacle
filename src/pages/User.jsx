@@ -156,6 +156,10 @@ function Content(props) {
                   <p>Days watched</p>
                 </div>
                 <div class="profile-progress-item">
+                  <p class="header">{numberCommas(props.user.statistics.anime.episodesWatched)}</p>
+                  <p>Episodes watched</p>
+                </div>
+                <div class="profile-progress-item">
                   <p class="header">{props.user.statistics.anime.meanScore}</p>
                   <p>Mean score</p>
                 </div>
@@ -170,6 +174,10 @@ function Content(props) {
                 <div class="profile-progress-item">
                   <p class="header">{numberCommas(props.user.statistics.manga.chaptersRead)}</p>
                   <p>Chapters read</p>
+                </div>
+                <div class="profile-progress-item">
+                  <p class="header">{numberCommas(props.user.statistics.manga.volumesRead)}</p>
+                  <p>Volumes read</p>
                 </div>
                 <div class="profile-progress-item">
                   <p class="header">{props.user.statistics.manga.meanScore}</p>
@@ -223,19 +231,19 @@ function ActivityHistory(props) {
     <Show when={props.history.at(-1).date > start}>
       <div>
         <h3>Activity</h3>
-        <div class="activity-history-container">
+        <ol class="activity-history-container">
           <For each={props.history}>{(activity, i) => (
             <Show when={activity.date > start}>
               <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-                <div>_</div>
+                <li class="activity-item" />
               )}</For>
-              <div>X</div>
+              <li class="activity-item" attr:data-level={activity.level} />
             </Show>
           )}</For>
           <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-            <div>_</div>
+            <li class="activity-item" />
           )}</For>
-        </div>
+        </ol>
       </div>
     </Show>
   );
