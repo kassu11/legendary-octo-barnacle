@@ -32,7 +32,7 @@ function formState(auth, initialData) {
 
   function setState(auth, data) {
     batch(() => {
-      setFormat(auth?.data.data.Viewer.mediaListOptions.scoreFormat);
+      setFormat(auth?.data.mediaListOptions.scoreFormat);
       // setFormat("POINT_10")
       // setFormat("POINT_100")
       // setFormat("POINT_10_DECIMAL")
@@ -40,25 +40,25 @@ function formState(auth, initialData) {
       // setFormat("POINT_3")
       setAdvancedScoresEnabled(() => {
         if (data?.type === "ANIME") {
-          return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoringEnabled;
+          return auth?.data.mediaListOptions.animeList.advancedScoringEnabled;
         } else if (data?.type === "MANGA") {
-          return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoringEnabled;
+          return auth?.data.mediaListOptions.mangaList.advancedScoringEnabled;
         }
         return false;
       });
       setAdvancedScoring(() => {
         if (data?.type === "ANIME") {
-          return auth?.data.data.Viewer.mediaListOptions.animeList.advancedScoring || [];
+          return auth?.data.mediaListOptions.animeList.advancedScoring || [];
         } else if (data?.type === "MANGA") {
-          return auth?.data.data.Viewer.mediaListOptions.mangaList.advancedScoring || [];
+          return auth?.data.mediaListOptions.mangaList.advancedScoring || [];
         }
         return [];
       });
       setCustomLists(() => {
         if (data?.type === "ANIME") {
-          return auth?.data.data.Viewer.mediaListOptions.animeList.customLists || [];
+          return auth?.data.mediaListOptions.animeList.customLists || [];
         } else if (data?.type === "MANGA") {
-          return auth?.data.data.Viewer.mediaListOptions.mangaList.customLists || [];
+          return auth?.data.mediaListOptions.mangaList.customLists || [];
         } 
         return [];
       });
