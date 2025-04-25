@@ -66,7 +66,7 @@ function MediaInfo(props) {
   assert(props.media, "Data missing");
   assert(props.media?.id, "Id missing");
 
-  const { accessToken, authUserData } = useAuthentication();
+  const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
   const [isFavourite, setIsFavourite] = createSignal(props.media?.isFavourite ?? false);
   

@@ -99,7 +99,7 @@ const api = {
       return await request.send();
     },
     getAuthUserData: reloadCache(token => {
-      return Fetch.authAnilist(token, querys.currentUser);
+      return Fetch.authAnilist(token, querys.currentUser, {}, (response) => response.data.Viewer);
     }),
     getActivity: fetchOnce((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistActivity, variables);
@@ -172,7 +172,9 @@ export default api;
 class Fetch {
   /** @type {number} - Date.getTime() of when to expire the cache data */
   expires;
-  constructor(url, { method = "POST", headers, body }) {
+  /** @type {undefined|(object) => any} - Formatthe response data if needed */
+  #formatResponse;
+  constructor(url, { method = "POST", headers, body }, formatResponse) {
     assert(url, "Url missing");
     assert(method, "Method missing");
     if (method === "POST") assert(body, "Body is missing");
@@ -183,6 +185,7 @@ class Fetch {
     this.headers = headers || defaultHeader;
     this.body = body;
     this.fromCache = true;
+    this.#formatResponse = formatResponse;
 
     this.cacheKey = this.#generateCacheKey();
   }
@@ -196,6 +199,10 @@ class Fetch {
     if (this.headers) {
       const headers = JSON.stringify(this.headers).replaceAll("\"", "");
       key += headers;
+    }
+    if (this.#formatResponse) {
+      const formatResponse = this.#formatResponse.toString().replace(/[\n\t\r ]+/g, "");
+      key += formatResponse;
     }
 
     return key;
@@ -227,7 +234,12 @@ class Fetch {
         throw new Error(`Response status: ${response.status}`);
       }
 
-      this.data = await response.json();
+      const json = await response.json();
+      if (this.#formatResponse) {
+        this.data = this.#formatResponse(json);
+      } else {
+        this.data = json;
+      }
       this.fromCache = false;
     }
     catch(err) {
@@ -237,11 +249,11 @@ class Fetch {
     return this;
   }
 
-  static anilist(query, variables = {}) {
-    return Fetch.authAnilist(null, query, variables);
+  static anilist(query, variables = {}, formatResponse) {
+    return Fetch.authAnilist(null, query, variables, formatResponse);
   }
 
-  static authAnilist(token, query, variables = {}) {
+  static authAnilist(token, query, variables = {}, formatResponse) {
     assert(query.length > 10, "Query must be above of length 10");
     const headers = { 
       "Content-Type": "application/json",
@@ -258,7 +270,7 @@ class Fetch {
         query,
         variables,
       },
-    });
+    }, formatResponse);
   }
 
   static getJson(url) {

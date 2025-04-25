@@ -20,13 +20,13 @@ const ExtraInfo = (props) => {
         <Show when={formatAnilistDate(props.media.endDate)}>{date => (
           <li>End Date: {date()}</li>
         )}</Show>
-        <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "ENGLISH"}>
+        <Show when={!authUserData() || authUserData().data.options.titleLanguage !== "ENGLISH"}>
           <li>English: {props.media.title.english}</li>
         </Show>
-        <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "ROMAJI"}>
+        <Show when={!authUserData() || authUserData().data.options.titleLanguage !== "ROMAJI"}>
           <li>Romaji: {props.media.title.romaji}</li>
         </Show>
-        <Show when={!authUserData() || authUserData().data.data.Viewer.options.titleLanguage !== "NATIVE"}>
+        <Show when={!authUserData() || authUserData().data.options.titleLanguage !== "NATIVE"}>
           <li>Native: {props.media.title.native}</li>
         </Show>
         <Show when={props.media.synonyms.length}>

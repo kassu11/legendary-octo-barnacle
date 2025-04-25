@@ -14,7 +14,7 @@ function Home() {
   return (
     <Show when={authUserData()}>
       <div class={style.container}>
-        <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.data.Viewer.id} />
+        <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.id} />
         <div class={style.body}>
           <div class={style.left}>
             <Activity token={accessToken()}/>
