@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, untrack } from "solid-js";
 import * as querys from "./querys";
 import { assert } from "./assert";
 import { getDates } from "./dates";
@@ -298,16 +298,19 @@ function cacheBuilder(settings) {
   return function cache(fetchCallback) {
     return (...fetchOptions) => {
       const [data, setData] = createSignal(undefined);
+      const [error, setError] = createSignal(false);
+      const [loading, setLoading] = createSignal(false);
+
       let request = null;
       const checkCacheBeforeFetch = settings.type == "default" || settings.type == "only-if-cached";
       const fetchOnStart = (DEBUG == false || settings.fetchOnDebug || settings.type == "no-store" || !settings.storeName) && checkCacheBeforeFetch == false;
 
       const mutateCache = mutateData => {
         if (typeof mutateData === "function") {
-          mutateData = mutateData(data());
+          mutateData = mutateData(untrack(data));
         }
 
-        assert(data() !== null || settings.type !== "only-if-cached", "Can't mutate null data");
+        assert(untrack(data) !== null || settings.type !== "only-if-cached", "Can't mutate null data");
         assert(typeof mutateData === "object", "Data should always be JSON object data");
 
 
@@ -333,7 +336,7 @@ function cacheBuilder(settings) {
 
       const mutate = mutateData => {
         if (typeof mutateData === "function") {
-          mutateData = mutateData(data());
+          mutateData = mutateData(untrack(data));
         }
 
         setData(mutateData);
@@ -341,6 +344,7 @@ function cacheBuilder(settings) {
 
       const refetch = async () => {
         if (settings.type === "only-if-cached") {
+          setLoading(false);
           return setData(null);
         }
 
@@ -350,12 +354,14 @@ function cacheBuilder(settings) {
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
         }
 
+        setLoading(false);
         saveMutate(data);
 
         if (!data.error) {
           mutateCache(data);
-        } else if (DEBUG) {
-          console.error("Fetch error, not saving data to cache");
+        } else {
+          setError(true);
+          console.assert(!DEBUG, "Fetch error, not saving data to cache");
         }
       }
 
@@ -370,11 +376,14 @@ function cacheBuilder(settings) {
           console.log("Fetching", settings.type, request.body);
         }
 
+        setLoading(true);
+        setError(false);
 
         const data = localFetchCacheStorage.get(request.cacheKey);
         if (data && data.expires > new Date()) {
           saveMutate({ ...data, fromCache: true });
           if (settings.type === "fetch-once") { 
+            setLoading(false);
             return;
           }
         } else if (settings.type !== "no-store" && settings.storeName) {
@@ -391,6 +400,7 @@ function cacheBuilder(settings) {
                 assert(evt.target.result.data, "Cache should always have data");
 
                 if (evt.target.result.expires > new Date()) {
+                  setLoading(false);
                   return saveMutate({ ...evt.target.result, fromCache: true });
                 }
               } 
@@ -407,6 +417,11 @@ function cacheBuilder(settings) {
         if (fetchOnStart) {
           refetch();
         }
+      });
+
+      Object.defineProperties(data, {
+        error: { get: () => error() },
+        loading: { get: () => loading() },
       });
 
       return [data, { mutate, refetch, mutateCache }];
