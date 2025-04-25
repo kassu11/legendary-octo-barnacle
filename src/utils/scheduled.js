@@ -1,13 +1,13 @@
 export const leadingAndTrailingDebounce = (callback, ms, bufferSize = 1) => {
   const buffer = [];
   let timeout = null;
-  function trigger(...callbackArgs) {
+  async function trigger(...callbackArgs) {
     if (timeout === null) {
-      callback(...callbackArgs);
+      await callback(...callbackArgs);
       timeout = setTimeout(addFromBuffer, ms);
     } else {
-      buffer.push(() => {
-        callback(...callbackArgs);
+      buffer.push(async () => {
+        await callback(...callbackArgs);
         buffer.shift();
         addFromBuffer();
       });
