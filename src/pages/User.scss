@@ -149,12 +149,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    flex-wrap: wrap;
 
     .container {
       display: flex;
       gap: 1rem;
       justify-content: space-around;
-      flex-grow: 1;
+      flex: 1;
       background-color: tomato;
       padding: .5rem;
     }
@@ -166,7 +167,7 @@
   }
   .profile-progress-item {
     text-align: center;
-    width: 100%;
+    flex: 1;
   }
 
 
@@ -178,7 +179,7 @@
   }
 
   .user-genres-overview {
-    flex-grow: 1;
+    flex: 1;
     background-color: steelblue;
 
     ol {
@@ -258,6 +259,7 @@
         --amount: 4.5;
         --padding: 1rem;
         padding: var(--padding); 
+        justify-content: flex-start;
         display: flex;
         overflow-y: auto;
         gap: var(--gap);
