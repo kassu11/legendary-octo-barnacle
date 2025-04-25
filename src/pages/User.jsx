@@ -72,66 +72,76 @@ function Content(props) {
             </Match>
           </Switch>
           <ActivityHistory history={props.user.stats?.activityHistory || []} />
-          <div class="user-favourites">
-            <h3>Favourite animes</h3>
-            <ol>
-              <For each={props.user.favourites.anime.edges}>{anime => (
-                <li class="item">
-                  <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
-                    <img src={anime.node.coverImage.large} alt="Cover" />
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
-          <div class="user-favourites">
-            <h3>Favourite manga</h3>
-            <ol>
-              <For each={props.user.favourites.manga.edges}>{manga => (
-                <li class="item">
-                  <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
-                    <img src={manga.node.coverImage.large} alt="Cover" />
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
-          <div class="user-favourites">
-            <h3>Favourite characters</h3>
-            <ol>
-              <For each={props.user.favourites.characters.edges}>{character => (
-                <li class="item">
-                  <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>
-                    <img src={character.node.image.large} alt="Cover" />
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
-          <div class="user-favourites">
-            <h3>Favourite staff</h3>
-            <ol>
-              <For each={props.user.favourites.staff.edges}>{staff => (
-                <li class="item">
-                  <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
-                    <img src={staff.node.image.large} alt="Cover" />
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
-          <div class="user-favourites-studio">
-            <h3>Favourite studio</h3>
-            <ol>
-              <For each={props.user.favourites.studios.edges}>{studio => (
-                <li class="item">
-                  <A href={"/ani/studio/" + studio.node.id + "/" + formatTitleToUrl(studio.node.name)}>
-                    {studio.node.name}
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
+          <Show when={props.user.favourites.anime.edges.length}>
+            <div class="user-favourites">
+              <h3>Favourite animes</h3>
+              <ol>
+                <For each={props.user.favourites.anime.edges}>{anime => (
+                  <li class="item">
+                    <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
+                      <img src={anime.node.coverImage.large} alt="Cover" />
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
+          <Show when={props.user.favourites.manga.edges.length}>
+            <div class="user-favourites">
+              <h3>Favourite manga</h3>
+              <ol>
+                <For each={props.user.favourites.manga.edges}>{manga => (
+                  <li class="item">
+                    <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
+                      <img src={manga.node.coverImage.large} alt="Cover" />
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
+          <Show when={props.user.favourites.characters.edges.length}>
+            <div class="user-favourites">
+              <h3>Favourite characters</h3>
+              <ol>
+                <For each={props.user.favourites.characters.edges}>{character => (
+                  <li class="item">
+                    <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>
+                      <img src={character.node.image.large} alt="Cover" />
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
+          <Show when={props.user.favourites.staff.edges.length}>
+            <div class="user-favourites">
+              <h3>Favourite staff</h3>
+              <ol>
+                <For each={props.user.favourites.staff.edges}>{staff => (
+                  <li class="item">
+                    <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
+                      <img src={staff.node.image.large} alt="Cover" />
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
+          <Show when={props.user.favourites.studios.edges.length}>
+            <div class="user-favourites-studio">
+              <h3>Favourite studio</h3>
+              <ol>
+                <For each={props.user.favourites.studios.edges}>{studio => (
+                  <li class="item">
+                    <A href={"/ani/studio/" + studio.node.id + "/" + formatTitleToUrl(studio.node.name)}>
+                      {studio.node.name}
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
         </div>
         <div class="user-activity-container">
           <div class="user-profile-progress">
