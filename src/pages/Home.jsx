@@ -137,7 +137,14 @@ function CurrentCard(props) {
     assert(data.data.data.SaveMediaListEntry.progress, "No progress found");
 
     props.data.progress = data.data.data.SaveMediaListEntry.progress;
-    props.mutateCache(data => data);
+    if (data.data.data.SaveMediaListEntry.status === "COMPLETED") {
+      props.mutateCache(request => {
+        request.data.data.Page.mediaList = request.data.data.Page.mediaList.filter(media => media.id !== props.data.id);
+        return request;
+      });
+    } else {
+      props.mutateCache(data => data);
+    }
   }, 250, 2);
 
   createEffect(() => {
