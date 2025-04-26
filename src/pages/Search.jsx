@@ -1,11 +1,11 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, on, For, untrack, Match, Switch } from "solid-js";
+import { createSignal, createEffect, Show, on, For, untrack, Match, Switch, onMount, onCleanup } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { capitalize, formatMediaFormat, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { getDates } from "../utils/dates";
@@ -217,7 +217,6 @@ function Search() {
   const [searchParams, _setSearchParams] = useSearchParams();
   const [variables, setVariables] = createSignal();
   const [cacheVariables, setCacheVariables] = createSignal();
-  const [mediaData, { mutate: mutateMediaData }] = api.anilist.searchMedia(accessToken, variables);
   const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
   const [genresAndTags] = api.anilist.genresAndTags();
   const [externalSources] = api.anilist.externalSources(() => (params.type?.toUpperCase() || null));
@@ -228,7 +227,6 @@ function Search() {
   createEffect(on(cacheData, data => {
     if (data) {
       setVariables(cacheVariables());
-      mutateMediaData(data);
     }
   }));
 
@@ -250,7 +248,6 @@ function Search() {
       setFormStateObject(createFormStateObject(variables));
 
       if (location.search.length === 0 && params.header === undefined) {
-        mutateMediaData(undefined);
         skipFirstDebounce = true;
       } else if (params.header && location.search.length) {
         navigate("/search" + (params.type ? ("/" + params.type) : "") + searchQueryFromForm(form, false));
@@ -592,7 +589,7 @@ function Search() {
       </form>
       <Switch>
         <Match when={location.search.length || params.header}>
-          <SearchContentCards content={mediaData()}/>
+          <SearchContentCards variables={variables()}/>
         </Match>
         <Match when={location.search.length === 0}>
           <Switch>
@@ -765,14 +762,69 @@ function MangaSearch() {
 }
 
 function SearchContentCards(props) {
+  const params = useParams();
   return (
     <div class="search-result-container">
+      <Show when={params.header}>
+        <h1>{params.header}</h1>
+      </Show>
       <ol class="search-page-content">
-        <Show when={props.content}>
-          <CardRow data={props.content.data.data.Page.media}/>
-        </Show>
+        <SearchPage variables={props.variables} nestLevel={1} />
       </ol>
     </div>
+  );
+}
+
+function SearchPage(props) {
+  const {accessToken} = useAuthentication();
+  const [variables, setVariables] = createSignal(undefined);
+  const [mediaData] = api.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables);
+  let intersection;
+
+  onMount(() => {
+    if (props.nestLevel > 1) {
+      intersectionObserver.observe(intersection);
+    }
+  });
+
+  onCleanup(() => {
+    intersectionObserver.disconnect();
+  });
+
+  const options = { rootMargin: "800px" }
+  const callback = (entries) => {
+    if (entries[0].isIntersecting === false) {
+      return;
+    }
+
+    intersectionObserver.unobserve(entries[0].target);
+    setVariables(props.variables);
+  };
+
+  const intersectionObserver = new IntersectionObserver(callback, options);
+
+  return (
+    <Switch fallback={<div ref={intersection}>Intersection</div>}>
+      <Match when={mediaData()}>
+        <CardRow data={mediaData().data.media}/>
+        <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>
+            {vars => (
+              <Show when={(mediaData.loading && props.loading) === false} fallback="Fetch cooldown">
+                <SearchPage 
+                  variables={{ ...vars(), page: (vars()?.page || 1) + 1 }}
+                  nestLevel={props.nestLevel + 1}
+                  loading={mediaData.loading}
+                />
+              </Show>
+            )}
+          </Show>
+        </Show>
+      </Match>
+      <Match when={mediaData.loading}>
+        loading...
+      </Match>
+    </Switch>
   );
 }
 
