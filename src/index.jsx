@@ -13,6 +13,7 @@ import User from "./pages/User.jsx";
 import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
 import { MangaCharacters, AnimeCharacters } from "./pages/Characters.jsx";
+import Staff from "./pages/Staff.jsx";
 
 const root = document.getElementById("root")
 
@@ -48,7 +49,7 @@ render(
             <Route path="/artist/:name" component={Artist} />
             <Route path="/ani">
               <Route path="/character/:id/:name?" matchFilters={idFilter} component={Character} />
-              <Route path="/staff/:id/:name?" matchFilters={idFilter} component={() => <div>Staff</div>} />
+              <Route path="/staff/:id/:name?" matchFilters={idFilter} component={Staff} />
             </Route>
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />

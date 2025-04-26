@@ -1,0 +1,66 @@
+@layer layout {
+  .staff-page {
+    width: min(60rem, calc(100% - 1rem));
+    margin-inline: auto;
+    background-color: seashell;
+  }
+
+  .staff-page-header {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: 1rem;
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-auto-flow: row dense;
+      align-items: start;
+      gap: 0 1rem;
+    }
+
+    .cover {
+      grid-row: span 2;
+      width: min(14rem, 100%);
+    }
+
+    .toggle-favourite-button {
+      grid-row: span 2;
+    }
+
+    .description {
+      padding: 0;
+      list-style: none;
+    }
+  }
+
+  .staff-page-alternative-names {
+    grid-column: 1;
+  }
+}
+
+@layer resize {
+  @media (width < 45em) {
+    .staff-page-header {
+      .row {
+        grid-template-columns: 1fr;
+        text-align: center;
+        justify-items: center;
+      }
+
+      .toggle-favourite-button {
+        margin-top: 1rem;
+      }
+      .cover, .description {
+        order: 1;
+      }
+
+      .cover {
+        place-self: center;
+      }
+    }
+
+    .staff-page-header {
+      grid-template-columns: 1fr;
+    }
+  }
+}
