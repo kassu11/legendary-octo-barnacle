@@ -105,10 +105,10 @@ const api = {
       return Fetch.authAnilist(token, querys.anilistActivity, variables);
     }),
     searchMedia: fetchOnce((token, variables) => {
-      return Fetch.authAnilist(token, querys.searchMedia, variables);
+      return Fetch.authAnilist(token, querys.searchMedia, variables, (response) => response.data.Page);
     }),
     searchMediaCache: onlyIfCache((token, variables) => {
-      return Fetch.authAnilist(token, querys.searchMedia, variables);
+      return Fetch.authAnilist(token, querys.searchMedia, variables, (response) => response.data.Page);
     }),
     friendsMediaScore: fetchOnce((token, id, variables) => {
       return Fetch.authAnilist(token, querys.anilistGetFriendMediaScore, {id, ...variables});
