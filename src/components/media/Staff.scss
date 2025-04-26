@@ -1,0 +1,40 @@
+.media-page-staff-container {
+  background-color: lawngreen;
+
+  ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    grid-template-rows: auto auto;
+    grid-auto-rows: 0px;
+    grid-column-gap: .5rem;
+    overflow: hidden;
+    list-style: none;
+    background-color: springgreen;
+    padding: 0;
+  }
+
+  li a {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    background-color: thistle;
+    gap: 0 .5rem;
+    height: 100%;
+  }
+  li {
+    margin-bottom: .5rem;
+  }
+
+  div {
+    padding-block: .5rem;
+    display: grid;
+    align-content: space-between;
+    gap: .25rem;
+  }
+
+  img {
+    aspect-ratio: 5.5/8;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+}

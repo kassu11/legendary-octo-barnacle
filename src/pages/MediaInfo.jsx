@@ -12,6 +12,7 @@ import Genres from "../components/media/Genres.jsx";
 import Tags from "../components/media/Tags.jsx";
 import Header from "../components/media/Header.jsx";
 import Characters from "../components/media/Characters.jsx";
+import Staff from "../components/media/Staff.jsx";
 import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
@@ -210,6 +211,7 @@ function MediaInfo(props) {
             </ol>
           </div>
           <Characters characters={props.media.characterPreview.edges} countryOfOrigin={props.media.countryOfOrigin} />
+          <Staff staff={props.media.staffPreview.edges} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
         </section>
