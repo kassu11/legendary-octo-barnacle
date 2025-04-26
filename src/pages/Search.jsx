@@ -807,17 +807,19 @@ function SearchPage(props) {
     <Switch fallback={<div ref={intersection}>Intersection</div>}>
       <Match when={mediaData()}>
         <CardRow data={mediaData().data.media}/>
-        <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
-          <Show when={props.variables}>
-            {vars => (
-              <Show when={(mediaData.loading && props.loading) === false} fallback="Fetch cooldown">
-                <SearchPage 
-                  variables={{ ...vars(), page: (vars()?.page || 1) + 1 }}
-                  nestLevel={props.nestLevel + 1}
-                  loading={mediaData.loading}
-                />
-              </Show>
-            )}
+        <Show when={mediaData().data.pageInfo.hasNextPage}>
+          <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
+            <Show when={props.variables}>
+              {vars => (
+                <Show when={(mediaData.loading && props.loading) === false} fallback="Fetch cooldown">
+                  <SearchPage 
+                    variables={{ ...vars(), page: (vars()?.page || 1) + 1 }}
+                    nestLevel={props.nestLevel + 1}
+                    loading={mediaData.loading}
+                  />
+                </Show>
+              )}
+            </Show>
           </Show>
         </Show>
       </Match>
