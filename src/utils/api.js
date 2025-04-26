@@ -54,6 +54,30 @@ const api = {
         "withRoles": true
       });
     }),
+    staffInfoById: fetchOnce(id => {
+      return Fetch.anilist(querys.anilistStaffById, { id }, (response) => response.data.Staff);
+    }),
+    staffCharactersById: fetchOnce((token, id, variables) => {
+      return Fetch.authAnilist(token, querys.anilistStaffById, { 
+        "characterPage": 1,
+        "sort": "START_DATE_DESC",
+        "onList": null,
+        "withCharacterRoles": true,
+        ...variables, 
+        id,
+      });
+    }),
+    staffMediaById: fetchOnce((token, id, type, variables) => {
+      return Fetch.authAnilist(token, querys.anilistStaffById, { 
+        "staffPage": 1,
+        "sort": "START_DATE_DESC",
+        "onList": null,
+        "withStaffRoles": true,
+        ...variables, 
+        id,
+        type,
+      });
+    }),
     genresAndTags: fetchOnce(() => {
       return Fetch.anilist(querys.anilistGenresAndTags);
     }),
