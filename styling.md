@@ -116,6 +116,7 @@ by the file they are in.
 - .visually-hidden
 - main#page-content
 - .list-status
+- .hidden
 
 ### 3. Generic Decorator Classes
 

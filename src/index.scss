@@ -54,6 +54,10 @@
     width: 1px;
   }
 
+  .hidden {
+    display: none;
+  }
+
   .line-clamp {
     @at-root [class^="line-clamp"] {
       overflow: hidden;
