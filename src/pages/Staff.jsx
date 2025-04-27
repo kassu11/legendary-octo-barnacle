@@ -151,55 +151,49 @@ function Staff() {
           </select>
         </form>
       </Show>
-      <details class="staff-page-details" open>
-        <summary class="staff-page-summary">
-          <h2>Characters</h2>
-          <label> 
-            <input type="checkbox" checked={showCharacterYears()} onChange={e => {
-              e.preventDefault();
-              setShowCharacterYears(e.target.checked);
-            }}/>
-            {" "}Show years
-          </label>
-        </summary>
-        <ol class="staff-page-character-container">
-          <StaffCharacterPage variables={variables()} showYears={showCharacterYears} nestLevel={1} />
-        </ol>
-      </details>
-      <details class="staff-page-details" open>
-        <summary class="staff-page-summary">
-          <h2>Anime staff roles</h2>
-          <label> 
-            <input type="checkbox" checked={showAnimeYears()} onChange={e => {
-              e.preventDefault();
-              setShowAnimeYears(e.target.checked);
-            }}/>
-            {" "}Show years
-          </label>
-        </summary>
-        <ol class="staff-page-character-container">
-          <StaffMediaRolePage variables={variables()} type="ANIME" nestLevel={1} showYears={showAnimeYears}/>
-        </ol>
-      </details>
-      <details class="staff-page-details" open>
-        <summary class="staff-page-summary">
-          <h2>Anime staff roles</h2>
-          <label> 
-            <input type="checkbox" checked={showMangaYears()} onChange={e => {
-              e.preventDefault();
-              setShowMangaYears(e.target.checked);
-            }}/>
-            {" "}Show years
-          </label>
-        </summary>
-        <ol class="staff-page-character-container">
-          <StaffMediaRolePage variables={variables()} type="MANGA" nestLevel={1} showYears={showMangaYears}/>
-        </ol>
-      </details>
+      <StaffSection variables={variables()} type="CHARACTER" showYears={true} title="Characters" />
+      <StaffSection variables={variables()} type="ANIME" title="Anime staff roles" />
+      <StaffSection variables={variables()} type="MANGA" title="Manga staff roles" />
     </div>
   )
 }
 
+function StaffSection(props) {
+  assert(props.title, "title missing");
+  assert(props.title, "title missing");
+  assert(props.type, "type missing");
+
+  const [showYears, setShowYears] = createSignal(props.showYears || false);
+  const [hidden, setHidden] = createSignal(true);
+
+  return (
+    <details class="staff-page-details" classList={{hidden: hidden()}} open>
+      <summary class="staff-page-summary">
+        <h2>{props.title}</h2>
+        <label> 
+          <input type="checkbox" checked={showYears()} onChange={e => {
+            e.preventDefault();
+            setShowYears(e.target.checked);
+          }}/>
+          {" "}Show years
+        </label>
+      </summary>
+      <ol class="staff-page-character-container">
+        <Switch>
+          <Match when={props.type === "CHARACTER"}>
+            <StaffCharacterPage setHidden={setHidden} variables={props.variables} showYears={showYears} nestLevel={1} />
+          </Match>
+          <Match when={props.type === "ANIME"}>
+            <StaffMediaRolePage setHidden={setHidden} variables={props.variables} type="ANIME" showYears={showYears} nestLevel={1} />
+          </Match>
+          <Match when={props.type === "MANGA"}>
+            <StaffMediaRolePage setHidden={setHidden} variables={props.variables} type="MANGA" showYears={showYears} nestLevel={1} />
+          </Match>
+        </Switch>
+      </ol>
+    </details>
+  );
+}
 
 function StaffCharacterPage(props) {
   const params = useParams();
@@ -207,6 +201,12 @@ function StaffCharacterPage(props) {
   const [variables, setVariables] = createSignal(undefined);
   const [staffCharacters] = api.anilist.staffCharactersById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
   let intersection;
+
+  if (props.nestLevel === 1) {
+    createEffect(on(staffCharacters, characters => {
+      props.setHidden(characters.data.edges.length === 0);
+    }, { defer: true }));
+  }
 
   onMount(() => {
     if (props.nestLevel > 1) {
@@ -270,6 +270,12 @@ function StaffMediaRolePage(props) {
   const [variables, setVariables] = createSignal(undefined);
   const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
   let intersection;
+
+  if (props.nestLevel === 1) {
+    createEffect(on(staffMedia, media => {
+      props.setHidden(media.data.edges.length === 0);
+    }, { defer: true }));
+  }
 
   onMount(() => {
     if (props.nestLevel > 1) {
