@@ -1,4 +1,4 @@
-import { createEffect, createSignal, untrack } from "solid-js";
+import { batch, createEffect, createSignal, untrack } from "solid-js";
 import * as querys from "./querys";
 import { assert } from "./assert";
 import { getDates } from "./dates";
@@ -69,14 +69,14 @@ const api = {
     }),
     staffMediaById: fetchOnce((token, id, type, variables) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
-        "staffPage": 1,
-        "sort": "START_DATE_DESC",
-        "onList": null,
-        "withStaffRoles": true,
         ...variables, 
+        "staffPage": variables.staffPage || 1,
+        "sort": variables.sort || "START_DATE_DESC",
+        "onList": variables.onList || null,
+        "withStaffRoles": true,
         id,
         type,
-      }, (response) => response.data.Staff);
+      }, (response) => response.data.Staff.staffMedia);
     }),
     genresAndTags: fetchOnce(() => {
       return Fetch.anilist(querys.anilistGenresAndTags);
@@ -345,6 +345,8 @@ function cacheBuilder(settings) {
         if (typeof mutateData === "function") {
           mutateData = mutateData(untrack(data));
         }
+        // Create a deepcopy because onsuccess events are not instant so mutations could leak into cache.
+        mutateData = structuredClone(mutateData);
 
         assert(untrack(data) !== null || settings.type !== "only-if-cached", "Can't mutate null data");
         assert(typeof mutateData === "object", "Data should always be JSON object data");
@@ -390,15 +392,17 @@ function cacheBuilder(settings) {
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
         }
 
-        setLoading(false);
-        saveMutate(data);
+        batch(() => {
+          if (!data.error) {
+            mutateCache(data);
+          } else {
+            setError(true);
+            console.assert(!DEBUG, "Fetch error, not saving data to cache");
+          }
 
-        if (!data.error) {
-          mutateCache(data);
-        } else {
-          setError(true);
-          console.assert(!DEBUG, "Fetch error, not saving data to cache");
-        }
+          setLoading(false);
+          saveMutate(data);
+        });
       }
 
       createEffect(() => {

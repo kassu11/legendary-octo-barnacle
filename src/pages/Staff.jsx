@@ -1,6 +1,6 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Switch, Match, Show, createSignal, createEffect, on, onCleanup, onMount, For } from "solid-js";
+import { Switch, Match, Show, createSignal, createEffect, on, onCleanup, onMount, For, batch } from "solid-js";
 import { Markdown } from "../components/Markdown";
 import "./Staff.scss";
 import { assert } from "../utils/assert";
@@ -17,7 +17,7 @@ function Staff() {
   const [searchParams, _setSearchParams] = useSearchParams();
   const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
   const [variables, setVariables] = createSignal();
-  // const [staffAnime] = api.anilist.staffMediaById(accessToken, () => params.id, "ANIME");
+  const [showAnimeYears, setShowAnimeYears] = createSignal(false);
   // const [staffManga] = api.anilist.staffMediaById(accessToken, () => params.id, "MANGA");
 
   const [favourite, setFavourite] = createSignal(false);
@@ -60,11 +60,11 @@ function Staff() {
               <li><strong>Age:</strong> {staffInfo().data.age}</li>
             </Show>
             <Show when={staffInfo().data.gender}>
-              <li><strong>Age:</strong> {staffInfo().data.gender}</li>
+              <li><strong>Gender:</strong> {staffInfo().data.gender}</li>
             </Show>
             <Show when={staffInfo().data.yearsActive}>
               <li>
-                <strong>Age:</strong> 
+                <strong>Active years: </strong> 
                 {staffInfo().data.yearsActive.join("-")}
                 <Switch>
                   <Match when={staffInfo().data.dateOfDeath.year && staffInfo().data.yearsActive.at(-1) !== staffInfo().data.dateOfDeath.year}>
@@ -157,6 +157,20 @@ function Staff() {
           <StaffCharacterPage variables={variables()} nestLevel={1} />
         </ol>
       </details>
+      <details open>
+        <summary class="staff-page-summary">
+          <h2>Anime staff roles</h2>
+          <label> 
+            <input type="checkbox" onChange={e => {
+              setShowAnimeYears(e.target.checked);
+            }}/>
+            {" "}Show years
+          </label>
+        </summary>
+        <ol class="staff-page-character-container">
+          <StaffAnimeRolePage variables={variables()} nestLevel={1} showYears={showAnimeYears}/>
+        </ol>
+      </details>
     </div>
   )
 }
@@ -219,6 +233,146 @@ function StaffCharacterPage(props) {
       </Switch>
     </Show>
   );
+}
+
+function StaffAnimeRolePage(props) {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [variables, setVariables] = createSignal(undefined);
+  const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, "ANIME", props.nestLevel === 1 ? () => props.variables : variables);
+  let intersection;
+
+  onMount(() => {
+    if (props.nestLevel > 1) {
+      intersectionObserver.observe(intersection);
+    }
+  });
+
+  createEffect(on(staffMedia, media => {
+    if (!props.lastMediaId || media.data.edges.length === 0) {
+      return;
+    }
+    const edges = structuredClone(media.data.edges);
+    const removedEdges = [];
+
+    for(const edge of media.data.edges) {
+      if (edge.node.id !== props.lastMediaId) { break; } 
+      removedEdges.push(edges.shift());
+    }
+
+    if (removedEdges.length === 0) {
+      return;
+    }
+    props.mutate(response => {
+      response.data.edges = [...response.data.edges, ...removedEdges];
+      return { ...response };
+    });
+    mutate(response => {
+      response.data.edges = edges;
+      return { ...response };
+    });
+  }, { defer: true }));
+
+  onCleanup(() => {
+    intersectionObserver.disconnect();
+  });
+
+  const options = { rootMargin: "800px" }
+  const callback = (entries) => {
+    if (entries[0].isIntersecting === false) {
+      return;
+    }
+
+    intersectionObserver.unobserve(entries[0].target);
+    setVariables(props.variables);
+  };
+
+  const intersectionObserver = new IntersectionObserver(callback, options);
+
+  return (
+    <Show when={staffMedia() || props.nestLevel > 1}>
+      <Switch fallback={<div ref={intersection}>Intersection</div>}>
+        <Match when={staffMedia()}>
+          <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
+          <Show when={staffMedia().data.pageInfo.hasNextPage}>
+            <Show when={props.variables} keyed={props.nestLevel === 1}>
+              <Show when={(staffMedia.loading && props.loading) === false} fallback="Fetch cooldown">
+                <StaffAnimeRolePage
+                  variables={{ ...props.variables, staffPage: (props.variables?.staffPage || 1) + 1 }} 
+                  nestLevel={props.nestLevel + 1} 
+                  showYears={props.showYears}
+                  mutate={mutate} 
+                  lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"}
+                  lastMediaId={staffMedia().data.edges.at(-1)?.node.id}
+                  loading={staffMedia.loading} 
+                /> 
+              </Show>
+            </Show>
+          </Show>
+        </Match>
+        <Match when={staffMedia.loading}>
+          loading...
+        </Match>
+      </Switch>
+    </Show>
+  );
+}
+
+function MediaCards(props) {
+  const combine = (acc, edge) => {
+    if (acc.at(-1)?.node.id !== edge.node.id) {
+      acc.push(edge);
+    }
+    return acc;
+  };
+  
+  return ( 
+    <For each={props.edges.reduce(combine, [])}>{(edge, i) => (
+      <>
+        <Show when={props.showYears()}>
+          <Switch>
+            <Match when={i() === 0}>
+              <Show when={props.lastYearGroup !== (edge.node.startDate?.year || "TBA")}>
+                <li class="staff-page-character-year-header">
+                  <h3>{edge.node.startDate?.year || "TBA"}</h3>
+                </li>
+              </Show>
+            </Match>
+            <Match when={i() > 0}>
+              <Show when={props.edges[i() - 1].node.startDate?.year !== edge.node.startDate?.year}>
+                <li class="staff-page-character-year-header">
+                  <h3>{edge.node.startDate?.year || "TBA"}</h3>
+                </li>
+              </Show>
+            </Match>
+          </Switch>
+        </Show>
+        <li>
+          <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <img src={edge.node.coverImage.large} alt="Character" class="background"/>
+            <p>
+              <Show when={edge.node.mediaListEntry?.status}>
+                <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
+              </Show>
+              {edge.node.title.userPreferred}
+            </p>
+            <ol>
+              <StaffRoles index={i()} mediaId={edge.node.id} />
+            </ol>
+          </A>
+        </li>
+      </>
+    )}</For>
+  );
+
+  function StaffRoles(roleProps) {
+    return (
+      <Show when={roleProps.mediaId === props.edges[roleProps.index]?.node.id}>
+        <li>{props.edges[roleProps.index].staffRole}</li>
+        <StaffRoles index={roleProps.index + 1} mediaId={roleProps.mediaId} />
+      </Show>
+    );
+  }
 }
 
 function CharacterCards(props) {
