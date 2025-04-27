@@ -700,6 +700,9 @@ export const anilistStaffById = format`query staff(
           id
           type
           isAdult
+          startDate {
+            year
+          }
           title {
             userPreferred
           }

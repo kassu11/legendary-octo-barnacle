@@ -46,8 +46,19 @@
     gap: 1rem;
   }
 
-  .staff-page-summary h2 {
-    display: inline;
+  .staff-page-summary {
+    position: sticky;
+    top: 2rem;
+    height: 3rem;
+    background-color: slateblue;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    padding: 1rem;
+
+    h2 {
+      display: inline;
+    }
   }
 
 
