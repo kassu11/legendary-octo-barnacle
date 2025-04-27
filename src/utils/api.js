@@ -57,15 +57,15 @@ const api = {
     staffInfoById: fetchOnce(id => {
       return Fetch.anilist(querys.anilistStaffById, { id }, (response) => response.data.Staff);
     }),
-    staffCharactersById: fetchOnce((token, id, variables) => {
+    staffCharactersById: fetchOnce((token, id, variables = {}) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
-        "characterPage": 1,
-        "sort": "START_DATE_DESC",
-        "onList": null,
-        "withCharacterRoles": true,
         ...variables, 
+        "characterPage": variables.characterPage || 1,
+        "sort": variables.sort || "START_DATE_DESC",
+        "onList": variables.onList || null,
+        "withCharacterRoles": true,
         id,
-      });
+      }, (response) => response.data.Staff.characterMedia);
     }),
     staffMediaById: fetchOnce((token, id, type, variables) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
@@ -76,7 +76,7 @@ const api = {
         ...variables, 
         id,
         type,
-      });
+      }, (response) => response.data.Staff);
     }),
     genresAndTags: fetchOnce(() => {
       return Fetch.anilist(querys.anilistGenresAndTags);
@@ -403,11 +403,11 @@ function cacheBuilder(settings) {
 
       createEffect(() => {
         const options = fetchOptions.map(option => typeof option == "function" ? option() : option);
-        request = fetchCallback(...options);
         if (options.some(option => option === undefined)) {
           return; // Don't fetch if you have undefined values
         };
 
+        request = fetchCallback(...options);
         if (DEBUG) {
           console.log("Fetching", settings.type, request.body);
         }

@@ -39,7 +39,7 @@
 
     a {
       text-decoration: none;
-      color: black;
+      color: inherit;
     }
 
     .horizontal-search-card:first-child .item::before {
@@ -68,17 +68,8 @@
   .horizontal-search-card {
     background-color: grey;
 
-    .list-status {
-      width: 0.8em;
-      height: 0.8em;
-      margin-right: .25rem;
-      border-radius: 50%;
-      display: inline-block;
-      text-align: center;
-      background-color: var(--status-color, purple);
-    }
     a {
-      color: white;
+      color: inherit;
       text-decoration: none;
 
       &:not(:hover) .search-card-quick-action {
@@ -203,7 +194,7 @@
 
     > a {
       text-decoration: none;
-      color: white;
+      color: inherit;
     }
   }
   .vertical-search-card-info {
@@ -232,7 +223,8 @@
 
     a {
       text-decoration: none;
-      color: rgb(0 0 0 / 80%);
+      color: inherit;
+      color: color-mix(in oklab, black, transparent 20%);
     }
   }
 

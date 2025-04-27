@@ -115,9 +115,11 @@ by the file they are in.
 - .line-clamp-6
 - .visually-hidden
 - main#page-content
+- .list-status
 
 ### 3. Generic Decorator Classes
 
+- .background
 - .banner
 - .clamp
 - .container
@@ -129,11 +131,12 @@ by the file they are in.
 - .header
 - .input-grid
 - .item
-- .list-status
 - .main
+- .media
 - .profile
 - .ranking
 - .right
+- .role
 
 ### 4. Generic State Classes
 
