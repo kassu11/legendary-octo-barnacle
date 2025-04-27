@@ -1,10 +1,10 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Switch, Match, Show, createSignal, createEffect, on, onCleanup, onMount, For, batch } from "solid-js";
+import { Switch, Match, Show, createSignal, createEffect, on, onCleanup, onMount, For } from "solid-js";
 import { Markdown } from "../components/Markdown";
 import "./Staff.scss";
 import { assert } from "../utils/assert";
-import { capitalize, formatAnilistDate, formatTimeToDate, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/formating";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
@@ -12,15 +12,10 @@ import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 
 function Staff() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [staffInfo, { mutateCache: mutateStaffInfoCache }] = api.anilist.staffInfoById(() => params.id);
   const [searchParams, _setSearchParams] = useSearchParams();
   const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
   const [variables, setVariables] = createSignal();
-  const [showCharacterYears, setShowCharacterYears] = createSignal(true);
-  const [showAnimeYears, setShowAnimeYears] = createSignal(false);
-  const [showMangaYears, setShowMangaYears] = createSignal(false);
-  // const [staffManga] = api.anilist.staffMediaById(accessToken, () => params.id, "MANGA");
 
   const [favourite, setFavourite] = createSignal(false);
   createEffect(on(staffInfo, info => {
