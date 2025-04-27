@@ -721,7 +721,7 @@ export const anilistStaffById = format`query staff(
 
 export const anilistCharacterById = format`query character(
   $id: Int
-  $page: Int
+  $page: Int = 1
   $sort: [MediaSort]
   $onList: Boolean
   $withRoles: Boolean = false

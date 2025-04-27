@@ -45,14 +45,18 @@ const api = {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.profileActivity, { id });
     }),
-    characterId: fetchOnce(id => {
-      return Fetch.anilist(querys.anilistCharacterById, {
+    characterInfoById: fetchOnce(id => {
+      return Fetch.anilist(querys.anilistCharacterById, { id }, response => response.data.Character);
+    }),
+    characterMediaById: fetchOnce((token, id, variables = {}) => { 
+      return Fetch.authAnilist(token, querys.anilistCharacterById, {
+        ...variables, 
+        "page": variables.page || 1,
+        "sort": variables.sort || "POPULARITY_DESC",
+        "onList": variables.onList || null,
+        "withRoles": variables.withRoles || true,
         id,
-        "page": 1,
-        "sort": "POPULARITY_DESC",
-        "onList": null,
-        "withRoles": true
-      });
+      }, response => response.data.Character.media);
     }),
     staffInfoById: fetchOnce(id => {
       return Fetch.anilist(querys.anilistStaffById, { id }, (response) => response.data.Staff);

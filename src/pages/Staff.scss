@@ -8,6 +8,7 @@
   .staff-page-header {
     display: grid;
     grid-template-columns: 14rem 1fr;
+    grid-template-rows: auto 1fr;
     gap: 1rem;
     max-width: 100ch;
     margin-inline: auto;
