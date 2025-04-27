@@ -17,7 +17,9 @@ function Staff() {
   const [searchParams, _setSearchParams] = useSearchParams();
   const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
   const [variables, setVariables] = createSignal();
+  const [showCharacterYears, setShowCharacterYears] = createSignal(true);
   const [showAnimeYears, setShowAnimeYears] = createSignal(false);
+  const [showMangaYears, setShowMangaYears] = createSignal(false);
   // const [staffManga] = api.anilist.staffMediaById(accessToken, () => params.id, "MANGA");
 
   const [favourite, setFavourite] = createSignal(false);
@@ -149,26 +151,49 @@ function Staff() {
           </select>
         </form>
       </Show>
-      <details open>
+      <details class="staff-page-details" open>
         <summary class="staff-page-summary">
           <h2>Characters</h2>
+          <label> 
+            <input type="checkbox" checked={showCharacterYears()} onChange={e => {
+              e.preventDefault();
+              setShowCharacterYears(e.target.checked);
+            }}/>
+            {" "}Show years
+          </label>
         </summary>
         <ol class="staff-page-character-container">
-          <StaffCharacterPage variables={variables()} nestLevel={1} />
+          <StaffCharacterPage variables={variables()} showYears={showCharacterYears} nestLevel={1} />
         </ol>
       </details>
-      <details open>
+      <details class="staff-page-details" open>
         <summary class="staff-page-summary">
           <h2>Anime staff roles</h2>
           <label> 
-            <input type="checkbox" onChange={e => {
+            <input type="checkbox" checked={showAnimeYears()} onChange={e => {
+              e.preventDefault();
               setShowAnimeYears(e.target.checked);
             }}/>
             {" "}Show years
           </label>
         </summary>
         <ol class="staff-page-character-container">
-          <StaffAnimeRolePage variables={variables()} nestLevel={1} showYears={showAnimeYears}/>
+          <StaffMediaRolePage variables={variables()} type="ANIME" nestLevel={1} showYears={showAnimeYears}/>
+        </ol>
+      </details>
+      <details class="staff-page-details" open>
+        <summary class="staff-page-summary">
+          <h2>Anime staff roles</h2>
+          <label> 
+            <input type="checkbox" checked={showMangaYears()} onChange={e => {
+              e.preventDefault();
+              setShowMangaYears(e.target.checked);
+            }}/>
+            {" "}Show years
+          </label>
+        </summary>
+        <ol class="staff-page-character-container">
+          <StaffMediaRolePage variables={variables()} type="MANGA" nestLevel={1} showYears={showMangaYears}/>
         </ol>
       </details>
     </div>
@@ -209,7 +234,7 @@ function StaffCharacterPage(props) {
     <Show when={staffCharacters() || props.nestLevel > 1}>
       <Switch fallback={<div ref={intersection}>Intersection</div>}>
         <Match when={staffCharacters()}>
-          <CharacterCards edges={staffCharacters().data.edges} lastYearGroup={props.lastYearGroup}/>
+          <CharacterCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
           <Show when={staffCharacters().data.pageInfo.hasNextPage}>
             <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
               <Show when={props.variables}>
@@ -218,6 +243,7 @@ function StaffCharacterPage(props) {
                     <StaffCharacterPage
                       variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} 
                       nestLevel={props.nestLevel + 1} 
+                      showYears={props.showYears} 
                       lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
                       loading={staffCharacters.loading} 
                     /> 
@@ -235,11 +261,14 @@ function StaffCharacterPage(props) {
   );
 }
 
-function StaffAnimeRolePage(props) {
+function StaffMediaRolePage(props) {
+  assert(props.type, "Type is missing");
+  assert(props.nestLevel, "nestLevel is missing");
+
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, "ANIME", props.nestLevel === 1 ? () => props.variables : variables);
+  const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
   let intersection;
 
   onMount(() => {
@@ -297,11 +326,12 @@ function StaffAnimeRolePage(props) {
           <Show when={staffMedia().data.pageInfo.hasNextPage}>
             <Show when={props.variables} keyed={props.nestLevel === 1}>
               <Show when={(staffMedia.loading && props.loading) === false} fallback="Fetch cooldown">
-                <StaffAnimeRolePage
+                <StaffMediaRolePage
                   variables={{ ...props.variables, staffPage: (props.variables?.staffPage || 1) + 1 }} 
                   nestLevel={props.nestLevel + 1} 
                   showYears={props.showYears}
                   mutate={mutate} 
+                  type={props.type} 
                   lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"}
                   lastMediaId={staffMedia().data.edges.at(-1)?.node.id}
                   loading={staffMedia.loading} 
@@ -319,6 +349,7 @@ function StaffAnimeRolePage(props) {
 }
 
 function MediaCards(props) {
+  assert(props.showYears, "showYears signal is missing");
   const combine = (acc, edge) => {
     if (acc.at(-1)?.node.id !== edge.node.id) {
       acc.push(edge);
@@ -376,26 +407,30 @@ function MediaCards(props) {
 }
 
 function CharacterCards(props) {
+  assert(props.showYears, "showYears signal is missing");
+
   return ( 
     <For each={props.edges}>{(edge, i) => (
       <For each={edge.characters}>{character => (
         <>
-          <Switch>
-            <Match when={i() === 0}>
-              <Show when={props.lastYearGroup !== (edge.node.startDate?.year || "TBA")}>
-                <li class="staff-page-character-year-header">
-                  <h3>{edge.node.startDate?.year || "TBA"}</h3>
-                </li>
-              </Show>
-            </Match>
-            <Match when={i() > 0}>
-              <Show when={props.edges[i() - 1].node.startDate?.year !== edge.node.startDate?.year}>
-                <li class="staff-page-character-year-header">
-                  <h3>{edge.node.startDate?.year || "TBA"}</h3>
-                </li>
-              </Show>
-            </Match>
-          </Switch>
+          <Show when={props.showYears()}>
+            <Switch>
+              <Match when={i() === 0}>
+                <Show when={props.lastYearGroup !== (edge.node.startDate?.year || "TBA")}>
+                  <li class="staff-page-character-year-header">
+                    <h3>{edge.node.startDate?.year || "TBA"}</h3>
+                  </li>
+                </Show>
+              </Match>
+              <Match when={i() > 0}>
+                <Show when={props.edges[i() - 1].node.startDate?.year !== edge.node.startDate?.year}>
+                  <li class="staff-page-character-year-header">
+                    <h3>{edge.node.startDate?.year || "TBA"}</h3>
+                  </li>
+                </Show>
+              </Match>
+            </Switch>
+          </Show>
           <li>
             <div class="staff-page-character-cover">
               <A href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>

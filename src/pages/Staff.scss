@@ -46,18 +46,34 @@
     gap: 1rem;
   }
 
+  .staff-page-details {
+    &[open] .staff-page-summary {
+    background-color: slateblue;
+      &::before {
+        content: "[open]";
+      }
+    }
+    .staff-page-summary {
+      background-color: red;
+      &::before {
+        content: "[closed]";
+      }
+    }
+  }
+
   .staff-page-summary {
     position: sticky;
-    top: 2rem;
-    height: 3rem;
-    background-color: slateblue;
+    top: 3rem;
+    cursor: pointer;
     display: flex;
     justify-content: space-between;
-    align-items: end;
-    padding: 1rem;
+    align-items: center;
+    padding: .5rem;
+    z-index: 1;
 
     h2 {
       display: inline;
+      margin-left: 2rem;
     }
   }
 
