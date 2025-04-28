@@ -78,7 +78,6 @@ function MediaInfo(props) {
   return (
     <>
       <Banner src={props.media.bannerImage} />
-      {console.log("MAL:", props.malData)}
       <div class="media-page-content">
         <aside class="media-page-left-aside">
           <img src={props.media.coverImage.large} alt="Cover" class="media-page-cover" />

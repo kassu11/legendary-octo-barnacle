@@ -20,7 +20,7 @@ function Staff() {
   const [favourite, setFavourite] = createSignal(false);
   createEffect(on(staffInfo, info => {
     setFavourite(info?.data.isFavourite);
-  }, { defer: true }));
+  }));
 
 
   createEffect(() => {
@@ -159,10 +159,10 @@ function StaffSection(props) {
   assert(props.type, "type missing");
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
-  const [hidden, setHidden] = createSignal(true);
+  const [visible, setVisible] = createSignal(false);
 
   return (
-    <details class="staff-page-details" classList={{hidden: hidden()}} open>
+    <details class="staff-page-details" classList={{hidden: !visible()}} open>
       <summary class="staff-page-summary">
         <h2>{props.title}</h2>
         <label> 
@@ -176,13 +176,13 @@ function StaffSection(props) {
       <ol class="staff-page-character-container">
         <Switch>
           <Match when={props.type === "CHARACTER"}>
-            <StaffCharacterPage setHidden={setHidden} variables={props.variables} showYears={showYears} nestLevel={1} />
+            <StaffCharacterPage setVisible={setVisible} variables={props.variables} showYears={showYears} nestLevel={1} />
           </Match>
           <Match when={props.type === "ANIME"}>
-            <StaffMediaRolePage setHidden={setHidden} variables={props.variables} type="ANIME" showYears={showYears} nestLevel={1} />
+            <StaffMediaRolePage setVisible={setVisible} variables={props.variables} type="ANIME" showYears={showYears} nestLevel={1} />
           </Match>
           <Match when={props.type === "MANGA"}>
-            <StaffMediaRolePage setHidden={setHidden} variables={props.variables} type="MANGA" showYears={showYears} nestLevel={1} />
+            <StaffMediaRolePage setVisible={setVisible} variables={props.variables} type="MANGA" showYears={showYears} nestLevel={1} />
           </Match>
         </Switch>
       </ol>
@@ -199,8 +199,8 @@ function StaffCharacterPage(props) {
 
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
-      props.setHidden(characters.data.edges.length === 0);
-    }, { defer: true }));
+      props.setVisible(characters?.data.edges.length > 0);
+    }));
   }
 
   onMount(() => {
@@ -268,8 +268,8 @@ function StaffMediaRolePage(props) {
 
   if (props.nestLevel === 1) {
     createEffect(on(staffMedia, media => {
-      props.setHidden(media.data.edges.length === 0);
-    }, { defer: true }));
+      props.setVisible(media?.data.edges.length > 0);
+    }));
   }
 
   onMount(() => {
@@ -279,7 +279,7 @@ function StaffMediaRolePage(props) {
   });
 
   createEffect(on(staffMedia, media => {
-    if (!props.lastMediaId || media.data.edges.length === 0) {
+    if (!props.lastMediaId || !media?.data.edges.length) {
       return;
     }
     const edges = structuredClone(media.data.edges);
@@ -301,7 +301,7 @@ function StaffMediaRolePage(props) {
       response.data.edges = edges;
       return { ...response };
     });
-  }, { defer: true }));
+  }));
 
   onCleanup(() => {
     intersectionObserver.disconnect();
