@@ -119,6 +119,32 @@
       width: 35%;
     }
   }
+
+  .staff-page-media-voice-actor {
+    position: relative;
+    width: 100%;
+    container-type: inline-size;
+
+    img {
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+      width: 100%;
+    }
+
+    .background {
+      position: absolute;
+      width: 35%;
+      transform: translateY(-100%);
+      left: 0px;
+      top: calc(100cqw * 8 / 5.5);
+    }
+
+    li:not(:first-child) .actor:not(:hover, :focus) {
+      img {
+        visibility: hidden;
+      }
+    }
+  }
 }
 
 @layer resize {

@@ -10,7 +10,7 @@ import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 
 
-function Staff() {
+function Character() {
   const params = useParams();
   const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = api.anilist.characterInfoById(() => params.id);
   const [searchParams, _setSearchParams] = useSearchParams();
@@ -146,12 +146,12 @@ function Staff() {
           </select>
         </form>
       </Show>
-      <StaffSection variables={variables()} type="MEDIA" title="Characters" />
+      <CharacterSection variables={variables()} type="MEDIA" title="Characters" />
     </div>
   )
 }
 
-function StaffSection(props) {
+function CharacterSection(props) {
   assert(props.title, "title missing");
   assert(props.title, "title missing");
   assert(props.type, "type missing");
@@ -219,6 +219,7 @@ function CharacterMediaPage(props) {
 
   return (
     <Show when={staffCharacters() || props.nestLevel > 1}>
+      {console.log(staffCharacters())}
       <Switch fallback={<div ref={intersection}>Intersection</div>}>
         <Match when={staffCharacters()}>
           <CharacterCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
@@ -253,62 +254,62 @@ function CharacterCards(props) {
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
-      <For each={edge.voiceActorRoles.filter(role => role.voiceActor.language === "Japanese")} fallback={<CharacterCard {...props} edge={edge} index={0} />}>{role => (
-        <CharacterCard {...props} index={i()} edge={edge} role={role}/>
-      )}</For>
+      <>
+        <Show when={props.showYears()}>
+          <Switch>
+            <Match when={i() === 0}>
+              <Show when={props.lastYearGroup !== (edge.node.startDate?.year || "TBA")}>
+                <li class="staff-page-character-year-header">
+                  <h3>{edge.node.startDate?.year || "TBA"}</h3>
+                </li>
+              </Show>
+            </Match>
+            <Match when={true}>
+              <Show when={props.edges[i() - 1].node.startDate?.year !== edge.node.startDate?.year}>
+                <li class="staff-page-character-year-header">
+                  <h3>{edge.node.startDate?.year || "TBA"}</h3>
+                </li>
+              </Show>
+            </Match>
+          </Switch>
+        </Show>
+        <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === "Japanese")}>{roles => (
+          <li class="staff-page-media-voice-actor">
+            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+              <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
+            </A>
+            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+              <p>
+                <Show when={edge.node.mediaListEntry?.status}>
+                  <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
+                </Show>
+                {edge.node.title.userPreferred} 
+                <Show when={edge.characterRole}>
+                  <span class="role"> {capitalize(edge.characterRole)}</span>
+                </Show>
+                {console.log(edge)}
+              </p>
+            </A>
+            <Show when={roles().length}>
+              <ol>
+                <For each={roles()}>{role => (
+                  <li>
+                    <A class="actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)}>
+                      <span>{role.voiceActor.name.userPreferred}</span>
+                      <Show when={role.roleNotes}>
+                        <span class="role"> {role.roleNotes}</span>
+                      </Show>
+                      <img src={role.voiceActor.image.large} alt="Staff profile" class="background"/>
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </Show>
+          </li>
+        )}</Show>
+      </>
     )}</For>
   );
 }
 
-function CharacterCard(props) {
-  return (
-    <>
-      <Show when={props.showYears()}>
-        <Switch>
-          <Match when={props.index === 0}>
-            <Show when={props.lastYearGroup !== (props.edge.node.startDate?.year || "TBA")}>
-              <li class="staff-page-character-year-header">
-                <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
-              </li>
-            </Show>
-          </Match>
-          <Match when={props.index > 0}>
-            <Show when={props.edges[props.index - 1].node.startDate?.year !== props.edge.node.startDate?.year}>
-              <li class="staff-page-character-year-header">
-                <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
-              </li>
-            </Show>
-          </Match>
-        </Switch>
-      </Show>
-      <li>
-        <div class="staff-page-character-cover">
-          <A href={"/anime/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.title.userPreferred)}>
-            <img src={props.edge.node.coverImage.large} alt={capitalize(props.edge.node.type) + " cover"} />
-          </A>
-          <Show when={props.role}>
-            <A class="media" href={"/ani/staff/" + props.role.voiceActor.id + "/" + formatTitleToUrl(props.role.voiceActor.name.userPreferred)}>
-              <img src={props.role.voiceActor.image.large} alt="Staff profile" class="background"/>
-            </A>
-          </Show>
-        </div>
-        <A href={"/anime/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.title.userPreferred)}>
-          <p>
-            <Show when={props.edge.node.mediaListEntry?.status}>
-              <div class="list-status" attr:data-status={props.edge.node.mediaListEntry.status} />
-            </Show>
-            {props.edge.node.title.userPreferred}
-          </p>
-        </A>
-        <Show when={props.role}>
-          <A href={"/ani/character/" + props.role.id + "/" + formatTitleToUrl(props.role.voiceActor.name.userPreferred)}>
-            <span>{props.role.voiceActor.name.userPreferred}</span>
-            <span class="role"> {capitalize(props.edge.characterRole)}</span>
-          </A>
-        </Show>
-      </li>
-    </>
-  );
-}
-
-export default Staff
+export default Character;

@@ -120,6 +120,7 @@ by the file they are in.
 
 ### 3. Generic Decorator Classes
 
+- .actors
 - .background
 - .banner
 - .clamp
