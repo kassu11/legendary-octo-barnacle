@@ -91,6 +91,9 @@ const api = {
     characters: fetchOnce((id, page = 1) => {
       return Fetch.anilist(querys.anilistCharacters, { id, page });
     }),
+    staff: fetchOnce((id, page = 1) => {
+      return Fetch.anilist(querys.anilistStaff, { id, page });
+    }),
     trendingMedia: fetchOnce((token) => {
       const dates = getDates();
       return Fetch.authAnilist(token, querys.trendingMedia, {
@@ -444,7 +447,9 @@ function cacheBuilder(settings) {
                 assert(evt.target.result.data, "Cache should always have data");
 
                 if (evt.target.result.expires > new Date()) {
-                  setLoading(false);
+                  if (fetchOnStart == false) {
+                    setLoading(false);
+                  }
                   const cacheData = { ...evt.target.result, fromCache: true };
                   localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
                   return saveMutate(cacheData);

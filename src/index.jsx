@@ -54,10 +54,12 @@ render(
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />
               <Route path="/:id/:name?/characters" matchFilters={idFilter} component={AnimeCharacters} />
+              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={AnimeCharacters} />
             </Route>
             <Route path="/manga">
               <Route path="/:id/:name?" matchFilters={idFilter} component={MangaInfo} />
               <Route path="/:id/:name?/characters" matchFilters={idFilter} component={MangaCharacters} />
+              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={MangaCharacters} />
             </Route>
             <Route path="/user/:name" component={User} />
             <Route path="*404" component={() => <div>Not fould 404</div>} />
