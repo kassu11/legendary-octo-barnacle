@@ -20,7 +20,7 @@ function Staff() {
   const [favourite, setFavourite] = createSignal(false);
   createEffect(on(characterInfo, info => {
     setFavourite(info?.data.isFavourite);
-  }, { defer: true }));
+  }));
 
 
   createEffect(() => {
@@ -157,10 +157,10 @@ function StaffSection(props) {
   assert(props.type, "type missing");
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
-  const [hidden, setHidden] = createSignal(true);
+  const [visible, setVisible] = createSignal(false);
 
   return (
-    <details class="staff-page-details" classList={{hidden: hidden()}} open>
+    <details class="staff-page-details" classList={{hidden: !visible()}} open>
       <summary class="staff-page-summary">
         <h2>{props.title}</h2>
         <label> 
@@ -174,7 +174,7 @@ function StaffSection(props) {
       <ol class="staff-page-character-container">
         <Switch>
           <Match when={props.type === "MEDIA"}>
-            <CharacterMediaPage setHidden={setHidden} variables={props.variables} showYears={showYears} nestLevel={1} />
+            <CharacterMediaPage setVisible={setVisible} variables={props.variables} showYears={showYears} nestLevel={1} />
           </Match>
         </Switch>
       </ol>
@@ -191,8 +191,8 @@ function CharacterMediaPage(props) {
 
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
-      props.setHidden(characters.data.edges.length === 0);
-    }, { defer: true }));
+      props.setVisible(characters?.data.edges.length > 0);
+    }));
   }
 
   onMount(() => {

@@ -417,15 +417,15 @@ function cacheBuilder(settings) {
 
         request = fetchCallback(...options);
         if (DEBUG) {
-          console.log("Fetching", settings.type, request.body);
+          console.log("Fetching", settings.type, request.body || request.url);
         }
 
         setLoading(true);
         setError(false);
 
-        const data = localFetchCacheStorage.get(request.cacheKey);
-        if (data && data.expires > new Date()) {
-          saveMutate({ ...data, fromCache: true });
+        const localCacheData = localFetchCacheStorage.get(request.cacheKey);
+        if (localCacheData && localCacheData.expires > new Date()) {
+          saveMutate({ ...localCacheData, fromCache: true });
           if (settings.type === "fetch-once") { 
             setLoading(false);
             return;
@@ -445,7 +445,9 @@ function cacheBuilder(settings) {
 
                 if (evt.target.result.expires > new Date()) {
                   setLoading(false);
-                  return saveMutate({ ...evt.target.result, fromCache: true });
+                  const cacheData = { ...evt.target.result, fromCache: true };
+                  localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
+                  return saveMutate(cacheData);
                 }
               } 
 
