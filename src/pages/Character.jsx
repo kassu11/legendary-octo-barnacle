@@ -4,7 +4,7 @@ import { Switch, Match, Show, createSignal, createEffect, on, onCleanup, onMount
 import { Markdown } from "../components/Markdown";
 import "./Staff.scss";
 import { assert } from "../utils/assert";
-import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatAnilistDate, formatTitleToUrl, languageFromCountry } from "../utils/formating";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
@@ -158,23 +158,47 @@ function CharacterSection(props) {
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
   const [visible, setVisible] = createSignal(false);
+  const [languages, setLanguages] = createSignal([]);
+  const [language, setLanguage] = createSignal(["Japanese"]);
+
+  createEffect(() => {
+    if (languages().length) {
+      setLanguage(languages().find(l => l === "Japanese") || languages().find(l => l === "Chinese") || languages()[0]);
+    }
+  });
 
   return (
     <details class="staff-page-details" classList={{hidden: !visible()}} open>
       <summary class="staff-page-summary">
         <h2>{props.title}</h2>
-        <label> 
-          <input type="checkbox" checked={showYears()} onChange={e => {
-            e.preventDefault();
-            setShowYears(e.target.checked);
-          }}/>
-          {" "}Show years
-        </label>
+        <div>
+          <label> 
+            <input type="checkbox" checked={showYears()} onChange={e => {
+              e.preventDefault();
+              setShowYears(e.target.checked);
+            }}/>
+            {" "}Show years
+          </label>
+          <Show when={languages().length}>
+            <select value={language()} onInput={e => setLanguage(e.target.value)}>
+              <For each={languages()}>{lang => (
+                <option value={lang}>{lang}</option>
+              )}</For>
+            </select>
+          </Show>
+        </div>
       </summary>
       <ol class="staff-page-character-container">
         <Switch>
           <Match when={props.type === "MEDIA"}>
-            <CharacterMediaPage setVisible={setVisible} variables={props.variables} showYears={showYears} nestLevel={1} />
+            <CharacterMediaPage 
+              setVisible={setVisible} 
+              variables={props.variables} 
+              showYears={showYears} 
+              setLanguages={setLanguages} 
+              language={language} 
+              nestLevel={1} 
+            />
           </Match>
         </Switch>
       </ol>
@@ -192,6 +216,15 @@ function CharacterMediaPage(props) {
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
       props.setVisible(characters?.data.edges.length > 0);
+
+      const newLanguages = new Set();
+      for(const edge of characters?.data.edges || []) {
+        for(const actorRole of edge.voiceActorRoles) {
+          newLanguages.add(actorRole.voiceActor.language);
+        }
+      }
+
+      props.setLanguages([...newLanguages]);
     }));
   }
 
@@ -219,10 +252,9 @@ function CharacterMediaPage(props) {
 
   return (
     <Show when={staffCharacters() || props.nestLevel > 1}>
-      {console.log(staffCharacters())}
       <Switch fallback={<div ref={intersection}>Intersection</div>}>
         <Match when={staffCharacters()}>
-          <CharacterCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
+          <CharacterCards language={props.language} edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
           <Show when={staffCharacters().data.pageInfo.hasNextPage}>
             <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
               <Show when={props.variables}>
@@ -232,6 +264,7 @@ function CharacterMediaPage(props) {
                       variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} 
                       nestLevel={props.nestLevel + 1} 
                       showYears={props.showYears} 
+                      language={props.language} 
                       lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
                       loading={staffCharacters.loading} 
                     /> 
@@ -251,6 +284,7 @@ function CharacterMediaPage(props) {
 
 function CharacterCards(props) {
   assert(props.showYears, "showYears signal is missing");
+  assert(props.language, "language signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
@@ -273,7 +307,7 @@ function CharacterCards(props) {
             </Match>
           </Switch>
         </Show>
-        <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === "Japanese")}>{roles => (
+        <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language())}>{roles => (
           <li class="staff-page-media-voice-actor">
             <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
               <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
@@ -287,7 +321,6 @@ function CharacterCards(props) {
                 <Show when={edge.characterRole}>
                   <span class="role"> {capitalize(edge.characterRole)}</span>
                 </Show>
-                {console.log(edge)}
               </p>
             </A>
             <Show when={roles().length}>
@@ -297,7 +330,10 @@ function CharacterCards(props) {
                     <A class="actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)}>
                       <span>{role.voiceActor.name.userPreferred}</span>
                       <Show when={role.roleNotes}>
-                        <span class="role"> {role.roleNotes}</span>
+                        <span class="role"> ({role.roleNotes})</span>
+                      </Show>
+                      <Show when={role.dubGroup}>
+                        <span class="role"> ({role.dubGroup})</span>
                       </Show>
                       <img src={role.voiceActor.image.large} alt="Staff profile" class="background"/>
                     </A>
