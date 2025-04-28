@@ -40,7 +40,7 @@ function Character() {
             <p class="staff-page-alternative-names">{[characterInfo().data.name.native, ...characterInfo().data.name.alternative].join(", ")}</p>
             <FavouriteToggle 
               checked={favourite()} 
-              staffId={params.id} 
+              characterId={params.id} 
               favourites={characterInfo().data.favourites} 
               onChange={setFavourite} 
               mutateCache={(isFavourite) => {
