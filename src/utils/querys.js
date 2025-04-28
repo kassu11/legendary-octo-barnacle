@@ -766,6 +766,7 @@ export const anilistCharacterById = format`query character(
         characterRole
         voiceActorRoles(sort: [RELEVANCE, ID]) {
           roleNotes
+          dubGroup
           voiceActor {
             id
             name {
