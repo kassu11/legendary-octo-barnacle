@@ -1,11 +1,11 @@
 @layer layout {
-  .staff-page {
+  .entity-page {
     width: min(85rem, calc(100% - 1rem));
     margin-inline: auto;
     background-color: seashell;
   }
 
-  .staff-page-header {
+  .entity-page-header {
     display: grid;
     grid-template-columns: 14rem 1fr;
     grid-template-rows: auto 1fr;
@@ -36,33 +36,18 @@
     }
   }
 
-  .staff-page-alternative-names {
+  .entity-page-alternative-names {
     grid-column: 1;
   }
 
-  .staff-page-form {
+  .entity-page-form {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
     gap: 1rem;
   }
 
-  .staff-page-details {
-    &[open] .staff-page-summary {
-    background-color: slateblue;
-      &::before {
-        content: "[open]";
-      }
-    }
-    .staff-page-summary {
-      background-color: red;
-      &::before {
-        content: "[closed]";
-      }
-    }
-  }
-
-  .staff-page-summary {
+  .entity-page-summary {
     position: sticky;
     top: 3rem;
     cursor: pointer;
@@ -72,6 +57,20 @@
     padding: .5rem;
     z-index: 1;
 
+    .entity-page-details[open] & {
+      background-color: slateblue;
+      &::before {
+        content: "[open]";
+      }
+    }
+
+    .entity-page-details & {
+      background-color: tomato;
+      &::before {
+        content: "[closed]";
+      }
+    }
+
     h2 {
       display: inline;
       margin-left: 2rem;
@@ -79,7 +78,7 @@
   }
 
 
-  .staff-page-character-container {
+  .entity-page-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
     gap: 1rem;
@@ -99,10 +98,10 @@
       color: inherit;
     }
   }
-  .staff-page-character-year-header {
+  .entity-page-grid-year-header {
     grid-column: 1/-1;
   }
-  .staff-page-character-cover {
+  .entity-page-character-cover {
     position: relative;
     width: 100%;
 
@@ -120,7 +119,7 @@
     }
   }
 
-  .staff-page-media-voice-actor {
+  .entity-page-media-voice-actor {
     position: relative;
     width: 100%;
     container-type: inline-size;
@@ -149,7 +148,8 @@
 
 @layer resize {
   @media (width < 45em) {
-    .staff-page-header {
+    .entity-page-header {
+      grid-template-columns: 1fr;
       .row {
         grid-template-columns: 1fr;
         text-align: center;
@@ -166,10 +166,6 @@
       .cover {
         place-self: center;
       }
-    }
-
-    .staff-page-header {
-      grid-template-columns: 1fr;
     }
   }
 }
