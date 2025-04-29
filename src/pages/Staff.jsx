@@ -1,6 +1,6 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Switch, Match, Show, createSignal, createEffect, on, onCleanup, onMount, For } from "solid-js";
+import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import { Markdown } from "../components/Markdown";
 import "./Staff.scss";
 import { assert } from "../utils/assert";
@@ -48,16 +48,17 @@ function Body(props) {
   });
 
   return (
-    <div class="staff-page">
+    <div class="entity-page">
       <Show when={props.entityInfo()}>
-        <div className="staff-page-header">
+        <div className="entity-page-header">
           <img src={props.entityInfo().data.image.large} class="cover" alt={capitalize(props.type) + " profile"} />
           <div className="row">
             <h1>{props.entityInfo().data.name.userPreferred}</h1>
-            <p class="staff-page-alternative-names">{[props.entityInfo().data.name.native, ...props.entityInfo().data.name.alternative].join(", ")}</p>
+            <p class="entity-page-alternative-names">{[props.entityInfo().data.name.native, ...props.entityInfo().data.name.alternative].join(", ")}</p>
             <FavouriteToggle 
               checked={favourite()} 
-              staffId={params.id} 
+              staffId={props.type === "STAFF" ? params.id : undefined} 
+              characterId={props.type === "CHARACTER" ? params.id : undefined} 
               favourites={props.entityInfo().data.favourites} 
               onChange={setFavourite} 
               mutateCache={(isFavourite) => {
@@ -103,7 +104,7 @@ function Body(props) {
             </Show>
           </ul>
         </div>
-        <form class="staff-page-form" onSubmit={e => e.preventDefault()} onInput={e => {
+        <form class="entity-page-form" onSubmit={e => e.preventDefault()} onInput={e => {
           const formData = new FormData(e.currentTarget);
           triggerSearchParams({
             list: formData.get("list") === "on" || undefined,
@@ -195,8 +196,8 @@ function SubSection(props) {
   }
 
   return (
-    <details class="staff-page-details" classList={{hidden: !visible()}} open>
-      <summary class="staff-page-summary">
+    <details class="entity-page-details" classList={{hidden: !visible()}} open>
+      <summary class="entity-page-summary">
         <h2>{props.title}</h2>
         <div>
           <label> 
@@ -215,7 +216,7 @@ function SubSection(props) {
           </Show>
         </div>
       </summary>
-      <ol class="staff-page-character-container">
+      <ol class="entity-page-grid">
         <Switch>
           <Match when={props.type === "CHARACTER"}>
             <StaffCharacterPage setVisible={setVisible} variables={props.variables} showYears={showYears} nestLevel={1} />
@@ -399,14 +400,14 @@ function YearHeader(props) {
       <Switch>
         <Match when={props.index() === 0}>
           <Show when={props.lastYearGroup !== (props.edge.node.startDate?.year || "TBA")}>
-            <li class="staff-page-character-year-header">
+            <li class="entity-page-grid-year-header">
               <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
             </li>
           </Show>
         </Match>
         <Match when={true}>
           <Show when={props.edges[props.index() - 1].node.startDate?.year !== props.edge.node.startDate?.year}>
-            <li class="staff-page-character-year-header">
+            <li class="entity-page-grid-year-header">
               <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
             </li>
           </Show>
@@ -425,7 +426,7 @@ function CharacterAndActorCards(props) {
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language())}>{roles => (
-          <li class="staff-page-media-voice-actor">
+          <li class="entity-page-media-voice-actor">
             <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
               <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
             </A>
@@ -514,7 +515,7 @@ function CharacterAndMediaCards(props) {
         <Show when={character}>
           <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
           <li>
-            <div class="staff-page-character-cover">
+            <div class="entity-page-character-cover">
               <A href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
                 <img src={character.image.large} alt="Character" class="background"/>
               </A>
