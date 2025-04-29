@@ -2,7 +2,7 @@ import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import { Markdown } from "../components/Markdown";
-import "./Staff.scss";
+import "./Entity.scss";
 import { assert } from "../utils/assert";
 import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/formating";
 import { useAuthentication } from "../context/AuthenticationContext";
@@ -131,19 +131,26 @@ function Body(props) {
             <option value="ID">ID</option>
             <option value="ID_DESC">ID_DESC</option>
             <option value="POPULARITY">POPULARITY</option>
-            <option value="POPULARITY_DESC">POPULARITY_DESC</option>
+            <option value={
+              (() => {
+                if (props.type === "CHARACTER" && searchParams.sort !== "POPULARITY_DESC") {
+                  return "";
+                }
+                return"POPULARITY_DESC";
+              })()
+            }>POPULARITY_DESC</option>
             <option value="SCORE">SCORE</option>
             <option value="SCORE_DESC">SCORE_DESC</option>
             <option value="SEARCH_MATCH">SEARCH_MATCH</option>
             <option value="START_DATE">START_DATE</option>
-            <Switch>
-              <Match when={searchParams.sort === "START_DATE_DESC"}>
-                <option value="START_DATE_DESC">START_DATE_DESC</option>
-              </Match>
-              <Match when={searchParams.sort !== "START_DATE_DESC"}>
-                <option value="">START_DATE_DESC</option>
-              </Match>
-            </Switch>
+            <option value={
+              (() => {
+                if (props.type === "STAFF" && searchParams.sort !== "START_DATE_DESC") {
+                  return "";
+                }
+                return "START_DATE_DESC";
+              })()
+            }>START_DATE_DESC</option>
             <option value="STATUS">STATUS</option>
             <option value="STATUS_DESC">STATUS_DESC</option>
             <option value="TITLE_ENGLISH">TITLE_ENGLISH</option>
