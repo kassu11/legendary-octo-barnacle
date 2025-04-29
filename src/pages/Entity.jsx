@@ -68,7 +68,7 @@ function Body(props) {
             />
           </div>
           <ul class="description">
-            <Show when={props.entityInfo().data.dateOfBirth}>
+            <Show when={formatAnilistDate(props.entityInfo().data.dateOfBirth)}>
               <li><strong>Birth:</strong> {formatAnilistDate(props.entityInfo().data.dateOfBirth)}</li>
             </Show>
             <Show when={props.entityInfo().data.age}>
@@ -77,7 +77,7 @@ function Body(props) {
             <Show when={props.entityInfo().data.gender}>
               <li><strong>Gender:</strong> {props.entityInfo().data.gender}</li>
             </Show>
-            <Show when={props.entityInfo().data.yearsActive}>
+            <Show when={props.entityInfo().data.yearsActive.length}>
               <li>
                 <strong>Active years: </strong> 
                 {props.entityInfo().data.yearsActive.join("-")}

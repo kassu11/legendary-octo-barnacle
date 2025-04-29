@@ -39,10 +39,10 @@ const api = {
       return Fetch.getJson(querys.myAnimeListMangaById(id));
     }),
     animeCharactersById: fetchOnce(id => {
-      return Fetch.getJson(querys.myAnimeListAnimeCharactersById(id));
+      return Fetch.getJson(querys.myAnimeListAnimeCharactersById(id), res => res.data);
     }),
     mangaCharactersById: fetchOnce(id => {
-      return Fetch.getJson(querys.myAnimeListMangaCharactersById(id));
+      return Fetch.getJson(querys.myAnimeListMangaCharactersById(id), res => res.data);
     }),
     animeStaffById: fetchOnce(id => {
       return Fetch.getJson(querys.myAnimeListAnimeStaffById(id));
@@ -107,10 +107,10 @@ const api = {
       return Fetch.anilist(querys.anilistExternalSources, { type: type || undefined });
     }),
     characters: fetchOnce((id, page = 1) => {
-      return Fetch.anilist(querys.anilistCharacters, { id, page });
+      return Fetch.anilist(querys.anilistCharacters, { id, page }, response => response.data.Media);
     }),
-    staff: fetchOnce((id, page = 1) => {
-      return Fetch.anilist(querys.anilistStaff, { id, page });
+    allMediaStaff: fetchOnce((id, page = 1) => {
+      return Fetch.anilist(querys.anilistStaff, { id, page }, res => res.data.Media);
     }),
     trendingMedia: fetchOnce((token) => {
       const dates = getDates();
@@ -340,12 +340,12 @@ class Fetch {
     }, formatResponse);
   }
 
-  static getJson(url) {
+  static getJson(url, formatResponse) {
     return new Fetch(url, {
       method: "GET",
       cache: "default",
       headers: { "Content-Type": "application/json" },
-    });
+    }, formatResponse);
   }
 }
 

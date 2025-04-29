@@ -30,7 +30,7 @@ export function DoomScroll(props) {
         {props.children(props.fetchResponse.loading && props.loading)}
       </Match>
       <Match when={props.fetchResponse.loading}>
-        loading...
+        {props.loadingElement || "loading..."}
       </Match>
     </Switch>
   );

@@ -11,7 +11,7 @@ import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx"
 import Search from "./pages/Search.jsx";
 import User from "./pages/User.jsx";
 import Artist from "./pages/Artist.jsx";
-import { MangaCharacters, AnimeCharacters } from "./pages/Characters.jsx";
+import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Characters.jsx";
 import { Staff, Character } from "./pages/Entity.jsx";
 
 const root = document.getElementById("root")
@@ -53,12 +53,12 @@ render(
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />
               <Route path="/:id/:name?/characters" matchFilters={idFilter} component={AnimeCharacters} />
-              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={AnimeCharacters} />
+              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={AnimeStaff} />
             </Route>
             <Route path="/manga">
               <Route path="/:id/:name?" matchFilters={idFilter} component={MangaInfo} />
               <Route path="/:id/:name?/characters" matchFilters={idFilter} component={MangaCharacters} />
-              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={MangaCharacters} />
+              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={MangaStaff} />
             </Route>
             <Route path="/user/:name" component={User} />
             <Route path="*404" component={() => <div>Not fould 404</div>} />
