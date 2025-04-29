@@ -11,7 +11,7 @@ import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx"
 import Search from "./pages/Search.jsx";
 import User from "./pages/User.jsx";
 import Artist from "./pages/Artist.jsx";
-import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Characters.jsx";
+import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff, Character } from "./pages/Entity.jsx";
 
 const root = document.getElementById("root")

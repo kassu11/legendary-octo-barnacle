@@ -1,7 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
-import { batch, createEffect, createSignal, Match, onCleanup, onMount, Show } from "solid-js";
-import "./Characters.scss";
+import { batch, createEffect, createSignal, Match, Show } from "solid-js";
+import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../utils/formating";
 import { DoomScroll } from "../components/utils/DoomScroll";
 
