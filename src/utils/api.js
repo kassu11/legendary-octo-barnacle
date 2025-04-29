@@ -10,6 +10,18 @@ const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached",
 // const noCache = cacheBuilder({ type: "no-store" });
 // const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
+const fetchRateLimits = {
+  anilist: {
+    retry: null,
+    limit: 60,
+    remaining: 60,
+    pending: 0,
+    burstLimit: 5,
+    burstTime: 1200,
+    burstBus: [],
+  }
+}
+
 const api = {
   animeThemes: {
     themesByAniListId: fetchOnce(id => {
@@ -253,18 +265,36 @@ class Fetch {
       cache: "default",
     }
 
+    if (this.url === "https://graphql.anilist.co") {
+      const now = performance.now();
+      const times = fetchRateLimits.anilist.burstBus.filter(time => (now - time) < fetchRateLimits.anilist.burstTime);
+      if (times.length >= fetchRateLimits.anilist.burstLimit) {
+        const newTime = times.at(-fetchRateLimits.anilist.burstLimit) + fetchRateLimits.anilist.burstTime + 100;
+        const delta = newTime - now;
+        assert(delta >= 0, "Delta is negative");
+        times.push(now + delta);
+        fetchRateLimits.anilist.burstBus = times;
+        await new Promise(res => setTimeout(res, delta));
+      } else {
+        times.push(now);
+        fetchRateLimits.anilist.burstBus = times;
+      }
+    }
+
     try {
       const response = await fetch(this.url, opt);
       this.status = response.status;
-      // console.log("headers Retry-After:", response.headers.get("Retry-After"));
-      // console.log("headers X-RateLimit-Limit:", response.headers.get("X-RateLimit-Limit"));
-      // console.log("headers X-RateLimit-Remaining:", response.headers.get("X-RateLimit-Remaining"));
-      // console.log("headers X-RateLimit-Reset:", response.headers.get("X-RateLimit-Reset"));
+      if (DEBUG && this.url === "https://graphql.anilist.co" && Number(response.headers.get("X-RateLimit-Remaining")) < 5) {
+        console.log("headers Retry-After:", response.headers.get("Retry-After"));
+        console.log("headers X-RateLimit-Limit:", response.headers.get("X-RateLimit-Limit"));
+        console.log("headers X-RateLimit-Remaining:", response.headers.get("X-RateLimit-Remaining"));
+        console.log("headers X-RateLimit-Reset:", response.headers.get("X-RateLimit-Reset"));
+        }
       // for(const [key, val] of response.headers.entries()) {
       //   console.log(`Header "${key}" value:`, val);
       // }
       if (!response.ok) {
-        if (DEBUG && response.url === "https://graphql.anilist.co/") {
+        if (DEBUG && this.url === "https://graphql.anilist.co") {
           const data = await response.json();
           console.error(...data.errors);
         }
