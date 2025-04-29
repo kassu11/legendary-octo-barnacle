@@ -3,13 +3,14 @@ import api from "../utils/api";
 import { batch, createEffect, createSignal, Match, onCleanup, onMount, Show } from "solid-js";
 import "./Characters.scss";
 import { capitalize, languageFromCountry } from "../utils/formating";
+import { DoomScroll } from "../components/utils/DoomScroll";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();
   const [malCharacters] = api.myAnimeList.animeCharactersById(idMal);
   
   return (
-    <Characters setIdMal={setIdMal} malCharacters={malCharacters} />
+    <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
   );
 }
 
@@ -18,28 +19,48 @@ export function MangaCharacters() {
   const [malCharacters] = api.myAnimeList.mangaCharactersById(idMal);
   
   return (
-    <Characters setIdMal={setIdMal} malCharacters={malCharacters} />
+    <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
   );
 }
 
-function Characters(props) {
+export function AnimeStaff() {
+  const [idMal, setIdMal] = createSignal();
+  const [malStaff] = api.myAnimeList.animeStaffById(idMal);
+  
+  return (
+    <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
+  );
+}
+
+export function MangaStaff() {
+  const [idMal, setIdMal] = createSignal();
+  const [malStaff] = api.myAnimeList.mangaStaffById(idMal);
+  
+  return (
+    <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
+  );
+}
+
+
+function Entities(props) {
   const params = useParams();
   const [languages, setLanguages] = createSignal([]);
   const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
   const [countryOfOrigin, setCountryOfOrigin] = createSignal("JP");
 
+  if (props.type === "CHARACTER") {
+    createEffect(() => {
+      if (languages().length) {
+        const language = languageFromCountry(countryOfOrigin());
+        const countryOfOriginIndex = languages().findIndex(lang => lang.language === language);
+        const defaultLanguage = countryOfOriginIndex !== -1 ? countryOfOriginIndex : languages().findIndex(lang => lang.language === "Japanese");
+        setLanguage(languages()[defaultLanguage === -1 ? 0 : defaultLanguage]);
+      }
+    });
+  }
 
   createEffect(() => {
-    if (languages().length) {
-      const language = languageFromCountry(countryOfOrigin());
-      const countryOfOriginIndex = languages().findIndex(lang => lang.language === language);
-      const defaultLanguage = countryOfOriginIndex !== -1 ? countryOfOriginIndex : languages().findIndex(lang => lang.language === "Japanese");
-      setLanguage(languages()[defaultLanguage === -1 ? 0 : defaultLanguage]);
-    }
-  });
-
-  createEffect(() => {
-    console.log("MalCharacters:", props.malCharacters());
+    console.log("malData:", props.malData());
   });
   
   return (
@@ -54,17 +75,30 @@ function Characters(props) {
           )}</For>
         </select>
       </Show>
-      <ol class="character-container">
-        <CharactersPage 
-          id={params.id} 
-          page={1} 
-          setLanguages={setLanguages} 
-          setCountryOfOrigin={setCountryOfOrigin} 
-          language={language().language} 
-          dubGroup={language().dubGroup} 
-          setIdMal={props.setIdMal} 
-        />
-      </ol>
+      <Switch>
+        <Match when={props.type === "CHARACTER"}>
+          <ol class="character-container">
+            <CharactersPage 
+              id={params.id} 
+              page={1} 
+              setLanguages={setLanguages} 
+              setCountryOfOrigin={setCountryOfOrigin} 
+              language={language().language} 
+              dubGroup={language().dubGroup} 
+              setIdMal={props.setIdMal} 
+            />
+          </ol>
+        </Match>
+        <Match when={props.type === "STAFF"}>
+          <ol class="character-container">
+            <StaffPage 
+              id={params.id} 
+              page={1} 
+              setIdMal={props.setIdMal} 
+            />
+          </ol>
+        </Match>
+      </Switch>
     </div>
   )
 }
@@ -72,31 +106,6 @@ function Characters(props) {
 function CharactersPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
   const [characters] = api.anilist.characters(() => props.id, page);
-  const [loadingAnimation, setLoadingAnimation] = createSignal(false);
-  let loading;
-
-  const options = { rootMargin: "300px" }
-  const callback = (entries) => {
-    if (entries[0].isIntersecting === false) {
-      return;
-    }
-
-    intersectionObserver.unobserve(entries[0].target);
-    setLoadingAnimation(true);
-    setPage(props.page);
-  };
-
-  const intersectionObserver = new IntersectionObserver(callback, options);
-
-  onMount(() => {
-    if (props.page > 1) {
-      intersectionObserver.observe(loading);
-    }
-  });
-
-  onCleanup(() => {
-    intersectionObserver.disconnect();
-  });
 
   createEffect(() => {
     if (props.page !== 1 || characters() == null) {
@@ -104,7 +113,7 @@ function CharactersPage(props) {
     }
 
     const newLanguages = new Map();
-    for(const edge of characters().data.data.Media.characters.edges) {
+    for(const edge of characters().data.characters.edges) {
       for(const actorRole of edge.voiceActorRoles) {
         const key = actorRole.voiceActor.language + actorRole.dubGroup;
         if (newLanguages.has(key) === false) {
@@ -117,46 +126,77 @@ function CharactersPage(props) {
     }
 
     batch(() => {
-      props.setCountryOfOrigin(characters().data.data.Media.countryOfOrigin || "JP");
+      props.setCountryOfOrigin(characters().data.countryOfOrigin || "JP");
       props.setLanguages([...newLanguages.values()]);
-      props.setIdMal(characters().data.data.Media.idMal ?? undefined);
+      props.setIdMal(characters().data.idMal ?? undefined);
     });
   });
 
   return (
-    <Switch fallback={<div ref={loading}>loading...</div>}>
-      <Match when={characters()}>
-        {console.log(characters())}
-        <For each={characters().data.data.Media.characters.edges}>{edge => (
+    <DoomScroll onIntersection={() => setPage(props.page)} fetchResponse={characters} loadingElement={<LoadingCard />} loading={props.loading}>{fetchCooldown => (
+      <>
+        <For each={characters().data.characters.edges}>{edge => (
           <Show when={edge.voiceActorRoles.filter(role => 
             role.voiceActor.language === props.language && role.dubGroup === props.dubGroup
           )}>{voiceActorRoles => (
-              <Show when={voiceActorRoles().length} fallback={<Card edge={edge}></Card>}>
+              <Show when={voiceActorRoles().length} fallback={<CharacterCard edge={edge}></CharacterCard>}>
                 <For each={voiceActorRoles()}>{actorRole => (
-                  <Card edge={edge} actorRole={actorRole} />
+                  <CharacterCard edge={edge} actorRole={actorRole} />
                 )}</For>
               </Show>
             )}</Show>
         )}</For>
-        <Show when={characters().data.data.Media.characters.pageInfo.hasNextPage}>
-          <CharactersPage 
-            id={props.id} 
-            page={props.page + 1} 
-            language={props.language} 
-            dubGroup={props.dubGroup} 
-          />
+        <Show when={characters().data.characters.pageInfo.hasNextPage}>
+          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+            <CharactersPage 
+              id={props.id} 
+              page={props.page + 1} 
+              language={props.language} 
+              dubGroup={props.dubGroup} 
+              loading={characters.loading} 
+            />
+          </Show>
         </Show>
-      </Match>
-      <Match when={loadingAnimation()}>
-        <For each={Array(3)}>{() => (
-          <LoadingCard />
-        )}</For>
-      </Match>
-    </Switch>
+      </>
+    )}</DoomScroll>
   );
 }
 
-function Card(props) {
+function StaffPage(props) {
+  const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
+  const [staff] = api.anilist.allMediaStaff(() => props.id, page);
+
+  if (props.page === 1) {
+    createEffect(() => {
+      if (!staff()) {
+        return;
+      }
+
+      props.setIdMal(staff().data.idMal ?? undefined);
+    });
+  }
+
+  return (
+    <DoomScroll onIntersection={() => setPage(props.page)} fetchResponse={staff} loadingElement={<LoadingCard />} loading={props.loading}>{fetchCooldown => (
+      <>
+        <For each={staff().data.staff.edges}>{edge => (
+          <StaffCard edge={edge}></StaffCard>
+        )}</For>
+        <Show when={staff().data.staff.pageInfo.hasNextPage}>
+          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+            <StaffPage
+              id={props.id}
+              page={props.page + 1}
+              loading={staff.loading}
+             /> 
+          </Show>
+        </Show>
+      </>
+    )}</DoomScroll>
+  );
+}
+
+function CharacterCard(props) {
   return (
     <li class="character">
       <A href={"/ani/character/" + props.edge.node.id} class="character-left">
@@ -184,21 +224,37 @@ function Card(props) {
   );
 }
 
+function StaffCard(props) {
+  return (
+    <li class="character">
+      <A href={"/ani/staff/" + props.edge.node.id} class="character-left">
+        <img class="character-image" src={props.edge.node.image.large} alt="Character" />
+        <div class="content">
+          <p class="line-clamp-3">{props.edge.node.name.userPreferred}</p>
+          <p>{capitalize(props.edge.role)}</p>
+        </div>
+      </A>
+    </li>
+  );
+}
+
 function LoadingCard() {
   return (
-    <li class="character loading">
-      <div class="character-left">
-        <div class="character-image" />
-        <div class="content">
-          <p class="line-clamp" />
+    <For each={Array(3)}>{() => (
+      <li class="character loading">
+        <div class="character-left">
+          <div class="character-image" />
+          <div class="content">
+            <p class="line-clamp" />
+          </div>
         </div>
-      </div>
-      <div class="character-right">
-        <div class="content">
-          <p class="line-clamp" />
+        <div class="character-right">
+          <div class="content">
+            <p class="line-clamp" />
+          </div>
+          <div class="character-image" />
         </div>
-        <div class="character-image" />
-      </div>
-    </li>
+      </li>
+    )}</For>
   );
 }

@@ -316,6 +316,7 @@ export const anilistCharacters = format`query media($id: Int, $page: Int) {
 export const anilistStaff = format`query media($id: Int, $page: Int) {
   Media(id: $id) {
     id
+    idMal
     staff(page: $page, sort: [RELEVANCE, ID]) {
       pageInfo {
         total
