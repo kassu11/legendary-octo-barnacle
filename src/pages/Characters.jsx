@@ -64,7 +64,7 @@ function Entities(props) {
   });
   
   return (
-    <div class="characters-page">
+    <div class="entities-page">
       <Show when={languages().length}>
         <select onChange={e => setLanguage(languages()[e.target.value])} value={languages().findIndex(v => v === language())}>
           <For each={languages()}>{(lang, i) => (
@@ -77,7 +77,7 @@ function Entities(props) {
       </Show>
       <Switch>
         <Match when={props.type === "CHARACTER"}>
-          <ol class="character-container">
+          <ol class="entities-page-grid">
             <CharactersPage 
               id={params.id} 
               page={1} 
@@ -90,7 +90,7 @@ function Entities(props) {
           </ol>
         </Match>
         <Match when={props.type === "STAFF"}>
-          <ol class="character-container">
+          <ol class="entities-page-grid">
             <StaffPage 
               id={params.id} 
               page={1} 
@@ -198,16 +198,16 @@ function StaffPage(props) {
 
 function CharacterCard(props) {
   return (
-    <li class="character">
-      <A href={"/ani/character/" + props.edge.node.id} class="character-left">
-        <img class="character-image" src={props.edge.node.image.large} alt="Character" />
+    <li class="entities-page-entity">
+      <A href={"/ani/character/" + props.edge.node.id} class="entity-left">
+        <img class="entity-image" src={props.edge.node.image.large} alt="Character" />
         <div class="content">
           <p class="line-clamp-3">{props.edge.node.name.userPreferred}</p>
           <p>{capitalize(props.edge.role)}</p>
         </div>
       </A>
       <Show when={props.actorRole}>
-        <A href={"/ani/staff/" + props.actorRole.voiceActor.id} class="character-right">
+        <A href={"/ani/staff/" + props.actorRole.voiceActor.id} class="entity-right">
           <div class="content">
             <Show when={props.actorRole.roleNotes} fallback={
               <p class="line-clamp-3">{props.actorRole.voiceActor.name.userPreferred}</p>
@@ -217,7 +217,7 @@ function CharacterCard(props) {
             </Show>
             <p class="voice-actor-language">{props.actorRole.voiceActor.language}</p>
           </div>
-          <img class="character-image" src={props.actorRole.voiceActor.image.large} alt="Voice actor" />
+          <img class="entity-image" src={props.actorRole.voiceActor.image.large} alt="Voice actor" />
         </A>
       </Show>
     </li>
@@ -226,9 +226,9 @@ function CharacterCard(props) {
 
 function StaffCard(props) {
   return (
-    <li class="character">
-      <A href={"/ani/staff/" + props.edge.node.id} class="character-left">
-        <img class="character-image" src={props.edge.node.image.large} alt="Character" />
+    <li class="entities-page-entity">
+      <A href={"/ani/staff/" + props.edge.node.id} class="entity-left">
+        <img class="entity-image" src={props.edge.node.image.large} alt="Staff" />
         <div class="content">
           <p class="line-clamp-3">{props.edge.node.name.userPreferred}</p>
           <p>{capitalize(props.edge.role)}</p>
@@ -241,18 +241,18 @@ function StaffCard(props) {
 function LoadingCard() {
   return (
     <For each={Array(3)}>{() => (
-      <li class="character loading">
-        <div class="character-left">
-          <div class="character-image" />
+      <li class="entities-page-entity loading">
+        <div class="entity-left">
+          <div class="entity-image" />
           <div class="content">
             <p class="line-clamp" />
           </div>
         </div>
-        <div class="character-right">
+        <div class="entity-right">
           <div class="content">
             <p class="line-clamp" />
           </div>
-          <div class="character-image" />
+          <div class="entity-image" />
         </div>
       </li>
     )}</For>
