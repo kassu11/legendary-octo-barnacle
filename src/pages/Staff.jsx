@@ -8,6 +8,7 @@ import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/format
 import { useAuthentication } from "../context/AuthenticationContext";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
+import { DoomScroll } from "../components/utils/DoomScroll";
 
 export function Character() {
   const params = useParams();
@@ -246,7 +247,6 @@ function CharacterMediaPage(props) {
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
   const [staffCharacters] = api.anilist.characterMediaById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
-  let intersection;
 
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
@@ -263,57 +263,30 @@ function CharacterMediaPage(props) {
     }));
   }
 
-  onMount(() => {
-    if (props.nestLevel > 1) {
-      intersectionObserver.observe(intersection);
-    }
-  });
-
-  onCleanup(() => {
-    intersectionObserver.disconnect();
-  });
-
-  const options = { rootMargin: "800px" }
-  const callback = (entries) => {
-    if (entries[0].isIntersecting === false) {
-      return;
-    }
-
-    intersectionObserver.unobserve(entries[0].target);
-    setVariables(props.variables);
-  };
-
-  const intersectionObserver = new IntersectionObserver(callback, options);
-
   return (
-    <Show when={staffCharacters() || props.nestLevel > 1}>
-      <Switch fallback={<div ref={intersection}>Intersection</div>}>
-        <Match when={staffCharacters()}>
-          <CharacterCards2 language={props.language} edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-          <Show when={staffCharacters().data.pageInfo.hasNextPage}>
-            <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
-              <Show when={props.variables}>
-                {vars => (
-                  <Show when={(staffCharacters.loading && props.loading) === false} fallback="Fetch cooldown">
-                    <CharacterMediaPage
-                      variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} 
-                      nestLevel={props.nestLevel + 1} 
-                      showYears={props.showYears} 
-                      language={props.language} 
-                      lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                      loading={staffCharacters.loading} 
-                    /> 
-                  </Show>
-                )}
-              </Show>
+    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffCharacters} loading={props.loading}>{fetchCooldown => (
+      <>
+        <CharacterAndActorCards language={props.language} edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
+        <Show when={staffCharacters().data.pageInfo.hasNextPage}>
+          <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
+            <Show when={props.variables}>
+              {vars => (
+                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+                  <CharacterMediaPage
+                    variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} 
+                    nestLevel={props.nestLevel + 1} 
+                    showYears={props.showYears} 
+                    language={props.language} 
+                    lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
+                    loading={staffCharacters.loading} 
+                  /> 
+                </Show>
+              )}
             </Show>
           </Show>
-        </Match>
-        <Match when={staffCharacters.loading}>
-          loading...
-        </Match>
-      </Switch>
-    </Show>
+        </Show>
+      </>
+    )}</DoomScroll>
   );
 }
 
@@ -322,7 +295,6 @@ function StaffCharacterPage(props) {
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
   const [staffCharacters] = api.anilist.staffCharactersById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
-  let intersection;
 
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
@@ -330,56 +302,29 @@ function StaffCharacterPage(props) {
     }));
   }
 
-  onMount(() => {
-    if (props.nestLevel > 1) {
-      intersectionObserver.observe(intersection);
-    }
-  });
-
-  onCleanup(() => {
-    intersectionObserver.disconnect();
-  });
-
-  const options = { rootMargin: "800px" }
-  const callback = (entries) => {
-    if (entries[0].isIntersecting === false) {
-      return;
-    }
-
-    intersectionObserver.unobserve(entries[0].target);
-    setVariables(props.variables);
-  };
-
-  const intersectionObserver = new IntersectionObserver(callback, options);
-
   return (
-    <Show when={staffCharacters() || props.nestLevel > 1}>
-      <Switch fallback={<div ref={intersection}>Intersection</div>}>
-        <Match when={staffCharacters()}>
-          <CharacterCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-          <Show when={staffCharacters().data.pageInfo.hasNextPage}>
-            <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
-              <Show when={props.variables}>
-                {vars => (
-                  <Show when={(staffCharacters.loading && props.loading) === false} fallback="Fetch cooldown">
-                    <StaffCharacterPage
-                      variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} 
-                      nestLevel={props.nestLevel + 1} 
-                      showYears={props.showYears} 
-                      lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                      loading={staffCharacters.loading} 
-                    /> 
-                  </Show>
-                )}
-              </Show>
+    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffCharacters} loading={props.loading}>{fetchCooldown => (
+      <>
+        <CharacterAndMediaCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
+        <Show when={staffCharacters().data.pageInfo.hasNextPage}>
+          <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
+            <Show when={props.variables}>
+              {vars => (
+                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+                  <StaffCharacterPage
+                    variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} 
+                    nestLevel={props.nestLevel + 1} 
+                    showYears={props.showYears} 
+                    lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
+                    loading={staffCharacters.loading} 
+                  /> 
+                </Show>
+              )}
             </Show>
           </Show>
-        </Match>
-        <Match when={staffCharacters.loading}>
-          loading...
-        </Match>
-      </Switch>
-    </Show>
+        </Show>
+      </>
+    )}</DoomScroll>
   );
 }
 
@@ -391,19 +336,12 @@ function StaffMediaRolePage(props) {
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
   const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
-  let intersection;
 
   if (props.nestLevel === 1) {
     createEffect(on(staffMedia, media => {
       props.setVisible(media?.data.edges.length > 0);
     }));
   }
-
-  onMount(() => {
-    if (props.nestLevel > 1) {
-      intersectionObserver.observe(intersection);
-    }
-  });
 
   createEffect(on(staffMedia, media => {
     if (!props.lastMediaId || !media?.data.edges.length) {
@@ -430,52 +368,55 @@ function StaffMediaRolePage(props) {
     });
   }));
 
-  onCleanup(() => {
-    intersectionObserver.disconnect();
-  });
-
-  const options = { rootMargin: "800px" }
-  const callback = (entries) => {
-    if (entries[0].isIntersecting === false) {
-      return;
-    }
-
-    intersectionObserver.unobserve(entries[0].target);
-    setVariables(props.variables);
-  };
-
-  const intersectionObserver = new IntersectionObserver(callback, options);
-
   return (
-    <Show when={staffMedia() || props.nestLevel > 1}>
-      <Switch fallback={<div ref={intersection}>Intersection</div>}>
-        <Match when={staffMedia()}>
-          <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-          <Show when={staffMedia().data.pageInfo.hasNextPage}>
-            <Show when={props.variables} keyed={props.nestLevel === 1}>
-              <Show when={(staffMedia.loading && props.loading) === false} fallback="Fetch cooldown">
-                <StaffMediaRolePage
-                  variables={{ ...props.variables, staffPage: (props.variables?.staffPage || 1) + 1 }} 
-                  nestLevel={props.nestLevel + 1} 
-                  showYears={props.showYears}
-                  mutate={mutate} 
-                  type={props.type} 
-                  lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                  lastMediaId={staffMedia().data.edges.at(-1)?.node.id}
-                  loading={staffMedia.loading} 
-                /> 
-              </Show>
+    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffMedia} loading={props.loading}>{fetchCooldown => (
+      <>
+        <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
+        <Show when={staffMedia().data.pageInfo.hasNextPage}>
+          <Show when={props.variables} keyed={props.nestLevel === 1}>
+            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+              <StaffMediaRolePage
+                variables={{ ...props.variables, staffPage: (props.variables?.staffPage || 1) + 1 }} 
+                nestLevel={props.nestLevel + 1} 
+                showYears={props.showYears}
+                mutate={mutate} 
+                type={props.type} 
+                lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"}
+                lastMediaId={staffMedia().data.edges.at(-1)?.node.id}
+                loading={staffMedia.loading} 
+              /> 
             </Show>
           </Show>
+        </Show>
+      </>
+    )}</DoomScroll>
+  );
+}
+
+function YearHeader(props) {
+  return (
+    <Show when={props.showYears()}>
+      <Switch>
+        <Match when={props.index() === 0}>
+          <Show when={props.lastYearGroup !== (props.edge.node.startDate?.year || "TBA")}>
+            <li class="staff-page-character-year-header">
+              <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
+            </li>
+          </Show>
         </Match>
-        <Match when={staffMedia.loading}>
-          loading...
+        <Match when={true}>
+          <Show when={props.edges[props.index() - 1].node.startDate?.year !== props.edge.node.startDate?.year}>
+            <li class="staff-page-character-year-header">
+              <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
+            </li>
+          </Show>
         </Match>
       </Switch>
     </Show>
   );
 }
-function CharacterCards2(props) {
+
+function CharacterAndActorCards(props) {
   assert(props.showYears, "showYears signal is missing");
   assert(props.language, "language signal is missing");
 
@@ -524,34 +465,15 @@ function CharacterCards2(props) {
   );
 }
 
-function YearHeader(props) {
-  return (
-    <Show when={props.showYears()}>
-      <Switch>
-        <Match when={props.index() === 0}>
-          <Show when={props.lastYearGroup !== (props.edge.node.startDate?.year || "TBA")}>
-            <li class="staff-page-character-year-header">
-              <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
-            </li>
-          </Show>
-        </Match>
-        <Match when={true}>
-          <Show when={props.edges[props.index() - 1].node.startDate?.year !== props.edge.node.startDate?.year}>
-            <li class="staff-page-character-year-header">
-              <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
-            </li>
-          </Show>
-        </Match>
-      </Switch>
-    </Show>
-  );
-}
-
 function MediaCards(props) {
   assert(props.showYears, "showYears signal is missing");
   const combine = (acc, edge) => {
-    if (acc.at(-1)?.node.id !== edge.node.id) {
+    const last = acc.at(-1);
+    if (last?.node.id !== edge.node.id) {
+      edge.staffRoles = [edge.staffRole];
       acc.push(edge);
+    } else if(last?.staffRoles) {
+      last.staffRoles.push(edge.staffRole);
     }
     return acc;
   };
@@ -569,32 +491,27 @@ function MediaCards(props) {
               </Show>
               {edge.node.title.userPreferred}
             </p>
-            <ol>
-              <StaffRoles index={i()} mediaId={edge.node.id} />
-            </ol>
+            <Show when={edge.staffRoles}>
+              <ol>
+                <For each={edge.staffRoles}>{role => (
+                  <li>{role}</li>
+                )}</For>
+              </ol>
+            </Show>
           </A>
         </li>
       </>
     )}</For>
   );
-
-  function StaffRoles(roleProps) {
-    return (
-      <Show when={roleProps.mediaId === props.edges[roleProps.index]?.node.id}>
-        <li>{props.edges[roleProps.index].staffRole}</li>
-        <StaffRoles index={roleProps.index + 1} mediaId={roleProps.mediaId} />
-      </Show>
-    );
-  }
 }
 
-function CharacterCards(props) {
+function CharacterAndMediaCards(props) {
   assert(props.showYears, "showYears signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
       <For each={edge.characters}>{character => (
-        <>
+        <Show when={character}>
           <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
           <li>
             <div class="staff-page-character-cover">
@@ -618,7 +535,7 @@ function CharacterCards(props) {
               </p>
             </A>
           </li>
-        </>
+        </Show>
       )}</For>
     )}</For>
   );
