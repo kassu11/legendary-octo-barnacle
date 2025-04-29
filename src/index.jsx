@@ -10,10 +10,9 @@ import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Search from "./pages/Search.jsx";
 import User from "./pages/User.jsx";
-import Character from "./pages/Character.jsx";
 import Artist from "./pages/Artist.jsx";
 import { MangaCharacters, AnimeCharacters } from "./pages/Characters.jsx";
-import Staff from "./pages/Staff.jsx";
+import { Staff, Character } from "./pages/Staff.jsx";
 
 const root = document.getElementById("root")
 
