@@ -63,6 +63,13 @@ const api = {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.profileActivity, { id });
     }),
+    mediaListByUserId: fetchOnce((id, token) => {
+      assert(id, "Id is missing");
+      return Fetch.authAnilist(token, querys.profileActivity, {
+        "userId": id,
+        "type": "ANIME"
+      });
+    }),
     characterInfoById: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, { id }, response => response.data.Character);
     }),
