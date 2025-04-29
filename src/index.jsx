@@ -9,7 +9,7 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Search from "./pages/Search.jsx";
-import User from "./pages/User.jsx";
+import { User, Overview } from "./pages/User.jsx";
 import Artist from "./pages/Artist.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff, Character } from "./pages/Entity.jsx";
@@ -60,7 +60,11 @@ render(
               <Route path="/:id/:name?/characters" matchFilters={idFilter} component={MangaCharacters} />
               <Route path="/:id/:name?/staff" matchFilters={idFilter} component={MangaStaff} />
             </Route>
-            <Route path="/user/:name" component={User} />
+            <Route path="/user/:name" component={User}>
+              <Route path="/" component={Overview} />
+              <Route path="/anime" component={MangaInfo} />
+            </Route>
+            {/* <Route path="/user/:name" component={User} /> */}
             <Route path="*404" component={() => <div>Not fould 404</div>} />
           </Router>
         </EditMediaEntriesProvider>
