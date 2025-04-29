@@ -237,6 +237,8 @@ export const myAnimeListAnimeById = id => `https://api.jikan.moe/v4/anime/${id}/
 export const myAnimeListMangaById = id => `https://api.jikan.moe/v4/manga/${id}/full`;
 export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/anime/${id}/characters`;
 export const myAnimeListMangaCharactersById = id => `https://api.jikan.moe/v4/manga/${id}/characters`;
+export const myAnimeListAnimeStaffById = id => `https://api.jikan.moe/v4/anime/${id}/staff`;
+export const myAnimeListMangaStaffById = id => `https://api.jikan.moe/v4/manga/${id}/staff`;
 
 export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
@@ -297,6 +299,34 @@ export const anilistCharacters = format`query media($id: Int, $page: Int) {
             }
           }
         }
+        node {
+          id
+          name {
+            userPreferred
+          }
+          image {
+            large
+          }
+        }
+      }
+    }
+  }
+}`;
+
+export const anilistStaff = format`query media($id: Int, $page: Int) {
+  Media(id: $id) {
+    id
+    staff(page: $page, sort: [RELEVANCE, ID]) {
+      pageInfo {
+        total
+        perPage
+        currentPage
+        lastPage
+        hasNextPage
+      }
+      edges {
+        id
+        role
         node {
           id
           name {
