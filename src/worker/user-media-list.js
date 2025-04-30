@@ -26,6 +26,9 @@ function modifyMediaListData(listData, type, filtering) {
     countryOfOrigin: filtering.countryOfOrigin,
     isAdult: filtering.isAdult,
     year: filtering.year,
+    private: filtering.private,
+    notes: filtering.notes,
+    rewatched: filtering.rewatched,
   };
 
   if (filtering.search) {
@@ -103,11 +106,18 @@ function filter(entry, filterObject) {
   if (filterObject.genre && entry.media.genres.every(genre => genre !== filterObject.genre)) {
     return false;
   }
+  if (filterObject.private && !entry.private) {
+    return false;
+  }
+  if (filterObject.notes && !entry.notes) {
+    return false;
+  }
+  if (filterObject.rewatched && !(entry.repeat > 0)) {
+    return false;
+  }
 
   return true;
 }
-
-
 
 function error(err) {
   console.warn(err);
