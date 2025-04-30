@@ -252,6 +252,7 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
     mediaList(mediaId: $id, isFollowing: true, sort: UPDATED_TIME_DESC) {
       id
       status
+      repeat
       score
       progress
       user {

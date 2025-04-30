@@ -2,7 +2,7 @@ import { Switch, Match, Show } from "solid-js";
 
 function Status(props) {
   return (
-    <p>
+    <p class="friend-list-status">
       <Switch fallback={props.friend.status}>
         <Match when={props.friend.status === "COMPLETED"}>Completed</Match>
         <Match when={props.friend.status === "CURRENT"}>
