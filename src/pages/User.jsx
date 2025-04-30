@@ -289,6 +289,7 @@ export function AnimeList() {
   const [privateFilter, setPrivateFilter] = createSignal(false);
   const [notesFilter, setNotesFilter] = createSignal(false);
   const [rewatchedFilter, setRewatchedFilter] = createSignal(false);
+  const [sort, setSort] = createSignal("score");
 
   createEffect(() => {
     if (window.Worker && mediaList()) {
@@ -306,7 +307,7 @@ export function AnimeList() {
         private: privateFilter(),
         notes: notesFilter(),
         rewatched: rewatchedFilter(),
-        sort: "", 
+        sort: sort(),
         type: "ANIME",
       });
 
@@ -435,8 +436,16 @@ export function AnimeList() {
         <label htmlFor="notes"> Notes</label>
         <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setRewatchedFilter(e.target.checked)} />
         <label htmlFor="rewatched"> Rewatched</label>
-        <select name="sort">
+        <select name="sort" value={sort()} onChange={e => setSort(e.target.value)}>
           <option value="score">Score</option>
+          <option value="title">Title</option>
+          <option value="progress">Progress</option>
+          <option value="updatedAt">Last Updated</option>
+          <option value="startedAt">Start Date</option>
+          <option value="completedAt">Completed Date</option>
+          <option value="releaseDate">Release Date</option>
+          <option value="averageScore">Average Score</option>
+          <option value="popularity">Popularity</option>
         </select>
         <button>clear</button>
       </div>

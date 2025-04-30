@@ -18,24 +18,24 @@ onmessage = ({ data: { cacheKey, type, ...filtering } }) => {
   };
 }
 
-function modifyMediaListData(listData, type, filtering) {
+function modifyMediaListData(listData, type, options) {
   const filterObject = {
-    format: filtering.format,
-    status: filtering.status,
-    genre: filtering.genre,
-    countryOfOrigin: filtering.countryOfOrigin,
-    isAdult: filtering.isAdult,
-    year: filtering.year,
-    private: filtering.private,
-    notes: filtering.notes,
-    rewatched: filtering.rewatched,
+    format: options.format,
+    status: options.status,
+    genre: options.genre,
+    countryOfOrigin: options.countryOfOrigin,
+    isAdult: options.isAdult,
+    year: options.year,
+    private: options.private,
+    notes: options.notes,
+    rewatched: options.rewatched,
   };
 
-  if (filtering.search) {
-    if (filtering.search.match(/\W/)) {
-      filterObject.searchRegex = new RegExp(filtering.search, "i");
+  if (options.search) {
+    if (options.search.match(/\W/)) {
+      filterObject.searchRegex = new RegExp(options.search, "i");
     } else {
-      filterObject.searchRegex = new RegExp(filtering.search.split("").join("\\W?"), "i");
+      filterObject.searchRegex = new RegExp(options.search.split("").join("\\W?"), "i");
     }
   }
 
@@ -55,14 +55,37 @@ function modifyMediaListData(listData, type, filtering) {
     list.entries.length = tail;
   });
   listData.data.total = mediaSet.size;
-
+  const sortFunction = (() => {
+    switch (options.sort) {
+      case "score":
+        return (a, b) => (b.score || 0) - (a.score || 0);
+      case "title":
+        return (a, b) => a.media.title.userPreferred.localeCompare(b.media.title.userPreferred);
+      case "progress":
+        return (a, b) => (b.progress || 0) - (a.progress || 0);
+      case "updatedAt":
+        return (a, b) => (a.updatedAt || 0) > (b.updatedAt || 0) ? -1 : 1;
+      case "startedAt":
+        return (a, b) => (b.startedAt?.year || 0) - (a.startedAt?.year || 0) || (b.startedAt?.month || 0) - (a.startedAt?.month || 0) || (b.startedAt?.day || 0) - (a.startedAt?.day || 0);
+      case "completedAt":
+        return (a, b) => (b.completedAt?.year || 0) - (a.completedAt?.year || 0) || (b.completedAt?.month || 0) - (a.completedAt?.month || 0) || (b.completedAt?.day || 0) - (a.completedAt?.day || 0);
+      case "releaseDate":
+        return (a, b) => (b.media.startDate?.year || 0) - (a.media.startDate?.year || 0) || (b.media.startDate?.month || 0) - (a.media.startDate?.month || 0) || (b.media.startDate?.day || 0) - (a.media.startDate?.day || 0);
+      case "averageScore":
+        return (a, b) => (b.media.averageScore || 0) - (a.media.averageScore || 0);
+      case "popularity":
+        return (a, b) => (b.media.popularity || 0) - (a.media.popularity || 0);
+      default:
+        console.error("No sort given");
+    }
+  })();
   listData.data.lists.forEach(list => {
-    list.entries.sort((a, b) => (b.score - a.score) || (a.media.title.userPreferred > b.media.title.userPreferred ? 1 : -1))
+    list.entries.sort(sortFunction);
   });
+
   const sectionOrder = listData.data.user.mediaListOptions[type === "ANIME" ? "animeList" : "mangaList"].sectionOrder;
   const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key + 1])));
   listData.data.lists.sort((a, b) => sectionSortOrder[a.name] - sectionSortOrder[b.name]);
-
 
   const cacheReq = IndexedDB.user();
   cacheReq.onerror = error;
