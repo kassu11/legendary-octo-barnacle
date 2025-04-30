@@ -57,7 +57,7 @@ const api = {
     }),
     userByName: fetchOnce((name, token) => {
       assert(name, "Name is missing");
-      return Fetch.authAnilist(token, querys.getUserByName, { name });
+      return Fetch.authAnilist(token, querys.getUserByName, { name }, res => res.data.User);
     }),
     activityByUserId: fetchOnce((id, token) => {
       assert(id, "Id is missing");
@@ -65,10 +65,10 @@ const api = {
     }),
     mediaListByUserId: fetchOnce((id, token) => {
       assert(id, "Id is missing");
-      return Fetch.authAnilist(token, querys.profileActivity, {
+      return Fetch.authAnilist(token, querys.anilistUserMediaList, {
         "userId": id,
         "type": "ANIME"
-      });
+      }, res => res.data.MediaListCollection);
     }),
     characterInfoById: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, { id }, response => response.data.Character);

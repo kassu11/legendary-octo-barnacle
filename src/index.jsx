@@ -9,7 +9,7 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Search from "./pages/Search.jsx";
-import { User, Overview } from "./pages/User.jsx";
+import { User, Overview, AnimeList } from "./pages/User.jsx";
 import Artist from "./pages/Artist.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff, Character } from "./pages/Entity.jsx";
@@ -62,7 +62,7 @@ render(
             </Route>
             <Route path="/user/:name" component={User}>
               <Route path="/" component={Overview} />
-              <Route path="/anime" component={MangaInfo} />
+              <Route path="/anime" component={AnimeList} />
             </Route>
             {/* <Route path="/user/:name" component={User} /> */}
             <Route path="*404" component={() => <div>Not fould 404</div>} />

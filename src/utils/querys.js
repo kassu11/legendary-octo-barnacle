@@ -304,8 +304,6 @@ export const anilistUserMediaList = format`query ($userId: Int, $userName: Strin
   }
 }
 fragment mediaListEntry on MediaList {
-  id
-  mediaId
   status
   score
   progress
@@ -330,6 +328,8 @@ fragment mediaListEntry on MediaList {
   }
   media {
     id
+    idMal
+    synonyms
     title {
       userPreferred
       romaji

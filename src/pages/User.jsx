@@ -1,11 +1,12 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../utils/api.js";
-import { createContext, For, Show, useContext } from "solid-js";
+import api, { IndexedDB } from "../utils/api.js";
+import { createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
 import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { ActivityCard } from "../components/Activity.jsx";
+import UserMediaListWorker from "../worker/user-media-list.js?worker";
 
 const UserContext = createContext();
 
@@ -15,7 +16,7 @@ export function User(props) {
   const [userData] = api.anilist.userByName(() => params.name, accessToken);
 
   return (
-    <UserContext.Provider value={{ user: () => userData().data.data.User }}>
+    <UserContext.Provider value={{ user: () => userData().data}}>
       <Switch>
         <Match when={userData()?.data}>
           <Content>
@@ -76,7 +77,7 @@ export function Overview() {
   const [activity, { mutateCache: mutateActivityCache }] = api.anilist.activityByUserId(() => user().id || undefined, accessToken);
 
   return (
-    <div class="body">
+    <div class="user-profile-overview-body">
       <div class="user-info-container">
         <Switch>
           <Match when={user().donatorTier === 1}>
@@ -263,5 +264,64 @@ function ActivityHistory(props) {
         </ol>
       </div>
     </Show>
+  );
+}
+
+
+
+
+export function AnimeList() {
+  const { user } = useUser();
+  const { accessToken } = useAuthentication();
+  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, accessToken);
+  const [listData, setListData] = createSignal({});
+  let worker;
+  
+  const [search, setSearch] = createSignal("");
+
+  createEffect(() => {
+    if (window.Worker && mediaList()) {
+      worker = worker instanceof Worker ? worker : new UserMediaListWorker();
+
+      worker.postMessage({ 
+        cacheKey: mediaList().cacheKey, 
+        search: search(),
+        sort: "", 
+      });
+
+      worker.onmessage = message => {
+        const cacheReq = IndexedDB.user();
+        cacheReq.onsuccess = evt => {
+          const db = evt.target.result;
+          const store = IndexedDB.store(db, "data", "readonly");
+          const getReq = store.get("media_list");
+          getReq.onsuccess = (evt) => {
+            console.log("worker data:", evt.target.result);
+            setListData(evt.target.result || {});
+          }
+        }
+      }
+    }
+  });
+
+  return (
+    <div class="user-profile-media-list-body">
+      <input type="text" onInput={e => setSearch(e.target.value)} value={search()} />
+      <Show when={listData()?.data}>
+        <For each={listData().data.lists}>{list => (
+          <>
+            <h2>{list.name}</h2>
+            <ol>
+              <For each={list.entries}>{entry => (
+                <li>
+                  <img src={entry.media.coverImage.large} loading="lazy" alt="Cover" />
+                </li>
+              )}</For>
+            </ol>
+          </>
+        )}
+        </For>
+      </Show>
+    </div>
   );
 }
