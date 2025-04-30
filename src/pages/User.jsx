@@ -1,4 +1,4 @@
-import { A, useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
 import { batch, createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
 import "./User.scss";
@@ -7,6 +7,7 @@ import { assert } from "../utils/assert.js";
 import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
+import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 
 const UserContext = createContext();
 
@@ -273,8 +274,10 @@ function ActivityHistory(props) {
 export function AnimeList() {
   const { user } = useUser();
   const params = useParams();
-  const { accessToken } = useAuthentication();
+  const { accessToken, authUserData } = useAuthentication();
+  const { openEditor } = useEditMediaEntries();
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, accessToken);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   const navigate = useNavigate();
   let worker;
@@ -295,7 +298,7 @@ export function AnimeList() {
     if (window.Worker && mediaList()) {
       worker = worker instanceof Worker ? worker : new UserMediaListWorker();
 
-      worker.postMessage({ 
+      const postObject = { 
         cacheKey: mediaList().cacheKey, 
         search: search(),
         format: format(),
@@ -309,7 +312,9 @@ export function AnimeList() {
         rewatched: rewatchedFilter(),
         sort: sort(),
         type: "ANIME",
-      });
+      };
+
+      worker.postMessage(postObject);
 
       worker.onmessage = message => {
         if (message.data === "success") {
@@ -319,7 +324,6 @@ export function AnimeList() {
             const store = IndexedDB.store(db, "data", "readonly");
             const getReq = store.get("media_list");
             getReq.onsuccess = (evt) => {
-              console.log("worker data:", evt.target.result);
               setListData(evt.target.result || {});
             }
           }
@@ -333,7 +337,7 @@ export function AnimeList() {
   return (
     <div class="user-profile-media-list-body">
       <div class="user-profile-media-list-search">
-        <input type="text" onInput={e => setSearch(e.target.value)} value={search()} />
+        <input type="text" placeholder="Search" onInput={e => setSearch(e.target.value)} value={search()} />
         <Show when={listData()?.data}>
           <ol>
             <li>
@@ -426,16 +430,23 @@ export function AnimeList() {
           <option value="false">R-17+</option>
           <option value="true">R-18</option>
         </select>
-        <label htmlFor="year">Year</label>
-        <input type="number" name="year" id="year" value={year()} onInput={e => {
+        <input type="number" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => {
           setYear(e.target.value);
         }} />
-        <input type="checkbox" name="private" id="private" checked={privateFilter()} onChange={e => setPrivateFilter(e.target.checked)} />
-        <label htmlFor="private"> Private</label>
-        <input type="checkbox" name="notes" id="notes" checked={notesFilter()} onChange={e => setNotesFilter(e.target.checked)} />
-        <label htmlFor="notes"> Notes</label>
-        <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setRewatchedFilter(e.target.checked)} />
-        <label htmlFor="rewatched"> Rewatched</label>
+        <Show when={authUserData().data.id === user().id}>
+          <label htmlFor="private"> 
+            <input type="checkbox" name="private" id="private" checked={privateFilter()} onChange={e => setPrivateFilter(e.target.checked)} />
+            {" "}Private
+          </label>
+        </Show>
+        <label htmlFor="notes">
+          <input type="checkbox" name="notes" id="notes" checked={notesFilter()} onChange={e => setNotesFilter(e.target.checked)} />
+          {" "}Notes
+        </label>
+        <label htmlFor="rewatched">
+          <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setRewatchedFilter(e.target.checked)} />
+          {" "}Rewatched
+        </label>
         <select name="sort" value={sort()} onChange={e => setSort(e.target.value)}>
           <option value="score">Score</option>
           <option value="title">Title</option>
@@ -465,13 +476,56 @@ export function AnimeList() {
       </div>
       <div class="user-profile-media-list-container">
         <Show when={listData()?.data}>
+          {console.log(listData().data.lists[2].entries[0])}
           <For each={listData().data.lists}>{list => (
             <Show when={list.entries.length && (!params.list || params.list === list.name)}>
               <h2>{list.name}</h2>
               <ol class="user-profile-media-list-grid">
                 <For each={list.entries}>{entry => (
-                  <li>
-                    <img src={entry.media.coverImage.large} loading="lazy" alt="Cover" />
+                  <li class="horizontal-search-card">
+                    <A href={"/" + entry.media.type.toLowerCase() +  "/" + entry.media.id + "/" + formatTitleToUrl(entry.media.title.userPreferred)}>
+                      <div class="container">
+                        <img src={entry.media.coverImage.large} class="cover" alt="Cover." />
+                        <div class="user-media-card-header">
+                          <Show when={entry.repeat}>
+                            <div class="user-profile-media-repeat" label={"Rewatched " + entry.repeat + " times"}>
+                              {entry.repeat}
+                              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
+                            </div>
+                          </Show>
+                          <Show when={entry.notes}>
+                            <div class="user-profile-media-notes" label={entry.notes}>
+                              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 32C114.6 32 0 125.1 0 240c0 49.6 21.4 95 57 130.7C44.5 421.1 2.7 466 2.2 466.5c-2.2 2.3-2.8 5.7-1.5 8.7S4.8 480 8 480c66.3 0 116-31.8 140.6-51.4 32.7 12.3 69 19.4 107.4 19.4 141.4 0 256-93.1 256-208S397.4 32 256 32z"></path></svg>
+                            </div>
+                          </Show>
+                        </div>
+                        <div class="user-media-card-footer">
+                          <p>
+                            {entry.media.title.userPreferred}
+                          </p>
+                          {entry.progress}
+                          <Show when={entry.progress < entry.media.episodes}>
+                            /{entry.media.episodes}
+                          </Show>
+                          <Show when={entry.progress < entry.media.chapters}>
+                            /{entry.media.chapters}
+                          </Show>
+                          <span>{entry.score || ""}</span>
+                        </div>
+                        <div class="search-card-quick-action">
+                          <ul class="search-card-quick-action-items">
+                            <li class="item" label="Edit media">
+                              <button onClick={e => {
+                                e.preventDefault();
+                                openEditor(entry.media);
+                              }}>
+                                <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z"></path></svg>
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </A> 
                   </li>
                 )}</For>
               </ol>

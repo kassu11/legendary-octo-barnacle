@@ -235,6 +235,9 @@
   }
 
   .user-profile-media-list-search {
+    background-color: lightsalmon;
+    display: grid;
+    place-content: start;
   }
 
   .user-profile-media-list-container {
@@ -251,7 +254,64 @@
       aspect-ratio: 5.5/8;
       object-fit: cover;
     }
+    .search-card-quick-action {
+      top: 0px;
+      bottom: unset;
+    }
 
+    .search-card-quick-action-items button {
+      width: 3rem;
+      height: 3rem;
+      border-radius: .25rem;
+      padding: .75rem;
+    }
+  }
+
+  .user-media-card-header {
+    position: absolute;
+    top: 0px;
+    padding: .5rem;
+    display: flex;
+    gap: .5rem;
+
+    > div {
+      background: black;
+      display: flex;
+      gap: .5rem;
+      padding: .25rem;
+      border-radius: .25rem;
+      align-items: center;
+
+      &:hover::before {
+        left: -50%;
+        bottom: 100%;
+        max-width: 20em;
+        position: absolute;
+        content: attr(label);
+        background-color: black;
+        width: max-content;
+        font-weight: 600;
+        padding: .5em;
+        border-radius: .25em;
+        z-index: 1;
+      }
+    }
+
+    svg {
+      height: 1.25rem;
+    }
+  }
+
+  .user-media-card-footer {
+    position: absolute;
+    bottom: 0px;
+    background-color: rgba(0, 0, 0, .75);
+    width: 100%;
+    padding: .5rem;
+
+    span {
+      float: right;
+    }
   }
 }
 
