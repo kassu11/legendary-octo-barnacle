@@ -1,0 +1,13 @@
+.score-component-container {
+  display: flex;
+  gap: .25rem;
+  padding-left: 1.25rem;
+
+  .score-star {
+    width: 1.5rem;
+  }
+  .score-emoji {
+    width: 2rem;
+    margin-left: -.25rem;
+  }
+}
