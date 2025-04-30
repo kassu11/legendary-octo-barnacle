@@ -112,7 +112,8 @@
       &:hover::before {
         --tooltip-padding: .5em;
         left: calc(-1 * var(--tooltip-padding));
-        transform: translateX(-100%);
+        transform: translateX(-100%) translateY(-50%);
+        top: 50%;
         position: absolute;
         content: attr(label);
         background-color: black;
