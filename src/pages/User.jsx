@@ -1,4 +1,4 @@
-import { A, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
 import { createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
 import "./User.scss";
@@ -272,12 +272,20 @@ function ActivityHistory(props) {
 
 export function AnimeList() {
   const { user } = useUser();
+  const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, accessToken);
   const [listData, setListData] = createSignal({});
+  const navigate = useNavigate();
   let worker;
   
   const [search, setSearch] = createSignal("");
+  const [format, setFormat] = createSignal("");
+  const [status, setStatus] = createSignal("");
+  const [genre, setGenre] = createSignal("");
+  const [countryOfOrigin, setCountryOfOrigin] = createSignal("");
+  const [isAdult, setIsAdult] = createSignal(undefined);
+  const [year, setYear] = createSignal("");
 
   createEffect(() => {
     if (window.Worker && mediaList()) {
@@ -286,19 +294,30 @@ export function AnimeList() {
       worker.postMessage({ 
         cacheKey: mediaList().cacheKey, 
         search: search(),
+        format: format(),
+        status: status(),
+        genre: genre(),
+        countryOfOrigin: countryOfOrigin(),
+        isAdult: isAdult(),
+        year: +year(),
         sort: "", 
+        type: "ANIME",
       });
 
       worker.onmessage = message => {
-        const cacheReq = IndexedDB.user();
-        cacheReq.onsuccess = evt => {
-          const db = evt.target.result;
-          const store = IndexedDB.store(db, "data", "readonly");
-          const getReq = store.get("media_list");
-          getReq.onsuccess = (evt) => {
-            console.log("worker data:", evt.target.result);
-            setListData(evt.target.result || {});
+        if (message.data === "success") {
+          const cacheReq = IndexedDB.user();
+          cacheReq.onsuccess = evt => {
+            const db = evt.target.result;
+            const store = IndexedDB.store(db, "data", "readonly");
+            const getReq = store.get("media_list");
+            getReq.onsuccess = (evt) => {
+              console.log("worker data:", evt.target.result);
+              setListData(evt.target.result || {});
+            }
           }
+        } else {
+          console.error("Error");
         }
       }
     }
@@ -306,22 +325,130 @@ export function AnimeList() {
 
   return (
     <div class="user-profile-media-list-body">
-      <input type="text" onInput={e => setSearch(e.target.value)} value={search()} />
-      <Show when={listData()?.data}>
-        <For each={listData().data.lists}>{list => (
-          <>
-            <h2>{list.name}</h2>
-            <ol>
-              <For each={list.entries}>{entry => (
-                <li>
-                  <img src={entry.media.coverImage.large} loading="lazy" alt="Cover" />
-                </li>
-              )}</For>
-            </ol>
-          </>
-        )}
-        </For>
-      </Show>
+      <div class="user-profile-media-list-search">
+        <input type="text" onInput={e => setSearch(e.target.value)} value={search()} />
+        <Show when={listData()?.data}>
+          <ol>
+            <li>
+              <button onClick={() => navigate("/user/" + user().name + "/anime/", { replace: true })}>
+                <Show when={params.list === undefined}>{"> "}</Show>
+                All {listData().data.total}
+              </button>
+            </li>
+            <For each={listData().data.lists}>{list => (
+              <li>
+                <button onClick={() => navigate("/user/" + user().name + "/anime/" + list.name, { replace: true })}>
+                  <Show when={params.list === list.name}>{"> "}</Show>
+                  {list.name} {list.entries.length}
+                </button>
+              </li>
+            )}
+            </For>
+          </ol>
+        </Show>
+        <select name="format" onChange={e => setFormat(e.target.value)} value={format() || ""}>
+          <option value="" hidden>Format</option>
+          <Show when={format()}>
+            <option value="">All formats</option>
+          </Show>
+          <option value="MOVIE">Movie</option>
+          <option value="MUSIC">Music</option>
+          <option value="ONA">Ona</option>
+          <option value="OVA">Ova</option>
+          <option value="SPECIAL">Special</option>
+          <option value="TV">TV</option>
+          <option value="TV_SHORT">TV short</option>
+        </select>
+        <select name="status" onChange={e => setStatus(e.target.value)} value={status() || ""}>
+          <option value="" hidden>Status</option>
+          <Show when={status()}>
+            <option value="">Any Status</option>
+          </Show>
+          <option value="RELEASING">Releasing</option>
+          <option value="FINISHED">Finished</option>
+          <option value="NOT_YET_RELEASED">Not Yet Released</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+        <select name="genre" onChange={e => setGenre(e.target.value)} value={genre() || ""}>
+          <option value="" hidden>Genre</option>
+          <Show when={genre()}>
+            <option value="">All genres</option>
+          </Show>
+          <option value="Action">Action</option>
+          <option value="Adventure">Adventure</option>
+          <option value="Comedy">Comedy</option>
+          <option value="Drama">Drama</option>
+          <option value="Ecchi">Ecchi</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Horror">Horror</option>
+          <option value="Mahou Shoujo">Mahou Shoujo</option>
+          <option value="Mecha">Mecha</option>
+          <option value="Music">Music</option>
+          <option value="Mystery">Mystery</option>
+          <option value="Psychological">Psychological</option>
+          <option value="Romance">Romance</option>
+          <option value="Sci-Fi">Sci-Fi</option>
+          <option value="Slice of Life">Slice of Life</option>
+          <option value="Sports">Sports</option>
+          <option value="Supernatural">Supernatural</option>
+          <option value="Thriller">Thriller</option>
+        </select>
+        <select name="countryOfOrigin" onChange={e => setCountryOfOrigin(e.target.value)} value={countryOfOrigin() || ""}>
+          <option value="" hidden>Country</option>
+          <Show when={countryOfOrigin()}>
+            <option value="">All countries</option>
+          </Show>
+          <option value="CN">China</option>
+          <option value="JP">Japan</option>
+          <option value="KR">South Korea</option>
+          <option value="TW">Taiwan</option>
+        </select>
+        <select name="isAdult" onChange={e => {
+          if (e.target.value === "true") {
+            setIsAdult(true);
+          } else if (e.target.value === "false") {
+            setIsAdult(false);
+          } else {
+            setIsAdult(undefined);
+          }
+        }} value={isAdult() || ""}>
+          <option value="" hidden>Age</option>
+          <Show when={countryOfOrigin()}>
+            <option value="">All ratings</option>
+          </Show>
+          <option value="false">R-17+</option>
+          <option value="true">R-18</option>
+        </select>
+        <label htmlFor="year">Year</label>
+        <input type="number" name="year" id="year" value={year()} onInput={e => {
+          setYear(e.target.value);
+        }} />
+        <input type="checkbox" name="private" id="private" />
+        <label htmlFor="private">Private</label>
+        <input type="checkbox" name="notes" id="notes" />
+        <label htmlFor="notes">Notes</label>
+        <select name="sort">
+          <option value="score">Score</option>
+        </select>
+        <button>clear</button>
+      </div>
+      <div class="user-profile-media-list-container">
+        <Show when={listData()?.data}>
+          <For each={listData().data.lists}>{list => (
+            <Show when={list.entries.length && (!params.list || params.list === list.name)}>
+              <h2>{list.name}</h2>
+              <ol class="user-profile-media-list-grid">
+                <For each={list.entries}>{entry => (
+                  <li>
+                    <img src={entry.media.coverImage.large} loading="lazy" alt="Cover" />
+                  </li>
+                )}</For>
+              </ol>
+            </Show>
+          )}
+          </For>
+        </Show>
+      </div>
     </div>
   );
 }
