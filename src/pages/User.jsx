@@ -1,6 +1,6 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
+import { batch, createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -447,7 +447,21 @@ export function AnimeList() {
           <option value="averageScore">Average Score</option>
           <option value="popularity">Popularity</option>
         </select>
-        <button>clear</button>
+        <button onClick={() => {
+          batch(() => {
+            setSearch("");
+            setFormat("");
+            setStatus("");
+            setGenre("");
+            setCountryOfOrigin("");
+            setIsAdult(undefined);
+            setYear("");
+            setPrivateFilter(false);
+            setNotesFilter(false);
+            setRewatchedFilter(false);
+            setSort("score");
+          });
+        }}>clear</button>
       </div>
       <div class="user-profile-media-list-container">
         <Show when={listData()?.data}>
