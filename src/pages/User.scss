@@ -5,13 +5,13 @@
     background-color: purple;
     margin-inline: auto;
 
-    .body {
-      display: grid;
-      grid-template-columns: minmax(29rem, 2fr) 3fr;
-      gap: 1rem;
-      background-color: slategrey;
-      align-items: start;
-    }
+  }
+  .user-profile-overview-body {
+    display: grid;
+    grid-template-columns: minmax(29rem, 2fr) 3fr;
+    gap: 1rem;
+    background-color: slategrey;
+    align-items: start;
   }
 
   .profile-banner-container {
@@ -226,6 +226,22 @@
       gap: 1rem;
     }
   }
+
+
+
+  .user-profile-media-list-body {
+    ol {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+
+      img {
+        aspect-ratio: 5.5/8;
+        object-fit: cover;
+      }
+    }
+  }
 }
 
 @layer resize {
@@ -248,7 +264,7 @@
       padding: 1rem;
       gap: .25rem;
     }
-    .user-page .body {
+    .user-profile-overview-body {
       grid-template-columns: 1fr;
     }
     .user-favourites {
