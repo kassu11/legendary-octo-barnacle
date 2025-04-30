@@ -286,6 +286,9 @@ export function AnimeList() {
   const [countryOfOrigin, setCountryOfOrigin] = createSignal("");
   const [isAdult, setIsAdult] = createSignal(undefined);
   const [year, setYear] = createSignal("");
+  const [privateFilter, setPrivateFilter] = createSignal(false);
+  const [notesFilter, setNotesFilter] = createSignal(false);
+  const [rewatchedFilter, setRewatchedFilter] = createSignal(false);
 
   createEffect(() => {
     if (window.Worker && mediaList()) {
@@ -300,6 +303,9 @@ export function AnimeList() {
         countryOfOrigin: countryOfOrigin(),
         isAdult: isAdult(),
         year: +year(),
+        private: privateFilter(),
+        notes: notesFilter(),
+        rewatched: rewatchedFilter(),
         sort: "", 
         type: "ANIME",
       });
@@ -413,7 +419,7 @@ export function AnimeList() {
           }
         }} value={isAdult() || ""}>
           <option value="" hidden>Age</option>
-          <Show when={countryOfOrigin()}>
+          <Show when={isAdult() !== undefined}>
             <option value="">All ratings</option>
           </Show>
           <option value="false">R-17+</option>
@@ -423,10 +429,12 @@ export function AnimeList() {
         <input type="number" name="year" id="year" value={year()} onInput={e => {
           setYear(e.target.value);
         }} />
-        <input type="checkbox" name="private" id="private" />
-        <label htmlFor="private">Private</label>
-        <input type="checkbox" name="notes" id="notes" />
-        <label htmlFor="notes">Notes</label>
+        <input type="checkbox" name="private" id="private" checked={privateFilter()} onChange={e => setPrivateFilter(e.target.checked)} />
+        <label htmlFor="private"> Private</label>
+        <input type="checkbox" name="notes" id="notes" checked={notesFilter()} onChange={e => setNotesFilter(e.target.checked)} />
+        <label htmlFor="notes"> Notes</label>
+        <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setRewatchedFilter(e.target.checked)} />
+        <label htmlFor="rewatched"> Rewatched</label>
         <select name="sort">
           <option value="score">Score</option>
         </select>
