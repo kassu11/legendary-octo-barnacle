@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { batch, createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
+import { batch, createContext, createEffect, createSignal, For, onCleanup, Show, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -269,22 +269,29 @@ function ActivityHistory(props) {
 }
 
 
-
-
 export function AnimeList() {
+  return <MediaList type="anime" />
+}
+export function MangaList() {
+  return <MediaList type="manga" />
+}
+
+
+function MediaList(props) {
+  assert(props.type, "Type missing");
   const { user } = useUser();
   const params = useParams();
   const location = useLocation();
   const { accessToken, authUserData } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, accessToken);
+  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, () => props.type.toUpperCase(), accessToken);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   const _navigate = useNavigate();
   let worker;
 
   const navigate = (listName) => {
-    _navigate(`/user/${user().name}/anime${listName ? "/" + listName : ""}${location.search}`, { replace: true });
+    _navigate(`/user/${user().name}/${props.type}${listName ? "/" + listName : ""}${location.search}`, { replace: true });
   }
   const setSearchParams = (options) => {
     _setSearchParams(options, { replace: true });
@@ -322,7 +329,7 @@ export function AnimeList() {
         notes: notesFilter(),
         rewatched: rewatchedFilter(),
         sort: sort(),
-        type: "ANIME",
+        type: props.type,
       };
 
       worker.postMessage(postObject);
@@ -343,6 +350,10 @@ export function AnimeList() {
         }
       }
     }
+  });
+
+  onCleanup(() => {
+    if (worker instanceof Worker) worker.terminate();
   });
 
   return (

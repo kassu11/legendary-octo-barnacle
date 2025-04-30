@@ -83,7 +83,7 @@ function modifyMediaListData(listData, type, options) {
     list.entries.sort(sortFunction);
   });
 
-  const sectionOrder = listData.data.user.mediaListOptions[type === "ANIME" ? "animeList" : "mangaList"].sectionOrder;
+  const sectionOrder = listData.data.user.mediaListOptions[type === "anime" ? "animeList" : "mangaList"].sectionOrder;
   const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key + 1])));
   listData.data.lists.sort((a, b) => sectionSortOrder[a.name] - sectionSortOrder[b.name]);
 
