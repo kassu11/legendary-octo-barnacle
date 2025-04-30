@@ -230,17 +230,28 @@
 
 
   .user-profile-media-list-body {
-    ol {
-      list-style: none;
-      padding: 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+  }
 
-      img {
-        aspect-ratio: 5.5/8;
-        object-fit: cover;
-      }
+  .user-profile-media-list-search {
+  }
+
+  .user-profile-media-list-container {
+  }
+
+  .user-profile-media-list-grid {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+
+    img {
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
     }
+
   }
 }
 

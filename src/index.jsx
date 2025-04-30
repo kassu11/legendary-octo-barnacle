@@ -62,7 +62,7 @@ render(
             </Route>
             <Route path="/user/:name" component={User}>
               <Route path="/" component={Overview} />
-              <Route path="/anime" component={AnimeList} />
+              <Route path="/anime/:list?" component={AnimeList} />
             </Route>
             {/* <Route path="/user/:name" component={User} /> */}
             <Route path="*404" component={() => <div>Not fould 404</div>} />
