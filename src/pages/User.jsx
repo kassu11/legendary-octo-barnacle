@@ -1,4 +1,4 @@
-import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
 import { batch, createContext, createEffect, createSignal, For, Show, useContext } from "solid-js";
 import "./User.scss";
@@ -274,39 +274,50 @@ function ActivityHistory(props) {
 export function AnimeList() {
   const { user } = useUser();
   const params = useParams();
+  const location = useLocation();
   const { accessToken, authUserData } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, accessToken);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   let worker;
-  
-  const [search, setSearch] = createSignal("");
-  const [format, setFormat] = createSignal("");
-  const [status, setStatus] = createSignal("");
-  const [genre, setGenre] = createSignal("");
-  const [countryOfOrigin, setCountryOfOrigin] = createSignal("");
-  const [isAdult, setIsAdult] = createSignal(undefined);
-  const [year, setYear] = createSignal("");
-  const [privateFilter, setPrivateFilter] = createSignal(false);
-  const [notesFilter, setNotesFilter] = createSignal(false);
-  const [rewatchedFilter, setRewatchedFilter] = createSignal(false);
-  const [sort, setSort] = createSignal("score");
+
+  const navigate = (listName) => {
+    _navigate(`/user/${user().name}/anime${listName ? "/" + listName : ""}${location.search}`, { replace: true });
+  }
+  const setSearchParams = (options) => {
+    _setSearchParams(options, { replace: true });
+  }
+  const search = () => searchParams.search || "";
+  const format = () => searchParams.format || "";
+  const status = () => searchParams.status || "";
+  const genre = () => searchParams.genre || "";
+  const countryOfOrigin = () => searchParams.countryOfOrigin || "";
+  const isAdult = () => {
+    if (searchParams.isAdult === "true") return true;
+    if (searchParams.isAdult === "false") return false;
+    return undefined;
+  };
+  const year = () => searchParams.year || "";
+  const privateFilter = () => searchParams.private === "true";
+  const notesFilter = () => searchParams.notes === "true";
+  const rewatchedFilter = () => searchParams.rewatched === "true";
+  const sort = () => searchParams.sort || "score";
 
   createEffect(() => {
     if (window.Worker && mediaList()) {
       worker = worker instanceof Worker ? worker : new UserMediaListWorker();
 
-      const postObject = { 
-        cacheKey: mediaList().cacheKey, 
+      const postObject = {
+        cacheKey: mediaList().cacheKey,
         search: search(),
         format: format(),
         status: status(),
         genre: genre(),
         countryOfOrigin: countryOfOrigin(),
         isAdult: isAdult(),
-        year: +year(),
+        year: +year() || undefined,
         private: privateFilter(),
         notes: notesFilter(),
         rewatched: rewatchedFilter(),
@@ -337,18 +348,18 @@ export function AnimeList() {
   return (
     <div class="user-profile-media-list-body">
       <div class="user-profile-media-list-search">
-        <input type="text" placeholder="Search" onInput={e => setSearch(e.target.value)} value={search()} />
+        <input type="text" placeholder="Search" onInput={e => setSearchParams({ search: e.target.value || undefined })} value={search()} />
         <Show when={listData()?.data}>
           <ol>
             <li>
-              <button onClick={() => navigate("/user/" + user().name + "/anime/", { replace: true })}>
+              <button onClick={() => navigate("")}>
                 <Show when={params.list === undefined}>{"> "}</Show>
                 All {listData().data.total}
               </button>
             </li>
             <For each={listData().data.lists}>{list => (
               <li>
-                <button onClick={() => navigate("/user/" + user().name + "/anime/" + list.name, { replace: true })}>
+                <button onClick={() => navigate(list.name)}>
                   <Show when={params.list === list.name}>{"> "}</Show>
                   {list.name} {list.entries.length}
                 </button>
@@ -357,7 +368,7 @@ export function AnimeList() {
             </For>
           </ol>
         </Show>
-        <select name="format" onChange={e => setFormat(e.target.value)} value={format() || ""}>
+        <select name="format" onChange={e => setSearchParams({ format: e.target.value || undefined })} value={format() || ""}>
           <option value="" hidden>Format</option>
           <Show when={format()}>
             <option value="">All formats</option>
@@ -370,7 +381,7 @@ export function AnimeList() {
           <option value="TV">TV</option>
           <option value="TV_SHORT">TV short</option>
         </select>
-        <select name="status" onChange={e => setStatus(e.target.value)} value={status() || ""}>
+        <select name="status" onChange={e => setSearchParams({ status: e.target.value || undefined })} value={status() || ""}>
           <option value="" hidden>Status</option>
           <Show when={status()}>
             <option value="">Any Status</option>
@@ -380,7 +391,7 @@ export function AnimeList() {
           <option value="NOT_YET_RELEASED">Not Yet Released</option>
           <option value="CANCELLED">Cancelled</option>
         </select>
-        <select name="genre" onChange={e => setGenre(e.target.value)} value={genre() || ""}>
+        <select name="genre" onChange={e => setSearchParams({ genre: e.target.value || undefined })} value={genre() || ""}>
           <option value="" hidden>Genre</option>
           <Show when={genre()}>
             <option value="">All genres</option>
@@ -404,7 +415,7 @@ export function AnimeList() {
           <option value="Supernatural">Supernatural</option>
           <option value="Thriller">Thriller</option>
         </select>
-        <select name="countryOfOrigin" onChange={e => setCountryOfOrigin(e.target.value)} value={countryOfOrigin() || ""}>
+        <select name="countryOfOrigin" onChange={e => setSearchParams({ countryOfOrigin: e.target.value || undefined })} value={countryOfOrigin() || ""}>
           <option value="" hidden>Country</option>
           <Show when={countryOfOrigin()}>
             <option value="">All countries</option>
@@ -414,15 +425,7 @@ export function AnimeList() {
           <option value="KR">South Korea</option>
           <option value="TW">Taiwan</option>
         </select>
-        <select name="isAdult" onChange={e => {
-          if (e.target.value === "true") {
-            setIsAdult(true);
-          } else if (e.target.value === "false") {
-            setIsAdult(false);
-          } else {
-            setIsAdult(undefined);
-          }
-        }} value={isAdult() || ""}>
+        <select name="isAdult" onChange={e => setSearchParams({ isAdult: e.target.value || undefined })} value={isAdult() === undefined ? "" : String(isAdult())}>
           <option value="" hidden>Age</option>
           <Show when={isAdult() !== undefined}>
             <option value="">All ratings</option>
@@ -430,24 +433,22 @@ export function AnimeList() {
           <option value="false">R-17+</option>
           <option value="true">R-18</option>
         </select>
-        <input type="number" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => {
-          setYear(e.target.value);
-        }} />
+        <input type="number" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => setSearchParams({ year: e.target.value || undefined })} />
         <Show when={authUserData().data.id === user().id}>
-          <label htmlFor="private"> 
-            <input type="checkbox" name="private" id="private" checked={privateFilter()} onChange={e => setPrivateFilter(e.target.checked)} />
+          <label htmlFor="private">
+            <input type="checkbox" name="private" id="private" checked={privateFilter()} onChange={e => setSearchParams({ private: e.target.checked ? "true" : undefined })} />
             {" "}Private
           </label>
         </Show>
         <label htmlFor="notes">
-          <input type="checkbox" name="notes" id="notes" checked={notesFilter()} onChange={e => setNotesFilter(e.target.checked)} />
+          <input type="checkbox" name="notes" id="notes" checked={notesFilter()} onChange={e => setSearchParams({ notes: e.target.checked ? "true" : undefined })} />
           {" "}Notes
         </label>
         <label htmlFor="rewatched">
-          <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setRewatchedFilter(e.target.checked)} />
+          <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setSearchParams({ rewatched: e.target.checked ? "true" : undefined })} />
           {" "}Rewatched
         </label>
-        <select name="sort" value={sort()} onChange={e => setSort(e.target.value)}>
+        <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
           <option value="score">Score</option>
           <option value="title">Title</option>
           <option value="progress">Progress</option>
@@ -459,24 +460,23 @@ export function AnimeList() {
           <option value="popularity">Popularity</option>
         </select>
         <button onClick={() => {
-          batch(() => {
-            setSearch("");
-            setFormat("");
-            setStatus("");
-            setGenre("");
-            setCountryOfOrigin("");
-            setIsAdult(undefined);
-            setYear("");
-            setPrivateFilter(false);
-            setNotesFilter(false);
-            setRewatchedFilter(false);
-            setSort("score");
+          setSearchParams({
+            search: undefined,
+            format: undefined,
+            status: undefined,
+            genre: undefined,
+            countryOfOrigin: undefined,
+            isAdult: undefined,
+            year: undefined,
+            private: undefined,
+            notes: undefined,
+            rewatched: undefined,
+            sort: undefined
           });
         }}>clear</button>
       </div>
       <div class="user-profile-media-list-container">
         <Show when={listData()?.data}>
-          {console.log(listData().data.lists[2].entries[0])}
           <For each={listData().data.lists}>{list => (
             <Show when={list.entries.length && (!params.list || params.list === list.name)}>
               <h2>{list.name}</h2>
