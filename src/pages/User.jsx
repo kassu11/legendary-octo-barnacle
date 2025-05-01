@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { batch, createContext, createEffect, createSignal, For, onCleanup, Show, useContext } from "solid-js";
+import { createContext, createEffect, createSignal, For, Match, onCleanup, Show, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
