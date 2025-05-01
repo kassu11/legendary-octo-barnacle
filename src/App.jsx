@@ -24,7 +24,7 @@ function App(props) {
               <li class="main-navigation-profile">
                 <A href={"/user/" + authUserData().data.name}>
                   {authUserData().data.name}
-                  <img class="main-navigation-profile-icon" src={authUserData().data.avatar.large} alt="Profile avatar" />
+                  <img class="main-navigation-profile-image" src={authUserData().data.avatar.large} alt="Profile avatar" />
                 </A>
               </li>
             </Show>
