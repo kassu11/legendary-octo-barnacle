@@ -27,7 +27,7 @@ export function AnimeInfo() {
   const [themeData] = api.animeThemes.themesByAniListId(() => params.id);
 
   return (
-    <MediaProvider setIdMal={setIdMal} theme={themeData()?.data.anime[0]} malData={malData()} />
+    <MediaProvider setIdMal={setIdMal} theme={themeData()?.data.anime[0]} malData={malData} />
   )
 }
 
@@ -36,7 +36,7 @@ export function MangaInfo() {
   const [malData] = api.myAnimeList.mangaById(idMal);
 
   return (
-    <MediaProvider setIdMal={setIdMal} malData={malData()} />
+    <MediaProvider setIdMal={setIdMal} malData={malData} />
   )
 }
 
@@ -104,27 +104,20 @@ function MediaInfo(props) {
               </Show>
               {" "}Users
             </p>
-            <Switch>
-              <Match when={props.malData}>
-                <div>
-                  <p>MAL</p>
-                  <span>
-                    <Show when={props.malData.data?.data.score > 0} fallback="N/A">
-                      {((props.malData.data.data.score || 0)).toFixed(2)}
-                    </Show>
-                  </span>
-                </div>
-              </Match>
-              <Match when={props.media.idMal}>
-                <div>
-                  <p>MAL</p>
-                  <span>...</span>
-                </div>
-              </Match>
-            </Switch>
+            <div>
+              <p>MAL</p>
+              <span>
+                <Switch fallback="N/A">
+                  <Match when={props.malData.loading}>...</Match>
+                  <Match when={props.malData()?.data?.score > 0 && props.media.idMal}>
+                    {((props.malData().data.score || 0)).toFixed(2)}
+                  </Match>
+                </Switch>
+              </span>
+            </div>
             <p>
-              <Show when={props.malData?.data?.data.scored_by} fallback="-">
-                {numberCommas(props.malData.data?.data.scored_by)}
+              <Show when={props.malData()?.data?.scored_by && props.media.idMal} fallback="-">
+                {numberCommas(props.malData().data.scored_by)}
               </Show>
               {" "}Users
             </p>

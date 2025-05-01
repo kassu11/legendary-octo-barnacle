@@ -33,10 +33,10 @@ const api = {
   },
   myAnimeList: {
     animeById: fetchOnce(id => {
-      return Fetch.getJson(querys.myAnimeListAnimeById(id));
+      return Fetch.getJson(querys.myAnimeListAnimeById(id), res => res.data);
     }),
     mangaById: fetchOnce(id => {
-      return Fetch.getJson(querys.myAnimeListMangaById(id));
+      return Fetch.getJson(querys.myAnimeListMangaById(id), res => res.data);
     }),
     animeCharactersById: fetchOnce(id => {
       return Fetch.getJson(querys.myAnimeListAnimeCharactersById(id), res => res.data);
