@@ -57,7 +57,7 @@ export default function Notifications() {
                     <CreatedAt createdAt={notification.createdAt} />
                   </div>
                 </Match>
-                <Match when={notification.type === "ACTIVITY_LIKE"}>
+                <Match when={notification.type === "ACTIVITY_LIKE" || notification.type === "ACTIVITY_REPLY"}>
                   <A href={"/user/" + notification.user.name}>
                     <img src={notification.user.avatar.large} alt="Media cover" />
                   </A>
