@@ -11,8 +11,10 @@ import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx"
 import Search from "./pages/Search.jsx";
 import { User, Overview, AnimeList, MangaList } from "./pages/User.jsx";
 import Artist from "./pages/Artist.jsx";
+import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff, Character } from "./pages/Entity.jsx";
+import Activity from "./pages/Activity.jsx";
 
 const root = document.getElementById("root")
 
@@ -40,6 +42,8 @@ render(
           <Router root={App} base="/legendary-octo-barnacle">
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
+            <Route path="/notifications" component={Notifications} />
+            <Route path="/activity/:id" matchFilters={idFilter} component={Activity} />
             <Route path="/search" component={Search}>
               <Route path="/:type?/:header?" matchFilters={animeSearch} />
               <Route path="/:type?/:header?" matchFilters={mangaSearch} />

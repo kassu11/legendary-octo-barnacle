@@ -5,6 +5,7 @@ import { getDates } from "./dates";
 const DEBUG = location.origin.includes("localhost");
 
 const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
+const fastReload = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 7 });
 const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
 const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached", expiresInSeconds: 60 * 60 * 24 * 365 });
 // const noCache = cacheBuilder({ type: "no-store" });
@@ -62,6 +63,61 @@ const api = {
     activityByUserId: fetchOnce((id, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.profileActivity, { id });
+    }),
+    activityById: fetchOnce((id, token) => {
+      assert(id, "Id is missing");
+      return Fetch.authAnilist(token, querys.anilistActivityById, { id }, res => res.data.Activity);
+    }),
+    activityRepliesById: fetchOnce((id, page, token) => {
+      assert(id, "Id is missing");
+      return Fetch.authAnilist(token, querys.anilistActivityRepliedById, { id, page }, res => res.data.Page);
+    }),
+    notifications: fastReload((token, type, page = 1) => {
+      switch(type) {
+        case "airing": return Fetch.authAnilist(token, querys.anilistUserNotifications, {
+          page,
+          "types": [
+            "AIRING"
+          ]
+        }, res => res.data.Page); 
+        case "activity": return Fetch.authAnilist(token, querys.anilistUserNotifications, {
+          page,
+          "types": [
+            "ACTIVITY_MESSAGE",
+            "ACTIVITY_MENTION",
+            "ACTIVITY_REPLY",
+            "ACTIVITY_LIKE",
+            "ACTIVITY_REPLY_LIKE"
+          ]
+        }, res => res.data.Page); 
+        case "forum": return Fetch.authAnilist(token, querys.anilistUserNotifications, {
+          page,
+          "types": [
+            "THREAD_COMMENT_REPLY",
+            "THREAD_SUBSCRIBED",
+            "THREAD_COMMENT_MENTION",
+            "THREAD_LIKE",
+            "THREAD_COMMENT_LIKE"
+          ]
+        }, res => res.data.Page); 
+        case "follows": return Fetch.authAnilist(token, querys.anilistUserNotifications, {
+          page,
+          "types": [
+            "FOLLOWING"
+          ]
+        }, res => res.data.Page); 
+        case "media": return Fetch.authAnilist(token, querys.anilistUserNotifications, {
+          page,
+          "types": [
+            "RELATED_MEDIA_ADDITION",
+            "MEDIA_DATA_CHANGE",
+            "MEDIA_MERGE",
+            "MEDIA_DELETION"
+          ]
+        }, res => res.data.Page); 
+        case "all": 
+        default: return Fetch.authAnilist(token, querys.anilistUserNotifications, { page }, res => res.data.Page);  
+      }
     }),
     mediaListByUserId: fetchOnce((id, type, token) => {
       assert(id, "Id is missing");

@@ -1,0 +1,40 @@
+.notification-page {
+  background-color: lightsalmon;
+  width: min(100% - 1rem, 50rem);
+  margin-inline: auto;
+}
+.notifications-container {
+  display: grid;
+  list-style: none;
+  padding: 0;
+  background-color: yellow;
+  gap: .25rem;
+
+  li {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    background-color: orange;
+    gap: .5rem;
+
+    img {
+      aspect-ratio: 5.5/7;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: .25rem;
+    align-items: center;
+    gap: .5rem;
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
+
+.notifications-created-at {
+  place-self: start;
+}

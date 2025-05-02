@@ -1,0 +1,33 @@
+.activity-page {
+  width: min(100% - 1rem, 65rem);
+  margin-inline: auto;
+}
+.activity-message-card {
+  min-height: 5rem;
+  background-color: orange;
+  border-radius: .25rem;
+  padding: .5rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+  }
+  .profile {
+    margin-top: .5rem;
+    height: 3rem;
+    width: 3rem;
+  }
+
+  button.active {
+    background-color: pink;
+  }
+  .content {
+    margin-top: .5rem;
+  }
+}
+
+.message-card-profile-header {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
