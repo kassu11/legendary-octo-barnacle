@@ -365,7 +365,7 @@ function Search() {
             </Show>
           </select>
         </div>
-        <div style={{display: "flex", gap: ".5rem" }}>
+        <div style={{"flex-wrap": "wrap", display: "flex", gap: ".5rem" }}>
           <div>
             <p>Genres</p>
             <select name="genres" multiple>
@@ -401,7 +401,7 @@ function Search() {
             </select>
           </div>
         </div>
-        <div style={{display: "flex", gap: ".5rem" }}>
+        <div style={{"flex-wrap": "wrap", display: "flex", gap: ".5rem" }}>
           <div>
             <p>Tags</p>
             <select name="tags" multiple>
@@ -453,7 +453,7 @@ function Search() {
             </select>
           </div>
         </div>
-        <div style={{display: "flex", gap: ".5rem" }}>
+        <div style={{"flex-wrap": "wrap", display: "flex", gap: ".5rem" }}>
           <div>
             <p>Sort Order</p>
             <select onInput={e => {
@@ -504,7 +504,7 @@ function Search() {
             <option value="TW">Taiwan</option>
           </select>
         </div>
-        <div style={{ display: "flex", gap: ".5rem" }}>
+        <div style={{ "flex-wrap": "wrap", display: "flex", gap: ".5rem" }}>
           <div>
             <p>Source</p>
             <select name="source" value={formStateObject().source || ""}>
@@ -553,7 +553,7 @@ function Search() {
         </div>
         <div>
           <p>Episode Range</p>
-          <div style={{ display: "flex", gap: ".5rem" }}>
+          <div style={{ "flex-wrap": "wrap", display: "flex", gap: ".5rem" }}>
             <div>
               <label htmlFor="episodeGreater">Min</label><br />
               <input 

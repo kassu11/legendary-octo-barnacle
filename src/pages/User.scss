@@ -49,12 +49,13 @@
     .content a{
       color: inherit;
       text-decoration: none;
+      word-break: break-word;
     }
   }
 
   .user-profile-following-badge {
     background-color: red;
-    font-size: 1rem;
+    font-size: .60em;
     padding: .25em .5em;
     margin-left: 1em;
     border-radius: .25em;
@@ -63,10 +64,11 @@
   .profile-navigation ul {
     background-color: thistle;
     display: flex;
+    flex-wrap: wrap;
     list-style: none;
     padding: 0;
     justify-content: center;
-    gap: 2rem;
+    gap: .5rem 2rem;
     padding: 1rem;
   }
   .activity-history-container {
@@ -237,7 +239,7 @@
   .user-profile-media-list-search {
     background-color: lightsalmon;
     display: grid;
-    place-content: start;
+    align-content: start;
   }
 
   .user-profile-media-list-container {
@@ -317,6 +319,10 @@
 
 @layer resize {
   @media (width < 55em) {
+    .user-profile-media-list-body {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
     .user-activity-container,
     .user-info-container {
       display: contents;
@@ -366,6 +372,28 @@
     }
     .user-favourites ol {
       --amount: 3.5;
+    }
+    .user-profile-media-list-grid {
+      grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+      font-size: .8rem;
+      gap: .25rem;
+    }
+    .search-card-quick-action-items button {
+      width: 2rem;
+      height: 2rem;
+      border-radius: .25rem;
+      padding: .5rem;
+    }
+
+
+    .user-profile-container {
+      .profile {
+        max-width: 5rem;
+      }
+
+      .content {
+        font-size: .75rem;
+      }
     }
   }
 }
