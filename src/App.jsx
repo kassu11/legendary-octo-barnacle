@@ -21,6 +21,7 @@ function App(props) {
               <button onClick={() => logoutUser()}>Logout</button>
             </li>
             <Show when={authUserData()}>
+              <li><A href="/notifications">Notifications ({authUserData().data.unreadNotificationCount})</A></li>
               <li class="main-navigation-profile">
                 <A href={"/user/" + authUserData().data.name}>
                   {authUserData().data.name}
