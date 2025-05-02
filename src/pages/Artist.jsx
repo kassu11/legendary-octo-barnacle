@@ -9,16 +9,15 @@ function Artist() {
   const [artistData] = api.animeThemes.artisBySlug(() => params.name);
   const video = <video src="" controls autoPlay />;
 
-  createEffect(() => {
-    setName(params.name);
-  });
-
   return (
     <>
       <h1>Artist</h1>
       <Show when={artistData()}>
         <p>{artistData().data.artist.name}</p>
-        <img src={artistData().data.artist.images[0].link} alt="Artist" />
+        {console.log(artistData())}
+        <Show when={artistData().data.artist.images.length} fallback={<img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg" alt="Artist missing" />}>
+          <img src={artistData().data.artist.images[0].link} alt="Artist" />
+        </Show>
         <div class={style.themes}>
           <For each={artistData().data.artist.songs}>{theme => (
             <div class={style.episode}>
