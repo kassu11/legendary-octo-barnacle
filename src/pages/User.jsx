@@ -567,14 +567,86 @@ function FavouriteSection(props) {
   assert(props.title, "title missing");
   assert(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
+  const [reorder, setReorder] = createSignal(false);
+  const [order, setOrder] = createSignal([]);
+  const { accessToken, authUserData } = useAuthentication();
+  const { user } = useUser();
+
+  let ol, dragging;
+
+  const resetOrder = () => {
+    setReorder(false);
+    order().forEach(id => {
+      const elem = ol.querySelector(`li[data-id="${id}"]`);
+      if (elem) {
+        ol.append(elem);
+      }
+    });
+  }
 
   return (
     <details class="user-profile-favourites-details" classList={{hidden: !visible()}} open>
       <summary>
         <h3>{props.title}</h3>
+        <Show when={user().id === authUserData()?.data.id}>
+          <Switch>
+            <Match when={reorder()}>
+              <button onClick={async () => {
+                const newIds = [...ol.childNodes].map(elem => +elem.dataset.id);
+                const newOrder = newIds.map((_, i) => i + 1);
+
+                let response;
+                if (props.type="anime") {
+                  response = await api.anilist.mutateFavourites(accessToken(), {animeIds: newIds, animeOrder: newOrder});
+                } else if (props.type="manga") {
+                  response = await api.anilist.mutateFavourites(accessToken(), {mangaIds: newIds, mangaOrder: newOrder});
+                } else if (props.type="studios") {
+                  response = await api.anilist.mutateFavourites(accessToken(), {studioIds: newIds, studioOrder: newOrder});
+                } else if (props.type="staff") {
+                  response = await api.anilist.mutateFavourites(accessToken(), {staffIds: newIds, staffOrder: newOrder});
+                } else if (props.type="characters") {
+                  response = await api.anilist.mutateFavourites(accessToken(), {characterIds: newIds, characterOrder: newOrder});
+                } 
+
+                if (response.status === 200) {
+                  setOrder(newIds);
+                  setReorder(false);
+                } else {
+                  resetOrder();
+                  console.error("mutation failed");
+                }
+              }}>Save</button>
+              <button onClick={resetOrder}>Cancel</button>
+            </Match>
+            <Match when={!reorder()}>
+              <button onClick={() => setReorder(v => !v)}>Reorder</button>
+            </Match>
+          </Switch>
+        </Show>
       </summary>
-      <ol classList={{grid: props.type !== "studios", flex: props.type === "studios"}}>
-        <FavouritesPage page={1} type={props.type} setVisible={setVisible}/>
+      <ol ref={ol} classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} onMouseMove={e => {
+        if (!reorder()) return;
+        if (dragging && e.buttons === 1 && e.target?.tagName === "LI") {
+          if (dragging.nextElementSibling === e.target) { e.target.after(dragging); } 
+          else { e.target.before(dragging); } 
+        } else if(e.buttons !== 1) {
+          dragging?.classList.remove("dragging");
+          dragging = null;
+        }
+      }} onMouseDown={e => {
+          if (!reorder()) {
+            return;
+          }
+          const dragged = e.target.closest("li");
+          if (!dragged) {
+            return
+          }
+        console.log(order());
+
+          dragged.classList.add("dragging");
+          dragging = dragged;
+      }}>
+        <FavouritesPage page={1} type={props.type} setOrder={setOrder} setVisible={setVisible}/>
       </ol>
     </details>
   );
@@ -587,11 +659,17 @@ function FavouritesPage(props) {
   const [page, setPage] = createSignal(undefined);
   const [favourites] = api.anilist.favouritesByUserId(() => user().id || undefined, props.page === 1 ? () => props.page : page, accessToken); 
 
-  if (props.page === 1) {
-    createEffect(() => {
+  createEffect(() => {
+    if (favourites()?.data[props.type]?.edges.length > 0) {
+      props.setOrder(order => {
+        order.splice((props.page - 1) * 25, 25, ...favourites()?.data[props.type]?.edges.map(edge => edge.node.id));
+        return [...order];
+      });
+    }
+    if (props.page === 1) {
       props.setVisible(favourites()?.data[props.type]?.edges.length > 0)
-    });
-  }
+    }
+  });
   
   return (
     <DoomScroll rootMargin="100px" onIntersection={() => setPage(props.page)} loading={props.loading} fetchResponse={favourites}>{fetchCooldown => (
@@ -603,6 +681,7 @@ function FavouritesPage(props) {
               <FavouritesPage
                 page={props.page + 1} 
                 type={props.type}
+                setOrder={props.setOrder}
                 loading={favourites.loading} 
               /> 
             </Show>
@@ -616,7 +695,7 @@ function FavouritesPage(props) {
 function FavouritePageItems(props) {
   return (
     <For each={props.edges}>{edge => (
-      <li class="item" onDrag={e => console.log(e)}>
+      <li class="item" attr:data-id={edge.node.id}>
         <Switch>
           <Match when={props.type === "anime"}>
             <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
