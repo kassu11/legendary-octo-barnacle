@@ -339,6 +339,7 @@
     }
 
     .reorder {
+      touch-action: none;
       li * {
         pointer-events: none;
         user-select: none;
