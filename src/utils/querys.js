@@ -664,6 +664,135 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
   }
 }`
 
+export const anilistUserFavouriteById = format`query (
+  $id: Int
+  $name: String
+  $page: Int
+) {
+  User(id: $id, name: $name) {
+    id
+    name
+    favourites {
+      anime(page: $page) {
+        pageInfo {
+          total
+          perPage
+          currentPage
+          lastPage
+          hasNextPage
+        }
+        edges {
+          favouriteOrder
+          node {
+            id
+            type
+            status(version: 2)
+            format
+            isAdult
+            bannerImage
+            title {
+              userPreferred
+            }
+            coverImage {
+              large
+            }
+            startDate {
+              year
+            }
+          }
+        }
+      }
+      manga(page: $page) {
+        pageInfo {
+          total
+          perPage
+          currentPage
+          lastPage
+          hasNextPage
+        }
+        edges {
+          favouriteOrder
+          node {
+            id
+            type
+            status(version: 2)
+            format
+            isAdult
+            bannerImage
+            title {
+              userPreferred
+            }
+            coverImage {
+              large
+            }
+            startDate {
+              year
+            }
+          }
+        }
+      }
+      characters(page: $page) {
+        pageInfo {
+          total
+          perPage
+          currentPage
+          lastPage
+          hasNextPage
+        }
+        edges {
+          favouriteOrder
+          node {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+          }
+        }
+      }
+      staff(page: $page) {
+        pageInfo {
+          total
+          perPage
+          currentPage
+          lastPage
+          hasNextPage
+        }
+        edges {
+          favouriteOrder
+          node {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+          }
+        }
+      }
+      studios(page: $page) {
+        pageInfo {
+          total
+          perPage
+          currentPage
+          lastPage
+          hasNextPage
+        }
+        edges {
+          favouriteOrder
+          node {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}`;
+
 export const anilistUserMediaList = format`query ($userId: Int, $userName: String, $type: MediaType) {
   MediaListCollection(userId: $userId, userName: $userName, type: $type) {
     lists {

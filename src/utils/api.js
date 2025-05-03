@@ -126,6 +126,11 @@ const api = {
         "type": type,
       }, res => res.data.MediaListCollection);
     }),
+    favouritesByUserId: fetchOnce((id, page, token) => {
+      assert(id, "Id is missing");
+      assert(page, "Page is missing");
+      return Fetch.authAnilist(token, querys.anilistUserFavouriteById, { id, page }, res => res.data.User.favourites);
+    }),
     characterInfoById: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, { id }, response => response.data.Character);
     }),
@@ -413,6 +418,7 @@ class Fetch {
 }
 
 const localFetchCacheStorage = new Map();
+const currentlyFetching = new Map();
 
 /**
  * @param {Object} settings - Cache settings.
@@ -492,7 +498,11 @@ function cacheBuilder(settings) {
           return setData(null);
         }
 
-        const data = await request.send();
+        if (!currentlyFetching.has(request.cacheKey)) {
+          currentlyFetching.set(request.cacheKey, request.send());
+        }
+        const data = await currentlyFetching.get(request.cacheKey);
+        currentlyFetching.delete(request.cacheKey);
         if (settings.expiresInSeconds) {
           const time = new Date();
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);

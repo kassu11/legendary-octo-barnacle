@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createSignal, For, Match, onCleanup, Show, useContext } from "solid-js";
+import { createContext, createEffect, createMemo, createSignal, For, Match, onCleanup, Show, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -8,6 +8,8 @@ import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/forma
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
+import { createStore } from "solid-js/store";
+import { DoomScroll } from "../components/utils/DoomScroll.jsx";
 
 const UserContext = createContext();
 
@@ -546,5 +548,113 @@ function MediaList(props) {
         </Show>
       </div>
     </div>
+  );
+}
+
+export function FavouriteContainer() {
+  return (
+    <div class="user-profile-favourites">
+      <FavouriteSection title="Favourite animes" type="anime" />
+      <FavouriteSection title="Favourite characters" type="characters" />
+      <FavouriteSection title="Favourite manga" type="manga" />
+      <FavouriteSection title="Favourite staff" type="staff" />
+      <FavouriteSection title="Favourite studios" type="studios" />
+    </div>
+  );
+}
+
+function FavouriteSection(props) {
+  assert(props.title, "title missing");
+  assert(props.type, "type missing");
+  const [visible, setVisible] = createSignal(false);
+
+  return (
+    <details class="user-profile-favourites-details" classList={{hidden: !visible()}} open>
+      <summary>
+        <h3>{props.title}</h3>
+      </summary>
+      <ol classList={{grid: props.type !== "studios", flex: props.type === "studios"}}>
+        <FavouritesPage page={1} type={props.type} setVisible={setVisible}/>
+      </ol>
+    </details>
+  );
+}
+
+function FavouritesPage(props) {
+  assert(props.type, "Type is missing");
+  const { user } = useUser();
+  const { accessToken } = useAuthentication();
+  const [page, setPage] = createSignal(undefined);
+  const [favourites] = api.anilist.favouritesByUserId(() => user().id || undefined, props.page === 1 ? () => props.page : page, accessToken); 
+
+  if (props.page === 1) {
+    createEffect(() => {
+      props.setVisible(favourites()?.data[props.type]?.edges.length > 0)
+    });
+  }
+  
+  return (
+    <DoomScroll rootMargin="100px" onIntersection={() => setPage(props.page)} loading={props.loading} fetchResponse={favourites}>{fetchCooldown => (
+      <Show when={favourites()?.data[props.type].edges.length}>
+        <Switch>
+          <Match when={props.type === "anime"}>
+            <For each={favourites().data[props.type].edges}>{anime => (
+              <li class="item">
+                <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
+                  <img src={anime.node.coverImage.large} alt="Cover" />
+                </A>
+              </li>
+            )}</For>
+          </Match>
+          <Match when={props.type === "manga"}>
+            <For each={favourites().data[props.type].edges}>{manga => (
+              <li class="item">
+                <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
+                  <img src={manga.node.coverImage.large} alt="Cover" />
+                </A>
+              </li>
+            )}</For>
+          </Match>
+          <Match when={props.type === "characters"}>
+            <For each={favourites().data[props.type].edges}>{character => (
+              <li class="item">
+                <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>
+                  <img src={character.node.image.large} alt="Cover" />
+                </A>
+              </li>
+            )}</For>
+          </Match>
+          <Match when={props.type === "staff"}>
+            <For each={favourites().data[props.type].edges}>{staff => (
+              <li class="item">
+                <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
+                  <img src={staff.node.image.large} alt="Cover" />
+                </A>
+              </li>
+            )}</For>
+          </Match>
+          <Match when={props.type === "studios"}>
+            <For each={favourites().data[props.type].edges}>{studio => (
+              <li class="item">
+                <A href={"/ani/studio/" + studio.node.id + "/" + formatTitleToUrl(studio.node.name)}>
+                  {studio.node.name}
+                </A>
+              </li>
+            )}</For>
+          </Match>
+        </Switch>
+        <Show when={favourites().data[props.type].pageInfo.hasNextPage}>
+          <Show when={favourites()?.data[props.type].edges} keyed={props.page === 1}>
+            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+              <FavouritesPage
+                page={props.page + 1} 
+                type={props.type}
+                loading={favourites.loading} 
+              /> 
+            </Show>
+          </Show>
+        </Show>
+      </Show>
+    )}</DoomScroll>
   );
 }

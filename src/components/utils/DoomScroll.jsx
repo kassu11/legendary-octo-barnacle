@@ -2,7 +2,7 @@ import { Match } from "solid-js";
 import { onCleanup, onMount, Switch } from "solid-js";
 
 export function DoomScroll(props) {
-  let intersection;
+  let intersection = <div>Intersection</div>;
 
   onMount(() => {
     intersectionObserver.observe(intersection);
@@ -25,7 +25,7 @@ export function DoomScroll(props) {
   const intersectionObserver = new IntersectionObserver(callback, options);
 
   return (
-    <Switch fallback={<div ref={intersection}>Intersection</div>}>
+    <Switch fallback={intersection}>
       <Match when={props.fetchResponse()}>
         {props.children(props.fetchResponse.loading && props.loading)}
       </Match>
