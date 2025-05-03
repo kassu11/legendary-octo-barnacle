@@ -595,54 +595,8 @@ function FavouritesPage(props) {
   
   return (
     <DoomScroll rootMargin="100px" onIntersection={() => setPage(props.page)} loading={props.loading} fetchResponse={favourites}>{fetchCooldown => (
-      <Show when={favourites()?.data[props.type].edges.length}>
-        <Switch>
-          <Match when={props.type === "anime"}>
-            <For each={favourites().data[props.type].edges}>{anime => (
-              <li class="item">
-                <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
-                  <img src={anime.node.coverImage.large} alt="Cover" />
-                </A>
-              </li>
-            )}</For>
-          </Match>
-          <Match when={props.type === "manga"}>
-            <For each={favourites().data[props.type].edges}>{manga => (
-              <li class="item">
-                <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
-                  <img src={manga.node.coverImage.large} alt="Cover" />
-                </A>
-              </li>
-            )}</For>
-          </Match>
-          <Match when={props.type === "characters"}>
-            <For each={favourites().data[props.type].edges}>{character => (
-              <li class="item">
-                <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>
-                  <img src={character.node.image.large} alt="Cover" />
-                </A>
-              </li>
-            )}</For>
-          </Match>
-          <Match when={props.type === "staff"}>
-            <For each={favourites().data[props.type].edges}>{staff => (
-              <li class="item">
-                <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
-                  <img src={staff.node.image.large} alt="Cover" />
-                </A>
-              </li>
-            )}</For>
-          </Match>
-          <Match when={props.type === "studios"}>
-            <For each={favourites().data[props.type].edges}>{studio => (
-              <li class="item">
-                <A href={"/ani/studio/" + studio.node.id + "/" + formatTitleToUrl(studio.node.name)}>
-                  {studio.node.name}
-                </A>
-              </li>
-            )}</For>
-          </Match>
-        </Switch>
+      <>
+        <FavouritePageItems type={props.type} edges={favourites()?.data[props.type].edges} />
         <Show when={favourites().data[props.type].pageInfo.hasNextPage}>
           <Show when={favourites()?.data[props.type].edges} keyed={props.page === 1}>
             <Show when={fetchCooldown === false} fallback="Fetch cooldown">
@@ -654,7 +608,43 @@ function FavouritesPage(props) {
             </Show>
           </Show>
         </Show>
-      </Show>
+      </>
     )}</DoomScroll>
+  );
+}
+
+function FavouritePageItems(props) {
+  return (
+    <For each={props.edges}>{edge => (
+      <li class="item" onDrag={e => console.log(e)}>
+        <Switch>
+          <Match when={props.type === "anime"}>
+            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+              <img src={edge.node.coverImage.large} alt="Cover" />
+            </A>
+          </Match>
+          <Match when={props.type === "manga"}>
+            <A href={"/manga/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+              <img src={edge.node.coverImage.large} alt="Cover" />
+            </A>
+          </Match>
+          <Match when={props.type === "characters"}>
+            <A href={"/ani/character/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name.userPreferred)}>
+              <img src={edge.node.image.large} alt="Cover" />
+            </A>
+          </Match>
+          <Match when={props.type === "staff"}>
+            <A href={"/ani/staff/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name.userPreferred)}>
+              <img src={edge.node.image.large} alt="Cover" />
+            </A>
+          </Match>
+          <Match when={props.type === "studios"}>
+            <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+              {edge.node.name}
+            </A>
+          </Match>
+        </Switch>
+      </li>
+    )}</For>
   );
 }
