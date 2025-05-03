@@ -664,6 +664,37 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
   }
 }`
 
+export const anilistUserMutateFavourites = format`mutation (
+  $animeIds: [Int]
+  $mangaIds: [Int]
+  $characterIds: [Int]
+  $staffIds: [Int]
+  $studioIds: [Int]
+  $animeOrder: [Int]
+  $mangaOrder: [Int]
+  $characterOrder: [Int]
+  $staffOrder: [Int]
+  $studioOrder: [Int]
+) {
+  UpdateFavouriteOrder(
+    animeIds: $animeIds
+    mangaIds: $mangaIds
+    characterIds: $characterIds
+    staffIds: $staffIds
+    studioIds: $studioIds
+    animeOrder: $animeOrder
+    mangaOrder: $mangaOrder
+    characterOrder: $characterOrder
+    staffOrder: $staffOrder
+    studioOrder: $studioOrder
+  ) {
+    anime {
+      pageInfo {
+        total
+      }
+    }
+  }
+}`;
 export const anilistUserFavouriteById = format`query (
   $id: Int
   $name: String

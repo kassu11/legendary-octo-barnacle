@@ -131,6 +131,10 @@ const api = {
       assert(page, "Page is missing");
       return Fetch.authAnilist(token, querys.anilistUserFavouriteById, { id, page }, res => res.data.User.favourites);
     }),
+    mutateFavourites: async (token, variables) => {
+      const request = Fetch.authAnilist(token, querys.anilistUserMutateFavourites, variables);
+      return await request.send();
+    },
     characterInfoById: fetchOnce(id => {
       return Fetch.anilist(querys.anilistCharacterById, { id }, response => response.data.Character);
     }),

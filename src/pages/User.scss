@@ -337,6 +337,20 @@
       padding: 0;
       gap: 1rem;
     }
+
+    .reorder {
+      li * {
+        pointer-events: none;
+        user-select: none;
+      }
+
+      li.dragging {
+        pointer-events: none;
+        user-select: none;
+        cursor: move;
+      }
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
