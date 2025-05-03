@@ -584,6 +584,46 @@ function FavouriteSection(props) {
     });
   }
 
+  const dragStart = e => {
+    if (!reorder()) {
+      return;
+    }
+    const dragged = e.target.closest("li");
+    if (!dragged) {
+      return
+    }
+    console.log(order());
+
+    dragged.classList.add("dragging");
+    dragging = dragged;
+  }
+
+  const dragMove = e => {
+    if (!reorder()) {
+      return;
+    }
+
+    if (dragging && e.type === "touchmove") {
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest("li");
+
+      if (dragging.nextElementSibling === target) { target.after(dragging); } 
+      else { target.before(dragging); } 
+    }
+    else if (dragging && e.buttons === 1 && e.target?.tagName === "LI") {
+      if (dragging.nextElementSibling === e.target) { e.target.after(dragging); } 
+      else { e.target.before(dragging); } 
+    } else if(e.buttons !== 1) {
+      dragging?.classList.remove("dragging");
+      dragging = null;
+    }
+  }
+
+  const dragEnd = () => {
+    dragging?.classList.remove("dragging");
+    dragging = null;
+  }
+
   return (
     <details class="user-profile-favourites-details" classList={{hidden: !visible()}} open>
       <summary>
@@ -624,28 +664,15 @@ function FavouriteSection(props) {
           </Switch>
         </Show>
       </summary>
-      <ol ref={ol} classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} onMouseMove={e => {
-        if (!reorder()) return;
-        if (dragging && e.buttons === 1 && e.target?.tagName === "LI") {
-          if (dragging.nextElementSibling === e.target) { e.target.after(dragging); } 
-          else { e.target.before(dragging); } 
-        } else if(e.buttons !== 1) {
-          dragging?.classList.remove("dragging");
-          dragging = null;
-        }
-      }} onMouseDown={e => {
-          if (!reorder()) {
-            return;
-          }
-          const dragged = e.target.closest("li");
-          if (!dragged) {
-            return
-          }
-        console.log(order());
-
-          dragged.classList.add("dragging");
-          dragging = dragged;
-      }}>
+      <ol 
+        ref={ol} 
+        classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} 
+        onMouseMove={dragMove} 
+        onTouchMove={dragMove} 
+        onTouchEnd={dragEnd} 
+        onMouseDown={dragStart} 
+        onTouchStart={dragStart}
+      >
         <FavouritesPage page={1} type={props.type} setOrder={setOrder} setVisible={setVisible}/>
       </ol>
     </details>
