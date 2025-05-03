@@ -315,6 +315,48 @@
       float: right;
     }
   }
+
+  .user-profile-favourites {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .user-profile-favourites-details {
+    summary {
+      position: sticky;
+      top: 3rem;
+      padding: 1rem;
+      background-color: pink;
+      h3 {
+        display: inline;
+      }
+    }
+
+    ol {
+      list-style: none;
+      padding: 0;
+      gap: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    }
+
+    .flex {
+      display: flex;
+      flex-wrap: wrap;
+      li {
+        padding: 1rem;
+        background-color: grey;
+      }
+    }
+
+    img {
+      aspect-ratio: 5.5/8;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
 }
 
 @layer resize {
@@ -363,6 +405,10 @@
         }
       }
     }
+
+    .user-profile-favourites-details .grid {
+      grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    }
   }
 
   @media (width < 35em) {
@@ -393,6 +439,14 @@
 
       .content {
         font-size: .75rem;
+      }
+    }
+
+    .user-profile-favourites-details ol {
+      gap: .5rem;
+
+      &.flex li {
+        padding: .5rem;
       }
     }
   }
