@@ -77,15 +77,15 @@ function Body(props) {
             <Show when={props.entityInfo().data.gender}>
               <li><strong>Gender:</strong> {props.entityInfo().data.gender}</li>
             </Show>
-            <Show when={props.entityInfo().data.yearsActive.length}>
+            <Show when={props.entityInfo().data.yearsActive?.length}>
               <li>
                 <strong>Active years: </strong> 
                 {props.entityInfo().data.yearsActive.join("-")}
                 <Switch>
-                  <Match when={props.entityInfo().data.dateOfDeath.year && props.entityInfo().data.yearsActive.at(-1) !== props.entityInfo().data.dateOfDeath.year}>
+                  <Match when={props.entityInfo().data.dateOfDeath?.year && props.entityInfo().data.yearsActive.at(-1) !== props.entityInfo().data.dateOfDeath?.year}>
                     -{props.entityInfo().data.dateOfDeath.year}
                   </Match>
-                  <Match when={props.entityInfo().data.dateOfDeath.year == null}>
+                  <Match when={props.entityInfo().data.dateOfDeath?.year == null}>
                     -Present
                   </Match>
                 </Switch>
@@ -434,10 +434,10 @@ function CharacterAndActorCards(props) {
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language())}>{roles => (
           <li class="entity-page-media-voice-actor">
-            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
               <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
             </A>
-            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
@@ -526,7 +526,7 @@ function CharacterAndMediaCards(props) {
               <A href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
                 <img src={character.image.large} alt="Character" class="background"/>
               </A>
-              <A class="media" href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+              <A class="media" href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
                 <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
               </A>
             </div>
@@ -534,7 +534,7 @@ function CharacterAndMediaCards(props) {
               <span>{character.name.userPreferred}</span>
               <span class="role"> {capitalize(edge.characterRole)}</span>
             </A>
-            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
