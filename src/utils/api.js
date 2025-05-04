@@ -239,7 +239,7 @@ const api = {
       assert(typeof token !== "function", "This specific api doesnt support signals");
       assert(variables, "Variables missing");
       assert(variables.id || variables.mediaId, "No mutation id given");
-      const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables);
+      const request = Fetch.authAnilist(token, querys.anilistMutateMedia, variables, res => res.data.SaveMediaListEntry);
       return await request.send();
     },
     deleteMediaListEntry: async (token, id) => {

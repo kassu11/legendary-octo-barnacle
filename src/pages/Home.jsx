@@ -133,11 +133,12 @@ function CurrentCard(props) {
   const [isBehind, setIsBehind] = createSignal(props.data.media.nextAiringEpisode?.episode > progress() + 1);
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (token, mediaId, newProgress) => {
-    const data = await api.anilist.mutateMedia(token, {mediaId, progress: newProgress});
-    assert(data.data.data.SaveMediaListEntry.progress, "No progress found");
+    const response = await api.anilist.mutateMedia(token, {mediaId, progress: newProgress});
+    if (response.status !== 200) { return; }
 
-    props.data.progress = data.data.data.SaveMediaListEntry.progress;
-    if (data.data.data.SaveMediaListEntry.status === "COMPLETED") {
+    assert(response.data.progress, "No progress found");
+    props.data.progress = response.data.progress;
+    if (response.data.status === "COMPLETED") {
       props.mutateCache(request => {
         request.data.data.Page.mediaList = request.data.data.Page.mediaList.filter(media => media.id !== props.data.id);
         return request;

@@ -40,13 +40,16 @@ function modifyMediaListData(listData, type, options) {
   }
 
   const mediaSet = new Set();
-  listData.data.lists.forEach(list => {
+  listData.indecies = {};
+  listData.data.lists.forEach((list, i) => {
     let tail = 0;
-    list.entries.forEach((entry, i, arr) => {
+    list.entries.forEach((entry, j, arr) => {
+      listData.indecies[entry.media.id] ??= []
+      listData.indecies[entry.media.id].push([i, j]);
       if (filter(entry, filterObject)) {
         mediaSet.add(entry.media.id);
 
-        if (tail++ < i) {
+        if (tail++ < j) {
           arr[tail - 1] = entry;
         }
       }
