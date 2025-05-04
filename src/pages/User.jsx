@@ -241,30 +241,40 @@ function GenrePreview(props) {
 }
 
 function ActivityHistory(props) {
-  const amount = Math.round(365 / 2 + 3);
   const _now = new Date();
   let start = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate());
   const end = start.getTime() / 1000;
-  start.setDate(start.getDate() - amount);
+  start.setDate(start.getDate() - 7 * 25 + (6 - start.getDay()) - 5);
   start /= 1000;
 
   return (
     <Show when={props.history.at(-1).date > start}>
       <div>
         <h3>Activity</h3>
-        <ol class="activity-history-container">
-          <For each={props.history}>{(activity, i) => (
-            <Show when={activity.date > start}>
-              <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-                <li class="activity-item" />
-              )}</For>
-              <li class="activity-item" attr:data-level={activity.level} />
-            </Show>
-          )}</For>
-          <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-            <li class="activity-item" />
-          )}</For>
-        </ol>
+        <div class="activity-history-container">
+          <ol class="activity-history-header-list">
+            <li class="activity-history-header">Mon</li>
+            <li class="activity-history-header">Tue</li>
+            <li class="activity-history-header">Wed</li>
+            <li class="activity-history-header">Thu</li>
+            <li class="activity-history-header">Fri</li>
+            <li class="activity-history-header">Sat</li>
+            <li class="activity-history-header">Sun</li>
+          </ol>
+          <ol class="activity-history-list">
+            <For each={props.history}>{(activity, i) => (
+              <Show when={activity.date > start}>
+                <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
+                  <li class="activity-item" />
+                )}</For>
+                <li class="activity-item" attr:data-level={activity.level} />
+              </Show>
+            )}</For>
+            <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
+              <li class="activity-item" />
+            )}</For>
+          </ol>
+        </div>
       </div>
     </Show>
   );
