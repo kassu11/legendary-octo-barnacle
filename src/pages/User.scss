@@ -328,8 +328,10 @@
     width: 100%;
     padding: .5rem;
 
-    span {
-      float: right;
+    > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
   }
 

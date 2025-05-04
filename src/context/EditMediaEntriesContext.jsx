@@ -475,7 +475,7 @@ export function EditMediaEntriesProvider(props) {
                   <input type="checkbox" name="private" id="private" checked={state.mediaPrivate()} onChange={e => state.setMediaPrivate(e.target.checked)} />
                   <label htmlFor="private"> Private</label>
                 </div>
-                <Show when={mediaListEntry().mediaListEntry?.id}>
+                <Show when={mediaListEntry().mediaListEntry}>
                   <button type="button" onClick={() => warning.showModal()}>Delete</button>
                 </Show>
               </div>
