@@ -20,7 +20,7 @@ function formState(auth, initialData) {
   const [format, setFormat] = createSignal();
   const [isFavourite, setIsFavourite] = createSignal();
   const [progress, setProgress] = createSignal()
-  const [volumeProgress, setvolumeProgress] = createSignal()
+  const [progressVolumes, setProgressVolumes] = createSignal()
   const [maxProgress, setMaxProgress] = createSignal()
   const [startedAt, setStartedAt] = createSignal()
   const [completedAt, setCompletedAt] = createSignal()
@@ -67,7 +67,7 @@ function formState(auth, initialData) {
       setAdvancedScores(data?.mediaListEntry?.advancedScores ?? {});
       setStatus(data?.mediaListEntry?.status ?? "none");
       setProgress(data?.mediaListEntry?.progress ?? "");
-      setvolumeProgress(data?.mediaListEntry?.volumeProgress ?? "")
+      setProgressVolumes(data?.mediaListEntry?.progressVolumes ?? "")
       setMaxProgress(data?.episodes ?? data?.chapters ?? null);
       setStartedAt(formatDateToInput(data?.mediaListEntry?.startedAt));
       setCompletedAt(formatDateToInput(data?.mediaListEntry?.completedAt));
@@ -92,7 +92,7 @@ function formState(auth, initialData) {
     status, setStatus,
     format, setFormat,
     progress, setProgress,
-    volumeProgress, setvolumeProgress,
+    volumeProgress: progressVolumes, setvolumeProgress: setProgressVolumes,
     maxProgress, setMaxProgress,
     startedAt, setStartedAt,
     completedAt, setCompletedAt,
@@ -132,8 +132,8 @@ export function EditMediaEntriesProvider(props) {
     if (Number.isNaN(+form.progress) === false && form.progress != (mediaListEntry().mediaListEntry?.progress || 0)) {
       changes.progress = Number(form.progress);
     }
-    if (Number.isNaN(+form.progressVolume) === false && form.progressVolume != (mediaListEntry().mediaListEntry?.progressVolume || 0)) {
-      changes.progressVolume = Number(form.progressVolume);
+    if (Number.isNaN(+form.progressVolumes) === false && form.progressVolumes != (mediaListEntry().mediaListEntry?.progressVolumes || 0)) {
+      changes.progressVolumes = Number(form.progressVolumes);
     }
     if (Number.isNaN(+form.score) === false && form.score != (mediaListEntry().mediaListEntry?.score || 0)) {
       changes.score = Number(form.score);
@@ -346,12 +346,12 @@ export function EditMediaEntriesProvider(props) {
                 </div>
                 <Show when={mediaListEntry().type === "MANGA"}>
                   <div class="media-editor-input volume-progress">
-                    <label htmlFor="volume-progress">Volume Progress</label>
+                    <label htmlFor="progress-volumes">Volume Progress</label>
                     <input 
                       type="number" 
                       inputMode="numeric" 
-                      id="volume-progress" 
-                      name="volumeProgress" 
+                      id="progress-volumes" 
+                      name="progressVolumes" 
                       min="0" 
                       max={mediaListEntry().volumes}
                       value={state.volumeProgress()} 
