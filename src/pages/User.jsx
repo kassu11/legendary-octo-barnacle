@@ -636,7 +636,6 @@ function FavouriteSection(props) {
     if (!dragged) {
       return
     }
-    console.log(order());
 
     dragged.classList.add("dragging");
     const rect = dragged.getBoundingClientRect();
@@ -648,7 +647,6 @@ function FavouriteSection(props) {
       offsetX = e.clientX - rect.x;
       offsetY = e.clientY - rect.y;
     }
-    console.log(offsetX, offsetY, e)
     dragging = dragged;
   }
 
