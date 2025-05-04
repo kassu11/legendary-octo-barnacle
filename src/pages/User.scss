@@ -73,12 +73,29 @@
   }
   .activity-history-container {
     display: grid;
-    gap: .15rem;
-    grid-template-rows: repeat(7, auto);
+    grid-template-columns: auto 1fr;
+    gap: .25rem;
     padding: .5rem;
+  }
+  .activity-history-list {
+    display: grid;
+    gap: .15rem;
+    padding: 0;
+    grid-template-rows: repeat(7, auto);
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
     list-style: none;
+  }
+  .activity-history-header-list {
+    display: grid;
+    list-style: none;
+    padding: 0;
+    align-items: center;
+
+  }
+  .activity-history-header {
+    line-height: 0;
+    font-size: .9em;
   }
   .activity-item {
     position: relative;
@@ -446,6 +463,9 @@
       padding: .5rem;
     }
 
+    .user-profile-activity {
+      grid-template-columns: 1fr;
+    }
 
     .user-profile-container {
       .profile {
@@ -463,6 +483,17 @@
       &.flex li {
         padding: .5rem;
       }
+    }
+  }
+
+  @media (width < 22em) {
+    .activity-history-container {
+      padding: .5rem;
+      gap: .15rem;
+    }
+    .activity-history-list {
+      gap: 0.05rem;
+      border-radius: .05rem;
     }
   }
 }
