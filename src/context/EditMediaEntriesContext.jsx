@@ -204,6 +204,9 @@ export function EditMediaEntriesProvider(props) {
           assert(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
         const response = await api.anilist.mutateMedia(accessToken(), changes);
+        if (response.status === 200) {
+          mutates()?.mutateMedia?.(response.data);
+        }
         console.log("Response", response);
       }
     } 
@@ -485,9 +488,10 @@ export function EditMediaEntriesProvider(props) {
             <p>Are you sure you want to delete this media entry</p>
             <form method="dialog">
               <button onClick={async () => {
-                const response = api.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
-                console.log("Detele", response);
                 editor.close();
+                const response = await api.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
+                console.log("Detele", response);
+                mutates()?.deleteMedia?.();
               }}>Yes</button>
               <button>No</button>
             </form>
