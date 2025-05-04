@@ -452,7 +452,7 @@ function MediaList(props) {
           <option value="TW">Taiwan</option>
         </select>
         <select name="isAdult" onChange={e => setSearchParams({ isAdult: e.target.value || undefined })} value={isAdult() === undefined ? "" : String(isAdult())}>
-          <option value="" hidden>Age</option>
+          <option value="" hidden>Age rating</option>
           <Show when={isAdult() !== undefined}>
             <option value="">All ratings</option>
           </Show>
@@ -485,21 +485,30 @@ function MediaList(props) {
           <option value="averageScore">Average Score</option>
           <option value="popularity">Popularity</option>
         </select>
-        <button onClick={() => {
-          setSearchParams({
-            search: undefined,
-            format: undefined,
-            status: undefined,
-            genre: undefined,
-            countryOfOrigin: undefined,
-            isAdult: undefined,
-            year: undefined,
-            private: undefined,
-            notes: undefined,
-            rewatched: undefined,
-            sort: undefined
-          });
-        }}>clear</button>
+        <Switch>
+          <Match when={location.search}>
+            <button style={{background: "skyblue"}} onClick={() => {
+              setSearchParams({
+                search: undefined,
+                format: undefined,
+                status: undefined,
+                genre: undefined,
+                countryOfOrigin: undefined,
+                isAdult: undefined,
+                year: undefined,
+                private: undefined,
+                notes: undefined,
+                rewatched: undefined,
+                sort: undefined
+              });
+            }}>Remove filters</button>
+          </Match>
+          <Match when={params.list}>
+            <button style={{background: "lime"}} onClick={() => {
+              navigate("");
+            }}>Back to home</button>
+          </Match>
+        </Switch>
       </div>
       <div class="user-profile-media-list-container">
         <Show when={listData()?.data}>
@@ -526,6 +535,9 @@ function MediaList(props) {
                           </Show>
                         </div>
                         <div class="user-media-card-footer">
+                          <Show when={entry.media.isAdult}>
+                            <p class="user-profile-media-list-adult-warning">18+</p>
+                          </Show>
                           <p>
                             {entry.media.title.userPreferred}
                           </p>

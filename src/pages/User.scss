@@ -285,6 +285,14 @@
       padding: .75rem;
     }
   }
+  .user-profile-media-list-adult-warning {
+    position: absolute;
+    bottom: 100%;
+    font-size: .75em;
+    padding: .1em .3em;
+    background-color: red;
+    transform: translateY(33%);
+  }
 
   .user-media-card-header {
     position: absolute;
