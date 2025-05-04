@@ -582,7 +582,7 @@ function FavouriteSection(props) {
   const { accessToken, authUserData } = useAuthentication();
   const { user } = useUser();
 
-  let ol, dragging;
+  let ol, dragging, offsetX,offsetY;
 
   const resetOrder = () => {
     setReorder(false);
@@ -605,6 +605,16 @@ function FavouriteSection(props) {
     console.log(order());
 
     dragged.classList.add("dragging");
+    const rect = dragged.getBoundingClientRect();
+    if (e.type === "touchstart") {
+      const touch = e.touches[0];
+      offsetX = touch.clientX - rect.x;
+      offsetY = touch.clientY - rect.y;
+    } else {
+      offsetX = e.clientX - rect.x;
+      offsetY = e.clientY - rect.y;
+    }
+    console.log(offsetX, offsetY, e)
     dragging = dragged;
   }
 
@@ -616,21 +626,44 @@ function FavouriteSection(props) {
     if (dragging && e.type === "touchmove") {
       const touch = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest("li");
-
-      if (dragging.nextElementSibling === target) { target.after(dragging); } 
-      else { target.before(dragging); } 
+      if (target) { 
+        if (dragging.nextElementSibling === target) { target.after(dragging); } 
+        else { target.before(dragging); } 
+      }
+      translateMove();
     }
     else if (dragging && e.buttons === 1 && e.target?.tagName === "LI") {
       if (dragging.nextElementSibling === e.target) { e.target.after(dragging); } 
       else { e.target.before(dragging); } 
     } else if(e.buttons !== 1) {
-      dragging?.classList.remove("dragging");
-      dragging = null;
+      dragEnd();
+    }
+
+    if (e.buttons === 1) {
+      translateMove();
+    }
+
+    function translateMove() {
+      const rect = dragging.getBoundingClientRect();
+      let curX = 0, curY = 0, x = e.clientX, y = e.clientY;
+      if (e.type === "touchmove") {
+        const touch = e.touches[0];
+        x = touch.clientX;
+        y = touch.clientY;
+      }
+      if (dragging.style.transform) {
+        const numbers = dragging.style.transform.match(/-?[\d.]+(?=px)/g).map(Number);
+        [curX, curY] = numbers;
+      }
+      dragging.style.transform = `translate(${curX + (x - (rect.x + offsetX))}px, ${curY + (y - (rect.y + offsetY))}px)`;
     }
   }
 
   const dragEnd = () => {
-    dragging?.classList.remove("dragging");
+    if (dragging) {
+      dragging.style.transform = null;
+      dragging.classList.remove("dragging");
+    }
     dragging = null;
   }
 
