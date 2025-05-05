@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createMemo, createSignal, For, Match, onCleanup, Show, useContext } from "solid-js";
+import { createContext, createEffect, createMemo, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -617,12 +617,15 @@ export function FavouriteContainer() {
   );
 }
 
+const FavouritesContext = createContext();
+const useFavourites = () => useContext(FavouritesContext);
+
 function FavouriteSection(props) {
   assert(props.title, "title missing");
   assert(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
   const [reorder, setReorder] = createSignal(false);
-  const [order, setOrder] = createSignal([]);
+  const [allEdges, setAllEdges] = createSignal([]);
   const { accessToken, authUserData } = useAuthentication();
   const { user } = useUser();
 
@@ -630,8 +633,8 @@ function FavouriteSection(props) {
 
   const resetOrder = () => {
     setReorder(false);
-    order().forEach(id => {
-      const elem = ol.querySelector(`li[data-id="${id}"]`);
+    allEdges().forEach(edge => {
+      const elem = ol.querySelector(`li[data-id="${edge.node.id}"]`);
       if (elem) {
         ol.append(elem);
       }
@@ -734,7 +737,10 @@ function FavouriteSection(props) {
                 } 
 
                 if (response.status === 200) {
-                  setOrder(newIds);
+                  setAllEdges(edges => {
+                    const indexFromId = Object.fromEntries(edges.map((edge, i) => [edge.node.id, i]));
+                    return edges.map((_, i) => (edges[indexFromId[newIds[i]]]));
+                  });
                   setReorder(false);
                 } else {
                   resetOrder();
@@ -758,45 +764,47 @@ function FavouriteSection(props) {
         onMouseDown={dragStart} 
         onTouchStart={dragStart}
       >
-        <FavouritesPage page={1} type={props.type} setOrder={setOrder} setVisible={setVisible}/>
+        <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges}}>
+          <Show when={user().id} keyed>
+            <FavouritesPage page={1} setVisible={setVisible} />
+          </Show>
+        </FavouritesContext.Provider>
       </ol>
     </details>
   );
 }
 
 function FavouritesPage(props) {
-  assert(props.type, "Type is missing");
   const { user } = useUser();
+  const { type, allEdges } = useFavourites();
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(undefined);
-  const [favourites] = api.anilist.favouritesByUserId(() => user().id || undefined, props.page === 1 ? () => props.page : page, accessToken); 
+  const [favourites, { mutateCache: mutateFavouritesCache }] = api.anilist.favouritesByUserId(() => user().id || undefined, props.page === 1 ? () => props.page : page, accessToken); 
 
   createEffect(() => {
-    if (favourites()?.data[props.type]?.edges.length > 0) {
-      props.setOrder(order => {
-        order.splice((props.page - 1) * 25, 25, ...favourites()?.data[props.type]?.edges.map(edge => edge.node.id));
-        return [...order];
-      });
+    if (favourites()?.data[type]?.edges.length > 0) {
+      untrack(allEdges).splice((props.page - 1) * 25, 25, ...favourites()?.data[type]?.edges);
     }
     if (props.page === 1) {
-      props.setVisible(favourites()?.data[props.type]?.edges.length > 0)
+      props.setVisible(favourites()?.data[type]?.edges.length > 0)
     }
   });
-  
+
+  createEffect(on(allEdges, listOfEdges => {
+    untrack(favourites).data[type].edges = listOfEdges.slice((props.page - 1) * 25, props.page * 25);
+    mutateFavouritesCache(data => data);
+  }, { defer: true }));
+
   return (
     <DoomScroll rootMargin="100px" onIntersection={() => setPage(props.page)} loading={props.loading} fetchResponse={favourites}>{fetchCooldown => (
       <>
-        <FavouritePageItems type={props.type} edges={favourites()?.data[props.type].edges} />
-        <Show when={favourites().data[props.type].pageInfo.hasNextPage}>
-          <Show when={favourites()?.data[props.type].edges} keyed={props.page === 1}>
-            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-              <FavouritesPage
-                page={props.page + 1} 
-                type={props.type}
-                setOrder={props.setOrder}
-                loading={favourites.loading} 
-              /> 
-            </Show>
+        <FavouritePageItems type={type} edges={favourites()?.data[type].edges} />
+        <Show when={favourites().data[type].pageInfo.hasNextPage}>
+          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+            <FavouritesPage
+              page={props.page + 1} 
+              loading={favourites.loading} 
+            /> 
           </Show>
         </Show>
       </>
