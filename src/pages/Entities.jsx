@@ -4,6 +4,7 @@ import { batch, createEffect, createSignal, Match, Show } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../utils/formating";
 import { DoomScroll } from "../components/utils/DoomScroll";
+import { useAuthentication } from "../context/AuthenticationContext";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();
@@ -105,7 +106,8 @@ function Entities(props) {
 
 function CharactersPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
-  const [characters] = api.anilist.characters(() => props.id, page);
+  const { accessToken } = useAuthentication();
+  const [characters] = api.anilist.characters(() => props.id, page, accessToken);
 
   createEffect(() => {
     if (props.page !== 1 || characters() == null) {
@@ -164,7 +166,8 @@ function CharactersPage(props) {
 
 function StaffPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
-  const [staff] = api.anilist.allMediaStaff(() => props.id, page);
+  const { accessToken } = useAuthentication();
+  const [staff] = api.anilist.allMediaStaff(() => props.id, page, accessToken);
 
   if (props.page === 1) {
     createEffect(() => {
