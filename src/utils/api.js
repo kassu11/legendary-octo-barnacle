@@ -447,7 +447,7 @@ function cacheBuilder(settings) {
       const checkCacheBeforeFetch = settings.type == "default" || settings.type == "only-if-cached";
       const fetchOnStart = (DEBUG == false || settings.fetchOnDebug || settings.type == "no-store" || !settings.storeName) && checkCacheBeforeFetch == false;
 
-      const mutateCache = mutateData => {
+      const mutateCache = (mutateData, callback) => {
         if (typeof mutateData === "function") {
           mutateData = mutateData(untrack(data));
         }
@@ -466,7 +466,10 @@ function cacheBuilder(settings) {
             cacheReq.onsuccess = evt => {
               const db = evt.target.result;
               const store = IndexedDB.store(db, settings.storeName, "readwrite");
-              store.put(mutateData);
+              const putReq = store.put(mutateData);
+              if (callback) {
+                putReq.onsuccess = callback;
+              }
             }
           }
         }

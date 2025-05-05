@@ -573,8 +573,7 @@ function MediaList(props) {
                                           res.data.lists[listIndex].entries[entryIndex] = responseEntry;
                                         });
                                         return res;
-                                      });
-                                      updateListInfo();
+                                      }, updateListInfo);
                                     },
                                     deleteMedia: () => {
                                       mutateMediaListCache(res => {
@@ -582,8 +581,7 @@ function MediaList(props) {
                                           res.data.lists[listIndex].entries.splice(entryIndex, 1);
                                         });
                                         return res;
-                                      });
-                                      updateListInfo();
+                                      }, updateListInfo);
                                     }
                                   });
                                 }}>
