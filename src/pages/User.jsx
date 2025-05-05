@@ -8,7 +8,6 @@ import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/forma
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
-import { createStore } from "solid-js/store";
 import { DoomScroll } from "../components/utils/DoomScroll.jsx";
 import Score from "../components/media/Score.jsx";
 
@@ -460,7 +459,7 @@ function MediaList(props) {
           <option value="true">R-18</option>
         </select>
         <input type="number" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => setSearchParams({ year: e.target.value || undefined })} />
-        <Show when={authUserData().data.id === user().id}>
+        <Show when={authUserData()?.data.id === user().id}>
           <label htmlFor="private">
             <input type="checkbox" name="private" id="private" checked={privateFilter()} onChange={e => setSearchParams({ private: e.target.checked ? "true" : undefined })} />
             {" "}Private
@@ -560,7 +559,7 @@ function MediaList(props) {
                             <Score score={entry.score} format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
                           </div>
                         </div>
-                        <Show when={user().id === authUserData().data.id}>
+                        <Show when={user().id === authUserData()?.data.id}>
                           <div class="search-card-quick-action">
                             <ul class="search-card-quick-action-items">
                               <li class="item" label="Edit media">
@@ -724,15 +723,15 @@ function FavouriteSection(props) {
                 const newOrder = newIds.map((_, i) => i + 1);
 
                 let response;
-                if (props.type="anime") {
+                if (props.type === "anime") {
                   response = await api.anilist.mutateFavourites(accessToken(), {animeIds: newIds, animeOrder: newOrder});
-                } else if (props.type="manga") {
+                } else if (props.type === "manga") {
                   response = await api.anilist.mutateFavourites(accessToken(), {mangaIds: newIds, mangaOrder: newOrder});
-                } else if (props.type="studios") {
+                } else if (props.type === "studios") {
                   response = await api.anilist.mutateFavourites(accessToken(), {studioIds: newIds, studioOrder: newOrder});
-                } else if (props.type="staff") {
+                } else if (props.type === "staff") {
                   response = await api.anilist.mutateFavourites(accessToken(), {staffIds: newIds, staffOrder: newOrder});
-                } else if (props.type="characters") {
+                } else if (props.type === "characters") {
                   response = await api.anilist.mutateFavourites(accessToken(), {characterIds: newIds, characterOrder: newOrder});
                 } 
 
@@ -798,7 +797,9 @@ function FavouritesPage(props) {
   return (
     <DoomScroll rootMargin="100px" onIntersection={() => setPage(props.page)} loading={props.loading} fetchResponse={favourites}>{fetchCooldown => (
       <>
-        <FavouritePageItems type={type} edges={favourites()?.data[type].edges} />
+        <For each={favourites()?.data[type].edges}>{edge => (
+          <FavouritePageItem edge={edge} />
+        )}</For>
         <Show when={favourites().data[type].pageInfo.hasNextPage}>
           <Show when={fetchCooldown === false} fallback="Fetch cooldown">
             <FavouritesPage
@@ -812,38 +813,72 @@ function FavouritesPage(props) {
   );
 }
 
-function FavouritePageItems(props) {
+function FavouritePageItem(props) {
+  const [hidden, setHidden] = createSignal(false);
+  const { setAllEdges, type } = useFavourites();
+  const removeEdgeId = (id) => setAllEdges(edges => edges.filter(edge => edge.node.id !== id));
+
   return (
-    <For each={props.edges}>{edge => (
-      <li class="item" attr:data-id={edge.node.id}>
-        <Switch>
-          <Match when={props.type === "anime"}>
-            <A href={"/anime/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
-              <img src={edge.node.coverImage.large} alt="Cover" />
-            </A>
-          </Match>
-          <Match when={props.type === "manga"}>
-            <A href={"/manga/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
-              <img src={edge.node.coverImage.large} alt="Cover" />
-            </A>
-          </Match>
-          <Match when={props.type === "characters"}>
-            <A href={"/ani/character/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name.userPreferred)}>
-              <img src={edge.node.image.large} alt="Cover" />
-            </A>
-          </Match>
-          <Match when={props.type === "staff"}>
-            <A href={"/ani/staff/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name.userPreferred)}>
-              <img src={edge.node.image.large} alt="Cover" />
-            </A>
-          </Match>
-          <Match when={props.type === "studios"}>
-            <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
-              {edge.node.name}
-            </A>
-          </Match>
-        </Switch>
-      </li>
-    )}</For>
+    <li classList={{hidden: hidden()}} attr:data-id={props.edge.node.id}>
+      <Switch>
+        <Match when={type === "anime"}>
+          <A href={"/anime/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.title.userPreferred)}>
+            <DeleteFavourite animeId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
+            <img src={props.edge.node.coverImage.large} alt="Cover" />
+          </A>
+        </Match>
+        <Match when={type === "manga"}>
+          <A href={"/manga/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.title.userPreferred)}>
+            <DeleteFavourite mangaId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
+            <img src={props.edge.node.coverImage.large} alt="Cover" />
+          </A>
+        </Match>
+        <Match when={type === "characters"}>
+          <A href={"/ani/character/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.name.userPreferred)}>
+            <DeleteFavourite characterId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
+            <img src={props.edge.node.image.large} alt="Cover" />
+          </A>
+        </Match>
+        <Match when={type === "staff"}>
+          <A href={"/ani/staff/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.name.userPreferred)}>
+            <DeleteFavourite staffId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
+            <img src={props.edge.node.image.large} alt="Cover" />
+          </A>
+        </Match>
+        <Match when={type === "studios"}>
+          <A href={"/ani/studio/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.name)}>
+            <DeleteFavourite studioId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
+            {props.edge.node.name}
+          </A>
+        </Match>
+      </Switch>
+    </li>
+  );
+}
+
+function DeleteFavourite(props) {
+  const { authUserData, accessToken } = useAuthentication();
+  const { user } = useUser();
+  assert(props.onClick, "onClick is missing");
+  assert(props.mutate, "mutate is missing");
+
+  return (
+    <Show when={user().id === authUserData()?.data.id}>
+      <button class="profile-favourites-delete-button" onClick={async (e) => {
+        e.preventDefault();
+        props.onClick();
+        const response = await api.anilist.toggleFavourite(accessToken(), {
+          mangaId: props.mangaId,
+          animeId: props.animeId,
+          staffId: props.staffId,
+          characterId: props.characterId,
+          studioId: props.studioId,
+        });
+
+        if (response.status === 200) {
+          props.mutate();
+        }
+      }}>Delete</button>
+    </Show>
   );
 }

@@ -354,6 +354,8 @@
       top: 3rem;
       padding: 1rem;
       background-color: pink;
+      z-index: 1;
+      margin-bottom: 1rem;
       h3 {
         display: inline;
       }
@@ -363,6 +365,9 @@
       list-style: none;
       padding: 0;
       gap: 1rem;
+    }
+    li {
+      position: relative;
     }
 
     .reorder {
@@ -376,6 +381,10 @@
         pointer-events: none;
         user-select: none;
         cursor: move;
+        z-index: 1;
+      }
+      .profile-favourites-delete-button {
+        display: none;
       }
     }
 
@@ -387,6 +396,7 @@
     .flex {
       display: flex;
       flex-wrap: wrap;
+      font-size: 1rem;
       li {
         padding: 1rem;
         background-color: grey;
@@ -398,6 +408,17 @@
       width: 100%;
       object-fit: cover;
     }
+
+    li:not(:hover, :focus-within) .profile-favourites-delete-button {
+      display: none;
+    }
+  }
+
+  .profile-favourites-delete-button {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    transform: translate(20%, -50%);
   }
 }
 
