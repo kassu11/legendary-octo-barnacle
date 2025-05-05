@@ -12,7 +12,8 @@ import { DoomScroll } from "../components/utils/DoomScroll";
 
 export function Character() {
   const params = useParams();
-  const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = api.anilist.characterInfoById(() => params.id);
+  const { accessToken } = useAuthentication();
+  const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = api.anilist.characterInfoById(() => params.id, accessToken);
 
   return (
     <Body type="CHARACTER" entityInfo={characterInfo} mutateEntityInfoCache={mutateCharacterInfoCache} />
@@ -21,7 +22,8 @@ export function Character() {
 
 export function Staff() {
   const params = useParams();
-  const [staffInfo, { mutateCache: mutateStaffInfoCache }] = api.anilist.staffInfoById(() => params.id);
+  const { accessToken } = useAuthentication();
+  const [staffInfo, { mutateCache: mutateStaffInfoCache }] = api.anilist.staffInfoById(() => params.id, accessToken);
 
   return (
     <Body type="STAFF" entityInfo={staffInfo} mutateEntityInfoCache={mutateStaffInfoCache} />

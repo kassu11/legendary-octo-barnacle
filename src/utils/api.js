@@ -135,8 +135,8 @@ const api = {
       const request = Fetch.authAnilist(token, querys.anilistUserMutateFavourites, variables);
       return await request.send();
     },
-    characterInfoById: fetchOnce(id => {
-      return Fetch.anilist(querys.anilistCharacterById, { id }, response => response.data.Character);
+    characterInfoById: fetchOnce((id, token) => {
+      return Fetch.authAnilist(token, querys.anilistCharacterById, { id }, response => response.data.Character);
     }),
     characterMediaById: fetchOnce((token, id, variables = {}) => { 
       return Fetch.authAnilist(token, querys.anilistCharacterById, {
@@ -148,8 +148,8 @@ const api = {
         id,
       }, response => response.data.Character.media);
     }),
-    staffInfoById: fetchOnce(id => {
-      return Fetch.anilist(querys.anilistStaffById, { id }, (response) => response.data.Staff);
+    staffInfoById: fetchOnce((id, token) => {
+      return Fetch.authAnilist(token, querys.anilistStaffById, { id }, (response) => response.data.Staff);
     }),
     staffCharactersById: fetchOnce((token, id, variables = {}) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
@@ -178,11 +178,11 @@ const api = {
     externalSources: fetchOnce(type => {
       return Fetch.anilist(querys.anilistExternalSources, { type: type || undefined });
     }),
-    characters: fetchOnce((id, page = 1) => {
-      return Fetch.anilist(querys.anilistCharacters, { id, page }, response => response.data.Media);
+    characters: fetchOnce((id, page = 1, token) => {
+      return Fetch.authAnilist(token, querys.anilistCharacters, { id, page }, response => response.data.Media);
     }),
-    allMediaStaff: fetchOnce((id, page = 1) => {
-      return Fetch.anilist(querys.anilistStaff, { id, page }, res => res.data.Media);
+    allMediaStaff: fetchOnce((id, page = 1, token) => {
+      return Fetch.authAnilist(token, querys.anilistStaff, { id, page }, res => res.data.Media);
     }),
     trendingMedia: fetchOnce((token) => {
       const dates = getDates();
@@ -272,16 +272,6 @@ const api = {
     readingManga: fetchOnce((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "MANGA", "perPage": 40
-      });
-    }),
-    topAnime: fetchOnce(() => {
-      return Fetch.anilist(querys.searchMedia, { 
-        "page": 1, "type": "ANIME", "sort": "POPULARITY_DESC" 
-      });
-    }),
-    topManga: fetchOnce(() => {
-      return Fetch.anilist(querys.searchMedia, { 
-        "page": 1, "type": "MANGA", "sort": "POPULARITY_DESC" 
       });
     }),
   },
