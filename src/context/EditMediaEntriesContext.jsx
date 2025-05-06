@@ -484,7 +484,7 @@ export function EditMediaEntriesProvider(props) {
               </div>
             </div>
           </form>
-          <dialog ref={warning}>
+          <dialog ref={warning} class="media-editor-warning-dialog" >
             <p>Are you sure you want to delete this media entry</p>
             <form method="dialog">
               <button onClick={async () => {
