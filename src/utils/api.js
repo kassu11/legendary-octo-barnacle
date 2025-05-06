@@ -53,22 +53,22 @@ const api = {
     }),
   },
   anilist: {
-    mediaId: fetchOnce((id, token) => {
+    mediaId: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.anilistMediaById, { id, perPage: 6 });
     }),
-    userByName: fetchOnce((name, token) => {
+    userByName: reloadCache((name, token) => {
       assert(name, "Name is missing");
       return Fetch.authAnilist(token, querys.getUserByName, { name }, res => res.data.User);
     }),
-    activityByUserId: fetchOnce((id, token) => {
+    activityByUserId: reloadCache((id, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.profileActivity, { id });
     }),
-    activityById: fetchOnce((id, token) => {
+    activityById: reloadCache((id, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.anilistActivityById, { id }, res => res.data.Activity);
     }),
-    activityRepliesById: fetchOnce((id, page, token) => {
+    activityRepliesById: reloadCache((id, page, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.anilistActivityRepliedById, { id, page }, res => res.data.Page);
     }),
@@ -119,14 +119,14 @@ const api = {
         default: return Fetch.authAnilist(token, querys.anilistUserNotifications, { page }, res => res.data.Page);  
       }
     }),
-    mediaListByUserId: fetchOnce((id, type, token) => {
+    mediaListByUserId: reloadCache((id, type, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.anilistUserMediaList, {
         "userId": id,
         "type": type,
       }, res => res.data.MediaListCollection);
     }),
-    favouritesByUserId: fetchOnce((id, page, token) => {
+    favouritesByUserId: reloadCache((id, page, token) => {
       assert(id, "Id is missing");
       assert(page, "Page is missing");
       return Fetch.authAnilist(token, querys.anilistUserFavouriteById, { id, page }, res => res.data.User.favourites);
@@ -135,10 +135,10 @@ const api = {
       const request = Fetch.authAnilist(token, querys.anilistUserMutateFavourites, variables);
       return await request.send();
     },
-    characterInfoById: fetchOnce((id, token) => {
+    characterInfoById: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.anilistCharacterById, { id }, response => response.data.Character);
     }),
-    characterMediaById: fetchOnce((token, id, variables = {}) => { 
+    characterMediaById: reloadCache((token, id, variables = {}) => { 
       return Fetch.authAnilist(token, querys.anilistCharacterById, {
         ...variables, 
         "page": variables.page || 1,
@@ -148,10 +148,10 @@ const api = {
         id,
       }, response => response.data.Character.media);
     }),
-    staffInfoById: fetchOnce((id, token) => {
+    staffInfoById: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { id }, (response) => response.data.Staff);
     }),
-    staffCharactersById: fetchOnce((token, id, variables = {}) => {
+    staffCharactersById: reloadCache((token, id, variables = {}) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
         ...variables, 
         "characterPage": variables.characterPage || 1,
@@ -161,7 +161,7 @@ const api = {
         id,
       }, (response) => response.data.Staff.characterMedia);
     }),
-    staffMediaById: fetchOnce((token, id, type, variables) => {
+    staffMediaById: reloadCache((token, id, type, variables) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
         ...variables, 
         "staffPage": variables.staffPage || 1,
@@ -172,19 +172,19 @@ const api = {
         type,
       }, (response) => response.data.Staff.staffMedia);
     }),
-    genresAndTags: fetchOnce(() => {
+    genresAndTags: reloadCache(() => {
       return Fetch.anilist(querys.anilistGenresAndTags);
     }),
-    externalSources: fetchOnce(type => {
+    externalSources: reloadCache(type => {
       return Fetch.anilist(querys.anilistExternalSources, { type: type || undefined });
     }),
-    characters: fetchOnce((id, page = 1, token) => {
+    characters: reloadCache((id, page = 1, token) => {
       return Fetch.authAnilist(token, querys.anilistCharacters, { id, page }, response => response.data.Media);
     }),
-    allMediaStaff: fetchOnce((id, page = 1, token) => {
+    allMediaStaff: reloadCache((id, page = 1, token) => {
       return Fetch.authAnilist(token, querys.anilistStaff, { id, page }, res => res.data.Media);
     }),
-    trendingMedia: fetchOnce((token) => {
+    trendingMedia: reloadCache((token) => {
       const dates = getDates();
       return Fetch.authAnilist(token, querys.trendingMedia, {
         "season": dates.season,
@@ -193,7 +193,7 @@ const api = {
         "nextYear": dates.nextYear,
       });
     }),
-    trendingAnime: fetchOnce((token) => {
+    trendingAnime: reloadCache((token) => {
       const dates = getDates();
       return Fetch.authAnilist(token, querys.trendingAnime, {
         "type": "ANIME",
@@ -203,7 +203,7 @@ const api = {
         "nextYear": dates.nextYear,
       });
     }),
-    trendingManga: fetchOnce((token) => {
+    trendingManga: reloadCache((token) => {
       const dates = getDates();
       return Fetch.authAnilist(token, querys.trendingManga, {
         "type": "MANGA",
@@ -222,7 +222,7 @@ const api = {
     getAuthUserData: reloadCache(token => {
       return Fetch.authAnilist(token, querys.currentUser, {}, (response) => response.data.Viewer);
     }),
-    getActivity: fetchOnce((token, variables) => {
+    getActivity: reloadCache((token, variables) => {
       return Fetch.authAnilist(token, querys.anilistActivity, variables);
     }),
     searchMedia: fetchOnce((token, variables) => {
@@ -231,7 +231,7 @@ const api = {
     searchMediaCache: onlyIfCache((token, variables) => {
       return Fetch.authAnilist(token, querys.searchMedia, variables, (response) => response.data.Page);
     }),
-    friendsMediaScore: fetchOnce((token, id, variables) => {
+    friendsMediaScore: reloadCache((token, id, variables) => {
       return Fetch.authAnilist(token, querys.anilistGetFriendMediaScore, {id, ...variables});
     }),
     mutateMedia: async (token, variables) => {
@@ -264,12 +264,12 @@ const api = {
       const request = Fetch.authAnilist(token, querys.anilistMutateToggleFavourite, variables);
       return await request.send();
     },
-    wachingAnime: fetchOnce((id, token) => {
+    wachingAnime: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "ANIME", "perPage": 40
       });
     }),
-    readingManga: fetchOnce((id, token) => {
+    readingManga: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.currentWachingMedia, {
         "userId": id, "type": "MANGA", "perPage": 40
       });
