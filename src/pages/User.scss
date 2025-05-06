@@ -460,7 +460,11 @@
 
   .user-profile-stats-graph-container {
     background-color: yellow;
-    overflow: auto;
+
+    .scroll {
+      overflow: auto;
+      direction: rtl;
+    }
 
     svg {
       background-color: orange;
@@ -483,7 +487,6 @@
       font-weight: 600;
     }
     .year {
-      font-size: 1.25rem;
       font-weight: 600;
     }
 
