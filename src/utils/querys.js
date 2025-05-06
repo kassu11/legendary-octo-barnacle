@@ -635,6 +635,53 @@ export const anilistUserNotifications = format`query ($page: Int, $types: [Notif
     }
   }
 }`;
+
+export const anilistToggleFollow = format`mutation ($id: Int) {
+  ToggleFollow(userId: $id) {
+    id
+    name
+    isFollowing
+  }
+}`;
+
+export const anilistGetUserFollowers = format`query ($id: Int!, $page: Int) {
+  Page(page: $page) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    followers(userId: $id, sort: USERNAME) {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+  }
+}`;
+
+export const anilistGetUserFollowing = format`query ($id: Int!, $page: Int) {
+  Page(page: $page) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    following(userId: $id, sort: USERNAME) {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+  }
+}`;
+
 export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {

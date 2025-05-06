@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createMemo, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
+import { createContext, createEffect, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -21,7 +21,7 @@ export function User(props) {
   return (
     <UserContext.Provider value={{ user: () => userData().data}}>
       <Switch>
-        <Match when={userData()?.data}>
+        <Match when={userData()?.data && !userData.loading}>
           <Content>
             {props.children}
           </Content>
@@ -882,3 +882,99 @@ function DeleteFavourite(props) {
     </Show>
   );
 }
+
+export function Socials() {
+  const { user } = useUser();
+  const [tab, setTab] = createSignal("following");
+
+  return (
+    <div class="user-profile-socials-page">
+      <ul>
+        <li>
+          <button onClick={() => setTab("following")}>Following</button>
+        </li>
+        <li>
+          <button onClick={() => setTab("followers")}>Followers</button>
+        </li>
+      </ul>
+      <Switch>
+        <Match when={tab() === "following"}>
+          <ol class="user-profile-social-grid">
+            <Show when={user().id} keyed>
+              <Following page={1} />
+            </Show>
+          </ol>
+        </Match>
+        <Match when={tab() === "followers"}>
+          <ol class="user-profile-social-grid">
+            <Show when={user().id} keyed>
+              <Followers page={1} />
+            </Show>
+          </ol>
+        </Match>
+      </Switch>
+    </div>
+  );
+}
+
+function Following(props) {
+  assert(props.page, "Page is missing");
+  const { user } = useUser();
+  const { authUserData, accessToken } = useAuthentication();
+  const [following] = api.anilist.userFollowing(() => user().id, props.page, accessToken);
+  const [showNext, setShowNext] = createSignal(false);
+
+  return (
+    <Show when={following()}>
+      <For each={following().data.following}>{follower => (
+        <li>
+          <A href={"/user/" + follower.name}>
+            <img src={follower.avatar.large} alt="User profile" />
+            <p>{follower.name}</p>
+            <Show when={user().id === authUserData()?.data.id}>
+              <button onClick={async e => {
+                e.preventDefault();
+                const response = await api.anilist.toggleFollow(accessToken(), follower.id);
+                console.log(response);
+              }}>Unfollow</button>
+            </Show>
+          </A>
+        </li>
+      )}</For>
+      <Show when={following().data.pageInfo.hasNextPage}>
+        <Show when={showNext()}>
+          <Followers page={props.page + 1} />
+        </Show>
+        <button onClick={() => setShowNext(true)}>Load more</button>
+      </Show>
+    </Show>
+  );
+}
+
+function Followers(props) {
+  assert(props.page, "Page is missing");
+  const { user } = useUser();
+  const { accessToken } = useAuthentication();
+  const [followers] = api.anilist.userFollowers(() => user().id, props.page, accessToken);
+  const [showNext, setShowNext] = createSignal(false);
+
+  return (
+    <Show when={followers()}>
+      <For each={followers().data.followers}>{follower => (
+        <li>
+          <A href={"/user/" + follower.name}>
+            <img src={follower.avatar.large} alt="User profile" />
+            <p>{follower.name}</p>
+          </A>
+        </li>
+      )}</For>
+      <Show when={followers().data.pageInfo.hasNextPage}>
+        <Show when={showNext()}>
+          <Followers page={props.page + 1} />
+        </Show>
+        <button onClick={() => setShowNext(true)}>Load more</button>
+      </Show>
+    </Show>
+  );
+}
+

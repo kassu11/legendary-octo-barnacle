@@ -60,6 +60,19 @@ const api = {
       assert(name, "Name is missing");
       return Fetch.authAnilist(token, querys.getUserByName, { name }, res => res.data.User);
     }),
+    toggleFollow: async (token, id) => {
+      assert(id, "id is missing");
+      const request = Fetch.authAnilist(token, querys.anilistToggleFollow, { id });
+      return await request.send();
+    },
+    userFollowing: reloadCache((id, page = 1, token) => {
+      assert(id, "id is missing");
+      return Fetch.authAnilist(token, querys.anilistGetUserFollowing, { id, page }, res => res.data.Page);
+    }),
+    userFollowers: reloadCache((id, page = 1, token) => {
+      assert(id, "id is missing");
+      return Fetch.authAnilist(token, querys.anilistGetUserFollowers, { id, page }, res => res.data.Page);
+    }),
     activityByUserId: reloadCache((id, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, querys.profileActivity, { id });
@@ -538,6 +551,8 @@ function cacheBuilder(settings) {
           if (settings.type === "fetch-once") { 
             setLoading(false);
             return;
+          } else if(fetchOnStart === false) {
+            setLoading(false);
           }
         } else if (settings.type !== "no-store" && settings.storeName) {
           const cacheReq = IndexedDB.fetchCache();
