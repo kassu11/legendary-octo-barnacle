@@ -62,7 +62,7 @@ const api = {
     }),
     toggleFollow: async (token, id) => {
       assert(id, "id is missing");
-      const request = Fetch.authAnilist(token, querys.anilistToggleFollow, { id });
+      const request = Fetch.authAnilist(token, querys.anilistToggleFollow, { id }, res => res.data.ToggleFollow);
       return await request.send();
     },
     userFollowing: reloadCache((id, page = 1, token) => {
