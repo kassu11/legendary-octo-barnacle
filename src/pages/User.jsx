@@ -16,10 +16,18 @@ const UserContext = createContext();
 export function User(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userData] = api.anilist.userByName(() => params.name, accessToken);
+  const [userData, {mutateCache: mutateUserCache}] = api.anilist.userByName(() => params.name, accessToken);
+
+  const following = (status) => {
+    mutateUserCache(response => {
+      response.data.isFollowing = status;
+      userData().data.isFollowing = status;
+      return response;
+    });
+  }
 
   return (
-    <UserContext.Provider value={{ user: () => userData().data}}>
+    <UserContext.Provider value={{ user: () => userData().data, following }}>
       <Switch>
         <Match when={userData()?.data && !userData.loading}>
           <Content>
@@ -37,7 +45,13 @@ export function User(props) {
 const useUser = () => useContext(UserContext);
 
 function Content(props) {
-  const { user } = useUser();
+  const { user, following } = useUser();
+  const { authUserData, accessToken } = useAuthentication();
+  const [isFollowing, setIsFollowing] = createSignal(user().isFollowing);
+
+  createEffect(() => {
+    setIsFollowing(user().isFollowing);
+  });
 
   return (
     <div class="user-page" style={{"--user-color": user().options.profileColor}}>
@@ -49,6 +63,21 @@ function Content(props) {
         <div class="user-profile-container">
           <img src={user().avatar.large} class="profile" alt="Profile" />
           <div class="content">
+            <Show when={user().id !== authUserData()?.data.id}>
+              <button onClick={async () => {
+                setIsFollowing(val => {
+                  return !val;
+                });
+                const response = await api.anilist.toggleFollow(accessToken(), user().id);
+                if (response.status === 200) {
+                  following(response.data.isFollowing);
+                } else {
+                  setIsFollowing(user().isFollowing);
+                }
+              }}>
+                <Show when={isFollowing()} fallback="Follow">Following</Show>
+              </button>
+            </Show>
             <h2>
               <a href={"https://anilist.co/user/" + user().name} target="_blank">{user().name}</a>
               <Show when={user().isFollower}>
