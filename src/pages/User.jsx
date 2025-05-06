@@ -1007,3 +1007,97 @@ function Followers(props) {
   );
 }
 
+
+export function Stats() {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [userStats] = api.anilist.userAnimeStats(() => params.name, accessToken);
+
+  return (
+    <Show when={userStats()}>
+      <div class="user-profile-stats-page">
+        {console.log(userStats())}
+        <StatsReleaseYear data={userStats().data.releaseYears}/>
+        <StatsReleaseYear data={userStats().data.startYears}/>
+      </div>
+    </Show>
+  );
+}
+
+function useWidth(elem) {
+  const [width, setWidth] = createSignal(elem()?.getBoundingClientRect().width || 0);
+  const resize = () => {
+    setWidth(elem()?.getBoundingClientRect().width || 0);
+  }
+
+  createEffect(on(elem, resize));
+
+  window.addEventListener("resize", resize);
+
+  onCleanup(() => {
+    window.removeEventListener("resize", resize);
+  });
+
+  return width;
+}
+
+const lerp = (a, b, t) => {
+  return a + t * (b - a);
+}
+
+function StatsReleaseYear(props) {
+  let container;
+  const [max, setMax] = createSignal(0);
+  const containerWidth = useWidth(() => container);
+  const [state, setState] = createSignal("count");
+
+  const inlinePadding = 32;
+  const topPadding = 64;
+  const bottomPadding = 60;
+  const width = () => Math.max(5*16, containerWidth() / props.data.length);
+  const getX = (x) => inlinePadding + x * width();
+  const getY = (stat) => Math.ceil((1 - stat / max()) * 400 + topPadding);
+
+  createEffect(() => {
+    const maxValue = props.data.reduce((acc, v) => Math.max(acc, v[state()]), 0);
+    setMax(maxValue);
+  });
+
+  createEffect(on(containerWidth, () => {
+    container?.classList.add("no-motion");
+
+    setTimeout(() => {
+      container?.classList.remove("no-motion");
+    }, 100);
+  }));
+
+  const path = (rounding) => {
+    return props.data.map((year, i, arr) => {
+      if (i === 0) {
+        return "M" + getX(i) + " " + getY(year[state()]);
+      }
+      return "S" + lerp(getX(i), getX(i - 1), rounding) + " " + lerp(getY(year[state()]), getY(arr[i - 1][state()]), rounding) + "," + getX(i) + " " + getY(year[state()]);
+    }).join("");
+  }
+
+  return (
+    <Show when={props.data.length}>
+      <div class="user-profile-stats-graph-container no-motion" ref={container}>
+        <button onClick={() => setState("count")}>Titles Watched</button>
+        <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+        <button onClick={() => setState("meanScore")}>Mean Score</button>
+        <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
+          <path d={path(.45)} stroke-width="5" fill="transparent" />
+          <For each={props.data.sort((a, b) => (a.releaseYear || a.startYear) - (b.releaseYear || b.startYear))}>{(year, i) => (
+            <g class="item">
+              <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
+              <circle cx={getX(i())} cy={getY(year[state()])} r="6" pointer-events="none" />
+              <text class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">{year[state()]}</text>
+              <text class="year" x={getX(i())} y="510" text-anchor="middle">{year.releaseYear || year.startYear}</text>
+            </g>
+          )}</For>
+        </svg>
+      </div>
+    </Show>
+  );
+}
