@@ -69,6 +69,9 @@ const api = {
       assert(id, "id is missing");
       return Fetch.authAnilist(token, querys.anilistGetUserFollowing, { id, page }, res => res.data.Page);
     }),
+    userAnimeStats: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserAnimeStats, { name }, res => res.data.User.statistics.anime);
+    }),
     userFollowers: reloadCache((id, page = 1, token) => {
       assert(id, "id is missing");
       return Fetch.authAnilist(token, querys.anilistGetUserFollowers, { id, page }, res => res.data.Page);

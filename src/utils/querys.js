@@ -636,6 +636,73 @@ export const anilistUserNotifications = format`query ($page: Int, $types: [Notif
   }
 }`;
 
+export const anilistGetUserAnimeStats = format`query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      anime {
+        formats {
+          format
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+        statuses {
+          status
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+        scores {
+          score
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+        lengths {
+          length
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+        releaseYears {
+          releaseYear
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+        startYears {
+          startYear
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+        countries {
+          country
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}`;
+
 export const anilistToggleFollow = format`mutation ($id: Int) {
   ToggleFollow(userId: $id) {
     id

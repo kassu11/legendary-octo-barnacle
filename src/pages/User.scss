@@ -1,6 +1,6 @@
 @layer layout {
   .user-page {
-    max-width: 90rem;
+    max-width: min(100% - 1rem, 90rem);
     background-color: purple;
     margin-inline: auto;
 
@@ -450,6 +450,56 @@
     img {
       aspect-ratio: 1/1;
       object-fit: cover;
+    }
+  }
+
+
+  // Stats page
+  .user-profile-stats-page {
+  }
+
+  .user-profile-stats-graph-container {
+    background-color: yellow;
+    overflow: auto;
+
+    svg {
+      background-color: orange;
+      max-width: unset;
+      margin-inline: auto;
+    }
+
+    circle {
+      fill: var(--user-color);
+    }
+    path {
+      stroke: var(--user-color);
+    }
+
+    g.item:hover circle {
+      r: 8;
+    }
+
+    .text {
+      font-weight: 600;
+    }
+    .year {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    &:not(.no-motion) {
+      circle {
+        transition: cy .65s, cx .65s, r .15s;
+      }
+
+      path {
+        transition: d .65s;
+      }
+
+      text {
+        transition: translate .65s;
+      }
+
     }
   }
 
