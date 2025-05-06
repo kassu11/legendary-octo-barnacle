@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
+import { createContext, createEffect, createMemo, createSignal, For, Match, on, onCleanup, onMount, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -1054,9 +1054,9 @@ function StatsReleaseYear(props) {
   const inlinePadding = 32;
   const topPadding = 64;
   const bottomPadding = 60;
-  const width = () => Math.max(5*16, containerWidth() / props.data.length);
+  const width = () => Math.max(50, containerWidth() / props.data.length);
   const getX = (x) => inlinePadding + x * width();
-  const getY = (stat) => Math.ceil((1 - stat / max()) * 400 + topPadding);
+  const getY = (stat) => Math.ceil((1 - stat / max()) * 200 + topPadding);
 
   createEffect(() => {
     const maxValue = props.data.reduce((acc, v) => Math.max(acc, v[state()]), 0);
@@ -1071,14 +1071,21 @@ function StatsReleaseYear(props) {
     }, 100);
   }));
 
-  const path = (rounding) => {
+  const path = createMemo(() => {
+    const rounding = .35;
     return props.data.map((year, i, arr) => {
       if (i === 0) {
         return "M" + getX(i) + " " + getY(year[state()]);
+      } if (i < arr.length - 1) {
+        return "S" + lerp(getX(i), getX(i - 1), rounding) + " " + lerp(getY(year[state()]), getY(year[state()]) + (getY(arr[i - 1][state()]) - getY(arr[i + 1][state()])) / 2, rounding) + "," + getX(i) + " " + getY(year[state()]);
       }
       return "S" + lerp(getX(i), getX(i - 1), rounding) + " " + lerp(getY(year[state()]), getY(arr[i - 1][state()]), rounding) + "," + getX(i) + " " + getY(year[state()]);
     }).join("");
-  }
+  });
+
+  const pathFill = createMemo(() => {
+    return path() + "L" + getX(props.data.length - 1) + " " + getY(0) + bottomPadding + "L" + inlinePadding + " " + getY(0) + bottomPadding;
+  });
 
   return (
     <Show when={props.data.length}>
@@ -1086,17 +1093,21 @@ function StatsReleaseYear(props) {
         <button onClick={() => setState("count")}>Titles Watched</button>
         <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
         <button onClick={() => setState("meanScore")}>Mean Score</button>
-        <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
-          <path d={path(.45)} stroke-width="5" fill="transparent" />
-          <For each={props.data.sort((a, b) => (a.releaseYear || a.startYear) - (b.releaseYear || b.startYear))}>{(year, i) => (
-            <g class="item">
-              <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
-              <circle cx={getX(i())} cy={getY(year[state()])} r="6" pointer-events="none" />
-              <text class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">{year[state()]}</text>
-              <text class="year" x={getX(i())} y="510" text-anchor="middle">{year.releaseYear || year.startYear}</text>
-            </g>
-          )}</For>
-        </svg>
+        <div class="scroll">
+          <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
+            <path d={pathFill()} stroke="none" stroke-width="0" fill="grey" />
+            <path d={path()} stroke="black" stroke-width="5" fill="transparent" />
+            <rect x="0" y={getY(0)} width="100%" height="60" fill="darkgrey" stroke="none" pointer-events="all" />
+            <For each={props.data.sort((a, b) => (a.releaseYear || a.startYear) - (b.releaseYear || b.startYear))}>{(year, i) => (
+              <g class="item">
+                <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
+                <circle cx={getX(i())} cy={getY(year[state()])} r="6" pointer-events="none" />
+                <text class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">{year[state()]}</text>
+                <text class="year" x={getX(i())} y="304" text-anchor="middle">{year.releaseYear || year.startYear}</text>
+              </g>
+            )}</For>
+          </svg>
+        </div>
       </div>
     </Show>
   );
