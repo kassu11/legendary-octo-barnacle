@@ -1,5 +1,5 @@
 import { render } from "solid-js/web"
-import { Router, Route } from "@solidjs/router";
+import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.scss"
 import App from "./App.jsx"
 import { MangaInfo, AnimeInfo } from "./pages/MediaInfo.jsx"
@@ -9,7 +9,7 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Search from "./pages/Search.jsx";
-import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stats } from "./pages/User.jsx";
+import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stats, StatsOverview } from "./pages/User.jsx";
 import Artist from "./pages/Artist.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
@@ -69,7 +69,13 @@ render(
               <Route path="/anime/:list?" component={AnimeList} />
               <Route path="/manga/:list?" component={MangaList} />
               <Route path="/favourites" component={FavouriteContainer} />
-              <Route path="/stats" component={Stats} />
+              <Route path="/stats" component={Stats}>
+                <Route path="/" component={() => <Navigate href="anime" />} />
+                <Route path="/anime">
+                  <Route path="/" component={() => <Navigate href="overview" />} />
+                  <Route path="/overview" component={StatsOverview} />
+                </Route>
+              </Route>
               <Route path="/socials" component={Socials} />
             </Route>
             <Route path="*404" component={() => <div>Not fould 404</div>} />
