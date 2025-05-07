@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createMemo, createSignal, For, Match, on, onCleanup, onMount, Show, untrack, useContext } from "solid-js";
+import { createContext, createEffect, createMemo, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
@@ -971,10 +971,9 @@ function Following(props) {
         </li>
       )}</For>
       <Show when={following().data.pageInfo.hasNextPage}>
-        <Show when={showNext()}>
+        <Show when={showNext()} fallback={<button onClick={() => setShowNext(true)}>Load more</button>}>
           <Followers page={props.page + 1} />
         </Show>
-        <button onClick={() => setShowNext(true)}>Load more</button>
       </Show>
     </Show>
   );
@@ -998,10 +997,9 @@ function Followers(props) {
         </li>
       )}</For>
       <Show when={followers().data.pageInfo.hasNextPage}>
-        <Show when={showNext()}>
+        <Show when={showNext()} fallback={<button onClick={() => setShowNext(true)}>Load more</button>}>
           <Followers page={props.page + 1} />
         </Show>
-        <button onClick={() => setShowNext(true)}>Load more</button>
       </Show>
     </Show>
   );
