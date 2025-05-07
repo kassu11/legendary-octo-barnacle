@@ -1006,18 +1006,135 @@ function Followers(props) {
 }
 
 
-export function Stats() {
+export function Stats(props) {
+  const { user } = useUser();
+
+  return (
+    <div class="user-profile-stats-page">
+      <div>
+        <ol>
+          <li>
+            Anime stats
+            <ol>
+              <li>
+                <A href={"/user/" + user().name + "/stats/anime/overview"}>Overview</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/anime/genres"}>Genres</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/anime/tags"}>Tags</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/anime/voice-actors"}>Voice actors</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/anime/studios"}>Studios</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/anime/staff"}>Staff</A>
+              </li>
+            </ol>
+          </li>
+          <li>
+            Manga stats
+            <ol>
+              <li>
+                <A href={"/user/" + user().name + "/stats/manga/overview"}>Overview</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/manga/genres"}>Genres</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/manga/tags"}>Tags</A>
+              </li>
+              <li>
+                <A href={"/user/" + user().name + "/stats/manga/staff"}>Staff</A>
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </div>
+      <div class="content">
+        {props.children}
+      </div>
+    </div>
+
+  );
+}
+
+export function StatsOverview() {
   const params = useParams();
+  const { user } = useUser();
   const { accessToken } = useAuthentication();
   const [userStats] = api.anilist.userAnimeStats(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
-      <div class="user-profile-stats-page">
-        {console.log(userStats())}
-        <StatsReleaseYear data={userStats().data.releaseYears}/>
-        <StatsReleaseYear data={userStats().data.startYears}/>
-      </div>
+      <section class="user-profile-stats-header-section">
+        <ul class="user-profile-stats-general-header">
+          <li>
+            <div class="svg-container">
+              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="currentColor" d="M592 0H48C21.5 0 0 21.5 0 48v320c0 26.5 21.5 48 48 48h245.1v32h-160c-17.7 0-32 14.3-32 32s14.3 32 32 32h384c17.7 0 32-14.3 32-32s-14.3-32-32-32h-160v-32H592c26.5 0 48-21.5 48-48V48c0-26.5-21.5-48-48-48zm-16 352H64V64h512v288z"></path></svg>
+            </div>
+            <div class="right">
+              <p class="value">{numberCommas(user().statistics.anime.count || 0)}</p>
+              <p class="title">Total anime</p>
+            </div>
+          </li>
+          <li>
+            <div class="svg-container">
+              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path></svg>
+            </div>
+            <div class="right">
+              <p class="value">{numberCommas(user().statistics.anime.episodesWatched || 0)}</p>
+              <p class="title">Episodes watched</p>
+            </div>
+          </li>
+          <li>
+            <div class="svg-container">
+              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M12 192h424c6.6 0 12 5.4 12 12v260c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V204c0-6.6 5.4-12 12-12zm436-44v-36c0-26.5-21.5-48-48-48h-48V12c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v52H160V12c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v52H48C21.5 64 0 85.5 0 112v36c0 6.6 5.4 12 12 12h424c6.6 0 12-5.4 12-12z"></path></svg>
+            </div>
+            <div class="right">
+              <p class="value">{((user().statistics.anime.minutesWatched || 0) / 60 / 24).toFixed(1)}</p>
+              <p class="title">Days watched</p>
+            </div>
+          </li>
+          <li>
+            <div class="svg-container">
+              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M360 64c13.255 0 24-10.745 24-24V24c0-13.255-10.745-24-24-24H24C10.745 0 0 10.745 0 24v16c0 13.255 10.745 24 24 24 0 90.965 51.016 167.734 120.842 192C75.016 280.266 24 357.035 24 448c-13.255 0-24 10.745-24 24v16c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24 0-90.965-51.016-167.734-120.842-192C308.984 231.734 360 154.965 360 64z"></path></svg>
+            </div>
+            <div class="right">
+              <p class="value">{((userStats().data.statuses.find(list => list.status === "PLANNING")?.minutesWatched || 0) / 60 / 24).toFixed(1)}</p>
+              <p class="title">Days planned</p>
+            </div>
+          </li>
+          <li>
+            <div class="svg-container">
+              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M109.25 173.25c24.99-24.99 24.99-65.52 0-90.51-24.99-24.99-65.52-24.99-90.51 0-24.99 24.99-24.99 65.52 0 90.51 25 25 65.52 25 90.51 0zm256 165.49c-24.99-24.99-65.52-24.99-90.51 0-24.99 24.99-24.99 65.52 0 90.51 24.99 24.99 65.52 24.99 90.51 0 25-24.99 25-65.51 0-90.51zm-1.94-231.43l-22.62-22.62c-12.5-12.5-32.76-12.5-45.25 0L20.69 359.44c-12.5 12.5-12.5 32.76 0 45.25l22.62 22.62c12.5 12.5 32.76 12.5 45.25 0l274.75-274.75c12.5-12.49 12.5-32.75 0-45.25z"></path></svg>
+            </div>
+            <div class="right">
+              <p class="value">{(user().statistics.anime.meanScore || 0).toFixed(2)}</p>
+              <p class="title">Mean score</p>
+            </div>
+          </li>
+          <li>
+            <div class="svg-container">
+              <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M224 352c-35.35 0-64 28.65-64 64s28.65 64 64 64 64-28.65 64-64-28.65-64-64-64zm0-192c35.35 0 64-28.65 64-64s-28.65-64-64-64-64 28.65-64 64 28.65 64 64 64zm192 48H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"></path></svg>
+            </div>
+            <div class="right">
+              <p class="value">{(user().statistics.anime.standardDeviation || 0).toFixed(1)}</p>
+              <p class="title">Standard Deviation</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+      {console.log(userStats())}
+      {console.log("userData:", user().statistics.anime)}
+      <StatsBarCharts data={userStats().data.scores.sort((a, b) => a.score - b.score)}/>
+      <StatsBarCharts2 data={userStats().data.lengths.sort((a, b) => (parseInt(a.length) || Infinity) - (parseInt(b.length) || Infinity))}/>
+      <StatsYearLineCharts data={userStats().data.releaseYears.sort((a, b) => a.releaseYear - b.releaseYear)}/>
+      <StatsYearLineCharts data={userStats().data.startYears.sort((a, b) => a.startYear - b.startYear)}/>
     </Show>
   );
 }
@@ -1043,7 +1160,74 @@ const lerp = (a, b, t) => {
   return a + t * (b - a);
 }
 
-function StatsReleaseYear(props) {
+function StatsBarCharts(props) {
+  const [state, setState] = createSignal("count");
+  const [max, setMax] = createSignal(0);
+
+  createEffect(() => {
+    const maxValue = props.data.reduce((acc, v) => Math.max(acc, v[state()]), 0);
+    setMax(maxValue);
+  });
+
+  return (
+    <section class="user-profile-stat-score-bar-section">
+      <button onClick={() => setState("count")}>Titles Watched</button>
+      <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+      <DraggableScrollContainer>
+        <ol>
+          <For each={props.data}>{stat => (
+            <li>
+              <p>{stat.score}</p>
+              <div style={{height: `${stat[state()] / max() * 85}%`}}></div>
+              <p>
+                <Show when={state() === "minutesWatched"} fallback={stat[state()]}>
+                  {numberCommas(Math.ceil(stat[state()] / 60))}
+                </Show>
+              </p>
+            </li>
+          )}</For>
+        </ol>
+        {console.log(props.data)}
+      </DraggableScrollContainer>
+    </section>
+  );
+}
+
+function StatsBarCharts2(props) {
+  const [state, setState] = createSignal("count");
+  const [max, setMax] = createSignal(0);
+
+  createEffect(() => {
+    const maxValue = props.data.reduce((acc, v) => Math.max(acc, v[state()]), 0);
+    setMax(maxValue);
+  });
+
+  return (
+    <section class="user-profile-stat-score-bar-section">
+      <button onClick={() => setState("count")}>Titles Watched</button>
+      <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+      <button onClick={() => setState("meanScore")}>Mean Score</button>
+      <DraggableScrollContainer>
+        <ol>
+          <For each={props.data}>{stat => (
+            <li>
+              <p>{stat.length || "Unknown"}</p>
+              <div style={{height: `${stat[state()] / max() * 85}%`}}></div>
+              <p>
+                <Show when={state() === "minutesWatched"} fallback={stat[state()]}>
+                  {numberCommas(Math.ceil(stat[state()] / 60))}
+                </Show>
+              </p>
+            </li>
+          )}</For>
+        </ol>
+        {console.log(props.data)}
+      </DraggableScrollContainer>
+    </section>
+  );
+}
+
+function StatsYearLineCharts(props) {
   let container;
   const [max, setMax] = createSignal(0);
   const containerWidth = useWidth(() => container);
@@ -1085,58 +1269,70 @@ function StatsReleaseYear(props) {
     return path() + "L" + getX(props.data.length - 1) + " " + getY(0) + bottomPadding + "L" + inlinePadding + " " + getY(0) + bottomPadding;
   });
 
+  return (
+    <Show when={props.data.length}>
+      <section class="user-profile-stats-graph-container no-motion" ref={container}>
+        <button onClick={() => setState("count")}>Titles Watched</button>
+        <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+        <button onClick={() => setState("meanScore")}>Mean Score</button>
+        <DraggableScrollContainer>
+          <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
+            <path d={pathFill()} stroke="none" stroke-width="0" fill="grey" />
+            <rect x="0" y={getY(0)} width="100%" height="60" fill="darkgrey" stroke="none" pointer-events="all" />
+            <path d={path()} stroke="black" stroke-width="5" fill="transparent" />
+            <For each={props.data}>{(year, i) => (
+              <g class="item">
+                <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
+                <circle cx={getX(i())} cy={getY(year[state()])} r="6" pointer-events="none" />
+                <text class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">
+                  <Show when={state() === "minutesWatched"} fallback={year[state()]}>
+                    {numberCommas(Math.ceil(year[state()] / 60))}
+                  </Show>
+                </text>
+                <text class="year" x={getX(i())} y="304" text-anchor="middle">{year.releaseYear || year.startYear}</text>
+              </g>
+            )}</For>
+          </svg>
+        </DraggableScrollContainer>
+      </section>
+    </Show>
+  );
+}
+
+function DraggableScrollContainer(props) {
   let xStart = 0;
   let xScroll = 0;
   let xPrev = NaN;
   let scrollContainer;
 
   return (
-    <Show when={props.data.length}>
-      <div class="user-profile-stats-graph-container no-motion" ref={container}>
-        <button onClick={() => setState("count")}>Titles Watched</button>
-        <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
-        <button onClick={() => setState("meanScore")}>Mean Score</button>
-        <div class="scroll" ref={scrollContainer} onMouseMove={e => {
-          if (e.buttons === 1) {
-            e.preventDefault();
-            const xDelta = e.clientX - xStart;
-            xPrev = e.clientX;
-            scrollContainer.style.userSelect = "none";
-            scrollContainer.scrollTo(xScroll - xDelta, 0);
-          } else {
-            scrollContainer.style.userSelect = null;
-            xStart = e.clientX;
-            xScroll = scrollContainer.scrollLeft;
+    <div class="scroll" ref={scrollContainer} onMouseMove={e => {
+      if (e.buttons === 1) {
+        e.preventDefault();
+        const xDelta = e.clientX - xStart;
+        xPrev = e.clientX;
+        scrollContainer.style.userSelect = "none";
+        scrollContainer.scrollTo(xScroll - xDelta, 0);
+      } else {
+        scrollContainer.style.userSelect = null;
+        xStart = e.clientX;
+        xScroll = scrollContainer.scrollLeft;
 
-            const xDelta = e.clientX - xPrev;
-            xPrev = NaN;
-            if (Math.abs(xDelta) > .1) {
-              const momentum = (start, time, deltaMomentum) => {
-                if (Math.abs(deltaMomentum) < 0.5) {
-                  return;
-                } 
-                scrollContainer.scrollBy(-deltaMomentum * 2, 0);
-                requestAnimationFrame((t) => momentum(start, t, (deltaMomentum * (time - start < 200 ? 0.99 : 0.95))));
-              }
-              requestAnimationFrame((t) => momentum(t, t, xDelta));
-            }
+        const xDelta = e.clientX - xPrev;
+        xPrev = NaN;
+        if (Math.abs(xDelta) > .1) {
+          const momentum = (start, time, deltaMomentum) => {
+            if (Math.abs(deltaMomentum) < 0.5) {
+              return;
+            } 
+            scrollContainer.scrollBy(-deltaMomentum * 2, 0);
+            requestAnimationFrame((t) => momentum(start, t, (deltaMomentum * (time - start < 200 ? 0.99 : 0.95))));
           }
-        }}>
-          <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
-            <path d={pathFill()} stroke="none" stroke-width="0" fill="grey" />
-            <rect x="0" y={getY(0)} width="100%" height="60" fill="darkgrey" stroke="none" pointer-events="all" />
-            <path d={path()} stroke="black" stroke-width="5" fill="transparent" />
-            <For each={props.data.sort((a, b) => (a.releaseYear || a.startYear) - (b.releaseYear || b.startYear))}>{(year, i) => (
-              <g class="item">
-                <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
-                <circle cx={getX(i())} cy={getY(year[state()])} r="6" pointer-events="none" />
-                <text class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">{year[state()]}</text>
-                <text class="year" x={getX(i())} y="304" text-anchor="middle">{year.releaseYear || year.startYear}</text>
-              </g>
-            )}</For>
-          </svg>
-        </div>
-      </div>
-    </Show>
+          requestAnimationFrame((t) => momentum(t, t, xDelta));
+        }
+      }
+    }}>
+      {props.children}
+    </div>
   );
 }
