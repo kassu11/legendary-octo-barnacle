@@ -1085,17 +1085,47 @@ function StatsReleaseYear(props) {
     return path() + "L" + getX(props.data.length - 1) + " " + getY(0) + bottomPadding + "L" + inlinePadding + " " + getY(0) + bottomPadding;
   });
 
+  let xStart = 0;
+  let xScroll = 0;
+  let xPrev = NaN;
+  let scrollContainer;
+
   return (
     <Show when={props.data.length}>
       <div class="user-profile-stats-graph-container no-motion" ref={container}>
         <button onClick={() => setState("count")}>Titles Watched</button>
         <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
         <button onClick={() => setState("meanScore")}>Mean Score</button>
-        <div class="scroll">
+        <div class="scroll" ref={scrollContainer} onMouseMove={e => {
+          if (e.buttons === 1) {
+            e.preventDefault();
+            const xDelta = e.clientX - xStart;
+            xPrev = e.clientX;
+            scrollContainer.style.userSelect = "none";
+            scrollContainer.scrollTo(xScroll - xDelta, 0);
+          } else {
+            scrollContainer.style.userSelect = null;
+            xStart = e.clientX;
+            xScroll = scrollContainer.scrollLeft;
+
+            const xDelta = e.clientX - xPrev;
+            xPrev = NaN;
+            if (Math.abs(xDelta) > .1) {
+              const momentum = (start, time, deltaMomentum) => {
+                if (Math.abs(deltaMomentum) < 0.5) {
+                  return;
+                } 
+                scrollContainer.scrollBy(-deltaMomentum * 2, 0);
+                requestAnimationFrame((t) => momentum(start, t, (deltaMomentum * (time - start < 200 ? 0.99 : 0.95))));
+              }
+              requestAnimationFrame((t) => momentum(t, t, xDelta));
+            }
+          }
+        }}>
           <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
             <path d={pathFill()} stroke="none" stroke-width="0" fill="grey" />
-            <path d={path()} stroke="black" stroke-width="5" fill="transparent" />
             <rect x="0" y={getY(0)} width="100%" height="60" fill="darkgrey" stroke="none" pointer-events="all" />
+            <path d={path()} stroke="black" stroke-width="5" fill="transparent" />
             <For each={props.data.sort((a, b) => (a.releaseYear || a.startYear) - (b.releaseYear || b.startYear))}>{(year, i) => (
               <g class="item">
                 <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
