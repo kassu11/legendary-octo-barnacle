@@ -21,11 +21,14 @@ function Status(props) {
           </Switch>
         </Match>
       </Switch>
-      <Show when={props.friend.progress !== 0 && props.friend.progress !== props.media.episodes && props.friend.progress !== props.media.chapters}>
+      <Show when={props.friend.progress > 0 && props.friend.progress !== props.media.episodes && props.friend.progress !== props.media.chapters}>
         <Switch>
-          <Match when={props.type === "ANIME"}> Ep {props.friend.progress}</Match>
-          <Match when={props.type === "MANGA"}> Ch {props.friend.progress}</Match>
+          <Match when={props.type === "ANIME"}> Ep. {props.friend.progress}</Match>
+          <Match when={props.type === "MANGA"}> Ch. {props.friend.progress}</Match>
         </Switch>
+      </Show>
+      <Show when={props.friend.progressVolumes > 0 && props.friend.progressVolumes !== props.media.volumes}>
+        {" "}Vol. {props.friend.progressVolumes}
       </Show>
     </p>
   );

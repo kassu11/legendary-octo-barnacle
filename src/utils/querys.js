@@ -764,6 +764,7 @@ export const anilistGetFriendMediaScore = format`query ($id: Int, $page: Int, $p
       repeat
       score
       progress
+      progressVolumes
       user {
         id
         name
