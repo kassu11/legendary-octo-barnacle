@@ -1,4 +1,4 @@
-@layer reset, base, layout, components, utilities, resize;
+@layer reset, base, utility, layout, components, resize;
 
 @layer reset {
   *, *::before, *::after {
@@ -44,6 +44,13 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 
+
+  main#page-content {
+    min-height: 100vh;
+  }
+}
+
+@layer utility {
   .visually-hidden {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
@@ -77,14 +84,10 @@
     &-6 { -webkit-line-clamp: 6; }
   }
 
-  main#page-content {
-    min-height: 100vh;
-  }
-
   .list-status {
     width: 0.8em;
     height: 0.8em;
-    margin-right: .25rem;
+    margin-right: .25em;
     border-radius: 50%;
     display: inline-block;
     text-align: center;
@@ -108,5 +111,30 @@
   }
   [data-status="REPEATING"] {
     --status-color: blue;
+  }
+
+  :is(ol, ul) {
+    &:is(.grid-column-auto-fill, .grid-row-clamp) {
+      list-style: none;
+      padding: 0;
+    }
+  }
+
+  .grid-column-auto-fill {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-column-width, 20rem)), 1fr));
+    gap: .5rem;
+  }
+
+  .grid-row-clamp {
+    display: grid;
+    grid-template-rows: repeat(var(--grid-max-rows, 1), auto);
+    grid-auto-rows: 0px;
+    grid-column-gap: var(--grid-gap, .5rem);
+    grid-row-gap: 0;
+    overflow: hidden;
+    > * {
+      margin-bottom: var(--grid-gap, .5rem);
+    }
   }
 }

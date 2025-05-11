@@ -9,7 +9,7 @@ function Staff(props) {
       <A href="staff">
         <h2>Staff</h2>
       </A>
-      <ol>
+      <ol class="grid-row-clamp grid-column-auto-fill">
         <For each={props.staff}>{staff => (
           <li>
             <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>

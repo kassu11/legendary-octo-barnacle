@@ -2,15 +2,8 @@
   background-color: lawngreen;
 
   ol {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-    grid-template-rows: auto auto;
-    grid-auto-rows: 0px;
-    grid-column-gap: .5rem;
-    overflow: hidden;
-    list-style: none;
-    background-color: springgreen;
-    padding: 0;
+    --grid-column-width: 16rem;
+    --grid-max-rows: 2;
   }
 
   li a {
@@ -19,9 +12,6 @@
     background-color: thistle;
     gap: 0 .5rem;
     height: 100%;
-  }
-  li {
-    margin-bottom: .5rem;
   }
 
   div {
