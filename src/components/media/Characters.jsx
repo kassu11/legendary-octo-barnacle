@@ -25,7 +25,7 @@ function Characters(props) {
       <A href="characters">
         <h2>Characters</h2>
       </A>
-      <ol>
+      <ol class="grid-column-auto-fill">
         <For each={props.characters}>{char => (
           <li class={style.character}>
             <A href={"/ani/character/" + char.node.id + "/" + formatTitleToUrl(char.node.name.userPreferred)} class={style.characterLeft}>

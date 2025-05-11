@@ -184,7 +184,7 @@ function MediaInfo(props) {
           </div>
           <div class="media-page-relation-container">
             <h2>Relations</h2>
-            <ol>
+            <ol class="grid-column-auto-fill">
               <For each={props.media.relations.edges}>{relation => (
                 <li>
                   <A 

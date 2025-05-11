@@ -2,11 +2,7 @@
   background-color: sienna;
 
   ol {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
-    gap: .5rem;
-    padding: 0px;
+    --grid-column-width: 25rem;
   }
 }
 
