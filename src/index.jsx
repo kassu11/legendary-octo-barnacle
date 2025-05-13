@@ -71,7 +71,7 @@ render(
               <Route path="/favourites" component={FavouriteContainer} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />
-                <Route path="/anime">
+                <Route path="/:type" matchFilters={{ type: "anime" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsOverview} />
                 </Route>
