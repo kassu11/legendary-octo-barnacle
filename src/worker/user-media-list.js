@@ -29,6 +29,7 @@ function modifyMediaListData(listData, type, options) {
     private: options.private,
     notes: options.notes,
     rewatched: options.rewatched,
+    userStatus: options.userStatus,
   };
 
   if (options.search) {
@@ -130,6 +131,9 @@ function filter(entry, filterObject) {
     return false;
   }
   if (filterObject.genre && entry.media.genres.every(genre => genre !== filterObject.genre)) {
+    return false;
+  }
+  if (filterObject.userStatus && entry.status !== filterObject.userStatus) {
     return false;
   }
   if (filterObject.private && !entry.private) {

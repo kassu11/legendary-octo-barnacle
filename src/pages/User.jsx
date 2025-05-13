@@ -352,6 +352,7 @@ function MediaList(props) {
   const notesFilter = () => searchParams.notes === "true";
   const rewatchedFilter = () => searchParams.rewatched === "true";
   const sort = () => searchParams.sort || "score";
+  const userStatus = () => searchParams.userStatus || "";
 
   const updateListInfo = () => {
     if (window.Worker && mediaList()) {
@@ -371,6 +372,7 @@ function MediaList(props) {
         rewatched: rewatchedFilter(),
         sort: sort(),
         type: props.type,
+        userStatus: userStatus(),
       };
 
       worker.postMessage(postObject);
@@ -434,6 +436,28 @@ function MediaList(props) {
           <option value="SPECIAL">Special</option>
           <option value="TV">TV</option>
           <option value="TV_SHORT">TV short</option>
+        </select>
+        <select name="userStatus" onChange={e => setSearchParams({ userStatus: e.target.value || undefined })} value={userStatus() || ""}>
+          <option value="" hidden>User Status</option>
+          <Show when={userStatus()}>
+            <option value="">Any User Status</option>
+          </Show>
+          <option value="COMPLETED">Completed</option>
+          <option value="CURRENT">
+            <Switch>
+              <Match when={props.type === "anime"}>Watching</Match>
+              <Match when={props.type === "manga"}>Reading</Match>
+            </Switch>
+          </option>
+          <option value="DROPPED">Dropped</option>
+          <option value="PAUSED">Paused</option>
+          <option value="PLANNING">Planning</option>
+          <option value="REPEATING">
+            <Switch>
+              <Match when={props.type === "anime"}>Rewatching</Match>
+              <Match when={props.type === "manga"}>Rereading</Match>
+            </Switch>
+          </option>
         </select>
         <select name="status" onChange={e => setSearchParams({ status: e.target.value || undefined })} value={status() || ""}>
           <option value="" hidden>Status</option>
@@ -527,7 +551,8 @@ function MediaList(props) {
                 private: undefined,
                 notes: undefined,
                 rewatched: undefined,
-                sort: undefined
+                sort: undefined,
+                userStatus: undefined
               });
             }}>Remove filters</button>
           </Match>
