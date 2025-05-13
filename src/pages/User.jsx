@@ -1131,10 +1131,10 @@ export function StatsOverview() {
       </section>
       {console.log(userStats())}
       {console.log("userData:", user().statistics.anime)}
-      <StatsBarCharts data={userStats().data.scores.sort((a, b) => a.score - b.score)}/>
-      <StatsBarCharts2 data={userStats().data.lengths.sort((a, b) => (parseInt(a.length) || Infinity) - (parseInt(b.length) || Infinity))}/>
-      <StatsYearLineCharts data={userStats().data.releaseYears.sort((a, b) => a.releaseYear - b.releaseYear)}/>
-      <StatsYearLineCharts data={userStats().data.startYears.sort((a, b) => a.startYear - b.startYear)}/>
+      <StatsScoreDistributionBars data={userStats().data.scores.sort((a, b) => a.score - b.score)}/>
+      <StatsEpisodeCountBars data={userStats().data.lengths.sort((a, b) => (parseInt(a.length) || Infinity) - (parseInt(b.length) || Infinity))}/>
+      <StatsYearLineCharts heading="Release year" data={userStats().data.releaseYears.sort((a, b) => a.releaseYear - b.releaseYear)}/>
+      <StatsYearLineCharts heading="Watch year" data={userStats().data.startYears.sort((a, b) => a.startYear - b.startYear)}/>
     </Show>
   );
 }
@@ -1160,7 +1160,7 @@ const lerp = (a, b, t) => {
   return a + t * (b - a);
 }
 
-function StatsBarCharts(props) {
+function StatsScoreDistributionBars(props) {
   const [state, setState] = createSignal("count");
   const [max, setMax] = createSignal(0);
 
@@ -1171,8 +1171,13 @@ function StatsBarCharts(props) {
 
   return (
     <section class="user-profile-stat-score-bar-section">
-      <button onClick={() => setState("count")}>Titles Watched</button>
-      <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+      <div class="header flex-space-between">
+        <h2>Score distributions</h2>
+        <div>
+          <button onClick={() => setState("count")}>Titles Watched</button>
+          <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+        </div>
+      </div>
       <DraggableScrollContainer>
         <ol>
           <For each={props.data}>{stat => (
@@ -1187,13 +1192,12 @@ function StatsBarCharts(props) {
             </li>
           )}</For>
         </ol>
-        {console.log(props.data)}
       </DraggableScrollContainer>
     </section>
   );
 }
 
-function StatsBarCharts2(props) {
+function StatsEpisodeCountBars(props) {
   const [state, setState] = createSignal("count");
   const [max, setMax] = createSignal(0);
 
@@ -1204,9 +1208,14 @@ function StatsBarCharts2(props) {
 
   return (
     <section class="user-profile-stat-score-bar-section">
-      <button onClick={() => setState("count")}>Titles Watched</button>
-      <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
-      <button onClick={() => setState("meanScore")}>Mean Score</button>
+      <div class="header flex-space-between">
+        <h2>Episode count</h2>
+        <div>
+          <button onClick={() => setState("count")}>Titles Watched</button>
+          <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+          <button onClick={() => setState("meanScore")}>Mean Score</button>
+        </div>
+      </div>
       <DraggableScrollContainer>
         <ol>
           <For each={props.data}>{stat => (
@@ -1221,7 +1230,6 @@ function StatsBarCharts2(props) {
             </li>
           )}</For>
         </ol>
-        {console.log(props.data)}
       </DraggableScrollContainer>
     </section>
   );
@@ -1272,9 +1280,14 @@ function StatsYearLineCharts(props) {
   return (
     <Show when={props.data.length}>
       <section class="user-profile-stats-graph-container no-motion" ref={container}>
-        <button onClick={() => setState("count")}>Titles Watched</button>
-        <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
-        <button onClick={() => setState("meanScore")}>Mean Score</button>
+        <div class="header flex-space-between">
+          <h2>{props.heading}</h2>
+          <div>
+            <button onClick={() => setState("count")}>Titles Watched</button>
+            <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
+            <button onClick={() => setState("meanScore")}>Mean Score</button>
+          </div>
+        </div>
         <DraggableScrollContainer>
           <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
             <path d={pathFill()} stroke="none" stroke-width="0" fill="grey" />
