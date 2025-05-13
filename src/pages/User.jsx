@@ -4,7 +4,7 @@ import { createContext, createEffect, createMemo, createSignal, For, Match, on, 
 import "./User.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
-import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
+import { capitalize, countryNameFromCountryCode, formatMediaFormat, formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
@@ -55,7 +55,6 @@ function Content(props) {
 
   return (
     <div class="user-page" style={{"--user-color": user().options.profileColor}}>
-      {console.log(user())}
       <div class="profile-banner-container">
         <Show when={user().bannerImage} fallback={<div class="banner"></div>}>
           <img src={user().bannerImage} class="banner" alt="Banner" />
@@ -1154,10 +1153,9 @@ export function StatsOverview() {
           </li>
         </ul>
       </section>
-      {console.log(userStats())}
-      {console.log("userData:", user().statistics.anime)}
       <StatsScoreDistributionBars data={userStats().data.scores.sort((a, b) => a.score - b.score)}/>
       <StatsEpisodeCountBars data={userStats().data.lengths.sort((a, b) => (parseInt(a.length) || Infinity) - (parseInt(b.length) || Infinity))}/>
+      <StatsDistributionLists formats={userStats().data.formats} statuses={userStats().data.statuses} countries={userStats().data.countries} />
       <StatsYearLineCharts heading="Release year" data={userStats().data.releaseYears.sort((a, b) => a.releaseYear - b.releaseYear)}/>
       <StatsYearLineCharts heading="Watch year" data={userStats().data.startYears.sort((a, b) => a.startYear - b.startYear)}/>
     </Show>
@@ -1372,5 +1370,112 @@ function DraggableScrollContainer(props) {
     }}>
       {props.children}
     </div>
+  );
+}
+
+const plural = num => num !== 1 ? "s" : "";
+
+function StatsDistributionLists(props) {
+  const [formats, setFormats] = createSignal();
+  const params = useParams();
+  const { user } = useUser();
+
+  createEffect(() => {
+    setFormats(props.formats.reduce((acc, v) => acc + v.count, 0));
+  });
+
+  return (
+    <section class="user-profile-stats-formats">
+      <div>
+        <h2>Format distribution</h2>
+        <ol>
+          <For each={props.formats}>{format => (
+            <li>
+              <div>
+                <div class="container">
+                  <A class="title" href={"/user/" + user().name + "/anime?format=" + format.format}>{formatMediaFormat(format.format)}</A>
+                  <p>{format.meanScore || ""}</p>
+                </div>
+                <p class="time">
+                  <Show when={Math.floor(format.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+                  <Show when={Math.floor(format.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+                  <Show when={format.minutesWatched < 60}>{format.minutesWatched} minute{plural(format.minutesWatched)}</Show>
+                </p>
+              </div>
+              <div class="right">
+                <p>{(format.count / formats() * 100).toFixed(2)}%</p>
+                <p>{numberCommas(format.count)}/{formats()}</p>
+              </div>
+            </li>
+          )}</For>
+        </ol>
+        <div class="filler"></div>
+      </div>
+      <div>
+        <h2>Status distribution</h2>
+        <ol>
+          <For each={props.statuses}>{status => (
+            <li>
+              <div>
+                <div class="container">
+                  <A class="title" href={"/user/" + user().name + "/anime?userStatus=" + status.status}>
+                    <Switch fallback={capitalize(status.status)}>
+                      <Match when={status.status === "CURRENT"}>
+                        <Switch>
+                          <Match when={params.type === "anime"}>Watching</Match>
+                          <Match when={params.type === "manga"}>Reading</Match>
+                        </Switch>
+                      </Match>
+                      <Match when={status.status === "REPEATING"}>
+                        <Switch>
+                          <Match when={params.type === "anime"}>Rewatching</Match>
+                          <Match when={params.type === "manga"}>Rereading</Match>
+                        </Switch>
+                      </Match>
+                    </Switch>
+                  </A>
+                  <p>{status.meanScore || ""}</p>
+                </div>
+                <p class="time">
+                  <Show when={Math.floor(status.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+                  <Show when={Math.floor(status.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+                  <Show when={status.minutesWatched < 60}>{status.minutesWatched} minute{plural(status.minutesWatched)}</Show>
+                </p>
+              </div>
+              <div class="right">
+                <p>{(status.count / formats() * 100).toFixed(2)}%</p>
+                <p>{numberCommas(status.count)}/{formats()}</p>
+              </div>
+            </li>
+          )}</For>
+        </ol>
+        <div class="filler"></div>
+      </div>
+      <div>
+        <h2>Country distribution</h2>
+        <ol>
+          <For each={props.countries}>{country => (
+            <li>
+              <div>
+                <div class="container">
+                  <A class="title" href={"/user/" + user().name + "/anime?countryOfOrigin=" + country.country}>{countryNameFromCountryCode(country.country)}</A>
+                  <p>{country.meanScore || ""}</p>
+                </div>
+                <p class="time">
+                  <Show when={Math.floor(country.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+                  <Show when={Math.floor(country.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+                  <Show when={country.minutesWatched < 60}>{country.minutesWatched} minute{plural(country.minutesWatched)}</Show>
+                </p>
+              </div>
+              <div class="right">
+                <p>{(country.count / formats() * 100).toFixed(2)}%</p>
+                <p>{numberCommas(country.count)}/{formats()}</p>
+              </div>
+            </li>
+          )}</For>
+        </ol>
+        <div class="filler"></div>
+      </div>
+    </section>
   );
 }

@@ -16,8 +16,27 @@ export const languageFromCountry = country => {
       return "Chinese";
     case "TW":
       return "Taiwanese";
+    case "KR":
+      return "Korean";
     default:
       return "Japanese";
+  }
+}
+
+export const countryNameFromCountryCode = country => {
+  if (!country?.length) {
+    return "";
+  }
+
+  switch(country) {
+    case "CN":
+      return "China";
+    case "TW":
+      return "Taiwan";
+    case "KR":
+      return "South Korea";
+    default:
+      return "Japan";
   }
 }
 
@@ -66,8 +85,9 @@ export const formatMediaFormat = text => {
     case "NOVEL":
     case "SPECIAL":
     case "ONE_SHOT":
-    case "TV_SHORT":
       return capitalize(text.replace("_", " "))
+    case "TV_SHORT":
+      return "TV short";
     default:
       console.error("Unknown media format");
       return text;

@@ -546,6 +546,71 @@
     }
   }
 
+  .user-profile-stats-formats {
+    background-color: thistle;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+
+    > div {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      --height: 3.5rem;
+      --gap: .25rem;
+    }
+
+    .filler {
+      height: 100%;
+      background: repeating-linear-gradient(
+        #00000059 var(--gap),
+        #00000059 calc(var(--height) + var(--gap)),
+        transparent calc(var(--height) + var(--gap)),
+        transparent calc(var(--height) + var(--gap) * 2), 
+      );
+    }
+
+    ol {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: var(--gap);
+      padding: 0;
+      list-style: none;
+      justify-content: space-between;
+    }
+
+    li {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-column: 1/-1;
+      background-color: yellowgreen;
+      padding: .25rem;
+      min-height: var(--height);
+      align-items: center;
+
+      .container {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+      }
+
+      .title {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .time {
+        opacity: .75;
+      }
+
+      .right {
+        text-align: right;
+      }
+    }
+  }
+
   .user-profile-stats-graph-container {
     background-color: yellow;
 
