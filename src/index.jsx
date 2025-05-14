@@ -9,7 +9,8 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import Search from "./pages/Search.jsx";
-import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stats, StatsOverview } from "./pages/User.jsx";
+import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stats } from "./pages/User.jsx";
+import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import Artist from "./pages/Artist.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
@@ -73,7 +74,11 @@ render(
                 <Route path="/" component={() => <Navigate href="anime" />} />
                 <Route path="/:type" matchFilters={{ type: "anime" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
-                  <Route path="/overview" component={StatsOverview} />
+                  <Route path="/overview" component={StatsAnimeOverview} />
+                </Route>
+                <Route path="/:type" matchFilters={{ type: "manga" }}>
+                  <Route path="/" component={() => <Navigate href="overview" />} />
+                  <Route path="/overview" component={StatsMangaOverview} />
                 </Route>
               </Route>
               <Route path="/socials" component={Socials} />

@@ -72,6 +72,9 @@ const api = {
     userAnimeStats: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserAnimeStats, { name }, res => res.data.User.statistics.anime);
     }),
+    userMangaStats: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserMangaStats, { name }, res => res.data.User.statistics.manga);
+    }),
     userFollowers: reloadCache((id, page = 1, token) => {
       assert(id, "id is missing");
       return Fetch.authAnilist(token, querys.anilistGetUserFollowers, { id, page }, res => res.data.Page);
