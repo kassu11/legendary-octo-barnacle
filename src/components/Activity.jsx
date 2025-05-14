@@ -5,10 +5,8 @@ import api from "../utils/api.js";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
-import { capitalize, formatTitleToUrl } from "../utils/formating.js";
+import { capitalize, formatTitleToUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
-
-const plural = num => num !== 1 ? "s" : "";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false }, _props);

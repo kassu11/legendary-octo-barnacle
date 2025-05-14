@@ -5,6 +5,7 @@ import "./Activity.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { ActivityCard } from "../components/Activity.jsx";
 import { Markdown } from "../components/Markdown.jsx";
+import { plural } from "../utils/formating.js";
 
 export default function Activity() {
   const { accessToken } = useAuthentication();
@@ -36,8 +37,6 @@ export default function Activity() {
     </div>
   )
 }
-
-const plural = num => num !== 1 ? "s" : "";
 
 function CreatedAt(props) {
   const [time, setTime] = createSignal(Math.max(1, Math.abs(new Date() / 1000 - props.createdAt)));

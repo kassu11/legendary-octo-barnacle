@@ -3,7 +3,7 @@ import api from "../utils/api.js";
 import { createSignal, For, Match, onCleanup, Show } from "solid-js";
 import "./Notifications.scss";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
-import { formatTitleToUrl } from "../utils/formating.js";
+import { formatTitleToUrl, plural } from "../utils/formating.js";
 
 export default function Notifications() {
   const { accessToken } = useAuthentication();
@@ -91,8 +91,6 @@ export default function Notifications() {
     </div>
   )
 }
-
-const plural = num => num !== 1 ? "s" : "";
 
 function CreatedAt(props) {
   const [time, setTime] = createSignal(Math.max(1, Math.abs(new Date() / 1000 - props.createdAt)));
