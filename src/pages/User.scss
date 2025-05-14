@@ -176,6 +176,8 @@
       flex: 1;
       background-color: tomato;
       padding: .5rem;
+      flex-wrap: wrap;
+      flex-basis: min(20rem, 100%);
     }
 
     .header {
@@ -218,13 +220,15 @@
   }
 
   .user-favourites {
+    container-type: inline-size;
+    container-name: user-favourites;
+
     ol {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(5rem, calc(100%/6)));
+      grid-template-columns: repeat(5, 1fr);
       list-style: none;
-      padding: 1rem;
-      justify-content: space-between;
-      gap: 1.5rem .5rem;
+      padding: .5rem;
+      gap: .5rem;
     }
 
     .item img {
@@ -663,13 +667,36 @@
 }
 
 @layer resize {
-  @container user-profile-stats-header (max-width: 73em) {
-    .user-profile-stats-general-header {
-      grid-template-columns: repeat(3, 1fr);
+  ol {
+    @container user-favourites (width < calc(5em * 8 + .5em * 7)) {
+      --amount: 7.5;
+    }
+    @container user-favourites (width < calc(5em * 7 + .5em * 6)) {
+      --amount: 6.5;
+    }
+    @container user-favourites (width < calc(5em * 6 + .5em * 5)) {
+      --amount: 5.5;
+    }
+    @container user-favourites (width < calc(5em * 5 + .5em * 4)) {
+      --amount: 4.5;
+    }
+    @container user-favourites (width < calc(5em * 4 + .5em * 3)) {
+      --amount: 3.5;
+    }
+    @container user-favourites (width < calc(5em * 3 + .5em * 2)) {
+      --amount: 2.5;
+    }
+    @container user-favourites (width < calc(5em * 2 + .5em * 1)) {
+      --amount: 1.5;
     }
   }
-  @container user-profile-stats-header (max-width: 50em) {
-    .user-profile-stats-general-header {
+
+  .user-profile-stats-general-header {
+    @container user-profile-stats-header (max-width: 73em) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @container user-profile-stats-header (max-width: 50em) {
       grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
     }
   }
@@ -704,23 +731,19 @@
     .user-profile-overview-body {
       grid-template-columns: 1fr;
     }
-    .user-favourites {
-      overflow: hidden;
+    .user-favourites ol {
+      --gap: .5rem;
+      --padding: 1rem;
+      grid-template-columns: unset;
+      grid-auto-flow: column;
+      grid-auto-columns: calc((100% / var(--amount, 8.5)) - (var(--gap) - var(--gap) / (var(--amount, 8.5) - 1)));
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding: var(--gap);
+      gap: var(--gap);
 
-      ol {
-        --gap: 1rem;
-        --amount: 4.5;
-        --padding: 1rem;
-        padding: var(--padding); 
-        justify-content: flex-start;
-        display: flex;
-        overflow-y: auto;
-        gap: var(--gap);
-
-        .item {
-          width: calc(((100vw - var(--padding)) / var(--amount)) - var(--gap));
-          flex-shrink: 0;
-        }
+      > li {
+        scroll-snap-align: start;
       }
     }
 
@@ -733,9 +756,6 @@
     .activity-history-container {
       padding: .5rem;
       gap: .15rem;
-    }
-    .user-favourites ol {
-      --amount: 3.5;
     }
     .user-profile-media-list-grid {
       grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
