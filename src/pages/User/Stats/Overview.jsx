@@ -2,7 +2,7 @@ import { A, useParams } from "@solidjs/router";
 import { useUser } from "../../User";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import api from "../../../utils/api";
-import { capitalize, countryNameFromCountryCode, formatMediaFormat, numberCommas } from "../../../utils/formating";
+import { capitalize, countryNameFromCountryCode, formatMediaFormat, numberCommas, plural } from "../../../utils/formating";
 import { createEffect, createMemo, createSignal, on, onCleanup } from "solid-js";
 
 export function StatsAnimeOverview() {
@@ -398,8 +398,6 @@ function DraggableScrollContainer(props) {
     </div>
   );
 }
-
-const plural = num => num !== 1 ? "s" : "";
 
 function StatsDistributionLists(props) {
   const [formats, setFormats] = createSignal();
