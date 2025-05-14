@@ -636,12 +636,12 @@ export const anilistUserNotifications = format`query ($page: Int, $types: [Notif
   }
 }`;
 
-export const anilistGetUserAnimeStats = format`query ($name: String) {
+const anilistGetUserMediaStats = type => format`query ($name: String) {
   User(name: $name) {
     id
     name
     statistics {
-      anime {
+      ${type} {
         formats {
           format
           count
@@ -702,6 +702,8 @@ export const anilistGetUserAnimeStats = format`query ($name: String) {
     }
   }
 }`;
+export const anilistGetUserAnimeStats = anilistGetUserMediaStats("anime");
+export const anilistGetUserMangaStats = anilistGetUserMediaStats("manga");
 
 export const anilistToggleFollow = format`mutation ($id: Int) {
   ToggleFollow(userId: $id) {
