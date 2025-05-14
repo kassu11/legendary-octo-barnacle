@@ -33,8 +33,10 @@ function modifyMediaListData(listData, type, options) {
   };
 
   if (options.search) {
-    if (options.search.match(/\W/)) {
+    if (options.search.trim() === "") {
       filterObject.searchRegex = new RegExp(options.search, "i");
+    } else if(options.search.match(/\W/)) {
+      filterObject.searchRegex = new RegExp(options.search.replace(/ +/g, "\\W"), "i");
     } else {
       filterObject.searchRegex = new RegExp(options.search.split("").join("\\W?"), "i");
     }
