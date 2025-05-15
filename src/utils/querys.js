@@ -1116,6 +1116,21 @@ fragment mediaListEntry on MediaList {
     countryOfOrigin
     genres
     bannerImage
+    tags {
+      name
+      rank
+      isMediaSpoiler
+      isGeneralSpoiler
+    }
+    studios(isMain: true) {
+      edges {
+        isMain
+        node {
+          id
+          name
+        }
+      }
+    }
     startDate {
       year
       month
