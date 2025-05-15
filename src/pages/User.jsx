@@ -479,6 +479,7 @@ function MediaList(props) {
           <option value="Drama">Drama</option>
           <option value="Ecchi">Ecchi</option>
           <option value="Fantasy">Fantasy</option>
+          <option value="Hentai">Hentai</option>
           <option value="Horror">Horror</option>
           <option value="Mahou Shoujo">Mahou Shoujo</option>
           <option value="Mecha">Mecha</option>
