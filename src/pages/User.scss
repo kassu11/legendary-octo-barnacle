@@ -733,7 +733,6 @@
     }
     .user-favourites ol {
       --gap: .5rem;
-      --padding: 1rem;
       grid-template-columns: unset;
       grid-auto-flow: column;
       grid-auto-columns: calc((100% / var(--amount, 8.5)) - (var(--gap) - var(--gap) / (var(--amount, 8.5) - 1)));
