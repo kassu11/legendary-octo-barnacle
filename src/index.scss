@@ -174,4 +174,8 @@
     flex-wrap: wrap;
     gap: .5rem;
   }
+
+  .inline-container {
+    container-type: inline-size;
+  }
 }

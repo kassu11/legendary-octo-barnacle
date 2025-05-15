@@ -89,10 +89,10 @@ function StatsGenres(props) {
               </ol>
             </div>
             <div class="wrapper">
-              <p class="media-list-header">
-                User {params.type}
+              <div className="flex-space-between">
+                <p>User {params.type}</p>
                 <A href={"/user/" + user().name + "/" + params.type + "?genre=" + genre.genre}>Show all</A>
-              </p>
+              </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
             </div>
           </li>
@@ -118,45 +118,28 @@ function Cards(props) {
   }));
 
   return (
-    <ol class="grid-reel" onScroll={() => {
-      if (!fetchNewCards) {
-        return;
-      }
-      fetchNewCards = false;
+    <div class="inline-container">
+      <ol class="grid-reel" onScroll={() => {
+        if (!fetchNewCards) {
+          return;
+        }
+        fetchNewCards = false;
 
-      const set = new Set(props.mediaIds);
-      const newFetchData = set.difference(props.allMediaIds);
-      newFetchData.forEach(id => props.allMediaIds.add(id));
-      setMediaIds(newFetchData);
-    }}>
-      <For each={props.mediaIds}>{mediaId => (
-        <li>
-          <A href={"/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.store[mediaId]?.title.userPreferred || "")}>
-            <Show when={props.store[mediaId]} fallback={<div class="cover-image"> </div>}>
-              <img class="cover-image" src={props.store[mediaId].coverImage.large} alt="Media cover" />
-            </Show>
-          </A>
-        </li>
-      )}</For>
-    </ol>
-  );
-}
-
-function Time(props) {
-  const params = useParams();
-
-  return (
-    <p class="time">
-      <Switch>
-        <Match when={params.type === "anime"}>
-          <Show when={Math.floor(props.stats.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
-          <Show when={Math.floor(props.stats.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
-          <Show when={props.stats.minutesWatched < 60}>{props.stats.minutesWatched} minute{plural(props.stats.minutesWatched)}</Show>
-        </Match>
-        <Match when={params.type === "manga"}>
-          {numberCommas(props.stats.chaptersRead)}
-        </Match>
-      </Switch>
-    </p>
+        const set = new Set(props.mediaIds);
+        const newFetchData = set.difference(props.allMediaIds);
+        newFetchData.forEach(id => props.allMediaIds.add(id));
+        setMediaIds(newFetchData);
+      }}>
+        <For each={props.mediaIds}>{mediaId => (
+          <li>
+            <A href={"/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.store[mediaId]?.title.userPreferred || "")}>
+              <Show when={props.store[mediaId]} fallback={<div class="cover-image"> </div>}>
+                <img class="cover-image" src={props.store[mediaId].coverImage.large} alt="Media cover" />
+              </Show>
+            </A>
+          </li>
+        )}</For>
+      </ol>
+    </div>
   );
 }

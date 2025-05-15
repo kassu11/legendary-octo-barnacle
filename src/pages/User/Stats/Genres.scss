@@ -1,7 +1,9 @@
 @layer layout {
   .user-profile-stats-genres {
     .grid-column-auto-fill {
+      --grid-column-width: 22rem;
       background-color: skyblue;
+      gap: 2rem;
 
       .header {
         display: grid;
@@ -34,24 +36,24 @@
 
     .wrapper {
       background-color: wheat;
-    }
-    .media-list-header {
-      padding-inline: 1rem;
-      padding-block: .25rem;
 
-      a {
-        float: right;
+      > .flex-space-between {
+        padding-inline: 1rem;
+        padding-block: .25rem;
       }
     }
     .grid-reel {
-      --amount: 3.5;
       padding-bottom: 1rem;
+      --amount: 5.5;
+      @container (width < 43em) { --amount: 4.5; }
+      @container (width < 34em) { --amount: 3.5; }
+      @container (width < 24em) { --amount: 2.5; }
 
       li {
         width: 100%;
         aspect-ratio: 5.5/8;
       }
     }
-
   }
+
 }
