@@ -87,8 +87,14 @@ const api = {
     userMangaTags: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserMangaTags, { name }, res => res.data.User.statistics.manga.tags);
     }),
-    mediaIds: reloadCache((ids, token) => {
-      return Fetch.authAnilist(token, querys.anilistGetMediaIds, { ids }, res => res.data.Page.media);
+    userAnimeStudios: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserAnimeStudios, { name }, res => res.data.User.statistics.anime.studios);
+    }),
+    userMangaStudios: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserMangaStudios, { name }, res => res.data.User.statistics.manga.studios);
+    }),
+    mediaIds: fetchOnce((ids, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetMediaIds(ids), { ids }, res => Object.values(res.data).map(page => page.media).flat());
     }),
     userFollowers: reloadCache((id, page = 1, token) => {
       assert(id, "id is missing");

@@ -1,5 +1,4 @@
 import { A, useParams } from "@solidjs/router";
-import { useUser } from "../../User";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import api from "../../../utils/api";
 import { formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
@@ -7,35 +6,34 @@ import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
 
-export function StatsAnimeGenres() {
+export function StatsAnimeStudios() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeGenres(() => params.name, accessToken);
+  const [userStats] = api.anilist.userAnimeStudios(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
-      <StatsGenres genres={userStats().data} />
+      <StatsStudios genres={userStats().data} />
     </Show>
   )
 }
-export function StatsMangaGenres() {
+export function StatsMangaStudios() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaGenres(() => params.name, accessToken);
+  const [userStats] = api.anilist.userMangaStudios(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
-      <StatsGenres genres={userStats().data} />
+      <StatsStudios genres={userStats().data} />
     </Show>
   )
 }
 
-function StatsGenres(props) {
+function StatsStudios(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
-  const { user } = useUser();
   const [mediaById, { mutate }] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
   const [store, setStore] = createStore({});
 
@@ -51,7 +49,7 @@ function StatsGenres(props) {
   return (
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
-        <h2>Genres</h2>
+        <h2>Tags</h2>
         <div>
           <button onClick={() => setState("count")}>Count</button>
           <Switch>
@@ -66,13 +64,13 @@ function StatsGenres(props) {
         </div>
       </div>
       <ol class="grid-column-auto-fill">
-        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.genre.localeCompare(b.genre))}>{(genre, i) => (
+        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.studio.name.localeCompare(b.studio.name))}>{(genre, i) => (
           <li class="item">
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/search/" + params.type + "?onList=false&genres=" + genre.genre}>
-                    {genre.genre}
+                  <A href={"/studio/" + genre.studio.id + "/" + formatTitleToUrl(genre.studio.name)}>
+                    {genre.studio.name}
                   </A>
                 </h2>
                 <p class="ranking">#{i() + 1}</p>
@@ -104,11 +102,7 @@ function StatsGenres(props) {
                 </li>
               </ol>
             </div>
-            <div class="wrapper">
-              <div className="flex-space-between">
-                <p>User {params.type}</p>
-                <A href={"/user/" + user().name + "/" + params.type + "?genre=" + genre.genre}>Show all</A>
-              </div>
+            <div class="wrapper tags">
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
             </div>
           </li>

@@ -750,19 +750,49 @@ const anilistGetUserMediaTags = type => format`query ($name: String) {
 export const anilistGetUserMangaTags = anilistGetUserMediaTags("manga");
 export const anilistGetUserAnimeTags = anilistGetUserMediaTags("anime");
 
-export const anilistGetMediaIds = format`query ($ids: [Int]) {
-  Page {
-    media(id_in: $ids) {
-      id
-      type
-      bannerImage
-      title {
-        userPreferred
-      }
-      coverImage {
-        large
+const anilistGetUserMediaStudios = type => format`query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      ${type} {
+        studios {
+          studio {
+            id
+            name
+          }
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
       }
     }
+  }
+}`;
+export const anilistGetUserMangaStudios = anilistGetUserMediaStudios("manga");
+export const anilistGetUserAnimeStudios = anilistGetUserMediaStudios("anime");
+
+export const anilistGetMediaIds = ids => format`query ($ids: [Int]) {
+  ${[...Array(Math.ceil(ids.length / 50))].map((_, i) => {
+    return `page${i + 1}: Page(page: ${i + 1}) {
+      media(id_in: $ids) {
+        ...media
+      }
+    }`;
+  }).join(" ")}
+}
+
+fragment media on Media {
+  id
+  type
+  bannerImage
+  title {
+    userPreferred
+  }
+  coverImage {
+    large
   }
 }`;
 

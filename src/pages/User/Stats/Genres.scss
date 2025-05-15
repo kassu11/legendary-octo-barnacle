@@ -48,10 +48,11 @@
     }
     .grid-reel {
       padding-bottom: 1rem;
+      background-color: wheat;
       --amount: 5.5;
       @container (width < 43em) { --amount: 4.5; }
       @container (width < 34em) { --amount: 3.5; }
-      @container (width < 24em) { --amount: 2.5; }
+      @container (width < 22em) { --amount: 2.5; }
 
       li {
         width: 100%;
