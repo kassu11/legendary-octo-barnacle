@@ -55,7 +55,7 @@ function StatsGenres(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/user/" + user().name + "/" + params.type + "?genre=" + genre.genre}>
+                  <A href={"/search/" + params.type + "?onList=false&genres=" + genre.genre}>
                     {genre.genre}
                   </A>
                 </h2>
@@ -88,7 +88,13 @@ function StatsGenres(props) {
                 </li>
               </ol>
             </div>
-            <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+            <div class="wrapper">
+              <p class="media-list-header">
+                User {params.type}
+                <A href={"/user/" + user().name + "/" + params.type + "?genre=" + genre.genre}>Show all</A>
+              </p>
+              <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+            </div>
           </li>
         )}</For>
       </ol>

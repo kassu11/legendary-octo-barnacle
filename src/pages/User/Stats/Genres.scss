@@ -32,10 +32,20 @@
       background-color: grey;
     }
 
+    .wrapper {
+      background-color: wheat;
+    }
+    .media-list-header {
+      padding-inline: 1rem;
+      padding-block: .25rem;
+
+      a {
+        float: right;
+      }
+    }
     .grid-reel {
       --amount: 3.5;
-      background-color: rebeccapurple;
-      padding-block: 1rem;
+      padding-bottom: 1rem;
 
       li {
         width: 100%;

@@ -160,6 +160,8 @@
     padding-inline: var(--padding, 1rem);
     scroll-padding: var(--padding, 1rem);
     gap: var(--gap, .5rem);
+    // Don't ask, but background color fixes the scrollbar for Chromium: 136.0.7103.93
+    background-color: inherit;
 
     > * {
       scroll-snap-align: start;
