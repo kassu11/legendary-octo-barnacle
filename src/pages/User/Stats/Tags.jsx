@@ -39,7 +39,7 @@ function StatsTags(props) {
 
   createEffect(on(() => props.genres, genres => {
     setStore(reconcile({}));
-    setMediaIds(new Set(genres.map(genre => genre.mediaIds.slice(0, 5)).flat()));
+    setMediaIds(new Set(genres.map(genre => genre.mediaIds.slice(0, 6)).flat()));
   }));
 
   createEffect(on(mediaById, medias => {

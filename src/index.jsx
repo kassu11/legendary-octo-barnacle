@@ -13,6 +13,7 @@ import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stat
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
+import { StatsAnimeStudios, StatsMangaStudios } from "./pages/User/Stats/Studios.jsx";
 import Artist from "./pages/Artist.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
@@ -79,12 +80,14 @@ render(
                   <Route path="/overview" component={StatsAnimeOverview} />
                   <Route path="/genres" component={StatsAnimeGenres} />
                   <Route path="/tags" component={StatsAnimeTags} />
+                  <Route path="/studios" component={StatsAnimeStudios} />
                 </Route>
                 <Route path="/:type" matchFilters={{ type: "manga" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsMangaOverview} />
                   <Route path="/genres" component={StatsMangaGenres} />
                   <Route path="/tags" component={StatsMangaTags} />
+                  <Route path="/studios" component={StatsMangaStudios} />
                 </Route>
               </Route>
               <Route path="/socials" component={Socials} />
