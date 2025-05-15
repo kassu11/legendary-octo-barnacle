@@ -1,0 +1,156 @@
+import { A, useParams } from "@solidjs/router";
+import { useUser } from "../../User";
+import { useAuthentication } from "../../../context/AuthenticationContext";
+import api from "../../../utils/api";
+import { capitalize, countryNameFromCountryCode, formatMediaFormat, formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
+import { createEffect, createMemo, createSignal, on, onCleanup } from "solid-js";
+import "./Genres.scss";
+import { createStore, reconcile } from "solid-js/store";
+
+export function StatsAnimeGenres() {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [userStats] = api.anilist.userAnimeGenres(() => params.name, accessToken);
+
+  return (
+    <Show when={userStats()}>
+      <StatsGenres genres={userStats().data} />
+    </Show>
+  )
+}
+export function StatsMangaGenres() {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [userStats] = api.anilist.userMangaGenres(() => params.name, accessToken);
+
+  return (
+    <Show when={userStats()}>
+      <StatsGenres genres={userStats().data} />
+    </Show>
+  )
+}
+
+function StatsGenres(props) {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [mediaIds, setMediaIds] = createSignal(new Set());
+  const { user } = useUser();
+  const [mediaById, { mutate }] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
+  const [store, setStore] = createStore({});
+
+  createEffect(on(() => props.genres, genres => {
+    setStore(reconcile({}));
+    setMediaIds(new Set(genres.map(genre => genre.mediaIds.slice(0, 5)).flat()));
+  }));
+
+  createEffect(on(mediaById, medias => {
+    medias?.data.forEach(media => setStore(media.id, media));
+  }));
+
+  return (
+    <section class="user-profile-stats-genres">
+      <ol class="grid-column-auto-fill">
+        <For each={props.genres}>{(genre, i) => (
+          <li class="item">
+            <div class="header">
+              <div class="flex-space-between">
+                <h2>
+                  <A href={"/user/" + user().name + "/" + params.type + "?genre=" + genre.genre}>
+                    {genre.genre}
+                  </A>
+                </h2>
+                <p class="ranking">#{i() + 1}</p>
+              </div>
+              <ol class="flex-space-between">
+                <li>
+                  <p class="value">{numberCommas(genre.count || 0)}</p>
+                  <p class="title">Count</p>
+                </li>
+                <li>
+                  <p class="value">{(genre.meanScore || 0)}</p>
+                  <p class="title">Mean score</p>
+                </li>
+                <li>
+                  <Switch>
+                    <Match when={params.type === "anime"}>
+                      <p class="value">
+                        <Show when={Math.floor(genre.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+                        <Show when={Math.floor(genre.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+                        <Show when={genre.minutesWatched < 60}>{genre.minutesWatched} minute{plural(genre.minutesWatched)}</Show>
+                      </p>
+                      <p class="title">Time watched</p>
+                    </Match>
+                    <Match when={params.type === "manga"}>
+                      <p class="value">{numberCommas(genre.chaptersRead)}</p>
+                      <p class="title">Chapters read</p>
+                    </Match>
+                  </Switch>
+                </li>
+              </ol>
+            </div>
+            <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+          </li>
+        )}</For>
+      </ol>
+    </section>
+  );
+}
+
+function Cards(props) {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [mediaIds, setMediaIds] = createSignal(new Set());
+  const [mediaById] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
+
+  let fetchNewCards = false;
+  createEffect(on(() => props.mediaIds, () => {
+    fetchNewCards = true;
+  }));
+
+  createEffect(on(mediaById, medias => {
+    medias?.data.forEach(media => props.setStore(media.id, media));
+  }));
+
+  return (
+    <ol class="grid-reel" onScroll={() => {
+      if (!fetchNewCards) {
+        return;
+      }
+      fetchNewCards = false;
+
+      const set = new Set(props.mediaIds);
+      const newFetchData = set.difference(props.allMediaIds);
+      newFetchData.forEach(id => props.allMediaIds.add(id));
+      setMediaIds(newFetchData);
+    }}>
+      <For each={props.mediaIds}>{mediaId => (
+        <li>
+          <A href={"/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.store[mediaId]?.title.userPreferred || "")}>
+            <Show when={props.store[mediaId]} fallback={<div class="cover-image"> </div>}>
+              <img class="cover-image" src={props.store[mediaId].coverImage.large} alt="Media cover" />
+            </Show>
+          </A>
+        </li>
+      )}</For>
+    </ol>
+  );
+}
+
+function Time(props) {
+  const params = useParams();
+
+  return (
+    <p class="time">
+      <Switch>
+        <Match when={params.type === "anime"}>
+          <Show when={Math.floor(props.stats.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+          <Show when={Math.floor(props.stats.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+          <Show when={props.stats.minutesWatched < 60}>{props.stats.minutesWatched} minute{plural(props.stats.minutesWatched)}</Show>
+        </Match>
+        <Match when={params.type === "manga"}>
+          {numberCommas(props.stats.chaptersRead)}
+        </Match>
+      </Switch>
+    </p>
+  );
+}

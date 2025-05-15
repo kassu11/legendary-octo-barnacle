@@ -705,6 +705,43 @@ const anilistGetUserMediaStats = type => format`query ($name: String) {
 export const anilistGetUserAnimeStats = anilistGetUserMediaStats("anime");
 export const anilistGetUserMangaStats = anilistGetUserMediaStats("manga");
 
+const anilistGetUserMediaGenres = type => format`query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      ${type} {
+        genres {
+          genre
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}`;
+export const anilistGetUserMangaGenres = anilistGetUserMediaGenres("manga");
+export const anilistGetUserAnimeGenres = anilistGetUserMediaGenres("anime");
+
+export const anilistGetMediaIds = format`query ($ids: [Int]) {
+  Page {
+    media(id_in: $ids) {
+      id
+      type
+      bannerImage
+      title {
+        userPreferred
+      }
+      coverImage {
+        large
+      }
+    }
+  }
+}`;
+
 export const anilistToggleFollow = format`mutation ($id: Int) {
   ToggleFollow(userId: $id) {
     id

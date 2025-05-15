@@ -75,6 +75,15 @@ const api = {
     userMangaStats: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserMangaStats, { name }, res => res.data.User.statistics.manga);
     }),
+    userAnimeGenres: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserAnimeGenres, { name }, res => res.data.User.statistics.anime.genres);
+    }),
+    userMangaGenres: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserMangaGenres, { name }, res => res.data.User.statistics.manga.genres);
+    }),
+    mediaIds: reloadCache((ids, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetMediaIds, { ids }, res => res.data.Page.media);
+    }),
     userFollowers: reloadCache((id, page = 1, token) => {
       assert(id, "id is missing");
       return Fetch.authAnilist(token, querys.anilistGetUserFollowers, { id, page }, res => res.data.Page);
