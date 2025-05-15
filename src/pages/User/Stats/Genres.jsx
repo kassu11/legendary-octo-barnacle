@@ -2,8 +2,8 @@ import { A, useParams } from "@solidjs/router";
 import { useUser } from "../../User";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import api from "../../../utils/api";
-import { capitalize, countryNameFromCountryCode, formatMediaFormat, formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
-import { createEffect, createMemo, createSignal, on, onCleanup } from "solid-js";
+import { formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
+import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
 
@@ -34,6 +34,7 @@ function StatsGenres(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
+  const [state, setState] = createSignal("count");
   const { user } = useUser();
   const [mediaById, { mutate }] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
   const [store, setStore] = createStore({});
@@ -49,8 +50,23 @@ function StatsGenres(props) {
 
   return (
     <section class="user-profile-stats-genres">
+      <div class="flex-space-between">
+        <h2>Genres</h2>
+        <div>
+          <button onClick={() => setState("count")}>Count</button>
+          <Switch>
+            <Match when={params.type === "anime"}>
+              <button onClick={() => setState("minutesWatched")}>Time Watched</button>
+            </Match>
+            <Match when={params.type === "manga"}>
+              <button onClick={() => setState("chaptersRead")}>Chapters Read</button>
+            </Match>
+          </Switch>
+          <button onClick={() => setState("meanScore")}>Mean Score</button>
+        </div>
+      </div>
       <ol class="grid-column-auto-fill">
-        <For each={props.genres}>{(genre, i) => (
+        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.genre.localeCompare(b.genre))}>{(genre, i) => (
           <li class="item">
             <div class="header">
               <div class="flex-space-between">
