@@ -740,6 +740,7 @@
       scroll-snap-type: x mandatory;
       scroll-padding: var(--gap);
       gap: var(--gap);
+      background-color: inherit;
 
       > li {
         scroll-snap-align: start;
