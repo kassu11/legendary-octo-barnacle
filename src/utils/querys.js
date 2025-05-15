@@ -726,6 +726,30 @@ const anilistGetUserMediaGenres = type => format`query ($name: String) {
 export const anilistGetUserMangaGenres = anilistGetUserMediaGenres("manga");
 export const anilistGetUserAnimeGenres = anilistGetUserMediaGenres("anime");
 
+const anilistGetUserMediaTags = type => format`query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      ${type} {
+        tags {
+          tag {
+            id
+            name
+          }
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}`;
+export const anilistGetUserMangaTags = anilistGetUserMediaTags("manga");
+export const anilistGetUserAnimeTags = anilistGetUserMediaTags("anime");
+
 export const anilistGetMediaIds = format`query ($ids: [Int]) {
   Page {
     media(id_in: $ids) {

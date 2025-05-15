@@ -37,6 +37,10 @@
     .wrapper {
       background-color: wheat;
 
+      &.tags .grid-reel {
+        padding-block: 1rem;
+      }
+
       > .flex-space-between {
         padding-inline: 1rem;
         padding-block: .25rem;

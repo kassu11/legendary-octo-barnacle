@@ -81,6 +81,12 @@ const api = {
     userMangaGenres: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserMangaGenres, { name }, res => res.data.User.statistics.manga.genres);
     }),
+    userAnimeTags: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserAnimeTags, { name }, res => res.data.User.statistics.anime.tags);
+    }),
+    userMangaTags: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserMangaTags, { name }, res => res.data.User.statistics.manga.tags);
+    }),
     mediaIds: reloadCache((ids, token) => {
       return Fetch.authAnilist(token, querys.anilistGetMediaIds, { ids }, res => res.data.Page.media);
     }),
