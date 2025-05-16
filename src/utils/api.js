@@ -93,6 +93,12 @@ const api = {
     userMangaStudios: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserMangaStudios, { name }, res => res.data.User.statistics.manga.studios);
     }),
+    userAnimeVoiceActors: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserAnimeVoiceActors, { name }, res => res.data.User.statistics.anime.voiceActors);
+    }),
+    userMangaVoiceActors: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserMangaVoiceActors, { name }, res => res.data.User.statistics.manga.voiceActors);
+    }),
     userAnimeStaff: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserAnimeStaff, { name }, res => res.data.User.statistics.anime.staff);
     }),
@@ -101,6 +107,9 @@ const api = {
     }),
     mediaIds: fetchOnce((ids, token) => {
       return Fetch.authAnilist(token, querys.anilistGetMediaIds(ids), { ids }, res => Object.values(res.data).map(page => page.media).flat());
+    }),
+    characterIds: fetchOnce((ids, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetCharacterIds(ids), { ids }, res => Object.values(res.data).map(page => page.characters).flat());
     }),
     userFollowers: reloadCache((id, page = 1, token) => {
       assert(id, "id is missing");
