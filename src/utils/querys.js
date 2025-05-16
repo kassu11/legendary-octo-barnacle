@@ -750,12 +750,12 @@ const anilistGetUserMediaTags = type => format`query ($name: String) {
 export const anilistGetUserMangaTags = anilistGetUserMediaTags("manga");
 export const anilistGetUserAnimeTags = anilistGetUserMediaTags("anime");
 
-const anilistGetUserMediaStudios = type => format`query ($name: String) {
+export const anilistGetUserAnimeStudios = format`query ($name: String) {
   User(name: $name) {
     id
     name
     statistics {
-      ${type} {
+      anime {
         studios {
           studio {
             id
@@ -771,15 +771,13 @@ const anilistGetUserMediaStudios = type => format`query ($name: String) {
     }
   }
 }`;
-export const anilistGetUserMangaStudios = anilistGetUserMediaStudios("manga");
-export const anilistGetUserAnimeStudios = anilistGetUserMediaStudios("anime");
 
-const anilistGetUserMediaVoiceActors = type => format`query ($name: String) {
+export const anilistGetUserAnimeVoiceActors = format`query ($name: String) {
   User(name: $name) {
     id
     name
     statistics {
-      ${type} {
+      anime {
         voiceActors {
           voiceActor {
             id
@@ -801,8 +799,6 @@ const anilistGetUserMediaVoiceActors = type => format`query ($name: String) {
     }
   }
 }`;
-export const anilistGetUserMangaVoiceActors = anilistGetUserMediaVoiceActors("manga");
-export const anilistGetUserAnimeVoiceActors = anilistGetUserMediaVoiceActors("anime");
 
 const anilistGetUserMediaStaff = type => format`query ($name: String) {
   User(name: $name) {

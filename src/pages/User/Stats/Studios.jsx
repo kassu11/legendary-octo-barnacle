@@ -17,17 +17,6 @@ export function StatsAnimeStudios() {
     </Show>
   )
 }
-export function StatsMangaStudios() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaStudios(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsStudios genres={userStats().data} />
-    </Show>
-  )
-}
 
 function StatsStudios(props) {
   const params = useParams();
