@@ -58,6 +58,10 @@
     padding-block: .5rem;
     display: flex;
     flex-direction: column;
+
+    .line-clamp.small {
+      --line-clamp: 2;
+    }
   }
   .entity-left .content {
     justify-content: space-between;

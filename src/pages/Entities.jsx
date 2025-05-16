@@ -205,7 +205,7 @@ function CharacterCard(props) {
       <A href={"/ani/character/" + props.edge.node.id} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Character" />
         <div class="content">
-          <p class="line-clamp-3">{props.edge.node.name.userPreferred}</p>
+          <p class="line-clamp">{props.edge.node.name.userPreferred}</p>
           <p>{capitalize(props.edge.role)}</p>
         </div>
       </A>
@@ -213,9 +213,9 @@ function CharacterCard(props) {
         <A href={"/ani/staff/" + props.actorRole.voiceActor.id} class="entity-right">
           <div class="content">
             <Show when={props.actorRole.roleNotes} fallback={
-              <p class="line-clamp-3">{props.actorRole.voiceActor.name.userPreferred}</p>
+              <p class="line-clamp">{props.actorRole.voiceActor.name.userPreferred}</p>
             }>
-              <p class="line-clamp-2">{props.actorRole.voiceActor.name.userPreferred}<br/></p>
+              <p class="line-clamp small">{props.actorRole.voiceActor.name.userPreferred}</p>
               <span class="role-notes">({props.actorRole.roleNotes})</span>
             </Show>
             <p class="voice-actor-language">{props.actorRole.voiceActor.language}</p>
@@ -233,7 +233,7 @@ function StaffCard(props) {
       <A href={"/ani/staff/" + props.edge.node.id} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Staff" />
         <div class="content">
-          <p class="line-clamp-3">{props.edge.node.name.userPreferred}</p>
+          <p class="line-clamp">{props.edge.node.name.userPreferred}</p>
           <p>{capitalize(props.edge.role)}</p>
         </div>
       </A>
