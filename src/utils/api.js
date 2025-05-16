@@ -200,6 +200,15 @@ const api = {
     staffInfoById: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { id }, (response) => response.data.Staff);
     }),
+    studioInfoAndMediaById: reloadCache((id, variables = {}, token) => {
+      return Fetch.authAnilist(token, querys.anilistStudioById, { 
+        ...variables,
+        "page": variables.page || 1,
+        "sort": variables.sort || "START_DATE_DESC",
+        "onList": variables.onList || null,
+        id
+      }, (response) => response.data.Studio);
+    }),
     staffCharactersById: reloadCache((token, id, variables = {}) => {
       return Fetch.authAnilist(token, querys.anilistStaffById, { 
         ...variables, 

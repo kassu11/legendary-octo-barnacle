@@ -10,7 +10,7 @@ export function FavouriteToggle(props) {
   assert("checked" in props, "checked missing");
   assert("onChange" in props, "onChange missing");
   assert("mutateCache" in props, "mutateCache missing");
-  assert("mangaId" in props || "animeId" in props || "staffId" in props || "characterId" in props, "Id missing");
+  assert("mangaId" in props || "animeId" in props || "staffId" in props || "characterId" in props || "studioId" in props, "Id missing");
 
   let localChecked = null;
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, variables, checked) => {
@@ -30,6 +30,7 @@ export function FavouriteToggle(props) {
           mangaId: props.mangaId,
           animeId: props.animeId,
           staffId: props.staffId,
+          studioId: props.studioId,
           characterId: props.characterId,
         }, e.target.checked);
       }}/>
