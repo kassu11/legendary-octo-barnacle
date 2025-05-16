@@ -1696,6 +1696,72 @@ export const anilistStaffById = format`query staff(
   }
 }`;
 
+export const anilistStudioById = format`query ($id: Int, $page: Int, $sort: [MediaSort], $onList: Boolean) {
+  Studio(id: $id) {
+    id
+    name
+    isAnimationStudio
+    favourites
+    isFavourite
+    media(page: $page, sort: $sort, onList: $onList) {
+      pageInfo {
+        total
+        perPage
+        currentPage
+        lastPage
+        hasNextPage
+      }
+      edges {
+        isMainStudio
+        node {
+          id
+          title {
+            userPreferred
+          }
+          coverImage {
+            extraLarge
+            large
+            color
+          }
+          startDate {
+            year
+            month
+            day
+          }
+          endDate {
+            year
+            month
+            day
+          }
+          bannerImage
+          season
+          description
+          type
+          format
+          status(version: 2)
+          episodes
+          duration
+          chapters
+          volumes
+          genres
+          isAdult
+          averageScore
+          popularity
+          mediaListEntry {
+            id
+            status
+          }
+          nextAiringEpisode {
+            airingAt
+            timeUntilAiring
+            episode
+          }
+        }
+      }
+    }
+  }
+}`;
+
 export const anilistCharacterById = format`query character(
   $id: Int
   $page: Int = 1

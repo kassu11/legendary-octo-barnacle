@@ -20,6 +20,7 @@ import Artist from "./pages/Artist.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff, Character } from "./pages/Entity.jsx";
+import { Studio } from "./pages/Studio.jsx";
 import Activity from "./pages/Activity.jsx";
 
 const root = document.getElementById("root")
@@ -59,6 +60,7 @@ render(
             <Route path="/ani">
               <Route path="/character/:id/:name?" matchFilters={idFilter} component={Character} />
               <Route path="/staff/:id/:name?" matchFilters={idFilter} component={Staff} />
+              <Route path="/studio/:id/:name?" matchFilters={idFilter} component={Studio} />
             </Route>
             <Route path="/anime">
               <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />
