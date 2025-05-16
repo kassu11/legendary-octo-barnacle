@@ -774,6 +774,36 @@ const anilistGetUserMediaStudios = type => format`query ($name: String) {
 export const anilistGetUserMangaStudios = anilistGetUserMediaStudios("manga");
 export const anilistGetUserAnimeStudios = anilistGetUserMediaStudios("anime");
 
+const anilistGetUserMediaVoiceActors = type => format`query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      ${type} {
+        voiceActors {
+          voiceActor {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+          }
+          characterIds
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}`;
+export const anilistGetUserMangaVoiceActors = anilistGetUserMediaVoiceActors("manga");
+export const anilistGetUserAnimeVoiceActors = anilistGetUserMediaVoiceActors("anime");
+
 const anilistGetUserMediaStaff = type => format`query ($name: String) {
   User(name: $name) {
     id
@@ -821,6 +851,26 @@ fragment media on Media {
     userPreferred
   }
   coverImage {
+    large
+  }
+}`;
+
+export const anilistGetCharacterIds = ids => format`query ($ids: [Int]) {
+  ${[...Array(Math.ceil(ids.length / 50))].map((_, i) => {
+    return `page${i + 1}: Page(page: ${i + 1}) {
+      characters(id_in: $ids) {
+        ...characters
+      }
+    }`;
+  }).join(" ")}
+}
+
+fragment characters on Character {
+  id
+  name {
+    userPreferred
+  }
+  image {
     large
   }
 }`;
