@@ -13,8 +13,8 @@ import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stat
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
-import { StatsAnimeStudios, StatsMangaStudios } from "./pages/User/Stats/Studios.jsx";
-import { StatsAnimeVoiceActors, StatsMangaVoiceActors } from "./pages/User/Stats/VoiceActors.jsx";
+import { StatsAnimeStudios } from "./pages/User/Stats/Studios.jsx";
+import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors.jsx";
 import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff.jsx";
 import Artist from "./pages/Artist.jsx";
 import Notifications from "./pages/Notifications.jsx";
@@ -91,9 +91,7 @@ render(
                   <Route path="/overview" component={StatsMangaOverview} />
                   <Route path="/genres" component={StatsMangaGenres} />
                   <Route path="/tags" component={StatsMangaTags} />
-                  <Route path="/studios" component={StatsMangaStudios} />
                   <Route path="/staff" component={StatsMangaStaff} />
-                  <Route path="/voice-actors" component={StatsMangaVoiceActors} />
                 </Route>
               </Route>
               <Route path="/socials" component={Socials} />

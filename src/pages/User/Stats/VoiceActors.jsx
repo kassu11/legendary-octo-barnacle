@@ -17,17 +17,6 @@ export function StatsAnimeVoiceActors() {
     </Show>
   )
 }
-export function StatsMangaVoiceActors() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaVoiceActors(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsVoiceActors genres={userStats().data} />
-    </Show>
-  )
-}
 
 function StatsVoiceActors(props) {
   const params = useParams();
@@ -173,7 +162,6 @@ function Cards(props) {
   return (
     <div class="inline-container">
       <ol class="grid-reel" ref={gridReel} onScroll={() => {
-        console.log("asdasd");
         if (!fetchNewCards) {
           return;
         }

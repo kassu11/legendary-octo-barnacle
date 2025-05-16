@@ -90,14 +90,8 @@ const api = {
     userAnimeStudios: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserAnimeStudios, { name }, res => res.data.User.statistics.anime.studios);
     }),
-    userMangaStudios: reloadCache((name, token) => {
-      return Fetch.authAnilist(token, querys.anilistGetUserMangaStudios, { name }, res => res.data.User.statistics.manga.studios);
-    }),
     userAnimeVoiceActors: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserAnimeVoiceActors, { name }, res => res.data.User.statistics.anime.voiceActors);
-    }),
-    userMangaVoiceActors: reloadCache((name, token) => {
-      return Fetch.authAnilist(token, querys.anilistGetUserMangaVoiceActors, { name }, res => res.data.User.statistics.manga.voiceActors);
     }),
     userAnimeStaff: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserAnimeStaff, { name }, res => res.data.User.statistics.anime.staff);
