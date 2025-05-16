@@ -200,7 +200,12 @@ function StatsScoreDistributionBars(props) {
       <div class="header flex-space-between">
         <h2>Score distributions</h2>
         <div>
-          <button onClick={() => setState("count")}>Titles Watched</button>
+          <button onClick={() => setState("count")}>
+            <Switch>
+              <Match when={params.type === "anime"}>Titles Watched</Match>
+              <Match when={params.type === "manga"}>Titles read</Match>
+            </Switch>
+          </button>
           <Switch>
             <Match when={params.type === "anime"}>
               <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
@@ -245,7 +250,12 @@ function StatsEpisodeCountBars(props) {
       <div class="header flex-space-between">
         <h2>Episode count</h2>
         <div>
-          <button onClick={() => setState("count")}>Titles Watched</button>
+          <button onClick={() => setState("count")}>
+            <Switch>
+              <Match when={params.type === "anime"}>Titles Watched</Match>
+              <Match when={params.type === "manga"}>Titles read</Match>
+            </Switch>
+          </button>
           <Switch>
             <Match when={params.type === "anime"}>
               <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
@@ -325,7 +335,12 @@ function StatsYearLineCharts(props) {
         <div class="header flex-space-between">
           <h2>{props.heading}</h2>
           <div>
-            <button onClick={() => setState("count")}>Titles Watched</button>
+            <button onClick={() => setState("count")}>
+              <Switch>
+                <Match when={params.type === "anime"}>Titles Watched</Match>
+                <Match when={params.type === "manga"}>Titles read</Match>
+              </Switch>
+            </button>
             <Switch>
               <Match when={params.type === "anime"}>
                 <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
