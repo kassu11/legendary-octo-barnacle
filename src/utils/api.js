@@ -93,6 +93,12 @@ const api = {
     userMangaStudios: reloadCache((name, token) => {
       return Fetch.authAnilist(token, querys.anilistGetUserMangaStudios, { name }, res => res.data.User.statistics.manga.studios);
     }),
+    userAnimeStaff: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserAnimeStaff, { name }, res => res.data.User.statistics.anime.staff);
+    }),
+    userMangaStaff: reloadCache((name, token) => {
+      return Fetch.authAnilist(token, querys.anilistGetUserMangaStaff, { name }, res => res.data.User.statistics.manga.staff);
+    }),
     mediaIds: fetchOnce((ids, token) => {
       return Fetch.authAnilist(token, querys.anilistGetMediaIds(ids), { ids }, res => Object.values(res.data).map(page => page.media).flat());
     }),

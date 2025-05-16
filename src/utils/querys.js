@@ -774,6 +774,35 @@ const anilistGetUserMediaStudios = type => format`query ($name: String) {
 export const anilistGetUserMangaStudios = anilistGetUserMediaStudios("manga");
 export const anilistGetUserAnimeStudios = anilistGetUserMediaStudios("anime");
 
+const anilistGetUserMediaStaff = type => format`query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      ${type} {
+        staff {
+          staff {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+          }
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}`;
+export const anilistGetUserMangaStaff = anilistGetUserMediaStaff("manga");
+export const anilistGetUserAnimeStaff = anilistGetUserMediaStaff("anime");
+
 export const anilistGetMediaIds = ids => format`query ($ids: [Int]) {
   ${[...Array(Math.ceil(ids.length / 50))].map((_, i) => {
     return `page${i + 1}: Page(page: ${i + 1}) {
