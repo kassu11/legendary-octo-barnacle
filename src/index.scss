@@ -79,22 +79,11 @@
   }
 
   .line-clamp {
-    @at-root [class^="line-clamp"] {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-    }
-
-    &-1 { 
-      -webkit-line-clamp: 1; 
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: inline;
-    }
-    &-2 { -webkit-line-clamp: 2; }
-    &-3 { -webkit-line-clamp: 3; }
-    &-6 { -webkit-line-clamp: 6; }
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--line-clamp, 3); 
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .list-status {
@@ -166,6 +155,10 @@
     > * {
       scroll-snap-align: start;
     }
+  }
+
+  .full-span {
+    grid-column: 1/-1;
   }
 
   .flex-space-between {

@@ -36,6 +36,7 @@
   isolation: isolate;
   padding: 1rem;
   gap: 1rem;
+  --line-clamp: 6;
 
   .banner {
     position: absolute;

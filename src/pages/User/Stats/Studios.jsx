@@ -58,7 +58,7 @@ function StatsStudios(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/studio/" + genre.studio.id + "/" + formatTitleToUrl(genre.studio.name)}>
+                  <A href={"/ani/studio/" + genre.studio.id + "/" + formatTitleToUrl(genre.studio.name)}>
                     {genre.studio.name}
                   </A>
                 </h2>

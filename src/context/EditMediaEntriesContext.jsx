@@ -253,7 +253,7 @@ export function EditMediaEntriesProvider(props) {
                 <img src={mediaListEntry().bannerImage} class="banner" alt="Banner" />
               </Show>
               <img src={mediaListEntry().coverImage?.large} class="cover" alt="Cover" />
-              <h2 class="line-clamp-6">{mediaListEntry().title?.userPreferred}</h2>
+              <h2 class="line-clamp">{mediaListEntry().title?.userPreferred}</h2>
               <div class="container">
                 <Switch>
                   <Match when={mediaListEntry().type === "MANGA"}>

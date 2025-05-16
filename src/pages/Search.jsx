@@ -854,7 +854,7 @@ function VerticalCardRow(props) {
                   <img src={card.coverImage.large} class="cover" alt="Cover." />
                 </A> 
                 <div class="vertical-search-card-content clamp">
-                  <A class="line-clamp-2" href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+                  <A class="line-clamp" href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
                     {card.title.userPreferred}
                   </A> 
                   <ol class="vertical-search-card-genre-list">
@@ -989,7 +989,7 @@ function Card(props) {
             </ul>
           </div>
         </div>
-        <p class="line-clamp-2">
+        <p class="line-clamp">
           <Show when={props.card.mediaListEntry?.status}>
             <div class="list-status" attr:data-status={props.card.mediaListEntry.status}></div>
           </Show>

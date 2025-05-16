@@ -194,7 +194,7 @@ function MediaInfo(props) {
                     <img src={relation.node.coverImage.large} alt="Cover" />
                     <div class="content">
                       <p class="type">{relation.relationType}</p>
-                      <p class="line-clamp-3">{relation.node.title.userPreferred}</p>
+                      <p class="line-clamp">{relation.node.title.userPreferred}</p>
                       <p class="format">{relation.node.format} - {relation.node.status}</p>
                     </div>
                   </A>
