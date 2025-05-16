@@ -6,30 +6,30 @@ import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
 
-export function StatsAnimeStudios() {
+export function StatsAnimeStaff() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeStudios(() => params.name, accessToken);
+  const [userStats] = api.anilist.userAnimeStaff(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
-      <StatsStudios genres={userStats().data} />
+      <StatsStaff genres={userStats().data} />
     </Show>
   )
 }
-export function StatsMangaStudios() {
+export function StatsMangaStaff() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaStudios(() => params.name, accessToken);
+  const [userStats] = api.anilist.userMangaStaff(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
-      <StatsStudios genres={userStats().data} />
+      <StatsStaff genres={userStats().data} />
     </Show>
   )
 }
 
-function StatsStudios(props) {
+function StatsStaff(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
@@ -49,7 +49,7 @@ function StatsStudios(props) {
   return (
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
-        <h2>Studios</h2>
+        <h2>Staff</h2>
         <div>
           <button onClick={() => setState("count")}>Count</button>
           <Switch>
@@ -63,47 +63,50 @@ function StatsStudios(props) {
           <button onClick={() => setState("meanScore")}>Mean Score</button>
         </div>
       </div>
-      <ol class="grid-column-auto-fill">
-        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.studio.name.localeCompare(b.studio.name))}>{(genre, i) => (
+      <ol class="grid-column-auto-fill staff">
+        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.staff.name.userPreferred.localeCompare(b.staff.name.userPreferred))}>{(genre, i) => (
           <li class="item">
-            <div class="header">
-              <div class="flex-space-between">
-                <h2>
-                  <A href={"/studio/" + genre.studio.id + "/" + formatTitleToUrl(genre.studio.name)}>
-                    {genre.studio.name}
-                  </A>
-                </h2>
-                <p class="ranking">#{i() + 1}</p>
-              </div>
-              <ol class="flex-space-between">
-                <li>
-                  <p class="value">{numberCommas(genre.count || 0)}</p>
-                  <p class="title">Count</p>
-                </li>
-                <li>
-                  <p class="value">{(genre.meanScore || 0)}</p>
-                  <p class="title">Mean score</p>
-                </li>
-                <li>
-                  <Switch>
-                    <Match when={params.type === "anime"}>
-                      <p class="value">
-                        <Show when={Math.floor(genre.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
-                        <Show when={Math.floor(genre.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
-                        <Show when={genre.minutesWatched < 60}>{genre.minutesWatched} minute{plural(genre.minutesWatched)}</Show>
-                      </p>
-                      <p class="title">Time watched</p>
-                    </Match>
-                    <Match when={params.type === "manga"}>
-                      <p class="value">{numberCommas(genre.chaptersRead)}</p>
-                      <p class="title">Chapters read</p>
-                    </Match>
-                  </Switch>
-                </li>
-              </ol>
+            <div class="flex-space-between staff-name-wrapper">
+              <h2>
+                <A href={"/ani/staff/" + genre.staff.id + "/" + formatTitleToUrl(genre.staff.name.userPreferred)}>
+                  {genre.staff.name.userPreferred}
+                </A>
+              </h2>
+              <p class="ranking">#{i() + 1}</p>
             </div>
-            <div class="wrapper tags">
-              <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+            <div class="inline-container">
+              <div class="main-content">
+                <img class="staff-cover" src={genre.staff.image.large} alt="Staff profile cover" />
+                <ol class="flex-space-between stats">
+                  <li>
+                    <p class="value">{numberCommas(genre.count || 0)}</p>
+                    <p class="title">Count</p>
+                  </li>
+                  <li>
+                    <p class="value">{(genre.meanScore || 0)}</p>
+                    <p class="title">Mean score</p>
+                  </li>
+                  <li>
+                    <Switch>
+                      <Match when={params.type === "anime"}>
+                        <p class="value">
+                          <Show when={Math.floor(genre.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+                          <Show when={Math.floor(genre.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+                          <Show when={genre.minutesWatched < 60}>{genre.minutesWatched} minute{plural(genre.minutesWatched)}</Show>
+                        </p>
+                        <p class="title">Time watched</p>
+                      </Match>
+                      <Match when={params.type === "manga"}>
+                        <p class="value">{numberCommas(genre.chaptersRead)}</p>
+                        <p class="title">Chapters read</p>
+                      </Match>
+                    </Switch>
+                  </li>
+                </ol>
+                <div class="wrapper">
+                  <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+                </div>
+              </div>
             </div>
           </li>
         )}</For>
