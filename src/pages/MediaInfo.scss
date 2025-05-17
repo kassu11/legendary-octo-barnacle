@@ -20,6 +20,9 @@
     margin-top: 1rem;
     margin-inline: auto;
 
+    .recommendations {
+      --grid-column-width: 8rem;
+    }
   }
 
   .media-page-left-aside {

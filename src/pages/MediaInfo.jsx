@@ -177,7 +177,6 @@ function MediaInfo(props) {
               </div>
             </Show>
           )}</Show>
-          {console.log("media", props.media.studios)}
           <ExternalLinks media={props.media}/>
           <ExtraInfo media={props.media}/>
           <Rankings rankings={props.media.rankings} />
@@ -238,6 +237,22 @@ function MediaInfo(props) {
           <Staff staff={props.media.staffPreview.edges} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
+          {console.log("media", props.media.recommendations)}
+          <Show when={props.media.recommendations.nodes.length > 0}>
+            <div>
+              <h2>Recommendations</h2>
+              <ol class="grid-column-auto-fill recommendations">
+                <For each={props.media.recommendations.nodes}>{node => (
+                  <li>
+                    <A href={"/" + node.mediaRecommendation.type.toLowerCase() + "/" + node.mediaRecommendation.id + "/" + formatTitleToUrl(node.mediaRecommendation.title.userPreferred)}>
+                      <img src={node.mediaRecommendation.coverImage.large} alt="Media cover" />
+                      <p>{node.mediaRecommendation.title.userPreferred}</p>
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
         </section>
       </div>
     </>
