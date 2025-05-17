@@ -231,6 +231,78 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const anilistRecommendationsById = format`query media($id: Int, $page: Int) {
+  Media(id: $id) {
+    id
+    title {
+      userPreferred
+    }
+    recommendations(page: $page, sort: [RATING_DESC, ID]) {
+      pageInfo {
+        total
+        perPage
+        currentPage
+        lastPage
+        hasNextPage
+      }
+      nodes {
+        id
+        rating
+        userRating
+        mediaRecommendation {
+          id
+          title {
+            userPreferred
+          }
+          format
+          type
+          status(version: 2)
+          bannerImage
+          coverImage {
+            large
+          }
+        }
+        user {
+          id
+          name
+          avatar {
+            large
+          }
+        }
+      }
+    }
+  }
+}`
+
+export const anilistRateRecommendations = format`mutation (
+  $mediaId: Int
+  $mediaRecommendationId: Int
+  $rating: RecommendationRating
+) {
+  SaveRecommendation(
+    mediaId: $mediaId
+    mediaRecommendationId: $mediaRecommendationId
+    rating: $rating
+  ) {
+    id
+    rating
+    userRating
+    mediaRecommendation {
+      id
+      title {
+        userPreferred
+      }
+      format
+      type
+      status(version: 2)
+      bannerImage
+      coverImage {
+        large
+      }
+    }
+  }
+}`
+
 export const animeThemesById = id => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=AniList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
 export const animeThemesByArtisSlug = slug => `https://api.animethemes.moe/artist/${slug}?include=songs.animethemes.anime,songs.animethemes.animethemeentries.videos.audio,songs.animethemes.song.artists,resources,images`;
 export const myAnimeListAnimeById = id => `https://api.jikan.moe/v4/anime/${id}/full`;
