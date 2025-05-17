@@ -117,8 +117,7 @@ function CharacterMediaPage(props) {
   return (
     <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={studioInfo2} loading={props.loading}>{fetchCooldown => (
       <>
-        {console.log(props.variables)}
-        <MediaCards edges={studioInfo2().data.media.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
+        <MediaCards edges={studioInfo2().data.media.edges} showYears={props.showYears} lastMediaId={props.lastMediaId} lastYearGroup={props.lastYearGroup}/>
         <Show when={studioInfo2().data.media.pageInfo.hasNextPage}>
           <Show when={studioInfo2().data.media.edges} keyed={props.nestLevel === 1}>
             <Show when={props.variables}>
@@ -129,6 +128,7 @@ function CharacterMediaPage(props) {
                     nestLevel={props.nestLevel + 1} 
                     showYears={props.showYears} 
                     language={props.language} 
+                    lastMediaId={studioInfo2().data.media.edges.at(-1)?.node.id}
                     lastYearGroup={studioInfo2().data.media.edges.at(-1)?.node.startDate?.year || "TBA"}
                     loading={studioInfo2.loading} 
                   /> 
@@ -170,9 +170,16 @@ function YearHeader(props) {
 
 function MediaCards(props) {
   assert(props.showYears, "showYears signal is missing");
+
+  const merge = (acc, edge) => {
+    if (acc.at(-1)?.node.id !== edge.node.id && props.lastMediaId !== edge.node.id) {
+      acc.push(edge);
+    }
+    return acc;
+  }
   
   return ( 
-    <For each={props.edges}>{(edge, i) => (
+    <For each={props.edges.reduce(merge, [])}>{(edge, i) => (
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <li>
