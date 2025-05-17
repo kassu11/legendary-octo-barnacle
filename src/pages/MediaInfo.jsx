@@ -18,6 +18,7 @@ import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
+import Recommendations from "../components/media/Recommendations.jsx";
 
 export function AnimeInfo() {
   const params = useParams();
@@ -238,21 +239,13 @@ function MediaInfo(props) {
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
           {console.log("media", props.media.recommendations)}
-          <Show when={props.media.recommendations.nodes.length > 0}>
-            <div>
-              <h2>Recommendations</h2>
-              <ol class="grid-column-auto-fill recommendations">
-                <For each={props.media.recommendations.nodes}>{node => (
-                  <li>
-                    <A href={"/" + node.mediaRecommendation.type.toLowerCase() + "/" + node.mediaRecommendation.id + "/" + formatTitleToUrl(node.mediaRecommendation.title.userPreferred)}>
-                      <img src={node.mediaRecommendation.coverImage.large} alt="Media cover" />
-                      <p>{node.mediaRecommendation.title.userPreferred}</p>
-                    </A>
-                  </li>
-                )}</For>
-              </ol>
-            </div>
-          </Show>
+          <Recommendations 
+            recommendations={props.media.recommendations} 
+            mutateCache={(i, node) => props.setMediaData(v => {
+              v.data.data.Media.recommendations.nodes[i] = node;
+              return v;
+            })} 
+          />
         </section>
       </div>
     </>

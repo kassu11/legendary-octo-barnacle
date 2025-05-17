@@ -56,6 +56,20 @@ const api = {
     mediaId: reloadCache((id, token) => {
       return Fetch.authAnilist(token, querys.anilistMediaById, { id, perPage: 6 });
     }),
+    recommendationsId: reloadCache((id, page, token) => {
+      return Fetch.authAnilist(token, querys.anilistRecommendationsById, { id, page: page || 1 }, res => res.data.Media.recommendations);
+    }),
+    rateRecommendation: async (token, id, rating, mediaId, mediaRecommendationId) => {
+      assert(token, "Token is missing");
+      assert(typeof token !== "function", "This specific api doesnt support signals");
+      assert(id != null, "Id missing");
+      assert(rating != null, "Rating missing");
+      assert(mediaId != null, "MediaId missing");
+      assert(mediaRecommendationId != null, "MediaRecommendationId missing");
+
+      const request = Fetch.authAnilist(token, querys.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, res => res.data.SaveRecommendation);
+      return await request.send();
+    },
     userByName: reloadCache((name, token) => {
       assert(name, "Name is missing");
       return Fetch.authAnilist(token, querys.getUserByName, { name }, res => res.data.User);
