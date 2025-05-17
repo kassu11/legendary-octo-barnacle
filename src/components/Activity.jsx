@@ -42,7 +42,10 @@ export function ActivityCard(_props) {
               <Match when={props.hideProfile === true}>
                 <p>
                   {capitalize(props.activity.status)}{" "}
-                  <Show when={props.activity.progress}>{props.activity.progress} of </Show>
+                  {console.log(props.activity)}
+                  <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
+                    {props.activity.progress} of 
+                  </Show>
                   <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
                 </p>
               </Match>
@@ -50,7 +53,9 @@ export function ActivityCard(_props) {
                 <A href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
                 <p>
                   {capitalize(props.activity.status)}{" "}
-                  <Show when={props.activity.progress}>{props.activity.progress} of </Show>
+                  <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
+                    {props.activity.progress} of 
+                  </Show>
                   <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
                   <A href={"/user/" + props.activity.user.name}>
                     <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
