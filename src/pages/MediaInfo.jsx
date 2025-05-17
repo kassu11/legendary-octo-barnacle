@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal, on } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
@@ -146,6 +146,7 @@ function MediaInfo(props) {
               })} 
             />
           </Show>
+          <Trailer trailer={props.media.trailer} />
           <Show when={props.media.studios.edges.filter(edge => edge.isMain)}>{edges => (
             <Show when={edges().length > 0}>
               <div>
@@ -238,7 +239,7 @@ function MediaInfo(props) {
           <Staff staff={props.media.staffPreview.edges} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
-          {console.log("media", props.media.recommendations)}
+          {console.log("media", props.media)}
           <Recommendations 
             recommendations={props.media.recommendations} 
             mutateCache={(i, node) => props.setMediaData(v => {
@@ -250,4 +251,37 @@ function MediaInfo(props) {
       </div>
     </>
   )
+}
+
+function Trailer(props) {
+  const [open, setOpen] = createSignal(false);
+  const [id, setId] = createSignal();
+  let dialog;
+
+  createEffect(on(() => props.trailer?.id, id => {
+    setId(id);
+  }));
+
+  return (
+    <Show when={props.trailer}>
+      <button  onClick={() => {
+        dialog.showModal();
+        setOpen(true);
+      }}>Watch trailer</button>
+      <dialog class="trailer-dialog" onClose={() => setOpen(false)} ref={dialog} onClick={e => e.target === dialog && dialog.close()}>
+        <div class="wrapper">
+          <Show when={open()}>
+            <Switch>
+              <Match when={props.trailer.site === "youtube"}>
+                <iframe src={"https://www.youtube-nocookie.com/embed/" + id() + "?enablejsapi=1&wmode=opaque&autoplay=1"} frameborder="0" allowFullScreen></iframe>
+              </Match>
+            </Switch>
+          </Show>
+          <form method="dialog" class="close">
+            <button>Close trailer</button>
+          </form>
+        </div>
+      </dialog>
+    </Show>
+  );
 }
