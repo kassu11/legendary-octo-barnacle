@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
@@ -10,14 +10,13 @@ import ExtraInfo from "../components/media/ExtraInfo.jsx";
 import Rankings from "../components/media/Rankings.jsx";
 import Genres from "../components/media/Genres.jsx";
 import Tags from "../components/media/Tags.jsx";
-import Header from "../components/media/Header.jsx";
 import Characters from "../components/media/Characters.jsx";
 import Staff from "../components/media/Staff.jsx";
 import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
-import { capitalize, compactNumber, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating.js";
+import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 
 export function AnimeInfo() {
@@ -146,6 +145,39 @@ function MediaInfo(props) {
               })} 
             />
           </Show>
+          <Show when={props.media.studios.edges.filter(edge => edge.isMain)}>{edges => (
+            <Show when={edges().length > 0}>
+              <div>
+                <h2>Studios</h2>
+                <ol>
+                  <For each={edges()}>{edge => (
+                    <li>
+                      <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+                        {edge.node.name}
+                      </A>
+                    </li>
+                  )}</For>
+                </ol>
+              </div>
+            </Show>
+          )}</Show>
+          <Show when={props.media.studios.edges.filter(edge => edge.isMain === false)}>{edges => (
+            <Show when={edges().length > 0}>
+              <div>
+                <h2>Producers</h2>
+                <ol>
+                  <For each={edges()}>{edge => (
+                    <li>
+                      <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+                        {edge.node.name}
+                      </A>
+                    </li>
+                  )}</For>
+                </ol>
+              </div>
+            </Show>
+          )}</Show>
+          {console.log("media", props.media.studios)}
           <ExternalLinks media={props.media}/>
           <ExtraInfo media={props.media}/>
           <Rankings rankings={props.media.rankings} />
