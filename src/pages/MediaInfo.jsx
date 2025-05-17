@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { For, Show, createEffect, createSignal, on } from "solid-js";
+import { For, Show, Switch, createEffect, createSignal, on } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import { useAuthentication } from "../context/AuthenticationContext.jsx";
@@ -239,6 +239,7 @@ function MediaInfo(props) {
           <Staff staff={props.media.staffPreview.edges} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
+          <StreamingEpisodes streamingEpisodes={props.media.streamingEpisodes}/>
           {console.log("media", props.media)}
           <Recommendations 
             recommendations={props.media.recommendations} 
@@ -282,6 +283,32 @@ function Trailer(props) {
           </form>
         </div>
       </dialog>
+    </Show>
+  );
+}
+
+function StreamingEpisodes(props) {
+  return (
+    <Show when={props.streamingEpisodes?.length}>
+      <div class="media-page-watch-episodes">
+        <h2>Watch</h2>
+        <ol class="grid-row-clamp grid-column-auto-fit">
+          <For each={props.streamingEpisodes.slice(0, 4)}>{episode => (
+            <li>
+              <Switch>
+                <Match when={episode.site === "Crunchyroll"}>
+                  <a href={episode.url} target="_black">
+                    <img src={episode.thumbnail} alt="Episode thumbnail" />
+                    <div class="wrapper">
+                      <p>{episode.title}</p>
+                    </div>
+                  </a>
+                </Match>
+              </Switch>
+            </li>
+          )}</For>
+        </ol>
+      </div>
     </Show>
   );
 }
