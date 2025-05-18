@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { createSignal, createEffect, Show, on, For, untrack, Match, Switch, onMount, onCleanup } from "solid-js";
+import { createSignal, createEffect, Show, on, For, untrack, Match, Switch } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
@@ -9,6 +9,7 @@ import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from ".
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { getDates } from "../utils/dates";
+import { DoomScroll } from "../components/utils/DoomScroll";
 
 function toObject(value) {
   if (value == null) {
@@ -210,25 +211,17 @@ function Search() {
   let _lastTimeHistoryChanged = performance.now()
   let form, sortInput;
 
-  const { accessToken } = useAuthentication();
   const params = useParams();
   const _navigate = useNavigate();
   const location = useLocation();
   const [searchParams, _setSearchParams] = useSearchParams();
   const [variables, setVariables] = createSignal();
   const [cacheVariables, setCacheVariables] = createSignal();
-  const [cacheData] = api.anilist.searchMediaCache(accessToken, cacheVariables);
   const [genresAndTags] = api.anilist.genresAndTags();
   const [externalSources] = api.anilist.externalSources(() => (params.type?.toUpperCase() || null));
   let skipFirstDebounce = true;
 
   const [formStateObject, setFormStateObject] = createSignal(createFormStateObject(parseUrl(params.type, params.header, location.search)));
-
-  createEffect(on(cacheData, data => {
-    if (data) {
-      setVariables(cacheVariables());
-    }
-  }));
 
   function setSearchParams(params, opt) {
     const time = performance.now() - _lastTimeHistoryChanged < 1000;
@@ -589,7 +582,7 @@ function Search() {
       </form>
       <Switch>
         <Match when={location.search.length || params.header}>
-          <SearchContentCards variables={variables()}/>
+          <SearchContentCards cacheVariables={cacheVariables()} variables={variables()}/>
         </Match>
         <Match when={location.search.length === 0}>
           <Switch>
@@ -769,7 +762,7 @@ function SearchContentCards(props) {
         <h1>{params.header}</h1>
       </Show>
       <ol class="search-page-content">
-        <SearchPage variables={props.variables} nestLevel={1} />
+        <SearchPage cacheVariables={props.cacheVariables} variables={props.variables} nestLevel={1} />
       </ol>
     </div>
   );
@@ -778,42 +771,25 @@ function SearchContentCards(props) {
 function SearchPage(props) {
   const {accessToken} = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
+  const [cacheData] = api.anilist.searchMediaCache(accessToken, () => props.cacheVariables);
   const [mediaData] = api.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables);
-  let intersection;
+  const [newestData, setNewestData] = createSignal();
+  const page = (props.cacheVariables?.page || 0) + 1;
 
-  onMount(() => {
-    if (props.nestLevel > 1) {
-      intersectionObserver.observe(intersection);
-    }
-  });
-
-  onCleanup(() => {
-    intersectionObserver.disconnect();
-  });
-
-  const options = { rootMargin: "800px" }
-  const callback = (entries) => {
-    if (entries[0].isIntersecting === false) {
-      return;
-    }
-
-    intersectionObserver.unobserve(entries[0].target);
-    setVariables(props.variables);
-  };
-
-  const intersectionObserver = new IntersectionObserver(callback, options);
-
+  createEffect(on(cacheData, data => data && setNewestData(data.data.media)));
+  createEffect(on(mediaData, data => data && setNewestData(data.data.media)));
   return (
-    <Switch fallback={<div ref={intersection}>Intersection</div>}>
-      <Match when={mediaData()}>
-        <CardRow data={mediaData().data.media}/>
+    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={mediaData} loadingElement={newestData() && <CardRow data={newestData()} />} loading={props.loading}>{fetchCooldown => (
+      <>
+        <CardRow data={newestData()} />
         <Show when={mediaData().data.pageInfo.hasNextPage}>
           <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
             <Show when={props.variables}>
               {vars => (
-                <Show when={(mediaData.loading && props.loading) === false} fallback="Fetch cooldown">
+                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
                   <SearchPage 
-                    variables={{ ...vars(), page: (vars()?.page || 1) + 1 }}
+                    variables={{ ...vars(), page }}
+                    cacheVariables={{ ...props.cacheVariables, page }}
                     nestLevel={props.nestLevel + 1}
                     loading={mediaData.loading}
                   />
@@ -822,11 +798,8 @@ function SearchPage(props) {
             </Show>
           </Show>
         </Show>
-      </Match>
-      <Match when={mediaData.loading}>
-        loading...
-      </Match>
-    </Switch>
+      </>
+    )}</DoomScroll>
   );
 }
 
