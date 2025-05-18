@@ -244,10 +244,10 @@ const api = {
         type,
       }, (response) => response.data.Staff.staffMedia);
     }),
-    genresAndTags: reloadCache(() => {
+    genresAndTags: fetchOnce(() => {
       return Fetch.anilist(querys.anilistGenresAndTags);
     }),
-    externalSources: reloadCache(type => {
+    externalSources: fetchOnce(type => {
       return Fetch.anilist(querys.anilistExternalSources, { type: type || undefined });
     }),
     characters: reloadCache((id, page = 1, token) => {
