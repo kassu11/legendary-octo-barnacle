@@ -1,96 +1,69 @@
-import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import api from "../utils/api";
-import { Show, For, Match, Switch, mergeProps, createSignal, createEffect, batch } from "solid-js";
+import { Show, For, Match, Switch } from "solid-js";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
-import { createStore } from "solid-js/store";
 
-
-export function BrowseSearchBar(props) {
-  return (
-    <SearchBar mode="browse">
-      {props.children}
-    </SearchBar>
-  );
-}
-
-function parseURL() {
-  const params = useParams();
-  const [searchParams] = useSearchParams();
-
-  const engine = searchParams.malSearch === "true" ? "mal" : "ani";
-  const vars = [{}];
-  const type = true;
-
-  return [type, engine, vars];
-}
-
-export function SearchBar(_props) {
-  const props = mergeProps({mode: "search"}, _props);
-  const params = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [val, setVal] = createSignal(4);
-  const [store, setStore] = createStore({
-    sig: val(),
-  });
-
-  const [searchType, setSearchType] = createSignal();
-  const [searchEngine, setSearchEngine] = createSignal();
-  const [searchVariables, setSearchVariables] = createSignal();
-
-  createEffect(() => {
-    const [type, engine, variables] = parseURL();
-
-    batch(() => {
-      setSearchType(type);
-      setSearchEngine(engine);
-      setSearchVariables(variables);
-    });
-  });
+export function BrowseMediaHome() {
+  const { accessToken } = useAuthentication();
+  const [homeData] = api.anilist.trendingMedia(accessToken);
 
   return (
-    <div class="search-page">
-      <div>
-        <input type="checkbox" name="malSearch" id="malSearch" checked={searchParams.malSearch === "true"} onInput={e => {
-          setSearchParams({ malSearch: e.target.checked || undefined });
-        }} />
-        <label htmlFor="malSearch"> MAL search</label>
-        <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
-          setSearchParams({ q: e.target.value });
-        }} />
-        <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice</button>
-        <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice2</button>
-        <button onClick={() => setStore("test", { "val": 5 })}>Nice2</button>
-        <button onClick={() => setStore("test", { "val": 5, val2: {val3: 11} })}>Nice2</button>
-        <button onClick={() => setVal(99)}>Sig</button>
+    <Show when={homeData()}>
+      <div>{console.log("Search Home Data:", homeData())}</div>
+      <div class="search-home-content">
+        <HorizontalCardRow data={homeData().data.data.trending.media} href="/search/trending" title="Trending anime and manga" />
+        <HorizontalCardRow data={homeData().data.data.newAnime.media} href="/search/anime/new" title="Newly added anime" />
+        <HorizontalCardRow data={homeData().data.data.newManga.media} href="/search/manga/new" title="Newly added manga" />
+        <HorizontalCardRow data={homeData().data.data.finishedAnime.media} href="/search/anime/finished" title="Recently finished anime" />
+        <HorizontalCardRow data={homeData().data.data.finishedManga.media} href="/search/manga/finished" title="Recently finished manga" />
+        <VerticalCardRow data={homeData().data.data.top.media} href="/search/top-100" title="Top 100 anime and manga" />
       </div>
-      {console.log(searchParams.test)}
-      {console.log(store.test?.val)}
-      {console.log(store.test?.val2)}
-      {console.log(store.sig)}
-      {props.children}
-    </div>
-  )
-}
-
-export function SearchContent(props) {
-  const params = useParams();
-  return (
-    <div class="search-result-container">
-      <Show when={params.header}>
-        <h1>{params.header}</h1>
-      </Show>
-      <ol class="search-page-content">
-        cards
-        {/* <SearchPage nestLevel={1} /> */}
-      </ol>
-    </div>
+    </Show>
   );
 }
+
+export function BrowseAnimeHome() {
+  const {accessToken} = useAuthentication();
+  const [animeData] = api.anilist.trendingAnime(accessToken);
+
+  return (
+    <Show when={animeData()}>
+      <div class="search-home-content">
+        <HorizontalCardRow data={animeData().data.data.trending.media} href="/search/anime/trending" title="Trending now" />
+        <HorizontalCardRow data={animeData().data.data.season.media} href="/search/anime/this-season" title="Popular this season" />
+        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="/search/anime/next-season" title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.finished.media} href="/search/anime/finished" title="Recently finished" />
+        <HorizontalCardRow data={animeData().data.data.popular.media} href="/search/anime/popular" title="All time popular" />
+        <VerticalCardRow data={animeData().data.data.top.media} type="manga" href="/search/anime/top-100" title="Top 100 anime" />
+      </div>
+    </Show>
+  );
+}
+
+export function BrowseMangaHome() {
+  const {accessToken} = useAuthentication();
+  const [mangaData] = api.anilist.trendingManga(accessToken);
+
+  return (
+    <Show when={mangaData()}>
+      <div class="search-home-content">
+        <HorizontalCardRow data={mangaData().data.data.trending.media} href="/search/manga/trending" title="Trending now" />
+        <HorizontalCardRow data={mangaData().data.data.novel.media} href="/search/manga/novel" title="Popular light novels" />
+        <HorizontalCardRow data={mangaData().data.data.manhwa.media} href="/search/manga/manwha" title="Popular Manwhas" />
+        <HorizontalCardRow data={mangaData().data.data.finishedManga.media} href="/search/manga/finished-manga" title="Recently finished mangas" />
+        <HorizontalCardRow data={mangaData().data.data.finishedNovel.media} href="/search/manga/finished-novel" title="Recently finished light novels" />
+        <HorizontalCardRow data={mangaData().data.data.popular.media} href="/search/manga/popular" title="All time popular" />
+        <VerticalCardRow data={mangaData().data.data.top.media} type="manga" href="/search/manga/top-100" title="Top 100 manga" />
+      </div>
+    </Show>
+  );
+}
+
 
 
 function VerticalCardRow(props) {
