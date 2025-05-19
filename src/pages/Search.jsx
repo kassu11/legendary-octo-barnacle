@@ -1,6 +1,6 @@
-import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Show, For, Match, Switch, mergeProps, createSignal, createEffect, batch } from "solid-js";
+import { Show, For, Match, Switch, mergeProps, createSignal, createEffect, batch, useContext, createContext, on } from "solid-js";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
@@ -8,9 +8,22 @@ import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from ".
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { createStore } from "solid-js/store";
+import { SearchBarContext, useSearchBar } from "../context/providers";
+import { debounce } from "@solid-primitives/scheduled";
+import { DoomScroll } from "../components/utils/DoomScroll";
 
 
 export function BrowseSearchBar(props) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  createEffect(on(() => location.search, search => {
+    if (search) {
+      console.log(location.query, )
+      navigate(location.pathname.replace(/.*browse/, "/search") + search);
+    }
+  }));
+
   return (
     <SearchBar mode="browse">
       {props.children}
@@ -18,21 +31,69 @@ export function BrowseSearchBar(props) {
   );
 }
 
+class SearchVariable {
+  constructor({ url, key, value, active = true, reason, desc, name, hidden = false, canClear = true }) {
+    assert(key, "key missing");
+    assert(typeof active === "boolean", "active is not boolean");
+    assert(typeof hidden === "boolean", "hidden is not boolean");
+    assert(typeof canClear === "boolean", "canClear is not boolean");
+
+    this.name = name;
+    this.url = url;
+    this.key = key;
+    this.value = value;
+    this.active = active;
+    this.reason = reason;
+    this.desc = desc;
+    this.hidden = hidden;
+    this.canClear = canClear;
+  }
+}
+
 function parseURL() {
   const params = useParams();
   const [searchParams] = useSearchParams();
 
   const engine = searchParams.malSearch === "true" ? "mal" : "ani";
-  const vars = [{}];
-  const type = true;
+  const variables = [];
 
-  return [type, engine, vars];
+  if (searchParams.q) {
+    variables.push(new SearchVariable({ 
+      url: "q=" + searchParams.q, 
+      key: engine === "ani" ? "search" : "q",
+      value: searchParams.q,
+      name: "Search: " + searchParams.q,
+    }));
+  }
+
+  if (engine === "ani") {
+    if (params.type === "anime") {
+      variables.push(new SearchVariable({ key: "type", value: "ANIME", }));
+    } else if (params.type === "manga") {
+      variables.push(new SearchVariable({ key: "type", value: "MANGA", }));
+    } else if (params.type === "media") {
+      variables.push(new SearchVariable({ key: "type", value: undefined, }));
+    }
+
+    if (searchParams.age === undefined) {
+      variables.push(new SearchVariable({ key: "isAdult", value: false, hidden: true, canClear: false }));
+    }
+
+  } else if (engine === "mal") {
+    variables.push(new SearchVariable({ key: "sfw", value: true, hidden: true, canClear: false }));
+  }
+
+  const type = params.type;
+
+  return [type, engine, variables];
 }
 
 export function SearchBar(_props) {
   const props = mergeProps({mode: "search"}, _props);
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
   const [val, setVal] = createSignal(4);
   const [store, setStore] = createStore({
     sig: val(),
@@ -60,7 +121,7 @@ export function SearchBar(_props) {
         }} />
         <label htmlFor="malSearch"> MAL search</label>
         <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
-          setSearchParams({ q: e.target.value });
+          triggerSetSearchParams({ q: e.target.value });
         }} />
         <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice</button>
         <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice2</button>
@@ -72,124 +133,144 @@ export function SearchBar(_props) {
       {console.log(store.test?.val)}
       {console.log(store.test?.val2)}
       {console.log(store.sig)}
-      {props.children}
+      <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables}}>
+        {props.children}
+      </SearchBarContext.Provider>
     </div>
   )
 }
 
 export function SearchContent(props) {
   const params = useParams();
+  const { searchEngine, searchType, searchVariables } = useSearchBar();
+
   return (
     <div class="search-result-container">
       <Show when={params.header}>
         <h1>{params.header}</h1>
       </Show>
-      <ol class="search-page-content">
-        cards
-        {/* <SearchPage nestLevel={1} /> */}
+      <ol class="search-page-content grid-column-auto-fill">
+        <Switch>
+          <Match when={searchEngine() === "ani"}>
+            <AnilistMediaSearchContent nestLevel={1} page={1} variables={searchVariables()} />
+          </Match>
+          <Match when={searchEngine() === "mal"}>
+            <Switch>
+              <Match when={searchType() === "anime"}>
+                <MyAnimeListAnimeSearchContent nestLevel={1} page={1} variables={searchVariables()} />
+              </Match>
+              <Match when={searchType() === "manga"}>
+              </Match>
+            </Switch>
+          </Match>
+        </Switch>
       </ol>
     </div>
   );
 }
 
+function AnilistMediaSearchContent(props) {
+  const {accessToken} = useAuthentication();
+  const { searchVariables } = useSearchBar();
+  const [variables, setVariables] = createSignal(undefined);
+  const [cacheData] = api.anilist.searchMediaCache(accessToken, searchVariables, props.page);
+  const [mediaData] = api.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables, props.page);
+  const [newestData, setNewestData] = createSignal();
 
-function VerticalCardRow(props) {
-  assert("href" in props, "Link is missing");
-
+  createEffect(on(cacheData, data => data && setNewestData(data.data.media)));
+  createEffect(on(mediaData, data => data && setNewestData(data.data.media)));
   return (
-    <section class="vertical-search-card-section">
-      <div class="search-cards-header">
-        <h2>{props.title}</h2>
-        <A href={props.href}>View all</A>
-      </div>
-      <ol class="vertical-search-card-row">
-        <For each={props.data}>
-          {(card, i) => (
-            <li class="vertical-search-card" style={{"--media-background-color": card.coverImage.color}}>
-              <p class="ranking">
-                #
-                <span>{i() + 1}</span>
-              </p>
-              <div class="vertical-search-card-body">
-                <A 
-                  class="cover-container"
-                  href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
-                  <img src={card.coverImage.large} class="cover" alt="Cover." />
-                </A> 
-                <div class="vertical-search-card-content clamp">
-                  <A class="line-clamp" href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
-                    {card.title.userPreferred}
-                  </A> 
-                  <ol class="vertical-search-card-genre-list">
-                    <For each={card.genres}>{genre => (
-                      <li class="vertical-search-card-genre">
-                        <A href={`/search${props.type ? ("/" + props.type) : ""}?genres=` + genre}>{genre}</A>
-                      </li>
-                    )}</For>
-                  </ol>
-                </div>
-                <div class="vertical-search-card-info">
-                  <div class="vertical-search-card-score">
-                    <Emoji score={card.averageScore} />
-                    <div class="clamp">
-                      <p>{card.averageScore}%</p>
-                      <p>{numberCommas(card.popularity)} users</p>
-                    </div>
-                  </div>
-                  <div class="clamp">
-                    <p>{formatMediaFormat(card.format)}</p>
-                    <p>
-                      <Switch>
-                        <Match when={card.type === "ANIME"}>
-                          <Show when={card.episodes} fallback="Ongoing">
-                            {numberCommas(card.episodes)} Episode
-                            <Show when={card.episodes > 1}>s</Show>
-                          </Show>
-                        </Match>
-                        <Match when={card.type === "MANGA"}>
-                          <Show when={card.chapters} fallback="Ongoing">
-                            {numberCommas(card.chapters)} Chapter
-                            <Show when={card.chapters > 1}>s</Show>
-                          </Show>
-                        </Match>
-                      </Switch>
-                    </p>
-                  </div>
-                  <div class="clamp">
-                    <p>{capitalize(card.season)} {card.seasonYear}</p>
-                    <p>{capitalize(card.status)}</p>
-                  </div>
-                </div>
-              </div>
-            </li>
-          )}
-        </For>
-      </ol>
-    </section>
+    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={mediaData} loadingElement={newestData() && <AniCardRow data={newestData()} />} loading={props.loading}>{fetchCooldown => (
+      <>
+        <AniCardRow data={newestData()} />
+        <Show when={mediaData().data.pageInfo.hasNextPage}>
+          <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
+            <Show when={props.variables}>
+              {vars => (
+                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+                  <AnilistMediaSearchContent 
+                    variables={vars()}
+                    page={props.page + 1}
+                    nestLevel={props.nestLevel + 1}
+                    loading={mediaData.loading}
+                  />
+                </Show>
+              )}
+            </Show>
+          </Show>
+        </Show>
+      </>
+    )}</DoomScroll>
   );
 }
 
-function HorizontalCardRow(props) {
-  assert("href" in props, "Link is missing");
+function MyAnimeListAnimeSearchContent(props) {
+  const { searchVariables } = useSearchBar();
+  const [variables, setVariables] = createSignal(undefined);
+  const [cacheData] = api.myAnimeList.animeSearchCache(searchVariables, props.page);
+  const [mediaData] = api.myAnimeList.animeSearch(props.nestLevel === 1 ? () => props.variables : variables, props.page);
+  const [newestData, setNewestData] = createSignal();
 
+  createEffect(on(cacheData, data => data && setNewestData(data.data.data)));
+  createEffect(on(mediaData, data => data && setNewestData(data.data.data)));
   return (
-    <section class="horizontal-search-card-section">
-      <A href={props.href} class="search-cards-header">
-        <h2>{props.title}</h2>
-        <span>View all</span>
+    <DoomScroll rootMargin="200px" onIntersection={() => setVariables(props.variables)} fetchResponse={mediaData} loadingElement={newestData() && <MalCardRow data={newestData()} />} loading={props.loading}>{fetchCooldown => (
+      <>
+        <MalCardRow data={newestData()} />
+        <Show when={mediaData().data.pagination.has_next_page}>
+          <Show when={mediaData().data.data} keyed={props.nestLevel === 1}>
+            <Show when={props.variables}>
+              {vars => (
+                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
+                  <MyAnimeListAnimeSearchContent 
+                    variables={vars()}
+                    page={props.page + 1}
+                    nestLevel={props.nestLevel + 1}
+                    loading={mediaData.loading}
+                  />
+                </Show>
+              )}
+            </Show>
+          </Show>
+        </Show>
+      </>
+    )}</DoomScroll>
+  );
+}
+
+function MalCardRow(props) {
+  return (
+    <For each={props.data}>
+      {card => <MalCard card={card} />}
+    </For>
+  );
+}
+
+function MalCard(props) {
+  return (
+    <li class="horizontal-search-card">
+      <A href={props.card.url}>
+        <img src={props.card.images.webp.image_url} alt="Anime cover" />
+        <p class="line-clamp">
+          <Switch>
+            <Match when={props.card.titles.English}>{props.card.titles.English}</Match>
+            <Match when={props.card.titles.Default}>{props.card.titles.Default}</Match>
+          </Switch>
+        </p>
       </A>
-      <ol class="horizontal-search-card-row">
-        <For each={props.data}>{card => (
-          <Card card={card} />
-        )}</For>
-      </ol>
-    </section>
+    </li>
   );
 }
 
+function AniCardRow(props) {
+  return (
+    <For each={props.data}>
+      {card => <AniCard card={card} />}
+    </For>
+  );
+}
 
-
-function Card(props) {
+function AniCard(props) {
   const { openEditor } = useEditMediaEntries();
   const { accessToken } = useAuthentication();
 
@@ -197,7 +278,7 @@ function Card(props) {
     <li class="horizontal-search-card">
       <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + formatTitleToUrl(props.card.title.userPreferred)}>
         <div class="container">
-          <img src={props.card.coverImage.large} class="cover" alt="Cover." />
+          <img src={props.card.coverImage.large} alt="Cover." />
           <div class="search-card-quick-action">
             <ul class="search-card-quick-action-items">
               <li class="item" label="Edit media">

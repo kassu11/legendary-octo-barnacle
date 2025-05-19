@@ -15,7 +15,7 @@ function App(props) {
           <li><A href="/">Home</A></li>
           <li><A href="/browse/anime">Anime</A></li>
           <li><A href="/browse/manga">Manga</A></li>
-          <li><A href="/browse">Search</A></li>
+          <li><A href="/browse/media">Search</A></li>
           <Show when={accessToken()} fallback={<li><a href={loginUrl}>Login with AniList</a></li>}>
             <li>
               <button onClick={() => logoutUser()}>Logout</button>

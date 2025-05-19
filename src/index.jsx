@@ -30,15 +30,16 @@ const idFilter = {
   id: /^\d+$/,
 }
 const animeSearch = {
-  type: ["anime"],
+  type: "anime",
   header: ["finished", "this-season", "new", "next-season", "trending", "popular", "top-100"],
 }
 const mangaSearch = {
-  type: ["manga"],
+  type: "manga",
   header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manwha", "trending", "popular", "top-100"],
 }
 
 const bothSearch = {
+  type: "media",
   header: ["finished", "trending", "popular", "top-100"],
 }
 
@@ -53,15 +54,15 @@ render(
             <Route path="/notifications" component={Notifications} />
             <Route path="/activity/:id" matchFilters={idFilter} component={Activity} />
             <Route path="/browse" component={BrowseSearchBar}>
-              <Route path="/" component={BrowseMediaHome} />
+              <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHome} />
               <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} />
               <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHome} />
             </Route>
             <Route path="/search" component={SearchBar}>
               <Route path="/" component={SearchContent}>
-                <Route path="/:type?/:header?" matchFilters={animeSearch} />
-                <Route path="/:type?/:header?" matchFilters={mangaSearch} />
-                <Route path="/:header" matchFilters={bothSearch} />
+                <Route path="/:type/:header?" matchFilters={animeSearch} />
+                <Route path="/:type/:header?" matchFilters={mangaSearch} />
+                <Route path="/:type/:header?" matchFilters={bothSearch} />
               </Route>
             </Route>
             <Route path="/artist/:name" component={Artist} />
