@@ -311,6 +311,8 @@ export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/an
 export const myAnimeListMangaCharactersById = id => `https://api.jikan.moe/v4/manga/${id}/characters`;
 export const myAnimeListAnimeStaffById = id => `https://api.jikan.moe/v4/anime/${id}/staff`;
 export const myAnimeListMangaStaffById = id => `https://api.jikan.moe/v4/manga/${id}/staff`;
+export const myAnimeListAnimeSearch = query => `https://api.jikan.moe/v4/anime?${query}`;
+export const myMangaListMangaSearch = query => `https://api.jikan.moe/v4/manga?${query}`;
 
 export const anilistActivityRepliedById = format`query ($id: Int, $page: Int) {
   Page(page: $page, perPage: 25) {
