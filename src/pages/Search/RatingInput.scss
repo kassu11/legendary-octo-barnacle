@@ -1,0 +1,88 @@
+@layer layout {
+  .multi-input {
+    position: relative;
+    max-width: 15rem;
+
+    &.mobile {
+      dialog {
+        margin: auto;
+        max-width: unset;
+        max-height: calc(100dvh - .5rem);
+        width: min(calc(100dvw - .5rem), 30rem);
+      }
+
+      input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      label {
+        gap: 1rem;
+        padding: .5rem 1rem;
+      }
+    }
+
+    dialog {
+      width: 100%;
+      z-index: 1;
+      padding: 0;
+      border: none;
+      max-height: min(calc(100dvh - .5rem), 30rem);
+      overscroll-behavior: contain;
+      &[open] {
+        display: flex;
+      }
+
+      &::backdrop {
+        background-color: rgb(0 0 0 / 60%);
+        backdrop-filter: blur(5px);
+      }
+
+      &:not(.has-scroll-bar) {
+        touch-action: none;
+      }
+    }
+
+    .wrapper {
+      overflow: hidden;
+      display: grid;
+      width: 100%;
+      border: 1px solid black;
+    }
+
+    .scroll-wrapper {
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
+
+    ol {
+      padding: 0;
+      list-style: none;
+    }
+
+    li ~ li {
+      border-top: 1px solid black;;
+    }
+
+    label {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: .5rem;
+      padding: .25rem .5rem;
+      align-items: center;
+    }
+  }
+
+  .open-multi-input {
+    width: 100%;
+  }
+
+  .multi-input-footer {
+    display: flex;
+    justify-content: end;
+    gap: .25rem 1rem;
+    padding: .5rem 1rem;
+    background-color: red;
+    flex-wrap: wrap;
+  }
+}
