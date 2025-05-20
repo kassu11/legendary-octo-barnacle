@@ -11,6 +11,8 @@ import { createStore } from "solid-js/store";
 import { SearchBarContext, useSearchBar } from "../context/providers";
 import { debounce } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
+import { useResponsive } from "../context/ResponsiveContext";
+import { RatingInput } from "./Search/RatingInput";
 
 
 export function BrowseSearchBar(props) {
@@ -48,6 +50,20 @@ class SearchVariable {
     this.hidden = hidden;
     this.canClear = canClear;
   }
+
+  match(searchVariable = {}) {
+    return (
+      this.name === searchVariable.name &&
+      this.url === searchVariable.url &&
+      this.key === searchVariable.key &&
+      this.value === searchVariable.value &&
+      this.active === searchVariable.active &&
+      this.reason === searchVariable.reason &&
+      this.desc === searchVariable.desc &&
+      this.hidden === searchVariable.hidden &&
+      this.canClear === searchVariable.canClear
+    );
+  }
 }
 
 function parseURL() {
@@ -68,11 +84,11 @@ function parseURL() {
 
   if (engine === "ani") {
     if (params.type === "anime") {
-      variables.push(new SearchVariable({ key: "type", value: "ANIME", }));
+      variables.push(new SearchVariable({ key: "type", value: "ANIME", hidden: true, canClear: false }));
     } else if (params.type === "manga") {
-      variables.push(new SearchVariable({ key: "type", value: "MANGA", }));
+      variables.push(new SearchVariable({ key: "type", value: "MANGA", hidden: true, canClear: false }));
     } else if (params.type === "media") {
-      variables.push(new SearchVariable({ key: "type", value: undefined, }));
+      variables.push(new SearchVariable({ key: "type", value: undefined, hidden: true, canClear: false }));
     }
 
     if (searchParams.age === undefined) {
@@ -85,7 +101,7 @@ function parseURL() {
 
   const type = params.type;
 
-  return [type, engine, variables];
+  return [type, engine, variables, searchParams.preventFetch === "true"];
 }
 
 export function SearchBar(_props) {
@@ -96,7 +112,8 @@ export function SearchBar(_props) {
   const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
   const [val, setVal] = createSignal(4);
   const [store, setStore] = createStore({
-    sig: val(),
+    active: [],
+    all: [],
   });
 
   const [searchType, setSearchType] = createSignal();
@@ -104,35 +121,46 @@ export function SearchBar(_props) {
   const [searchVariables, setSearchVariables] = createSignal();
 
   createEffect(() => {
-    const [type, engine, variables] = parseURL();
+    const [type, engine, variables, preventFetch] = parseURL();
+    if (preventFetch) {
+      return;
+    }
 
     batch(() => {
       setSearchType(type);
       setSearchEngine(engine);
-      setSearchVariables(variables);
+      setSearchVariables(vars => {
+        if (vars?.length === variables.length && variables.every(variable => variable.match(vars))) {
+          return vars;
+        }
+        return variables;
+      });
     });
   });
 
   return (
     <div class="search-page">
-      <div>
+      <form>
         <input type="checkbox" name="malSearch" id="malSearch" checked={searchParams.malSearch === "true"} onInput={e => {
           setSearchParams({ malSearch: e.target.checked || undefined });
         }} />
         <label htmlFor="malSearch"> MAL search</label>
+        <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.hideMyAnime === "true"} onInput={e => {
+          setSearchParams({ hideMyAnime: e.target.checked || undefined });
+        }} />
+        <label htmlFor="hideMyAnime"> Hide my anime</label>
         <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
           triggerSetSearchParams({ q: e.target.value });
         }} />
-        <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice</button>
-        <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice2</button>
-        <button onClick={() => setStore("test", { "val": 5 })}>Nice2</button>
-        <button onClick={() => setStore("test", { "val": 5, val2: {val3: 11} })}>Nice2</button>
-        <button onClick={() => setVal(99)}>Sig</button>
-      </div>
-      {console.log(searchParams.test)}
-      {console.log(store.test?.val)}
-      {console.log(store.test?.val2)}
-      {console.log(store.sig)}
+        <RatingInput />
+
+        {/* <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice</button> */}
+        {/* <button type="button" onClick={() => setSearchParams({preventFetch: true})}>Nice2</button> */}
+        {/* <button type="button" onClick={() => setStore("all", [new searchVariables({key: "test", val: true})])}>Nice2</button> */}
+        {/* <button type="button" onClick={() => setStore("test", { "val": 5, val2: {val3: 11} })}>Nice2</button> */}
+        {/* <button type="button" onClick={() => setVal(99)}>Sig</button> */}
+      </form>
+      {console.log(store.all[0])}
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables}}>
         {props.children}
       </SearchBarContext.Provider>
@@ -140,7 +168,8 @@ export function SearchBar(_props) {
   )
 }
 
-export function SearchContent(props) {
+
+export function SearchContent() {
   const params = useParams();
   const { searchEngine, searchType, searchVariables } = useSearchBar();
 
@@ -149,22 +178,33 @@ export function SearchContent(props) {
       <Show when={params.header}>
         <h1>{params.header}</h1>
       </Show>
-      <ol class="search-page-content grid-column-auto-fill">
-        <Switch>
-          <Match when={searchEngine() === "ani"}>
-            <AnilistMediaSearchContent nestLevel={1} page={1} variables={searchVariables()} />
-          </Match>
-          <Match when={searchEngine() === "mal"}>
-            <Switch>
-              <Match when={searchType() === "anime"}>
-                <MyAnimeListAnimeSearchContent nestLevel={1} page={1} variables={searchVariables()} />
-              </Match>
-              <Match when={searchType() === "manga"}>
-              </Match>
-            </Switch>
-          </Match>
-        </Switch>
-      </ol>
+      <Show when={searchVariables()?.length}>
+        <ol>
+          <For each={searchVariables()}>{variable => (
+            <Show when={!variable.hidden}>
+              <li>{variable.name}</li>
+            </Show>
+          )}</For>
+        </ol>
+      </Show>
+      <section>
+        <ol class="search-page-content grid-column-auto-fill">
+          <Switch>
+            <Match when={searchEngine() === "ani"}>
+              <AnilistMediaSearchContent nestLevel={1} page={1} variables={searchVariables()} />
+            </Match>
+            <Match when={searchEngine() === "mal"}>
+              <Switch>
+                <Match when={searchType() === "anime"}>
+                  <MyAnimeListAnimeSearchContent nestLevel={1} page={1} variables={searchVariables()} />
+                </Match>
+                <Match when={searchType() === "manga"}>
+                </Match>
+              </Switch>
+            </Match>
+          </Switch>
+        </ol>
+      </section>
     </div>
   );
 }
