@@ -7,9 +7,9 @@ import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import { SearchBarContext, useSearchBar } from "../context/providers";
-import { debounce } from "@solid-primitives/scheduled";
+import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useResponsive } from "../context/ResponsiveContext";
 import { RatingInput } from "./Search/RatingInput";
@@ -21,7 +21,6 @@ export function BrowseSearchBar(props) {
 
   createEffect(on(() => location.search, search => {
     if (search) {
-      console.log(location.query, )
       navigate(location.pathname.replace(/.*browse/, "/search") + search);
     }
   }));
@@ -34,9 +33,13 @@ export function BrowseSearchBar(props) {
 }
 
 class SearchVariable {
-  constructor({ url, key, value, active = true, reason, desc, name, hidden = false, canClear = true }) {
-    assert(key, "key missing");
+  constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true }) {
+    assert(!active || key, "key missing");
+    assert(hidden || name, "Name is missing");
+    assert(!canClear || !active || url, "Url is missing");
+    assert(canClear || hidden , "Don't show user meta tags they can't clear");
     assert(typeof active === "boolean", "active is not boolean");
+    assert(typeof visuallyDisabled === "boolean", "visuallyDisabled is not boolean");
     assert(typeof hidden === "boolean", "hidden is not boolean");
     assert(typeof canClear === "boolean", "canClear is not boolean");
 
@@ -45,6 +48,7 @@ class SearchVariable {
     this.key = key;
     this.value = value;
     this.active = active;
+    this.visuallyDisabled = visuallyDisabled;
     this.reason = reason;
     this.desc = desc;
     this.hidden = hidden;
@@ -58,12 +62,21 @@ class SearchVariable {
       this.key === searchVariable.key &&
       this.value === searchVariable.value &&
       this.active === searchVariable.active &&
+      this.visuallyDisabled === searchVariable.visuallyDisabled &&
       this.reason === searchVariable.reason &&
       this.desc === searchVariable.desc &&
       this.hidden === searchVariable.hidden &&
       this.canClear === searchVariable.canClear
     );
   }
+}
+
+function objectFromArrayEntries(arr) {
+  if (!arr) {
+    return null;
+  } else if (Array.isArray(arr)) {
+    return Object.fromEntries(arr.map(v => ([v, true])));
+  } return {[arr]: true};
 }
 
 function parseURL() {
@@ -91,13 +104,48 @@ function parseURL() {
       variables.push(new SearchVariable({ key: "type", value: undefined, hidden: true, canClear: false }));
     }
 
-    if (searchParams.age === undefined) {
-      variables.push(new SearchVariable({ key: "isAdult", value: false, hidden: true, canClear: false }));
-    }
 
   } else if (engine === "mal") {
-    variables.push(new SearchVariable({ key: "sfw", value: true, hidden: true, canClear: false }));
+
   }
+
+
+  if (searchParams.rating === undefined) {
+    if (engine === "ani") {
+      variables.push(new SearchVariable({ key: "isAdult", value: false, hidden: true, canClear: false }));
+    } else if(engine === "mal") {
+      variables.push(new SearchVariable({ key: "sfw", value: true, hidden: true, canClear: false }));
+    }
+  } else {
+    const ratings = objectFromArrayEntries(searchParams.rating);
+    if (ratings.any) {
+      if (engine === "ani") {
+        variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", key: "isAdult", value: undefined }));
+      } else if(engine === "mal") {
+        variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", active: false }));
+      }
+    } else {
+      const names = { g: "G - All ages", pg: "PG - Children", pg13: "PG-13", r17: "R - 17+", r: "R+", rx: "Rx - Hentai" };
+      const ratingSet = new Set([searchParams.rating].flat());
+      ratingSet.forEach(value => {
+        if (value === "g" || value === "pg" || value === "pg13" || value === "r17") {
+          variables.push(new SearchVariable({ name: names[value], url: `rating=${value}`, key: "rating", value, visuallyDisabled: engine === "ani", active: engine === "mal" }));
+        } else if (value === "r" || value === "rx") {
+          variables.push(new SearchVariable({ name: names[value], url: `rating=${value}`, key: "rating", value, active: engine === "mal" }));
+        }
+      });
+
+      if (engine === "ani") {
+        if (ratings.rx && (ratings.g || ratings.pg || ratings.pg13 || ratings.r17 || ratings.r)) {
+          variables.push(new SearchVariable({ key: "isAdult", value: undefined, hidden: true, canClear: false }));
+        } else {
+          variables.push(new SearchVariable({ key: "isAdult", value: ratings.rx === true, hidden: true, canClear: false }));
+        }
+      }
+    }
+  }
+
+
 
   const type = params.type;
 
@@ -110,6 +158,18 @@ export function SearchBar(_props) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
+  const triggerSearchValues = leadingAndTrailing(debounce, (type, engine, variables) => {
+    batch(() => {
+      setDebouncedSearchType(type)
+      setDebouncedSearchEngine(engine)
+      setDebouncedSearchVariables(vars => {
+        if (vars?.length === variables.length && variables.every(variable => variable.match(vars))) {
+          return vars;
+        }
+        return variables;
+      });
+    });
+  });
   const [val, setVal] = createSignal(4);
   const [store, setStore] = createStore({
     active: [],
@@ -119,6 +179,9 @@ export function SearchBar(_props) {
   const [searchType, setSearchType] = createSignal();
   const [searchEngine, setSearchEngine] = createSignal();
   const [searchVariables, setSearchVariables] = createSignal();
+  const [debouncedSearchType, setDebouncedSearchType] = createSignal();
+  const [debouncedSearchEngine, setDebouncedSearchEngine] = createSignal();
+  const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
 
   createEffect(() => {
     const [type, engine, variables, preventFetch] = parseURL();
@@ -135,6 +198,7 @@ export function SearchBar(_props) {
         }
         return variables;
       });
+      triggerSearchValues(type, engine, variables);
     });
   });
 
@@ -160,8 +224,7 @@ export function SearchBar(_props) {
         {/* <button type="button" onClick={() => setStore("test", { "val": 5, val2: {val3: 11} })}>Nice2</button> */}
         {/* <button type="button" onClick={() => setVal(99)}>Sig</button> */}
       </form>
-      {console.log(store.all[0])}
-      <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables}}>
+      <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
       </SearchBarContext.Provider>
     </div>
@@ -171,34 +234,56 @@ export function SearchBar(_props) {
 
 export function SearchContent() {
   const params = useParams();
-  const { searchEngine, searchType, searchVariables } = useSearchBar();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { debouncedSearchEngine, debouncedSearchType, searchVariables, debouncedSearchVariables } = useSearchBar();
+  const navigate = useNavigate();
 
   return (
     <div class="search-result-container">
       <Show when={params.header}>
         <h1>{params.header}</h1>
       </Show>
-      <Show when={searchVariables()?.length}>
-        <ol>
-          <For each={searchVariables()}>{variable => (
-            <Show when={!variable.hidden}>
-              <li>{variable.name}</li>
-            </Show>
-          )}</For>
-        </ol>
+      <Show when={searchVariables()?.filter(variable => !variable.hidden)}>{filteredVariables => (
+        <Show when={filteredVariables().length}>
+          Tags:
+          <ol class="search-meta-tags">
+            <For each={filteredVariables()}>{variable => (
+              <Show when={!variable.hidden}>
+                <li classList={{disabled: variable.visuallyDisabled}}>
+                  <button onClick={() => {
+                    const [key, value] = variable.url.split("=");
+                    setSearchParams({[key]: [searchParams[key]].flat().filter(v => v !== value)});
+                  }}>{variable.name}</button>
+                </li>
+              </Show>
+            )}</For>
+            <li>
+              <button onClick={() => {
+                if (searchParams.malSearch === "true") {
+                  navigate("/search/" + params.type + "?malSearch=true"); 
+                } else {
+                  navigate("/search/" + params.type);
+                }
+              }}>
+                Clear all
+              </button>
+            </li>
+          </ol>
+        </Show>
+      )}
       </Show>
       <section>
         <ol class="search-page-content grid-column-auto-fill">
           <Switch>
-            <Match when={searchEngine() === "ani"}>
-              <AnilistMediaSearchContent nestLevel={1} page={1} variables={searchVariables()} />
+            <Match when={debouncedSearchEngine() === "ani"}>
+              <AnilistMediaSearchContent nestLevel={1} page={1} variables={debouncedSearchVariables()} />
             </Match>
-            <Match when={searchEngine() === "mal"}>
+            <Match when={debouncedSearchEngine() === "mal"}>
               <Switch>
-                <Match when={searchType() === "anime"}>
-                  <MyAnimeListAnimeSearchContent nestLevel={1} page={1} variables={searchVariables()} />
+                <Match when={debouncedSearchType() === "anime"}>
+                  <MyAnimeListAnimeSearchContent nestLevel={1} page={1} variables={debouncedSearchVariables()} />
                 </Match>
-                <Match when={searchType() === "manga"}>
+                <Match when={debouncedSearchType() === "manga"}>
                 </Match>
               </Switch>
             </Match>
@@ -211,9 +296,9 @@ export function SearchContent() {
 
 function AnilistMediaSearchContent(props) {
   const {accessToken} = useAuthentication();
-  const { searchVariables } = useSearchBar();
+  const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = api.anilist.searchMediaCache(accessToken, searchVariables, props.page);
+  const [cacheData] = api.anilist.searchMediaCache(accessToken, debouncedSearchVariables, props.page);
   const [mediaData] = api.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables, props.page);
   const [newestData, setNewestData] = createSignal();
 
@@ -245,9 +330,9 @@ function AnilistMediaSearchContent(props) {
 }
 
 function MyAnimeListAnimeSearchContent(props) {
-  const { searchVariables } = useSearchBar();
+  const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = api.myAnimeList.animeSearchCache(searchVariables, props.page);
+  const [cacheData] = api.myAnimeList.animeSearchCache(debouncedSearchVariables, props.page);
   const [mediaData] = api.myAnimeList.animeSearch(props.nestLevel === 1 ? () => props.variables : variables, props.page);
   const [newestData, setNewestData] = createSignal();
 

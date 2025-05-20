@@ -3,8 +3,23 @@
     container-type: inline-size;
     container-name: media-search-results;
   }
+
+  .search-meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+
+    li {
+      &.disabled {
+        opacity: .5;
+      }
+    }
+  }
   .search-page-content {
     --grid-column-width: 13rem;
+    --grid-column-width: 20rem;
     --line-clamp: 3;
   }
 
