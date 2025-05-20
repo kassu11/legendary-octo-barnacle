@@ -128,17 +128,23 @@ export function RatingInput(props) {
               <input type="checkbox" name="rating" value="pg13" checked={ratings.any || ratings.pg13} />
             </label>
           </li>
-        </Show>
-        <li>
-          <label>
-            R - 17+ (violence & profanity) 
-            <input type="checkbox" name="rating" value="r17" checked={ratings.any || ratings.r17} />
-          </label>
-        </li>
-        <Show when={searchParams.malSearch === "true"}>
+          <li>
+            <label>
+              R - 17+ (violence & profanity) 
+              <input type="checkbox" name="rating" value="r17" checked={ratings.any || ratings.r17} />
+            </label>
+          </li>
           <li>
             <label>
               R+ - Mild nudity 
+              <input type="checkbox" name="rating" value="r" checked={ratings.any || ratings.r} />
+            </label>
+          </li>
+        </Show>
+        <Show when={searchParams.malSearch !== "true"}>
+          <li>
+            <label>
+              R+ - (violence, profanity & mild nudity)
               <input type="checkbox" name="rating" value="r" checked={ratings.any || ratings.r} />
             </label>
           </li>
