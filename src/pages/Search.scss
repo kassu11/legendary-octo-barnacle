@@ -1,8 +1,16 @@
 @layer layout {
-  .search-result-container {
-    container-type: inline-size;
-    container-name: media-search-results;
+  .search-page {
+    max-width: 85rem;
+    padding: 2rem 1rem;
+    margin-inline: auto;
+    background-color: purple;
+
+    .header-row {
+      display: flex;
+    }
   }
+
+
 
   .search-meta-tags {
     display: flex;
@@ -23,19 +31,9 @@
     --line-clamp: 3;
   }
 
-
-
-  .search-page {
-    max-width: 85rem;
-    padding: 2rem 1rem;
-    margin-inline: auto;
-    background-color: purple;
-  }
-
-  .media-search-header {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
+  .search-result-container {
+    container-type: inline-size;
+    container-name: media-search-results;
   }
 
   .search-home-content {

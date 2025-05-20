@@ -23,29 +23,27 @@ const fetchRateLimits = {
   }
 }
 
-function malMediaSearch(type) {
-  return (variables, page) => {
-    const query = variables.reduce((acc, v) => {
-      if (v.active) { acc.push(`${v.key}=${v.value}`) };
-      return acc;
-    }, []);
-    if (page > 1) {
-      query.push(`page=${page}`);
-    }
-
-    const endpoint = type === "anime" ? queries.myAnimeListAnimeSearch : queries.myAnimeListAnimeSearch;
-    return Fetch.getJson(endpoint(query.join("&")), res => {
-      res.data.forEach(media => {
-        media.titles = media.titles.reduce((acc, title) => {
-          acc[title.type] = title.title;
-          return acc;
-        }, {});
-      })
-
-      return res;
-    });
+function malMediaSearch(type, variables, page) {
+  const query = variables.reduce((acc, v) => {
+    if (v.active) { acc.push(`${v.key}=${v.value}`) };
+    return acc;
+  }, []);
+  if (page > 1) {
+    query.push(`page=${page}`);
   }
+
+  return Fetch.getJson(queries.myAnimeListMediaSearch(type, query.join("&")), res => {
+    res.data.forEach(media => {
+      media.titles = media.titles.reduce((acc, title) => {
+        acc[title.type] = title.title;
+        return acc;
+      }, {});
+    })
+
+    return res;
+  });
 }
+
 
 const api = {
   animeThemes: {
@@ -75,10 +73,8 @@ const api = {
     mangaStaffById: fetchOnce(id => {
       return Fetch.getJson(queries.myAnimeListMangaStaffById(id));
     }),
-    animeSearch: fetchOnce(malMediaSearch("anime")),
-    mangaSearch: fetchOnce(malMediaSearch("manga")),
-    animeSearchCache: onlyIfCache(malMediaSearch("anime")),
-    mangaSearchCache: onlyIfCache(malMediaSearch("manga")),
+    mediaSearch: fetchOnce(malMediaSearch),
+    mediaSearchCache: onlyIfCache(malMediaSearch),
   },
   anilist: {
     mediaId: reloadCache((id, token) => {
