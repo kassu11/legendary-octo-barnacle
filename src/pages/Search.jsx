@@ -154,6 +154,7 @@ function parseURL() {
 
 export function SearchBar(_props) {
   const props = mergeProps({mode: "search"}, _props);
+  const navigate = useNavigate();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -169,7 +170,7 @@ export function SearchBar(_props) {
         return variables;
       });
     });
-  });
+  }, 300);
   const [val, setVal] = createSignal(4);
   const [store, setStore] = createStore({
     active: [],
@@ -204,6 +205,16 @@ export function SearchBar(_props) {
 
   return (
     <div class="search-page">
+      <div class="header-row">
+        <h1>{capitalize(props.mode)}</h1>
+        <select name="type" id="type" value={params.type} onChange={e => {
+          navigate("/" + props.mode + "/" + e.target.value + "/" + (params.header ? "/" + params.header : "") + location.search);
+        }}>
+          <option value="anime">Anime</option>
+          <option value="manga">Manga</option>
+          <option value="media">Media</option>
+        </select>
+      </div>
       <form>
         <input type="checkbox" name="malSearch" id="malSearch" checked={searchParams.malSearch === "true"} onInput={e => {
           setSearchParams({ malSearch: e.target.checked || undefined });
@@ -232,7 +243,7 @@ export function SearchBar(_props) {
 }
 
 
-export function SearchContent() {
+export function SearchContent(props) {
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { debouncedSearchEngine, debouncedSearchType, searchVariables, debouncedSearchVariables } = useSearchBar();
@@ -243,6 +254,7 @@ export function SearchContent() {
       <Show when={params.header}>
         <h1>{params.header}</h1>
       </Show>
+      {props.children}
       <Show when={searchVariables()?.filter(variable => !variable.hidden)}>{filteredVariables => (
         <Show when={filteredVariables().length}>
           Tags:
@@ -281,9 +293,10 @@ export function SearchContent() {
             <Match when={debouncedSearchEngine() === "mal"}>
               <Switch>
                 <Match when={debouncedSearchType() === "anime"}>
-                  <MyAnimeListAnimeSearchContent nestLevel={1} page={1} variables={debouncedSearchVariables()} />
+                  <MyAnimeListMediaSearchContent nestLevel={1} type="anime" page={1} variables={debouncedSearchVariables()} />
                 </Match>
                 <Match when={debouncedSearchType() === "manga"}>
+                  <MyAnimeListMediaSearchContent nestLevel={1} type="manga" page={1} variables={debouncedSearchVariables()} />
                 </Match>
               </Switch>
             </Match>
@@ -329,11 +342,11 @@ function AnilistMediaSearchContent(props) {
   );
 }
 
-function MyAnimeListAnimeSearchContent(props) {
+function MyAnimeListMediaSearchContent(props) {
   const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = api.myAnimeList.animeSearchCache(debouncedSearchVariables, props.page);
-  const [mediaData] = api.myAnimeList.animeSearch(props.nestLevel === 1 ? () => props.variables : variables, props.page);
+  const [cacheData] = api.myAnimeList.mediaSearchCache(props.type, debouncedSearchVariables, props.page);
+  const [mediaData] = api.myAnimeList.mediaSearch(props.type, props.nestLevel === 1 ? () => props.variables : variables, props.page);
   const [newestData, setNewestData] = createSignal();
 
   createEffect(on(cacheData, data => data && setNewestData(data.data.data)));
@@ -347,8 +360,9 @@ function MyAnimeListAnimeSearchContent(props) {
             <Show when={props.variables}>
               {vars => (
                 <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <MyAnimeListAnimeSearchContent 
+                  <MyAnimeListMediaSearchContent 
                     variables={vars()}
+                    type={props.type}
                     page={props.page + 1}
                     nestLevel={props.nestLevel + 1}
                     loading={mediaData.loading}
