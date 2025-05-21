@@ -269,7 +269,7 @@ const api = {
       }, (response) => response.data.Staff.staffMedia);
     }),
     genresAndTags: fetchOnce(() => {
-      return Fetch.anilist(queries.anilistGenresAndTags);
+      return Fetch.anilist(queries.anilistGenresAndTags, {}, res => res.data);
     }),
     externalSources: fetchOnce(type => {
       return Fetch.anilist(queries.anilistExternalSources, { type: type || undefined });

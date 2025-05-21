@@ -9,13 +9,17 @@ export function RatingInput(props) {
   const { isTouch } = useResponsive()
   let open = false;
   let oldRatings;
-  let rating, controller, button, form;
+  let dialog, scrollWrapper, controller, button, form;
 
   function close() {
-    rating.close();
+    dialog.close();
     open = false;
     controller?.abort();
     setSearchParams({preventFetch: undefined});
+  }
+
+  function preventMobileDragOverFlow() {
+    scrollWrapper.classList.toggle("has-scroll-bar", scrollWrapper.scrollHeight - scrollWrapper.clientHeight > 0);
   }
 
   createEffect(on(isTouch, close));
@@ -48,15 +52,16 @@ export function RatingInput(props) {
           oldRatings = searchParams.rating;
 
           if(isTouch()) {
-            rating.showModal();
+            dialog.showModal();
             setSearchParams({preventFetch: true});
+            preventMobileDragOverFlow();
+            window.addEventListener("resize", preventMobileDragOverFlow, { signal });
 
-            rating.addEventListener("touchstart", e => {
-              rating.classList.toggle("has-scroll-bar", rating.scrollHeight - rating.clientHeight > 0);
-              if (e.target !== rating) { return }
+            dialog.addEventListener("touchstart", e => {
+              if (e.target !== dialog) { return }
 
-              rating.addEventListener("touchend", e => {
-                if (e.target !== rating) { return }
+              dialog.addEventListener("touchend", e => {
+                if (e.target !== dialog) { return }
 
                 e.preventDefault();
                 close();
@@ -64,15 +69,15 @@ export function RatingInput(props) {
 
             }, {signal});
           } else {
-            window.addEventListener("mousedown", e => e.target !== button && e.target.closest("dialog") !== rating && close(), {signal});
-            rating.show();
+            window.addEventListener("mousedown", e => e.target !== button && e.target.closest("dialog") !== dialog && close(), {signal});
+            dialog.show();
           }
           open = true;
         }
       }}>Rating</button>
-      <dialog ref={rating} onClose={close}>
+      <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
-          <div class="scroll-wrapper">
+          <div class="scroll-wrapper" ref={scrollWrapper}>
             <Content />
           </div>
           <Show when={isTouch()}>
