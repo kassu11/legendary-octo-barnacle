@@ -23,6 +23,7 @@ import { Staff, Character } from "./pages/Entity.jsx";
 import { Studio } from "./pages/Studio.jsx";
 import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome } from "./pages/Browse.jsx";
+import { RedirectSearchHeaders } from "./pages/SearchHeaderRedirect.jsx";
 
 const root = document.getElementById("root")
 
@@ -63,6 +64,7 @@ render(
                 <Route path="/:type/:header?" matchFilters={animeSearch} />
                 <Route path="/:type/:header?" matchFilters={mangaSearch} />
                 <Route path="/:type/:header?" matchFilters={bothSearch} />
+                <Route path="/:type/:header?" component={RedirectSearchHeaders} />
               </Route>
             </Route>
             <Route path="/artist/:name" component={Artist} />

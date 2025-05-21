@@ -13,6 +13,8 @@ import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useResponsive } from "../context/ResponsiveContext";
 import { RatingInput } from "./Search/RatingInput";
+import { SwitchInput } from "./Search/SwitchInput";
+import { GenresInput } from "./Search/GenresInput";
 
 
 export function BrowseSearchBar(props) {
@@ -69,6 +71,14 @@ class SearchVariable {
       this.canClear === searchVariable.canClear
     );
   }
+
+  looseMatch(searchVariable = {}) {
+    return (
+      this.key === searchVariable.key &&
+      this.value === searchVariable.value &&
+      this.active === searchVariable.active
+    );
+  }
 }
 
 function objectFromArrayEntries(arr) {
@@ -83,7 +93,7 @@ function parseURL() {
   const params = useParams();
   const [searchParams] = useSearchParams();
 
-  const engine = searchParams.malSearch === "true" ? "mal" : "ani";
+  const engine = (searchParams.malSearch === "true" && params.type !== "media") ? "mal" : "ani";
   const variables = [];
 
   if (searchParams.q) {
@@ -103,8 +113,6 @@ function parseURL() {
     } else if (params.type === "media") {
       variables.push(new SearchVariable({ key: "type", value: undefined, hidden: true, canClear: false }));
     }
-
-
   } else if (engine === "mal") {
 
   }
@@ -157,6 +165,7 @@ export function SearchBar(_props) {
   const navigate = useNavigate();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [anilistGenresAndTags] = api.anilist.genresAndTags();
 
   const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
   const triggerSearchValues = leadingAndTrailing(debounce, (type, engine, variables) => {
@@ -164,7 +173,7 @@ export function SearchBar(_props) {
       setDebouncedSearchType(type)
       setDebouncedSearchEngine(engine)
       setDebouncedSearchVariables(vars => {
-        if (vars?.length === variables.length && variables.every(variable => variable.match(vars))) {
+        if (vars?.length === variables.length && variables.every((variable, i) => variable.looseMatch(vars[i]))) {
           return vars;
         }
         return variables;
@@ -185,7 +194,7 @@ export function SearchBar(_props) {
   const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
 
   createEffect(() => {
-    const [type, engine, variables, preventFetch] = parseURL();
+    const [type, engine, variables, preventFetch] = parseURL(anilistGenresAndTags());
     if (preventFetch) {
       return;
     }
@@ -194,7 +203,7 @@ export function SearchBar(_props) {
       setSearchType(type);
       setSearchEngine(engine);
       setSearchVariables(vars => {
-        if (vars?.length === variables.length && variables.every(variable => variable.match(vars))) {
+        if (vars?.length === variables.length && variables.every((variable, i) => variable.match(vars[i]))) {
           return vars;
         }
         return variables;
@@ -206,6 +215,7 @@ export function SearchBar(_props) {
   return (
     <div class="search-page">
       <div class="header-row">
+        {console.log(anilistGenresAndTags())}
         <h1>{capitalize(props.mode)}</h1>
         <select name="type" id="type" value={params.type} onChange={e => {
           navigate("/" + props.mode + "/" + e.target.value + "/" + (params.header ? "/" + params.header : "") + location.search);
@@ -216,18 +226,21 @@ export function SearchBar(_props) {
         </select>
       </div>
       <form>
-        <input type="checkbox" name="malSearch" id="malSearch" checked={searchParams.malSearch === "true"} onInput={e => {
-          setSearchParams({ malSearch: e.target.checked || undefined });
+        <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
+          triggerSetSearchParams({ q: e.target.value });
         }} />
-        <label htmlFor="malSearch"> MAL search</label>
+        <span>
+          <p>Search MAL</p>
+          <SwitchInput disabled={params.type === "media"} name="malSearch" checked={searchParams.malSearch === "true" && params.type !== "media"} onInput={e => {
+          setSearchParams({ malSearch: e.target.checked || undefined });
+        }}/>
+        </span>
         <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.hideMyAnime === "true"} onInput={e => {
           setSearchParams({ hideMyAnime: e.target.checked || undefined });
         }} />
         <label htmlFor="hideMyAnime"> Hide my anime</label>
-        <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
-          triggerSetSearchParams({ q: e.target.value });
-        }} />
         <RatingInput />
+        <GenresInput aniGenres={anilistGenresAndTags} malGenres={[]} engine={searchEngine()} showAdult={true} />
 
         {/* <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice</button> */}
         {/* <button type="button" onClick={() => setSearchParams({preventFetch: true})}>Nice2</button> */}
