@@ -1,7 +1,8 @@
-import { batch, createEffect, createSignal, untrack } from "solid-js";
+import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import * as queries from "./querys";
 import { assert } from "./assert";
 import { getDates } from "./dates";
+import { TokenBucket } from "./TokenBucket";
 const DEBUG = location.origin.includes("localhost");
 
 const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
@@ -12,15 +13,41 @@ const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached",
 // const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
 const fetchRateLimits = {
-  anilist: {
-    retry: null,
-    limit: 60,
-    remaining: 60,
-    pending: 0,
-    burstLimit: 5,
-    burstTime: 1200,
-    burstBus: [],
-  }
+  "animeThemes": new TokenBucket({
+    start: 90,
+    limit: 90,
+    interval: 60,
+    defaultDelay: 20,
+  }),
+  "anilist": new TokenBucket({
+    start: 5,
+    limit: 5,
+    interval: 2,
+    defaultDelay: 20,
+    pool: new TokenBucket({
+      start: 60,
+      limit: 90,
+      interval: 60,
+      fillAmount: 60,
+    })
+  }),
+  "jikan": new TokenBucket({
+    start: 1,
+    limit: 1,
+    interval: 1/3,
+    defaultDelay: 1.5,
+    pool: new TokenBucket({
+      start: 3,
+      limit: 3,
+      interval: 1.25,
+      pool: new TokenBucket({
+        start: 60,
+        limit: 60,
+        interval: 60,
+        fillAmount: 60,
+      })
+    })
+  }),
 }
 
 function malMediaSearch(type, variables, page) {
@@ -403,6 +430,8 @@ class Fetch {
   expires;
   /** @type {undefined|(object) => any} - Formatthe response data if needed */
   #formatResponse;
+  #controller;
+  #signal;
   constructor(url, { method = "POST", headers, body }, formatResponse) {
     assert(url, "Url missing");
     assert(method, "Method missing");
@@ -437,7 +466,56 @@ class Fetch {
     return key;
   }
 
+  #getFetchRateLimitBucket() {
+    if (this.url.startsWith("https://graphql.anilist.co")) {
+      return fetchRateLimits["anilist"];
+    } else if (this.url.startsWith("https://api.jikan.moe")) {
+      return fetchRateLimits["jikan"];
+    } else {
+      assert(false, `Fetch to url "${this.url}" does not have any rate limits`);
+    }
+  }
+
+  abort() {
+    this.#controller?.abort();
+  }
+
   async send() {
+    const bucket = this.#getFetchRateLimitBucket();
+    this.#controller = new AbortController();
+    this.#signal = this.#controller.signal;
+
+    while(true) {
+      if (this.#signal.aborted) {
+        return null;
+      }
+      const token = bucket.requestToken();
+      if (token) {
+        const response = await this.#send();
+        if (response?.status !== 429) return this;
+
+        if (DEBUG) {
+          console.log("headers Retry-After:", response.headers.get("Retry-After"));
+          console.log("headers X-RateLimit-Limit:", response.headers.get("X-RateLimit-Limit"));
+          console.log("headers X-RateLimit-Remaining:", response.headers.get("X-RateLimit-Remaining"));
+          console.log("headers X-RateLimit-Reset:", response.headers.get("X-RateLimit-Reset"));
+        }
+        for(const [key, val] of response.headers.entries()) {
+          console.log(`Header "${key}" value:`, val);
+        }
+        const { promise, resolve } = Promise.withResolvers();
+        bucket.delayBucket(response.headers.get("Retry-After"));
+        bucket.addToBucket(resolve);
+        await promise;
+      } else {
+        const { promise, resolve } = Promise.withResolvers();
+        bucket.addToBucket(resolve);
+        await promise;
+      }
+    }
+  }
+
+  async #send() {
     const opt = {
       method: this.method,
       headers: this.headers,
@@ -445,34 +523,11 @@ class Fetch {
       cache: "default",
     }
 
-    if (this.url === "https://graphql.anilist.co") {
-      const now = performance.now();
-      const times = fetchRateLimits.anilist.burstBus.filter(time => (now - time) < fetchRateLimits.anilist.burstTime);
-      if (times.length >= fetchRateLimits.anilist.burstLimit) {
-        const newTime = times.at(-fetchRateLimits.anilist.burstLimit) + fetchRateLimits.anilist.burstTime + 100;
-        const delta = newTime - now;
-        assert(delta >= 0, "Delta is negative");
-        times.push(now + delta);
-        fetchRateLimits.anilist.burstBus = times;
-        await new Promise(res => setTimeout(res, delta));
-      } else {
-        times.push(now);
-        fetchRateLimits.anilist.burstBus = times;
-      }
-    }
-
+    let response;
     try {
-      const response = await fetch(this.url, opt);
+      response = await fetch(this.url, opt);
       this.status = response.status;
-      if (DEBUG && this.url === "https://graphql.anilist.co" && Number(response.headers.get("X-RateLimit-Remaining")) < 5) {
-        console.log("headers Retry-After:", response.headers.get("Retry-After"));
-        console.log("headers X-RateLimit-Limit:", response.headers.get("X-RateLimit-Limit"));
-        console.log("headers X-RateLimit-Remaining:", response.headers.get("X-RateLimit-Remaining"));
-        console.log("headers X-RateLimit-Reset:", response.headers.get("X-RateLimit-Reset"));
-        }
-      // for(const [key, val] of response.headers.entries()) {
-      //   console.log(`Header "${key}" value:`, val);
-      // }
+      this.error = false;
       if (!response.ok) {
         if (DEBUG && this.url === "https://graphql.anilist.co") {
           const data = await response.json();
@@ -491,9 +546,9 @@ class Fetch {
     }
     catch(err) {
       this.error = true;
-      console.assert(!DEBUG, err);
+      if (DEBUG) { console.error(err); }
     }
-    return this;
+    return response;
   }
 
   static anilist(query, variables = {}, formatResponse) {
@@ -642,6 +697,7 @@ function cacheBuilder(settings) {
           return; // Don't fetch if you have undefined values
         };
 
+        request?.abort();
         request = fetchCallback(...options);
         if (DEBUG) {
           console.log("Fetching", settings.type, request.body || request.url);
@@ -700,6 +756,8 @@ function cacheBuilder(settings) {
         error: { get: () => error() },
         loading: { get: () => loading() },
       });
+
+      onCleanup(() => request?.abort());
 
       return [data, { mutate, refetch, mutateCache }];
     }
