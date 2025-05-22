@@ -54,6 +54,21 @@
       &:not(.has-scroll-bar) {
         touch-action: none;
       }
+
+      > *:not(ol) {
+        padding-inline: .5rem;
+      }
+    }
+
+    .multi-input-header {
+      padding: .25rem .5rem;
+      background-color: red;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      padding: .25rem .5rem;
+      margin-inline: auto;
     }
 
     ol {

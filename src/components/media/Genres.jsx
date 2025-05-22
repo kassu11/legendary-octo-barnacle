@@ -8,14 +8,14 @@ const Genres = (props) => {
     <Show when={props.genres?.length}>
       <div class="media-page-genre-container">
         <h2>
-          <A href={"/search/" + props.type.toLowerCase() + "?" + props.genres.map(genre => "genres=" + genre).join("&")}>
+          <A href={"/search/" + props.type.toLowerCase() + "?" + props.genres.map(genre => "genre=" + genre).join("&")}>
             Genres
           </A>
         </h2>
         <ul>
           <For each={props.genres}>{genre => (
             <li class="media-page-genre">
-              <A href={"/search/" + props.type.toLowerCase() + "?genres=" + genre}>
+              <A href={"/search/" + props.type.toLowerCase() + "?genre=" + genre}>
                 {genre}
               </A>
             </li>

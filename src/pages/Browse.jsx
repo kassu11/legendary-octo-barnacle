@@ -96,7 +96,7 @@ function VerticalCardRow(props) {
                   <ol class="vertical-search-card-genre-list">
                     <For each={card.genres}>{genre => (
                       <li class="vertical-search-card-genre">
-                        <A href={`/search${props.type ? ("/" + props.type) : ""}?genres=` + genre}>{genre}</A>
+                        <A href={`/search${props.type ? ("/" + props.type) : ""}?genre=` + genre}>{genre}</A>
                       </li>
                     )}</For>
                   </ol>

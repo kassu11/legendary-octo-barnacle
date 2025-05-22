@@ -7,6 +7,7 @@ import { createStore, reconcile } from "solid-js/store";
 export function GenresInput(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
+  const [filter, setFilter] = createSignal("");
   let open = false;
   let oldGenres, oldTags;
   let dialog, scrollWrapper, controller, button, form;
@@ -82,6 +83,12 @@ export function GenresInput(props) {
       }}>Genres</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
+          <div class="multi-input-header">
+            <input type="search" placeholder="Filter genres" onInput={e => {
+              e.stopPropagation();
+              setFilter(e.target.value.toLowerCase());
+            }} />
+          </div>
           <div class="scroll-wrapper" ref={scrollWrapper}>
             <Content {...props} />
           </div>
@@ -114,16 +121,10 @@ export function GenresInput(props) {
       }));
     });
 
-    const [filter, setFilter] = createSignal("");
-
     return (
       <Switch>
         <Match when={props.engine === "ani"}>
           <Show when={props.aniGenres()} fallback="Loading...">
-            <input type="search" onInput={e => {
-              e.stopPropagation();
-              setFilter(e.target.value.toLowerCase());
-            }} />
             <h3>Genres</h3>
             <ol>
               <For each={props.aniGenres().data.genres}>{genre => (
@@ -154,60 +155,6 @@ export function GenresInput(props) {
                 </li>
               )}</For>
             </ol>
-            {/* <ol> */}
-            {/*   <li> */}
-            {/*     <label> */}
-            {/*       Any rating  */}
-            {/*       <input type="checkbox" name="rating" value="any" checked={ratings.any} /> */}
-            {/*     </label> */}
-            {/*   </li> */}
-            {/*   <Show when={searchParams.malSearch === "true"}> */}
-            {/*     <li> */}
-            {/*       <label> */}
-            {/*         G - All ages  */}
-            {/*         <input type="checkbox" name="rating" value="g" checked={ratings.any || ratings.g} /> */}
-            {/*       </label> */}
-            {/*     </li> */}
-            {/*     <li> */}
-            {/*       <label> */}
-            {/*         PG - Children  */}
-            {/*         <input type="checkbox" name="rating" value="pg" checked={ratings.any || ratings.pg} /> */}
-            {/*       </label> */}
-            {/*     </li> */}
-            {/*     <li> */}
-            {/*       <label> */}
-            {/*         PG-13 - Teen 13 or older  */}
-            {/*         <input type="checkbox" name="rating" value="pg13" checked={ratings.any || ratings.pg13} /> */}
-            {/*       </label> */}
-            {/*     </li> */}
-            {/*     <li> */}
-            {/*       <label> */}
-            {/*         R - 17+ (violence & profanity)  */}
-            {/*         <input type="checkbox" name="rating" value="r17" checked={ratings.any || ratings.r17} /> */}
-            {/*       </label> */}
-            {/*     </li> */}
-            {/*     <li> */}
-            {/*       <label> */}
-            {/*         R+ - Mild nudity  */}
-            {/*         <input type="checkbox" name="rating" value="r" checked={ratings.any || ratings.r} /> */}
-            {/*       </label> */}
-            {/*     </li> */}
-            {/*   </Show> */}
-            {/*   <Show when={searchParams.malSearch !== "true"}> */}
-            {/*     <li> */}
-            {/*       <label> */}
-            {/*         R+ - (violence, profanity & mild nudity) */}
-            {/*         <input type="checkbox" name="rating" value="r" checked={ratings.any || ratings.r} /> */}
-            {/*       </label> */}
-            {/*     </li> */}
-            {/*   </Show> */}
-            {/*   <li> */}
-            {/*     <label> */}
-            {/*       Rx - Hentai  */}
-            {/*       <input type="checkbox" name="rating" value="rx" checked={ratings.any || ratings.rx} /> */}
-            {/*     </label> */}
-            {/*   </li> */}
-            {/* </ol> */}
           </Show>
         </Match>
       </Switch>
