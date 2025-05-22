@@ -69,7 +69,7 @@ function StatsTags(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/search/" + params.type + "?onList=false&tags=" + genre.tag.name}>
+                  <A href={"/search/" + params.type + "?onList=false&tag=" + genre.tag.name}>
                     {genre.tag.name}
                   </A>
                 </h2>

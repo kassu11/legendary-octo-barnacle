@@ -75,6 +75,19 @@ const api = {
     }),
     mediaSearch: fetchOnce(malMediaSearch),
     mediaSearchCache: onlyIfCache(malMediaSearch),
+    genresAndThemes: fetchOnce(type => {
+      return Fetch.getJson(queries.myAnimeListMediaGenres(type), res => {
+        return {
+          translations: {
+            [type]: {
+              id: Object.fromEntries(res.data.map(genre => ([genre.mal_id, genre.name]))),
+              name: Object.fromEntries(res.data.map(genre => ([genre.name, genre.mal_id]))),
+            }
+          },
+          genres: res.data,
+        };
+      });
+    }),
   },
   anilist: {
     mediaId: reloadCache((id, token) => {

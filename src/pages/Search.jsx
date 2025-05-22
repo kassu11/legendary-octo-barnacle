@@ -89,12 +89,14 @@ function objectFromArrayEntries(arr) {
   } return {[arr]: true};
 }
 
-function parseURL() {
+function parseURL(genreTranslations) {
   const params = useParams();
   const [searchParams] = useSearchParams();
 
+  const type = params.type;
   const engine = (searchParams.malSearch === "true" && params.type !== "media") ? "mal" : "ani";
   const variables = [];
+  let preventFetch = searchParams.preventFetch === "true";
 
   if (searchParams.q) {
     variables.push(new SearchVariable({ 
@@ -153,11 +155,44 @@ function parseURL() {
     }
   }
 
+  if (searchParams.genre) {
+    const genres = objectFromArrayEntries(searchParams.genre);
+    const validGenres = [];
+    [searchParams.genre].flat().forEach(genre => {
+      if (Number.isNaN(Number(genre))) {
+        if (engine === "mal") {
+          if (genreTranslations[type].name === null) {
+            preventFetch = true;
+          }
+          const id = genreTranslations[type].name?.[genre];
+          if (Number.isInteger(id)) {
+            validGenres.push(id);
+          }
+          variables.push(new SearchVariable({ name: genre, url: `genre=${genre}`, active: false, visuallyDisabled: !Number.isInteger(id) }));
+        } 
+        else if (engine === "ani") {
+          validGenres.push(genre);
+          variables.push(new SearchVariable({ name: genre, url: `genre=${genre}`, active: false, visuallyDisabled: engine !== "ani" }));
+        }
+      } else {
+        variables.push(new SearchVariable({ name: genre, url: `genre=${genre}`, key: "genres", active: engine === "mal", visuallyDisabled: engine !== "mal", value: genre }));
+      }
+    });
 
 
-  const type = params.type;
+    if (engine === "ani") {
+      variables.push(new SearchVariable({ key: "genres", value: validGenres, hidden: true, canClear: false }));
+    }
+    else if (engine === "mal") {
+      console.log(validGenres);
+      variables.push(new SearchVariable({ key: "genres", value: validGenres.join(","), hidden: true, canClear: false }));
+    }
+  }
 
-  return [type, engine, variables, searchParams.preventFetch === "true"];
+
+
+
+  return [type, engine, variables, preventFetch];
 }
 
 export function SearchBar(_props) {
@@ -165,7 +200,20 @@ export function SearchBar(_props) {
   const navigate = useNavigate();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchType, setSearchType] = createSignal();
+  const [searchEngine, setSearchEngine] = createSignal();
+  const [searchVariables, setSearchVariables] = createSignal();
+  const [debouncedSearchType, setDebouncedSearchType] = createSignal();
+  const [debouncedSearchEngine, setDebouncedSearchEngine] = createSignal();
+  const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
+  const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
+    anime: {id: null, name: null},
+    manga: {id: null, name: null},
+  });
+
   const [anilistGenresAndTags] = api.anilist.genresAndTags();
+  const [malGenresAndThemes] = api.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
   const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
   const triggerSearchValues = leadingAndTrailing(debounce, (type, engine, variables) => {
@@ -180,21 +228,15 @@ export function SearchBar(_props) {
       });
     });
   }, 300);
-  const [val, setVal] = createSignal(4);
-  const [store, setStore] = createStore({
-    active: [],
-    all: [],
-  });
 
-  const [searchType, setSearchType] = createSignal();
-  const [searchEngine, setSearchEngine] = createSignal();
-  const [searchVariables, setSearchVariables] = createSignal();
-  const [debouncedSearchType, setDebouncedSearchType] = createSignal();
-  const [debouncedSearchEngine, setDebouncedSearchEngine] = createSignal();
-  const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
+  createEffect(on(malGenresAndThemes, genres => {
+    if (!genres) { return; }
+    setGenreAndTagTranslations(genres.data.translations);
+  }));
+
 
   createEffect(() => {
-    const [type, engine, variables, preventFetch] = parseURL(anilistGenresAndTags());
+    const [type, engine, variables, preventFetch] = parseURL(genreAndTagTranslations);
     if (preventFetch) {
       return;
     }
@@ -215,7 +257,6 @@ export function SearchBar(_props) {
   return (
     <div class="search-page">
       <div class="header-row">
-        {console.log(anilistGenresAndTags())}
         <h1>{capitalize(props.mode)}</h1>
         <select name="type" id="type" value={params.type} onChange={e => {
           navigate("/" + props.mode + "/" + e.target.value + "/" + (params.header ? "/" + params.header : "") + location.search);
@@ -241,12 +282,6 @@ export function SearchBar(_props) {
         <label htmlFor="hideMyAnime"> Hide my anime</label>
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={[]} engine={searchEngine()} showAdult={true} />
-
-        {/* <button onClick={() => setSearchParams({test: ["yks", "kaks", "kolme"]})}>Nice</button> */}
-        {/* <button type="button" onClick={() => setSearchParams({preventFetch: true})}>Nice2</button> */}
-        {/* <button type="button" onClick={() => setStore("all", [new searchVariables({key: "test", val: true})])}>Nice2</button> */}
-        {/* <button type="button" onClick={() => setStore("test", { "val": 5, val2: {val3: 11} })}>Nice2</button> */}
-        {/* <button type="button" onClick={() => setVal(99)}>Sig</button> */}
       </form>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}

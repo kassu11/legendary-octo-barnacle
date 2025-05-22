@@ -71,7 +71,7 @@ function StatsGenres(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/search/" + params.type + "?onList=false&genres=" + genre.genre}>
+                  <A href={"/search/" + params.type + "?onList=false&genre=" + genre.genre}>
                     {genre.genre}
                   </A>
                 </h2>
