@@ -3,13 +3,14 @@ import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
+import { objectFromArrayEntries } from "../../utils/arrays";
 
 export function GenresInput(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   const [filter, setFilter] = createSignal("");
   let open = false;
-  let oldGenres, oldTags;
+  let oldGenres;
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
@@ -32,7 +33,7 @@ export function GenresInput(props) {
       if (!e.target.checked && !parent.classList.contains("exclude")) {
         parent.classList.add("exclude");
         e.target.checked = true;
-        e.target.name = e.target.name === "tag" ? "excludeTag" : "excludeGenre";
+        e.target.name = "excludeGenre";
       } else if (parent.classList.contains("exclude")) {
         parent.classList.remove("exclude");
       }
@@ -44,8 +45,7 @@ export function GenresInput(props) {
           [e.target.name]: formData.getAll(e.target.name),
         });
       } else {
-        console.log(formData.getAll(e.target.name), e.target.name)
-        setSearchParams({[e.target.name]: formData.getAll(e.target.name)});
+        setSearchParams({ [e.target.name]: formData.getAll(e.target.name) });
       }
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
@@ -55,7 +55,6 @@ export function GenresInput(props) {
           controller = new AbortController();
           const signal = controller.signal;
           oldGenres = searchParams.genre;
-          oldTags = searchParams.tag;
 
           if(isTouch()) {
             dialog.showModal();
@@ -90,13 +89,13 @@ export function GenresInput(props) {
             }} />
           </div>
           <div class="scroll-wrapper" ref={scrollWrapper}>
-            <Content {...props} />
+            <Content />
           </div>
           <Show when={isTouch()}>
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({ genre: oldGenres, tag: oldTags });
+                setSearchParams({ genre: oldGenres });
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -108,16 +107,15 @@ export function GenresInput(props) {
 
   function Content() {
     const [searchParams] = useSearchParams();
-    const [genres, setGenres] = createStore({exclude: {}});
+    const [genres, setGenres] = createStore({
+      include: {},
+      exclude: {},
+    });
 
     createEffect(() => {
       setGenres(reconcile({
-        ...[searchParams.genre].flat().reduce((acc, genre) => ({...acc, [genre]: true}), {}),
-        ...[searchParams.tag].flat().reduce((acc, tag) => ({...acc, [tag]: true}), {}),
-        exclude: {
-          ...[searchParams.excludeGenre].flat().reduce((acc, genre) => ({...acc, [genre]: true}), {}),
-          ...[searchParams.excludeTag].flat().reduce((acc, tag) => ({...acc, [tag]: true}), {}),
-        }
+        include: objectFromArrayEntries(searchParams.genre, {}),
+        exclude: objectFromArrayEntries(searchParams.excludeGenre, {}),
       }));
     });
 
@@ -132,7 +130,7 @@ export function GenresInput(props) {
                   <label>
                     {genre}
                     <Show when={genres.exclude[genre]} fallback={
-                      <input type="checkbox" data-steps="2" name="genre" value={genre} checked={genres[genre]} />
+                      <input type="checkbox" data-steps="2" name="genre" value={genre} checked={genres.include[genre]} />
                     }>
                       <input type="checkbox" data-steps="2" name="excludeGenre" value={genre} checked={genres.exclude[genre]} />
                     </Show>
@@ -147,9 +145,43 @@ export function GenresInput(props) {
                   <label>
                     {tag.name}
                     <Show when={genres.exclude[tag.name]} fallback={
-                      <input type="checkbox" data-steps="2" name="tag" value={tag.name} checked={genres[tag.name]} />
+                      <input type="checkbox" data-steps="2" name="genre" value={tag.name} checked={genres.include[tag.name]} />
                     }>
-                      <input type="checkbox" data-steps="2" name="excludeTag" value={tag.name} checked={genres.exclude[tag.name]} />
+                      <input type="checkbox" data-steps="2" name="excludeGenre" value={tag.name} checked={genres.exclude[tag.name]} />
+                    </Show>
+                  </label>
+                </li>
+              )}</For>
+            </ol>
+          </Show>
+        </Match>
+        <Match when={props.engine === "mal"}>
+          <Show when={props.malGenres()} fallback="Loading...">
+            <h3>Genres</h3>
+            <ol>
+              <For each={props.malGenres().data.genres}>{genre => (
+                <li classList={{exclude: genres.exclude[genre.name], hidden: !genre.name.toLowerCase().includes(filter())}} >
+                  <label>
+                    {genre.name}
+                    <Show when={genres.exclude[genre.name]} fallback={
+                      <input type="checkbox" data-steps="2" name="genre" value={genre.name} checked={genres.include[genre.name]} />
+                    }>
+                      <input type="checkbox" data-steps="2" name="excludeGenre" value={genre.name} checked={genres.exclude[genre.name]} />
+                    </Show>
+                  </label>
+                </li>
+              )}</For>
+            </ol>
+            <h3>Themes</h3>
+            <ol>
+              <For each={props.malGenres().data.themes}>{genre => (
+                <li classList={{exclude: genres.exclude[genre.name], hidden: !genre.name.toLowerCase().includes(filter())}} >
+                  <label>
+                    {genre.name}
+                    <Show when={genres.exclude[genre.name]} fallback={
+                      <input type="checkbox" data-steps="2" name="genre" value={genre.name} checked={genres.include[genre.name]} />
+                    }>
+                      <input type="checkbox" data-steps="2" name="excludeGenre" value={genre.name} checked={genres.exclude[genre.name]} />
                     </Show>
                   </label>
                 </li>
