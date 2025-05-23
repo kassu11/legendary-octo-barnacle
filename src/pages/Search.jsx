@@ -15,6 +15,7 @@ import { useResponsive } from "../context/ResponsiveContext";
 import { RatingInput } from "./Search/RatingInput";
 import { SwitchInput } from "./Search/SwitchInput";
 import { GenresInput } from "./Search/GenresInput";
+import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 
 
 export function BrowseSearchBar(props) {
@@ -62,7 +63,7 @@ class SearchVariable {
       this.name === searchVariable.name &&
       this.url === searchVariable.url &&
       this.key === searchVariable.key &&
-      this.value === searchVariable.value &&
+      compare(this.value, searchVariable.value) &&
       this.active === searchVariable.active &&
       this.visuallyDisabled === searchVariable.visuallyDisabled &&
       this.reason === searchVariable.reason &&
@@ -75,21 +76,13 @@ class SearchVariable {
   looseMatch(searchVariable = {}) {
     return (
       this.key === searchVariable.key &&
-      this.value === searchVariable.value &&
+      compare(this.value, searchVariable.value) &&
       this.active === searchVariable.active
     );
   }
 }
 
-function objectFromArrayEntries(arr) {
-  if (!arr) {
-    return null;
-  } else if (Array.isArray(arr)) {
-    return Object.fromEntries(arr.map(v => ([v, true])));
-  } return {[arr]: true};
-}
-
-function parseURL(genreTranslations) {
+function parseURL() {
   const params = useParams();
   const [searchParams] = useSearchParams();
 
@@ -156,44 +149,65 @@ function parseURL(genreTranslations) {
   }
 
   if (searchParams.genre) {
-    const genres = objectFromArrayEntries(searchParams.genre);
-    const validGenres = [];
-    [searchParams.genre].flat().forEach(genre => {
-      if (Number.isNaN(Number(genre))) {
-        if (engine === "mal") {
-          if (genreTranslations[type].name === null) {
-            preventFetch = true;
-          }
-          const id = genreTranslations[type].name?.[genre];
-          if (Number.isInteger(id)) {
-            validGenres.push(id);
-          }
-          variables.push(new SearchVariable({ name: genre, url: `genre=${genre}`, active: false, visuallyDisabled: !Number.isInteger(id) }));
-        } 
-        else if (engine === "ani") {
-          validGenres.push(genre);
-          variables.push(new SearchVariable({ name: genre, url: `genre=${genre}`, active: false, visuallyDisabled: engine !== "ani" }));
-        }
-      } else {
-        variables.push(new SearchVariable({ name: genre, url: `genre=${genre}`, key: "genres", active: engine === "mal", visuallyDisabled: engine !== "mal", value: genre }));
-      }
-    });
-
+    const [, genres, tags] = [...wrapToSet(searchParams.genre)].reduce(parseGenres, ["genre"]);
 
     if (engine === "ani") {
-      variables.push(new SearchVariable({ key: "genres", value: validGenres, hidden: true, canClear: false }));
+      if (genres.length) {
+        variables.push(new SearchVariable({ key: "genres", value: genres, hidden: true, canClear: false }));
+      }
+      if (tags.length) {
+        variables.push(new SearchVariable({ key: "tags", value: tags, hidden: true, canClear: false }));
+      }
     }
-    else if (engine === "mal") {
-      console.log(validGenres);
-      variables.push(new SearchVariable({ key: "genres", value: validGenres.join(","), hidden: true, canClear: false }));
+    else if(engine === "mal" && genres.length) {
+      variables.push(new SearchVariable({ key: "genres", value: genres.join(","), hidden: true, canClear: false }));
     }
   }
+  if (searchParams.excludeGenre) {
+    const [, excludeGenres, excludeTags] = [...wrapToSet(searchParams.excludeGenre)].reduce(parseGenres, ["excludeGenre"]);
+
+    if (engine === "ani") {
+      if (excludeGenres.length) {
+        variables.push(new SearchVariable({ key: "excludedGenres", value: excludeGenres, hidden: true, canClear: false }));
+      }
+      if (excludeTags.length) {
+        variables.push(new SearchVariable({ key: "excludeTags", value: excludeTags, hidden: true, canClear: false }));
+      }
+    }
+    else if(engine === "mal" && excludeGenres.length) {
+      variables.push(new SearchVariable({ key: "genres_exclude", value: excludeGenres.join(","), hidden: true, canClear: false }));
+    }
+  }
+  function parseGenres([urlKey, validGenres = [], validTags = []], genre) {
+    let disabled = false;
+    if (engine === "mal") {
+      if (genreAndTagTranslations[type] === null) { preventFetch = true } 
+      else if (Number.isInteger(genreAndTagTranslations[type][genre])) { validGenres.push(genreAndTagTranslations[type][genre]) }
+      else { disabled = true }
+    }
+    else if (engine === "ani") {
+      if (genreAndTagTranslations.genres === null) { preventFetch = true } 
+      else if (genreAndTagTranslations.tags[genre]) { validTags.push(genre) } 
+      else if (genreAndTagTranslations.genres[genre]) { validGenres.push(genre) } 
+      else { disabled = true }
+    }
+
+    variables.push(new SearchVariable({ name: genre, url: `${urlKey}=${genre}`, active: false, visuallyDisabled: disabled }));
+    return [urlKey, validGenres, validTags];
+  };
 
 
 
 
   return [type, engine, variables, preventFetch];
 }
+
+const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
+  anime: null,
+  manga: null,
+  genres: null,
+  tags: null,
+});
 
 export function SearchBar(_props) {
   const props = mergeProps({mode: "search"}, _props);
@@ -207,12 +221,8 @@ export function SearchBar(_props) {
   const [debouncedSearchType, setDebouncedSearchType] = createSignal();
   const [debouncedSearchEngine, setDebouncedSearchEngine] = createSignal();
   const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
-  const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
-    anime: {id: null, name: null},
-    manga: {id: null, name: null},
-  });
 
-  const [anilistGenresAndTags] = api.anilist.genresAndTags();
+  const [anilistGenresAndTags] = api.anilist.genresAndTags(() => searchParams.malSearch !== "true" || undefined);
   const [malGenresAndThemes] = api.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
   const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
@@ -221,7 +231,9 @@ export function SearchBar(_props) {
       setDebouncedSearchType(type)
       setDebouncedSearchEngine(engine)
       setDebouncedSearchVariables(vars => {
-        if (vars?.length === variables.length && variables.every((variable, i) => variable.looseMatch(vars[i]))) {
+        const activeVars = vars?.filter(val => val.active) || [];
+        const activeVariables = variables.filter(val => val.active);
+        if (activeVars.length === activeVariables.length && activeVars.every((variable, i) => variable.looseMatch(activeVariables[i]))) {
           return vars;
         }
         return variables;
@@ -229,9 +241,17 @@ export function SearchBar(_props) {
     });
   }, 300);
 
-  createEffect(on(malGenresAndThemes, genres => {
-    if (!genres) { return; }
-    setGenreAndTagTranslations(genres.data.translations);
+  createEffect(on(malGenresAndThemes, response => {
+    if (!response) { return; }
+    setGenreAndTagTranslations(response.data.translations);
+  }));
+
+  createEffect(on(anilistGenresAndTags, response => {
+    if (!response) { return; }
+    setGenreAndTagTranslations({
+      genres: objectFromArrayEntries(response.data.genres),
+      tags: response.data.tags.reduce((acc, tag) => (acc[tag.name] = tag, acc), {}),
+    });
   }));
 
 
@@ -281,7 +301,7 @@ export function SearchBar(_props) {
         }} />
         <label htmlFor="hideMyAnime"> Hide my anime</label>
         <RatingInput />
-        <GenresInput aniGenres={anilistGenresAndTags} malGenres={[]} engine={searchEngine()} showAdult={true} />
+        <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
       </form>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}

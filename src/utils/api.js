@@ -35,7 +35,7 @@ const fetchRateLimits = {
     start: 1,
     limit: 1,
     interval: 1/3,
-    defaultDelay: 1.5,
+    defaultDelay: 1,
     pool: new TokenBucket({
       start: 3,
       limit: 3,
@@ -104,14 +104,28 @@ const api = {
     mediaSearchCache: onlyIfCache(malMediaSearch),
     genresAndThemes: fetchOnce(type => {
       return Fetch.getJson(queries.myAnimeListMediaGenres(type), res => {
+        const idSet = new Set();
+        const headers = ["genres", "genres", "themes"];
+        const genres = { "genres": [], "themes": [] };
+        let headerIndex = 0;
+        res.data.reduce((lastGenre, genre) => {
+          if (idSet.has(genre.mal_id)) {
+            return lastGenre;
+          } 
+          if (genre.name < lastGenre) {
+            headerIndex = Math.min(headerIndex + 1, headers.length - 1);
+          }
+          genres[headers[headerIndex]].push(genre);
+          idSet.add(genre.mal_id);
+          return genre.name;
+        }, "");
+        genres.genres.sort();
+
         return {
           translations: {
-            [type]: {
-              id: Object.fromEntries(res.data.map(genre => ([genre.mal_id, genre.name]))),
-              name: Object.fromEntries(res.data.map(genre => ([genre.name, genre.mal_id]))),
-            }
+            [type]: Object.fromEntries(res.data.map(genre => ([genre.name, genre.mal_id]))),
           },
-          genres: res.data,
+          ...genres
         };
       });
     }),
@@ -471,6 +485,8 @@ class Fetch {
       return fetchRateLimits["anilist"];
     } else if (this.url.startsWith("https://api.jikan.moe")) {
       return fetchRateLimits["jikan"];
+    } else if (this.url.startsWith("https://api.animethemes.moe")) {
+      return fetchRateLimits["animeThemes"];
     } else {
       assert(false, `Fetch to url "${this.url}" does not have any rate limits`);
     }
