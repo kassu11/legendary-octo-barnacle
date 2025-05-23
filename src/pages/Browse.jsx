@@ -1,4 +1,4 @@
-import { A } from "@solidjs/router";
+import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch } from "solid-js";
 import { useAuthentication } from "../context/AuthenticationContext";
@@ -7,6 +7,18 @@ import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
+
+export function BrowseRedirect(props) {
+  const params = useParams();
+  const location = useLocation();
+
+  console.log("test")
+  return (
+    <Show when={!location.search} fallback={<Navigate href={"/search/" + params.type + location.search} />}>
+      {props.children}
+    </Show>
+  );
+}
 
 export function BrowseMediaHome() {
   const { accessToken } = useAuthentication();
