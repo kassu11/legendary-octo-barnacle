@@ -15,25 +15,10 @@ import { useResponsive } from "../context/ResponsiveContext";
 import { RatingInput } from "./Search/RatingInput";
 import { SwitchInput } from "./Search/SwitchInput";
 import { GenresInput } from "./Search/GenresInput";
+import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 
 
-export function BrowseSearchBar(props) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  createEffect(on(() => location.search, search => {
-    if (search) {
-      navigate(location.pathname.replace(/.*browse/, "/search") + search);
-    }
-  }));
-
-  return (
-    <SearchBar mode="browse">
-      {props.children}
-    </SearchBar>
-  );
-}
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true }) {
@@ -180,15 +165,15 @@ function parseURL() {
   }
   function parseGenres([urlKey, validGenres = [], validTags = []], genre) {
     let disabled = false;
-    if (engine === "mal") {
-      if (genreAndTagTranslations[type] === null) { preventFetch = true } 
-      else if (Number.isInteger(genreAndTagTranslations[type][genre])) { validGenres.push(genreAndTagTranslations[type][genre]) }
-      else { disabled = true }
-    }
-    else if (engine === "ani") {
+    if (engine === "ani") {
       if (genreAndTagTranslations.genres === null) { preventFetch = true } 
       else if (genreAndTagTranslations.tags[genre]) { validTags.push(genre) } 
       else if (genreAndTagTranslations.genres[genre]) { validGenres.push(genre) } 
+      else { disabled = true }
+    }
+    else if (engine === "mal") {
+      if (genreAndTagTranslations[type] === null) { preventFetch = true } 
+      else if (Number.isInteger(genreAndTagTranslations[type][genre])) { validGenres.push(genreAndTagTranslations[type][genre]) }
       else { disabled = true }
     }
 
@@ -196,6 +181,16 @@ function parseURL() {
     return [urlKey, validGenres, validTags];
   };
 
+  const year = searchParams.year;
+  if (year && !Array.isArray(year)) {
+    if (engine === "ani") {
+      variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
+    }
+    else if (engine === "mal") {
+      variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "start_date", value: `${year}-01-01` }));
+      variables.push(new SearchVariable({ hidden: true, canClear: false, key: "end_date", value: `${year}-12-31` }));
+    }
+  }
 
 
 
@@ -209,8 +204,7 @@ const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
   tags: null,
 });
 
-export function SearchBar(_props) {
-  const props = mergeProps({mode: "search"}, _props);
+export function SearchBar(props) {
   const navigate = useNavigate();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -277,16 +271,16 @@ export function SearchBar(_props) {
   return (
     <div class="search-page">
       <div class="header-row">
-        <h1>{capitalize(props.mode)}</h1>
+        <h1>{capitalize(params.mode)}</h1>
         <select name="type" id="type" value={params.type} onChange={e => {
-          navigate("/" + props.mode + "/" + e.target.value + "/" + (params.header ? "/" + params.header : "") + location.search);
+          navigate("/" + params.mode + "/" + e.target.value + "/" + (params.header ? "/" + params.header : "") + location.search);
         }}>
           <option value="anime">Anime</option>
           <option value="manga">Manga</option>
           <option value="media">Media</option>
         </select>
       </div>
-      <form>
+      <div>
         <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
           triggerSetSearchParams({ q: e.target.value });
         }} />
@@ -302,7 +296,8 @@ export function SearchBar(_props) {
         <label htmlFor="hideMyAnime"> Hide my anime</label>
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
-      </form>
+        <YearInput />
+      </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
       </SearchBarContext.Provider>

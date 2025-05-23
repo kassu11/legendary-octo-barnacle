@@ -8,7 +8,7 @@ import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
-import { SearchBar, BrowseSearchBar, SearchContent } from "./pages/Search.jsx";
+import { SearchBar, SearchContent } from "./pages/Search.jsx";
 import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stats } from "./pages/User.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
@@ -22,7 +22,7 @@ import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./page
 import { Staff, Character } from "./pages/Entity.jsx";
 import { Studio } from "./pages/Studio.jsx";
 import Activity from "./pages/Activity.jsx";
-import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome } from "./pages/Browse.jsx";
+import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { RedirectSearchHeaders } from "./pages/SearchHeaderRedirect.jsx";
 
 const root = document.getElementById("root")
@@ -54,13 +54,13 @@ render(
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />
             <Route path="/activity/:id" matchFilters={idFilter} component={Activity} />
-            <Route path="/browse" component={BrowseSearchBar}>
-              <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHome} />
-              <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} />
-              <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHome} />
-            </Route>
-            <Route path="/search" component={SearchBar}>
-              <Route path="/" component={SearchContent}>
+            <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}>
+              <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}>
+                <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHome} />
+                <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} />
+                <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHome} />
+              </Route>
+              <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}>
                 <Route path="/:type/:header?" matchFilters={animeSearch} />
                 <Route path="/:type/:header?" matchFilters={mangaSearch} />
                 <Route path="/:type/:header?" matchFilters={bothSearch} />
