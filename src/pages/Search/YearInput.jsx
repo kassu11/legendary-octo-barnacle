@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on, Show } from "solid-js";
+import { createEffect, createSignal, For, mergeProps, on, Show } from "solid-js";
 import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
@@ -29,7 +29,6 @@ export function YearInput() {
       setSearchParams({ [e.target.name]: e.target.checked ? e.target.value : undefined });
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
-        console.log(document.activeElement);
         if (open) {
           close();
         } else {
@@ -72,19 +71,21 @@ export function YearInput() {
           <div class="scroll-wrapper" ref={scrollWrapper}>
             <Content />
           </div>
-          <Show when={isTouch()}>
-            <div class="multi-input-footer">
+          <div class="multi-input-footer">
+            <TwoHeadedRange min={1970} max={2026} separation={1} />
+            <Show when={isTouch()}>
               <button onClick={() => {
                 close();
                 setSearchParams({ genre: oldGenres });
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
-            </div>
-          </Show>
+            </Show>
+          </div>
         </div>
       </dialog>
     </form>
   );
+
 
   function Content() {
     const [searchParams] = useSearchParams();
@@ -103,3 +104,110 @@ export function YearInput() {
     );
   }
 }
+
+function TwoHeadedRange(_props) {
+  const props = mergeProps({min: 0, max: 100, separation: 1}, _props);
+  return (
+    <div class="two-headed-range-wrapper">
+      <div class="two-headed-range" onTouchStart={rangeMovePoint} onMouseDown={rangeMovePoint}>
+        <div class="point start" style={{"--value": props.min, "--percentage": "0%"}} />
+        <div class="point end" style={{"--value": props.max, "--percentage": "100%"}} />
+        <div class="progress-bar"></div>
+      </div>
+      <div className="flex-space-between">
+        <input type="number" name="year" />
+        <input type="number" name="year" />
+      </div>
+    </div>
+  );
+
+  function rangeMovePoint(e) {
+    e.preventDefault();
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const parent = e.target.closest(".two-headed-range");
+    const initialX = e.clientX || e.touches[0].clientX;
+    const pointARect = parent.querySelector(".point.start").getBoundingClientRect();
+    const pointBRect = parent.querySelector(".point.end").getBoundingClientRect();
+    const pointADelta = Math.min(Math.abs(initialX - pointARect.left), Math.abs(initialX - pointARect.right));
+    const pointBDelta = Math.min(Math.abs(initialX - pointBRect.left), Math.abs(initialX - pointBRect.right));
+    let target, notTarget, delta = 0;
+    if (e.target.classList.contains("start")) {
+      target = e.target;
+      notTarget = parent.querySelector(".point.end");
+    } else if (e.target.classList.contains("end")) {
+      target = e.target;
+      notTarget = parent.querySelector(".point.start");
+    } else if(pointADelta < pointBDelta) {
+      target = parent.querySelector(".point.start");
+      notTarget = parent.querySelector(".point.end");
+    } else {
+      target = parent.querySelector(".point.end");
+      notTarget = parent.querySelector(".point.start");
+    }
+
+    const hasSelectedEnd = target.classList.contains("end");
+    const parentRect = parent.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const notTargetRect = notTarget.getBoundingClientRect();
+    let widthBetweenTargets;
+    let left = parentRect.left;
+    if (hasSelectedEnd) {
+      widthBetweenTargets = parentRect.width - (notTargetRect.right - parentRect.left) - notTargetRect.width / 2;
+      left = notTargetRect.right + notTargetRect.width / 2;
+    }
+    else {
+      widthBetweenTargets = notTargetRect.left - parentRect.left - (targetRect.width / 2);
+    }
+
+    console.log(widthBetweenTargets, parentRect.width);
+    if (e.target === target) { // Don't snap
+      delta = initialX - (targetRect.left + targetRect.width / 2);
+    }
+
+    movePoint(initialX);
+
+    function movePoint(x) {
+      const percentageBetweenTargets = Math.max(Math.min(1, (x - delta - left) / widthBetweenTargets), 0);
+      const min = hasSelectedEnd ? parseInt(notTarget.style.getPropertyValue("--value")) + props.separation : props.min;
+      const max = hasSelectedEnd ? props.max : parseInt(notTarget.style.getPropertyValue("--value")) - props.separation;
+      const minP = hasSelectedEnd ? (parentRect.width - widthBetweenTargets) / parentRect.width : 0;
+      const maxP = hasSelectedEnd ? 1 : widthBetweenTargets / parentRect.width;
+      const percentage = Math.max(Math.min(maxP, (x - delta - parentRect.left) / parentRect.width), minP);
+
+      if (hasSelectedEnd) {
+        parent.querySelector(".progress-bar").style.width = `${(percentage * 100 - parseInt(notTarget.style.getPropertyValue("--percentage"))).toFixed(1)}%`;
+      } else {
+        parent.querySelector(".progress-bar").style.left = `${(percentage * 100).toFixed(1)}%`;
+        parent.querySelector(".progress-bar").style.width = `${(parseInt(notTarget.style.getPropertyValue("--percentage")) - percentage * 100).toFixed(1)}%`;
+      }
+      target.style.setProperty("--percentage", (percentage * 100).toFixed(1) + "%");
+      target.style.setProperty("--value", min + Math.round((max - min) * percentageBetweenTargets));
+    }
+
+    target.classList.add("active");
+    signal.addEventListener("abort", () => target.classList.remove("active"));
+
+    window.addEventListener("mousemove", e => {
+      e.preventDefault();
+      if (e.buttons === 1) {
+        movePoint(e.clientX);
+      } else {
+        controller.abort();
+      }
+    }, {signal});
+
+
+    window.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const [{clientX}] = e.touches;
+      movePoint(clientX);
+    }, {signal});
+
+    window.addEventListener("touchend", () => {
+      controller.abort();
+    }, {signal, once: true});
+  }
+}
+
