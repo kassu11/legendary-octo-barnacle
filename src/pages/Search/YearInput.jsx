@@ -3,14 +3,18 @@ import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { assert } from "../../utils/assert";
+import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 
 export function YearInput() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   const [filter, setFilter] = createSignal("");
+  const currentYearPlusTwo = new Date().getFullYear() + 2;
   let open = false;
   let oldGenres;
   let dialog, scrollWrapper, controller, button, form;
+
+  const triggerSetSearchParams = leadingAndTrailing(debounce, (params, options) => setSearchParams(params, options), 100);
 
   function close() {
     dialog.close();
@@ -27,7 +31,13 @@ export function YearInput() {
 
   return (
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
-      setSearchParams({ [e.target.name]: e.target.checked ? e.target.value : undefined });
+      if (e.target.name === "year") {
+        triggerSetSearchParams({ 
+          [e.target.name]: e.target.checked ? e.target.value : undefined,
+          startYear: undefined,
+          endYear: undefined,
+        });
+      }
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
@@ -39,7 +49,7 @@ export function YearInput() {
 
           if(isTouch()) {
             dialog.showModal();
-            setSearchParams({preventFetch: true});
+            triggerSetSearchParams({preventFetch: true});
             preventMobileDragOverFlow();
             window.addEventListener("resize", preventMobileDragOverFlow, { signal });
 
@@ -73,11 +83,56 @@ export function YearInput() {
             <Content />
           </div>
           <div class="multi-input-footer">
-            <TwoHeadedRange min={1970} max={2026} separation={1} minValue={+searchParams.startYear || 1970} maxValue={+searchParams.endYear || 2026} onChange={() => null} />
+            <TwoHeadedRange 
+              min={1970} 
+              max={currentYearPlusTwo} 
+              separation={1} 
+              minValue={+searchParams.startYear || 1970} 
+              maxValue={+searchParams.endYear || currentYearPlusTwo} 
+              onChange={([min, max]) => triggerSetSearchParams({startYear: min, endYear: max})} 
+            />
+            <div class="flex-space-between">
+              <input 
+                type="number" 
+                inputMode="numeric" 
+                name="startYear"
+                value={+searchParams.startYear || 1970} 
+                onChange={e => {
+                  triggerSetSearchParams({
+                    startYear: Math.min(+e.target.value, +searchParams.endYear || currentYearPlusTwo),
+                    endYear: Math.max(+e.target.value, +searchParams.endYear || currentYearPlusTwo),
+                  });
+                }} 
+                onBlur={e => e.target.value = searchParams.startYear || 1970} 
+                onBeforeInput={e => {
+                  if (e.data?.toLowerCase().includes("e")) {
+                    e.preventDefault();
+                  }
+                }}
+              />
+              <input 
+                type="number" 
+                inputMode="numeric" 
+                name="endYear"
+                value={+searchParams.endYear || currentYearPlusTwo} 
+                onChange={e => {
+                  triggerSetSearchParams({
+                    startYear: Math.min(+e.target.value, +searchParams.startYear || 1970),
+                    endYear: Math.max(+e.target.value, +searchParams.startYear || 1970),
+                  });
+                }} 
+                onBlur={e => e.target.value = searchParams.endYear || currentYearPlusTwo} 
+                onBeforeInput={e => {
+                  if (e.data?.toLowerCase().includes("e")) {
+                    e.preventDefault();
+                  }
+                }}
+              />
+            </div>
             <Show when={isTouch()}>
               <button onClick={() => {
                 close();
-                setSearchParams({ genre: oldGenres });
+                triggerSetSearchParams({ genre: oldGenres });
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </Show>
@@ -90,11 +145,10 @@ export function YearInput() {
 
   function Content() {
     const [searchParams] = useSearchParams();
-    const startYear = new Date().getFullYear() + 2;
 
     return (
       <ol>
-        <For each={Array.from({length: Math.abs(startYear - 1969)}, (_, i) => startYear - i)}>{year => (
+        <For each={Array.from({length: Math.abs(currentYearPlusTwo - 1969)}, (_, i) => currentYearPlusTwo - i)}>{year => (
           <li classList={{ hidden: !year.toString().startsWith(filter()) }}>
             <label>
               {year} <input type="radio" name="year" value={year} checked={searchParams.year == year} />
@@ -131,8 +185,8 @@ function TwoHeadedRange(_props) {
 
   const callback = (entries) => {
     if (entries[0].isIntersecting === true) {
-      updateValue(startPoint, props.minValue);
       updateValue(endPoint, props.maxValue);
+      updateValue(startPoint, props.minValue);
     }
   };
 
@@ -243,9 +297,9 @@ function TwoHeadedRange(_props) {
     signal.addEventListener("abort", () => {
       target.classList.remove("active");
       if (hasSelectedEnd) {
-        props.onChange([parseInt(target.style.getPropertyValue("--value")), parseInt(notTarget.style.getPropertyValue("--value"))]);
-      } else {
         props.onChange([parseInt(notTarget.style.getPropertyValue("--value")), parseInt(target.style.getPropertyValue("--value"))]);
+      } else {
+        props.onChange([parseInt(target.style.getPropertyValue("--value")), parseInt(notTarget.style.getPropertyValue("--value"))]);
       }
     });
 
