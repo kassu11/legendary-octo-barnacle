@@ -100,8 +100,7 @@ export function FormatInput() {
     };
 
     createEffect(() => {
-      const formatValues = objectFromArrayEntries(searchParams.format);
-      setFormatStore(reconcile(formatValues));
+      setFormatStore(reconcile(objectFromArrayEntries(searchParams.format, {})));
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
