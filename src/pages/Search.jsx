@@ -1,22 +1,21 @@
-import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Show, For, Match, Switch, mergeProps, createSignal, createEffect, batch, useContext, createContext, on } from "solid-js";
+import { Show, For, Match, Switch, createSignal, createEffect, batch, on } from "solid-js";
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
-import Emoji from "../assets/Emoji";
+import { capitalize, formatTitleToUrl } from "../utils/formating";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
-import { createStore, reconcile } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import { SearchBarContext, useSearchBar } from "../context/providers";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
-import { useResponsive } from "../context/ResponsiveContext";
 import { RatingInput } from "./Search/RatingInput";
 import { SwitchInput } from "./Search/SwitchInput";
 import { GenresInput } from "./Search/GenresInput";
 import { YearInput } from "./Search/YearInput";
-import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
+import { compare, objectFromArrayEntries, wrapToSet } from "../utils/arrays";
+import { FormatInput } from "./Search/FormatInput";
 
 
 
@@ -327,6 +326,7 @@ export function SearchBar(props) {
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
         <YearInput />
+        <FormatInput />
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
