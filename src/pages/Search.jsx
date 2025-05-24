@@ -190,25 +190,32 @@ function parseURL() {
       variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "start_date", value: `${year}-01-01` }));
       variables.push(new SearchVariable({ hidden: true, canClear: false, key: "end_date", value: `${year}-12-31` }));
     }
-  } else {
-    const [startYear] = [+searchParams.startYear].flat();
-    if (startYear) {
-      if (engine === "ani") {
-        variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, url: `startYear=${startYear}`, key: "yearGreater", value: parseInt(`${startYear - 1}9999`) }));
-      }
-      else if (engine === "mal") {
-        variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01` }));
-      }
+  } 
+
+  const [startYear] = [+searchParams.startYear].flat();
+  if (startYear) {
+    if (engine === "ani") {
+      variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearGreater", value: parseInt(`${startYear - 1}9999`) }));
     }
-    const [endYear] = [+searchParams.endYear].flat();
-    if (endYear) {
-      if (engine === "ani") {
-        variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, url: `startYear=${startYear}`, key: "yearLesser", value: parseInt(`${endYear + 1}0000`) }));
-      }
-      else if (engine === "mal") {
-        variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31` }));
-      }
+    else if (engine === "mal") {
+      variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01` }));
     }
+  }
+  const [endYear] = [+searchParams.endYear].flat();
+  if (endYear) {
+    if (engine === "ani") {
+      variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearLesser", value: parseInt(`${endYear + 1}0000`) }));
+    }
+    else if (engine === "mal") {
+      variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31` }));
+    }
+  }
+
+  if (searchParams.onList === "true") {
+    variables.push(new SearchVariable({ name: `Show my ${type}`, active: engine === "ani", visuallyDisabled: engine !== "ani", url: `onList=true`, key: "onList", value: true }));
+  }
+  if (searchParams.onList === "false") {
+    variables.push(new SearchVariable({ name: `Hide my ${type}`, active: engine === "ani", visuallyDisabled: engine !== "ani", url: `onList=false`, key: "onList", value: false }));
   }
 
 
@@ -309,10 +316,14 @@ export function SearchBar(props) {
           setSearchParams({ malSearch: e.target.checked || undefined });
         }}/>
         </span>
-        <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.hideMyAnime === "true"} onInput={e => {
-          setSearchParams({ hideMyAnime: e.target.checked || undefined });
+        <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.onList === "false"} onInput={e => {
+          setSearchParams({ onList: e.target.checked ? false : undefined });
         }} />
-        <label htmlFor="hideMyAnime"> Hide my anime</label>
+        <label htmlFor="hideMyAnime"> Hide my {params.type}</label>
+        <input type="checkbox" name="showMyAnime" id="showMyAnime" checked={searchParams.onList === "true"} onInput={e => {
+          setSearchParams({ onList: e.target.checked || undefined });
+        }} />
+        <label htmlFor="showMyAnime"> Only show my {params.type}</label>
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
         <YearInput />
@@ -345,7 +356,8 @@ export function SearchContent(props) {
               <Show when={!variable.hidden}>
                 <li classList={{disabled: variable.visuallyDisabled}}>
                   <button onClick={() => {
-                    const [key, value] = variable.url.split("=");
+                    const [key, ...rest] = variable.url.split("=");
+                    const value = rest.join("=");
                     setSearchParams({[key]: [searchParams[key]].flat().filter(v => v !== value)});
                   }}>{variable.name}</button>
                 </li>

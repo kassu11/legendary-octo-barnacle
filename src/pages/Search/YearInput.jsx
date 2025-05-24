@@ -89,7 +89,7 @@ export function YearInput() {
               separation={1} 
               minValue={+searchParams.startYear || 1970} 
               maxValue={+searchParams.endYear || currentYearPlusTwo} 
-              onChange={([min, max]) => triggerSetSearchParams({startYear: min, endYear: max})} 
+              onChange={([min, max]) => triggerSetSearchParams({startYear: min, endYear: max, year: undefined})} 
             />
             <div class="flex-space-between">
               <input 
@@ -101,6 +101,7 @@ export function YearInput() {
                   triggerSetSearchParams({
                     startYear: Math.min(+e.target.value, +searchParams.endYear || currentYearPlusTwo),
                     endYear: Math.max(+e.target.value, +searchParams.endYear || currentYearPlusTwo),
+                    year: undefined,
                   });
                 }} 
                 onBlur={e => e.target.value = searchParams.startYear || 1970} 
@@ -119,6 +120,7 @@ export function YearInput() {
                   triggerSetSearchParams({
                     startYear: Math.min(+e.target.value, +searchParams.startYear || 1970),
                     endYear: Math.max(+e.target.value, +searchParams.startYear || 1970),
+                    year: undefined,
                   });
                 }} 
                 onBlur={e => e.target.value = searchParams.endYear || currentYearPlusTwo} 
