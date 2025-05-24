@@ -1,7 +1,8 @@
-import { createEffect, createSignal, For, mergeProps, on, Show } from "solid-js";
+import { createEffect, createSignal, For, mergeProps, on, onCleanup, onMount, Show } from "solid-js";
 import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
+import { assert } from "../../utils/assert";
 
 export function YearInput() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -72,7 +73,7 @@ export function YearInput() {
             <Content />
           </div>
           <div class="multi-input-footer">
-            <TwoHeadedRange min={1970} max={2026} separation={1} />
+            <TwoHeadedRange min={1970} max={2026} separation={1} minValue={+searchParams.startYear || 1970} maxValue={+searchParams.endYear || 2026} onChange={() => null} />
             <Show when={isTouch()}>
               <button onClick={() => {
                 close();
@@ -106,20 +107,73 @@ export function YearInput() {
 }
 
 function TwoHeadedRange(_props) {
-  const props = mergeProps({min: 0, max: 100, separation: 1}, _props);
+  assert(_props.onChange, "onChange is missing");
+  const _defaults = mergeProps({min: 0, max: 100, separation: 1 }, _props);
+  const props = mergeProps({value: [_defaults.min, _defaults.max]}, _defaults);
+  let startPoint, endPoint;
+
+  createEffect(on(() => props.minValue, value => {
+    updateValue(startPoint, value || props.min);
+  }));
+  createEffect(on(() => props.maxValue, value => {
+    updateValue(endPoint, value || props.max);
+  }));
+
+  let intersection;
+
+  onMount(() => {
+    intersectionObserver.observe(intersection);
+  });
+
+  onCleanup(() => {
+    intersectionObserver.disconnect();
+  });
+
+  const callback = (entries) => {
+    if (entries[0].isIntersecting === true) {
+      updateValue(startPoint, props.minValue);
+      updateValue(endPoint, props.maxValue);
+    }
+  };
+
+  const intersectionObserver = new IntersectionObserver(callback);
+
   return (
-    <div class="two-headed-range-wrapper">
-      <div class="two-headed-range" onTouchStart={rangeMovePoint} onMouseDown={rangeMovePoint}>
-        <div class="point start" style={{"--value": props.min, "--percentage": "0%"}} />
-        <div class="point end" style={{"--value": props.max, "--percentage": "100%"}} />
-        <div class="progress-bar"></div>
-      </div>
-      <div className="flex-space-between">
-        <input type="number" name="year" />
-        <input type="number" name="year" />
-      </div>
+    <div class="two-headed-range" ref={intersection} onTouchStart={rangeMovePoint} onMouseDown={rangeMovePoint}>
+      <div class="point start" ref={startPoint} style={{"--value": props.min, "--percentage": "0%"}}></div>
+      <div class="point end" ref={endPoint} style={{"--value": props.max, "--percentage": "100%"}}></div>
+      <div class="progress-bar"></div>
     </div>
   );
+
+  function updateValue(target, value) {
+    const parent = target.closest(".two-headed-range");
+    const pointA = parent.querySelector(".point.start");
+    const pointB = parent.querySelector(".point.end");
+    const pointARect = pointA.getBoundingClientRect();
+    const pointBRect = pointB.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+
+    if (target === pointA) {
+      const width = (pointBRect.left - parentRect.left) - (pointARect.width / 2);
+      const newWidth = Math.min(1, Math.max(0, (value - props.min) / (parseInt(pointB.style.getPropertyValue("--value")) - props.min))) * width;
+      const percentage = newWidth / parentRect.width;
+      
+      parent.querySelector(".progress-bar").style.left = `${(percentage * 100).toFixed(1)}%`;
+      parent.querySelector(".progress-bar").style.width = `${(parseInt(pointB.style.getPropertyValue("--percentage")) - percentage * 100).toFixed(1)}%`;
+      target.style.setProperty("--percentage", (percentage * 100 || 0).toFixed(1) + "%");
+      target.style.setProperty("--value", value);
+    } else if (target === pointB) {
+      const width = parentRect.width - (pointARect.right - parentRect.left) - (pointBRect.width / 2);
+      const min = parseInt(pointA.style.getPropertyValue("--value"));
+      const newWidth = Math.min(1, Math.max(0, (value - min) / (props.max - min))) * width;
+      const percentage = ((pointARect.right - parentRect.left) + (pointBRect.width / 2) + newWidth) / parentRect.width;
+      
+      parent.querySelector(".progress-bar").style.width = `${(percentage * 100 - parseInt(pointA.style.getPropertyValue("--percentage"))).toFixed(1)}%`;
+      target.style.setProperty("--percentage", (percentage * 100 || 0).toFixed(1) + "%");
+      target.style.setProperty("--value", value);
+    }
+  }
 
   function rangeMovePoint(e) {
     e.preventDefault();
@@ -161,7 +215,6 @@ function TwoHeadedRange(_props) {
       widthBetweenTargets = notTargetRect.left - parentRect.left - (targetRect.width / 2);
     }
 
-    console.log(widthBetweenTargets, parentRect.width);
     if (e.target === target) { // Don't snap
       delta = initialX - (targetRect.left + targetRect.width / 2);
     }
@@ -187,7 +240,14 @@ function TwoHeadedRange(_props) {
     }
 
     target.classList.add("active");
-    signal.addEventListener("abort", () => target.classList.remove("active"));
+    signal.addEventListener("abort", () => {
+      target.classList.remove("active");
+      if (hasSelectedEnd) {
+        props.onChange([parseInt(target.style.getPropertyValue("--value")), parseInt(notTarget.style.getPropertyValue("--value"))]);
+      } else {
+        props.onChange([parseInt(notTarget.style.getPropertyValue("--value")), parseInt(target.style.getPropertyValue("--value"))]);
+      }
+    });
 
     window.addEventListener("mousemove", e => {
       e.preventDefault();
