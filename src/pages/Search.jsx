@@ -4,7 +4,7 @@ import { Show, For, Match, Switch, createSignal, createEffect, batch, on } from 
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { capitalize, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatTitleToUrl } from "../utils/formating";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useSearchBar } from "../context/providers";
@@ -215,6 +215,77 @@ function parseURL() {
   }
   if (searchParams.onList === "false") {
     variables.push(new SearchVariable({ name: `Hide my ${type}`, active: engine === "ani", visuallyDisabled: engine !== "ani", url: `onList=false`, key: "onList", value: false }));
+  }
+
+  if (searchParams.format) {
+    const formatSet = wrapToSet(searchParams.format);
+    const formats = {
+      mal: {
+        anime: {
+          tv: "tv",
+          movie: "movie",
+          ova: "ova",
+          special: "special",
+          ona: "ona",
+          music: "music",
+          cm: "cm",
+          pv: "pv",
+          tv_special: "tv_special",
+        },
+        manga: {
+          manga: "manga",
+          novel: "novel",
+          lightnovel: "lightnovel",
+          "one-shot": "oneshot",
+          doujin: "doujin",
+          manhwa: "manhwa",
+          manhua: "manhua",
+        },
+      },
+      ani: {
+        anime: {
+          movie: "MOVIE",
+          music: "MUSIC",
+          ona: "ONA",
+          ova: "OVA",
+          special: "SPECIAL",
+          tv: "TV",
+          tv_short: "TV_SHORT",
+        },
+        manga: {
+          manga: "MANGA",
+          novel: "NOVEL",
+          "one-shot": "ONE_SHOT",
+        },
+        media: {
+          manga: "MANGA",
+          movie: "MOVIE",
+          music: "MUSIC",
+          novel: "NOVEL",
+          ona: "ONA",
+          "one-shot": "ONE_SHOT",
+          ova: "OVA",
+          special: "SPECIAL",
+          tv: "TV",
+          tv_short: "TV_SHORT",
+        },
+      },
+    };
+
+    const validFormats = [];
+
+    formatSet.forEach(format => {
+      const formatValue = formats[engine][type]?.[format] || null;
+      const active = !!formatValue;
+      if (engine === "ani" && active) {
+        validFormats.push(formatValue);
+      }
+      variables.push(new SearchVariable({ name: formatMediaFormat(format.toUpperCase()), active: active && engine === "mal", visuallyDisabled: !active, key: "type", value: formatValue, url: `format=${format}` }));
+    });
+
+    if (validFormats.length) {
+      variables.push(new SearchVariable({ key: "format", value: validFormats, canClear: false, hidden: true }));
+    }
   }
 
 
