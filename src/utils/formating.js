@@ -77,19 +77,29 @@ export const formatMediaFormat = text => {
   }
 
   switch(text) {
-    case "TV":
+    case "CM":
     case "ONA":
     case "OVA":
+    case "PV":
+    case "TV":
       return text;
+    case "DOUJIN":
+    case "LIGHTNOVEL":
     case "MANGA":
+    case "MANHUA":
+    case "MANHWA":
     case "MOVIE":
     case "MUSIC":
     case "NOVEL":
+    case "ONE-SHOT":
     case "SPECIAL":
+      return capitalize(text);
     case "ONE_SHOT":
-      return capitalize(text.replace("_", " "))
+      return "One-shot"
     case "TV_SHORT":
       return "TV short";
+    case "TV_SPECIAL":
+      return "TV special";
     default:
       console.error("Unknown media format");
       return text;
