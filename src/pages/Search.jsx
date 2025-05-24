@@ -181,14 +181,33 @@ function parseURL() {
     return [urlKey, validGenres, validTags];
   };
 
-  const year = searchParams.year;
-  if (year && !Array.isArray(year)) {
+  const [year] = [searchParams.year].flat();
+  if (year) {
     if (engine === "ani") {
       variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
     }
     else if (engine === "mal") {
       variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "start_date", value: `${year}-01-01` }));
       variables.push(new SearchVariable({ hidden: true, canClear: false, key: "end_date", value: `${year}-12-31` }));
+    }
+  } else {
+    const [startYear] = [+searchParams.startYear].flat();
+    if (startYear) {
+      if (engine === "ani") {
+        variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, url: `startYear=${startYear}`, key: "yearGreater", value: parseInt(`${startYear - 1}9999`) }));
+      }
+      else if (engine === "mal") {
+        variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01` }));
+      }
+    }
+    const [endYear] = [+searchParams.endYear].flat();
+    if (endYear) {
+      if (engine === "ani") {
+        variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, url: `startYear=${startYear}`, key: "yearLesser", value: parseInt(`${endYear + 1}0000`) }));
+      }
+      else if (engine === "mal") {
+        variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31` }));
+      }
     }
   }
 

@@ -131,6 +131,13 @@
       }
     }
 
+    .flex-space-between {
+      width: 100%;
+      input {
+        max-width: 4rem;
+      }
+    }
+
 
 
     .exclude input[data-steps="2"] {
