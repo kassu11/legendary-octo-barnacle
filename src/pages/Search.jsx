@@ -17,7 +17,7 @@ import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
-import { searchFormats, sortOrder } from "../utils/searchObjects";
+import { searchFormats, sortOrders } from "../utils/searchObjects";
 
 
 
@@ -258,7 +258,8 @@ function parseURL() {
 
     const orderSet = wrapToSet(searchParams.order);
     orderSet.forEach(order => {
-      const {flavor, api} = sortOrder[engine][type]?.[order] || {};
+      const {api, flavorText} = sortOrders[engine][type]?.[order] || {};
+      const flavorTextFallback = flavorText || sortOrders.flavorTexts[order] || order;
       if (engine === "ani" && api) {
         if (sortDirection === "ASC") {
           validOrders.push(api);
@@ -266,10 +267,10 @@ function parseURL() {
           validOrders.push(api + "_DESC");
         }
       }
-      if (flavor) {
-        variables.push(new SearchVariable({ name: "Sort: " + flavor, active: api && engine === "mal", key: "order_by", value: api, url: `order=${order}` }));
+      if (api) {
+        variables.push(new SearchVariable({ name: "Sort: " + flavorText, active: engine === "mal", key: "order_by", value: api, url: `order=${order}` }));
       } else {
-        variables.push(new SearchVariable({ name: "Sort: " + order, active: false, visuallyDisabled: true, url: `order=${order}` }));
+        variables.push(new SearchVariable({ name: "Sort: " + flavorTextFallback, active: false, visuallyDisabled: true, url: `order=${order}` }));
       }
     });
 
