@@ -1,81 +1,82 @@
-export const sortOrder = {
+export const sortOrders = {
   mal: {
     anime: {
-      end_date: { api: "end_date", flavor: "End date" },
-      episodes: { api: "episodes", flavor: "Episodes" },
-      favorites: { api: "favorites", flavor: "Favorites" },
-      id: { api: "mal_id", flavor: "ID" },
-      members: { api: "members", flavor: "Members" },
-      popularity: { api: "popularity", flavor: "Popularity" },
-      rank: { api: "rank", flavor: "Rank" },
-      scored_by: { api: "scored_by", flavor: "Ratings" },
-      score: { api: "score", flavor: "Score" },
-      start_date: { api: "start_date", flavor: "Start date" },
-      title: { api: "title", flavor: "Title" },
+      end_date: { api: "end_date", flavorText: "End date" },
+      episodes: { api: "episodes", flavorText: "Episodes" },
+      favorites: { api: "favorites", flavorText: "Favorites" },
+      id: { api: "mal_id", flavorText: "ID" },
+      members: { api: "members", flavorText: "Members" },
+      popularity: { api: "popularity", flavorText: "Popularity" },
+      rank: { api: "rank", flavorText: "Rank" },
+      scored_by: { api: "scored_by", flavorText: "Ratings" },
+      score: { api: "score", flavorText: "Score" },
+      start_date: { api: "start_date", flavorText: "Start date" },
+      title: { api: "title", flavorText: "Title" },
     },
     manga: {
-      episodes: { api: "chapters", flavor: "Chapters" },
-      end_date: { api: "end_date", flavor: "End date" },
-      favorites: { api: "favorites", flavor: "Favorites" },
-      id: { api: "mal_id", flavor: "ID" },
-      members: { api: "members", flavor: "Members" },
-      popularity: { api: "popularity", flavor: "Popularity" },
-      rank: { api: "rank", flavor: "Rank" },
-      scored_by: { api: "scored_by", flavor: "Ratings" },
-      score: { api: "score", flavor: "Score" },
-      start_date: { api: "start_date", flavor: "Start date" },
-      title: { api: "title", flavor: "Title" },
-      volumes: { api: "volumes", flavor: "Volumes" },
+      episodes: { api: "chapters", flavorText: "Chapters" },
+      end_date: { api: "end_date", flavorText: "End date" },
+      favorites: { api: "favorites", flavorText: "Favorites" },
+      id: { api: "mal_id", flavorText: "ID" },
+      members: { api: "members", flavorText: "Members" },
+      popularity: { api: "popularity", flavorText: "Popularity" },
+      rank: { api: "rank", flavorText: "Rank" },
+      scored_by: { api: "scored_by", flavorText: "Ratings" },
+      score: { api: "score", flavorText: "Score" },
+      start_date: { api: "start_date", flavorText: "Start date" },
+      title: { api: "title", flavorText: "Title" },
+      volumes: { api: "volumes", flavorText: "Volumes" },
     },
   },
   ani: {
     anime: {
-      duration: { api: "DURATION", flavor: "Duration" },
-      end_date: { api: "END_DATE", flavor: "End date" },
-      episodes: { api: "CHAPTERS", flavor: "Episodes" },
-      favorites: { api: "FAVOURITES", flavor: "Favorites" },
-      id: { api: "ID", flavor: "ID" },
-      popularity: { api: "POPULARITY", flavor: "Popularity" },
-      score: { api: "SCORE", flavor: "Score" },
-      start_date: { api: "START_DATE", flavor: "Start date" },
-      title_english: { api: "TITLE_ENGLISH", flavor: "Title (English)" },
-      title: { api: "TITLE_NATIVE", flavor: "Title (Native)" },
-      title_romaji: { api: "TITLE_ROMAJI", flavor: "Title (Romaji)" },
-      trending: { api: "TRENDING", flavor: "Trending" },
-      updated_at: { api: "UPDATED_AT", flavor: "Updated" },
+      duration: { api: "DURATION", flavorText: "Duration" },
+      end_date: { api: "END_DATE", flavorText: "End date" },
+      episodes: { api: "CHAPTERS", flavorText: "Episodes" },
+      favorites: { api: "FAVOURITES", flavorText: "Favorites" },
+      id: { api: "ID", flavorText: "ID" },
+      popularity: { api: "POPULARITY", flavorText: "Popularity" },
+      score: { api: "SCORE", flavorText: "Score" },
+      start_date: { api: "START_DATE", flavorText: "Start date" },
+      title_english: { api: "TITLE_ENGLISH", flavorText: "Title (English)" },
+      title: { api: "TITLE_NATIVE", flavorText: "Title (Native)" },
+      title_romaji: { api: "TITLE_ROMAJI", flavorText: "Title (Romaji)" },
+      trending: { api: "TRENDING", flavorText: "Trending" },
+      updated_at: { api: "UPDATED_AT", flavorText: "Updated" },
     },
     manga: {
-      episodes: { api: "CHAPTERS", flavor: "Chapters" },
-      end_date: { api: "END_DATE", flavor: "End date" },
-      favorites: { api: "FAVOURITES", flavor: "Favorites" },
-      id: { api: "ID", flavor: "ID" },
-      popularity: { api: "POPULARITY", flavor: "Popularity" },
-      score: { api: "SCORE", flavor: "Score" },
-      start_date: { api: "START_DATE", flavor: "Start date" },
-      title_english: { api: "TITLE_ENGLISH", flavor: "Title (English)" },
-      title: { api: "TITLE_NATIVE", flavor: "Title (Native)" },
-      title_romaji: { api: "TITLE_ROMAJI", flavor: "Title (Romaji)" },
-      trending: { api: "TRENDING", flavor: "Trending" },
-      updated_at: { api: "UPDATED_AT", flavor: "Updated" },
-      volumes: { api: "DURATION", flavor: "Volumes" },
+      episodes: { api: "CHAPTERS", flavorText: "Chapters" },
+      end_date: { api: "END_DATE", flavorText: "End date" },
+      favorites: { api: "FAVOURITES", flavorText: "Favorites" },
+      id: { api: "ID", flavorText: "ID" },
+      popularity: { api: "POPULARITY", flavorText: "Popularity" },
+      score: { api: "SCORE", flavorText: "Score" },
+      start_date: { api: "START_DATE", flavorText: "Start date" },
+      title_english: { api: "TITLE_ENGLISH", flavorText: "Title (English)" },
+      title: { api: "TITLE_NATIVE", flavorText: "Title (Native)" },
+      title_romaji: { api: "TITLE_ROMAJI", flavorText: "Title (Romaji)" },
+      trending: { api: "TRENDING", flavorText: "Trending" },
+      updated_at: { api: "UPDATED_AT", flavorText: "Updated" },
+      volumes: { api: "DURATION", flavorText: "Volumes" },
     },
     media: {
-      duration: { api: "DURATION", flavor: "Duration / Volumes" },
-      end_date: { api: "END_DATE", flavor: "End date" },
-      episodes: { api: "CHAPTERS", flavor: "Episodes / Chapters" },
-      favorites: { api: "FAVOURITES", flavor: "Favorites" },
-      id: { api: "ID", flavor: "ID" },
-      popularity: { api: "POPULARITY", flavor: "Popularity" },
-      score: { api: "SCORE", flavor: "Score" },
-      start_date: { api: "START_DATE", flavor: "Start date" },
-      title: { api: "TITLE_NATIVE", flavor: "Title (Native)" },
-      title_english: { api: "TITLE_ENGLISH", flavor: "Title (English)" },
-      title_romaji: { api: "TITLE_ROMAJI", flavor: "Title (Romaji)" },
-      trending: { api: "TRENDING", flavor: "Trending" },
-      updated_at: { api: "UPDATED_AT", flavor: "Updated" },
+      duration: { api: "DURATION", flavorText: "Duration / Volumes" },
+      end_date: { api: "END_DATE", flavorText: "End date" },
+      episodes: { api: "CHAPTERS", flavorText: "Episodes / Chapters" },
+      favorites: { api: "FAVOURITES", flavorText: "Favorites" },
+      id: { api: "ID", flavorText: "ID" },
+      popularity: { api: "POPULARITY", flavorText: "Popularity" },
+      score: { api: "SCORE", flavorText: "Score" },
+      start_date: { api: "START_DATE", flavorText: "Start date" },
+      title: { api: "TITLE_NATIVE", flavorText: "Title (Native)" },
+      title_english: { api: "TITLE_ENGLISH", flavorText: "Title (English)" },
+      title_romaji: { api: "TITLE_ROMAJI", flavorText: "Title (Romaji)" },
+      trending: { api: "TRENDING", flavorText: "Trending" },
+      updated_at: { api: "UPDATED_AT", flavorText: "Updated" },
     }
   }
 };
+sortOrders.flavorTexts = extractFlavorTexts(sortOrders);
 
 
 export const searchFormats = {
@@ -130,11 +131,14 @@ export const searchFormats = {
     }
   },
 }
+searchFormats.flavorTexts = extractFlavorTexts(searchFormats);
 
-searchFormats.flavorTexts = Object.values(searchFormats).reduce((acc, apis) => {
-  return Object.values(apis).reduce((acc, medias) => {
-    return Object.entries(medias).reduce((acc, [key, value]) => {
-      return (acc[key] = value.flavorText, acc);
+function extractFlavorTexts(obj) {
+  return Object.values(obj).reduce((acc, apis) => {
+    return Object.values(apis).reduce((acc, medias) => {
+      return Object.entries(medias).reduce((acc, [key, value]) => {
+        return (acc[key] = value.flavorText, acc);
+      }, acc);
     }, acc);
-  }, acc);
-}, {});
+  }, {});
+}

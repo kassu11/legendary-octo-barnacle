@@ -4,7 +4,7 @@ import "./RatingInput.scss";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { sortOrder } from "../../utils/searchObjects";
+import { sortOrders } from "../../utils/searchObjects";
 
 export function SortInput() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -97,7 +97,7 @@ export function SortInput() {
 
     return (
       <ol>
-        <For each={Object.entries(sortOrder[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, order]) => (
+        <For each={Object.entries(sortOrders[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, order]) => (
           <li>
             <label>
               {order.flavor}
