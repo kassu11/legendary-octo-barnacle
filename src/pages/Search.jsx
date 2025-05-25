@@ -16,6 +16,8 @@ import { GenresInput } from "./Search/GenresInput";
 import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
+import { SortInput } from "./Search/SortInput";
+import { sortOrder } from "../utils/searchObjects";
 
 
 
@@ -289,6 +291,44 @@ function parseURL() {
   }
 
 
+  const sortDirection = searchParams.sort === "ASC" ? "ASC" : "DESC";
+  if (engine === "mal") {
+    variables.push(new SearchVariable({ key: "sort", value: sortDirection.toLowerCase(), hidden: true, canClear: false }));
+  }
+  if (searchParams.order === undefined) {
+    if (engine === "ani") {
+      variables.push(new SearchVariable({ key: "sort", value: "POPULARITY_DESC", canClear: false, hidden: true }));
+    }
+    else if (engine === "mal") {
+      variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
+    }
+  }
+  else {
+    const validOrders = [];
+
+    const orderSet = wrapToSet(searchParams.order);
+    orderSet.forEach(order => {
+      const {flavor, api} = sortOrder[engine][type]?.[order] || {};
+      if (engine === "ani" && api) {
+        if (sortDirection === "ASC") {
+          validOrders.push(api);
+        } else {
+          validOrders.push(api + "_DESC");
+        }
+      }
+      if (flavor) {
+        variables.push(new SearchVariable({ name: "Sort: " + flavor, active: api && engine === "mal", key: "order_by", value: api, url: `order=${order}` }));
+      } else {
+        variables.push(new SearchVariable({ name: "Sort: " + order, active: false, visuallyDisabled: true, url: `order=${order}` }));
+      }
+    });
+
+    if (validOrders.length) {
+      variables.push(new SearchVariable({ key: "sort", value: validOrders, canClear: false, hidden: true }));
+    }
+  }
+
+
 
   return [type, engine, variables, preventFetch];
 }
@@ -398,6 +438,7 @@ export function SearchBar(props) {
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
         <YearInput />
         <FormatInput />
+        <SortInput />
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
