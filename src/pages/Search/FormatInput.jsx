@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { formatMediaFormat } from "../../utils/formating";
 import { objectFromArrayEntries } from "../../utils/arrays";
+import { searchFormats } from "../../utils/searchObjects";
 
 export function FormatInput() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -87,17 +88,6 @@ export function FormatInput() {
     const [searchParams] = useSearchParams();
     const [formatStore, setFormatStore] = createStore({});
     const params = useParams();
-    const formats = {
-      mal: {
-        anime: [ "cm", "movie", "music", "ona", "ova", "pv", "special", "tv", "tv_special", ],
-        manga: [ "doujin", "lightnovel", "manga", "manhua", "manhwa", "novel", "one-shot", ],
-      },
-      ani: {
-        anime: [ "movie", "music", "ona", "ova", "special", "tv", "tv_short", ],
-        manga: [ "manga", "novel", "one-shot", ],
-        media: [ "manga", "movie", "music", "novel", "ona", "one-shot", "ova", "special", "tv", "tv_short", ],
-      }
-    };
 
     createEffect(() => {
       setFormatStore(reconcile(objectFromArrayEntries(searchParams.format, {})));
@@ -107,11 +97,11 @@ export function FormatInput() {
 
     return (
       <ol>
-        <For each={formats[engine()][params.type] || []} fallback={"Something went wrong"}>{format => (
+        <For each={Object.entries(searchFormats[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, format]) => (
           <li>
             <label>
-              {formatMediaFormat(format.toUpperCase())}
-              <input type="checkbox" name="format" value={format} checked={formatStore[format]} />
+              {format.flavorText}
+              <input type="checkbox" name="format" value={key} checked={formatStore[key]} />
             </label>
           </li>
         )}</For>

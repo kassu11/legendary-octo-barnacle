@@ -17,7 +17,7 @@ import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
-import { sortOrder } from "../utils/searchObjects";
+import { searchFormats, sortOrder } from "../utils/searchObjects";
 
 
 
@@ -220,69 +220,19 @@ function parseURL() {
   }
 
   if (searchParams.format) {
-    const formatSet = wrapToSet(searchParams.format);
-    const formats = {
-      mal: {
-        anime: {
-          tv: "tv",
-          movie: "movie",
-          ova: "ova",
-          special: "special",
-          ona: "ona",
-          music: "music",
-          cm: "cm",
-          pv: "pv",
-          tv_special: "tv_special",
-        },
-        manga: {
-          manga: "manga",
-          novel: "novel",
-          lightnovel: "lightnovel",
-          "one-shot": "oneshot",
-          doujin: "doujin",
-          manhwa: "manhwa",
-          manhua: "manhua",
-        },
-      },
-      ani: {
-        anime: {
-          movie: "MOVIE",
-          music: "MUSIC",
-          ona: "ONA",
-          ova: "OVA",
-          special: "SPECIAL",
-          tv: "TV",
-          tv_short: "TV_SHORT",
-        },
-        manga: {
-          manga: "MANGA",
-          novel: "NOVEL",
-          "one-shot": "ONE_SHOT",
-        },
-        media: {
-          manga: "MANGA",
-          movie: "MOVIE",
-          music: "MUSIC",
-          novel: "NOVEL",
-          ona: "ONA",
-          "one-shot": "ONE_SHOT",
-          ova: "OVA",
-          special: "SPECIAL",
-          tv: "TV",
-          tv_short: "TV_SHORT",
-        },
-      },
-    };
-
     const validFormats = [];
-
+    const formatSet = wrapToSet(searchParams.format);
     formatSet.forEach(format => {
-      const formatValue = formats[engine][type]?.[format] || null;
-      const active = !!formatValue;
-      if (engine === "ani" && active) {
-        validFormats.push(formatValue);
+      const {api, flavorText} = searchFormats[engine][type]?.[format] || {};
+      const flavorTextFallback = flavorText || searchFormats.flavorTexts[format] || format;
+      if (engine === "ani" && api) {
+        validFormats.push(api);
       }
-      variables.push(new SearchVariable({ name: formatMediaFormat(format.toUpperCase()), active: active && engine === "mal", visuallyDisabled: !active, key: "type", value: formatValue, url: `format=${format}` }));
+      if (api) {
+        variables.push(new SearchVariable({ name: "Format: " + flavorText, active: engine === "mal", key: "type", value: api, url: `format=${format}` }));
+      } else {
+        variables.push(new SearchVariable({ name: "Format: " + flavorTextFallback, active: false, visuallyDisabled: true, url: `format=${format}` }));
+      }
     });
 
     if (validFormats.length) {
