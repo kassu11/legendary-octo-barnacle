@@ -14,7 +14,7 @@ import { RatingInput } from "./Search/RatingInput";
 import { SwitchInput } from "./Search/SwitchInput";
 import { GenresInput } from "./Search/GenresInput";
 import { YearInput } from "./Search/YearInput";
-import { compare, objectFromArrayEntries, wrapToSet } from "../utils/arrays";
+import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
 import { searchFormats, sortOrders } from "../utils/searchObjects";
@@ -22,7 +22,7 @@ import { searchFormats, sortOrders } from "../utils/searchObjects";
 
 
 class SearchVariable {
-  constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true }) {
+  constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
     assert(!active || key, "key missing");
     assert(hidden || name, "Name is missing");
     assert(!canClear || !active || url, "Url is missing");
@@ -34,6 +34,7 @@ class SearchVariable {
 
     this.name = name;
     this.url = url;
+    this.addUrl = addUrl;
     this.key = key;
     this.value = value;
     this.active = active;
@@ -47,7 +48,8 @@ class SearchVariable {
   match(searchVariable = {}) {
     return (
       this.name === searchVariable.name &&
-      this.url === searchVariable.url &&
+      compare(this.url, searchVariable.url) &&
+      compare(this.addUrl, searchVariable.addUrl) &&
       this.key === searchVariable.key &&
       compare(this.value, searchVariable.value) &&
       this.active === searchVariable.active &&
@@ -182,8 +184,12 @@ function parseURL() {
     return [urlKey, validGenres, validTags];
   };
 
+  let hasEndDateSet = false;
+  let hasStartDateSet = false;
   const [year] = [searchParams.year].flat();
   if (year) {
+    hasEndDateSet = true;
+    hasStartDateSet = true;
     if (engine === "ani") {
       variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
     }
@@ -195,6 +201,7 @@ function parseURL() {
 
   const [startYear] = [+searchParams.startYear].flat();
   if (startYear) {
+    hasStartDateSet = true;
     if (engine === "ani") {
       variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearGreater", value: parseInt(`${startYear - 1}9999`) }));
     }
@@ -204,6 +211,7 @@ function parseURL() {
   }
   const [endYear] = [+searchParams.endYear].flat();
   if (endYear) {
+    hasEndDateSet = true;
     if (engine === "ani") {
       variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearLesser", value: parseInt(`${endYear + 1}0000`) }));
     }
@@ -247,10 +255,16 @@ function parseURL() {
   }
   if (searchParams.order === undefined) {
     if (engine === "ani") {
-      variables.push(new SearchVariable({ key: "sort", value: "POPULARITY_DESC", canClear: false, hidden: true }));
+      if (searchParams.q) {
+        variables.push(new SearchVariable({ key: "sort", value: "SEARCH_MATCH", canClear: false, hidden: true }));
+      } else {
+        variables.push(new SearchVariable({ key: "sort", value: "POPULARITY_DESC", canClear: false, hidden: true }));
+      }
     }
     else if (engine === "mal") {
-      variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
+      if (!searchParams.q) {
+        variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
+      }
     }
   }
   else {
@@ -258,8 +272,31 @@ function parseURL() {
 
     const orderSet = wrapToSet(searchParams.order);
     orderSet.forEach(order => {
-      const {api, flavorText} = sortOrders[engine][type]?.[order] || {};
-      const flavorTextFallback = flavorText || sortOrders.flavorTexts[order] || order;
+      let orderWithoutAlternativeKey = order;
+      if (order === sortOrders.mal.anime.end_date.alternative_key) {
+        orderWithoutAlternativeKey = "end_date";
+        const base = { name: "Only valid dates", active: !hasEndDateSet, visuallyDisabled: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
+        if (engine === "ani") {
+          variables.push(new SearchVariable({ ...base, key: "endDateGreater", value: 0 }));
+        }
+        else if (engine === "mal") {
+          variables.push(new SearchVariable({ ...base, key: "end_date", value: `${new Date().getFullYear() + 100}-01-01` }));
+        }
+      }
+      else if (order === sortOrders.mal.anime.start_date.alternative_key) {
+        orderWithoutAlternativeKey = "start_date";
+        const base = { name: "Only valid dates", active: !hasStartDateSet, visuallyDisabled: hasStartDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
+        if (engine === "ani") {
+          variables.push(new SearchVariable({ ...base, key: "yearGreater", value: 0 }));
+        }
+        else if (engine === "mal") {
+          variables.push(new SearchVariable({ ...base, key: "start_date", value: `0000-01-01` }));
+        }
+      }
+
+
+      const {api, flavorText} = sortOrders[engine][type]?.[orderWithoutAlternativeKey] || {};
+      const flavorTextFallback = flavorText || sortOrders.flavorTexts[orderWithoutAlternativeKey] || order;
       if (engine === "ani" && api) {
         if (sortDirection === "ASC") {
           validOrders.push(api);
@@ -267,10 +304,12 @@ function parseURL() {
           validOrders.push(api + "_DESC");
         }
       }
+      const url = [`order=${order}`];
+      if (searchParams.sort) { url.push(`sort=${searchParams.sort}`); }
       if (api) {
-        variables.push(new SearchVariable({ name: "Sort: " + flavorText, active: engine === "mal", key: "order_by", value: api, url: `order=${order}` }));
+        variables.push(new SearchVariable({ name: "Sort: " + flavorText, active: engine === "mal", key: "order_by", value: api, url }));
       } else {
-        variables.push(new SearchVariable({ name: "Sort: " + flavorTextFallback, active: false, visuallyDisabled: true, url: `order=${order}` }));
+        variables.push(new SearchVariable({ name: "Sort: " + flavorTextFallback, active: false, visuallyDisabled: true, url }));
       }
     });
 
@@ -419,9 +458,20 @@ export function SearchContent(props) {
               <Show when={!variable.hidden}>
                 <li classList={{disabled: variable.visuallyDisabled}}>
                   <button onClick={() => {
-                    const [key, ...rest] = variable.url.split("=");
-                    const value = rest.join("=");
-                    setSearchParams({[key]: [searchParams[key]].flat().filter(v => v !== value)});
+                    const search = {};
+                    wrapToArray(variable.url).forEach(url => {
+                      const [key, ...rest] = url.split("=");
+                      const value = rest.join("=");
+                      search[key] = wrapToArray(search[key] || searchParams[key]).filter(v => v !== value);
+                    });
+
+                    wrapToArray(variable.addUrl).forEach(url => {
+                      const [key, ...rest] = url.split("=");
+                      const value = rest.join("=");
+                      search[key] ??= wrapToArray(searchParams[key]);
+                      search[key].push(value);
+                    });
+                    setSearchParams(search);
                   }}>{variable.name}</button>
                 </li>
               </Show>

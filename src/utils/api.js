@@ -689,6 +689,11 @@ function cacheBuilder(settings) {
         }
         const data = await currentlyFetching.get(request.cacheKey);
         currentlyFetching.delete(request.cacheKey);
+
+        if (data === null) { // Data should be only null if signal aborted
+          return;
+        }
+
         if (settings.expiresInSeconds) {
           const time = new Date();
           data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
