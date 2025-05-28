@@ -94,14 +94,15 @@ export function SortInput() {
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
+    const sortEntries = () => Object.entries(sortOrders[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>
-        <For each={Object.entries(sortOrders[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, order]) => (
+        <For each={sortEntries()} fallback={"Something went wrong"}>{([key, order]) => (
           <li>
             <label>
-              {order.flavor}
-              <input type="radio" name="order" value={key} checked={store[key]} />
+              {order.flavorText}
+              <input type="radio" name="order" value={order.alternative_key || key} checked={store[key] || (order.alternative_key && store[order.alternative_key])} />
             </label>
           </li>
         )}</For>
