@@ -295,7 +295,7 @@ function parseURL() {
       }
 
 
-      const {api, flavorText} = sortOrders[engine][type]?.[orderWithoutAlternativeKey] || {};
+      const {api, flavorText, reverse} = sortOrders[engine][type]?.[orderWithoutAlternativeKey] || {};
       const flavorTextFallback = flavorText || sortOrders.flavorTexts[orderWithoutAlternativeKey] || order;
       if (engine === "ani" && api) {
         if (sortDirection === "ASC") {
@@ -303,6 +303,9 @@ function parseURL() {
         } else {
           validOrders.push(api + "_DESC");
         }
+      }
+      else if (engine === "mal" && reverse) {
+        variables.push(new SearchVariable({ key: "sort", value: sortDirection === "DESC" ? "asc" : "desc", hidden: true, canClear: false }));
       }
       const url = [`order=${order}`];
       if (searchParams.sort) { url.push(`sort=${searchParams.sort}`); }
