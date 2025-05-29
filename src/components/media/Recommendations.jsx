@@ -81,7 +81,9 @@ function RecommendationsPage(props) {
 function RecommendationCards(props)  {
   return (
     <For each={props.nodes}>{(node, i) => (
-      <RecommendationCard node={node} mutateCache={n => props.mutateCache(i(), n)} />
+      <Show when={node.mediaRecommendation}>
+        <RecommendationCard node={node} mutateCache={n => props.mutateCache(i(), n)} />
+      </Show>
     )}</For>
   );
 }
