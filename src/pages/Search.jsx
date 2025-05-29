@@ -257,7 +257,50 @@ function parseURL() {
     const orderSet = wrapToSet(searchParams.order);
     orderSet.forEach(order => {
       let orderWithoutAlternativeKey = order;
-      if (order === sortOrders.mal.anime.end_date.alternative_key) {
+      if (order === sortOrders.ani.anime.duration.alternative_key) {
+        orderWithoutAlternativeKey = "duration";
+        variables.push(new SearchVariable({ 
+          name: "Duration greater than 0", 
+          url: `order=${order}`, 
+          active: engine === "ani", visuallyDisabled: engine !== "ani", 
+          addUrl: `order=${orderWithoutAlternativeKey}`, 
+          key: "durationGreater", 
+          value: 0 
+        }));
+      }
+      else if (order === sortOrders.mal.anime.episodes.alternative_key) {
+        orderWithoutAlternativeKey = "episodes";
+        if (engine === "ani") {
+          if (type === "anime") {
+            variables.push(new SearchVariable({ name: "Episodes greater than 0", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "chapterGreater", value: 0 }));
+          } else if(type === "manga") {
+            variables.push(new SearchVariable({ name: "Chapters greater than 0", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "chapterGreater", value: 0 }));
+          } else if(type === "media") {
+            variables.push(new SearchVariable({ name: "Episodes/Chapters greater than 0", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "chapterGreater", value: 0 }));
+          }
+        }
+        else if (engine === "mal") {
+          variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete" }));
+        }
+      }
+      else if (order === sortOrders.mal.manga.volumes.alternative_key) {
+        orderWithoutAlternativeKey = "volumes";
+        if (engine === "ani") {
+          variables.push(new SearchVariable({ 
+            name: "Volumes greater than 0", 
+            url: `order=${order}`, 
+            addUrl: `order=${orderWithoutAlternativeKey}`, 
+            active: type === "manga",
+            visuallyDisabled: type !== "manga",
+            key: "volumeGreater", 
+            value: 0 
+          }));
+        }
+        else if (engine === "mal") {
+          variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete" }));
+        }
+      }
+      else if (order === sortOrders.mal.anime.end_date.alternative_key) {
         orderWithoutAlternativeKey = "end_date";
         const base = { name: "Only valid dates", active: !hasEndDateSet, visuallyDisabled: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
@@ -280,7 +323,7 @@ function parseURL() {
 
 
       const {api, flavorText, reverse} = sortOrders[engine][type]?.[orderWithoutAlternativeKey] || {};
-      const flavorTextFallback = flavorText || sortOrders.flavorTexts[orderWithoutAlternativeKey] || order;
+      const flavorTextFallback = flavorText || sortOrders[engine === "ani" ? "mal" : "ani"][type]?.[orderWithoutAlternativeKey]?.flavorText || sortOrders.flavorTexts[orderWithoutAlternativeKey] || order;
       if (engine === "ani" && api) {
         if (searchParams.sort === "ASC") {
           validAniOrders.push(api);
