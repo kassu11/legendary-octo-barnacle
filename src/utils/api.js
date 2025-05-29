@@ -59,7 +59,7 @@ function malMediaSearch(type, variables, page) {
     query.push(`page=${page}`);
   }
 
-  return Fetch.getJson(queries.myAnimeListMediaSearch(type, query.join("&")), res => {
+  return Fetch.getJson(queries.myAnimeListMediaSearch(type, query.sort().join("&")), res => {
     res.data.forEach(media => {
       media.titles = media.titles.reduce((acc, title) => {
         acc[title.type] = title.title;

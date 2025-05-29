@@ -249,26 +249,10 @@ function parseURL() {
   }
 
 
-  const sortDirection = searchParams.sort === "ASC" ? "ASC" : "DESC";
-  if (engine === "mal") {
-    variables.push(new SearchVariable({ key: "sort", value: sortDirection.toLowerCase(), hidden: true, canClear: false }));
-  }
-  if (searchParams.order === undefined) {
-    if (engine === "ani") {
-      if (searchParams.q) {
-        variables.push(new SearchVariable({ key: "sort", value: "SEARCH_MATCH", canClear: false, hidden: true }));
-      } else {
-        variables.push(new SearchVariable({ key: "sort", value: "POPULARITY_DESC", canClear: false, hidden: true }));
-      }
-    }
-    else if (engine === "mal") {
-      if (!searchParams.q) {
-        variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
-      }
-    }
-  }
-  else {
-    const validOrders = [];
+  {
+    const validAniOrders = [];
+    let validMalOrder = false;
+    let reverseMalSort = false;
 
     const orderSet = wrapToSet(searchParams.order);
     orderSet.forEach(order => {
@@ -298,26 +282,46 @@ function parseURL() {
       const {api, flavorText, reverse} = sortOrders[engine][type]?.[orderWithoutAlternativeKey] || {};
       const flavorTextFallback = flavorText || sortOrders.flavorTexts[orderWithoutAlternativeKey] || order;
       if (engine === "ani" && api) {
-        if (sortDirection === "ASC") {
-          validOrders.push(api);
+        if (searchParams.sort === "ASC") {
+          validAniOrders.push(api);
         } else {
-          validOrders.push(api + "_DESC");
+          validAniOrders.push(api + "_DESC");
         }
       }
       else if (engine === "mal" && reverse) {
-        variables.push(new SearchVariable({ key: "sort", value: sortDirection === "DESC" ? "asc" : "desc", hidden: true, canClear: false }));
+        reverseMalSort = true;
       }
       const url = [`order=${order}`];
       if (searchParams.sort) { url.push(`sort=${searchParams.sort}`); }
       if (api) {
+        validMalOrder ||= engine === "mal";
         variables.push(new SearchVariable({ name: "Sort: " + flavorText, active: engine === "mal", key: "order_by", value: api, url }));
       } else {
         variables.push(new SearchVariable({ name: "Sort: " + flavorTextFallback, active: false, visuallyDisabled: true, url }));
       }
     });
 
-    if (validOrders.length) {
-      variables.push(new SearchVariable({ key: "sort", value: validOrders, canClear: false, hidden: true }));
+    assert(validAniOrders.length === 0 || engine === "ani", "validAniOrder should not have anilist orders when engine is mal");
+    assert(validMalOrder === false || engine === "mal", "validMalOrder should be false if engine is ani");
+
+    if (engine === "ani") {
+      if (validAniOrders.length) {
+        variables.push(new SearchVariable({ key: "sort", value: validAniOrders, canClear: false, hidden: true }));
+      } else if (searchParams.q) {
+        variables.push(new SearchVariable({ key: "sort", value: "SEARCH_MATCH", canClear: false, hidden: true }));
+      } else {
+        variables.push(new SearchVariable({ key: "sort", value: "POPULARITY_DESC", canClear: false, hidden: true }));
+      }
+    }
+    else if (engine === "mal") {
+      if (!validMalOrder && !searchParams.q) {
+        variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
+      }
+      if (reverseMalSort) {
+        variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "desc" : "asc", hidden: true, canClear: false }));
+      } else {
+        variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "asc" : "desc", hidden: true, canClear: false }));
+      }
     }
   }
 
