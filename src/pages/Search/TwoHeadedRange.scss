@@ -1,0 +1,41 @@
+.cp-two-headed-range {
+  position: relative;
+  height: .75rem;
+  width: 100%;
+  background-color: orange;
+  isolation: isolate;
+
+  .point {
+    width: 1rem;
+    height: 1rem;
+    background-color: lime;
+    border-radius: .25rem;
+    position: absolute;
+    top: 50%;
+    left: var(--percentage, 0%);
+    transform: translateY(-50%) translateX(-50%);
+
+    &:where(:hover, .active)::before {
+      counter-reset: value var(--value);
+      content: counter(value);
+      left: 50%;
+      bottom: 100%;
+      position: absolute;
+      color: white;
+      background-color: black;
+      width: max-content;
+      font-weight: 600;
+      padding: .5em;
+      border-radius: .25em;
+      z-index: 1;
+      transform: translateX(-50%);
+    }
+  }
+  .progress-bar {
+    position: absolute;
+    height: 100%;
+    background-color: lightyellow;
+    width: 100%;
+    z-index: -1;
+  }
+}

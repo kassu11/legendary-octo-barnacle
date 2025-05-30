@@ -22,6 +22,7 @@ import { StatusInput } from "./Search/StatusInput";
 import { CountryInput } from "./Search/CountryInput";
 import { SourceInput } from "./Search/SourceInput";
 import { ExternalSourceInput } from "./Search/ExternalSourcesInput";
+import { TwoHeadedRange } from "./Search/TwoHeadedRange";
 
 
 
@@ -407,6 +408,29 @@ function parseURL() {
     variables.push(new SearchVariable({ active: engine === "ani", hidden: true, canClear: false, key: "licensedBy", value: externalSources }));
   }
 
+  if (searchParams.episodeGreater !== undefined) {
+    const [ep] = wrapToArray(searchParams.episodeGreater).map(Number);
+    const base = {active: engine === "ani", visuallyDisabled: engine !== "ani", key: "episodeGreater", value: Math.max(ep + 1, 0), url: `episodeGreater=${ep}`};
+    if (type === "manga") {
+      variables.push(new SearchVariable({ name: `Chapters greater than ${ep}`, ...base }));
+    } else if (type === "anime") {
+      variables.push(new SearchVariable({ name: `Episodes greater than ${ep}`, ...base }));
+    } else if (type === "media") {
+      variables.push(new SearchVariable({ name: `Episode/Chapters greater than ${ep}`, ...base }));
+    }
+  }
+  if (searchParams.episodeLesser !== undefined) {
+    const [ep] = wrapToArray(searchParams.episodeLesser).map(Number);
+    const base = {active: engine === "ani", visuallyDisabled: engine !== "ani", key: "episodeLesser", value: Math.max(ep, 0), url: `episodeLesser=${ep}`};
+    if (type === "manga") {
+      variables.push(new SearchVariable({ name: `Chapters lesser than ${ep}`, ...base }));
+    } else if (type === "anime") {
+      variables.push(new SearchVariable({ name: `Episodes lesser than ${ep}`, ...base }));
+    } else if (type === "media") {
+      variables.push(new SearchVariable({ name: `Episode/Chapters lesser than ${ep}`, ...base }));
+    }
+  }
+
 
 
   return [type, engine, variables, preventFetch];
@@ -441,7 +465,8 @@ export function SearchBar(props) {
   });
   const [malGenresAndThemes] = api.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
-  const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
+  const triggerSetSearchParams = debounce(setSearchParams, 300);
+  const triggerSetSearchParamsFast = leadingAndTrailing(debounce, setSearchParams, 100);
   const triggerSearchValues = leadingAndTrailing(debounce, (type, engine, variables) => {
     batch(() => {
       setDebouncedSearchType(type)
@@ -544,6 +569,14 @@ export function SearchBar(props) {
         <CountryInput />
         <SourceInput />
         <ExternalSourceInput sources={externalSources} />
+        <TwoHeadedRange 
+          min={0} 
+          max={500} 
+          separation={1} 
+          minValue={+searchParams.episodeGreater || 0} 
+          maxValue={+searchParams.episodeLesser || 500} 
+          onChange={([min, max]) => setSearchParams({ episodeLesser: max, episodeGreater: min })} 
+        />
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
