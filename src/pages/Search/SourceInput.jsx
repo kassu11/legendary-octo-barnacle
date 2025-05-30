@@ -1,4 +1,4 @@
-import { createEffect, For, on } from "solid-js";
+import { createEffect, createSignal, For, on } from "solid-js";
 import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
@@ -8,6 +8,7 @@ import { searchSources } from "../../utils/searchObjects";
 
 export function SourceInput() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = createSignal("");
   const { isTouch } = useResponsive()
   let open = false;
   let oldOrder;
@@ -64,6 +65,12 @@ export function SourceInput() {
       }}>Source</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
+          <div class="multi-input-header">
+            <input type="search" placeholder="Filter sources" onInput={e => {
+              e.stopPropagation();
+              setFilter(e.target.value.toLowerCase());
+            }} />
+          </div>
           <div class="scroll-wrapper" ref={scrollWrapper}>
             <Content />
           </div>
@@ -94,7 +101,7 @@ export function SourceInput() {
     return (
       <ol>
         <For each={sourceEntries()} fallback={"Something went wrong"}>{([key, order]) => (
-          <li>
+          <li classList={{hidden: !order.flavorText.toLowerCase().includes(filter())}}>
             <label>
               {order.flavorText}
               <input type="radio" name="source" value={key} checked={store[key]} />
