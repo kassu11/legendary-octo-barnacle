@@ -180,6 +180,24 @@ export const searchCountries = {
   TW: { flavorText: "Taiwan" },
 }
 
+export const searchSources = {
+  anime: { api: "ANIME", flavorText: "Anime"},
+  comic: { api: "COMIC", flavorText: "Comic"},
+  doujinshi: { api: "DOUJINSHI", flavorText: "Doujinshi"},
+  game: { api: "GAME", flavorText: "Game"},
+  light_novel: { api: "LIGHT_NOVEL", flavorText: "Light Novel"},
+  live_action: { api: "LIVE_ACTION", flavorText: "Live Action"},
+  manga: { api: "MANGA", flavorText: "Manga"},
+  multimedia_project: { api: "MULTIMEDIA_PROJECT", flavorText: "Multimedia Project"},
+  novel: { api: "NOVEL", flavorText: "Novel"},
+  original: { api: "ORIGINAL", flavorText: "Original"},
+  other: { api: "OTHER", flavorText: "Other"},
+  picture_book: { api: "PICTURE_BOOK", flavorText: "Picture Book"},
+  video_game: { api: "VIDEO_GAME", flavorText: "Video Game"},
+  visual_novel: { api: "VISUAL_NOVEL", flavorText: "Visual Novel"},
+  web_novel: { api: "WEB_NOVEL", flavorText: "Web Novel"},
+}
+
 function extractFlavorTexts(obj) {
   return Object.values(obj).reduce((acc, apis) => {
     return Object.values(apis).reduce((acc, medias) => {
