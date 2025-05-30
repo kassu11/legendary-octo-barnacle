@@ -4,7 +4,7 @@ import { Show, For, Match, Switch, createSignal, createEffect, batch, on } from 
 import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { capitalize, formatMediaFormat, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatTitleToUrl } from "../utils/formating";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useSearchBar } from "../context/providers";
@@ -21,6 +21,7 @@ import { searchCountries, searchFormats, searchSources, searchStatuses, sortOrde
 import { StatusInput } from "./Search/StatusInput";
 import { CountryInput } from "./Search/CountryInput";
 import { SourceInput } from "./Search/SourceInput";
+import { ExternalSourceInput } from "./Search/ExternalSourcesInput";
 
 
 
@@ -393,6 +394,19 @@ function parseURL() {
     variables.push(new SearchVariable({ name: flavorText, active: engine === "ani", visuallyDisabled: engine !== "ani", key: "source", value: api, url: `source=${source}` }));
   }
 
+  if (searchParams.license !== undefined) {
+    const value = searchParams.license === "true";
+    variables.push(new SearchVariable({ name: value ? "Licensed" : "Unlicensed", active: engine === "ani", visuallyDisabled: engine !== "ani", key: "isLicensed", value, url: `license=${value}` }));
+  }
+
+  if (searchParams.externalSource !== undefined) {
+    const externalSources = wrapToArray(searchParams.externalSource).map(Number);
+    externalSources.forEach(id => {
+      variables.push(new SearchVariable({ name: externalSourceStore[id] || id, active: false, visuallyDisabled: engine !== "ani", url: `externalSource=${id}` }));
+    });
+    variables.push(new SearchVariable({ active: engine === "ani", hidden: true, canClear: false, key: "licensedBy", value: externalSources }));
+  }
+
 
 
   return [type, engine, variables, preventFetch];
@@ -404,6 +418,8 @@ const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
   genres: null,
   tags: null,
 });
+
+const [externalSourceStore, setExternalSourceStore] = createStore({});
 
 export function SearchBar(props) {
   const navigate = useNavigate();
@@ -418,6 +434,11 @@ export function SearchBar(props) {
   const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
 
   const [anilistGenresAndTags] = api.anilist.genresAndTags(() => searchParams.malSearch !== "true" || undefined);
+  const [externalSources] = api.anilist.externalSources(() => {
+    if (searchParams.malSearch !== "true" || params.type === "media") { return null }
+    else if (params.type === "anime" || params.type === "manga") { return params.type.toUpperCase(); }
+    else return undefined
+  });
   const [malGenresAndThemes] = api.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
   const triggerSetSearchParams = debounce((search, options) => setSearchParams(search, options), 300);
@@ -447,6 +468,11 @@ export function SearchBar(props) {
       genres: objectFromArrayEntries(response.data.genres),
       tags: response.data.tags.reduce((acc, tag) => (acc[tag.name] = tag, acc), {}),
     });
+  }));
+
+  createEffect(on(externalSources, response => {
+    if (!response) { return; }
+    setExternalSourceStore(response.data.reduce((acc, source) => (acc[source.id] = source.site, acc), {}));
   }));
 
 
@@ -491,6 +517,7 @@ export function SearchBar(props) {
           setSearchParams({ malSearch: e.target.checked || undefined });
         }}/>
         </span>
+        <br />
         <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.onList === "false"} onInput={e => {
           setSearchParams({ onList: e.target.checked ? false : undefined });
         }} />
@@ -499,6 +526,15 @@ export function SearchBar(props) {
           setSearchParams({ onList: e.target.checked || undefined });
         }} />
         <label htmlFor="showMyAnime"> Only show my {params.type}</label>
+        <br />
+        <input type="checkbox" name="hasLicense" id="hasLicense" checked={searchParams.license === "false"} onInput={e => {
+          setSearchParams({ license: e.target.checked ? false : undefined });
+        }} />
+        <label htmlFor="hasLicense"> Licensed</label>
+        <input type="checkbox" name="hasNotLicense" id="hasNotLicense" checked={searchParams.license === "true"} onInput={e => {
+          setSearchParams({ license: e.target.checked || undefined });
+        }} />
+        <label htmlFor="hasNotLicense"> Unlicensed</label>
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
         <YearInput />
@@ -507,6 +543,7 @@ export function SearchBar(props) {
         <StatusInput />
         <CountryInput />
         <SourceInput />
+        <ExternalSourceInput sources={externalSources} />
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
