@@ -326,7 +326,7 @@ const api = {
       return Fetch.anilist(queries.anilistGenresAndTags, {}, res => res.data);
     }),
     externalSources: fetchOnce(type => {
-      return Fetch.anilist(queries.anilistExternalSources, { type: type || undefined });
+      return Fetch.anilist(queries.anilistExternalSources, { type: type || undefined }, res => res.data.ExternalLinkSourceCollection);
     }),
     characters: reloadCache((id, page = 1, token) => {
       return Fetch.authAnilist(token, queries.anilistCharacters, { id, page }, response => response.data.Media);
