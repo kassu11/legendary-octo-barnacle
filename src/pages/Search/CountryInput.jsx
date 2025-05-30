@@ -1,12 +1,12 @@
 import { createEffect, For, on } from "solid-js";
 import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
-import { useParams, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchStatuses } from "../../utils/searchObjects";
+import { searchCountries } from "../../utils/searchObjects";
 
-export function StatusInput() {
+export function CountryInput() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
@@ -36,7 +36,7 @@ export function StatusInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldOrder = searchParams.status;
+          oldOrder = searchParams.country;
 
           if(isTouch()) {
             dialog.showModal();
@@ -61,7 +61,7 @@ export function StatusInput() {
           }
           open = true;
         }
-      }}>Status</button>
+      }}>Country</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
           <div class="scroll-wrapper" ref={scrollWrapper}>
@@ -71,7 +71,7 @@ export function StatusInput() {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({status: oldOrder});
+                setSearchParams({country: oldOrder});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -84,22 +84,20 @@ export function StatusInput() {
   function Content() {
     const [searchParams] = useSearchParams();
     const [store, setStore] = createStore({});
-    const params = useParams();
 
     createEffect(() => {
-      setStore(reconcile(objectFromArrayEntries(searchParams.status, {})));
+      setStore(reconcile(objectFromArrayEntries(searchParams.country, {})));
     });
 
-    const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
-    const statusEntries = () => Object.entries(searchStatuses[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const countryEntries = () => Object.entries(searchCountries).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>
-        <For each={statusEntries()} fallback={"Something went wrong"}>{([key, order]) => (
+        <For each={countryEntries()} fallback={"Something went wrong"}>{([key, order]) => (
           <li>
             <label>
               {order.flavorText}
-              <input type="radio" name="status" value={key} checked={store[key]} />
+              <input type="radio" name="country" value={key} checked={store[key]} />
             </label>
           </li>
         )}</For>

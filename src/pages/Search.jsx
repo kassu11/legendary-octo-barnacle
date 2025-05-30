@@ -17,8 +17,9 @@ import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
-import { searchFormats, searchStatuses, sortOrders } from "../utils/searchObjects";
+import { searchCountries, searchFormats, searchStatuses, sortOrders } from "../utils/searchObjects";
 import { StatusInput } from "./Search/StatusInput";
+import { CountryInput } from "./Search/CountryInput";
 
 
 
@@ -372,11 +373,17 @@ function parseURL() {
   }
 
   if (searchParams.status) {
-    const status = wrapToArray(searchParams.status);
+    const [status] = wrapToArray(searchParams.status);
     const { api, flavorText } = searchStatuses[engine][type]?.[status] || {
       flavorText: searchStatuses[notEngine][type]?.[status]?.flavorText || searchStatuses.flavorTexts[status] || status
     };
     variables.push(new SearchVariable({ name: flavorText, active: !!api, visuallyDisabled: !api, key: "status", value: api, url: `status=${status}` }));
+  }
+
+  if (searchParams.country) {
+    const [country] = wrapToArray(searchParams.country);
+    const { flavorText } = searchCountries[country] || { flavorText: country };
+    variables.push(new SearchVariable({ name: flavorText, active: engine === "ani", visuallyDisabled: engine !== "ani", key: "countryOfOrigin", value: country, url: `country=${country}` }));
   }
 
 
@@ -491,6 +498,7 @@ export function SearchBar(props) {
         <FormatInput />
         <SortInput />
         <StatusInput />
+        <CountryInput />
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}

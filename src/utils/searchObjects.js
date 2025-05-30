@@ -173,6 +173,13 @@ export const searchStatuses = {
 }
 searchStatuses.flavorTexts = extractFlavorTexts(searchStatuses);
 
+export const searchCountries = {
+  CN: { flavorText: "China" },
+  JP: { flavorText: "Japan" },
+  KR: { flavorText: "South Korea" },
+  TW: { flavorText: "Taiwan" },
+}
+
 function extractFlavorTexts(obj) {
   return Object.values(obj).reduce((acc, apis) => {
     return Object.values(apis).reduce((acc, medias) => {
