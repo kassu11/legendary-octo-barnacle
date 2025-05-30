@@ -17,7 +17,8 @@ import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
-import { searchFormats, sortOrders } from "../utils/searchObjects";
+import { searchFormats, searchStatuses, sortOrders } from "../utils/searchObjects";
+import { StatusInput } from "./Search/StatusInput";
 
 
 
@@ -76,6 +77,7 @@ function parseURL() {
 
   const type = params.type;
   const engine = (searchParams.malSearch === "true" && params.type !== "media") ? "mal" : "ani";
+  const notEngine = engine === "ani" ? "mal" : "ani";
   const variables = [];
   let preventFetch = searchParams.preventFetch === "true";
 
@@ -358,6 +360,7 @@ function parseURL() {
     }
     else if (engine === "mal") {
       if (!validMalOrder && !searchParams.q) {
+        reverseMalSort = true;
         variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
       }
       if (reverseMalSort) {
@@ -366,6 +369,14 @@ function parseURL() {
         variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "asc" : "desc", hidden: true, canClear: false }));
       }
     }
+  }
+
+  if (searchParams.status) {
+    const status = wrapToArray(searchParams.status);
+    const { api, flavorText } = searchStatuses[engine][type]?.[status] || {
+      flavorText: searchStatuses[notEngine][type]?.[status]?.flavorText || searchStatuses.flavorTexts[status] || status
+    };
+    variables.push(new SearchVariable({ name: flavorText, active: !!api, visuallyDisabled: !api, key: "status", value: api, url: `status=${status}` }));
   }
 
 
@@ -479,6 +490,7 @@ export function SearchBar(props) {
         <YearInput />
         <FormatInput />
         <SortInput />
+        <StatusInput />
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}

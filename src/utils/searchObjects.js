@@ -131,6 +131,48 @@ export const searchFormats = {
 }
 searchFormats.flavorTexts = extractFlavorTexts(searchFormats);
 
+
+
+export const searchStatuses = {
+  mal: {
+    anime: {
+      releasing: { api: "airing", flavorText: "Airing" },
+      complete: { api: "complete", flavorText: "Complete" },
+      upcoming: { api: "upcoming", flavorText: "Upcoming" },
+    },
+    manga: {
+      cancelled: { api: "discontinued", flavorText: "Cancelled"},
+      complete: { api: "complete", flavorText: "Complete"},
+      hiatus: { api: "hiatus", flavorText: "Hiatus"},
+      publishing: { api: "publishing", flavorText: "Publishing"},
+      // upcoming: { api: "upcoming", flavorText: "Upcoming"}, // 30.5.2025 this is not supported, even though the docs says it is
+    }
+  },
+  ani: {
+    anime: {
+      releasing: { api: "RELEASING", flavorText: "Airing"},
+      cancelled: { api: "CANCELLED", flavorText: "Cancelled"},
+      complete: { api: "FINISHED", flavorText: "Complete"},
+      upcoming: { api: "NOT_YET_RELEASED", flavorText: "Upcoming"},
+    },
+    manga: {
+      cancelled: { api: "CANCELLED", flavorText: "Cancelled"},
+      complete: { api: "FINISHED", flavorText: "Complete"},
+      hiatus: { api: "HIATUS", flavorText: "Hiatus"},
+      upcoming: { api: "NOT_YET_RELEASED", flavorText: "Upcoming"},
+      releasing: { api: "RELEASING", flavorText: "Releasing"},
+    },
+    media: {
+      cancelled: { api: "CANCELLED", flavorText: "Cancelled"},
+      complete: { api: "FINISHED", flavorText: "Complete"},
+      hiatus: { api: "HIATUS", flavorText: "Hiatus"},
+      upcoming: { api: "NOT_YET_RELEASED", flavorText: "Upcoming"},
+      releasing: { api: "RELEASING", flavorText: "Releasing"},
+    }
+  },
+}
+searchStatuses.flavorTexts = extractFlavorTexts(searchStatuses);
+
 function extractFlavorTexts(obj) {
   return Object.values(obj).reduce((acc, apis) => {
     return Object.values(apis).reduce((acc, medias) => {
