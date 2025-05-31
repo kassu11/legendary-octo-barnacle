@@ -223,12 +223,8 @@
     container-type: inline-size;
     container-name: user-favourites;
 
-    ol {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      list-style: none;
-      padding: .5rem;
-      gap: .5rem;
+    .grid-reel-auto-fill {
+      --grid-column-width: 10rem;
     }
 
     .item img {
@@ -667,30 +663,6 @@
 }
 
 @layer resize {
-  ol {
-    @container user-favourites (width < calc(5em * 8 + .5em * 7)) {
-      --amount: 7.5;
-    }
-    @container user-favourites (width < calc(5em * 7 + .5em * 6)) {
-      --amount: 6.5;
-    }
-    @container user-favourites (width < calc(5em * 6 + .5em * 5)) {
-      --amount: 5.5;
-    }
-    @container user-favourites (width < calc(5em * 5 + .5em * 4)) {
-      --amount: 4.5;
-    }
-    @container user-favourites (width < calc(5em * 4 + .5em * 3)) {
-      --amount: 3.5;
-    }
-    @container user-favourites (width < calc(5em * 3 + .5em * 2)) {
-      --amount: 2.5;
-    }
-    @container user-favourites (width < calc(5em * 2 + .5em * 1)) {
-      --amount: 1.5;
-    }
-  }
-
   .user-profile-stats-general-header {
     @container user-profile-stats-header (max-width: 73em) {
       grid-template-columns: repeat(3, 1fr);
@@ -731,24 +703,17 @@
     .user-profile-overview-body {
       grid-template-columns: 1fr;
     }
-    .user-favourites ol {
-      --gap: .5rem;
-      grid-template-columns: unset;
-      grid-auto-flow: column;
-      grid-auto-columns: calc((100% / var(--amount, 8.5)) - (var(--gap) - var(--gap) / (var(--amount, 8.5) - 1)));
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-padding: var(--gap);
-      gap: var(--gap);
-      background-color: inherit;
-
-      > li {
-        scroll-snap-align: start;
-      }
-    }
 
     .user-profile-favourites-details .grid {
       grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    }
+  }
+
+  @media (width >= 55em) {
+    .user-favourites .grid-reel-auto-fill {
+      grid-template-columns: repeat(5, 1fr);
+      grid-auto-flow: row;
+      padding: .5rem;
     }
   }
 

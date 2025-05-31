@@ -125,7 +125,7 @@ export function Overview() {
         <Show when={user().favourites.anime.edges.length}>
           <div class="user-favourites">
             <h3>Favourite animes</h3>
-            <ol>
+            <ol class="grid-reel-auto-fill">
               <For each={user().favourites.anime.edges}>{anime => (
                 <li class="item">
                   <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
@@ -139,7 +139,7 @@ export function Overview() {
         <Show when={user().favourites.manga.edges.length}>
           <div class="user-favourites">
             <h3>Favourite manga</h3>
-            <ol>
+            <ol class="grid-reel-auto-fill">
               <For each={user().favourites.manga.edges}>{manga => (
                 <li class="item">
                   <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
@@ -153,7 +153,7 @@ export function Overview() {
         <Show when={user().favourites.characters.edges.length}>
           <div class="user-favourites">
             <h3>Favourite characters</h3>
-            <ol>
+            <ol class="grid-reel-auto-fill">
               <For each={user().favourites.characters.edges}>{character => (
                 <li class="item">
                   <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>

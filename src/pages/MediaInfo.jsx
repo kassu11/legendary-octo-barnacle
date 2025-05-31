@@ -292,8 +292,8 @@ function StreamingEpisodes(props) {
     <Show when={props.streamingEpisodes?.length}>
       <div class="media-page-watch-episodes">
         <h2>Watch</h2>
-        <ol class="grid-row-clamp grid-column-auto-fit">
-          <For each={props.streamingEpisodes.slice(0, 4)}>{episode => (
+        <ol class="grid-reel-auto-fill">
+          <For each={props.streamingEpisodes}>{episode => (
             <li>
               <Switch>
                 <Match when={episode.site === "Crunchyroll"}>

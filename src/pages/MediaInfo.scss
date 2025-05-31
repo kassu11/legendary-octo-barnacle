@@ -81,7 +81,8 @@
   }
 
   .media-page-watch-episodes {
-    --grid-column-width: 12rem;
+    --grid-column-width: 20rem;
+    --padding: 0px;
 
     li {
       position: relative;
