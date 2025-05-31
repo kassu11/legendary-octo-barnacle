@@ -129,7 +129,7 @@ function Cards(props) {
 
   return (
     <div class="inline-container">
-      <ol class="grid-reel" onScroll={() => {
+      <ol class="grid-reel-auto-fill" onScroll={() => {
         if (!fetchNewCards) {
           return;
         }

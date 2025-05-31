@@ -24,6 +24,18 @@
       background-color: purple;
     }
 
+    .grid-reel-auto-fill {
+      --grid-max-column-count: 5.5;
+      --grid-column-width: 9rem;
+      padding-bottom: 1rem;
+      background-color: wheat;
+
+      li {
+        width: 100%;
+        aspect-ratio: 5.5/8;
+      }
+    }
+
     .main-content {
       display: grid;
       grid-template-columns: min(11.5rem, 30%) 1fr;
@@ -56,7 +68,7 @@
         padding: 1rem;
       }
 
-      .grid-reel {
+      .grid-reel-auto-fill {
         padding-block: 0;
       }
     }
@@ -94,7 +106,7 @@
     .wrapper {
       background-color: wheat;
 
-      &.tags .grid-reel {
+      &.tags .grid-reel-auto-fill {
         padding-block: 1rem;
       }
 
@@ -103,19 +115,5 @@
         padding-block: .25rem;
       }
     }
-    .grid-reel {
-      padding-bottom: 1rem;
-      background-color: wheat;
-      --amount: 5.5;
-      @container (width < 43em) { --amount: 4.5; }
-      @container (width < 34em) { --amount: 3.5; }
-      @container (width < 22em) { --amount: 2.5; }
-
-      li {
-        width: 100%;
-        aspect-ratio: 5.5/8;
-      }
-    }
   }
-
 }
