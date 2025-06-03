@@ -33,6 +33,7 @@ function modifyMediaListData(listData, type, options) {
   };
 
   if (options.search) {
+    options.search = options.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&");
     if (options.search.trim() === "") {
       filterObject.searchRegex = new RegExp(options.search, "i");
     } else if(options.search.match(/\W/)) {
