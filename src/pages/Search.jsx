@@ -23,6 +23,7 @@ import { CountryInput } from "./Search/CountryInput";
 import { SourceInput } from "./Search/SourceInput";
 import { ExternalSourceInput } from "./Search/ExternalSourcesInput";
 import { TwoHeadedRange } from "./Search/TwoHeadedRange";
+import { useVirtualSearchParams } from "../utils/virtualSearchParams.js";
 
 
 
@@ -78,6 +79,7 @@ class SearchVariable {
 function parseURL() {
   const params = useParams();
   const [searchParams] = useSearchParams();
+  const [virtualSearchParams] = useVirtualSearchParams();
 
   const type = params.type;
   const engine = (searchParams.malSearch === "true" && params.type !== "media") ? "mal" : "ani";
@@ -233,10 +235,9 @@ function parseURL() {
     variables.push(new SearchVariable({ name: `Hide my ${type}`, active: engine === "ani", visuallyDisabled: engine !== "ani", url: `onList=false`, key: "onList", value: false }));
   }
 
-  if (searchParams.format) {
+  {
     const validFormats = [];
-    const formatSet = wrapToSet(searchParams.format);
-    formatSet.forEach(format => {
+    wrapToSet(virtualSearchParams("format")).forEach(format => {
       const {api, flavorText} = searchFormats[engine][type]?.[format] || {};
       const flavorTextFallback = flavorText || searchFormats.flavorTexts[format] || format;
       if (engine === "ani" && api) {
@@ -260,7 +261,7 @@ function parseURL() {
     let validMalOrder = false;
     let reverseMalSort = false;
 
-    const orderSet = wrapToSet(searchParams.order);
+    const orderSet = wrapToSet(virtualSearchParams("order"));
     orderSet.forEach(order => {
       let orderWithoutAlternativeKey = order;
       if (order === sortOrders.ani.anime.duration.alternative_key) {
@@ -589,6 +590,7 @@ export function SearchBar(props) {
 export function SearchContent(props) {
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [, setVirtualSearchParams] = useVirtualSearchParams();
   const { debouncedSearchEngine, debouncedSearchType, searchVariables, debouncedSearchVariables } = useSearchBar();
   const navigate = useNavigate();
 
@@ -619,7 +621,7 @@ export function SearchContent(props) {
                       search[key] ??= wrapToArray(searchParams[key]);
                       search[key].push(value);
                     });
-                    setSearchParams(search);
+                    setVirtualSearchParams(search);
                   }}>{variable.name}</button>
                 </li>
               </Show>
