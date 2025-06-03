@@ -2,16 +2,16 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/r
 
 const obj = {
   trending: { order: "trending" },
+  popular: { order: "popularity" },
   novel: { format: "lightnovel" },
+  finished: { order: "end_date_filtered", status: "complete" },
+  new: { order: "id" },
+  "top-100": { order: "score" },
+  "finished-manga": { order: "end_date_filtered", status: "complete", format: "manga" },
+  "finished-novel": { order: "end_date_filtered", status: "complete", format: "lightnovel" },
+
   ani: {
     manhwa: { country: "KR" },
-    "finished-manga": { order: "end_date_filtered", status: "complete" },
-    anime: {
-    },
-    manga: {
-    },
-    media: {
-    }
   },
   mal: {
     manhwa: { format: "manhwa" },
@@ -20,16 +20,7 @@ const obj = {
 
 const animeSearch = {
   type: "anime",
-  header: ["finished", "this-season", "new", "next-season", "trending", "popular", "top-100"],
-}
-const mangaSearch = {
-  type: "manga",
-  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top-100"],
-}
-
-const bothSearch = {
-  type: "media",
-  header: ["finished", "trending", "popular", "top-100"],
+  header: ["this-season", "next-season"],
 }
 
 
@@ -53,30 +44,30 @@ export function useVirtualSearchParams() {
   }
 
 
-  function setVirtualSearchParams(p, options) {
-    for (const [key, value] of Object.entries(p)) {
+  function setVirtualSearchParams(sParams, options) {
+    for (const key of Object.keys(sParams)) {
       if (key in getVirtualObject()) {
         // User is trying to change search results that is part of the virtual url
         // The results is coming from params.header, so lets redirect the user to a page without the current header
-        return navigate(`/search/${params.type}${searchQueryStringFromObject(p)}`);
+        return navigate(`/search/${params.type}${searchQueryStringFromObject(sParams)}`);
       }
     }
 
     // No need to redirect, set search params normally
-    setSearchParams(p, options);
+    setSearchParams(sParams, options);
   }
 
 
-  function searchQueryStringFromObject(obj) {
+  function searchQueryStringFromObject(sParams) {
     const originalSearchParams = [...new URLSearchParams(location.search)]
-    .filter(([key]) => (key in obj) === false)
+    .filter(([key]) => (key in sParams) === false)
     .map(([key, val]) => `${key}=${val}`);
 
     const originalVirtualSearchParams = Object.entries(getVirtualObject())
-    .filter(([key]) => (key in obj) === false)
+    .filter(([key]) => (key in sParams) === false)
     .map(([key, val]) => `${key}=${val}`);
 
-    const newSearchParams = Object.entries(obj)
+    const newSearchParams = Object.entries(sParams)
     .filter(([, val ]) => searchValueIsNotNullish(val))
     .map(([key, val]) => {
       if (Array.isArray(val)) {
@@ -84,13 +75,6 @@ export function useVirtualSearchParams() {
       }
       return `${key}=${val}`
     });
-
-    console.log(
-      obj,
-    originalVirtualSearchParams,
-    originalSearchParams,
-    newSearchParams,
-    )
 
     const query = originalVirtualSearchParams
     .concat(originalSearchParams)
