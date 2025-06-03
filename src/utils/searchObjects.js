@@ -112,14 +112,14 @@ export const searchFormats = {
     },
     manga: {
       manga: { api: "MANGA", flavorText: "Manga" },
-      novel: { api: "NOVEL", flavorText: "Light novel" },
+      lightnovel: { api: "NOVEL", flavorText: "Light novel" },
       one_shot: { api: "ONE_SHOT", flavorText: "One-shot" }
     },
     media: {
       manga: { api: "MANGA", flavorText: "Manga" },
       movie: { api: "MOVIE", flavorText: "Movie" },
       music: { api: "MUSIC", flavorText: "Music" },
-      novel: { api: "NOVEL", flavorText: "Light novel" },
+      lightnovel: { api: "NOVEL", flavorText: "Light novel" },
       ona: { api: "ONA", flavorText: "ONA" },
       one_shot: { api: "ONE_SHOT", flavorText: "One-shot" },
       ova: { api: "OVA", flavorText: "OVA" },
