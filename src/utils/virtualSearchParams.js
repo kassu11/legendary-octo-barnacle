@@ -5,6 +5,7 @@ const obj = {
   novel: { format: "lightnovel" },
   ani: {
     manhwa: { country: "KR" },
+    "finished-manga": { order: "end_date_filtered", status: "complete" },
     anime: {
     },
     manga: {
@@ -43,16 +44,19 @@ export function useVirtualSearchParams() {
 
   // Gives search results that are not present in the actual url, but all virtualSearchParams must be removable
   function virtualSearchParams(key) {
-    const engine = searchParams.malSearch === "true" ? "mal" : "ani";
+    return searchParams[key] || getVirtualObject()[key];
+  }
 
-    return searchParams[key] || obj[params.header]?.[key] || obj[engine]?.[params.header]?.[key] || obj[engine]?.[params.type]?.[params.header]?.[key];
+  function getVirtualObject() {
+    const engine = searchParams.malSearch === "true" ? "mal" : "ani";
+    return obj[params.header] || obj[engine]?.[params.header] || obj[engine]?.[params.type]?.[params.header] || {};
   }
 
 
   function setVirtualSearchParams(p, options) {
     for (const [key, value] of Object.entries(p)) {
-      if (searchValueIsNotNullish(value) === false && searchParams[key] == null && virtualSearchParams(key) != null) {
-        // User is trying to remove search results that is not present inside the url
+      if (key in getVirtualObject()) {
+        // User is trying to change search results that is part of the virtual url
         // The results is coming from params.header, so lets redirect the user to a page without the current header
         return navigate(`/search/${params.type}${searchQueryStringFromObject(p)}`);
       }
@@ -68,19 +72,33 @@ export function useVirtualSearchParams() {
     .filter(([key]) => (key in obj) === false)
     .map(([key, val]) => `${key}=${val}`);
 
+    const originalVirtualSearchParams = Object.entries(getVirtualObject())
+    .filter(([key]) => (key in obj) === false)
+    .map(([key, val]) => `${key}=${val}`);
+
     const newSearchParams = Object.entries(obj)
     .filter(([, val ]) => searchValueIsNotNullish(val))
-    .map((key, val) => {
+    .map(([key, val]) => {
       if (Array.isArray(val)) {
         return val.map(v => `${key}=${v}`).join("&");
       }
       return `${key}=${val}`
-    })
+    });
+
+    console.log(
+      obj,
+    originalVirtualSearchParams,
+    originalSearchParams,
+    newSearchParams,
+    )
+
+    const query = originalVirtualSearchParams
     .concat(originalSearchParams)
+    .concat(newSearchParams)
     .join("&");
 
-    if (newSearchParams.length) {
-      return "?" + newSearchParams;
+    if (query.length) {
+      return "?" + query;
     }
     return "";
   }
