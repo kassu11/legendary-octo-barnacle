@@ -66,7 +66,7 @@ export function BrowseMangaHome() {
       <div class="search-home-content">
         <HorizontalCardRow data={mangaData().data.data.trending.media} href="/search/manga/trending" title="Trending now" />
         <HorizontalCardRow data={mangaData().data.data.novel.media} href="/search/manga/novel" title="Popular light novels" />
-        <HorizontalCardRow data={mangaData().data.data.manhwa.media} href="/search/manga/manwha" title="Popular Manwhas" />
+        <HorizontalCardRow data={mangaData().data.data.manhwa.media} href="/search/manga/manhwa" title="Popular Manhwas" />
         <HorizontalCardRow data={mangaData().data.data.finishedManga.media} href="/search/manga/finished-manga" title="Recently finished mangas" />
         <HorizontalCardRow data={mangaData().data.data.finishedNovel.media} href="/search/manga/finished-novel" title="Recently finished light novels" />
         <HorizontalCardRow data={mangaData().data.data.popular.media} href="/search/manga/popular" title="All time popular" />
