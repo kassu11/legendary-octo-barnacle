@@ -4,12 +4,16 @@ const obj = {
   trending: { order: "trending" },
   novel: { format: "lightnovel" },
   ani: {
+    manhwa: { country: "KR" },
     anime: {
     },
     manga: {
     },
     media: {
     }
+  },
+  mal: {
+    manhwa: { format: "manhwa" },
   }
 };
 
@@ -19,7 +23,7 @@ const animeSearch = {
 }
 const mangaSearch = {
   type: "manga",
-  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manwha", "trending", "popular", "top-100"],
+  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top-100"],
 }
 
 const bothSearch = {

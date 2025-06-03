@@ -7,7 +7,7 @@ const animeSearch = {
 }
 const mangaSearch = {
   type: "manga",
-  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manwha", "trending", "popular", "top-100"],
+  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top-100"],
 }
 
 const bothSearch = {

@@ -384,8 +384,8 @@ function parseURL() {
     variables.push(new SearchVariable({ name: flavorText, active: !!api, visuallyDisabled: !api, key: "status", value: api, url: `status=${status}` }));
   }
 
-  if (searchParams.country) {
-    const [country] = wrapToArray(searchParams.country);
+  if (virtualSearchParams("country")) {
+    const [country] = wrapToArray(virtualSearchParams("country"));
     const { flavorText } = searchCountries[country] || { flavorText: country };
     variables.push(new SearchVariable({ name: flavorText, active: engine === "ani", visuallyDisabled: engine !== "ani", key: "countryOfOrigin", value: country, url: `country=${country}` }));
   }

@@ -36,7 +36,7 @@ const animeSearch = {
 }
 const mangaSearch = {
   type: "manga",
-  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manwha", "trending", "popular", "top-100"],
+  header: ["finished", "finished-manga", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top-100"],
 }
 
 const bothSearch = {
@@ -64,7 +64,7 @@ render(
                 <Route path="/:type/:header?" matchFilters={animeSearch} />
                 <Route path="/:type/:header?" matchFilters={mangaSearch} />
                 <Route path="/:type/:header?" matchFilters={bothSearch} />
-                <Route path="/:type/:header?" component={RedirectSearchHeaders} />
+                {/* <Route path="/:type/:header?" component={RedirectSearchHeaders} /> */}
               </Route>
             </Route>
             <Route path="/artist/:name" component={Artist} />
