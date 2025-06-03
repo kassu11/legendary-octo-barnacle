@@ -376,8 +376,8 @@ function parseURL() {
     }
   }
 
-  if (searchParams.status) {
-    const [status] = wrapToArray(searchParams.status);
+  if (virtualSearchParams("status")) {
+    const [status] = wrapToArray(virtualSearchParams("status"));
     const { api, flavorText } = searchStatuses[engine][type]?.[status] || {
       flavorText: searchStatuses[notEngine][type]?.[status]?.flavorText || searchStatuses.flavorTexts[status] || status
     };
