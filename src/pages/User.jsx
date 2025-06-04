@@ -10,8 +10,7 @@ import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { DoomScroll } from "../components/utils/DoomScroll.jsx";
 import Score from "../components/media/Score.jsx";
-
-const UserContext = createContext();
+import { UserContext, useUser } from "../context/providers.js";
 
 export function User(props) {
   const params = useParams();
@@ -41,8 +40,6 @@ export function User(props) {
     </UserContext.Provider>
   )
 }
-
-export const useUser = () => useContext(UserContext);
 
 function Content(props) {
   const { user, following } = useUser();
@@ -167,7 +164,7 @@ export function Overview() {
         <Show when={user().favourites.staff.edges.length}>
           <div class="user-favourites">
             <h3>Favourite staff</h3>
-            <ol>
+            <ol class="grid-reel-auto-fill">
               <For each={user().favourites.staff.edges}>{staff => (
                 <li class="item">
                   <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
