@@ -1,11 +1,11 @@
 import { A, useParams } from "@solidjs/router";
-import { useUser } from "../../User";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import api from "../../../utils/api";
 import { formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
 import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
+import { useUser } from "../../../context/providers";
 
 export function StatsAnimeGenres() {
   const params = useParams();
