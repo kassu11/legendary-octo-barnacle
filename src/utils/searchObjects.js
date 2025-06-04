@@ -132,6 +132,19 @@ export const searchFormats = {
 searchFormats.flavorTexts = extractFlavorTexts(searchFormats);
 
 
+export const searchSeasons = {
+  ani: {
+    anime: {
+      winter: { api: "WINTER", flavorText: "Winter" },
+      spring: { api: "SPRING", flavorText: "Spring" },
+      summer: { api: "SUMMER", flavorText: "Summer" },
+      fall: { api: "FALL", flavorText: "Fall" },
+    },
+  }
+}
+searchSeasons.flavorTexts = extractFlavorTexts(searchSeasons);
+
+
 
 export const searchStatuses = {
   mal: {

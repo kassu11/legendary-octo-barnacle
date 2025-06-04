@@ -4,13 +4,14 @@ import "./RatingInput.scss";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchFormats } from "../../utils/searchObjects";
+import { searchSeasons } from "../../utils/searchObjects";
+import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
 
-export function FormatInput() {
+export function SeasonInput() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
-  let oldFormats;
+  let oldSeasons;
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
@@ -29,8 +30,8 @@ export function FormatInput() {
   return (
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
       const formData = new FormData(e.currentTarget);
-      const formats = formData.getAll("format");
-      setSearchParams({format: formats});
+      const seasons = formData.getAll("season");
+      setSearchParams({season: seasons});
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
@@ -38,7 +39,7 @@ export function FormatInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldFormats = searchParams.format;
+          oldSeasons = searchParams.season;
 
           if(isTouch()) {
             dialog.showModal();
@@ -63,7 +64,7 @@ export function FormatInput() {
           }
           open = true;
         }
-      }}>Formats</button>
+      }}>Seasons</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
           <div class="scroll-wrapper" ref={scrollWrapper}>
@@ -73,7 +74,7 @@ export function FormatInput() {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({format: oldFormats});
+                setSearchParams({season: oldSeasons});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -84,23 +85,23 @@ export function FormatInput() {
   );
 
   function Content() {
-    const [searchParams] = useSearchParams();
-    const [formatStore, setFormatStore] = createStore({});
+    const [virtualSearchParams] = useVirtualSearchParams();
     const params = useParams();
+    const [seasonStore, setSeasonStore] = createStore({});
 
     createEffect(() => {
-      setFormatStore(reconcile(objectFromArrayEntries(searchParams.format, {})));
+      setSeasonStore(reconcile(objectFromArrayEntries(virtualSearchParams("season"), {})));
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
 
     return (
       <ol>
-        <For each={Object.entries(searchFormats[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, format]) => (
+        <For each={Object.entries(searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
           <li>
             <label>
-              {format.flavorText}
-              <input type="checkbox" name="format" value={key} checked={formatStore[key]} />
+              {season.flavorText}
+              <input type="radio" name="season" value={key} checked={seasonStore[key]} />
             </label>
           </li>
         )}</For>
