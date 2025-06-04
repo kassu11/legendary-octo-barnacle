@@ -17,13 +17,14 @@ import { YearInput } from "./Search/YearInput";
 import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
-import { searchCountries, searchFormats, searchSources, searchStatuses, sortOrders } from "../utils/searchObjects";
+import { searchCountries, searchFormats, searchSeasons, searchSources, searchStatuses, sortOrders } from "../utils/searchObjects";
 import { StatusInput } from "./Search/StatusInput";
 import { CountryInput } from "./Search/CountryInput";
 import { SourceInput } from "./Search/SourceInput";
 import { ExternalSourceInput } from "./Search/ExternalSourcesInput";
 import { TwoHeadedRange } from "./Search/TwoHeadedRange";
 import { useVirtualSearchParams } from "../utils/virtualSearchParams.js";
+import { SeasonInput } from "./Search/SeasonInput.jsx";
 
 
 
@@ -194,7 +195,7 @@ function parseURL() {
 
   let hasEndDateSet = false;
   let hasStartDateSet = false;
-  const [year] = [searchParams.year].flat();
+  const [year] = wrapToArray(virtualSearchParams("year"));
   if (year) {
     hasEndDateSet = true;
     hasStartDateSet = true;
@@ -432,6 +433,12 @@ function parseURL() {
     }
   }
 
+  if (virtualSearchParams("season")) {
+    const [season] = wrapToArray(virtualSearchParams("season"));
+    const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
+    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: !!api, visuallyDisabled: !api}));
+  }
+
 
 
   return [type, engine, variables, preventFetch];
@@ -569,6 +576,7 @@ export function SearchBar(props) {
         <StatusInput />
         <CountryInput />
         <SourceInput />
+        <SeasonInput />
         <ExternalSourceInput sources={externalSources} />
         <TwoHeadedRange 
           min={0} 

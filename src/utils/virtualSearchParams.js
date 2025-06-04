@@ -1,6 +1,9 @@
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { getDates } from "./dates";
 
-const obj = {
+const dates = getDates();
+
+const headers = {
   trending: { order: "trending" },
   popular: { order: "popularity" },
   novel: { format: "lightnovel" },
@@ -11,18 +14,16 @@ const obj = {
   "finished-novel": { order: "end_date_filtered", status: "complete", format: "lightnovel" },
 
   ani: {
+    anime: {
+      "this-season": { year: dates.seasonYear, season: dates.season.toLowerCase() },
+      "next-season": { year: dates.nextYear, season: dates.nextSeason.toLowerCase() },
+    },
     manhwa: { country: "KR" },
   },
   mal: {
     manhwa: { format: "manhwa" },
   }
 };
-
-const animeSearch = {
-  type: "anime",
-  header: ["this-season", "next-season"],
-}
-
 
 
 
@@ -40,7 +41,7 @@ export function useVirtualSearchParams() {
 
   function getVirtualObject() {
     const engine = searchParams.malSearch === "true" ? "mal" : "ani";
-    return obj[params.header] || obj[engine]?.[params.header] || obj[engine]?.[params.type]?.[params.header] || {};
+    return headers[params.header] || headers[engine]?.[params.header] || headers[engine]?.[params.type]?.[params.header] || {};
   }
 
 
