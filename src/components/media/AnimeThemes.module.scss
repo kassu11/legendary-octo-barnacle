@@ -1,5 +1,5 @@
 .theme-container {
-  background-color: olivedrab;
+  background-color: var(--background-400);
 }
 
 .header {
@@ -21,7 +21,7 @@
 }
 
 .play-button {
-  background-color: yellow;
+  background-color: var(--background-600);
   padding: .25rem;
   display: flex;
   align-items: center;

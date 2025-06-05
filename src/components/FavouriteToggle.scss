@@ -1,12 +1,14 @@
 .toggle-favourite-button {
   display: flex;
-  background-color: springgreen;
+  background-color: var(--background-300);
+  border-radius: .5rem;
   align-items: center;
   gap: .5rem;
   padding: .5rem;
+  cursor: pointer;
 
   &:has(:checked) {
-    background-color: green;
+    background-color: var(--background-300);
   }
 
   input {
@@ -14,12 +16,12 @@
     position: absolute;
 
     &:checked + svg {
-      color: red;
+      color: var(--crimson-400);
+      filter: drop-shadow(0px 0px 5px currentColor);
     }
   }
 
   svg {
-    color: white;
     width: 2rem;
     height: 2rem;
   }

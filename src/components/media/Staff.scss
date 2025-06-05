@@ -1,5 +1,4 @@
 .media-page-staff-container {
-  background-color: lawngreen;
 
   ol {
     --grid-column-width: 16rem;
@@ -9,7 +8,7 @@
   li a {
     display: grid;
     grid-template-columns: 3.5rem 1fr;
-    background-color: thistle;
+    background-color: var(--background-400);
     gap: 0 .5rem;
     height: 100%;
   }

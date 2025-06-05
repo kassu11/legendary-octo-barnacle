@@ -1,6 +1,6 @@
 @layer layout {
   .media-page-banner {
-    background-color: black;
+    background-color: var(--background-400);
 
     img {
       opacity: .9;
@@ -12,7 +12,6 @@
 
   .media-page-content {
     position: relative;
-    background-color: green;
     max-width: 80rem;
     display: grid;
     grid-template-columns: 15rem 1fr;
@@ -45,7 +44,7 @@
     width: min(50rem, 100%);
     margin: auto;
     &::backdrop {
-      background-color: rgb(0 0 0 / 92%);
+      background-color: var(--shadow-300);
     }
 
     .wrapper {
@@ -65,9 +64,8 @@
       button {
         padding: 1rem 2rem;
         border-radius: 1rem;
-        border: 2px solid black;
-        background-color: grey;
-        color: white;
+        border: none;
+        background-color: var(--background-600);
         cursor: pointer;
       }
     }
@@ -90,7 +88,7 @@
 
     a {
       text-decoration: none;
-      color: white;
+      color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -107,7 +105,7 @@
 
     p {
       margin-top: auto;
-      background-color: rgb(0 0 0 / 50%);
+      background-color: var(--shadow-400);
       padding: .5rem;
       width: 100%;
     }
@@ -139,7 +137,6 @@
     button {
       border: none;
       background: transparent;
-      color: white;
       cursor: pointer;
       padding: .25rem;
 
@@ -153,8 +150,7 @@
     }
 
     .flex-space-between {
-      background-color: black;
-      color: white;
+      background-color: var(--shadow-300);
       padding: .5rem .25rem;
       cursor: default;
       pointer-events: all;
@@ -167,7 +163,6 @@
   }
 
   .media-page-left-aside {
-    background-color: pink;
     display: grid;
     height: fit-content;
     gap: 1rem;
@@ -177,7 +172,7 @@
     }
 
     > div {
-      background-color: gold;
+      background-color: var(--background-400);
     }
   }
 
@@ -210,14 +205,9 @@
   }
 
   .media-page-main {
-    background-color: purple;
     display: grid;
     gap: 1rem;
     height: fit-content;
-
-    :where(& > div) {
-      background-color: wheat;
-    }
   }
   .media-page-title-info h1 {
     line-height: 1.1;
@@ -244,22 +234,18 @@
       top: calc(50% + .1em);
       transform: translateY(-50%) translateX(calc(var(--gap, 1rem) / -2 + -50%));
       border-radius: 100%;
-      background-color: grey;
+      background-color: var(--text-200);
     }
   }
 
 
-  .media-page-relation-container {
-    background-color: pink;
-  }
-
   .media-page-relation {
-    background-color: orange;
+    background-color: var(--background-400);
     display: grid;
     grid-template-columns: 5.5rem 1fr;
     gap: .5rem;
     text-decoration: none;
-    color: white;
+    color: var(--text-400);
 
     img {
       width: 100%;
@@ -275,7 +261,8 @@
     }
 
     .type {
-      background-color: grey;
+      color: var(--text-500);
+      font-weight: 700;
     }
 
     .format {

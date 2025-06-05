@@ -215,26 +215,28 @@ function MediaInfo(props) {
           <div class="media-page-description">
             <Markdown children={props.media.description}/>
           </div>
-          <div class="media-page-relation-container">
-            <h2>Relations</h2>
-            <ol class="grid-column-auto-fill">
-              <For each={props.media.relations.edges}>{relation => (
-                <li>
-                  <A 
-                    href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + formatTitleToUrl(relation.node.title.userPreferred)}
-                    class="media-page-relation"
-                  >
-                    <img src={relation.node.coverImage.large} alt="Cover" />
-                    <div class="content">
-                      <p class="type">{relation.relationType}</p>
-                      <p class="line-clamp">{relation.node.title.userPreferred}</p>
-                      <p class="format">{relation.node.format} - {relation.node.status}</p>
-                    </div>
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
+          <Show when={props.media?.relations?.edges.length}>
+            <div class="media-page-relation-container">
+              <h2>Relations</h2>
+              <ol class="grid-column-auto-fill">
+                <For each={props.media.relations.edges}>{relation => (
+                  <li>
+                    <A 
+                      href={"/" + relation.node.type.toLowerCase() + "/" + relation.node.id + "/" + formatTitleToUrl(relation.node.title.userPreferred)}
+                      class="media-page-relation"
+                    >
+                      <img src={relation.node.coverImage.large} alt="Cover" />
+                      <div class="content">
+                        <p class="type">{relation.relationType}</p>
+                        <p class="line-clamp">{relation.node.title.userPreferred}</p>
+                        <p class="format">{relation.node.format} - {relation.node.status}</p>
+                      </div>
+                    </A>
+                  </li>
+                )}</For>
+              </ol>
+            </div>
+          </Show>
           <Characters characters={props.media.characterPreview.edges} countryOfOrigin={props.media.countryOfOrigin} />
           <Staff staff={props.media.staffPreview.edges} />
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
