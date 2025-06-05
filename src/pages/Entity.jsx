@@ -225,7 +225,7 @@ function SubSection(props) {
           </Show>
         </div>
       </summary>
-      <ol class="entity-page-grid">
+      <ol class="grid-column-auto-fill">
         <Switch>
           <Match when={props.type === "CHARACTER"}>
             <StaffCharacterPage setVisible={setVisible} variables={props.variables} showYears={showYears} nestLevel={1} />

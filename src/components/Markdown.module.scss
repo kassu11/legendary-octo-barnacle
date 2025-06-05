@@ -1,27 +1,16 @@
 .spoiler {
-  display: inline;
-  background-color: #333;
-
-  .text {
-    background-color: #3333;
-  }
+  display: inline-block;
+  background-color: var(--background-400);
 
   &:not([open]) {
+    background-color: var(--background-500);
     * {
       color: transparent;
-    }
-
-    .text {
-      background-color: #333;
     }
 
     summary * {
       pointer-events: none;
     }
-  }
-
-  &[open] {
-    color: inherit;
   }
 
   > summary {
