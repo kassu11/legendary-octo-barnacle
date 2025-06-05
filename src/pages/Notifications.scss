@@ -1,19 +1,22 @@
 .notification-page {
-  background-color: lightsalmon;
   width: min(100% - 1rem, 50rem);
+  display: grid;
+  gap: 1rem;
   margin-inline: auto;
+  .flex-space-between {
+    justify-content: left;
+  }
 }
 .notifications-container {
   display: grid;
   list-style: none;
   padding: 0;
-  background-color: yellow;
   gap: .25rem;
 
   li {
     display: grid;
     grid-template-columns: 4rem 1fr;
-    background-color: orange;
+    background-color: var(--background-400);
     gap: .5rem;
 
     img {
