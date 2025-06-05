@@ -1,15 +1,11 @@
 .toggle-favourite-button {
   display: flex;
-  background-color: var(--background-300);
+  background-color: var(--background-400);
   border-radius: .5rem;
   align-items: center;
   gap: .5rem;
   padding: .5rem;
   cursor: pointer;
-
-  &:has(:checked) {
-    background-color: var(--background-300);
-  }
 
   input {
     all: unset;

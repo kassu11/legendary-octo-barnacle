@@ -2,7 +2,6 @@
   .entity-page {
     width: min(85rem, calc(100% - 1rem));
     margin-inline: auto;
-    background-color: seashell;
   }
 
   .entity-page-header {
@@ -58,14 +57,14 @@
     z-index: 1;
 
     .entity-page-details[open] & {
-      background-color: slateblue;
+      background-color: var(--background-400);
       &::before {
         content: "[open]";
       }
     }
 
     .entity-page-details & {
-      background-color: tomato;
+      background-color: var(--background-300);
       &::before {
         content: "[closed]";
       }
@@ -77,27 +76,11 @@
     }
   }
 
-
-  .entity-page-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  .entity-page-details .grid-column-auto-fill {
+    --grid-column-width: 12rem;
     gap: 1rem;
-    background-color: orange;
-    list-style: none;
-    padding: 0;
-
-
-    .role {
-      font-size: .8rem;
-      margin-left: .5rem;
-      opacity: .8;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
   }
+
   .entity-page-grid-year-header {
     grid-column: 1/-1;
   }
@@ -166,6 +149,17 @@
       .cover {
         place-self: center;
       }
+    }
+
+    .entity-page-details .grid-column-auto-fill {
+      --grid-column-width: 9rem;
+      gap: .25rem;
+    }
+  }
+
+  @media (width < 26em) {
+    .entity-page-details .grid-column-auto-fill {
+      --grid-column-width: 6rem;
     }
   }
 }
