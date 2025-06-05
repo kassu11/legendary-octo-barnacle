@@ -1,7 +1,6 @@
 @layer layout {
   .multi-input {
     position: relative;
-    max-width: 15rem;
 
     &.mobile {
       dialog {
@@ -65,7 +64,7 @@
 
     .multi-input-header {
       padding: .25rem .5rem;
-      background-color: red;
+      background-color: var(--background-300);
     }
 
     input[type="search"] {
@@ -115,11 +114,11 @@
 
 
     .exclude input[data-steps="2"] {
-      accent-color: crimson;
+      accent-color: var(--crimson-400);
     }
 
     input[data-steps="2"] {
-      accent-color: green;
+      accent-color: var(--lime-400);
     }
   }
 
@@ -132,7 +131,7 @@
     justify-content: end;
     gap: .25rem 1rem;
     padding: .5rem 1rem;
-    background-color: red;
+    background-color: var(--background-300);
     flex-wrap: wrap;
   }
 }

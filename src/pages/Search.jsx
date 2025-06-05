@@ -539,7 +539,7 @@ export function SearchBar(props) {
           <option value="media">Media</option>
         </select>
       </div>
-      <div>
+      <div class="grid-column-auto-fill">
         <input type="search" placeholder={"Search " + (params.type || "All")} value={searchParams.q || ""} onInput={e => {
           triggerSetSearchParams({ q: e.target.value });
         }} />
@@ -549,24 +549,28 @@ export function SearchBar(props) {
           setSearchParams({ malSearch: e.target.checked || undefined });
         }}/>
         </span>
-        <br />
-        <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.onList === "false"} onInput={e => {
-          setSearchParams({ onList: e.target.checked ? false : undefined });
-        }} />
-        <label htmlFor="hideMyAnime"> Hide my {params.type}</label>
-        <input type="checkbox" name="showMyAnime" id="showMyAnime" checked={searchParams.onList === "true"} onInput={e => {
-          setSearchParams({ onList: e.target.checked || undefined });
-        }} />
-        <label htmlFor="showMyAnime"> Only show my {params.type}</label>
-        <br />
-        <input type="checkbox" name="hasLicense" id="hasLicense" checked={searchParams.license === "false"} onInput={e => {
-          setSearchParams({ license: e.target.checked ? false : undefined });
-        }} />
-        <label htmlFor="hasLicense"> Licensed</label>
-        <input type="checkbox" name="hasNotLicense" id="hasNotLicense" checked={searchParams.license === "true"} onInput={e => {
-          setSearchParams({ license: e.target.checked || undefined });
-        }} />
-        <label htmlFor="hasNotLicense"> Unlicensed</label>
+        <div>
+          <input type="checkbox" name="hideMyAnime" id="hideMyAnime" checked={searchParams.onList === "false"} onInput={e => {
+            setSearchParams({ onList: e.target.checked ? false : undefined });
+          }} />
+          <label htmlFor="hideMyAnime"> Hide my {params.type}</label>
+          <br />
+          <input type="checkbox" name="showMyAnime" id="showMyAnime" checked={searchParams.onList === "true"} onInput={e => {
+            setSearchParams({ onList: e.target.checked || undefined });
+          }} />
+          <label htmlFor="showMyAnime"> Only show my {params.type}</label>
+        </div>
+        <div>
+          <input type="checkbox" name="hasLicense" id="hasLicense" checked={searchParams.license === "false"} onInput={e => {
+            setSearchParams({ license: e.target.checked ? false : undefined });
+          }} />
+          <label htmlFor="hasLicense"> Licensed</label>
+          <br />
+          <input type="checkbox" name="hasNotLicense" id="hasNotLicense" checked={searchParams.license === "true"} onInput={e => {
+            setSearchParams({ license: e.target.checked || undefined });
+          }} />
+          <label htmlFor="hasNotLicense"> Unlicensed</label>
+        </div>
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
         <YearInput />

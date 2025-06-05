@@ -8,6 +8,10 @@
     .header-row {
       display: flex;
     }
+
+    .grid-column-auto-fill > input[type="search"] {
+      grid-column: span 2;
+    }
   }
 
 
