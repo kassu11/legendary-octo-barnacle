@@ -354,19 +354,19 @@ function StatsYearLineCharts(props) {
         </div>
         <DraggableScrollContainer>
           <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
-            <path d={pathFill()} stroke="none" stroke-width="0" fill="grey" />
-            <rect x="0" y={getY(0)} width="100%" height="60" fill="darkgrey" stroke="none" pointer-events="all" />
+            <path d={pathFill()} stroke="none" stroke-width="0" fill="var(--background-350)" />
+            <rect x="0" y={getY(0)} width="100%" height="60" fill="var(--background-300)" stroke="none" pointer-events="all" />
             <path d={path()} stroke="black" stroke-width="5" fill="transparent" />
             <For each={props.data}>{(year, i) => (
               <g class="item">
                 <rect x={getX(i()) - width() / 2} y="0" width={width()} height="100%" fill="none" stroke="none" pointer-events="all" />
                 <circle cx={getX(i())} cy={getY(year[state()])} r="6" pointer-events="none" />
-                <text class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">
+                <text fill="currentColor" class="text" x={getX(i())} y="0" style={{translate: `0 ${getY(year[state()]) - 10}px`}} text-anchor="middle">
                   <Show when={state() === "minutesWatched"} fallback={numberCommas(year[state()])}>
                     {numberCommas(Math.ceil(year[state()] / 60))}
                   </Show>
                 </text>
-                <text class="year" x={getX(i())} y="304" text-anchor="middle">{year.releaseYear || year.startYear}</text>
+                <text fill="currentColor" class="year" x={getX(i())} y="304" text-anchor="middle">{year.releaseYear || year.startYear}</text>
               </g>
             )}</For>
           </svg>

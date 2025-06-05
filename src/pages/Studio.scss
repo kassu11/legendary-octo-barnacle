@@ -2,7 +2,7 @@
   .studio-page {
     width: min(85rem, calc(100% - 1rem));
     margin-inline: auto;
-    background-color: seashell;
+    background-color: var(--background-400);
 
     --grid-column-width: 11rem;
 
