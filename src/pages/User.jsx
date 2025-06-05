@@ -27,7 +27,7 @@ export function User(props) {
   return (
     <UserContext.Provider value={{ user: () => userData().data, following }}>
       <Switch>
-        <Match when={userData()?.data && !userData.loading}>
+        <Match when={userData()?.data && (!userData.loading || userData().data.name === params.name)}>
           <Content>
             {props.children}
           </Content>
