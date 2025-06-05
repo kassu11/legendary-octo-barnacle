@@ -7,10 +7,9 @@ import { assert } from "../utils/assert.js";
 import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
-import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { DoomScroll } from "../components/utils/DoomScroll.jsx";
 import Score from "../components/media/Score.jsx";
-import { UserContext, useUser } from "../context/providers.js";
+import { useEditMediaEntries, UserContext, useUser } from "../context/providers.js";
 
 export function User(props) {
   const params = useParams();

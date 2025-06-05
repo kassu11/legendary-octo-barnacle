@@ -6,7 +6,7 @@ import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
-import { useEditMediaEntries } from "../context/EditMediaEntriesContext";
+import { useEditMediaEntries } from "../context/providers";
 
 export function BrowseRedirect(props) {
   const params = useParams();

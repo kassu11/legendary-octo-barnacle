@@ -5,8 +5,7 @@ import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
-
-const EditMediaEntriesContext = createContext();
+import { EditMediaEntriesContext } from "./providers.js";
 
 function formState(auth, initialData) {
   assert(!initialData || auth, "Should not be able to edit if not authenticated");
@@ -253,7 +252,7 @@ export function EditMediaEntriesProvider(props) {
                 <img src={mediaListEntry().bannerImage} class="banner" alt="Banner" />
               </Show>
               <img src={mediaListEntry().coverImage?.large} class="cover" alt="Cover" />
-              <h2 class="line-clamp">{mediaListEntry().title?.userPreferred}</h2>
+              <h2 class="line-clamp header">{mediaListEntry().title?.userPreferred}</h2>
               <div class="container">
                 <Switch>
                   <Match when={mediaListEntry().type === "MANGA"}>
@@ -401,7 +400,7 @@ export function EditMediaEntriesProvider(props) {
                 </div>
                 <div class="media-editor-input notes">
                   <label htmlFor="notes">Notes</label>
-                  <textarea type="text" id="notes" name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
+                  <textarea type="text" id="notes" placeholder="Notes..." name="notes" value={state.notes()} onChange={e => state.setNotes(e.target.value)} />
                 </div>
                 <Show when={state.advancedScoresEnabled() && state.advancedScoring().length}>
                   <p class="advanced-scoring-header">Advanced scoring</p>
@@ -512,11 +511,3 @@ function formatDateToInput(date) {
   const month = String(date.month).padStart(2, "0");
   return `${date.year}-${month}-${day}`;
 }
-
-export function useEditMediaEntries() {
-  const context = useContext(EditMediaEntriesContext);
-  if (!context) {
-    throw new Error("useEditMediaEntries must be used within a ResponsiveProvider");
-  }
-  return context;
-} 

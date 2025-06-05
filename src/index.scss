@@ -20,6 +20,7 @@
 
   input, button, textarea, select {
     font: inherit;
+    color: inherit;
     background-color: var(--background-500);
   }
 
@@ -59,7 +60,8 @@
 
     --lime-400: oklch(0.66 0.29 10.59);
     --crimson-400: oklch(0.66 0.29 10.59);
-    --red-400: oklch(0.35 0.23 263.34);
+    --red-400: oklch(0.67 0.28 26.71);
+    --red-100: oklch(0.05 0.28 26.71);
     --dark-blue-400: oklch(0.35 0.23 263.34);
 
     --text-500: oklch(0.97 0 0);
