@@ -7,7 +7,6 @@ import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import { SearchBar, SearchContent } from "./pages/Search.jsx";
 import { User, Overview, AnimeList, MangaList, FavouriteContainer, Socials, Stats } from "./pages/User.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
@@ -24,6 +23,7 @@ import { Studio } from "./pages/Studio.jsx";
 import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { RedirectSearchHeaders } from "./pages/SearchHeaderRedirect.jsx";
+import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 
 const root = document.getElementById("root")
 

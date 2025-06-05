@@ -5,3 +5,6 @@ export const useSearchBar = () => useContext(SearchBarContext);
 
 export const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
+
+export const EditMediaEntriesContext = createContext();
+export const useEditMediaEntries = () => useContext(EditMediaEntriesContext);

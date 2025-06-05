@@ -15,10 +15,10 @@ import Staff from "../components/media/Staff.jsx";
 import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
-import { useEditMediaEntries } from "../context/EditMediaEntriesContext.jsx";
 import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import Recommendations from "../components/media/Recommendations.jsx";
+import { useEditMediaEntries } from "../context/providers.js";
 
 export function AnimeInfo() {
   const params = useParams();
