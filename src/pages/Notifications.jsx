@@ -12,7 +12,7 @@ export default function Notifications() {
 
   return (
     <div class="notification-page">
-      <ol>
+      <ol class="flex-space-between">
         <li><button onClick={() => setType("all")}>All</button></li>
         <li><button onClick={() => setType("airing")}>Airing</button></li>
         <li><button onClick={() => setType("activity")}>Activity</button></li>

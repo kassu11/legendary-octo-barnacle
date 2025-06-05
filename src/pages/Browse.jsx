@@ -28,12 +28,12 @@ export function BrowseMediaHome() {
     <Show when={homeData()}>
       <div>{console.log("Search Home Data:", homeData())}</div>
       <div class="search-home-content">
-        <HorizontalCardRow data={homeData().data.data.trending.media} href="/search/trending" title="Trending anime and manga" />
+        <HorizontalCardRow data={homeData().data.data.trending.media} href="/search/media/trending" title="Trending anime and manga" />
         <HorizontalCardRow data={homeData().data.data.newAnime.media} href="/search/anime/new" title="Newly added anime" />
         <HorizontalCardRow data={homeData().data.data.newManga.media} href="/search/manga/new" title="Newly added manga" />
         <HorizontalCardRow data={homeData().data.data.finishedAnime.media} href="/search/anime/finished" title="Recently finished anime" />
         <HorizontalCardRow data={homeData().data.data.finishedManga.media} href="/search/manga/finished" title="Recently finished manga" />
-        <VerticalCardRow data={homeData().data.data.top.media} href="/search/top-100" title="Top 100 anime and manga" />
+        <VerticalCardRow data={homeData().data.data.top.media} href="/search/media/top-100" title="Top 100 anime and manga" />
       </div>
     </Show>
   );
@@ -83,10 +83,10 @@ function VerticalCardRow(props) {
 
   return (
     <section class="vertical-search-card-section">
-      <div class="search-cards-header">
+      <A href={props.href} class="search-cards-header">
         <h2>{props.title}</h2>
-        <A href={props.href}>View all</A>
-      </div>
+        View all
+      </A>
       <ol class="vertical-search-card-row">
         <For each={props.data}>
           {(card, i) => (

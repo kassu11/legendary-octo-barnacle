@@ -3,7 +3,8 @@
   top: 0px;
   height: auto;
   padding: .5rem;
-  background-color: green;
+  background-color: var(--shadow-400);
+  backdrop-filter: blur(5px);
   display: flow-root;
   z-index: 100;
   
@@ -26,7 +27,7 @@
 
 .main-footer {
   min-height: 20rem;
-  background-color: lightgrey;
+  background-color: var(--background-350);
 }
 
 .main-navigation-profile {

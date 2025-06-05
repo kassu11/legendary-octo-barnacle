@@ -15,16 +15,7 @@ function Home() {
     <Show when={authUserData()}>
       <div class={style.container}>
         <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.id} />
-        <div class={style.body}>
-          <div class={style.left}>
-            <Activity token={accessToken()}/>
-          </div>
-          <div class={style.right}>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-            <div class={style.rowContainer}></div>
-          </div>
-        </div>
+        <Activity token={accessToken()}/>
       </div>
     </Show>
   )
@@ -75,9 +66,11 @@ function Activity(props) {
         setIsFollowing(false);
         setHasReplies(true);
       }}>Global</button>
-      <For each={activityData()?.data.data.Page.activities}>{activity => (
-        <ActivityCard activity={activity} mutateCache={mutateCache} />
-      )}</For>
+      <div class="user-profile-activity">
+        <For each={activityData()?.data.data.Page.activities}>{activity => (
+          <ActivityCard activity={activity} mutateCache={mutateCache} />
+        )}</For>
+      </div>
     </>
   )
 }

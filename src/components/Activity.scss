@@ -1,6 +1,6 @@
 .activity-card-text {
   min-height: 5rem;
-  background-color: orange;
+  background-color: var(--background-400);
   border-radius: .25rem;
   padding: .5rem;
 
@@ -73,6 +73,6 @@
   }
 
   button.active {
-    background-color: pink;
+    background-color: var(--crimson-400);
   }
 }

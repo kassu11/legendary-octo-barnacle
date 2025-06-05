@@ -1,7 +1,6 @@
 $radius: .2rem;
 
 .container {
-  background-color: yellow;
   margin-inline: auto;
   width: min(100%, 80rem);
   display: grid;
@@ -10,14 +9,13 @@ $radius: .2rem;
 
 .header {
   width: 100%;
-  background-color: lime;
   margin-inline: auto;
   display: grid;
   gap: 5px;
 }
 
 .row-container {
-  background-color: purple;
+  background-color: var(--background-400);
   min-height: 6em;
   display: flex;
   flex-wrap: wrap;
@@ -33,38 +31,16 @@ $radius: .2rem;
 }
 
 
-.body {
-  display: grid;
-  align-items: start;
-  grid-template-columns: 4fr 3fr;
-  gap: 5px;
-  background-color: wheat;
-}
-
-.left {
-  background-color: skyblue;
-  width: 100%;
-  display: grid;
-  gap: 5px;
-}
-
-.right {
-  background-color: steelblue;
-  width: 100%;
-  display: grid;
-  gap: 5px;
-}
-
 .is-behind {
   position: absolute;
-  background-color: red;
+  background-color: var(--red-400);
   height: .3rem;
   width: 100%;
   bottom: 0px;
 }
 
 .normal-info {
-  background-color: #333;
+  background-color: var(--shadow-400);
   padding-block: .75em 1rem;
   position: absolute;
   width: 100%;
@@ -76,7 +52,7 @@ $radius: .2rem;
 }
 
 .hover-info {
-  background-color: #333;
+  background-color: var(--shadow-400);
   padding-block: .75em;
   position: absolute;
   width: 100%;
@@ -89,7 +65,7 @@ $radius: .2rem;
   overflow: hidden;
 
   &:hover {
-    background-color: black;
+    background-color: var(--shadow-300);
   }
 
   .plus {
@@ -106,7 +82,7 @@ $radius: .2rem;
   position: relative;
   width: 5.5rem;
   height: 8rem;
-  color: white;
+  color: inherit;
   border-radius: $radius;
   text-decoration: none;
 
@@ -139,7 +115,7 @@ $radius: .2rem;
   bottom: 0px;
   left: 100%;
   width: 16rem;
-  background-color: green;
+  background-color: var(--background-350);
   z-index: 1;
   display: none;
   pointer-events: none;
