@@ -2,7 +2,6 @@
   .user-profile-stats-genres {
     .grid-column-auto-fill {
       --grid-column-width: 22rem;
-      background-color: skyblue;
       gap: 2rem;
 
       &.staff {
@@ -21,14 +20,14 @@
     }
 
     .item {
-      background-color: purple;
+      background-color: var(--background-400);
     }
 
     .grid-reel-auto-fill {
       --grid-max-column-count: 5.5;
       --grid-column-width: 9rem;
       padding-bottom: 1rem;
-      background-color: wheat;
+      background-color: var(--background-350);
 
       li {
         width: 100%;
@@ -100,11 +99,11 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      background-color: grey;
+      background-color: var(--background-500);
     }
 
     .wrapper {
-      background-color: wheat;
+      background-color: var(--background-350);
 
       &.tags .grid-reel-auto-fill {
         padding-block: 1rem;

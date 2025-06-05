@@ -1,15 +1,14 @@
 @layer layout {
   .user-page {
     max-width: min(100% - 1rem, 90rem);
-    background-color: purple;
     margin-inline: auto;
 
   }
   .user-profile-overview-body {
     display: grid;
+    margin-top: 1rem;
     grid-template-columns: minmax(29rem, 2fr) 3fr;
     gap: 1rem;
-    background-color: slategrey;
     align-items: start;
   }
 
@@ -25,7 +24,7 @@
       object-fit: cover;
       left: 0px;
       z-index: -1;
-      background-color: #333;
+      background-color: var(--background-400);
       filter: brightness(.75);
     }
 
@@ -61,7 +60,7 @@
   }
 
   .profile-navigation ul {
-    background-color: thistle;
+    background-color: var(--background-500);
     display: flex;
     flex-wrap: wrap;
     list-style: none;
@@ -135,16 +134,14 @@
   }
 
   .user-info-container {
-    background-color: blueviolet;
     display: grid;
     gap: 2rem;
 
     > div {
-      background-color: yellowgreen;
+      background-color: var(--background-400);
     }
   }
   .user-activity-container {
-    background-color: aqua;
     display: grid;
     gap: 2rem;
   }
@@ -163,7 +160,6 @@
 
 
   .user-profile-progress {
-    background-color: sienna;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
@@ -174,7 +170,7 @@
       gap: 1rem;
       justify-content: space-around;
       flex: 1;
-      background-color: tomato;
+      background-color: var(--background-400);
       padding: .5rem;
       flex-wrap: wrap;
       flex-basis: min(20rem, 100%);
@@ -192,7 +188,6 @@
 
 
   .user-profile-genres {
-    background-color: springgreen;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
@@ -200,7 +195,6 @@
 
   .user-genres-overview {
     flex: 1;
-    background-color: steelblue;
 
     ol {
       padding: 0;
@@ -210,7 +204,7 @@
     }
 
     .item {
-      background-color: green;
+      background-color: var(--background-400);
       padding-inline: .5rem;
 
       span {
@@ -251,12 +245,13 @@
   .user-profile-media-list-body {
     display: grid;
     grid-template-columns: 12rem 1fr;
+    gap: .5rem;
   }
 
   .user-profile-media-list-search {
-    background-color: lightsalmon;
     display: grid;
     align-content: start;
+    gap: .25rem;
   }
 
   .user-profile-media-list-container {
@@ -348,19 +343,29 @@
 
   .user-profile-favourites {
     display: grid;
-    gap: 2rem;
   }
 
   .user-profile-favourites-details {
+    &:not([open]) {
+      summary {
+        background-color: var(--background-300);
+      }
+      button {
+        display: none;
+      }
+    }
     summary {
       position: sticky;
       top: 3rem;
       padding: 1rem;
-      background-color: pink;
+      background-color: var(--background-400);
       z-index: 1;
-      margin-bottom: 1rem;
       h3 {
         display: inline;
+      }
+
+      button {
+        margin-left: 1rem;
       }
     }
 
@@ -402,7 +407,7 @@
       font-size: 1rem;
       li {
         padding: 1rem;
-        background-color: grey;
+        background-color: var(--background-500);
       }
     }
 
@@ -422,6 +427,7 @@
     right: 0px;
     top: 0px;
     transform: translate(20%, -50%);
+    z-index: 1;
   }
 
 
@@ -439,7 +445,6 @@
     width: min-content;
     flex-grow: 1;
     padding: 0;
-    background-color: orange;
 
     a {
       text-align: center;
@@ -460,19 +465,13 @@
     position: relative;
     width: 100%;
     grid-template-columns: 11rem 1fr;
-    background-color: magenta;
     gap: 1rem;
-
-    > * {
-      background-color: pink;
-    }
 
     .content {
       overflow: auto;
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      background-color: lightyellow;
     }
   }
 
@@ -484,7 +483,6 @@
   .user-profile-stats-general-header {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    background-color: lime;
     justify-content: space-between;
     padding: 0;
     gap: 1rem;
@@ -495,7 +493,6 @@
     }
 
     .svg-container {
-      background-color: green;
       border-radius: 100%;
       aspect-ratio: 1/1;
       width: 100%;
@@ -512,11 +509,13 @@
       grid-template-columns: 3rem 1fr;
       align-items: center;
       gap: .5rem;
+      background-color: var(--background-400);
+      border-radius: .25rem;
     }
   }
 
   .user-profile-stat-score-bar-section {
-    background-color: skyblue;
+    background-color: var(--background-400);
     .scroll {
       overflow: auto;
       margin-inline: 1rem;
@@ -536,7 +535,7 @@
       text-align: center;
 
       div {
-        background-color: red;
+        background-color: var(--user-color);
         max-width: 3rem;
         border-radius: .25rem;
         width: 100%;
@@ -547,7 +546,6 @@
   }
 
   .user-profile-stats-formats {
-    background-color: thistle;
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
@@ -564,8 +562,8 @@
     .filler {
       height: 100%;
       background: repeating-linear-gradient(
-        #00000059 var(--gap),
-        #00000059 calc(var(--height) + var(--gap)),
+        var(--background-500) var(--gap),
+        var(--background-500) calc(var(--height) + var(--gap)),
         transparent calc(var(--height) + var(--gap)),
         transparent calc(var(--height) + var(--gap) * 2), 
       );
@@ -584,7 +582,7 @@
       display: grid;
       grid-template-columns: subgrid;
       grid-column: 1/-1;
-      background-color: yellowgreen;
+      background-color: var(--background-400);
       padding: .25rem;
       min-height: var(--height);
       align-items: center;
@@ -612,16 +610,15 @@
   }
 
   .user-profile-stats-graph-container {
-    background-color: yellow;
-
     .scroll {
       overflow: auto;
       direction: rtl;
       cursor: grab;
+      background-color: var(--background-400);
+      box-shadow: inset 0 -60px var(--background-300);
     }
 
     svg {
-      background-color: orange;
       max-width: unset;
       margin-inline: auto;
     }
