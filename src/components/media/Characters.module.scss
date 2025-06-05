@@ -1,5 +1,4 @@
 .character-container {
-  background-color: sienna;
 
   ol {
     --grid-column-width: 25rem;
@@ -7,7 +6,7 @@
 }
 
 .character {
-  background-color: orange;
+  background-color: var(--background-400);
   display: flex;
   gap: .5rem;
   text-decoration: none;
@@ -25,7 +24,6 @@
 
 .character-left, .character-right {
   width: 100%;
-  background-color: lightsteelblue;
   display: grid;
   gap: .5rem;
 

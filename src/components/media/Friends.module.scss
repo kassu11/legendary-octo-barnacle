@@ -1,6 +1,4 @@
 .friend-container {
-  background-color: lightcoral;
-
   ul {
     list-style: none;
     display: grid;
@@ -16,14 +14,14 @@
 
 .friend {
   display: grid;
-  background-color: magenta;
+  background-color: var(--background-400);
   border-radius: .25rem;
   grid-template-columns: subgrid;
   grid-column: 1/-1;
   gap: .5rem;
   padding: .5rem;
   align-items: center;
-  color: white;
+  color: inherit;
   text-decoration: none;
 
   img {
