@@ -3,11 +3,10 @@
   margin-inline: auto;
   padding: 1rem .5rem;
   display: grid;
+  background-color: var(--background-400);
   gap: 1rem;
-  background-color: blue;
 }
 .entities-page-grid {
-  background-color: sienna;
   list-style: none;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
@@ -16,7 +15,7 @@
 }
 
 .entities-page-entity {
-  background-color: orange;
+  background-color: var(--background-350);
   display: flex;
   gap: .5rem;
   text-decoration: none;
@@ -43,7 +42,6 @@
 
   .entity-left, .entity-right {
     width: 100%;
-    background-color: darkorchid;
     display: grid;
     gap: .5rem;
     text-decoration: none;
