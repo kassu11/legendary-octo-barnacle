@@ -600,7 +600,7 @@ export function SearchBar(props) {
 
 export function SearchContent(props) {
   const params = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [, setVirtualSearchParams] = useVirtualSearchParams();
   const { debouncedSearchEngine, debouncedSearchType, searchVariables, debouncedSearchVariables } = useSearchBar();
   const navigate = useNavigate();
@@ -756,7 +756,7 @@ function MalCardRow(props) {
 function MalCard(props) {
   return (
     <li class="horizontal-search-card">
-      <A href={props.card.url}>
+      <a href={props.card.url} target="_blank">
         <img src={props.card.images.webp.image_url} alt="Anime cover" />
         <p class="line-clamp">
           <Switch>
@@ -764,7 +764,7 @@ function MalCard(props) {
             <Match when={props.card.titles.Default}>{props.card.titles.Default}</Match>
           </Switch>
         </p>
-      </A>
+      </a>
     </li>
   );
 }
