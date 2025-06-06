@@ -241,6 +241,15 @@
 
 
 @layer resize {
+  @media (width < 60rem) {
+    .search-page {
+      .grid-column-auto-fill > input[type="search"] {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+
   @container vertical-search-cards (width < 42em) {
     .vertical-search-card {
       position: relative;
