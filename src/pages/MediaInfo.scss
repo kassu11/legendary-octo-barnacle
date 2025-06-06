@@ -81,6 +81,13 @@
   .media-page-watch-episodes {
     --grid-column-width: 20rem;
     --padding: 0px;
+    // This fixes the scroll snapping of the child reel
+    position: relative;
+
+    .grid-reel-auto-fill {
+      // Setting background color to the same as background because other wise the scroll snapping is broken ¯\_(ツ)_/¯
+      background-color: var(--background-200);
+    }
 
     li {
       position: relative;
