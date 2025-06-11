@@ -112,7 +112,7 @@ function Footer(props) {
           return !liked
         });
       }}>Like {likeCount()}</button>
-      <button>Reply {props.activity.replyCount}</button>
+      {/* <button>Reply {props.activity.replyCount}</button> */}
     </>
   )
 }
