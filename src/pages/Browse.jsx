@@ -12,7 +12,6 @@ export function BrowseRedirect(props) {
   const params = useParams();
   const location = useLocation();
 
-  console.log("test")
   return (
     <Show when={!location.search} fallback={<Navigate href={"/search/" + params.type + location.search} />}>
       {props.children}
@@ -26,7 +25,6 @@ export function BrowseMediaHome() {
 
   return (
     <Show when={homeData()}>
-      <div>{console.log("Search Home Data:", homeData())}</div>
       <div class="search-home-content">
         <HorizontalCardRow data={homeData().data.data.trending.media} href="/search/media/trending" title="Trending anime and manga" />
         <HorizontalCardRow data={homeData().data.data.newAnime.media} href="/search/anime/new" title="Newly added anime" />

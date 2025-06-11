@@ -14,7 +14,6 @@ function Artist() {
       <h1>Artist</h1>
       <Show when={artistData()}>
         <p>{artistData().data.artist.name}</p>
-        {console.log(artistData())}
         <Show when={artistData().data.artist.images.length} fallback={<img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg" alt="Artist missing" />}>
           <img src={artistData().data.artist.images[0].link} alt="Artist" />
         </Show>

@@ -242,7 +242,6 @@ function MediaInfo(props) {
           <Friends friend={props.friend} media={props.media} type={props.media.type} />
           <Show when={props.media.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
           <StreamingEpisodes streamingEpisodes={props.media.streamingEpisodes}/>
-          {console.log("media", props.media)}
           <Recommendations 
             recommendations={props.media.recommendations} 
             mutateCache={(i, node) => props.setMediaData(v => {
