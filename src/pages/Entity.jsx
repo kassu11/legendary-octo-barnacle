@@ -44,7 +44,7 @@ function Body(props) {
 
   createEffect(() => {
     setVariables({
-      onList: searchParams.list === "true" || undefined,
+      onList: searchParams.list ? searchParams.list === "true" : undefined,
       sort: searchParams.sort,
     });
   });
@@ -106,18 +106,19 @@ function Body(props) {
             </Show>
           </ul>
         </div>
-        <form class="entity-page-form" onSubmit={e => e.preventDefault()} onInput={e => {
-          const formData = new FormData(e.currentTarget);
-          triggerSearchParams({
-            list: formData.get("list") === "on" || undefined,
-            sort: formData.get("sort") || undefined,
-          }, { replace: true });
-        }}>
-          <label> 
-            <input type="checkbox" name="list" checked={searchParams.list} />
-            {" "}On my list
-          </label>
-          <select name="sort" value={searchParams.sort || ""}>
+        <form class="entity-page-form" onSubmit={e => e.preventDefault()}>
+          <div>
+            <label> 
+              <input type="checkbox" name="list" value="false" checked={searchParams.list === "false"} onChange={e => triggerSearchParams({list: e.target.checked ? e.target.value : undefined})}/>
+              {" "}Hide from my list
+            </label>
+            <br />
+            <label> 
+              <input type="checkbox" name="list" value="true" checked={searchParams.list === "true"} onChange={e => triggerSearchParams({list: e.target.checked ? e.target.value : undefined})}/>
+              {" "}Only show my list
+            </label>
+          </div>
+          <select name="sort" value={searchParams.sort || ""} onChange={e => triggerSearchParams({sort: e.target.value})}>
             <option value="CHAPTERS">CHAPTERS</option>
             <option value="CHAPTERS_DESC">CHAPTERS_DESC</option>
             <option value="DURATION">DURATION</option>
@@ -179,7 +180,7 @@ function Body(props) {
           <SubSection variables={variables()} type="MANGA" title="Manga staff roles" />
         </Match>
         <Match when={props.type === "CHARACTER"}>
-          <SubSection variables={variables()} type="MEDIA" title="Characters" />
+          <SubSection variables={variables()} type="MEDIA" title="Media entries" />
         </Match>
       </Switch>
     </div>
