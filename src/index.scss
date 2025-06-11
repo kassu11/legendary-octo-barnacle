@@ -163,25 +163,25 @@
 
   .grid-column-auto-fill {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-column-width, 20rem)), 1fr));
-    gap: .5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--grid-column-width, 20rem), 100% / var(--grid-max-column-count, 999) - var(--gap, .5rem))), 1fr));
+    gap: var(--gap, .5rem);
   }
 
   .grid-column-auto-fit {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-column-width, 20rem)), 1fr));
-    gap: .5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(var(--grid-column-width, 20rem), 100% / var(--grid-max-column-count, 999) - var(--gap, .5rem))), 1fr));
+    gap: var(--gap, .5rem);
   }
 
   .grid-row-clamp {
     display: grid;
     grid-template-rows: repeat(var(--grid-max-rows, 1), auto);
     grid-auto-rows: 0px;
-    grid-column-gap: var(--grid-gap, .5rem);
+    grid-column-gap: var(--gap, .5rem);
     grid-row-gap: 0;
     overflow: hidden;
     > * {
-      margin-bottom: var(--grid-gap, .5rem);
+      margin-bottom: var(--gap, .5rem);
     }
   }
 
