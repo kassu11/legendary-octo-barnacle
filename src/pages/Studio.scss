@@ -1,4 +1,4 @@
-@layer layour {
+@layer layout {
   .studio-page {
     width: min(85rem, calc(100% - 1rem));
     margin-inline: auto;
@@ -17,6 +17,14 @@
       aspect-ratio: 5.5/8;
       width: 100%;
       object-fit: cover;
+    }
+  }
+}
+
+@layer resize {
+  @media (width < 40rem) {
+    .studio-page {
+      --grid-column-width: 8rem;
     }
   }
 }
