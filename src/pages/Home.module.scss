@@ -14,29 +14,27 @@ $radius: .2rem;
       grid-column: 1/-1;
     }
   }
+
+  :global .grid-column-auto-fill.current {
+    background-color: var(--background-400);
+    --grid-column-width: 5rem;
+    --gap: 1.5rem;
+    padding: 1rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: $radius;
+    }
+  }
 }
 
 .header {
   width: 100%;
   margin-inline: auto;
   display: grid;
-  gap: 5px;
-}
-
-.row-container {
-  background-color: var(--background-400);
-  min-height: 6em;
-  display: flex;
-  flex-wrap: wrap;
   gap: 1rem;
-  padding: 1rem;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: $radius;
-  }
 }
 
 
@@ -89,8 +87,7 @@ $radius: .2rem;
 
 .card {
   position: relative;
-  width: 5.5rem;
-  height: 8rem;
+  align-self: 5.5/8;
   color: inherit;
   border-radius: $radius;
   text-decoration: none;
@@ -135,5 +132,3 @@ $radius: .2rem;
   display: flex;
   flex-direction: column;
 }
-
-
