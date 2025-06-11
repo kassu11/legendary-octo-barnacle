@@ -10,6 +10,7 @@ import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { DoomScroll } from "../components/utils/DoomScroll.jsx";
 import Score from "../components/media/Score.jsx";
 import { useEditMediaEntries, UserContext, useUser } from "../context/providers.js";
+import { Tooltip } from "../components/Tooltips.jsx";
 
 export function User(props) {
   const params = useParams();
@@ -269,6 +270,7 @@ function ActivityHistory(props) {
   let start = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate());
   const end = start.getTime() / 1000;
   start.setDate(start.getDate() - 7 * 25 + (6 - start.getDay()) - 5);
+  const lastDate = props.history.at(-1).date;
   start /= 1000;
 
   return (
@@ -286,16 +288,35 @@ function ActivityHistory(props) {
             <li class="activity-history-header">Sun</li>
           </ol>
           <ol class="activity-history-list">
-            <For each={props.history}>{(activity, i) => (
-              <Show when={activity.date > start}>
-                <For each={Array(Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-                  <li class="activity-item" />
-                )}</For>
-                <li class="activity-item" attr:data-level={activity.level} />
-              </Show>
-            )}</For>
-            <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{_ => (
-              <li class="activity-item" />
+            <For each={props.history}>{(activity, i) => {
+
+              const emtySpace = Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1);
+              return (
+                <Show when={activity.date > start}>
+                  <For each={Array(emtySpace).fill(0)}>{(_, j) => (
+                    <li class="activity-item">
+                      <Tooltip>
+                        <p>{formatTimeToDate(((activity.date + 3600 * 24 * (j() - emtySpace)) * 1000))}</p>
+                        <p>Amount: 0</p>
+                      </Tooltip>
+                    </li>
+                  )}</For>
+                  <li class="activity-item" attr:data-level={activity.level}>
+                    <Tooltip>
+                      <p>{formatTimeToDate(activity.date * 1000)}</p>
+                      <p>Amount: {activity.level}</p>
+                    </Tooltip>
+                  </li>
+                </Show>
+              );
+            }}</For>
+            <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{(_, j) => (
+              <li class="activity-item">
+                <Tooltip>
+                  <p>{formatTimeToDate(((lastDate + 3600 * 24 * (j() + 1)) * 1000))}</p>
+                  <p>Amount: 0</p>
+                </Tooltip>
+              </li>
             )}</For>
           </ol>
         </div>
@@ -985,7 +1006,6 @@ function Following(props) {
               <button onClick={async e => {
                 e.preventDefault();
                 const response = await api.anilist.toggleFollow(accessToken(), follower.id);
-                console.log(response);
               }}>Unfollow</button>
             </Show>
           </A>
