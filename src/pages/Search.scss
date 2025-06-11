@@ -380,8 +380,7 @@
 
   @container media-search-results (width < calc(6 * 7em + 5 * .5em)) {
     .search-page-content {
-      gap: .5rem;
-      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+      --grid-column-width: 7rem;
     }
   }
 }

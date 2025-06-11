@@ -66,7 +66,7 @@ function Activity(props) {
         setIsFollowing(false);
         setHasReplies(true);
       }}>Global</button>
-      <div class="user-profile-activity">
+      <div class="grid-column-auto-fill activity">
         <For each={activityData()?.data.data.Page.activities}>{activity => (
           <ActivityCard activity={activity} mutateCache={mutateCache} />
         )}</For>
