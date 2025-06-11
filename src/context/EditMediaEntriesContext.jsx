@@ -206,12 +206,8 @@ export function EditMediaEntriesProvider(props) {
         if (response.status === 200) {
           mutates()?.mutateMedia?.(response.data);
         }
-        console.log("Response", response);
       }
     } 
-
-    console.log("Data: ", { ...form });
-    console.log("Changes: ", changes);
   } 
 
   /**
@@ -489,7 +485,6 @@ export function EditMediaEntriesProvider(props) {
               <button onClick={async () => {
                 editor.close();
                 const response = await api.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
-                console.log("Detele", response);
                 mutates()?.deleteMedia?.();
               }}>Yes</button>
               <button>No</button>

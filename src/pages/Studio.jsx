@@ -34,7 +34,6 @@ export function Studio() {
   return (
     <div class="studio-page">
       <Show when={studioInfo()}>
-        {console.log(studioInfo())}
         <div class="flex-space-between">
           <h1>{studioInfo().data.name}</h1>
           <FavouriteToggle 

@@ -22,7 +22,6 @@ export default function Notifications() {
       </ol>
       <Show when={notifications()?.data.notifications.length}>
         <ol class="notifications-container">
-          {console.log(notifications().data)}
           <For each={notifications().data.notifications}>{notification => (
             <li>
               <Switch fallback={"Notification type \"" + notification.type + "\" not supported."}>

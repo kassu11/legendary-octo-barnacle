@@ -59,10 +59,6 @@ function Entities(props) {
       }
     });
   }
-
-  createEffect(() => {
-    console.log("malData:", props.malData());
-  });
   
   return (
     <div class="entities-page">

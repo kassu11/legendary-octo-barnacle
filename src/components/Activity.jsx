@@ -42,7 +42,6 @@ export function ActivityCard(_props) {
               <Match when={props.hideProfile === true}>
                 <p>
                   {capitalize(props.activity.status)}{" "}
-                  {console.log(props.activity)}
                   <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
                     {props.activity.progress} of 
                   </Show>
