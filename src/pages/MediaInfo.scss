@@ -286,7 +286,9 @@
     }
     .media-page-banner img {
       height: var(--media-page-banner-height);
+      opacity: .5;
     }
+
     .media-page-banner + .media-page-content {
       margin-top: calc(var(--media-page-banner-height) * -1 + var(--media-page-cover-padding));
       margin-inline: var(--media-page-cover-padding);
@@ -311,6 +313,10 @@
     .media-page-title-info {
       order: 0; 
       grid-column: 2;
+
+      * {
+        text-shadow: 0 0 2px #000000;
+      }
 
       h1 {
         font-size: 1.2rem;
