@@ -38,6 +38,11 @@
     isolation: isolate;
   }
 
+  video, audio {
+    &:not([src]), &[src=""] {
+      display: none;
+    }
+  }
 }
 
 @layer base {
