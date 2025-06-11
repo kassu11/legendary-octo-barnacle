@@ -110,7 +110,7 @@ function CurrentWatchingMedia(props) {
 function CurrentCards(props) {
   return (
     <Show when={props.cards.length}>
-      <div class={style.rowContainer}>
+      <div class="grid-column-auto-fill current">
         <For each={props.cards}>{cardData => (
           <CurrentCard data={cardData} mutateCache={props.mutateCache} />
         )}</For>
