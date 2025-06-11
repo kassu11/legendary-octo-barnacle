@@ -284,7 +284,7 @@ const api = {
         ...variables, 
         "page": variables.page || 1,
         "sort": variables.sort || "POPULARITY_DESC",
-        "onList": variables.onList || null,
+        "onList": variables.onList,
         "withRoles": variables.withRoles || true,
         id,
       }, response => response.data.Character.media);
@@ -297,7 +297,7 @@ const api = {
         ...variables,
         "page": variables.page || 1,
         "sort": variables.sort || "START_DATE_DESC",
-        "onList": variables.onList || null,
+        "onList": variables.onList,
         id
       }, (response) => response.data.Studio);
     }),
@@ -306,7 +306,7 @@ const api = {
         ...variables, 
         "characterPage": variables.characterPage || 1,
         "sort": variables.sort || "START_DATE_DESC",
-        "onList": variables.onList || null,
+        "onList": variables.onList,
         "withCharacterRoles": true,
         id,
       }, (response) => response.data.Staff.characterMedia);
@@ -316,7 +316,7 @@ const api = {
         ...variables, 
         "staffPage": variables.staffPage || 1,
         "sort": variables.sort || "START_DATE_DESC",
-        "onList": variables.onList || null,
+        "onList": variables.onList,
         "withStaffRoles": true,
         id,
         type,
