@@ -366,7 +366,7 @@ function MediaList(props) {
   const year = () => searchParams.year || "";
   const privateFilter = () => searchParams.private === "true";
   const notesFilter = () => searchParams.notes === "true";
-  const rewatchedFilter = () => searchParams.rewatched === "true";
+  const rewatchedFilter = () => searchParams.repeat === "true";
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
 
@@ -385,7 +385,7 @@ function MediaList(props) {
         year: +year() || undefined,
         private: privateFilter(),
         notes: notesFilter(),
-        rewatched: rewatchedFilter(),
+        repeat: rewatchedFilter(),
         sort: sort(),
         type: props.type,
         userStatus: userStatus(),
@@ -539,9 +539,13 @@ function MediaList(props) {
           <input type="checkbox" name="notes" id="notes" checked={notesFilter()} onChange={e => setSearchParams({ notes: e.target.checked ? "true" : undefined })} />
           {" "}Notes
         </label>
-        <label htmlFor="rewatched">
-          <input type="checkbox" name="rewatched" id="rewatched" checked={rewatchedFilter()} onChange={e => setSearchParams({ rewatched: e.target.checked ? "true" : undefined })} />
-          {" "}Rewatched
+        <label htmlFor="repeat">
+          <input type="checkbox" name="repeat" id="repeat" checked={rewatchedFilter()} onChange={e => setSearchParams({ repeat: e.target.checked ? "true" : undefined })} />
+          {" "}
+          <Switch>
+            <Match when={props.type === "anime"}>Rewatched</Match>
+            <Match when={props.type === "manga"}>Reread</Match>
+          </Switch>
         </label>
         <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
           <option value="score">Score</option>
@@ -567,7 +571,7 @@ function MediaList(props) {
                 year: undefined,
                 private: undefined,
                 notes: undefined,
-                rewatched: undefined,
+                repeat: undefined,
                 sort: undefined,
                 userStatus: undefined
               });

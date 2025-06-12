@@ -28,7 +28,7 @@ function modifyMediaListData(listData, type, options) {
     year: options.year,
     private: options.private,
     notes: options.notes,
-    rewatched: options.rewatched,
+    repeat: options.repeat,
     userStatus: options.userStatus,
   };
 
@@ -145,7 +145,7 @@ function filter(entry, filterObject) {
   if (filterObject.notes && !entry.notes) {
     return false;
   }
-  if (filterObject.rewatched && !(entry.repeat > 0)) {
+  if (filterObject.repeat && !(entry.repeat > 0)) {
     return false;
   }
 
