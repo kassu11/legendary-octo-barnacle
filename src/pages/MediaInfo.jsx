@@ -15,11 +15,11 @@ import Staff from "../components/media/Staff.jsx";
 import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { assert } from "../utils/assert.js";
-import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, numberCommas } from "../utils/formating.js";
+import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, languageFromCountry, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import Recommendations from "../components/media/Recommendations.jsx";
 import { useEditMediaEntries } from "../context/providers.js";
-import { searchSources } from "../utils/searchObjects.js";
+import { searchFormats, searchSources } from "../utils/searchObjects.js";
 
 export function AnimeInfo() {
   const params = useParams();
@@ -218,10 +218,17 @@ function MediaInfo(props) {
                 </Switch>
               </li>
               <li>
-                {formatMediaFormat(props.media.format)}
                 <Switch>
-                  <Match when={props.media.countryOfOrigin === "CN"}> (Chinese)</Match>
-                  <Match when={props.media.countryOfOrigin === "TW"}> (Taiwanese)</Match>
+                  <Match when={props.media.countryOfOrigin !== "JP"}> 
+                    <A href={"/search/" + props.media.type.toLowerCase() + "?format=" + Object.entries(searchFormats.ani.media).find(([, val]) => val.api === props.media.format)[0] + "&country=" + props.media.countryOfOrigin}>
+                      {formatMediaFormat(props.media.format)} ({languageFromCountry(props.media.countryOfOrigin)})
+                    </A>
+                  </Match>
+                  <Match when={props.media.countryOfOrigin === "JP"}> 
+                    <A href={"/search/" + props.media.type.toLowerCase() + "?format=" + Object.entries(searchFormats.ani.media).find(([, val]) => val.api === props.media.format)[0]}>
+                      {formatMediaFormat(props.media.format)}
+                    </A>
+                  </Match>
                 </Switch>
               </li>
               <li>{formatMediaStatus(props.media.status)}</li>
