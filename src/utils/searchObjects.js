@@ -139,6 +139,7 @@ export const searchSeasons = {
       spring: { api: "SPRING", flavorText: "Spring" },
       summer: { api: "SUMMER", flavorText: "Summer" },
       fall: { api: "FALL", flavorText: "Fall" },
+      tba: { api: null, flavorText: "TBA" },
     },
   }
 }
