@@ -435,7 +435,7 @@ function parseURL() {
   if (virtualSearchParams("season")) {
     const [season] = wrapToArray(virtualSearchParams("season"));
     const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
-    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: !!api, visuallyDisabled: !api}));
+    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
   }
 
 
