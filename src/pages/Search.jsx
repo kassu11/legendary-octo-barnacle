@@ -438,6 +438,11 @@ function parseURL() {
     variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
   }
 
+  if (searchParams.rank) {
+    const [rank] = wrapToArray(searchParams.rank);
+    variables.push(new SearchVariable({ name: `Tags above ${rank}%`, url: `rank=${rank}`, key: "minimumTagRank", value: rank, active: engine === "ani", visuallyDisabled: engine !== "ani" }));
+  }
+
 
 
   return [type, engine, variables, preventFetch];
