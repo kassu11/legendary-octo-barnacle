@@ -19,6 +19,7 @@ import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, fo
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import Recommendations from "../components/media/Recommendations.jsx";
 import { useEditMediaEntries } from "../context/providers.js";
+import { searchSources } from "../utils/searchObjects.js";
 
 export function AnimeInfo() {
   const params = useParams();
@@ -226,7 +227,11 @@ function MediaInfo(props) {
               <li>{formatMediaStatus(props.media.status)}</li>
             </ul>
             <ul>
-              <li>Source: {formatMediaSource(props.media.source)}</li>
+              <li>Source: 
+                <A href={"/search/" + props.media.type.toLowerCase() + "?source=" + Object.entries(searchSources).find(([, val]) => val.api === props.media.source)[0]}>
+                  {formatMediaSource(props.media.source)}
+                </A>
+              </li>
               <li>Members: {numberCommas(props.media.popularity)}</li>
               <li>Favourites: {numberCommas(props.media.favourites)}</li>
             </ul>
