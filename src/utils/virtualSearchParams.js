@@ -9,6 +9,7 @@ const headers = {
   novel: { format: "lightnovel" },
   finished: { order: "end_date_filtered", status: "complete" },
   new: { order: "id" },
+  tba: { season: "tba", status: "upcoming" },
   "top-100": { order: "score" },
   "finished-manga": { order: "end_date_filtered", status: "complete", format: "manga" },
   "finished-novel": { order: "end_date_filtered", status: "complete", format: "lightnovel" },
