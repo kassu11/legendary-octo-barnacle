@@ -183,7 +183,7 @@ function MediaInfo(props) {
           <ExtraInfo media={props.media}/>
           <Rankings rankings={props.media.rankings} />
           <Genres genres={props.media.genres} type={props.media.type} />
-          <Tags tags={props.media.tags} />
+          <Tags tags={props.media.tags} type={props.media.type} />
         </aside>
         <section class="media-page-main">
           <div class="media-page-title-info">
