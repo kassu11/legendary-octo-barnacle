@@ -189,14 +189,33 @@ function MediaInfo(props) {
           <div class="media-page-title-info">
             <h1>{props.media.title.userPreferred}</h1>
             <ul class="media-page-info-list">
-              <Switch>
-                <Match when={props.media.type === "MANGA"}>
-                  <li>{(props.media.startDate?.year) || "TBA"}</li>
-                </Match>
-                <Match when={props.media.type === "ANIME"}>
-                  <li>{capitalize(props.media.season) || "TBA"} {props.media.seasonYear}</li>
-                </Match>
-              </Switch>
+              <li>
+                <Switch>
+                  <Match when={props.media.type === "MANGA"}>
+                    <Switch>
+                      <Match when={props.media.startDate?.year}>
+                        <A href={"/search/manga?year=" + props.media.startDate.year}>{props.media.startDate.year}</A>
+                      </Match>
+                      <Match when={props.media.startDate?.year == null}>
+                        <A href="/search/manga/tba">TBA</A>
+                      </Match>
+                    </Switch>
+                  </Match>
+                  <Match when={props.media.type === "ANIME"}>
+                    <Switch>
+                      <Match when={props.media.seasonYear}>
+                        <A href={"/search/anime?year=" + props.media.seasonYear + "&season=" + props.media.season.toLowerCase()}>{capitalize(props.media.season) || "TBA"} {props.media.seasonYear}</A>
+                      </Match>
+                      <Match when={props.media.startDate?.year}>
+                        <A href={"/search/anime?year=" + props.media.startDate.year}>{props.media.startDate.year}</A>
+                      </Match>
+                      <Match when={props.media.startDate?.year == null}>
+                        <A href="/search/anime/tba">TBA</A>
+                      </Match>
+                    </Switch>
+                  </Match>
+                </Switch>
+              </li>
               <li>
                 {formatMediaFormat(props.media.format)}
                 <Switch>
