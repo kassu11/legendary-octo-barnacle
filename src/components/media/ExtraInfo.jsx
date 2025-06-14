@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
 import { formatAnilistDate } from "../../utils/formating";
-import { useAuthentication } from "../../context/AuthenticationContext";
+import { useAuthentication } from "../../context/providers";
 
 const ExtraInfo = (props) => {
   const { authUserData } = useAuthentication();

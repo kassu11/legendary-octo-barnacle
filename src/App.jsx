@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import "./App.scss"
-import { useAuthentication } from "./context/AuthenticationContext.jsx";
+import { useAuthentication } from "./context/providers.js";
 
 function App(props) {
   const clientId = location.hostname === "kassu11.github.io" ? 24951 : 7936;

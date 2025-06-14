@@ -1,12 +1,11 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on } from "solid-js";
-import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatTitleToUrl } from "../utils/formating";
 import { createStore } from "solid-js/store";
-import { SearchBarContext, useEditMediaEntries, useSearchBar } from "../context/providers";
+import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../context/providers";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { RatingInput } from "./Search/RatingInput";

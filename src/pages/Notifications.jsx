@@ -2,8 +2,8 @@ import { A } from "@solidjs/router";
 import api from "../utils/api.js";
 import { createSignal, For, Match, onCleanup, Show } from "solid-js";
 import "./Notifications.scss";
-import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { formatTitleToUrl, plural } from "../utils/formating.js";
+import { useAuthentication } from "../context/providers.js";
 
 export default function Notifications() {
   const { accessToken } = useAuthentication();

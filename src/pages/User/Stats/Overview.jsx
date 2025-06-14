@@ -1,9 +1,8 @@
 import { A, useParams } from "@solidjs/router";
-import { useAuthentication } from "../../../context/AuthenticationContext";
 import api from "../../../utils/api";
 import { capitalize, countryNameFromCountryCode, formatMediaFormat, numberCommas, plural } from "../../../utils/formating";
 import { createEffect, createMemo, createSignal, on, onCleanup } from "solid-js";
-import { useUser } from "../../../context/providers";
+import { useAuthentication, useUser } from "../../../context/providers";
 
 export function StatsAnimeOverview() {
   const params = useParams();

@@ -2,10 +2,10 @@ import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
 import { createSignal, For, Match, onCleanup, Show, } from "solid-js";
 import "./Activity.scss";
-import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { ActivityCard } from "../components/Activity.jsx";
 import { Markdown } from "../components/Markdown.jsx";
 import { plural } from "../utils/formating.js";
+import { useAuthentication } from "../context/providers.js";
 
 export default function Activity() {
   const { accessToken } = useAuthentication();

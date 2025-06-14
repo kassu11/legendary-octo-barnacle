@@ -2,8 +2,8 @@ import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import api from "../utils/api";
 import "./FavouriteToggle.scss";
 import { assert } from "../utils/assert";
-import { useAuthentication } from "../context/AuthenticationContext";
 import { compactNumber } from "../utils/formating.js";
+import { useAuthentication } from "../context/providers.js";
 
 export function FavouriteToggle(props) {
   const { accessToken } = useAuthentication();

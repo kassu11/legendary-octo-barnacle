@@ -1,7 +1,6 @@
 import api, { IndexedDB } from "../utils/api";
-import { createContext, useContext, createResource, Show } from "solid-js";
-
-const AuthenticationContext = createContext();
+import { createResource, Show } from "solid-js";
+import { AuthenticationContext } from "./providers";
 
 export function AuthenticationProvider(props) {
   const [accessToken, { mutate: setToken }] = createResource(async () => {
@@ -62,5 +61,3 @@ export function AuthenticationProvider(props) {
     </AuthenticationContext.Provider>
   )
 }
-
-export function useAuthentication() { return useContext(AuthenticationContext); }

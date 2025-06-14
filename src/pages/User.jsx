@@ -2,14 +2,13 @@ import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidj
 import api, { IndexedDB } from "../utils/api.js";
 import { createContext, createEffect, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
-import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { assert } from "../utils/assert.js";
 import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { DoomScroll } from "../components/utils/DoomScroll.jsx";
 import Score from "../components/media/Score.jsx";
-import { useEditMediaEntries, UserContext, useUser } from "../context/providers.js";
+import { useAuthentication, useEditMediaEntries, UserContext, useUser } from "../context/providers.js";
 import { Tooltip } from "../components/Tooltips.jsx";
 
 export function User(props) {

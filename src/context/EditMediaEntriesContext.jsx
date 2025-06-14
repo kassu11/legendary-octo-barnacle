@@ -1,11 +1,10 @@
 import { batch, createContext, createSignal, Match, useContext } from "solid-js";
-import { useAuthentication } from "./AuthenticationContext";
 import { assert } from "../utils/assert";
 import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
-import { EditMediaEntriesContext } from "./providers.js";
+import { EditMediaEntriesContext, useAuthentication } from "./providers.js";
 
 function formState(auth, initialData) {
   assert(!initialData || auth, "Should not be able to edit if not authenticated");

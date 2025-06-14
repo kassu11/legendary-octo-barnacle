@@ -1,12 +1,11 @@
 import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch } from "solid-js";
-import { useAuthentication } from "../context/AuthenticationContext";
 import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
-import { useEditMediaEntries } from "../context/providers";
+import { useAuthentication, useEditMediaEntries } from "../context/providers";
 
 export function BrowseRedirect(props) {
   const params = useParams();

@@ -4,10 +4,10 @@ import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-
 import "./Studio.scss";
 import { assert } from "../utils/assert";
 import { formatTitleToUrl } from "../utils/formating";
-import { useAuthentication } from "../context/AuthenticationContext";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
+import { useAuthentication } from "../context/providers";
 
 export function Studio() {
   const params = useParams();

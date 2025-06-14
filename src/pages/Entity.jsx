@@ -5,10 +5,10 @@ import { Markdown } from "../components/Markdown";
 import "./Entity.scss";
 import { assert } from "../utils/assert";
 import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/formating";
-import { useAuthentication } from "../context/AuthenticationContext";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
+import { useAuthentication } from "../context/providers";
 
 export function Character() {
   const params = useParams();
