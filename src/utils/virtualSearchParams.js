@@ -41,6 +41,11 @@ export function useVirtualSearchParams() {
   }
 
   function getVirtualObject() {
+    if (params.header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
+      const [season, year] = params.header.split("-");
+      return { year, season }
+    }
+
     const engine = searchParams.malSearch === "true" ? "mal" : "ani";
     return headers[params.header] || headers[engine]?.[params.header] || headers[engine]?.[params.type]?.[params.header] || {};
   }
