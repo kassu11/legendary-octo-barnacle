@@ -1,12 +1,12 @@
 import { createEffect, createSignal, For, on, Show } from "solid-js";
 import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
-import { useSearchParams } from "@solidjs/router";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { TwoHeadedRange } from "./TwoHeadedRange";
+import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
 
 export function YearInput() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
   const { isTouch } = useResponsive()
   const [filter, setFilter] = createSignal("");
   const currentYearPlusTwo = new Date().getFullYear() + 2;
@@ -14,13 +14,13 @@ export function YearInput() {
   let oldGenres;
   let dialog, scrollWrapper, controller, button, form;
 
-  const triggerSetSearchParams = leadingAndTrailing(debounce, (params, options) => setSearchParams(params, options), 100);
+  const triggerSetVirtualSearchParams = leadingAndTrailing(debounce, (params, options) => setVirtualSearchParams(params, options), 100);
 
   function close() {
     dialog.close();
     open = false;
     controller?.abort();
-    setSearchParams({preventFetch: undefined});
+    setVirtualSearchParams({preventFetch: undefined});
   }
 
   function preventMobileDragOverFlow() {
@@ -32,7 +32,7 @@ export function YearInput() {
   return (
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
       if (e.target.name === "year") {
-        triggerSetSearchParams({ 
+        triggerSetVirtualSearchParams({ 
           [e.target.name]: e.target.checked ? e.target.value : undefined,
           startYear: undefined,
           endYear: undefined,
@@ -45,11 +45,11 @@ export function YearInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldGenres = searchParams.genre;
+          oldGenres = virtualSearchParams("genre");
 
           if(isTouch()) {
             dialog.showModal();
-            triggerSetSearchParams({preventFetch: true});
+            triggerSetVirtualSearchParams({preventFetch: true});
             preventMobileDragOverFlow();
             window.addEventListener("resize", preventMobileDragOverFlow, { signal });
 
@@ -87,24 +87,24 @@ export function YearInput() {
               min={1970} 
               max={currentYearPlusTwo} 
               separation={1} 
-              minValue={+searchParams.startYear || 1970} 
-              maxValue={+searchParams.endYear || currentYearPlusTwo} 
-              onChange={([min, max]) => triggerSetSearchParams({startYear: min, endYear: max, year: undefined})} 
+              minValue={+virtualSearchParams("startYear") || 1970} 
+              maxValue={+virtualSearchParams("endYear") || currentYearPlusTwo} 
+              onChange={([min, max]) => triggerSetVirtualSearchParams({startYear: min, endYear: max, year: undefined})} 
             />
             <div class="flex-space-between">
               <input 
                 type="number" 
                 inputMode="numeric" 
                 name="startYear"
-                value={+searchParams.startYear || 1970} 
+                value={+virtualSearchParams("startYear") || 1970} 
                 onChange={e => {
-                  triggerSetSearchParams({
-                    startYear: Math.min(+e.target.value, +searchParams.endYear || currentYearPlusTwo),
-                    endYear: Math.max(+e.target.value, +searchParams.endYear || currentYearPlusTwo),
+                  triggerSetVirtualSearchParams({
+                    startYear: Math.min(+e.target.value, +virtualSearchParams("endYear") || currentYearPlusTwo),
+                    endYear: Math.max(+e.target.value, +virtualSearchParams("endYear") || currentYearPlusTwo),
                     year: undefined,
                   });
                 }} 
-                onBlur={e => e.target.value = searchParams.startYear || 1970} 
+                onBlur={e => e.target.value = virtualSearchParams("startYear") || 1970} 
                 onBeforeInput={e => {
                   if (e.data?.toLowerCase().includes("e")) {
                     e.preventDefault();
@@ -115,15 +115,15 @@ export function YearInput() {
                 type="number" 
                 inputMode="numeric" 
                 name="endYear"
-                value={+searchParams.endYear || currentYearPlusTwo} 
+                value={+virtualSearchParams("endYear") || currentYearPlusTwo} 
                 onChange={e => {
-                  triggerSetSearchParams({
-                    startYear: Math.min(+e.target.value, +searchParams.startYear || 1970),
-                    endYear: Math.max(+e.target.value, +searchParams.startYear || 1970),
+                  triggerSetVirtualSearchParams({
+                    startYear: Math.min(+e.target.value, +virtualSearchParams("startYear") || 1970),
+                    endYear: Math.max(+e.target.value, +virtualSearchParams("startYear") || 1970),
                     year: undefined,
                   });
                 }} 
-                onBlur={e => e.target.value = searchParams.endYear || currentYearPlusTwo} 
+                onBlur={e => e.target.value = virtualSearchParams("endYear") || currentYearPlusTwo} 
                 onBeforeInput={e => {
                   if (e.data?.toLowerCase().includes("e")) {
                     e.preventDefault();
@@ -134,7 +134,7 @@ export function YearInput() {
             <Show when={isTouch()}>
               <button onClick={() => {
                 close();
-                triggerSetSearchParams({ genre: oldGenres });
+                triggerSetVirtualSearchParams({ genre: oldGenres });
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </Show>
@@ -146,14 +146,12 @@ export function YearInput() {
 
 
   function Content() {
-    const [searchParams] = useSearchParams();
-
     return (
       <ol>
         <For each={Array.from({length: Math.abs(currentYearPlusTwo - 1969)}, (_, i) => currentYearPlusTwo - i)}>{year => (
           <li classList={{ hidden: !year.toString().startsWith(filter()) }}>
             <label>
-              {year} <input type="radio" name="year" value={year} checked={searchParams.year == year} />
+              {year} <input type="radio" name="year" value={year} checked={virtualSearchParams("year") == year} />
             </label>
           </li>
         )}</For>

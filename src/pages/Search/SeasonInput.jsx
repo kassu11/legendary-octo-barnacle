@@ -1,14 +1,14 @@
-import { createEffect, For, on } from "solid-js";
+import { createEffect, For, on, Show } from "solid-js";
 import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
-import { useParams, useSearchParams } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
 import { searchSeasons } from "../../utils/searchObjects";
 import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
 
 export function SeasonInput() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
   let oldSeasons;
@@ -18,7 +18,7 @@ export function SeasonInput() {
     dialog.close();
     open = false;
     controller?.abort();
-    setSearchParams({preventFetch: undefined});
+    setVirtualSearchParams({preventFetch: undefined});
   }
 
   function preventMobileDragOverFlow() {
@@ -31,7 +31,7 @@ export function SeasonInput() {
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
       const formData = new FormData(e.currentTarget);
       const seasons = formData.getAll("season");
-      setSearchParams({season: seasons});
+      setVirtualSearchParams({season: seasons});
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
@@ -39,11 +39,11 @@ export function SeasonInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldSeasons = searchParams.season;
+          oldSeasons = virtualSearchParams("season");
 
           if(isTouch()) {
             dialog.showModal();
-            setSearchParams({preventFetch: true});
+            setVirtualSearchParams({preventFetch: true});
             preventMobileDragOverFlow();
             window.addEventListener("resize", preventMobileDragOverFlow, { signal });
 
@@ -74,7 +74,7 @@ export function SeasonInput() {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({season: oldSeasons});
+                setVirtualSearchParams({season: oldSeasons});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -85,7 +85,6 @@ export function SeasonInput() {
   );
 
   function Content() {
-    const [virtualSearchParams] = useVirtualSearchParams();
     const params = useParams();
     const [seasonStore, setSeasonStore] = createStore({});
 
@@ -93,17 +92,19 @@ export function SeasonInput() {
       setSeasonStore(reconcile(objectFromArrayEntries(virtualSearchParams("season"), {})));
     });
 
-    const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
+    const engine = () => (virtualSearchParams("malSearch") === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
 
     return (
       <ol>
         <For each={Object.entries(searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
-          <li>
-            <label>
-              {season.flavorText}
-              <input type="radio" name="season" value={key} checked={seasonStore[key]} />
-            </label>
-          </li>
+          <Show when={key !== "tba"}>
+            <li>
+              <label>
+                {season.flavorText}
+                <input type="radio" name="season" value={key} checked={seasonStore[key]} />
+              </label>
+            </li>
+          </Show>
         )}</For>
       </ol>
     );

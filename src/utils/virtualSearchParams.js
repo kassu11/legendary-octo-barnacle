@@ -27,7 +27,14 @@ const headers = {
 };
 
 
+function keyIsNullish(obj, ...keys) {
+  return keys.some(key => key in obj && (obj[key] == null || obj[key].length === 0));
+}
 
+
+// Virtual search params are search options that are not part of the actual search query.
+// params.header for example can sort of filter the media by setting default values to virtual params
+// the search page than reads these as normal url search query values
 export function useVirtualSearchParams() {
   const params = useParams();
   const location = useLocation();
@@ -52,12 +59,16 @@ export function useVirtualSearchParams() {
 
 
   function setVirtualSearchParams(sParams, options) {
-    for (const key of Object.keys(sParams)) {
-      if (key in getVirtualObject()) {
-        // User is trying to change search results that is part of the virtual url
-        // The results is coming from params.header, so lets redirect the user to a page without the current header
-        return navigate(`/search/${params.type}${searchQueryStringFromObject(sParams)}`);
-      }
+    const virtualObj = getVirtualObject();
+    // The user is trying to remove search results that are part of the virtual url
+    // The results are coming from params.header, so lets redirect the user to a page without the current header
+    if (keyIsNullish(sParams, ...Object.keys(virtualObj))) {
+      return navigate(`/search/${params.type}${searchQueryStringFromObject(sParams)}`, options);
+    }
+
+    if (params.header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
+      const { season, year, ...restParams } = sParams;
+      return navigate(`/search/${params.type}/${season || virtualObj.season}-${year || virtualObj.year}${searchQueryStringFromObject(restParams, false)}`, options);
     }
 
     // No need to redirect, set search params normally
@@ -65,12 +76,12 @@ export function useVirtualSearchParams() {
   }
 
 
-  function searchQueryStringFromObject(sParams) {
+  function searchQueryStringFromObject(sParams, addVirtualParams = true) {
     const originalSearchParams = [...new URLSearchParams(location.search)]
     .filter(([key]) => (key in sParams) === false)
     .map(([key, val]) => `${key}=${val}`);
 
-    const originalVirtualSearchParams = Object.entries(getVirtualObject())
+    const originalVirtualSearchParams = addVirtualParams === false ? [] : Object.entries(getVirtualObject())
     .filter(([key]) => (key in sParams) === false)
     .map(([key, val]) => `${key}=${val}`);
 
