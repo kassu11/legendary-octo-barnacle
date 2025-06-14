@@ -32,7 +32,13 @@ const idFilter = {
 }
 const animeSearch = {
   type: "anime",
-  header: ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top-100"],
+  header: (string) => {
+    if (string.match(/^(summer|fall|spring|winter)-\d+$/)) {
+      return true;
+    }
+
+    return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top-100"].includes(string);
+  }
 }
 const mangaSearch = {
   type: "manga",
