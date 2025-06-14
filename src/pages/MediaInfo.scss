@@ -1,6 +1,6 @@
 @layer layout {
   .media-page-banner {
-    background-color: var(--background-400);
+    background-color: var(--background-200);
 
     img {
       opacity: .9;
@@ -286,7 +286,7 @@
     }
     .media-page-banner img {
       height: var(--media-page-banner-height);
-      opacity: .5;
+      opacity: .4;
     }
 
     .media-page-banner + .media-page-content {
@@ -315,7 +315,7 @@
       grid-column: 2;
 
       * {
-        text-shadow: 0 0 2px #000000;
+        text-shadow: 0 0 2px #000000, 0 0 4px #000000;
       }
 
       h1 {
