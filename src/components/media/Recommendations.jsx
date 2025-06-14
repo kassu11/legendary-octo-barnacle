@@ -2,10 +2,10 @@ import { createEffect, createSignal, For, on, Show } from "solid-js";
 import { A, useParams } from "@solidjs/router";
 import { formatTitleToUrl } from "../../utils/formating";
 import api from "../../utils/api";
-import { useAuthentication } from "../../context/AuthenticationContext";
 import { DoomScroll } from "../utils/DoomScroll";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled";
 import { assert } from "../../utils/assert";
+import { useAuthentication } from "../../context/providers";
 
 function Recommendations(props) {
   const params = useParams();

@@ -2,11 +2,11 @@ import { Switch, Show, Match, createSignal, onCleanup, mergeProps } from "solid-
 import { Markdown } from "../components/Markdown.jsx";
 import "./Activity.scss";
 import api from "../utils/api.js";
-import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { assert } from "../utils/assert.js";
 import { capitalize, formatTitleToUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
+import { useAuthentication } from "../context/providers.js";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false }, _props);

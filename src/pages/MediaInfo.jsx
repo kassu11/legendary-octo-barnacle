@@ -3,7 +3,6 @@ import api from "../utils/api.js";
 import { For, Show, Switch, createEffect, createSignal, on } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
-import { useAuthentication } from "../context/AuthenticationContext.jsx";
 import Banner from "../components/media/Banner.jsx";
 import ExternalLinks from "../components/media/ExternalLinks.jsx";
 import ExtraInfo from "../components/media/ExtraInfo.jsx";
@@ -18,7 +17,7 @@ import { assert } from "../utils/assert.js";
 import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, languageFromCountry, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import Recommendations from "../components/media/Recommendations.jsx";
-import { useEditMediaEntries } from "../context/providers.js";
+import { useAuthentication, useEditMediaEntries } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 
 export function AnimeInfo() {

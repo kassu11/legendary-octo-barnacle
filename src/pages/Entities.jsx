@@ -4,7 +4,7 @@ import { batch, createEffect, createSignal, Match, Show } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../utils/formating";
 import { DoomScroll } from "../components/utils/DoomScroll";
-import { useAuthentication } from "../context/AuthenticationContext";
+import { useAuthentication } from "../context/providers";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();

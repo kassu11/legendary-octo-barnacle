@@ -8,3 +8,6 @@ export const useUser = () => useContext(UserContext);
 
 export const EditMediaEntriesContext = createContext();
 export const useEditMediaEntries = () => useContext(EditMediaEntriesContext);
+
+export const AuthenticationContext = createContext();
+export const useAuthentication = () => useContext(AuthenticationContext);
