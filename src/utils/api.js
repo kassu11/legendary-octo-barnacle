@@ -375,11 +375,21 @@ const api = {
     getActivity: reloadCache((token, variables) => {
       return Fetch.authAnilist(token, queries.anilistActivity, variables);
     }),
-    searchMedia: fetchOnce((token, variables, page) => {
+    searchMedia: fetchOnce((token, variables, page, extraVariables = {}) => {
       const variableObject = variables.reduce((acc, v) => {
         if (v.active) { acc[v.key] = v.value; }
         return acc;
       }, { page });
+
+      Object.entries(extraVariables).forEach(([key, value]) => {
+        if (key === "format") {
+          variableObject[key] = value;
+        } else {
+          variableObject[key] &&= [value, variableObject[key]].flat();
+          variableObject[key] ??= value;
+        }
+      });
+
       return Fetch.authAnilist(token, queries.searchMedia, variableObject, (response) => response.data.Page);
     }),
     searchMediaCache: onlyIfCache((token, variables, page) => {

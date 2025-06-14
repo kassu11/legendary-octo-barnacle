@@ -3,7 +3,7 @@ import api from "../utils/api";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on } from "solid-js";
 import { assert } from "../utils/assert";
 import "./Search.scss";
-import { capitalize, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatTitleToUrl } from "../utils/formating";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../context/providers";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
@@ -191,6 +191,12 @@ function parseURL() {
     return [urlKey, validGenres, validTags];
   };
 
+  const [season] = wrapToArray(virtualSearchParams("season"));
+  if (season) {
+    const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
+    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
+  }
+
   let hasEndDateSet = false;
   let hasStartDateSet = false;
   const [year] = wrapToArray(virtualSearchParams("year"));
@@ -198,7 +204,11 @@ function parseURL() {
     hasEndDateSet = true;
     hasStartDateSet = true;
     if (engine === "ani") {
-      variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
+      if (season) {
+        variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "seasonYear", value: year }));
+      } else {
+        variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
+      }
     }
     else if (engine === "mal") {
       variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "start_date", value: `${year}-01-01` }));
@@ -431,11 +441,6 @@ function parseURL() {
     }
   }
 
-  if (virtualSearchParams("season")) {
-    const [season] = wrapToArray(virtualSearchParams("season"));
-    const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
-    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
-  }
 
   if (searchParams.rank) {
     const [rank] = wrapToArray(searchParams.rank);
@@ -611,9 +616,14 @@ export function SearchContent(props) {
 
   return (
     <div class="search-result-container">
-      <Show when={params.header}>
-        <h1>{params.header}</h1>
-      </Show>
+      <Switch>
+        <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/)}>
+          <h1>{capitalize(params.header.split("-")[0])} {params.header.split("-")[1]}</h1>
+        </Match>
+        <Match when={params.header}>
+          <h1>{params.header}</h1>
+        </Match>
+      </Switch>
       {props.children}
       <Show when={searchVariables()?.filter(variable => !variable.hidden)}>{filteredVariables => (
         <Show when={filteredVariables().length}>
@@ -660,7 +670,14 @@ export function SearchContent(props) {
         <ol class="search-page-content grid-column-auto-fill">
           <Switch>
             <Match when={debouncedSearchEngine() === "ani"}>
-              <AnilistMediaSearchContent nestLevel={1} page={1} variables={debouncedSearchVariables()} />
+              <Switch>
+                <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) && (debouncedSearchVariables().format == null || debouncedSearchVariables().format?.includes("TV"))}>
+                  <AnilistMediaSeasonContent page={1} variables={debouncedSearchVariables()} extraVariables={{ sort: "FORMAT" }} />
+                </Match>
+                <Match when={true}>
+                  <AnilistMediaSearchContent nestLevel={1} page={1} variables={debouncedSearchVariables()} />
+                </Match>
+              </Switch>
             </Match>
             <Match when={debouncedSearchEngine() === "mal"}>
               <Switch>
@@ -711,6 +728,35 @@ function AnilistMediaSearchContent(props) {
         </Show>
       </>
     )}</DoomScroll>
+  );
+}
+
+function AnilistMediaSeasonContent(props) {
+  assert(props.page, "page is missing");
+  assert(props.extraVariables, "extraVariables is missing");
+
+  const {accessToken} = useAuthentication();
+  const [variables, setVariables] = createSignal(undefined);
+  const [mediaData] = api.anilist.searchMedia(accessToken, () => props.variables, props.page, props.extraVariables);
+
+  createEffect(on(mediaData, response => {
+    if (response?.data.pageInfo.hasNextPage) {
+      setVariables(props.variables);
+    }
+  }));
+
+  return (
+    <Show when={mediaData()}>
+      <AniCardRowWithFormatHeader data={mediaData().data.media} lastFormat={props.previousFormat} />
+      <Show when={mediaData().data.pageInfo.hasNextPage}>
+        <AnilistMediaSeasonContent 
+          variables={variables()} 
+          extraVariables={props.extraVariables} 
+          page={props.page + 1} 
+          previousFormat={mediaData().data.media.at(-1)?.format} 
+        />
+      </Show>
+    </Show>
   );
 }
 
@@ -770,6 +816,28 @@ function MalCard(props) {
         </p>
       </a>
     </li>
+  );
+}
+
+function AniCardRowWithFormatHeader(props) {
+  return (
+    <>
+      <Show when={props.lastFormat !== props.data[0]?.format}>
+        <li class="full-span">
+          <h2>{formatMediaFormat(props.data[0].format)}</h2>
+        </li>
+      </Show>
+      <For each={props.data}>{(card, i) => (
+        <>
+          <Show when={i() > 0 && props.data[i() - 1].format !== card.format}>
+            <li class="full-span">
+              <h2>{formatMediaFormat(card.format)}</h2>
+            </li>
+          </Show>
+          <AniCard card={card} />
+        </>
+      )}</For>
+    </>
   );
 }
 

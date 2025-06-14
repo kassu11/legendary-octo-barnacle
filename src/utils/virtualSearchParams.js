@@ -43,7 +43,7 @@ export function useVirtualSearchParams() {
   function getVirtualObject() {
     if (params.header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
       const [season, year] = params.header.split("-");
-      return { year, season }
+      return { year, season, order: "title_romaji", sort: "ASC" }
     }
 
     const engine = searchParams.malSearch === "true" ? "mal" : "ani";
