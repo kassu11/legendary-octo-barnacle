@@ -318,7 +318,7 @@ function parseURL() {
       }
       else if (order === sortOrders.mal.anime.end_date.alternative_key) {
         orderWithoutAlternativeKey = "end_date";
-        const base = { name: "Only valid dates", active: !hasEndDateSet, visuallyDisabled: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
+        const base = { name: "Only valid dates", active: !hasEndDateSet, hidden: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
           variables.push(new SearchVariable({ ...base, key: "endDateGreater", value: 0 }));
         }
@@ -328,7 +328,7 @@ function parseURL() {
       }
       else if (order === sortOrders.mal.anime.start_date.alternative_key) {
         orderWithoutAlternativeKey = "start_date";
-        const base = { name: "Only valid dates", active: !hasStartDateSet, visuallyDisabled: hasStartDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
+        const base = { name: "Only valid dates", active: !hasStartDateSet, hidden: hasStartDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
           variables.push(new SearchVariable({ ...base, key: "yearGreater", value: 0 }));
         }
@@ -822,7 +822,7 @@ function MalCard(props) {
 function AniCardRowWithFormatHeader(props) {
   return (
     <>
-      <Show when={props.lastFormat !== props.data[0]?.format}>
+      <Show when={props.data[0]?.format && props.lastFormat !== props.data[0].format}>
         <li class="full-span">
           <h2>{formatMediaFormat(props.data[0].format)}</h2>
         </li>
