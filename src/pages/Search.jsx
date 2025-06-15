@@ -566,15 +566,15 @@ export function SearchBar(props) {
           <label htmlFor="showMyAnime"> Only show my {params.type}</label>
         </div>
         <div>
-          <input type="checkbox" name="hasLicense" id="hasLicense" checked={searchParams.license === "false"} onInput={e => {
-            setSearchParams({ license: e.target.checked ? false : undefined });
-          }} />
-          <label htmlFor="hasLicense"> Licensed</label>
-          <br />
           <input type="checkbox" name="hasNotLicense" id="hasNotLicense" checked={searchParams.license === "true"} onInput={e => {
             setSearchParams({ license: e.target.checked || undefined });
           }} />
-          <label htmlFor="hasNotLicense"> Unlicensed</label>
+          <label htmlFor="hasNotLicense"> Licensed</label>
+          <br />
+          <input type="checkbox" name="hasLicense" id="hasLicense" checked={searchParams.license === "false"} onInput={e => {
+            setSearchParams({ license: e.target.checked ? false : undefined });
+          }} />
+          <label htmlFor="hasLicense"> Unlicensed</label>
         </div>
         <RatingInput />
         <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
