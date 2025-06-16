@@ -501,37 +501,50 @@ class Fetch {
     this.#controller = new AbortController();
     this.#signal = this.#controller.signal;
 
-    while(true) {
-      if (this.#signal.aborted) {
-        return null;
-      }
-      const token = bucket.requestToken();
-      if (token) {
-        const response = await this.#send();
-        if (response?.status !== 429) return this;
+    const response = await bucket.enqueue(async () => {
+      while(true) {
+        if (this.#signal.aborted) {
+          return null;
+        }
 
-        if (DEBUG) {
-          console.log("headers Retry-After:", response.headers.get("Retry-After"));
-          console.log("headers X-RateLimit-Limit:", response.headers.get("X-RateLimit-Limit"));
-          console.log("headers X-RateLimit-Remaining:", response.headers.get("X-RateLimit-Remaining"));
-          console.log("headers X-RateLimit-Reset:", response.headers.get("X-RateLimit-Reset"));
+        const token = bucket.requestToken();
+        if (!token) {
+          await Promise.race([
+            bucket.getsNextToken(),
+            new Promise(res => this.#signal.addEventListener("abort", res))
+          ]);
+          continue;
         }
-        for(const [key, val] of response.headers.entries()) {
-          console.log(`Header "${key}" value:`, val);
-        }
-        const { promise, resolve } = Promise.withResolvers();
-        bucket.delayBucket(response.headers.get("Retry-After"));
-        bucket.addToBucket(resolve);
-        await promise;
-      } else {
-        const { promise, resolve } = Promise.withResolvers();
-        bucket.addToBucket(resolve);
-        await promise;
+
+        const response = await this.#sendRequest();
+
+        if (response.status === 429) {
+          console.warn('429 received, backing off...', this.url);
+          const time = (parseInt(response.headers.get("Retry-After")) || bucket.getDefaultDelay());
+          await new Promise(res => setTimeout(res, time * 1000));
+          continue;
+        } 
+
+        return response;
       }
+    });
+
+    if (response == null) {
+      return null;
     }
+
+    if (!response.ok) {
+      this.error = true;
+      return this;
+    }
+
+    const json = await response.json(); 
+    this.data = this.#formatResponse?.(json) || json;
+    this.fromCache = false;
+    return this;
   }
 
-  async #send() {
+  #sendRequest() {
     const opt = {
       method: this.method,
       headers: this.headers,
@@ -539,32 +552,12 @@ class Fetch {
       cache: "default",
     }
 
-    let response;
-    try {
-      response = await fetch(this.url, opt);
-      this.status = response.status;
-      this.error = false;
-      if (!response.ok) {
-        if (DEBUG && this.url === "https://graphql.anilist.co") {
-          const data = await response.json();
-          console.error(...data.errors);
-        }
-        throw new Error(`Response status: ${response.status}`);
-      }
-
-      const json = await response.json();
-      if (this.#formatResponse) {
-        this.data = this.#formatResponse(json);
-      } else {
-        this.data = json;
-      }
-      this.fromCache = false;
+    if (Math.random() > 1) {
+      console.log("Error route")
+      return fetch("http://127.0.0.1:3000/api/version", opt);
+    } else {
+      return fetch(this.url, opt);
     }
-    catch(err) {
-      this.error = true;
-      if (DEBUG) { console.error(err); }
-    }
-    return response;
   }
 
   static anilist(query, variables = {}, formatResponse) {
@@ -702,13 +695,13 @@ function cacheBuilder(settings) {
         batch(() => {
           if (!data.error) {
             mutateCache(data);
+            saveMutate(data);
           } else {
             setError(true);
             console.assert(!DEBUG, "Fetch error, not saving data to cache");
           }
 
           setLoading(false);
-          saveMutate(data);
         });
       }
 
