@@ -8,6 +8,7 @@ export class TokenBucket {
   #fillAmount
   #pool
   #defaultDelay
+  #requestQueue = Promise.resolve();
   constructor({ start, limit, interval = 60, fillAmount = 1, pool, defaultDelay = 30 }) {
     this.#current = start;
     this.#limit = limit;
@@ -59,6 +60,24 @@ export class TokenBucket {
       return true;
     }
     return false;
+  }
+
+  enqueue(requestFunction) {
+    this.#requestQueue = this.#requestQueue.then(requestFunction).catch(err => {
+      console.error('Request error:', err);
+    });
+
+    return this.#requestQueue;
+  }
+
+  getDefaultDelay() {
+    return this.#defaultDelay;
+  }
+
+  getsNextToken() {
+    const { promise, resolve } = Promise.withResolvers();
+    this.addToBucket(resolve);
+    return promise;
   }
 
   addToBucket(callback) {
