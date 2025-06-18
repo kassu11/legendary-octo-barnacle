@@ -12,7 +12,7 @@ import { RatingInput } from "./Search/RatingInput";
 import { SwitchInput } from "./Search/SwitchInput";
 import { GenresInput } from "./Search/GenresInput";
 import { YearInput } from "./Search/YearInput";
-import { compare, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
+import { compare, first, objectFromArrayEntries, wrapToArray, wrapToSet } from "../utils/arrays";
 import { FormatInput } from "./Search/FormatInput";
 import { SortInput } from "./Search/SortInput";
 import { searchCountries, searchFormats, searchSeasons, searchSources, searchStatuses, sortOrders } from "../utils/searchObjects";
@@ -610,12 +610,38 @@ export function SearchBar(props) {
 export function SearchContent(props) {
   const params = useParams();
   const [searchParams] = useSearchParams();
-  const [, setVirtualSearchParams] = useVirtualSearchParams();
+  const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
   const { debouncedSearchEngine, debouncedSearchType, searchVariables, debouncedSearchVariables } = useSearchBar();
   const navigate = useNavigate();
 
   return (
     <div class="search-result-container">
+      <Switch>
+        <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) && (debouncedSearchVariables()?.format == null || debouncedSearchVariables().format?.includes("TV"))}>
+          <ol class="flex-space-between">
+            <li>
+              <A href={"/search/anime/" + first(virtualSearchParams("season")) + "-" + (first(virtualSearchParams("year")) - 1)}>
+                <h3>Last year</h3>
+                <p>{first(virtualSearchParams("year")) - 1}</p>
+              </A>{" "}
+            </li>
+            <For each={["winter", "spring", "summer", "fall"]}>{season => (
+              <li>
+                <A href={"/search/anime/" + season + "-" + first(virtualSearchParams("year"))}>
+                  <h3>{capitalize(season)}</h3>
+                  <p>{first(virtualSearchParams("year"))}</p>
+                </A>{" "}
+              </li>
+            )}</For>
+            <li>
+              <A href={"/search/anime/" + first(virtualSearchParams("season")) + "-" + (parseInt(first(virtualSearchParams("year"))) + 1)}>
+                <h3>Next year</h3>
+                <p>{parseInt(first(virtualSearchParams("year"))) + 1}</p>
+              </A>{" "}
+            </li>
+          </ol>
+        </Match>
+      </Switch>
       <Switch>
         <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/)}>
           <h1>{capitalize(params.header.split("-")[0])} {params.header.split("-")[1]}</h1>

@@ -35,3 +35,7 @@ export function compare(a, b) {
 
   return false;
 }
+
+export function first(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
