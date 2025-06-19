@@ -617,8 +617,8 @@ export function SearchContent(props) {
   return (
     <div class="search-result-container">
       <Switch>
-        <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) && (debouncedSearchVariables()?.format == null || debouncedSearchVariables().format?.includes("TV"))}>
-          <ol class="flex-space-between">
+        <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
+          <ol class="flex-space-between cp-search-season-controls">
             <li>
               <A href={"/search/anime/" + first(virtualSearchParams("season")) + "-" + (first(virtualSearchParams("year")) - 1)}>
                 <h3>Last year</h3>
@@ -626,7 +626,7 @@ export function SearchContent(props) {
               </A>{" "}
             </li>
             <For each={["winter", "spring", "summer", "fall"]}>{season => (
-              <li>
+              <li class="item" classList={{selected: season === first(virtualSearchParams("season"))}}>
                 <A href={"/search/anime/" + season + "-" + first(virtualSearchParams("year"))}>
                   <h3>{capitalize(season)}</h3>
                   <p>{first(virtualSearchParams("year"))}</p>
@@ -697,7 +697,7 @@ export function SearchContent(props) {
           <Switch>
             <Match when={debouncedSearchEngine() === "ani"}>
               <Switch>
-                <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) && (debouncedSearchVariables().format == null || debouncedSearchVariables().format?.includes("TV"))}>
+                <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
                   <AnilistMediaSeasonContent page={1} variables={debouncedSearchVariables()} extraVariables={{ sort: "FORMAT" }} />
                 </Match>
                 <Match when={true}>
