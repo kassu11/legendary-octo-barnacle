@@ -216,20 +216,22 @@ function MediaInfo(props) {
                   </Match>
                 </Switch>
               </li>
-              <li>
-                <Switch>
-                  <Match when={props.media.countryOfOrigin !== "JP"}> 
-                    <A href={"/search/" + props.media.type.toLowerCase() + "?format=" + Object.entries(searchFormats.ani.media).find(([, val]) => val.api === props.media.format)[0] + "&country=" + props.media.countryOfOrigin}>
-                      {formatMediaFormat(props.media.format)} ({languageFromCountry(props.media.countryOfOrigin)})
-                    </A>
-                  </Match>
-                  <Match when={props.media.countryOfOrigin === "JP"}> 
-                    <A href={"/search/" + props.media.type.toLowerCase() + "?format=" + Object.entries(searchFormats.ani.media).find(([, val]) => val.api === props.media.format)[0]}>
-                      {formatMediaFormat(props.media.format)}
-                    </A>
-                  </Match>
-                </Switch>
-              </li>
+              <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === props.media.format)?.[0]}>{formatApiValue => (
+                <li>
+                  <Switch>
+                    <Match when={props.media.countryOfOrigin !== "JP"}> 
+                      <A href={"/search/" + props.media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + props.media.countryOfOrigin}>
+                        {formatMediaFormat(props.media.format)} ({languageFromCountry(props.media.countryOfOrigin)})
+                      </A>
+                    </Match>
+                    <Match when={props.media.countryOfOrigin === "JP"}> 
+                      <A href={"/search/" + props.media.type.toLowerCase() + "?format=" + formatApiValue()}>
+                        {formatMediaFormat(props.media.format)}
+                      </A>
+                    </Match>
+                  </Switch>
+                </li>
+              )}</Show>
               <li>{formatMediaStatus(props.media.status)}</li>
             </ul>
             <ul>
