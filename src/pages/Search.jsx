@@ -541,7 +541,7 @@ export function SearchBar(props) {
       <div class="header-row">
         <h1>{capitalize(params.mode)}</h1>
         <select name="type" id="type" value={params.type} onChange={e => {
-          navigate("/" + params.mode + "/" + e.target.value + "/" + (params.header ? "/" + params.header : "") + location.search);
+          navigate("/" + params.mode + "/" + e.target.value + (params.header ? "/" + params.header : "") + location.search);
         }}>
           <option value="anime">Anime</option>
           <option value="manga">Manga</option>
