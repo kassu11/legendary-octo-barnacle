@@ -789,13 +789,13 @@ function AnilistMediaSeasonContent(props) {
 
   return (
     <Show when={mediaData()}>
-      <AniCardRowWithFormatHeader data={mediaData().data.media} lastFormat={props.previousFormat} />
+      <AniCardRowWithFormatHeader data={mediaData().data.media} lastFormat={props.previousFormat || "Unknown format"} />
       <Show when={mediaData().data.pageInfo.hasNextPage}>
         <AnilistMediaSeasonContent 
           variables={variables()} 
           extraVariables={props.extraVariables} 
           page={props.page + 1} 
-          previousFormat={mediaData().data.media.at(-1)?.format} 
+          previousFormat={mediaData().data.media.at(-1)?.format || "Unknown format"} 
         />
       </Show>
     </Show>
@@ -864,9 +864,9 @@ function MalCard(props) {
 function AniCardRowWithFormatHeader(props) {
   return (
     <>
-      <Show when={props.data[0]?.format && props.lastFormat !== props.data[0].format}>
+      <Show when={props.data[0] && props.lastFormat !== props.data[0].format}>
         <li class="full-span">
-          <h2>{formatMediaFormat(props.data[0].format)}</h2>
+          <h2>{formatMediaFormat(props.data[0].format) || "Unknown format"}</h2>
         </li>
       </Show>
       <For each={props.data}>{(card, i) => (
