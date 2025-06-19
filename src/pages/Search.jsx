@@ -598,6 +598,19 @@ export function SearchBar(props) {
           maxValue={+searchParams.episodeLesser || 500} 
           onChange={([min, max]) => setSearchParams({ episodeLesser: max, episodeGreater: min })} 
         />
+        <Show when={params.type === "anime"}>
+          <div>
+            <A href="/search/anime/tba">
+              <button>TBA</button>
+            </A>
+            <A href="/search/anime/this-season">
+              <button>Current season</button>
+            </A>
+            <A href="/search/anime/next-season">
+              <button>Next season</button>
+            </A>
+          </div>
+        </Show>
       </div>
       <SearchBarContext.Provider value={{searchType, searchEngine, searchVariables, debouncedSearchType, debouncedSearchEngine, debouncedSearchVariables }}>
         {props.children}
@@ -645,6 +658,9 @@ export function SearchContent(props) {
       <Switch>
         <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/)}>
           <h1>{capitalize(params.header.split("-")[0])} {params.header.split("-")[1]}</h1>
+        </Match>
+        <Match when={params.header === "tba"}>
+          <h1>TBA</h1>
         </Match>
         <Match when={params.header}>
           <h1>{params.header}</h1>
