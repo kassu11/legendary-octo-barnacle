@@ -51,7 +51,6 @@ export function YearInput() {
             startYear: virtualSearchParams("startYear"),
             endYear: virtualSearchParams("endYear"),
           };
-          console.log("oldYearObj:", oldYearData);
 
           if(isTouch()) {
             dialog.showModal();

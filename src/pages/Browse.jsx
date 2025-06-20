@@ -44,8 +44,8 @@ export function BrowseAnimeHome() {
     <Show when={animeData()}>
       <div class="search-home-content">
         <HorizontalCardRow data={animeData().data.data.trending.media} href="/search/anime/trending" title="Trending now" />
-        <HorizontalCardRow data={animeData().data.data.season.media} href="/search/anime/this-season" title="Popular this season" />
-        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="/search/anime/next-season" title="Upcoming next season" />
+        <HorizontalCardRow data={animeData().data.data.season.media} href="/search/anime/this-season?order=popularity" title="Popular this season" />
+        <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="/search/anime/next-season?order=popularity" title="Upcoming next season" />
         <HorizontalCardRow data={animeData().data.data.finished.media} href="/search/anime/finished" title="Recently finished" />
         <HorizontalCardRow data={animeData().data.data.popular.media} href="/search/anime/popular" title="All time popular" />
         <VerticalCardRow data={animeData().data.data.top.media} type="manga" href="/search/anime/top-100" title="Top 100 anime" />
