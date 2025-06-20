@@ -660,6 +660,20 @@ export function SearchContent(props) {
         <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/)}>
           <h1>{capitalize(params.header.split("-")[0])} {params.header.split("-")[1]}</h1>
         </Match>
+        <Match when={params.header === "this-season"}>
+          <h1>
+            <Show when={searchParams.season || searchParams.year} fallback="Current season">
+              {capitalize(first(virtualSearchParams("season")))} {first(virtualSearchParams("year"))}
+            </Show>
+          </h1>
+        </Match>
+        <Match when={params.header === "next-season"}>
+          <h1>
+            <Show when={searchParams.season || searchParams.year} fallback="Next season">
+              {capitalize(first(virtualSearchParams("season")))} {first(virtualSearchParams("year"))}
+            </Show>
+          </h1>
+        </Match>
         <Match when={params.header === "tba"}>
           <h1>TBA</h1>
         </Match>
