@@ -367,6 +367,7 @@ function MediaList(props) {
   const notesFilter = () => searchParams.notes === "true";
   const rewatchedFilter = () => searchParams.repeat === "true";
   const missingStartFilter = () => searchParams.missingStart === "true";
+  const missingScoreFilter = () => searchParams.missingScore === "true";
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
 
@@ -382,6 +383,7 @@ function MediaList(props) {
         genre: genre(),
         countryOfOrigin: countryOfOrigin(),
         missingStart: missingStartFilter(),
+        missingScore: missingScoreFilter(),
         isAdult: isAdult(),
         year: +year() || undefined,
         private: privateFilter(),
@@ -552,6 +554,10 @@ function MediaList(props) {
           <input type="checkbox" name="missingStart" id="missingStart" checked={missingStartFilter()} onChange={e => setSearchParams({ missingStart: e.target.checked ? "true" : undefined })} />
           {" "}Missing start date
         </label>
+        <label htmlFor="missingScore">
+          <input type="checkbox" name="missingScore" id="missingScore" checked={missingScoreFilter()} onChange={e => setSearchParams({ missingScore: e.target.checked ? "true" : undefined })} />
+          {" "}Missing score
+        </label>
         <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
           <option value="score">Score</option>
           <option value="title">Title</option>
@@ -573,6 +579,7 @@ function MediaList(props) {
                 genre: undefined,
                 countryOfOrigin: undefined,
                 missingStart: undefined,
+                missingScore: undefined,
                 isAdult: undefined,
                 year: undefined,
                 private: undefined,

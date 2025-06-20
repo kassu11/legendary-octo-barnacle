@@ -25,6 +25,7 @@ function modifyMediaListData(listData, type, options) {
     genre: options.genre,
     countryOfOrigin: options.countryOfOrigin,
     missingStart: options.missingStart,
+    missingScore: options.missingScore,
     isAdult: options.isAdult,
     year: options.year,
     private: options.private,
@@ -150,6 +151,9 @@ function filter(entry, filterObject) {
     return false;
   }
   if (filterObject.missingStart && entry.startedAt?.year) {
+    return false;
+  }
+  if (filterObject.missingScore && entry.score !== 0) {
     return false;
   }
 
