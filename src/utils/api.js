@@ -3,7 +3,7 @@ import * as queries from "./querys";
 import { assert } from "./assert";
 import { getDates } from "./dates";
 import { TokenBucket } from "./TokenBucket";
-const DEBUG = location.origin.includes("localhost");
+const DEBUG = !location.origin.includes("localhost");
 
 const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
 const fastReload = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 7 });
@@ -757,7 +757,9 @@ function cacheBuilder(settings) {
                     setLoading(false);
                   }
                   const cacheData = { ...evt.target.result, fromCache: true };
-                  localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
+                  if (settings.type !== "only-if-cached") {
+                    localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
+                  }
                   return saveMutate(cacheData);
                 }
               } 
