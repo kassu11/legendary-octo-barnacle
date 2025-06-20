@@ -16,8 +16,8 @@ const headers = {
 
   ani: {
     anime: {
-      "this-season": { year: dates.seasonYear, season: dates.season.toLowerCase() },
-      "next-season": { year: dates.nextYear, season: dates.nextSeason.toLowerCase() },
+      "this-season": { year: dates.seasonYear, season: dates.season.toLowerCase(), order: "title_romaji", sort: "ASC" },
+      "next-season": { year: dates.nextYear, season: dates.nextSeason.toLowerCase(), order: "title_romaji", sort: "ASC" },
     },
     manhwa: { country: "KR" },
   },
@@ -71,18 +71,46 @@ export function useVirtualSearchParams() {
       return navigate(`/search/${params.type}/${season || virtualObj.season}-${year || virtualObj.year}${searchQueryStringFromObject(restParams, false)}`, options);
     }
 
+    // Keep this-season in header if search has only year or season params, but if both are present switch the header to {season-year}
+    if (params.header === "this-season" || params.header === "next-season") {
+      const { season, year, ...restParams } = sParams;
+      const seasonParam = season || searchParams.season;
+      const yearParam = year || searchParams.year;
+      if (seasonParam != null && yearParam != null) {
+        return navigate(`/search/${params.type}/${seasonParam}-${yearParam}${searchQueryStringFromObject(restParams, false)}`, options);
+      }
+    }
+
     // No need to redirect, set search params normally
     setSearchParams(sParams, options);
   }
 
 
   function searchQueryStringFromObject(sParams, addVirtualParams = true) {
+    const virtualObj = getVirtualObject();
+    const searchObj = Object.fromEntries(new URLSearchParams(location.search));
     const originalSearchParams = [...new URLSearchParams(location.search)]
-    .filter(([key]) => (key in sParams) === false)
+    .filter(([key]) => {
+      if (key in sParams) {
+        return false;
+      }
+      if (!addVirtualParams && key in virtualObj) {
+        return false
+      }
+      return true;
+    })
     .map(([key, val]) => `${key}=${val}`);
 
-    const originalVirtualSearchParams = addVirtualParams === false ? [] : Object.entries(getVirtualObject())
-    .filter(([key]) => (key in sParams) === false)
+    const originalVirtualSearchParams = addVirtualParams === false ? [] : Object.entries(virtualObj)
+    .filter(([key]) => {
+      if (key in sParams) {
+        return false;
+      }
+      if (key in searchObj) {
+        return false
+      }
+      return true;
+    })
     .map(([key, val]) => `${key}=${val}`);
 
     const newSearchParams = Object.entries(sParams)
