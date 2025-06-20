@@ -634,22 +634,24 @@ export function SearchContent(props) {
         <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
           <ol class="flex-space-between cp-search-season-controls">
             <li>
-              <A href={"/search/anime/" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), - 1).season.toLowerCase() + "-" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), - 1).year}>
-                <button>{"<"}</button>
-              </A>
+              <button onClick={() => {
+                const seasonObj = moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), - 1);
+                setVirtualSearchParams({year: seasonObj.year, season: seasonObj.season.toLowerCase()});
+              }}>{"<"}</button>
             </li>
             <For each={["winter", "spring", "summer", "fall"]}>{season => (
               <li class="item" classList={{selected: season === first(virtualSearchParams("season"))}}>
-                <A href={"/search/anime/" + season + "-" + first(virtualSearchParams("year"))}>
+                <button onClick={() => setVirtualSearchParams({ season, year: +first(virtualSearchParams("year")) })}>
                   <h3>{capitalize(season)}</h3>
                   <p>{first(virtualSearchParams("year"))}</p>
-                </A>
+                </button>
               </li>
             )}</For>
             <li>
-              <A href={"/search/anime/" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), 1).season.toLowerCase() + "-" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), 1).year}>
-                <button>{">"}</button>
-              </A>
+              <button onClick={() => {
+                const seasonObj = moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), 1);
+                setVirtualSearchParams({year: seasonObj.year, season: seasonObj.season.toLowerCase()});
+              }}>{">"}</button>
             </li>
           </ol>
         </Match>
@@ -715,7 +717,7 @@ export function SearchContent(props) {
                 <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
                   <Show when={debouncedSearchVariables().find(v => v.key === "seasonYear")?.value}>{seasonYear => (
                     <Show when={debouncedSearchVariables().find(v => v.key === "season")?.value}>{season => (
-                      <Show when={debouncedSearchVariables().filter(v => v.key === "format").length === 0 || debouncedSearchVariables().some(v => v.key === "format" && v.value === "TV")}>
+                      <Show when={debouncedSearchVariables().filter(v => v.key === "format").length === 0 || debouncedSearchVariables().some(v => v.key === "format" && v.value?.includes("TV"))}>
                         <AnilistMediaSeasonContent 
                           page={1} 
                           variables={debouncedSearchVariables()} 
@@ -807,7 +809,7 @@ function AnilistMediaSeasonContent(_props) {
 
   return (
     <Show when={mediaData()}>
-      <Show when={props.title}>
+      <Show when={props.title && mediaData().data.media.length}>
         <li class="full-span">
           <h2>{props.title}</h2>
         </li>
