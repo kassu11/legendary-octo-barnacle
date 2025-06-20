@@ -757,7 +757,9 @@ function cacheBuilder(settings) {
                     setLoading(false);
                   }
                   const cacheData = { ...evt.target.result, fromCache: true };
-                  localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
+                  if (settings.type !== "only-if-cached") {
+                    localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
+                  }
                   return saveMutate(cacheData);
                 }
               } 
