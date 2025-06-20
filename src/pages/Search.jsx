@@ -1,6 +1,6 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Show, For, Match, Switch, createSignal, createEffect, batch, on } from "solid-js";
+import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps } from "solid-js";
 import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl } from "../utils/formating";
@@ -23,6 +23,7 @@ import { ExternalSourceInput } from "./Search/ExternalSourcesInput";
 import { TwoHeadedRange } from "./Search/TwoHeadedRange";
 import { useVirtualSearchParams } from "../utils/virtualSearchParams.js";
 import { SeasonInput } from "./Search/SeasonInput.jsx";
+import { moveSeasonObject } from "../utils/dates.js";
 
 
 
@@ -633,24 +634,22 @@ export function SearchContent(props) {
         <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
           <ol class="flex-space-between cp-search-season-controls">
             <li>
-              <A href={"/search/anime/" + first(virtualSearchParams("season")) + "-" + (first(virtualSearchParams("year")) - 1)}>
-                <h3>Last year</h3>
-                <p>{first(virtualSearchParams("year")) - 1}</p>
-              </A>{" "}
+              <A href={"/search/anime/" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), - 1).season.toLowerCase() + "-" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), - 1).year}>
+                <button>{"<"}</button>
+              </A>
             </li>
             <For each={["winter", "spring", "summer", "fall"]}>{season => (
               <li class="item" classList={{selected: season === first(virtualSearchParams("season"))}}>
                 <A href={"/search/anime/" + season + "-" + first(virtualSearchParams("year"))}>
                   <h3>{capitalize(season)}</h3>
                   <p>{first(virtualSearchParams("year"))}</p>
-                </A>{" "}
+                </A>
               </li>
             )}</For>
             <li>
-              <A href={"/search/anime/" + first(virtualSearchParams("season")) + "-" + (parseInt(first(virtualSearchParams("year"))) + 1)}>
-                <h3>Next year</h3>
-                <p>{parseInt(first(virtualSearchParams("year"))) + 1}</p>
-              </A>{" "}
+              <A href={"/search/anime/" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), 1).season.toLowerCase() + "-" + moveSeasonObject(first(virtualSearchParams("season")), +first(virtualSearchParams("year")), 1).year}>
+                <button>{">"}</button>
+              </A>
             </li>
           </ol>
         </Match>
@@ -714,6 +713,24 @@ export function SearchContent(props) {
             <Match when={debouncedSearchEngine() === "ani"}>
               <Switch>
                 <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
+                  <Show when={debouncedSearchVariables().find(v => v.key === "seasonYear")?.value}>{seasonYear => (
+                    <Show when={debouncedSearchVariables().find(v => v.key === "season")?.value}>{season => (
+                      <Show when={debouncedSearchVariables().filter(v => v.key === "format").length === 0 || debouncedSearchVariables().some(v => v.key === "format" && v.value === "TV")}>
+                        <AnilistMediaSeasonContent 
+                          page={1} 
+                          variables={debouncedSearchVariables()} 
+                          title="Leftovers" 
+                          groupCards={false} 
+                          extraVariables={{ 
+                            seasonYear: moveSeasonObject(season(), +seasonYear(), - 1).year,
+                            season: moveSeasonObject(season(), +seasonYear(), - 1).season,
+                            episodeGreater: 16,
+                            format: "TV"
+                          }} 
+                        />
+                      </Show>
+                    )}</Show>
+                  )}</Show>
                   <AnilistMediaSeasonContent page={1} variables={debouncedSearchVariables()} extraVariables={{ sort: "FORMAT" }} />
                 </Match>
                 <Match when={true}>
@@ -773,13 +790,14 @@ function AnilistMediaSearchContent(props) {
   );
 }
 
-function AnilistMediaSeasonContent(props) {
+function AnilistMediaSeasonContent(_props) {
+  const props = mergeProps({groupCards: true}, _props);
   assert(props.page, "page is missing");
   assert(props.extraVariables, "extraVariables is missing");
 
   const {accessToken} = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [mediaData] = api.anilist.searchMedia(accessToken, () => props.variables, props.page, props.extraVariables);
+  const [mediaData] = api.anilist.searchMedia(accessToken, () => props.variables, props.page, () => props.extraVariables);
 
   createEffect(on(mediaData, response => {
     if (response?.data.pageInfo.hasNextPage) {
@@ -789,7 +807,19 @@ function AnilistMediaSeasonContent(props) {
 
   return (
     <Show when={mediaData()}>
-      <AniCardRowWithFormatHeader data={mediaData().data.media} lastFormat={props.previousFormat || "Unknown format"} />
+      <Show when={props.title}>
+        <li class="full-span">
+          <h2>{props.title}</h2>
+        </li>
+      </Show>
+      <Switch>
+        <Match when={props.groupCards}>
+          <AniCardRowWithFormatHeader data={mediaData().data.media} lastFormat={props.previousFormat || "Unknown format"} />
+        </Match>
+        <Match when={props.groupCards === false}>
+          <AniCardRow data={mediaData().data.media} />
+        </Match>
+      </Switch>
       <Show when={mediaData().data.pageInfo.hasNextPage}>
         <AnilistMediaSeasonContent 
           variables={variables()} 

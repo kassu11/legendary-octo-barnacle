@@ -382,8 +382,10 @@ const api = {
       }, { page });
 
       Object.entries(extraVariables).forEach(([key, value]) => {
-        if (key === "format") {
+        if (key === "format" || key === "season" || key === "seasonYear") {
           variableObject[key] = value;
+        } else if (key === "episodeGreater") {
+          variableObject[key] = Math.max(value, variableObject[key] || 0);
         } else {
           variableObject[key] &&= [value, variableObject[key]].flat();
           variableObject[key] ??= value;
