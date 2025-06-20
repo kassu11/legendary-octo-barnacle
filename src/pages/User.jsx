@@ -233,8 +233,8 @@ export function Overview() {
           </Show>
         </div>
         <div class="user-profile-genres">
-          <GenrePreview title="Anime genre overview" genres={user().statistics.anime.genrePreview} total={user().statistics.anime.count}/>
-          <GenrePreview title="Manga genre overview" genres={user().statistics.manga.genrePreview} total={user().statistics.manga.count}/>
+          <GenrePreview title="Anime genre overview" type="anime" genres={user().statistics.anime.genrePreview} total={user().statistics.anime.count}/>
+          <GenrePreview title="Manga genre overview" type="manga" genres={user().statistics.manga.genrePreview} total={user().statistics.manga.count}/>
         </div>
         <div class="user-profile-activity">
           <For each={activity()?.data.data.Page.activities}>{activity => (
@@ -250,13 +250,19 @@ function GenrePreview(props) {
   assert(props.genres, "Genres missing");
   assert(props.title, "Title missing");
 
+  const { user } = useUser();
+
   return (
     <Show when={props.total}>
       <div class="user-genres-overview">
         <h3>{props.title}</h3>
         <ol>
           <For each={props.genres}>{genre => (
-            <li class="item">{genre.genre} <span>{Math.round(genre.count / props.total * 100)}%</span></li>
+            <li class="item">
+              <A href={"/user/" + user().name + "/" + props.type + "?genre=" + genre.genre}>
+                {genre.genre} <span>{Math.round(genre.count / props.total * 100)}%</span>
+              </A>
+            </li>
           )}</For>
         </ol>
       </div>
