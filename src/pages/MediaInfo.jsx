@@ -203,8 +203,8 @@ function MediaInfo(props) {
                   </Match>
                   <Match when={props.media.type === "ANIME"}>
                     <Switch>
-                      <Match when={props.media.seasonYear}>
-                        <A href={"/search/anime?year=" + props.media.seasonYear + "&season=" + props.media.season.toLowerCase()}>{capitalize(props.media.season) || "TBA"} {props.media.seasonYear}</A>
+                      <Match when={props.media.seasonYear && props.media.season}>
+                        <A href={"/search/anime/" + props.media.season.toLowerCase() + "-" + props.media.seasonYear}>{capitalize(props.media.season)} {props.media.seasonYear}</A>
                       </Match>
                       <Match when={props.media.startDate?.year}>
                         <A href={"/search/anime?year=" + props.media.startDate.year}>{props.media.startDate.year}</A>
