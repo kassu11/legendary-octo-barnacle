@@ -47,14 +47,15 @@ export function useVirtualSearchParams() {
     return searchParams[key] || getVirtualObject()[key];
   }
 
-  function getVirtualObject() {
-    if (params.header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
-      const [season, year] = params.header.split("-");
+  function getVirtualObject(currentHeader) {
+    const header = currentHeader || params.header;
+    if (header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
+      const [season, year] = header.split("-");
       return { year, season, order: "title_romaji", sort: "ASC" }
     }
 
     const engine = searchParams.malSearch === "true" ? "mal" : "ani";
-    return headers[params.header] || headers[engine]?.[params.header] || headers[engine]?.[params.type]?.[params.header] || {};
+    return headers[header] || headers[engine]?.[header] || headers[engine]?.[params.type]?.[header] || {};
   }
 
 
@@ -67,17 +68,17 @@ export function useVirtualSearchParams() {
     }
 
     if (params.header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
-      const { season, year, ...restParams } = sParams;
-      return navigate(`/search/${params.type}/${season || virtualObj.season}-${year || virtualObj.year}${searchQueryStringFromObject(restParams, false)}`, options);
+      const { season = virtualObj.season, year = virtualObj.year, ...restParams } = sParams;
+      const header = `${season}-${year}`;
+      return navigate(`/search/${params.type}/${header}${searchQueryStringFromObject(restParams, false, header)}`, options);
     }
 
     // Keep this-season in header if search has only year or season params, but if both are present switch the header to {season-year}
     if (params.header === "this-season" || params.header === "next-season") {
-      const { season, year, ...restParams } = sParams;
-      const seasonParam = season || searchParams.season;
-      const yearParam = year || searchParams.year;
-      if (seasonParam != null && yearParam != null) {
-        return navigate(`/search/${params.type}/${seasonParam}-${yearParam}${searchQueryStringFromObject(restParams, false)}`, options);
+      const { season = searchParams.season, year = searchParams.year, ...restParams } = sParams;
+      if (season != null && year != null) {
+        const header = `${season}-${year}`;
+        return navigate(`/search/${params.type}/${header}${searchQueryStringFromObject(restParams, false, header)}`, options);
       }
     }
 
@@ -86,15 +87,15 @@ export function useVirtualSearchParams() {
   }
 
 
-  function searchQueryStringFromObject(sParams, addVirtualParams = true) {
-    const virtualObj = getVirtualObject();
+  function searchQueryStringFromObject(sParams, addVirtualParams = true, header) {
+    const virtualObj = getVirtualObject(header);
     const searchObj = Object.fromEntries(new URLSearchParams(location.search));
     const originalSearchParams = [...new URLSearchParams(location.search)]
-    .filter(([key]) => {
+    .filter(([key, value]) => {
       if (key in sParams) {
         return false;
       }
-      if (!addVirtualParams && key in virtualObj) {
+      if (!addVirtualParams && key in virtualObj && virtualObj[key] == value) {
         return false
       }
       return true;
