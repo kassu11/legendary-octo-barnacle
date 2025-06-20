@@ -24,6 +24,7 @@ function modifyMediaListData(listData, type, options) {
     status: options.status,
     genre: options.genre,
     countryOfOrigin: options.countryOfOrigin,
+    missingStart: options.missingStart,
     isAdult: options.isAdult,
     year: options.year,
     private: options.private,
@@ -146,6 +147,9 @@ function filter(entry, filterObject) {
     return false;
   }
   if (filterObject.repeat && !(entry.repeat > 0)) {
+    return false;
+  }
+  if (filterObject.missingStart && entry.startedAt?.year) {
     return false;
   }
 

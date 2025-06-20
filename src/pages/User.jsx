@@ -366,6 +366,7 @@ function MediaList(props) {
   const privateFilter = () => searchParams.private === "true";
   const notesFilter = () => searchParams.notes === "true";
   const rewatchedFilter = () => searchParams.repeat === "true";
+  const missingStartFilter = () => searchParams.missingStart === "true";
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
 
@@ -380,6 +381,7 @@ function MediaList(props) {
         status: status(),
         genre: genre(),
         countryOfOrigin: countryOfOrigin(),
+        missingStart: missingStartFilter(),
         isAdult: isAdult(),
         year: +year() || undefined,
         private: privateFilter(),
@@ -546,6 +548,10 @@ function MediaList(props) {
             <Match when={props.type === "manga"}>Reread</Match>
           </Switch>
         </label>
+        <label htmlFor="missingStart">
+          <input type="checkbox" name="missingStart" id="missingStart" checked={missingStartFilter()} onChange={e => setSearchParams({ missingStart: e.target.checked ? "true" : undefined })} />
+          {" "}Missing start date
+        </label>
         <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
           <option value="score">Score</option>
           <option value="title">Title</option>
@@ -566,6 +572,7 @@ function MediaList(props) {
                 status: undefined,
                 genre: undefined,
                 countryOfOrigin: undefined,
+                missingStart: undefined,
                 isAdult: undefined,
                 year: undefined,
                 private: undefined,
