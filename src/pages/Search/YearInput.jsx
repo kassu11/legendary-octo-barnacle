@@ -11,7 +11,7 @@ export function YearInput() {
   const [filter, setFilter] = createSignal("");
   const currentYearPlusTwo = new Date().getFullYear() + 2;
   let open = false;
-  let oldGenres;
+  let oldYearData = {};
   let dialog, scrollWrapper, controller, button, form;
 
   const triggerSetVirtualSearchParams = leadingAndTrailing(debounce, (params, options) => setVirtualSearchParams(params, options), 100);
@@ -34,6 +34,7 @@ export function YearInput() {
       if (e.target.name === "year") {
         triggerSetVirtualSearchParams({ 
           [e.target.name]: e.target.checked ? e.target.value : undefined,
+          season: virtualSearchParams("season"),
           startYear: undefined,
           endYear: undefined,
         });
@@ -45,7 +46,12 @@ export function YearInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldGenres = virtualSearchParams("genre");
+          oldYearData = {
+            year: virtualSearchParams("year"),
+            startYear: virtualSearchParams("startYear"),
+            endYear: virtualSearchParams("endYear"),
+          };
+          console.log("oldYearObj:", oldYearData);
 
           if(isTouch()) {
             dialog.showModal();
@@ -134,7 +140,7 @@ export function YearInput() {
             <Show when={isTouch()}>
               <button onClick={() => {
                 close();
-                triggerSetVirtualSearchParams({ genre: oldGenres });
+                setVirtualSearchParams(oldYearData);
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </Show>

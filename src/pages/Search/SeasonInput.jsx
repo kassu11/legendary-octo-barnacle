@@ -31,7 +31,7 @@ export function SeasonInput() {
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
       const formData = new FormData(e.currentTarget);
       const seasons = formData.getAll("season");
-      setVirtualSearchParams({season: seasons});
+      setVirtualSearchParams({ season: seasons, year: virtualSearchParams("year") });
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
