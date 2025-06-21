@@ -300,27 +300,18 @@ function ActivityHistory(props) {
                 <Show when={activity.date > start}>
                   <For each={Array(emtySpace).fill(0)}>{(_, j) => (
                     <li class="activity-item">
-                      <Tooltip>
-                        <p>{formatTimeToDate(((activity.date + 3600 * 24 * (j() - emtySpace)) * 1000))}</p>
-                        <p>Amount: 0</p>
-                      </Tooltip>
+                      <ActivityTooltip date={(activity.date + 3600 * 24 * (j() - emtySpace)) * 1000}/>
                     </li>
                   )}</For>
                   <li class="activity-item" attr:data-level={activity.level}>
-                    <Tooltip>
-                      <p>{formatTimeToDate(activity.date * 1000)}</p>
-                      <p>Amount: {activity.level}</p>
-                    </Tooltip>
+                    <ActivityTooltip date={activity.date * 1000} amount={activity.amount} />
                   </li>
                 </Show>
               );
             }}</For>
             <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{(_, j) => (
               <li class="activity-item">
-                <Tooltip>
-                  <p>{formatTimeToDate(((lastDate + 3600 * 24 * (j() + 1)) * 1000))}</p>
-                  <p>Amount: 0</p>
-                </Tooltip>
+                <ActivityTooltip date={(lastDate + 3600 * 24 * (j() + 1)) * 1000} />
               </li>
             )}</For>
           </ol>
@@ -328,6 +319,24 @@ function ActivityHistory(props) {
       </div>
     </Show>
   );
+
+  function ActivityTooltip(props) {
+    const getTipPosition = date => {
+      if (date < (start + 3600 * 24 * 60) * 1000) {
+        return "right";
+      }
+      if (date > (start + 3600 * 24 * (180 - 60)) * 1000) {
+        return "left";
+      }
+    }
+
+    return (
+      <Tooltip tipPosition={getTipPosition(props.date)}>
+        <p>{formatTimeToDate(props.date)}</p>
+        <p>Amount: {props.amount || 0}</p>
+      </Tooltip>
+    );
+  }
 }
 
 
