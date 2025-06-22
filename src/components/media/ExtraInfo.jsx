@@ -11,6 +11,12 @@ const ExtraInfo = (props) => {
         <Show when={props.media.episodes}>
           <li>Episodes: {props.media.episodes}</li>
         </Show>
+        <Show when={props.media.volumes}>
+          <li>Volumes: {props.media.volumes}</li>
+        </Show>
+        <Show when={props.media.chapters}>
+          <li>Chapters: {props.media.chapters}</li>
+        </Show>
         <Show when={props.media.duration}>
           <li>Duration: {props.media.duration} mins</li>
         </Show>
