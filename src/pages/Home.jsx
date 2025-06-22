@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import { Show, createSignal, createEffect } from "solid-js";
+import { Show, createSignal, createEffect, onMount } from "solid-js";
 import style from "./Home.module.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
@@ -21,15 +21,14 @@ function Home() {
   )
 }
 
-function Activity(props) {
+function Activity() {
+  const loadMoreButton = <button>Load more</button>;
   const [activityType, setActivityType] = createSignal(undefined);
   const [isFollowing, setIsFollowing] = createSignal(true);
   const [hasReplies, setHasReplies] = createSignal(undefined);
   const [variables, setVariables] = createSignal({
-    "page": 1,
     "isFollowing": true,
   });
-  const [activityData, { mutateCache }] = api.anilist.getActivity(props.token, variables);
 
   createEffect(() => {
     setVariables(current => {
@@ -67,12 +66,34 @@ function Activity(props) {
         setHasReplies(true);
       }}>Global</button>
       <div class="grid-column-auto-fill activity">
-        <For each={activityData()?.data.data.Page.activities}>{activity => (
-          <ActivityCard activity={activity} mutateCache={mutateCache} />
-        )}</For>
+        <Show when={variables()} keyed>
+          <ActivityContent page={1} variables={variables()} loadMoreButton={loadMoreButton} />
+        </Show>
       </div>
+      {loadMoreButton}
     </>
-  )
+  );
+}
+
+function ActivityContent(props) {
+  const { accessToken } = useAuthentication();
+  const [activityData, { mutateCache }] = api.anilist.getActivity(accessToken, props.variables, props.page);
+  const [showMore, setShowMore] = createSignal(false);
+
+  onMount(() => {
+    props.loadMoreButton.addEventListener("click", () => setShowMore(true), { once: true });
+  });
+  
+  return (
+    <Show when={activityData()}>
+      <For each={activityData().data.activities}>{activity => (
+        <ActivityCard activity={activity} mutateCache={mutateCache} />
+      )}</For>
+      <Show when={activityData().data.pageInfo.hasNextPage && showMore()}>
+        <ActivityContent page={props.page + 1} variables={props.variables} loadMoreButton={props.loadMoreButton} />
+      </Show>
+    </Show>
+  );
 }
 
 
