@@ -17,6 +17,7 @@ export function Studio() {
   const [variables, setVariables] = createSignal();
   const [showYears, setShowYears] = createSignal(true);
   const [studioInfo, { mutateCache: mutateStudioInfoCache }] = api.anilist.studioInfoAndMediaById(() => params.id, variables, accessToken);
+  document.title = "Studio - LOB";
 
   const [favourite, setFavourite] = createSignal(false);
   createEffect(on(studioInfo, info => {

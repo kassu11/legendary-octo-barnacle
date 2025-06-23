@@ -8,6 +8,7 @@ function Artist() {
   const params = useParams();
   const [artistData] = api.animeThemes.artisBySlug(() => params.name);
   const video = <video src="" controls autoPlay />;
+  document.title = "Artist - LOB";
 
   return (
     <>

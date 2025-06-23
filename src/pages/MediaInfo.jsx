@@ -47,6 +47,9 @@ function MediaProvider(props) {
   const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
 
   createEffect(() => {
+    if (mediaData()) {
+      document.title = `${mediaData().data.data.Media.title.userPreferred} - LOB`;
+    }
     props.setIdMal(mediaData()?.data.data.Media.idMal ?? undefined);
   });
 

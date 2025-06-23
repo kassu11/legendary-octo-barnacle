@@ -7,6 +7,8 @@ function Authentication() {
   const search = new URLSearchParams(hash);
   const token = search.get("access_token");
 
+  document.title = "Authentication - LOB";
+
   if (token?.length > 50) {
     const { setAccessToken } = useAuthentication();
     setAccessToken(token);

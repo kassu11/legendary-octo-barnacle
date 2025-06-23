@@ -9,6 +9,7 @@ import { useAuthentication } from "../context/providers";
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();
   const [malCharacters] = api.myAnimeList.animeCharactersById(idMal);
+  document.title = "Characters - LOB";
   
   return (
     <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
@@ -18,6 +19,7 @@ export function AnimeCharacters() {
 export function MangaCharacters() {
   const [idMal, setIdMal] = createSignal();
   const [malCharacters] = api.myAnimeList.mangaCharactersById(idMal);
+  document.title = "Characters - LOB";
   
   return (
     <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
@@ -27,6 +29,7 @@ export function MangaCharacters() {
 export function AnimeStaff() {
   const [idMal, setIdMal] = createSignal();
   const [malStaff] = api.myAnimeList.animeStaffById(idMal);
+  document.title = "Staff - LOB";
   
   return (
     <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
@@ -36,6 +39,7 @@ export function AnimeStaff() {
 export function MangaStaff() {
   const [idMal, setIdMal] = createSignal();
   const [malStaff] = api.myAnimeList.mangaStaffById(idMal);
+  document.title = "Staff - LOB";
   
   return (
     <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />

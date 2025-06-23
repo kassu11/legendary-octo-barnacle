@@ -21,6 +21,7 @@ export function BrowseRedirect(props) {
 export function BrowseMediaHome() {
   const { accessToken } = useAuthentication();
   const [homeData] = api.anilist.trendingMedia(accessToken);
+  document.title = "Browse media - LOB";
 
   return (
     <Show when={homeData()}>
@@ -39,6 +40,7 @@ export function BrowseMediaHome() {
 export function BrowseAnimeHome() {
   const {accessToken} = useAuthentication();
   const [animeData] = api.anilist.trendingAnime(accessToken);
+  document.title = "Browse anime - LOB";
 
   return (
     <Show when={animeData()}>
@@ -57,6 +59,7 @@ export function BrowseAnimeHome() {
 export function BrowseMangaHome() {
   const {accessToken} = useAuthentication();
   const [mangaData] = api.anilist.trendingManga(accessToken);
+  document.title = "Browse manga - LOB";
 
   return (
     <Show when={mangaData()}>
