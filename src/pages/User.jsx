@@ -3,7 +3,7 @@ import api, { IndexedDB } from "../utils/api.js";
 import { createContext, createEffect, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
 import { assert } from "../utils/assert.js";
-import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
+import { capitalize, formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
 import { ActivityCard } from "../components/Activity.jsx";
 import UserMediaListWorker from "../worker/user-media-list.js?worker";
 import { DoomScroll } from "../components/utils/DoomScroll.jsx";
@@ -671,9 +671,45 @@ function MediaList(props) {
                                   openEditor({ ...entry.media, mediaListEntry: entry }, {
                                     mutateMedia: responseEntry => {
                                       mutateMediaListCache(res => {
+                                        function findListNameFromStatus(status) {
+                                          switch (status) {
+                                            case "COMPLETED": case "DROPPED": case "PAUSED": case "PLANNING":
+                                              return capitalize(status)
+                                            case "CURRENT":
+                                              return props.type === "anime" ? "Watching" : "Reading";
+                                            case "REPEATING":
+                                              return props.type === "anime" ? "Rewatching" : "Rereading";
+                                            default:
+                                              assert(false, "Unkown status: " + status);
+                                          }
+                                        }
+
+                                        function pushEntryToList(name, isCustomList) {
+                                          const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
+                                          if (listIndex === -1) {
+                                            res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
+                                          }
+
+                                          const list = res.data.lists.at(listIndex);
+                                          list.entries.push(responseEntry);
+                                          listData().indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
+                                        }
+
                                         listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                          res.data.lists[listIndex].entries[entryIndex] = responseEntry;
+                                          res.data.lists[listIndex].entries.splice(entryIndex, 1);
                                         });
+                                        listData().indecies[entry.media.id] = [];
+
+                                        if (!responseEntry.hiddenFromStatusLists) {
+                                          const name = findListNameFromStatus(responseEntry.status);
+                                          pushEntryToList(name, false);
+                                        }
+
+                                        for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
+                                          if (enabled) {
+                                            pushEntryToList(listName, true);
+                                          }
+                                        }
                                         return res;
                                       }, updateListInfo);
                                     },
