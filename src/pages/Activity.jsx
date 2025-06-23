@@ -13,6 +13,8 @@ export default function Activity() {
   const [activity] = api.anilist.activityById(() => params.id, accessToken);
   const [replies] = api.anilist.activityRepliesById(() => params.id, 1, accessToken);
 
+  document.title = "Activity - LOB";
+
   return (
     <div class="activity-page">
       <Show when={activity()?.data}>

@@ -10,6 +10,8 @@ export default function Notifications() {
   const [type, setType] = createSignal("all");
   const [notifications] = api.anilist.notifications(accessToken, type, 1);
 
+  document.title = "Notifications - LOB";
+
   return (
     <div class="notification-page">
       <ol class="flex-space-between">

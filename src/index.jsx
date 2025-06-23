@@ -91,8 +91,8 @@ render(
             </Route>
             <Route path="/user/:name" component={User}>
               <Route path="/" component={Overview} />
-              <Route path="/anime/:list?" component={AnimeList} />
-              <Route path="/manga/:list?" component={MangaList} />
+              <Route path="/:type/:list?" matchFilters={{type: "anime"}} component={AnimeList} />
+              <Route path="/:type/:list?" matchFilters={{type: "manga"}} component={MangaList} />
               <Route path="/favourites" component={FavouriteContainer} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />

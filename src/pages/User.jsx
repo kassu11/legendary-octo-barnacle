@@ -24,6 +24,12 @@ export function User(props) {
     });
   }
 
+  createEffect(on(userData, user => {
+    if (user) {
+      document.title = `${user.data.name} profile - LOB`;
+    }
+  }))
+
   return (
     <UserContext.Provider value={{ user: () => userData().data, following }}>
       <Switch>
@@ -360,6 +366,12 @@ function MediaList(props) {
   const [listData, setListData] = createSignal({});
   const _navigate = useNavigate();
   let worker;
+  createEffect(on(user, (u) => {
+    if (u) {
+      document.title = `${u.name} ${params.type} - LOB`;
+    }
+  }))
+  document.title = "Authentication - LOB";
 
   const navigate = (listName) => {
     _navigate(`/user/${user().name}/${props.type}${listName ? "/" + listName : ""}${location.search}`, { replace: true });
@@ -744,6 +756,11 @@ function MediaList(props) {
 }
 
 export function FavouriteContainer() {
+  const { user } = useUser();
+  createEffect(on(user, u => {
+    document.title = `${u.name} favourites - LOB`;
+  }));
+
   return (
     <div class="user-profile-favourites">
       <FavouriteSection title="Favourite animes" type="anime" />
@@ -1025,6 +1042,9 @@ function DeleteFavourite(props) {
 export function Socials() {
   const { user } = useUser();
   const [tab, setTab] = createSignal("following");
+  createEffect(on(user, u => {
+    document.title = `${u.name} socials - LOB`;
+  }));
 
   return (
     <div class="user-profile-socials-page">
@@ -1117,6 +1137,9 @@ function Followers(props) {
 
 export function Stats(props) {
   const { user } = useUser();
+  createEffect(()=> {
+    document.title = `${user().name} stats - LOB`;
+  });
 
   return (
     <div class="user-profile-stats-page">

@@ -14,6 +14,7 @@ export function Character() {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = api.anilist.characterInfoById(() => params.id, accessToken);
+  document.title = "Character - LOB";
 
   return (
     <Body type="CHARACTER" entityInfo={characterInfo} mutateEntityInfoCache={mutateCharacterInfoCache} />
@@ -24,6 +25,7 @@ export function Staff() {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [staffInfo, { mutateCache: mutateStaffInfoCache }] = api.anilist.staffInfoById(() => params.id, accessToken);
+  document.title = "Staff - LOB";
 
   return (
     <Body type="STAFF" entityInfo={staffInfo} mutateEntityInfoCache={mutateStaffInfoCache} />

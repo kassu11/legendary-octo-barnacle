@@ -11,6 +11,8 @@ import { useAuthentication } from "../context/providers.js";
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
 
+  document.title = "Home - LOB";
+
   return (
     <Show when={authUserData()}>
       <div class={style.container}>
