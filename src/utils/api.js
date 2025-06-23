@@ -545,6 +545,8 @@ class Fetch {
       return null;
     }
 
+    this.status = response.status;
+
     if (!response.ok) {
       this.error = true;
       return this;
