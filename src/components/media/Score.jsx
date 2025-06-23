@@ -14,9 +14,9 @@ function Score(props) {
           <Match when={props.format === "POINT_5"}>{props.score}/5 <Star class="score-star" /></Match>
           <Match when={props.format === "POINT_3"}>
             <Switch>
-              <Match when={props.score === 1}><Emoji class="score-emoji" score={80} /></Match>
+              <Match when={props.score === 1}><Emoji class="score-emoji" score={0} /></Match>
               <Match when={props.score === 2}><Emoji class="score-emoji" score={70} /></Match>
-              <Match when={props.score === 3}><Emoji class="score-emoji" score={0} /></Match>
+              <Match when={props.score === 3}><Emoji class="score-emoji" score={80} /></Match>
             </Switch>
           </Match>
         </Switch>
