@@ -519,6 +519,12 @@ class Fetch {
           return null;
         }
 
+        if (document.hidden) {
+          const { promise, resolve } = Promise.withResolvers();
+          document.addEventListener("visibilitychange", resolve, { once: true });
+          await promise;
+        }
+
         const token = bucket.requestToken();
         if (!token) {
           await Promise.race([
