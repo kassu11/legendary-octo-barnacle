@@ -14,3 +14,6 @@ export const useAuthentication = () => useContext(AuthenticationContext);
 
 export const ResponsiveContext = createContext();
 export const useResponsive = () => useContext(ResponsiveContext);
+
+export const UserMediaListContext = createContext();
+export const useUserMediaList = () => useContext(UserMediaListContext);
