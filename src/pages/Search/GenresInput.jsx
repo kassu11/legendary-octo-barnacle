@@ -1,9 +1,9 @@
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
-import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
+import { useResponsive } from "../../context/providers";
 
 export function GenresInput(props) {
   const [searchParams, setSearchParams] = useSearchParams();
