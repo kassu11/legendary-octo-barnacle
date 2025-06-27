@@ -1,7 +1,5 @@
-import { createContext, useContext } from "solid-js";
 import useMediaQuery from "../hooks/useMediaQuery";
-
-const ResponsiveContext = createContext();
+import { ResponsiveContext } from "./providers";
 
 export function ResponsiveProvider(props) {
   const isMobilSmall = useMediaQuery("(max-width: 30em)");
@@ -20,10 +18,3 @@ export function ResponsiveProvider(props) {
   );
 }
 
-export function useResponsive() {
-  const context = useContext(ResponsiveContext);
-  if (!context) {
-    throw new Error("useResponsive must be used within a ResponsiveProvider");
-  }
-  return context;
-} 

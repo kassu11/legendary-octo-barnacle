@@ -1,10 +1,10 @@
 import { createEffect, For, on } from "solid-js";
-import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
 import { sortOrders } from "../../utils/searchObjects";
+import { useResponsive } from "../../context/providers";
 
 export function SortInput() {
   const [searchParams, setSearchParams] = useSearchParams();

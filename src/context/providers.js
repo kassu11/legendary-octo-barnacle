@@ -11,3 +11,6 @@ export const useEditMediaEntries = () => useContext(EditMediaEntriesContext);
 
 export const AuthenticationContext = createContext();
 export const useAuthentication = () => useContext(AuthenticationContext);
+
+export const ResponsiveContext = createContext();
+export const useResponsive = () => useContext(ResponsiveContext);

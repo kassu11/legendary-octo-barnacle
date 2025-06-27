@@ -1,9 +1,9 @@
 import { createEffect, createSignal, For, on, Show } from "solid-js";
-import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { TwoHeadedRange } from "./TwoHeadedRange";
 import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
+import { useResponsive } from "../../context/providers";
 
 export function YearInput() {
   const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();

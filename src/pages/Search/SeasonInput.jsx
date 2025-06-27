@@ -1,11 +1,11 @@
 import { createEffect, For, on, Show } from "solid-js";
-import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
 import { searchSeasons } from "../../utils/searchObjects";
 import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
+import { useResponsive } from "../../context/providers";
 
 export function SeasonInput() {
   const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();

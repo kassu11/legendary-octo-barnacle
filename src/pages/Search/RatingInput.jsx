@@ -1,8 +1,8 @@
 import { createEffect, createSignal, on } from "solid-js";
-import { useResponsive } from "../../context/ResponsiveContext";
 import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
+import { useResponsive } from "../../context/providers";
 
 export function RatingInput(props) {
   const [searchParams, setSearchParams] = useSearchParams();
