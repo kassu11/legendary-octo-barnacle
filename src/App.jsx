@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import "./App.scss"
 import { useAuthentication } from "./context/providers.js";
+import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 
 function App(props) {
   const clientId = location.hostname === "kassu11.github.io" ? 24951 : 7936;
@@ -32,6 +33,7 @@ function App(props) {
           </Show>
         </ul>
       </nav>
+      <InstallPWAInfoPanel />
       <main id="page-content">
         {props.children}
       </main>

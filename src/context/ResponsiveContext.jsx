@@ -10,9 +10,10 @@ export function ResponsiveProvider(props) {
   const isDesktopLarge = useMediaQuery("(max-width: 160em)");
   
   const isTouch = useMediaQuery("(hover: none) and (pointer: coarse)"); 
+  const isPWA = useMediaQuery("(display-mode: standalone)");
 
   return (
-    <ResponsiveContext.Provider value={{ isMobilSmall, isMobilLarge, isTablet, isLaptop, isDesktop, isDesktopLarge, isTouch }}>
+    <ResponsiveContext.Provider value={{ isMobilSmall, isMobilLarge, isTablet, isLaptop, isDesktop, isDesktopLarge, isTouch, isPWA }}>
       {props.children}
     </ResponsiveContext.Provider>
   );
