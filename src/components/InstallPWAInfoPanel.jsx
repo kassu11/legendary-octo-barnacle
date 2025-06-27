@@ -8,8 +8,7 @@ export function InstallPWAInfoPanel() {
   const [error, setError] = createSignal(false);
   let deferredPrompt;
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
+  window.addEventListener("beforeinstallprompt", (e) => {
     deferredPrompt = e;
     setVisible(true);
   });
