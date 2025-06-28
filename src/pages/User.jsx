@@ -396,6 +396,7 @@ function MediaList(props) {
   const rewatchedFilter = () => searchParams.repeat === "true";
   const missingStartFilter = () => searchParams.missingStart === "true";
   const missingScoreFilter = () => searchParams.missingScore === "true";
+  const reverse = () => searchParams.reverse === "true";
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
 
@@ -461,6 +462,7 @@ function MediaList(props) {
         format: format(),
         status: status(),
         genre: genre(),
+        reverse: reverse(),
         countryOfOrigin: countryOfOrigin(),
         missingStart: missingStartFilter(),
         missingScore: missingScoreFilter(),
@@ -642,6 +644,10 @@ function MediaList(props) {
           <label htmlFor="missingScore">
             <input type="checkbox" name="missingScore" id="missingScore" checked={missingScoreFilter()} onChange={e => setSearchParams({ missingScore: e.target.checked ? "true" : undefined })} />
             {" "}Missing score
+          </label>
+          <label htmlFor="reverse">
+            <input type="checkbox" name="reverse" id="reverse" checked={reverse()} onChange={e => setSearchParams({ reverse: e.target.checked ? "true" : undefined })} />
+            {" "}Reverse order
           </label>
           <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
             <option value="score">Score</option>

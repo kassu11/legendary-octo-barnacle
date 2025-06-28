@@ -23,6 +23,7 @@ function modifyMediaListData(listData, type, options) {
     format: options.format,
     status: options.status,
     genre: options.genre,
+    reverse: options.reverse,
     countryOfOrigin: options.countryOfOrigin,
     missingStart: options.missingStart,
     missingScore: options.missingScore,
@@ -64,32 +65,7 @@ function modifyMediaListData(listData, type, options) {
     list.entries.length = tail;
   });
   listData.data.total = mediaSet.size;
-  const sortFunction = (() => {
-    switch (options.sort) {
-      case "score":
-        return (a, b) => (b.score || 0) - (a.score || 0);
-      case "title":
-        return (a, b) => a.media.title.userPreferred.localeCompare(b.media.title.userPreferred);
-      case "progress":
-        return (a, b) => (b.progress || 0) - (a.progress || 0);
-      case "updatedAt":
-        return (a, b) => (a.updatedAt || 0) > (b.updatedAt || 0) ? -1 : 1;
-      case "startedAt":
-        return (a, b) => (b.startedAt?.year || 0) - (a.startedAt?.year || 0) || (b.startedAt?.month || 0) - (a.startedAt?.month || 0) || (b.startedAt?.day || 0) - (a.startedAt?.day || 0);
-      case "completedAt":
-        return (a, b) => (b.completedAt?.year || 0) - (a.completedAt?.year || 0) || (b.completedAt?.month || 0) - (a.completedAt?.month || 0) || (b.completedAt?.day || 0) - (a.completedAt?.day || 0);
-      case "releaseDate":
-        return (a, b) => (b.media.startDate?.year || 0) - (a.media.startDate?.year || 0) || (b.media.startDate?.month || 0) - (a.media.startDate?.month || 0) || (b.media.startDate?.day || 0) - (a.media.startDate?.day || 0);
-      case "averageScore":
-        return (a, b) => (b.media.averageScore || 0) - (a.media.averageScore || 0);
-      case "popularity":
-        return (a, b) => (b.media.popularity || 0) - (a.media.popularity || 0);
-      case "repeat":
-        return (a, b) => (b.repeat || 0) - (a.repeat || 0);
-      default:
-        console.error("No sort given");
-    }
-  })();
+  const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
   listData.data.lists.forEach(list => {
     list.entries.sort(sortFunction);
   });
@@ -110,6 +86,47 @@ function modifyMediaListData(listData, type, options) {
       postMessage("success");
     }
   }
+}
+
+function generateSortFunction(sort, direction = 1) {
+  switch (sort) {
+    case "score":
+      return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
+    case "title":
+      return (a, b) => (sortFunctions.title(a, b) * direction) || sortFunctions.score(a, b);
+    case "progress":
+      return (a, b) => (sortFunctions.progress(a, b) * direction) || sortFunctions.title(a, b);
+    case "updatedAt":
+      return (a, b) => (sortFunctions.updatedAt(a, b) * direction) || sortFunctions.title(a, b);
+    case "startedAt":
+      return (a, b) => (sortFunctions.startedAt(a, b) || sortFunctions.completedAt(a, b)) * direction || sortFunctions.title(a, b);
+    case "completedAt":
+      return (a, b) => (sortFunctions.completedAt(a, b) || sortFunctions.updatedAt(a, b)) * direction;
+    case "releaseDate":
+      return (a, b) => (sortFunctions.releaseDate(a, b) * direction) || sortFunctions.title(a, b);
+    case "averageScore":
+      return (a, b) => (sortFunctions.averageScore(a, b) * direction) || sortFunctions.title(a, b);
+    case "popularity":
+      return (a, b) => (sortFunctions.popularity(a, b) * direction) || sortFunctions.title(a, b);
+    case "repeat":
+      return (a, b) => ((sortFunctions.repeat(a, b) || sortFunctions.progress(a, b)) * direction) || sortFunctions.title(a, b);
+    default:
+      console.error("No sort given");
+      return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
+  };
+}
+
+const sortFunctions = {
+  "score": (a, b) => (b.score || 0) - (a.score || 0),
+  "title": (a, b) => a.media.title.userPreferred.localeCompare(b.media.title.userPreferred),
+  "progress": (a, b) => (b.progress || 0) - (a.progress || 0),
+  "updatedAt": (a, b) => (a.updatedAt || 0) > (b.updatedAt || 0) ? -1 : 1,
+  "startedAt": (a, b) => (b.startedAt?.year || 0) - (a.startedAt?.year || 0) || (b.startedAt?.month || 0) - (a.startedAt?.month || 0) || (b.startedAt?.day || 0) - (a.startedAt?.day || 0),
+  "completedAt": (a, b) => (b.completedAt?.year || 0) - (a.completedAt?.year || 0) || (b.completedAt?.month || 0) - (a.completedAt?.month || 0) || (b.completedAt?.day || 0) - (a.completedAt?.day || 0),
+  "releaseDate": (a, b) => (b.media.startDate?.year || 0) - (a.media.startDate?.year || 0) || (b.media.startDate?.month || 0) - (a.media.startDate?.month || 0) || (b.media.startDate?.day || 0) - (a.media.startDate?.day || 0),
+  "averageScore": (a, b) => (b.media.averageScore || 0) - (a.media.averageScore || 0),
+  "popularity": (a, b) => (b.media.popularity || 0) - (a.media.popularity || 0),
+  "repeat": (a, b) => (b.repeat || 0) - (a.repeat || 0),
 }
 
 function filter(entry, filterObject) {
