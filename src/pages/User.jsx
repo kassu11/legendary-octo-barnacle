@@ -362,7 +362,7 @@ function MediaList(props) {
   const location = useLocation();
   const { accessToken, authUserData } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserId(() => user().id || undefined, () => props.type.toUpperCase(), accessToken);
+  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => user().name || undefined, () => props.type.toUpperCase(), accessToken);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   const _navigate = useNavigate();
