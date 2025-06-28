@@ -84,6 +84,8 @@ function modifyMediaListData(listData, type, options) {
         return (a, b) => (b.media.averageScore || 0) - (a.media.averageScore || 0);
       case "popularity":
         return (a, b) => (b.media.popularity || 0) - (a.media.popularity || 0);
+      case "repeat":
+        return (a, b) => (b.repeat || 0) - (a.repeat || 0);
       default:
         console.error("No sort given");
     }

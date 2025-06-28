@@ -653,6 +653,12 @@ function MediaList(props) {
             <option value="releaseDate">Release Date</option>
             <option value="averageScore">Average Score</option>
             <option value="popularity">Popularity</option>
+            <option value="repeat">
+              <Switch>
+                <Match when={props.type === "anime"}>Rewatches</Match>
+                <Match when={props.type === "manga"}>Rereads</Match>
+              </Switch>
+            </option>
           </select>
           <Switch>
             <Match when={location.search}>
