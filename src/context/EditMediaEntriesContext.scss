@@ -5,12 +5,18 @@
   width: 100%;
   border: none;
   box-shadow: 0 0 1rem .25rem var(--background-200);
+  background-color: var(--background-350);
   border-radius: 0.25rem;
   container-type: inline-size;
   container-name: media-editor;
 
   &:not(:has(.media-editor-warning-dialog[open]))::backdrop {
     background-color: var(--shadow-400);
+  }
+
+  .score-star-input, .score-emoji-input {
+    height: 100%;
+    padding-block: .75rem;
   }
 }
 
