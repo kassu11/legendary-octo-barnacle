@@ -24,6 +24,7 @@ import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { RedirectSearchHeaders } from "./pages/SearchHeaderRedirect.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
+import ComparePage from "./pages/ComparePage.jsx";
 
 const root = document.getElementById("root")
 
@@ -60,6 +61,12 @@ render(
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />
             <Route path="/activity/:id" matchFilters={idFilter} component={Activity} />
+            {/* <Route path="/compare/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} /> */}
+            <Route path="/compare">
+              <Route path="/" component={() => <Navigate href="anime" />} />
+              <Route path="/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} />
+              <Route path="*" component={() => <Navigate href="/compare" />} />
+            </Route>
             <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}>
               <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}>
                 <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHome} />

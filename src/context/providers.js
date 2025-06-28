@@ -17,3 +17,6 @@ export const useResponsive = () => useContext(ResponsiveContext);
 
 export const UserMediaListContext = createContext();
 export const useUserMediaList = () => useContext(UserMediaListContext);
+
+export const CompareMediaListContext = createContext();
+export const useCompareMediaList = () => useContext(CompareMediaListContext);
