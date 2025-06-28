@@ -1,6 +1,12 @@
 {
-  "short_name": "LOB",
   "name": "Legendary Octo Barnacle",
+  "id": "legendary-octo-barnacle",
+  "short_name": "LOB",
+  "start_url": "/legendary-octo-barnacle",
+  "background_color": "#000000",
+  "theme_color": "#eb4034",
+  "display": "fullscreen",
+  "lang": "en",
   "icons": [
     {
       "src": "./vite.svg",
@@ -16,9 +22,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#eb4034",
-  "background_color": "#000000"
+  ]
 }
