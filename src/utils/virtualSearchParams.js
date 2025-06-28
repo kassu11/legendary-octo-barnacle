@@ -64,13 +64,13 @@ export function useVirtualSearchParams() {
     // The user is trying to remove search results that are part of the virtual url
     // The results are coming from params.header, so lets redirect the user to a page without the current header
     if (keyIsNullish(sParams, ...Object.keys(virtualObj))) {
-      return navigate(`/search/${params.type}${searchQueryStringFromObject(sParams)}`, options);
+      return navigate(`/search/${params.type}${searchQueryStringFromObject(sParams)}`, {scroll: false, ...options});
     }
 
     if (params.header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
       const { season = virtualObj.season, year = virtualObj.year, ...restParams } = sParams;
       const header = `${season}-${year}`;
-      return navigate(`/search/${params.type}/${header}${searchQueryStringFromObject(restParams, false, header)}`, options);
+      return navigate(`/search/${params.type}/${header}${searchQueryStringFromObject(restParams, false, header)}`, {scroll: false, ...options});
     }
 
     // Keep this-season in header if search has only year or season params, but if both are present switch the header to {season-year}
@@ -78,7 +78,7 @@ export function useVirtualSearchParams() {
       const { season = searchParams.season, year = searchParams.year, ...restParams } = sParams;
       if (season != null && year != null) {
         const header = `${season}-${year}`;
-        return navigate(`/search/${params.type}/${header}${searchQueryStringFromObject(restParams, false, header)}`, options);
+        return navigate(`/search/${params.type}/${header}${searchQueryStringFromObject(restParams, false, header)}`, {scroll: false, ...options});
       }
     }
 
