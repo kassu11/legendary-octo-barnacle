@@ -57,18 +57,31 @@
     --fs-800: clamp(1.4016rem, 0.9064rem + 1.9806vw, 2.4414rem);
     --fs-900: clamp(1.5768rem, 0.8744rem + 2.8095vw, 3.0518rem);
 
-    --background-600: oklch(0.30 0 0);
-    --background-500: oklch(0.25 0 0);
-    --background-400: oklch(0.20 0 0);
-    --background-350: oklch(0.175 0 0);
-    --background-300: oklch(0.15 0 0);
-    --background-200: oklch(0.10 0 0);
+    --background-color: #000;
+    --foreground-color: #fff;
+
+    --neutral-color-875: color-mix(in oklch, var(--foreground-color), var(--background-color) 87.5%);
+    --neutral-color-85: color-mix(in oklch, var(--foreground-color), var(--background-color) 85%);
+    --neutral-color-825: color-mix(in oklch, var(--foreground-color), var(--background-color) 82.5%);
+    --neutral-color-80: color-mix(in oklch, var(--foreground-color), var(--background-color) 80%);
+    --neutral-color-75: color-mix(in oklch, var(--foreground-color), var(--background-color) 75%);
+    --neutral-color-70: color-mix(in oklch, var(--foreground-color), var(--background-color) 70%);
+    --neutral-color-60: color-mix(in oklch, var(--foreground-color), var(--background-color) 60%);
+
+    --background-700: var(--neutral-color-60);
+    --background-600: var(--neutral-color-70);
+    --background-500: var(--neutral-color-75);
+    --background-400: var(--neutral-color-80);
+    --background-350: var(--neutral-color-825);
+    --background-300: var(--neutral-color-85);
+    --background-200: var(--neutral-color-875);
 
     --lime-400: oklch(0.85 0.34 148.22);
     --crimson-400: oklch(0.66 0.29 10.59);
     --red-400: oklch(0.67 0.28 26.71);
     --red-100: oklch(0.05 0.28 26.71);
     --dark-blue-400: oklch(0.35 0.23 263.34);
+    --gold-400: oklch(0.88 0.21 91.46);
 
     --text-500: oklch(0.97 0 0);
     --text-400: oklch(0.95 0 0);
@@ -84,7 +97,7 @@
   }
 
   body {
-    background-color: var(--background-200);
+    background-color: var(--background-color);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: var(--fs-400);
     color: var(--text-400);

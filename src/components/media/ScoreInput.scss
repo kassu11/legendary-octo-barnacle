@@ -1,18 +1,18 @@
 .score-star-input, .score-emoji-input {
   display: flex;
-  background-color: green;
+  background-color: var(--background-500);
   gap: .25rem;
   padding: .25rem;
   justify-content: space-around;
+  place-items: center;
+  label:not(.selected) svg {
+    color: var(--background-700);
+  }
 }
 
 .selected {
   .score-star-input & {
-    color: gold;
-  }
-
-  .score-emoji-input:has(&) .radio-container:not(&) svg {
-    color: #333;
+    color: var(--gold-400);
   }
 }
 
