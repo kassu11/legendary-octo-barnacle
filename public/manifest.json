@@ -5,7 +5,7 @@
   "start_url": "/legendary-octo-barnacle",
   "background_color": "#000000",
   "theme_color": "#eb4034",
-  "display": "fullscreen",
+  "display": "standalone",
   "lang": "en",
   "icons": [
     {
