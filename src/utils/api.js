@@ -260,11 +260,11 @@ const api = {
         default: return Fetch.authAnilist(token, queries.anilistUserNotifications, { page }, res => res.data.Page);  
       }
     }),
-    mediaListByUserId: reloadCache((id, type, token) => {
-      assert(id, "Id is missing");
+    mediaListByUserName: reloadCache((name, type, token) => {
+      assert(name, "Name is missing");
       return Fetch.authAnilist(token, queries.anilistUserMediaList, {
-        "userId": id,
-        "type": type,
+        userName: name,
+        type,
       }, res => res.data.MediaListCollection);
     }),
     favouritesByUserId: reloadCache((id, page, token) => {
