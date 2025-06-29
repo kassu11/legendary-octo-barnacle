@@ -145,7 +145,7 @@ function UserRow(props) {
   console.log("name", props.name);
 
   createEffect(() => {
-    if (mediaList()?.data && mediaList.savedOnCacheSuccessfully) {
+    if (mediaList()?.data && mediaList.indexedDBClosed) {
       setIncludeKeys(arr => {
         return [...new Set([...arr, mediaList().cacheKey])];
       });
@@ -154,7 +154,7 @@ function UserRow(props) {
 
   return (
     <li>
-      {console.log(props.name, mediaList.savedOnCacheSuccessfully)}
+      {console.log(props.name, mediaList.indexedDBClosed)}
       <Switch>
         <Match when={mediaList.error}>
           <p>No user found with name: "{props.name}"</p>
