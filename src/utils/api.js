@@ -644,6 +644,7 @@ function cacheBuilder(settings) {
       const [data, setData] = createSignal(undefined);
       const [error, setError] = createSignal(false);
       const [loading, setLoading] = createSignal(false);
+      const [indexedDBClosed, setIndexedDBClosed] = createSignal(true);
 
       let request = null;
       const checkCacheBeforeFetch = settings.type == "default" || settings.type == "only-if-cached";
@@ -664,10 +665,11 @@ function cacheBuilder(settings) {
           localFetchCacheStorage.set(request.cacheKey, mutateData);
 
           if (settings.storeName) {
+            setIndexedDBClosed(false);
             const cacheReq = IndexedDB.fetchCache();
             cacheReq.onsuccess = evt => {
               const db = evt.target.result;
-              const store = IndexedDB.store(db, settings.storeName, "readwrite");
+              const store = IndexedDB.store(db, settings.storeName, "readwrite", () => setIndexedDBClosed(true), () => setIndexedDBClosed(true));
               const putReq = store.put(mutateData);
               if (callback) {
                 putReq.onsuccess = callback;
@@ -737,8 +739,10 @@ function cacheBuilder(settings) {
           console.log("Fetching", settings.type, request.body || request.url);
         }
 
-        setLoading(true);
-        setError(false);
+        batch(() => {
+          setLoading(true);
+          setError(false);
+        });
 
         const localCacheData = localFetchCacheStorage.get(request.cacheKey);
         if (localCacheData && localCacheData.expires > new Date()) {
@@ -791,6 +795,7 @@ function cacheBuilder(settings) {
       Object.defineProperties(data, {
         error: { get: () => error() },
         loading: { get: () => loading() },
+        indexedDBClosed: { get: () => indexedDBClosed() },
       });
 
       onCleanup(() => request?.abort());
@@ -807,10 +812,16 @@ export class IndexedDB {
     }
   }
 
-  static store(db, storeName, mode, error) {
+  static store(db, storeName, mode, error, complete) {
     const tx = db.transaction(storeName, mode);
-    if (error) { tx.onerror = error; }
-    else { tx.onerror = console.warn; }
+    if (error) {
+      tx.onerror = error;
+    } else {
+      tx.onerror = console.warn;
+    }
+    if (complete) {
+      tx.oncomplete = complete;
+    }
     const store = tx.objectStore(storeName);
 
     return store;
