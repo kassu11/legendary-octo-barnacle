@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { For, Show, Switch, createEffect, createSignal, on } from "solid-js";
+import { ErrorBoundary, For, Show, Switch, createEffect, createSignal, on } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import Banner from "../components/media/Banner.jsx";
@@ -79,7 +79,7 @@ function MediaInfo(props) {
   });
 
   return (
-    <>
+    <ErrorBoundary fallback="Error">
       <Banner src={props.media.bannerImage} />
       <div class="media-page-content">
         <aside class="media-page-left-aside">
@@ -238,11 +238,13 @@ function MediaInfo(props) {
               <li>{formatMediaStatus(props.media.status)}</li>
             </ul>
             <ul>
-              <li>Source: 
-                <A href={"/search/" + props.media.type.toLowerCase() + "?source=" + Object.entries(searchSources).find(([, val]) => val.api === props.media.source)[0]}>
-                  {formatMediaSource(props.media.source)}
-                </A>
-              </li>
+              <Show when={props.media.source}>
+                <li>Source: 
+                  <A href={"/search/" + props.media.type.toLowerCase() + "?source=" + Object.entries(searchSources).find(([, val]) => val.api === props.media.source)[0]}>
+                    {formatMediaSource(props.media.source)}
+                  </A>
+                </li>
+              </Show>
               <li>Members: {numberCommas(props.media.popularity)}</li>
               <li>Favourites: {numberCommas(props.media.favourites)}</li>
             </ul>
@@ -286,7 +288,7 @@ function MediaInfo(props) {
           />
         </section>
       </div>
-    </>
+    </ErrorBoundary>
   )
 }
 
