@@ -147,7 +147,11 @@ function UserRow(props) {
   createEffect(() => {
     if (mediaList()?.data && mediaList.indexedDBClosed) {
       setIncludeKeys(arr => {
-        return [...new Set([...arr, mediaList().cacheKey])];
+        if (enabled()) {
+          return [...new Set([...arr, mediaList().cacheKey])];
+        } else {
+          return arr.filter(val => val !== mediaList().cacheKey);
+        }
       });
     }
   });

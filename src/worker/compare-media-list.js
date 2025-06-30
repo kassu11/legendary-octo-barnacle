@@ -15,8 +15,6 @@ onmessage = ({ data: { includeKeys, excludeKeys, type, sort, reverse, ...filteri
       }
     }
 
-    console.log(includeKeys.map(v => v.substring(1020, 1080)), excludeKeys.map(v => v.substring(1020, 1080)));
-
     for (const includeKey of includeKeys) {
       const getReg = store.get(includeKey);
       getReg.onerror = error;
