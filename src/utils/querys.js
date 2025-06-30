@@ -1252,6 +1252,7 @@ fragment mediaListEntry on MediaList {
     coverImage {
       extraLarge
       large
+      color
     }
     type
     format

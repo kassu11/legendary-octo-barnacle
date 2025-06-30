@@ -106,6 +106,23 @@ export const formatMediaFormat = text => {
   }
 }
 
+export function formatUsersMediaStatus(status, type) {
+  switch(status) {
+    case "COMPLETED":
+    case "DROPPED":
+    case "PAUSED":
+    case "PLANNING":
+      return capitalize(status);
+    case "CURRENT":
+      return type === "anime" ? "Watching" : "Reading";
+    case "REPEATING":
+      return type === "anime" ? "Rewatching" : "Rereading";
+    default:
+      console.error("Unknown status");
+      return status;
+  }
+}
+
 export const formatMediaStatus = status => {
   if (!status?.length) {
     return "";

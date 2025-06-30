@@ -67,7 +67,9 @@
     --neutral-color-75: color-mix(in oklch, var(--foreground-color), var(--background-color) 75%);
     --neutral-color-70: color-mix(in oklch, var(--foreground-color), var(--background-color) 70%);
     --neutral-color-60: color-mix(in oklch, var(--foreground-color), var(--background-color) 60%);
+    --neutral-color-50: color-mix(in oklch, var(--foreground-color), var(--background-color) 50%);
 
+    --background-800: var(--neutral-color-50);
     --background-700: var(--neutral-color-60);
     --background-600: var(--neutral-color-70);
     --background-500: var(--neutral-color-75);
@@ -85,9 +87,10 @@
 
     --text-500: oklch(0.97 0 0);
     --text-400: oklch(0.95 0 0);
-    --text-300: oklch(0.75 0 0);
+    --text-300: oklch(0.85 0 0);
     --text-200: oklch(0.65 0 0);
 
+    --shadow-500: oklab(0 0 0 / .7);
     --shadow-400: oklab(0 0 0 / .8);
     --shadow-300: oklab(0 0 0 / .9);
   }
@@ -270,6 +273,11 @@
 
   .inline-container {
     container-type: inline-size;
+  }
+
+  .cover {
+    aspect-ratio: 5.5/8;
+    object-fit: cover;
   }
 }
 
