@@ -10,12 +10,15 @@ import api, { IndexedDB } from "../utils/api";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
 import { Tooltip } from "../components/Tooltips.jsx";
 import CompareMediaListWorker from "../worker/compare-media-list.js?worker";
-
+import { formatMediaStatus, formatTitleToUrl, formatUsersMediaStatus } from "../utils/formating.js";
+import "./ComparePage.scss";
+import Score from "../components/media/Score.jsx";
 
 export default function ComparePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const params = useParams();
   const [names, storeNames] = createStore([]);
+  const [users, storeUsers] = createStore({});
   const [compareMediaList, setCompareMediaList] = createSignal([]);
   const [includeKeys, setIncludeKeys] = createSignal([]);
   const [excludeKeys, setExcludeKeys] = createSignal([]);
@@ -102,7 +105,7 @@ export default function ComparePage() {
   createEffect(updateCompareScores);
 
   return (
-    <CompareMediaListContext.Provider value={{ compareMediaList, setIncludeKeys, setExcludeKeys }}>
+    <CompareMediaListContext.Provider value={{ compareMediaList, setIncludeKeys, setExcludeKeys, users, storeUsers }}>
       <div>
         Compare
         <A href="?user=kassu11">kassu11</A>
@@ -136,23 +139,32 @@ export default function ComparePage() {
 function UserRow(props) {
   assert(props.name, "Name is missing");
   const params = useParams();
-  const { setIncludeKeys } = useCompareMediaList();
+  const { setIncludeKeys, setExcludeKeys, users, storeUsers } = useCompareMediaList();
   const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = createSignal(true);
+  const [exclude, setExclude] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => props.name, () => params.type.toUpperCase(), accessToken);
 
   console.log("name", props.name);
 
+  function setKeys(keys, excludedValue) {
+    if (enabled() && exclude() === excludedValue) {
+      return [...new Set([...keys, mediaList().cacheKey])];
+    } else {
+      return keys.filter(val => val !== mediaList().cacheKey);
+    }
+  }
+
   createEffect(() => {
-    if (mediaList()?.data && mediaList.indexedDBClosed) {
-      setIncludeKeys(arr => {
-        if (enabled()) {
-          return [...new Set([...arr, mediaList().cacheKey])];
-        } else {
-          return arr.filter(val => val !== mediaList().cacheKey);
-        }
-      });
+    if (mediaList()) {
+      console.log(mediaList().data.user.name, mediaList().data.user);
+      storeUsers(mediaList().data.user.name, mediaList().data.user);
+
+      if (mediaList.indexedDBClosed) {
+        setIncludeKeys(keys => setKeys(keys, false));
+        setExcludeKeys(keys => setKeys(keys, true));
+      }
     }
   });
 
@@ -166,6 +178,9 @@ function UserRow(props) {
         <Match when={mediaList() || mediaList.loading}>
           <label>
             <input type="checkbox" name="enable" checked={!enabled()} onChange={e => setEnabled(!e.target.checked)} /> Disable user
+          </label>
+          <label>
+            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Hide {params.type} from this user
           </label>
           <Show when={mediaList()} fallback={
             <LoaderCircle>
@@ -188,20 +203,47 @@ function UserRow(props) {
 }
 
 function CompareMediaListContent() {
-  const { compareMediaList } = useCompareMediaList();
+  const { compareMediaList, users } = useCompareMediaList();
+  const params = useParams();
+
   return (
-    <ol class="grid-column-auto-fill">
+    <ol class="pg-compare-content grid-column-auto-fill">
       <For each={compareMediaList()}>{media => (
-        <li>
-          {media.title.userPreferred}
-          <img src={media.coverImage.large} alt="" />
-          <ol>
-            <For each={media.scores}>{user => (
-              <li>
-                {user.name} {user.score}
-              </li>
-            )}</For>
-          </ol>
+        <li class="pg-compare-media-card" style={{"--color": media.coverImage.color}}>
+          <Show when={media.bannerImage}>
+            <img src={media.bannerImage} class="bg" inert alt="Background banner" />
+          </Show>
+          <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+            <img class="cover" src={media.coverImage.large} alt="Media cover" />
+            <div class="footer">
+              Avg: {media.score.toFixed(2)}
+              {media.repeats}
+              <Switch>
+                <Match when={params.type === "anime"}>
+                  <Show when={media.chapters}>Ep {media.episodes}</Show>
+                </Match>
+                <Match when={params.type === "manga"}>
+                  <Show when={media.chapters}>Ch {media.chapters}</Show><br />
+                  <Show when={media.volumes}>Vol {media.volumes}</Show>
+                </Match>
+              </Switch>
+            </div>
+          </A>
+          <div>
+            <p class="title">{media.title.userPreferred}</p>
+            <ol class="pg-compare-media-users">
+              <For each={media.scores}>{user => (
+                <li>
+                  <img class="profile" src={users[user.name].avatar.large} alt="Profile picture" />
+                  <span class="name">{user.name}</span>
+                  <Show when={user.status !== "COMPLETED"}>
+                    <span class="status">{formatUsersMediaStatus(user.status, params.type)}</span>
+                  </Show>
+                  <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
+                </li>
+              )}</For>
+            </ol>
+          </div>
         </li>
       )}</For>
     </ol>
