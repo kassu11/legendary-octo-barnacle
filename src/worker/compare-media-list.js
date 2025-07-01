@@ -58,10 +58,10 @@ function includeCompareList(listData, entries, type, filterObject, filteringComp
       if (filter(entry, filterObject)) {
         const id = entry.media.id;
         entries[id] ??= entry.media;
-        entries[id].scores ??= {}
+        entries[id].mediaEntries ??= {}
         delete entry.media;
         entry.name = listData.data.user.name;
-        entries[id].scores[listData.data.user.name] ??= entry;
+        entries[id].mediaEntries[listData.data.user.name] ??= entry;
       }
     });
   });
@@ -86,18 +86,23 @@ function formatCompareList(entries, minUserCount, sort, reverse) {
       return false;
     }
 
-    entry.scores = Object.values(entry.scores);
-    entry.scores.sort((a, b) => b.score - a.score);
-    let count = 0, total = 0;
-    entry.scores.forEach(v => {
+    entry.mediaEntries = Object.values(entry.mediaEntries);
+    entry.mediaEntries.sort((a, b) => b.score - a.score);
+    let scoreCount = 0, scoreTotal = 0;
+    let repeatTotal = 0;
+    entry.mediaEntries.forEach(v => {
       if (v.score > 0) {
-        total += v.score;
-        count++;
+        scoreTotal += v.score;
+        scoreCount++;
       }
+      repeatTotal += v.repeat;
+
+
     });
-    entry.score = total / count;
-    entry.users = entry.scores.length;
-    return entry.scores.length >= minUserCount;
+    entry.score = scoreTotal / scoreCount;
+    entry.users = entry.mediaEntries.length;
+    entry.repeat = repeatTotal;
+    return entry.mediaEntries.length >= minUserCount;
   });
 
   const sortFunction = generateSortFunction(sort, reverse ? -1 : 1);
