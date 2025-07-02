@@ -1,6 +1,6 @@
 import { IndexedDB } from "../utils/api";
 
-onmessage = ({ data: { includeKeys, excludeKeys, type, sort, reverse, ...filtering } }) => {
+onmessage = ({ data: { includeKeys, excludeKeys, type, ...filtering } }) => {
   const cacheReq = IndexedDB.fetchCache();
   cacheReq.onerror = error;
   cacheReq.onsuccess = evt => {
@@ -11,7 +11,7 @@ onmessage = ({ data: { includeKeys, excludeKeys, type, sort, reverse, ...filteri
     let count = 0;
     function listFilteringComplate() {
       if (includeKeys.length + excludeKeys.length === ++count) {
-        formatCompareList(entries, includeKeys.length, sort, reverse);
+        formatCompareList(entries, includeKeys.length, filtering);
       }
     }
 
@@ -80,7 +80,7 @@ function excludeCompareList(listData, entries, filteringComplate) {
   filteringComplate();
 }
 
-function formatCompareList(entries, minUserCount, sort, reverse) {
+function formatCompareList(entries, minUserCount, filterObject) {
   entries = Object.values(entries).filter(entry => {
     if (entry.exclude) {
       return false;
@@ -102,10 +102,15 @@ function formatCompareList(entries, minUserCount, sort, reverse) {
     entry.score = scoreTotal / scoreCount;
     entry.users = entry.mediaEntries.length;
     entry.repeat = repeatTotal;
+
+    if (filterObject.repeat && repeatTotal === 0) {
+      return false;
+    }
+
     return entry.mediaEntries.length >= minUserCount;
   });
 
-  const sortFunction = generateSortFunction(sort, reverse ? -1 : 1);
+  const sortFunction = generateSortFunction(filterObject.sort, filterObject.reverse ? -1 : 1);
   entries.sort(sortFunction);
 
   const cacheReq = IndexedDB.user();
@@ -128,8 +133,12 @@ function generateSortFunction(sort, direction = 1) {
       return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
     case "title":
       return (a, b) => (sortFunctions.title(a, b) * direction) || sortFunctions.score(a, b);
-    case "progress":
-      return (a, b) => (sortFunctions.progress(a, b) * direction) || sortFunctions.title(a, b);
+    case "episodes":
+      return (a, b) => (sortFunctions.episodes(a, b) * direction) || sortFunctions.title(a, b);
+    case "chapters":
+      return (a, b) => (sortFunctions.chapters(a, b) * direction) || sortFunctions.title(a, b);
+    case "volumes":
+      return (a, b) => (sortFunctions.volumes(a, b) * direction) || sortFunctions.title(a, b);
     case "updatedAt":
       return (a, b) => (sortFunctions.updatedAt(a, b) * direction) || sortFunctions.title(a, b);
     case "startedAt":
@@ -152,6 +161,9 @@ function generateSortFunction(sort, direction = 1) {
 
 const sortFunctions = {
   "score": (a, b) => (b.score || 0) - (a.score || 0),
+  "episodes": (a, b) => (b.episodes || 0) - (a.episodes || 0),
+  "chapters": (a, b) => (b.chapters || 0) - (a.chapters || 0),
+  "volumes": (a, b) => (b.volumes || 0) - (a.volumes || 0),
   "title": (a, b) => a.title.userPreferred.localeCompare(b.title.userPreferred),
   "progress": (a, b) => (b.progress || 0) - (a.progress || 0),
   "updatedAt": (a, b) => (a.updatedAt || 0) > (b.updatedAt || 0) ? -1 : 1,
@@ -194,19 +206,7 @@ function filter(entry, filterObject) {
   if (filterObject.userStatus && entry.status !== filterObject.userStatus) {
     return false;
   }
-  if (filterObject.private && !entry.private) {
-    return false;
-  }
-  if (filterObject.notes && !entry.notes) {
-    return false;
-  }
-  if (filterObject.repeat && !(entry.repeat > 0)) {
-    return false;
-  }
-  if (filterObject.missingStart && entry.startedAt?.year) {
-    return false;
-  }
-  if (filterObject.missingScore && entry.score !== 0) {
+  if (filterObject.missingScore === false && entry.score === 0) {
     return false;
   }
 

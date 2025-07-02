@@ -1,12 +1,57 @@
 @layer layout {
+
+  .pg-compare-users {
+    display: grid;
+    grid-template-columns: 3rem auto auto auto auto;
+    justify-content: start;
+    gap: 1rem;
+
+    li {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-column: 1 / -1;
+    }
+  }
+
+  .pg-compare-filter-panel {
+    width: min(100% - 1rem, 40rem);
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    margin: auto;
+  }
+
   .pg-compare-content {
     width: min(100% - 1rem, 140rem);
     margin-inline: auto;
     gap: 1rem;
     --grid-column-width: 32rem;
+
+    &:not(.loading) {
+      .cp-loader-circle {
+        transition-delay: .2s;
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+    .cp-loader-circle {
+      position: absolute;
+      z-index: 1;
+      justify-self: center;
+      margin-top: 5rem;
+      transition: all .2s;
+      transition-behavior: allow-discrete;
+      --loader-size: 5rem;
+      --loader-border-size: .5rem;
+    }
+
+    &.loading .pg-compare-media-card {
+      opacity: .5;
+    }
   }
 
   .pg-compare-media-card {
+    transition: opacity .2s;
     .wrapper {
       background-color: color-mix(in oklch, var(--background-400), var(--color, var(--neutral-color-60)) 30%);
       position: relative;
