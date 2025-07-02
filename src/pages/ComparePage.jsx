@@ -409,7 +409,7 @@ function CompareMediaListContent() {
                     </span>
                     <Show when={media.score}>
                       <span>
-                        {Math.round(media.score * 100) / 100}/10
+                        {Math.round(media.score * 100) / 100}
                         <Tooltip tipPosition="right">Users average score</Tooltip>
                       </span>
                     </Show>

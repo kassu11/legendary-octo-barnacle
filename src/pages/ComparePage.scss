@@ -218,7 +218,7 @@
 
   .pg-compare-media-users {
     list-style: none;
-    grid-template-columns: auto 1fr repeat(2, auto);
+    grid-template-columns: 1fr repeat(3, auto);
     display: grid;
     gap: .25rem;
     padding: 0;
