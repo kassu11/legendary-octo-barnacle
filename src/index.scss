@@ -273,6 +273,30 @@
     gap: .5rem;
   }
 
+  .flex-bullet-separator {
+    display: flex;
+    list-style: none;
+    gap: 0 var(--gap, 2rem);
+    padding: 0;
+    flex-wrap: wrap;
+    overflow: clip;
+
+    > * {
+      position: relative;
+
+      &:not(:first-child)::before {
+        content: "";
+        position: absolute;
+        width: var(--bullet-size, .4rem);
+        height: var(--bullet-size, .4rem);
+        top: calc(50% + .1em);
+        transform: translateY(-50%) translateX(calc(var(--gap, 2rem) / -2 + -50%));
+        border-radius: 100%;
+        background-color: var(--text-200);
+      }
+    }
+  }
+
   .inline-container {
     container-type: inline-size;
   }

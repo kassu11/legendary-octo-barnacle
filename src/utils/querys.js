@@ -1255,6 +1255,8 @@ fragment mediaListEntry on MediaList {
       color
     }
     type
+    season
+    seasonYear
     format
     status(version: 2)
     episodes
