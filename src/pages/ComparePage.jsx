@@ -10,10 +10,11 @@ import api, { IndexedDB } from "../utils/api";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
 import { Tooltip } from "../components/Tooltips.jsx";
 import CompareMediaListWorker from "../worker/compare-media-list.js?worker";
-import { formatMediaStatus, formatTitleToUrl, formatUsersMediaStatus } from "../utils/formating.js";
+import { capitalize, formatMediaFormat, formatMediaStatus, formatTitleToUrl, formatUsersMediaStatus, languageFromCountry } from "../utils/formating.js";
 import "./ComparePage.scss";
 import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
+import { searchFormats } from "../utils/searchObjects.js";
 
 export default function ComparePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -251,7 +252,7 @@ function CompareMediaListContent() {
               </div>
             </Show>
           </A>
-          <div>
+          <div class="pg-compare-card-content">
             <p class="title">{media.title.userPreferred}</p>
             <ol class="pg-compare-media-users">
               <For each={media.mediaEntries}>{user => (
@@ -272,6 +273,49 @@ function CompareMediaListContent() {
                 </li>
               )}</For>
             </ol>
+            <ul class="flex-bullet-separator">
+              <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
+                <li>
+                  <Switch>
+                    <Match when={media.countryOfOrigin !== "JP"}> 
+                      <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
+                        {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
+                      </A>
+                    </Match>
+                    <Match when={media.countryOfOrigin === "JP"}> 
+                      <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
+                        {formatMediaFormat(media.format)}
+                      </A>
+                    </Match>
+                  </Switch>
+                </li>
+              )}</Show>
+              <Switch>
+                <Match when={params.type === "manga"}>
+                  <Switch>
+                    <Match when={media.startDate?.year}>
+                      <A href={"/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
+                    </Match>
+                    <Match when={media.startDate?.year == null}>
+                      <A href="/search/manga/tba">TBA</A>
+                    </Match>
+                  </Switch>
+                </Match>
+                <Match when={params.type === "anime"}>
+                  <Switch>
+                    <Match when={media.seasonYear && media.season}>
+                      <A href={"/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
+                    </Match>
+                    <Match when={media.startDate?.year}>
+                      <A href={"/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
+                    </Match>
+                    <Match when={media.startDate?.year == null}>
+                      <A href="/search/anime/tba">TBA</A>
+                    </Match>
+                  </Switch>
+                </Match>
+              </Switch>
+            </ul>
           </div>
         </li>
       )}</For>

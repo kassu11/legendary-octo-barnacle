@@ -191,7 +191,7 @@ function MediaInfo(props) {
         <section class="media-page-main">
           <div class="media-page-title-info">
             <h1>{props.media.title.userPreferred}</h1>
-            <ul class="media-page-info-list">
+            <ul class="flex-bullet-separator">
               <li>
                 <Switch>
                   <Match when={props.media.type === "MANGA"}>
