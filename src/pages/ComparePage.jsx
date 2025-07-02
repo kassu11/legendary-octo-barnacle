@@ -1,5 +1,5 @@
-import { A, useParams, useSearchParams } from "@solidjs/router";
-import { createSignal, For, on } from "solid-js";
+import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { createSignal, For, on, Show } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import { wrapToArray, wrapToSet } from "../utils/arrays";
@@ -17,6 +17,7 @@ import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 
 export default function ComparePage() {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const params = useParams();
   const [names, storeNames] = createStore([]);
@@ -24,6 +25,7 @@ export default function ComparePage() {
   const [compareMediaList, setCompareMediaList] = createSignal([]);
   const [includeKeys, setIncludeKeys] = createSignal([]);
   const [excludeKeys, setExcludeKeys] = createSignal([]);
+  const [loading, setLoading] = createSignal(true);
 
   createEffect(on(() => searchParams.user, user => {
     const names = wrapToSet(user);
@@ -40,7 +42,7 @@ export default function ComparePage() {
   const notesFilter = () => searchParams.notes === "true";
   const rewatchedFilter = () => searchParams.repeat === "true";
   const missingStartFilter = () => searchParams.missingStart === "true";
-  const missingScoreFilter = () => searchParams.missingScore === "true";
+  const missingScoreFilter = () => searchParams.missingScore !== "false";
   const reverse = () => searchParams.reverse === "true";
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
@@ -76,28 +78,28 @@ export default function ComparePage() {
         userStatus: userStatus(),
       };
 
-      if (postObject.includeKeys.length === 0 && postObject.excludeKeys.length === 0) {
+      if (postObject.includeKeys.length === 0) {
         return;
       }
 
-      console.log("Posted message");
-
       worker.postMessage(postObject);
+      setLoading(true);
 
       worker.onmessage = message => {
         if (message.data === "success") {
-          console.log("success")
           const cacheReq = IndexedDB.user();
           cacheReq.onsuccess = evt => {
             const db = evt.target.result;
             const store = IndexedDB.store(db, "data", "readonly");
             const getReq = store.get("compare_list");
+            getReq.onerror = () => setLoading(false);
             getReq.onsuccess = (evt) => {
-              console.log("Worker event", evt.target.result);
+              setLoading(false);
               setCompareMediaList(evt.target.result || {});
             }
           }
         } else {
+          setLoading(false);
           console.error("Error");
         }
       }
@@ -107,31 +109,190 @@ export default function ComparePage() {
   createEffect(updateCompareScores);
 
   return (
-    <CompareMediaListContext.Provider value={{ compareMediaList, setIncludeKeys, setExcludeKeys, users, storeUsers }}>
+    <CompareMediaListContext.Provider value={{ compareMediaList, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
       <div>
-        Compare
-        <A href="?user=kassu11">kassu11</A>
-        <A href="?user=MrMiika">MrMiika</A>
-        <button onClick={() => {
-          setSearchParams({ user: ["kassu11", "MrMiika"] });
-        }}>
-          Order 1
-        </button>
-        <button onClick={() => {
-          setSearchParams({ user: ["MrMiika", "kassu11"] });
-        }}>
-          Order 2
-        </button>
-        <button onClick={() => {
-          setSearchParams({ user: ["MrMiika", "lmnoo"] });
-        }}>
-          Order 3
-        </button>
-        <ul>
+        <ul class="pg-compare-users">
           <For each={names}>{name => (
             <UserRow name={name} />
           )}</For>
         </ul>
+      </div>
+      <div class="pg-compare-filter-panel">
+        <input type="text" placeholder="Search" onInput={e => setSearchParams({ search: e.target.value || undefined })} value={search()} />
+        <Show when={null?.data}>
+          <ol>
+            <li>
+              <button onClick={() => navigate("")}>
+                <Show when={params.list === undefined}>{"> "}</Show>
+                All {null.data.total}
+              </button>
+            </li>
+            <For each={null.data.lists}>{list => (
+              <li>
+                <button onClick={() => navigate(list.name)}>
+                  <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
+                  {list.name} {list.entries.length}
+                </button>
+              </li>
+            )}
+            </For>
+          </ol>
+        </Show>
+        <select name="format" onChange={e => setSearchParams({ format: e.target.value || undefined })} value={format() || ""}>
+          <option value="" hidden>Format</option>
+          <Show when={format()}>
+            <option value="">All formats</option>
+          </Show>
+          <option value="MOVIE">Movie</option>
+          <option value="MUSIC">Music</option>
+          <option value="ONA">Ona</option>
+          <option value="OVA">Ova</option>
+          <option value="SPECIAL">Special</option>
+          <option value="TV">TV</option>
+          <option value="TV_SHORT">TV short</option>
+        </select>
+        <select name="userStatus" onChange={e => setSearchParams({ userStatus: e.target.value || undefined })} value={userStatus() || ""}>
+          <option value="" hidden>User Status</option>
+          <Show when={userStatus()}>
+            <option value="">Any User Status</option>
+          </Show>
+          <option value="COMPLETED">Completed</option>
+          <option value="CURRENT">
+            <Switch>
+              <Match when={params.type === "anime"}>Watching</Match>
+              <Match when={params.type === "manga"}>Reading</Match>
+            </Switch>
+          </option>
+          <option value="DROPPED">Dropped</option>
+          <option value="PAUSED">Paused</option>
+          <option value="PLANNING">Planning</option>
+          <option value="REPEATING">
+            <Switch>
+              <Match when={params.type === "anime"}>Rewatching</Match>
+              <Match when={params.type === "manga"}>Rereading</Match>
+            </Switch>
+          </option>
+        </select>
+        <select name="status" onChange={e => setSearchParams({ status: e.target.value || undefined })} value={status() || ""}>
+          <option value="" hidden>Status</option>
+          <Show when={status()}>
+            <option value="">Any Status</option>
+          </Show>
+          <option value="RELEASING">Releasing</option>
+          <option value="FINISHED">Finished</option>
+          <option value="NOT_YET_RELEASED">Not Yet Released</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+        <select name="genre" onChange={e => setSearchParams({ genre: e.target.value || undefined })} value={genre() || ""}>
+          <option value="" hidden>Genre</option>
+          <Show when={genre()}>
+            <option value="">All genres</option>
+          </Show>
+          <option value="Action">Action</option>
+          <option value="Adventure">Adventure</option>
+          <option value="Comedy">Comedy</option>
+          <option value="Drama">Drama</option>
+          <option value="Ecchi">Ecchi</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Hentai">Hentai</option>
+          <option value="Horror">Horror</option>
+          <option value="Mahou Shoujo">Mahou Shoujo</option>
+          <option value="Mecha">Mecha</option>
+          <option value="Music">Music</option>
+          <option value="Mystery">Mystery</option>
+          <option value="Psychological">Psychological</option>
+          <option value="Romance">Romance</option>
+          <option value="Sci-Fi">Sci-Fi</option>
+          <option value="Slice of Life">Slice of Life</option>
+          <option value="Sports">Sports</option>
+          <option value="Supernatural">Supernatural</option>
+          <option value="Thriller">Thriller</option>
+        </select>
+        <select name="countryOfOrigin" onChange={e => setSearchParams({ countryOfOrigin: e.target.value || undefined })} value={countryOfOrigin() || ""}>
+          <option value="" hidden>Country</option>
+          <Show when={countryOfOrigin()}>
+            <option value="">All countries</option>
+          </Show>
+          <option value="CN">China</option>
+          <option value="JP">Japan</option>
+          <option value="KR">South Korea</option>
+          <option value="TW">Taiwan</option>
+        </select>
+        <select name="isAdult" onChange={e => setSearchParams({ isAdult: e.target.value || undefined })} value={isAdult() === undefined ? "" : String(isAdult())}>
+          <option value="" hidden>Age rating</option>
+          <Show when={isAdult() !== undefined}>
+            <option value="">All ratings</option>
+          </Show>
+          <option value="false">R-17+</option>
+          <option value="true">R-18</option>
+        </select>
+        <input type="number" name="year" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => setSearchParams({ year: e.target.value || undefined })} />
+        <label htmlFor="repeat">
+          <input type="checkbox" name="repeat" id="repeat" checked={rewatchedFilter()} onChange={e => setSearchParams({ repeat: e.target.checked ? "true" : undefined })} />
+          {" "}
+          <Switch>
+            <Match when={params.type === "anime"}>Rewatched</Match>
+            <Match when={params.type === "manga"}>Reread</Match>
+          </Switch>
+        </label>
+        <label htmlFor="missingScore">
+          <input type="checkbox" name="missingScore" id="missingScore" checked={missingScoreFilter()} onChange={e => setSearchParams({ missingScore: e.target.checked ? undefined : "false" })} />
+          {" "}Allow missing scores
+        </label>
+        <label htmlFor="reverse">
+          <input type="checkbox" name="reverse" id="reverse" checked={reverse()} onChange={e => setSearchParams({ reverse: e.target.checked ? "true" : undefined })} />
+          {" "}Reverse order
+        </label>
+        <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
+          <option value="averageScore">Average Score</option>
+          <Show when={params.type === "manga"}>
+            <option value="chapters">Chapters</option>
+          </Show>
+          <Show when={params.type === "anime"}>
+            <option value="episodes">Episodes</option>
+          </Show>
+          <option value="popularity">Popularity</option>
+          <option value="releaseDate">Release Date</option>
+          <option value="repeat">
+            <Switch>
+              <Match when={params.type === "anime"}>Rewatches</Match>
+              <Match when={params.type === "manga"}>Rereads</Match>
+            </Switch>
+          </option>
+          <option value="score">Score</option>
+          <option value="startedAt">Start Date</option>
+          <option value="title">Title</option>
+          <Show when={params.type === "manga"}>
+            <option value="volumes">Volumes</option>
+          </Show>
+        </select>
+        <Switch>
+          <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
+            <button style={{background: "skyblue"}} onClick={() => {
+              setSearchParams({
+                search: undefined,
+                format: undefined,
+                status: undefined,
+                genre: undefined,
+                countryOfOrigin: undefined,
+                missingStart: undefined,
+                missingScore: undefined,
+                isAdult: undefined,
+                year: undefined,
+                private: undefined,
+                notes: undefined,
+                repeat: undefined,
+                sort: undefined,
+                userStatus: undefined
+              });
+            }}>Remove filters</button>
+          </Match>
+          <Match when={params.list}>
+            <button style={{background: "lime"}} onClick={() => {
+              navigate("");
+            }}>Back to home</button>
+          </Match>
+        </Switch>
       </div>
       <CompareMediaListContent />
     </CompareMediaListContext.Provider>
@@ -148,8 +309,6 @@ function UserRow(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => props.name, () => params.type.toUpperCase(), accessToken);
 
-  console.log("name", props.name);
-
   function setKeys(keys, excludedValue) {
     if (enabled() && exclude() === excludedValue) {
       return [...new Set([...keys, mediaList().cacheKey])];
@@ -160,7 +319,6 @@ function UserRow(props) {
 
   createEffect(() => {
     if (mediaList()) {
-      console.log(mediaList().data.user.name, mediaList().data.user);
       storeUsers(mediaList().data.user.name, mediaList().data.user);
 
       if (mediaList.indexedDBClosed) {
@@ -172,18 +330,11 @@ function UserRow(props) {
 
   return (
     <li>
-      {console.log(props.name, mediaList.indexedDBClosed)}
       <Switch>
         <Match when={mediaList.error}>
           <p>No user found with name: "{props.name}"</p>
         </Match>
         <Match when={mediaList() || mediaList.loading}>
-          <label>
-            <input type="checkbox" name="enable" checked={!enabled()} onChange={e => setEnabled(!e.target.checked)} /> Disable user
-          </label>
-          <label>
-            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Hide {params.type} from this user
-          </label>
           <Show when={mediaList()} fallback={
             <LoaderCircle>
               <Tooltip tipPosition="right">
@@ -198,6 +349,12 @@ function UserRow(props) {
               {mediaList().data.user.name}
             </Show>
           </p>
+          <label>
+            <input type="checkbox" name="enable" checked={!enabled()} onChange={e => setEnabled(!e.target.checked)} /> Disable user
+          </label>
+          <label>
+            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Hide {params.type} from this user
+          </label>
         </Match>
       </Switch>
     </li>
@@ -205,124 +362,131 @@ function UserRow(props) {
 }
 
 function CompareMediaListContent() {
-  const { compareMediaList, users } = useCompareMediaList();
+  const { compareMediaList, users, loading } = useCompareMediaList();
   const params = useParams();
 
   return (
-    <ol class="pg-compare-content grid-column-auto-fill">
-      <For each={compareMediaList()}>{media => (
-        <li class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
-          <div class="wrapper">
-            <Show when={media.bannerImage}>
-              <img src={media.bannerImage} class="bg" inert alt="Background banner" />
-            </Show>
-            <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
-              <div class="header flex-space-between">
-                <Show when={media.repeat}>
-                  <div class="cp-card-repeat">
-                    <Tooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</Tooltip>
-                    {media.repeat}
-                    <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
+    <>
+      <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
+        <LoaderCircle />
+        <For each={compareMediaList()} fallback={
+          <Show when={loading()} fallback="No content">
+            Loading content
+          </Show>
+        }>{media => (
+          <li class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
+            <div class="wrapper">
+              <Show when={media.bannerImage}>
+                <img src={media.bannerImage} class="bg" inert alt="Background banner" />
+              </Show>
+              <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+                <div class="header flex-space-between">
+                  <Show when={media.repeat}>
+                    <div class="cp-card-repeat">
+                      <Tooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</Tooltip>
+                      {media.repeat}
+                      <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
+                    </div>
+                  </Show>
+                  <div class="score">
+                    <Tooltip tipPosition="right">Global average score</Tooltip>
+                    <Star /> {(media.averageScore / 10) || "N/A"}
+                  </div>
+                </div>
+                <img class="cover" src={media.coverImage.large} alt="Media cover" />
+                <Show when={media.episodes || media.chapters || media.volumes || media.score}>
+                  <div class="footer flex-space-between">
+                    <span>
+                      <Switch>
+                        <Match when={params.type === "anime"}>
+                          <Show when={media.episodes}>Ep {media.episodes}</Show>
+                        </Match>
+                        <Match when={params.type === "manga"}>
+                          <Show when={media.chapters}>Ch {media.chapters}</Show><br />
+                          <Show when={media.volumes}>Vol {media.volumes}</Show>
+                        </Match>
+                      </Switch>
+                    </span>
+                    <Show when={media.score}>
+                      <span>
+                        {Math.round(media.score * 100) / 100}/10
+                        <Tooltip tipPosition="right">Users average score</Tooltip>
+                      </span>
+                    </Show>
                   </div>
                 </Show>
-                <div class="score">
-                  <Tooltip tipPosition="right">Global average score</Tooltip>
-                  <Star /> {(media.averageScore / 10) || "N/A"}
-                </div>
+              </A>
+              <div class="pg-compare-card-content">
+                <p class="title">{media.title.userPreferred}</p>
+                <ol class="pg-compare-media-users">
+                  <For each={media.mediaEntries}>{user => (
+                    <li>
+                      <A href={ "/user/" + user.name } class="name">
+                        <img class="profile" src={users[user.name].avatar.large} alt="Profile picture" />
+                        {user.name}
+                      </A>
+                      <Show when={user.status !== "COMPLETED"}>
+                        <span class="status">{formatUsersMediaStatus(user.status, params.type)}</span>
+                      </Show>
+                      <Show when={user.repeat}>
+                        <div class="cp-card-repeat">
+                          <Tooltip tipPosition="top">{params.type === "anime" ? "Rewatched" : "Reread"} {user.repeat} times</Tooltip>
+                          {user.repeat}
+                          <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
+                        </div>
+                      </Show>
+                      <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
+                    </li>
+                  )}</For>
+                </ol>
+                <ul class="flex-bullet-separator">
+                  <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
+                    <li>
+                      <Switch>
+                        <Match when={media.countryOfOrigin !== "JP"}> 
+                          <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
+                            {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
+                          </A>
+                        </Match>
+                        <Match when={media.countryOfOrigin === "JP"}> 
+                          <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
+                            {formatMediaFormat(media.format)}
+                          </A>
+                        </Match>
+                      </Switch>
+                    </li>
+                  )}</Show>
+                  <Switch>
+                    <Match when={params.type === "manga"}>
+                      <Switch>
+                        <Match when={media.startDate?.year}>
+                          <A href={"/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
+                        </Match>
+                        <Match when={media.startDate?.year == null}>
+                          <A href="/search/manga/tba">TBA</A>
+                        </Match>
+                      </Switch>
+                    </Match>
+                    <Match when={params.type === "anime"}>
+                      <Switch>
+                        <Match when={media.seasonYear && media.season}>
+                          <A href={"/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
+                        </Match>
+                        <Match when={media.startDate?.year}>
+                          <A href={"/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
+                        </Match>
+                        <Match when={media.startDate?.year == null}>
+                          <A href="/search/anime/tba">TBA</A>
+                        </Match>
+                      </Switch>
+                    </Match>
+                  </Switch>
+                </ul>
               </div>
-              <img class="cover" src={media.coverImage.large} alt="Media cover" />
-              <Show when={media.episodes || media.chapters || media.volumes || media.score}>
-                <div class="footer flex-space-between">
-                  <span>
-                    <Switch>
-                      <Match when={params.type === "anime"}>
-                        <Show when={media.episodes}>Ep {media.episodes}</Show>
-                      </Match>
-                      <Match when={params.type === "manga"}>
-                        <Show when={media.chapters}>Ch {media.chapters}</Show><br />
-                        <Show when={media.volumes}>Vol {media.volumes}</Show>
-                      </Match>
-                    </Switch>
-                  </span>
-                  <Show when={media.score}>
-                    <span>
-                      {Math.round(media.score * 100) / 100}/10
-                      <Tooltip tipPosition="right">Users average score</Tooltip>
-                    </span>
-                  </Show>
-                </div>
-              </Show>
-            </A>
-            <div class="pg-compare-card-content">
-              <p class="title">{media.title.userPreferred}</p>
-              <ol class="pg-compare-media-users">
-                <For each={media.mediaEntries}>{user => (
-                  <li>
-                    <A href={ "/user/" + user.name } class="name">
-                      <img class="profile" src={users[user.name].avatar.large} alt="Profile picture" />
-                      {user.name}
-                    </A>
-                    <Show when={user.status !== "COMPLETED"}>
-                      <span class="status">{formatUsersMediaStatus(user.status, params.type)}</span>
-                    </Show>
-                    <Show when={user.repeat}>
-                      <div class="cp-card-repeat">
-                        <Tooltip tipPosition="top">{params.type === "anime" ? "Rewatched" : "Reread"} {user.repeat} times</Tooltip>
-                        {user.repeat}
-                        <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
-                      </div>
-                    </Show>
-                    <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
-                  </li>
-                )}</For>
-              </ol>
-              <ul class="flex-bullet-separator">
-                <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
-                  <li>
-                    <Switch>
-                      <Match when={media.countryOfOrigin !== "JP"}> 
-                        <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
-                          {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
-                        </A>
-                      </Match>
-                      <Match when={media.countryOfOrigin === "JP"}> 
-                        <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
-                          {formatMediaFormat(media.format)}
-                        </A>
-                      </Match>
-                    </Switch>
-                  </li>
-                )}</Show>
-                <Switch>
-                  <Match when={params.type === "manga"}>
-                    <Switch>
-                      <Match when={media.startDate?.year}>
-                        <A href={"/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
-                      </Match>
-                      <Match when={media.startDate?.year == null}>
-                        <A href="/search/manga/tba">TBA</A>
-                      </Match>
-                    </Switch>
-                  </Match>
-                  <Match when={params.type === "anime"}>
-                    <Switch>
-                      <Match when={media.seasonYear && media.season}>
-                        <A href={"/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
-                      </Match>
-                      <Match when={media.startDate?.year}>
-                        <A href={"/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
-                      </Match>
-                      <Match when={media.startDate?.year == null}>
-                        <A href="/search/anime/tba">TBA</A>
-                      </Match>
-                    </Switch>
-                  </Match>
-                </Switch>
-              </ul>
             </div>
-          </div>
-        </li>
-      )}</For>
-    </ol>
+          </li>
+        )}</For>
+      </ol>
+    </>
   );
 }
