@@ -373,7 +373,7 @@ const api = {
       return Fetch.authAnilist(token, queries.currentUser, {}, (response) => response.data.Viewer);
     }),
     getActivity: reloadCache((token, variables, page = 1) => {
-      return Fetch.authAnilist(token, queries.anilistActivity, { variables, page }, res => res.data.Page);
+      return Fetch.authAnilist(token, queries.anilistActivity, { ...variables, page }, res => res.data.Page);
     }),
     searchMedia: fetchOnce((token, variables, page, extraVariables = {}) => {
       const variableObject = variables.reduce((acc, v) => {
