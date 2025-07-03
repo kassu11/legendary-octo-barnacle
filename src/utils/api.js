@@ -260,10 +260,14 @@ const api = {
         default: return Fetch.authAnilist(token, queries.anilistUserNotifications, { page }, res => res.data.Page);  
       }
     }),
+    searchUsers: fetchOnce((search, page, token) => {
+      assert(search, "Search is missing");
+      return Fetch.authAnilist(token, queries.anilistUserSearch, { search, page, }, res => res.data.Page);
+    }),
     mediaListByUserName: reloadCache((name, type, token) => {
       assert(name, "Name is missing");
       return Fetch.authAnilist(token, queries.anilistUserMediaList, {
-        userName: name,
+        userName: name.toLowerCase(),
         type,
       }, res => res.data.MediaListCollection);
     }),

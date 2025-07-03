@@ -22,6 +22,13 @@ export function wrapToSet(value) {
   return new Set(wrapToArray(value));
 }
 
+export function removeDuplicateIgnoreCaseSensitivity(array) {
+  assert(Array.isArray(array), "Not array");
+  const map = new Map();
+  array.forEach(value => map.set(value.toLowerCase(), value));
+  return Array.from(map.values());
+}
+
 export function compare(a, b) {
   if (a === b) {
     return true;
