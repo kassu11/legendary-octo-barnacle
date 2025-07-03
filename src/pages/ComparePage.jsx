@@ -1,8 +1,8 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { createSignal, For, on, Show, Switch } from "solid-js";
+import { batch, createSignal, For, on, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
-import { wrapToSet } from "../utils/arrays";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToSet } from "../utils/arrays";
 import { assert } from "../utils/assert";
 import { CompareMediaListContext, useAuthentication, useCompareMediaList } from "../context/providers";
 import api, { IndexedDB } from "../utils/api";
@@ -14,6 +14,7 @@ import "./ComparePage.scss";
 import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
+import { debounce } from "@solid-primitives/scheduled";
 
 export default function ComparePage() {
   const location = useLocation();
@@ -111,6 +112,7 @@ export default function ComparePage() {
 
   return (
     <CompareMediaListContext.Provider value={{ compareMediaList, includeKeys, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
+      <UserSearch />
       <div>
         <ul class="pg-compare-users">
           <For each={names}>{name => (
@@ -297,6 +299,94 @@ export default function ComparePage() {
       </div>
       <CompareMediaListContent />
     </CompareMediaListContext.Provider>
+  );
+}
+
+function UserSearch() {
+  const [search, setSearch] = createSignal("");
+  const [index, setIndex] = createSignal(0);
+  const [searchVar, setSearchVar] = createSignal(undefined);
+  const { accessToken } = useAuthentication();
+  const [searchedUsers, { mutate: mutateSearchUsers }] = api.anilist.searchUsers(searchVar, 1, accessToken);
+  const triggerSetSearchVar = debounce(setSearchVar, 300);
+  const [searchParams, setSearchParams] = useSearchParams();
+  let form;
+
+  // function setIndex(callback) {
+  //   _setIndex(callback);
+  //   const target = form?.querySelectorAll("li")[callback];
+  //   const wrapper = form?.querySelector("ol");
+  //   if (!target || !wrapper) {
+  //     console.log(target, wrapper, form?.querySelectorAll("li"), callback)
+  //     return;
+  //   }
+  //
+  //   const { height: wrapperHeight, top: wrapperTop } = wrapper.getBoundingClientRect();
+  //   const { top, height, bottom } = target.getBoundingClientRect();
+  //   // if (wrapper.scrollTop + wrapperHeight < (bottom - wrapperTop)) {
+  //   // if ((bottom - wrapperTop) - height > 0) {
+  //     wrapper.scrollTop = (bottom - wrapperTop) - wrapperHeight;
+  //   // }
+  //   // }
+  //   console.log((bottom - wrapperTop) - wrapperHeight);
+  //   // target?.scrollIntoView();
+  // }
+
+  function addUserToSearch(user) {
+    user = user?.trim() || "";
+    if (user) {
+      setSearchParams({user: removeDuplicateIgnoreCaseSensitivity([...wrapToSet(searchParams.user).add(user)])});
+    }
+    batch(() => {
+      triggerSetSearchVar(undefined);
+      mutateSearchUsers(undefined);
+      setIndex(0);
+      setSearch("");
+    });
+  }
+
+  return (
+    <form class="pg-compare-user-search" ref={form} onKeyDown={e => {
+      const userCount = searchedUsers()?.data?.users?.length || 0;
+      if (!userCount) {
+        return;
+      }
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setIndex(i => (i + 1) % userCount);
+      } else if (e.key === "ArrowUp"){
+        e.preventDefault();
+        setIndex(i => (userCount + i - 1) % userCount);
+      }
+    }} onSubmit={e => {
+        e.preventDefault();
+        addUserToSearch(searchedUsers()?.data.users?.[index()]?.name || search());
+      }}>
+      <input type="search" name="user" id="user" value={search()} placeholder="Search users" onInput={e => {
+        const search = e.target.value.trim();
+        batch(() => {
+          setSearch(e.target.value);
+          setIndex(0);
+          triggerSetSearchVar(e.target.value.trim() || undefined);
+          if (!search) {
+            mutateSearchUsers(undefined);
+          }
+        });
+      }} />
+      <ol>
+        <For each={searchedUsers()?.data.users}>{(user, i) => (
+          <li 
+            classList={{selected: index() === i()}} 
+            onClick={() => addUserToSearch(user.name) } 
+            onMouseEnter={() => setIndex(i())}
+          >
+            <img src={user.avatar.large} alt="Profile picture" />
+            {user.name}
+          </li>
+        )}</For>
+      </ol>
+    </form>
   );
 }
 

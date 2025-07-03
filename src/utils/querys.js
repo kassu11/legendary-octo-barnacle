@@ -231,6 +231,29 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const anilistUserSearch = format`query (
+  $page: Int = 1
+  $search: String
+  $sort: [UserSort] = SEARCH_MATCH
+) {
+  Page(page: $page, perPage: 20) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    users(search: $search, sort: $sort) {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+  }
+}`
+
 export const anilistRecommendationsById = format`query media($id: Int, $page: Int) {
   Media(id: $id) {
     id
