@@ -1,16 +1,15 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { createSignal, For, on, Show } from "solid-js";
+import { createSignal, For, on, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
-import { wrapToArray, wrapToSet } from "../utils/arrays";
-import { createTrigger } from "../utils/createTrigger";
+import { wrapToSet } from "../utils/arrays";
 import { assert } from "../utils/assert";
 import { CompareMediaListContext, useAuthentication, useCompareMediaList } from "../context/providers";
 import api, { IndexedDB } from "../utils/api";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
 import { Tooltip } from "../components/Tooltips.jsx";
 import CompareMediaListWorker from "../worker/compare-media-list.js?worker";
-import { capitalize, formatMediaFormat, formatMediaStatus, formatTitleToUrl, formatUsersMediaStatus, languageFromCountry } from "../utils/formating.js";
+import { capitalize, formatMediaFormat, formatTitleToUrl, formatUsersMediaStatus, languageFromCountry } from "../utils/formating.js";
 import "./ComparePage.scss";
 import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
@@ -79,6 +78,8 @@ export default function ComparePage() {
       };
 
       if (postObject.includeKeys.length === 0) {
+        setLoading(false);
+        setCompareMediaList([]);
         return;
       }
 
@@ -95,7 +96,7 @@ export default function ComparePage() {
             getReq.onerror = () => setLoading(false);
             getReq.onsuccess = (evt) => {
               setLoading(false);
-              setCompareMediaList(evt.target.result || {});
+              setCompareMediaList(evt.target.result || []);
             }
           }
         } else {
@@ -109,7 +110,7 @@ export default function ComparePage() {
   createEffect(updateCompareScores);
 
   return (
-    <CompareMediaListContext.Provider value={{ compareMediaList, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
+    <CompareMediaListContext.Provider value={{ compareMediaList, includeKeys, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
       <div>
         <ul class="pg-compare-users">
           <For each={names}>{name => (
@@ -302,11 +303,10 @@ export default function ComparePage() {
 function UserRow(props) {
   assert(props.name, "Name is missing");
   const params = useParams();
-  const { setIncludeKeys, setExcludeKeys, users, storeUsers } = useCompareMediaList();
+  const { setIncludeKeys, setExcludeKeys, storeUsers } = useCompareMediaList();
   const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = createSignal(true);
   const [exclude, setExclude] = createSignal(false);
-  const [searchParams, setSearchParams] = useSearchParams();
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => props.name, () => params.type.toUpperCase(), accessToken);
 
   function setKeys(keys, excludedValue) {
@@ -362,7 +362,8 @@ function UserRow(props) {
 }
 
 function CompareMediaListContent() {
-  const { compareMediaList, users, loading } = useCompareMediaList();
+  const { compareMediaList, users, loading, includeKeys } = useCompareMediaList();
+  const [searchParams] = useSearchParams();
   const params = useParams();
 
   return (
@@ -370,9 +371,13 @@ function CompareMediaListContent() {
       <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
         <LoaderCircle />
         <For each={compareMediaList()} fallback={
-          <Show when={loading()} fallback="No content">
-            Loading content
-          </Show>
+          <li>
+            <Switch fallback="No content">
+              <Match when={loading()}>Loading content</Match>
+              <Match when={!searchParams.user}>No users selected</Match>
+              <Match when={includeKeys().length === 0}>All users are disabled</Match>
+            </Switch>
+          </li>
         }>{media => (
           <li class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
             <div class="wrapper">
