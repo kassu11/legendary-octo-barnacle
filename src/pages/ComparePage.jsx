@@ -1,5 +1,5 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createSignal, For, Match, on, Show, Switch } from "solid-js";
+import { batch, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../utils/arrays";
@@ -15,6 +15,7 @@ import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
+import { mediaListEntry } from "../utils/querys.js";
 
 export default function ComparePage() {
   const location = useLocation();
@@ -34,6 +35,7 @@ export default function ComparePage() {
 
   const search = () => searchParams.search || "";
   const format = () => searchParams.format || "";
+  const reviewsNeeded = () => searchParams.reviewsNeeded;
   const status = () => searchParams.status || "";
   const genre = () => searchParams.genre || "";
   const countryOfOrigin = () => searchParams.countryOfOrigin || "";
@@ -73,6 +75,7 @@ export default function ComparePage() {
         private: privateFilter(),
         notes: notesFilter(),
         repeat: rewatchedFilter(),
+        reviewsNeeded: reviewsNeeded(),
         sort: sort(),
         type: params.type,
         userStatus: userStatus(),
@@ -270,6 +273,16 @@ export default function ComparePage() {
               <option value="volumes">Volumes</option>
             </Show>
           </select>
+          <label htmlFor="reviewsNeeded">Reviews needed: <output>{reviewsNeeded() || includeKeys().length} <Show when={!reviewsNeeded()}>(All)</Show></output></label>
+          <input 
+            type="range" 
+            min="1" 
+            max={includeKeys().length} 
+            value={reviewsNeeded() || includeKeys().length} 
+            onInput={e => setSearchParams({ reviewsNeeded: e.target.value == includeKeys().length ? undefined : e.target.value })} 
+            name="reviewsNeeded" 
+            id="reviewsNeeded"  
+          />
           <Switch>
             <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
               <button style={{background: "skyblue"}} onClick={() => {
@@ -468,128 +481,174 @@ function CompareMediaListContent() {
       <h1>Total {params.type} {compareMediaList().length}</h1>
       <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
         <LoaderCircle />
-        <For each={compareMediaList()} fallback={
-          <li>
-            <Switch fallback="No content">
-              <Match when={loading()}>Loading content</Match>
-              <Match when={!searchParams.user}>No users selected</Match>
-              <Match when={includeKeys().length === 0}>All users are disabled</Match>
-            </Switch>
-          </li>
-        }>{media => (
-          <li class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
-            <div class="wrapper">
-              <Show when={media.bannerImage}>
-                <img src={media.bannerImage} class="bg" inert alt="Background banner" />
-              </Show>
-              <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
-                <div class="header flex-space-between">
-                  <Show when={media.repeat}>
-                    <div class="cp-card-repeat">
-                      <Tooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</Tooltip>
-                      {media.repeat}
-                      <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
-                    </div>
-                  </Show>
-                  <div class="score">
-                    <Tooltip tipPosition="right">Global average score</Tooltip>
-                    <Star /> {(media.averageScore / 10) || "N/A"}
-                  </div>
-                </div>
-                <img class="cover" src={media.coverImage.large} alt="Media cover" />
-                <Show when={media.episodes || media.chapters || media.volumes || media.score}>
-                  <div class="footer flex-space-between">
-                    <span>
-                      <Switch>
-                        <Match when={params.type === "anime"}>
-                          <Show when={media.episodes}>Ep {media.episodes}</Show>
-                        </Match>
-                        <Match when={params.type === "manga"}>
-                          <Show when={media.chapters}>Ch {media.chapters}</Show><br />
-                          <Show when={media.volumes}>Vol {media.volumes}</Show>
-                        </Match>
-                      </Switch>
-                    </span>
-                    <Show when={media.score}>
-                      <span>
-                        {Math.round(media.score * 100) / 100}
-                        <Tooltip tipPosition="right">Users average score</Tooltip>
-                      </span>
-                    </Show>
+        <Show when={compareMediaList()} keyed>
+          <ContentPage page={0} pageSize={20} />
+        </Show>
+      </ol>
+      <Show when={compareMediaList().length === 0}>
+        <Switch fallback="No content">
+          <Match when={loading()}>Loading content</Match>
+          <Match when={!searchParams.user}>No users selected</Match>
+          <Match when={includeKeys().length === 0}>All users are disabled</Match>
+        </Switch>
+      </Show>
+    </>
+  );
+}
+
+function ContentPage(props) {
+  const { compareMediaList, users } = useCompareMediaList();
+  const [intersection, setIntersection] = createSignal(false);
+  const params = useParams();
+  const observerList = [];
+
+  function observe(target) {
+    observerList.push(target);
+  }
+
+  onMount(() => {
+    observerList.forEach(elem => intersectionObserver.observe(elem));
+  });
+
+  onCleanup(() => {
+    intersectionObserver.disconnect();
+  });
+
+  const options = { rootMargin: "500px" }
+  const callback = (entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting === false) {
+        continue;
+      }
+
+      observerList.length = 0;
+      intersectionObserver.disconnect();
+      setIntersection(true);
+      return;
+    }
+  };
+
+
+  const intersectionObserver = new IntersectionObserver(callback, options);
+
+  return (
+    <>
+      <For each={compareMediaList().slice(props.page * props.pageSize, (props.page + 1) * props.pageSize)}>{media => (
+        <li use:observe class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
+          <div class="wrapper">
+            <Show when={media.bannerImage}>
+              <img src={media.bannerImage} class="bg" inert alt="Background banner" />
+            </Show>
+            <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+              <div class="header flex-space-between">
+                <Show when={media.repeat}>
+                  <div class="cp-card-repeat">
+                    <Tooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</Tooltip>
+                    {media.repeat}
+                    <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
                   </div>
                 </Show>
-              </A>
-              <div class="pg-compare-card-content">
-                <p class="title">{media.title.userPreferred}</p>
-                <ol class="pg-compare-media-users">
-                  <For each={media.mediaEntries}>{user => (
-                    <li>
-                      <A href={ "/user/" + user.name } class="name">
-                        <img class="profile" src={users[user.name].avatar.large} alt="Profile picture" />
-                        {user.name}
-                      </A>
-                      <Show when={user.status !== "COMPLETED"}>
-                        <span class="status">{formatUsersMediaStatus(user.status, params.type)}</span>
-                      </Show>
-                      <Show when={user.repeat}>
-                        <div class="cp-card-repeat">
-                          <Tooltip tipPosition="top">{params.type === "anime" ? "Rewatched" : "Reread"} {user.repeat} times</Tooltip>
-                          {user.repeat}
-                          <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
-                        </div>
-                      </Show>
-                      <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
-                    </li>
-                  )}</For>
-                </ol>
-                <ul class="flex-bullet-separator">
-                  <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
-                    <li>
-                      <Switch>
-                        <Match when={media.countryOfOrigin !== "JP"}> 
-                          <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
-                            {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
-                          </A>
-                        </Match>
-                        <Match when={media.countryOfOrigin === "JP"}> 
-                          <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
-                            {formatMediaFormat(media.format)}
-                          </A>
-                        </Match>
-                      </Switch>
-                    </li>
-                  )}</Show>
-                  <Switch>
-                    <Match when={params.type === "manga"}>
-                      <Switch>
-                        <Match when={media.startDate?.year}>
-                          <A href={"/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
-                        </Match>
-                        <Match when={media.startDate?.year == null}>
-                          <A href="/search/manga/tba">TBA</A>
-                        </Match>
-                      </Switch>
-                    </Match>
-                    <Match when={params.type === "anime"}>
-                      <Switch>
-                        <Match when={media.seasonYear && media.season}>
-                          <A href={"/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
-                        </Match>
-                        <Match when={media.startDate?.year}>
-                          <A href={"/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
-                        </Match>
-                        <Match when={media.startDate?.year == null}>
-                          <A href="/search/anime/tba">TBA</A>
-                        </Match>
-                      </Switch>
-                    </Match>
-                  </Switch>
-                </ul>
+                <div class="score">
+                  <Tooltip tipPosition="right">Global average score</Tooltip>
+                  <Star /> {(media.averageScore / 10) || "N/A"}
+                </div>
               </div>
+              <img class="cover" src={media.coverImage.large} alt="Media cover" />
+              <Show when={media.episodes || media.chapters || media.volumes || media.score}>
+                <div class="footer flex-space-between">
+                  <span>
+                    <Switch>
+                      <Match when={params.type === "anime"}>
+                        <Show when={media.episodes}>Ep {media.episodes}</Show>
+                      </Match>
+                      <Match when={params.type === "manga"}>
+                        <Show when={media.chapters}>Ch {media.chapters}</Show><br />
+                        <Show when={media.volumes}>Vol {media.volumes}</Show>
+                      </Match>
+                    </Switch>
+                  </span>
+                  <Show when={media.score}>
+                    <span>
+                      {Math.round(media.score * 100) / 100}
+                      <Tooltip tipPosition="right">Users average score</Tooltip>
+                    </span>
+                  </Show>
+                </div>
+              </Show>
+            </A>
+            <div class="pg-compare-card-content">
+              <p class="title">{media.title.userPreferred}</p>
+              <ol class="pg-compare-media-users">
+                <For each={media.mediaEntries}>{user => (
+                  <li>
+                    <A href={ "/user/" + user.name } class="name">
+                      <img class="profile" src={users[user.name].avatar.large} alt="Profile picture" />
+                      {user.name}
+                    </A>
+                    <Show when={user.status !== "COMPLETED"}>
+                      <span class="status">{formatUsersMediaStatus(user.status, params.type)}</span>
+                    </Show>
+                    <Show when={user.repeat}>
+                      <div class="cp-card-repeat">
+                        <Tooltip tipPosition="top">{params.type === "anime" ? "Rewatched" : "Reread"} {user.repeat} times</Tooltip>
+                        {user.repeat}
+                        <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
+                      </div>
+                    </Show>
+                    <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
+                  </li>
+                )}</For>
+              </ol>
+              <ul class="flex-bullet-separator">
+                <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
+                  <li>
+                    <Switch>
+                      <Match when={media.countryOfOrigin !== "JP"}> 
+                        <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
+                          {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
+                        </A>
+                      </Match>
+                      <Match when={media.countryOfOrigin === "JP"}> 
+                        <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
+                          {formatMediaFormat(media.format)}
+                        </A>
+                      </Match>
+                    </Switch>
+                  </li>
+                )}</Show>
+                <Switch>
+                  <Match when={params.type === "manga"}>
+                    <Switch>
+                      <Match when={media.startDate?.year}>
+                        <A href={"/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
+                      </Match>
+                      <Match when={media.startDate?.year == null}>
+                        <A href="/search/manga/tba">TBA</A>
+                      </Match>
+                    </Switch>
+                  </Match>
+                  <Match when={params.type === "anime"}>
+                    <Switch>
+                      <Match when={media.seasonYear && media.season}>
+                        <A href={"/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
+                      </Match>
+                      <Match when={media.startDate?.year}>
+                        <A href={"/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
+                      </Match>
+                      <Match when={media.startDate?.year == null}>
+                        <A href="/search/anime/tba">TBA</A>
+                      </Match>
+                    </Switch>
+                  </Match>
+                </Switch>
+              </ul>
             </div>
-          </li>
-        )}</For>
-      </ol>
+          </div>
+        </li>
+      )}</For>
+      <Show when={intersection()}>
+        <ContentPage {...props} page={props.page + 1} />
+      </Show>
     </>
   );
 }
