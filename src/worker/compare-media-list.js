@@ -11,7 +11,7 @@ onmessage = ({ data: { includeKeys, excludeKeys, type, ...filtering } }) => {
     let count = 0;
     function listFilteringComplate() {
       if (includeKeys.length + excludeKeys.length === ++count) {
-        formatCompareList(entries, includeKeys.length, filtering);
+        formatCompareList(entries, Math.min(+filtering.reviewsNeeded || includeKeys.length, includeKeys.length), filtering);
       }
     }
 
