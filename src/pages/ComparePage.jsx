@@ -465,6 +465,7 @@ function CompareMediaListContent() {
 
   return (
     <>
+      <h1>Total {params.type} {compareMediaList().length}</h1>
       <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
         <LoaderCircle />
         <For each={compareMediaList()} fallback={
