@@ -666,6 +666,11 @@ function MediaList(props) {
               </Switch>
             </option>
           </select>
+          <Show when={!isOwnProfile() && authUserData()?.data?.name}>
+            <A href={ "/compare/" + params.type + "?user=" + user().name + "&user=" + authUserData().data.name }>
+              <button>Compare with your list</button>
+            </A>
+          </Show>
           <Switch>
             <Match when={location.search}>
               <button style={{background: "skyblue"}} onClick={() => {
