@@ -312,25 +312,24 @@ function UserSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
   let form;
 
-  // function setIndex(callback) {
-  //   _setIndex(callback);
-  //   const target = form?.querySelectorAll("li")[callback];
-  //   const wrapper = form?.querySelector("ol");
-  //   if (!target || !wrapper) {
-  //     console.log(target, wrapper, form?.querySelectorAll("li"), callback)
-  //     return;
-  //   }
-  //
-  //   const { height: wrapperHeight, top: wrapperTop } = wrapper.getBoundingClientRect();
-  //   const { top, height, bottom } = target.getBoundingClientRect();
-  //   // if (wrapper.scrollTop + wrapperHeight < (bottom - wrapperTop)) {
-  //   // if ((bottom - wrapperTop) - height > 0) {
-  //     wrapper.scrollTop = (bottom - wrapperTop) - wrapperHeight;
-  //   // }
-  //   // }
-  //   console.log((bottom - wrapperTop) - wrapperHeight);
-  //   // target?.scrollIntoView();
-  // }
+  createEffect(on(index, i => {
+    const target = form?.querySelectorAll("li")[i];
+    const wrapper = form?.querySelector("ol");
+    if (!target || !wrapper) {
+      return;
+    }
+
+    const { height, top: wrapperTop } = wrapper.getBoundingClientRect();
+    const { top, bottom } = target.getBoundingClientRect();
+    const scrollDown = bottom - wrapperTop - height
+    if (scrollDown > 0) {
+      wrapper.scrollTop += scrollDown;
+    }
+    const scrollUp = top - wrapperTop;
+    if (scrollUp < 0) {
+      wrapper.scrollTop += scrollUp;
+    }
+  }));
 
   function addUserToSearch(user) {
     user = user?.trim() || "";
