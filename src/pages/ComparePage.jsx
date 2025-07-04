@@ -365,14 +365,11 @@ function UserSearch() {
         addUserToSearch(searchedUsers()?.data.users?.[index()]?.name || search());
       }}>
       <input type="search" name="user" id="user" value={search()} placeholder="Search users" onInput={e => {
-        const search = e.target.value.trim();
         batch(() => {
           setSearch(e.target.value);
           setIndex(0);
           triggerSetSearchVar(e.target.value.trim() || undefined);
-          if (!search) {
-            mutateSearchUsers(undefined);
-          }
+          mutateSearchUsers(undefined);
         });
       }} />
       <ol>
