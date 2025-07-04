@@ -1,8 +1,8 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createSignal, For, on, Show, Switch } from "solid-js";
+import { batch, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
-import { createStore } from "solid-js/store";
-import { removeDuplicateIgnoreCaseSensitivity, wrapToSet } from "../utils/arrays";
+import { createStore, reconcile } from "solid-js/store";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../utils/arrays";
 import { assert } from "../utils/assert";
 import { CompareMediaListContext, useAuthentication, useCompareMediaList } from "../context/providers";
 import api, { IndexedDB } from "../utils/api";
@@ -29,7 +29,7 @@ export default function ComparePage() {
 
   createEffect(on(() => searchParams.user, user => {
     const names = wrapToSet(user);
-    storeNames([...names]);
+    storeNames(reconcile([...names], []));
   }));
 
   const search = () => searchParams.search || "";
@@ -112,192 +112,194 @@ export default function ComparePage() {
 
   return (
     <CompareMediaListContext.Provider value={{ compareMediaList, includeKeys, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
-      <UserSearch />
-      <div>
-        <ul class="pg-compare-users">
-          <For each={names}>{name => (
-            <UserRow name={name} />
-          )}</For>
-        </ul>
-      </div>
-      <div class="pg-compare-filter-panel">
-        <input type="text" placeholder="Search" onInput={e => setSearchParams({ search: e.target.value || undefined })} value={search()} />
-        <Show when={null?.data}>
-          <ol>
-            <li>
-              <button onClick={() => navigate("")}>
-                <Show when={params.list === undefined}>{"> "}</Show>
-                All {null.data.total}
-              </button>
-            </li>
-            <For each={null.data.lists}>{list => (
+      <div class="pg-compare">
+        <UserSearch />
+        <div>
+          <ul class="pg-compare-users">
+            <For each={names}>{name => (
+              <UserRow name={name} />
+            )}</For>
+          </ul>
+        </div>
+        <div class="pg-compare-filter-panel">
+          <input type="text" placeholder="Search" onInput={e => setSearchParams({ search: e.target.value || undefined })} value={search()} />
+          <Show when={null?.data}>
+            <ol>
               <li>
-                <button onClick={() => navigate(list.name)}>
-                  <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
-                  {list.name} {list.entries.length}
+                <button onClick={() => navigate("")}>
+                  <Show when={params.list === undefined}>{"> "}</Show>
+                  All {null.data.total}
                 </button>
               </li>
-            )}
-            </For>
-          </ol>
-        </Show>
-        <select name="format" onChange={e => setSearchParams({ format: e.target.value || undefined })} value={format() || ""}>
-          <option value="" hidden>Format</option>
-          <Show when={format()}>
-            <option value="">All formats</option>
+              <For each={null.data.lists}>{list => (
+                <li>
+                  <button onClick={() => navigate(list.name)}>
+                    <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
+                    {list.name} {list.entries.length}
+                  </button>
+                </li>
+              )}
+              </For>
+            </ol>
           </Show>
-          <option value="MOVIE">Movie</option>
-          <option value="MUSIC">Music</option>
-          <option value="ONA">Ona</option>
-          <option value="OVA">Ova</option>
-          <option value="SPECIAL">Special</option>
-          <option value="TV">TV</option>
-          <option value="TV_SHORT">TV short</option>
-        </select>
-        <select name="userStatus" onChange={e => setSearchParams({ userStatus: e.target.value || undefined })} value={userStatus() || ""}>
-          <option value="" hidden>User Status</option>
-          <Show when={userStatus()}>
-            <option value="">Any User Status</option>
-          </Show>
-          <option value="COMPLETED">Completed</option>
-          <option value="CURRENT">
+          <select name="format" onChange={e => setSearchParams({ format: e.target.value || undefined })} value={format() || ""}>
+            <option value="" hidden>Format</option>
+            <Show when={format()}>
+              <option value="">All formats</option>
+            </Show>
+            <option value="MOVIE">Movie</option>
+            <option value="MUSIC">Music</option>
+            <option value="ONA">Ona</option>
+            <option value="OVA">Ova</option>
+            <option value="SPECIAL">Special</option>
+            <option value="TV">TV</option>
+            <option value="TV_SHORT">TV short</option>
+          </select>
+          <select name="userStatus" onChange={e => setSearchParams({ userStatus: e.target.value || undefined })} value={userStatus() || ""}>
+            <option value="" hidden>User Status</option>
+            <Show when={userStatus()}>
+              <option value="">Any User Status</option>
+            </Show>
+            <option value="COMPLETED">Completed</option>
+            <option value="CURRENT">
+              <Switch>
+                <Match when={params.type === "anime"}>Watching</Match>
+                <Match when={params.type === "manga"}>Reading</Match>
+              </Switch>
+            </option>
+            <option value="DROPPED">Dropped</option>
+            <option value="PAUSED">Paused</option>
+            <option value="PLANNING">Planning</option>
+            <option value="REPEATING">
+              <Switch>
+                <Match when={params.type === "anime"}>Rewatching</Match>
+                <Match when={params.type === "manga"}>Rereading</Match>
+              </Switch>
+            </option>
+          </select>
+          <select name="status" onChange={e => setSearchParams({ status: e.target.value || undefined })} value={status() || ""}>
+            <option value="" hidden>Status</option>
+            <Show when={status()}>
+              <option value="">Any Status</option>
+            </Show>
+            <option value="RELEASING">Releasing</option>
+            <option value="FINISHED">Finished</option>
+            <option value="NOT_YET_RELEASED">Not Yet Released</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+          <select name="genre" onChange={e => setSearchParams({ genre: e.target.value || undefined })} value={genre() || ""}>
+            <option value="" hidden>Genre</option>
+            <Show when={genre()}>
+              <option value="">All genres</option>
+            </Show>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Drama">Drama</option>
+            <option value="Ecchi">Ecchi</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Hentai">Hentai</option>
+            <option value="Horror">Horror</option>
+            <option value="Mahou Shoujo">Mahou Shoujo</option>
+            <option value="Mecha">Mecha</option>
+            <option value="Music">Music</option>
+            <option value="Mystery">Mystery</option>
+            <option value="Psychological">Psychological</option>
+            <option value="Romance">Romance</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Slice of Life">Slice of Life</option>
+            <option value="Sports">Sports</option>
+            <option value="Supernatural">Supernatural</option>
+            <option value="Thriller">Thriller</option>
+          </select>
+          <select name="countryOfOrigin" onChange={e => setSearchParams({ countryOfOrigin: e.target.value || undefined })} value={countryOfOrigin() || ""}>
+            <option value="" hidden>Country</option>
+            <Show when={countryOfOrigin()}>
+              <option value="">All countries</option>
+            </Show>
+            <option value="CN">China</option>
+            <option value="JP">Japan</option>
+            <option value="KR">South Korea</option>
+            <option value="TW">Taiwan</option>
+          </select>
+          <select name="isAdult" onChange={e => setSearchParams({ isAdult: e.target.value || undefined })} value={isAdult() === undefined ? "" : String(isAdult())}>
+            <option value="" hidden>Age rating</option>
+            <Show when={isAdult() !== undefined}>
+              <option value="">All ratings</option>
+            </Show>
+            <option value="false">R-17+</option>
+            <option value="true">R-18</option>
+          </select>
+          <input type="number" name="year" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => setSearchParams({ year: e.target.value || undefined })} />
+          <label htmlFor="repeat">
+            <input type="checkbox" name="repeat" id="repeat" checked={rewatchedFilter()} onChange={e => setSearchParams({ repeat: e.target.checked ? "true" : undefined })} />
+            {" "}
             <Switch>
-              <Match when={params.type === "anime"}>Watching</Match>
-              <Match when={params.type === "manga"}>Reading</Match>
+              <Match when={params.type === "anime"}>Rewatched</Match>
+              <Match when={params.type === "manga"}>Reread</Match>
             </Switch>
-          </option>
-          <option value="DROPPED">Dropped</option>
-          <option value="PAUSED">Paused</option>
-          <option value="PLANNING">Planning</option>
-          <option value="REPEATING">
-            <Switch>
-              <Match when={params.type === "anime"}>Rewatching</Match>
-              <Match when={params.type === "manga"}>Rereading</Match>
-            </Switch>
-          </option>
-        </select>
-        <select name="status" onChange={e => setSearchParams({ status: e.target.value || undefined })} value={status() || ""}>
-          <option value="" hidden>Status</option>
-          <Show when={status()}>
-            <option value="">Any Status</option>
-          </Show>
-          <option value="RELEASING">Releasing</option>
-          <option value="FINISHED">Finished</option>
-          <option value="NOT_YET_RELEASED">Not Yet Released</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
-        <select name="genre" onChange={e => setSearchParams({ genre: e.target.value || undefined })} value={genre() || ""}>
-          <option value="" hidden>Genre</option>
-          <Show when={genre()}>
-            <option value="">All genres</option>
-          </Show>
-          <option value="Action">Action</option>
-          <option value="Adventure">Adventure</option>
-          <option value="Comedy">Comedy</option>
-          <option value="Drama">Drama</option>
-          <option value="Ecchi">Ecchi</option>
-          <option value="Fantasy">Fantasy</option>
-          <option value="Hentai">Hentai</option>
-          <option value="Horror">Horror</option>
-          <option value="Mahou Shoujo">Mahou Shoujo</option>
-          <option value="Mecha">Mecha</option>
-          <option value="Music">Music</option>
-          <option value="Mystery">Mystery</option>
-          <option value="Psychological">Psychological</option>
-          <option value="Romance">Romance</option>
-          <option value="Sci-Fi">Sci-Fi</option>
-          <option value="Slice of Life">Slice of Life</option>
-          <option value="Sports">Sports</option>
-          <option value="Supernatural">Supernatural</option>
-          <option value="Thriller">Thriller</option>
-        </select>
-        <select name="countryOfOrigin" onChange={e => setSearchParams({ countryOfOrigin: e.target.value || undefined })} value={countryOfOrigin() || ""}>
-          <option value="" hidden>Country</option>
-          <Show when={countryOfOrigin()}>
-            <option value="">All countries</option>
-          </Show>
-          <option value="CN">China</option>
-          <option value="JP">Japan</option>
-          <option value="KR">South Korea</option>
-          <option value="TW">Taiwan</option>
-        </select>
-        <select name="isAdult" onChange={e => setSearchParams({ isAdult: e.target.value || undefined })} value={isAdult() === undefined ? "" : String(isAdult())}>
-          <option value="" hidden>Age rating</option>
-          <Show when={isAdult() !== undefined}>
-            <option value="">All ratings</option>
-          </Show>
-          <option value="false">R-17+</option>
-          <option value="true">R-18</option>
-        </select>
-        <input type="number" name="year" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => setSearchParams({ year: e.target.value || undefined })} />
-        <label htmlFor="repeat">
-          <input type="checkbox" name="repeat" id="repeat" checked={rewatchedFilter()} onChange={e => setSearchParams({ repeat: e.target.checked ? "true" : undefined })} />
-          {" "}
+          </label>
+          <label htmlFor="missingScore">
+            <input type="checkbox" name="missingScore" id="missingScore" checked={missingScoreFilter()} onChange={e => setSearchParams({ missingScore: e.target.checked ? undefined : "false" })} />
+            {" "}Allow missing scores
+          </label>
+          <label htmlFor="reverse">
+            <input type="checkbox" name="reverse" id="reverse" checked={reverse()} onChange={e => setSearchParams({ reverse: e.target.checked ? "true" : undefined })} />
+            {" "}Reverse order
+          </label>
+          <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
+            <option value="averageScore">Average Score</option>
+            <Show when={params.type === "manga"}>
+              <option value="chapters">Chapters</option>
+            </Show>
+            <Show when={params.type === "anime"}>
+              <option value="episodes">Episodes</option>
+            </Show>
+            <option value="popularity">Popularity</option>
+            <option value="releaseDate">Release Date</option>
+            <option value="repeat">
+              <Switch>
+                <Match when={params.type === "anime"}>Rewatches</Match>
+                <Match when={params.type === "manga"}>Rereads</Match>
+              </Switch>
+            </option>
+            <option value="score">Score</option>
+            <option value="startedAt">Start Date</option>
+            <option value="title">Title</option>
+            <Show when={params.type === "manga"}>
+              <option value="volumes">Volumes</option>
+            </Show>
+          </select>
           <Switch>
-            <Match when={params.type === "anime"}>Rewatched</Match>
-            <Match when={params.type === "manga"}>Reread</Match>
+            <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
+              <button style={{background: "skyblue"}} onClick={() => {
+                setSearchParams({
+                  search: undefined,
+                  format: undefined,
+                  status: undefined,
+                  genre: undefined,
+                  countryOfOrigin: undefined,
+                  missingStart: undefined,
+                  missingScore: undefined,
+                  isAdult: undefined,
+                  year: undefined,
+                  private: undefined,
+                  notes: undefined,
+                  repeat: undefined,
+                  sort: undefined,
+                  userStatus: undefined
+                });
+              }}>Remove filters</button>
+            </Match>
+            <Match when={params.list}>
+              <button style={{background: "lime"}} onClick={() => {
+                navigate("");
+              }}>Back to home</button>
+            </Match>
           </Switch>
-        </label>
-        <label htmlFor="missingScore">
-          <input type="checkbox" name="missingScore" id="missingScore" checked={missingScoreFilter()} onChange={e => setSearchParams({ missingScore: e.target.checked ? undefined : "false" })} />
-          {" "}Allow missing scores
-        </label>
-        <label htmlFor="reverse">
-          <input type="checkbox" name="reverse" id="reverse" checked={reverse()} onChange={e => setSearchParams({ reverse: e.target.checked ? "true" : undefined })} />
-          {" "}Reverse order
-        </label>
-        <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
-          <option value="averageScore">Average Score</option>
-          <Show when={params.type === "manga"}>
-            <option value="chapters">Chapters</option>
-          </Show>
-          <Show when={params.type === "anime"}>
-            <option value="episodes">Episodes</option>
-          </Show>
-          <option value="popularity">Popularity</option>
-          <option value="releaseDate">Release Date</option>
-          <option value="repeat">
-            <Switch>
-              <Match when={params.type === "anime"}>Rewatches</Match>
-              <Match when={params.type === "manga"}>Rereads</Match>
-            </Switch>
-          </option>
-          <option value="score">Score</option>
-          <option value="startedAt">Start Date</option>
-          <option value="title">Title</option>
-          <Show when={params.type === "manga"}>
-            <option value="volumes">Volumes</option>
-          </Show>
-        </select>
-        <Switch>
-          <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
-            <button style={{background: "skyblue"}} onClick={() => {
-              setSearchParams({
-                search: undefined,
-                format: undefined,
-                status: undefined,
-                genre: undefined,
-                countryOfOrigin: undefined,
-                missingStart: undefined,
-                missingScore: undefined,
-                isAdult: undefined,
-                year: undefined,
-                private: undefined,
-                notes: undefined,
-                repeat: undefined,
-                sort: undefined,
-                userStatus: undefined
-              });
-            }}>Remove filters</button>
-          </Match>
-          <Match when={params.list}>
-            <button style={{background: "lime"}} onClick={() => {
-              navigate("");
-            }}>Back to home</button>
-          </Match>
-        </Switch>
+        </div>
+        <CompareMediaListContent />
       </div>
-      <CompareMediaListContent />
     </CompareMediaListContext.Provider>
   );
 }
@@ -393,6 +395,7 @@ function UserRow(props) {
   assert(props.name, "Name is missing");
   const params = useParams();
   const { setIncludeKeys, setExcludeKeys, storeUsers } = useCompareMediaList();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = createSignal(true);
   const [exclude, setExclude] = createSignal(false);
@@ -404,6 +407,13 @@ function UserRow(props) {
     } else {
       return keys.filter(val => val !== mediaList().cacheKey);
     }
+  }
+
+  function remove() {
+    setIncludeKeys(keys => keys.filter(key => key !== mediaList()?.cacheKey));
+    setExcludeKeys(keys => keys.filter(key => key !== mediaList()?.cacheKey));
+
+    setSearchParams({ user: wrapToArray(searchParams.user).filter(name => name !== props.name) });
   }
 
   createEffect(() => {
@@ -421,7 +431,7 @@ function UserRow(props) {
     <li>
       <Switch>
         <Match when={mediaList.error}>
-          <p>No user found with name: "{props.name}"</p>
+          <p class="error">No user found with name: "{props.name}"</p>
         </Match>
         <Match when={mediaList() || mediaList.loading}>
           <Show when={mediaList()} fallback={
@@ -446,6 +456,7 @@ function UserRow(props) {
           </label>
         </Match>
       </Switch>
+      <button onClick={() => remove(mediaList()?.cacheKey)}>Remove</button>
     </li>
   );
 }

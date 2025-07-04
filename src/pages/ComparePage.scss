@@ -1,4 +1,10 @@
 @layer layout {
+  .pg-compare {
+    width: min(100% - 1rem, 140rem);
+    display: grid;
+    gap: 1rem;
+    margin-inline: auto;
+  }
   .pg-compare-user-search {
     position: relative;
     margin: auto;
@@ -44,13 +50,22 @@
   .pg-compare-users {
     display: grid;
     grid-template-columns: 3rem auto auto auto auto;
-    justify-content: start;
-    gap: 1rem;
+    justify-content: center;
+    gap: .5rem 1rem;
+    padding: 0;
 
     li {
       display: grid;
       grid-template-columns: subgrid;
       grid-column: 1 / -1;
+      background-color: var(--background-400);
+      padding: .5rem 1rem;
+      border-radius: .25rem;
+      align-items: center;
+    }
+
+    .error {
+      grid-column: 1/-2;
     }
   }
 
@@ -63,8 +78,7 @@
   }
 
   .pg-compare-content {
-    width: min(100% - 1rem, 140rem);
-    margin-inline: auto;
+    width: 100%;
     gap: 1rem;
     --grid-column-width: 32rem;
 
