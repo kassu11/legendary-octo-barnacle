@@ -288,6 +288,11 @@ export default function ComparePage() {
               name="reviewsNeeded" 
               id="reviewsNeeded"  
             />
+            <button class="help">?
+              <Tooltip tipPosition="bottom">
+                Count of how many users need to have the {params.type} on their list <i>(default is all users)</i>
+              </Tooltip>
+            </button>
           </label>
           <Switch>
             <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
