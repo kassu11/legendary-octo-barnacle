@@ -113,6 +113,7 @@
       isolation: isolate;
       display: grid;
       grid-template-columns: auto 1fr;
+      min-height: 16rem;
       height: 16rem;
       padding: .5rem;
       border-radius: .5rem;
