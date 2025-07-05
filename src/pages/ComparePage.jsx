@@ -15,7 +15,6 @@ import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
-import { mediaListEntry } from "../utils/querys.js";
 
 export default function ComparePage() {
   const location = useLocation();
@@ -471,7 +470,7 @@ function UserRow(props) {
 }
 
 function CompareMediaListContent() {
-  const { compareMediaList, users, loading, includeKeys } = useCompareMediaList();
+  const { compareMediaList, loading, includeKeys } = useCompareMediaList();
   const [searchParams] = useSearchParams();
   const params = useParams();
 
@@ -481,7 +480,7 @@ function CompareMediaListContent() {
       <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
         <LoaderCircle />
         <Show when={compareMediaList()} keyed>
-          <ContentPage page={0} pageSize={20} />
+          <ContentPage />
         </Show>
       </ol>
       <Show when={compareMediaList().length === 0}>
@@ -495,9 +494,9 @@ function CompareMediaListContent() {
   );
 }
 
-function ContentPage(props) {
+function ContentPage() {
   const { compareMediaList, users } = useCompareMediaList();
-  const [intersection, setIntersection] = createSignal(false);
+  const [store, setStore] = createStore([]);
   const params = useParams();
   const observerList = [];
 
@@ -516,25 +515,17 @@ function ContentPage(props) {
   const options = { rootMargin: "500px" }
   const callback = (entries) => {
     for (const entry of entries) {
-      if (entry.isIntersecting === false) {
-        continue;
-      }
-
-      observerList.length = 0;
-      intersectionObserver.disconnect();
-      setIntersection(true);
-      return;
+      setStore(entry.target.dataset.index, entry.isIntersecting);
     }
   };
-
 
   const intersectionObserver = new IntersectionObserver(callback, options);
 
   return (
-    <>
-      <For each={compareMediaList().slice(props.page * props.pageSize, (props.page + 1) * props.pageSize)}>{media => (
-        <li use:observe class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
-          <div class="wrapper">
+    <For each={compareMediaList()}>{(media, i) => (
+      <li use:observe attr:data-index={i()} class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
+        <div class="wrapper">
+          <Show when={store[i()]}>
             <Show when={media.bannerImage}>
               <img src={media.bannerImage} class="bg" inert alt="Background banner" />
             </Show>
@@ -641,12 +632,9 @@ function ContentPage(props) {
                 </Switch>
               </ul>
             </div>
-          </div>
-        </li>
-      )}</For>
-      <Show when={intersection()}>
-        <ContentPage {...props} page={props.page + 1} />
-      </Show>
-    </>
+          </Show>
+        </div>
+      </li>
+    )}</For>
   );
 }
