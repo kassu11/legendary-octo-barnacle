@@ -494,9 +494,9 @@ function CompareMediaListContent() {
   );
 }
 
+const [cardsVisibility, storeCardsVisibility] = createStore([]);
 function ContentPage() {
   const { compareMediaList, users } = useCompareMediaList();
-  const [store, setStore] = createStore([]);
   const params = useParams();
   const observerList = [];
 
@@ -515,7 +515,7 @@ function ContentPage() {
   const options = { rootMargin: "500px" }
   const callback = (entries) => {
     for (const entry of entries) {
-      setStore(entry.target.dataset.index, entry.isIntersecting);
+      storeCardsVisibility(entry.target.dataset.index, entry.isIntersecting);
     }
   };
 
@@ -525,7 +525,7 @@ function ContentPage() {
     <For each={compareMediaList()}>{(media, i) => (
       <li use:observe attr:data-index={i()} class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
         <div class="wrapper">
-          <Show when={store[i()]}>
+          <Show when={cardsVisibility[i()]}>
             <Show when={media.bannerImage}>
               <img src={media.bannerImage} class="bg" inert alt="Background banner" />
             </Show>
