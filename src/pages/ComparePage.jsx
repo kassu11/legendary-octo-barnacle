@@ -34,7 +34,7 @@ export default function ComparePage() {
 
   const search = () => searchParams.search || "";
   const format = () => searchParams.format || "";
-  const reviewsNeeded = () => searchParams.reviewsNeeded;
+  const reviewsNeeded = () => searchParams.reviewsNeeded || includeKeys().length;
   const status = () => searchParams.status || "";
   const genre = () => searchParams.genre || "";
   const countryOfOrigin = () => searchParams.countryOfOrigin || "";
@@ -270,25 +270,35 @@ export default function ComparePage() {
               <option value="volumes">Volumes</option>
             </Show>
           </select>
-          <label htmlFor="reviewsNeeded">Reviews needed: <output>{reviewsNeeded() || includeKeys().length} <Show when={!reviewsNeeded()}>(All)</Show></output></label>
-          <input 
-            type="range" 
-            min="1" 
-            max={includeKeys().length} 
-            value={reviewsNeeded() || includeKeys().length} 
-            onInput={e => setSearchParams({ reviewsNeeded: e.target.value == includeKeys().length ? undefined : e.target.value })} 
-            name="reviewsNeeded" 
-            id="reviewsNeeded"  
-          />
+          <label htmlFor="reviewsNeeded">Reviews needed: 
+            <input 
+              type="number" 
+              inputMode="numeric" 
+              onBlur={e => setSearchParams({ reviewsNeeded: Number(e.target.value) >= includeKeys().length ? undefined : +e.target.value || "" })} 
+              onBeforeInput={e => {
+                if (e.data?.toLowerCase().includes("e")) {
+                  e.preventDefault();
+                }
+              }}
+              min="1" 
+              max={includeKeys().length} 
+              placeholder={includeKeys().length + " (All)"}
+              value={reviewsNeeded()} 
+              onInput={e => setSearchParams({ reviewsNeeded: e.target.value == includeKeys().length ? undefined : e.target.value })} 
+              name="reviewsNeeded" 
+              id="reviewsNeeded"  
+            />
+          </label>
           <Switch>
             <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
-              <button style={{background: "skyblue"}} onClick={() => {
+              <button style={{background: "var(--crimson-400)"}} onClick={() => {
                 setSearchParams({
                   search: undefined,
                   format: undefined,
                   status: undefined,
                   genre: undefined,
                   countryOfOrigin: undefined,
+                  reviewsNeeded: undefined,
                   missingStart: undefined,
                   missingScore: undefined,
                   isAdult: undefined,
@@ -299,12 +309,7 @@ export default function ComparePage() {
                   sort: undefined,
                   userStatus: undefined
                 });
-              }}>Remove filters</button>
-            </Match>
-            <Match when={params.list}>
-              <button style={{background: "lime"}} onClick={() => {
-                navigate("");
-              }}>Back to home</button>
+              }}>Reset filters</button>
             </Match>
           </Switch>
         </div>
