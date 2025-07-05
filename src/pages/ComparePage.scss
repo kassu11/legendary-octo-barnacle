@@ -62,6 +62,14 @@
       padding: .5rem 1rem;
       border-radius: .25rem;
       align-items: center;
+      --loader-size: 2rem;
+      --loader-border-size: .35rem;
+    }
+
+    img {
+      aspect-ratio: 1/1;
+      width: 100%;
+      border-radius: .25rem;
     }
 
     .error {

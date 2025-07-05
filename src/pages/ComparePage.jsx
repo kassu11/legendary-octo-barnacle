@@ -81,7 +81,6 @@ export default function ComparePage() {
       };
 
       if (postObject.includeKeys.length === 0) {
-        setLoading(false);
         setCompareMediaList([]);
         return;
       }
@@ -383,18 +382,20 @@ function UserSearch() {
           mutateSearchUsers(undefined);
         });
       }} />
-      <ol>
-        <For each={searchedUsers()?.data.users}>{(user, i) => (
-          <li 
-            classList={{selected: index() === i()}} 
-            onClick={() => addUserToSearch(user.name) } 
-            onMouseEnter={() => setIndex(i())}
-          >
-            <img src={user.avatar.large} alt="Profile picture" />
-            {user.name}
-          </li>
-        )}</For>
-      </ol>
+      <Show when={search()}>
+        <ol>
+          <For each={searchedUsers()?.data.users}>{(user, i) => (
+            <li 
+              classList={{selected: index() === i()}} 
+              onClick={() => addUserToSearch(user.name) } 
+              onMouseEnter={() => setIndex(i())}
+            >
+              <img src={user.avatar.large} alt="Profile picture" />
+              {user.name}
+            </li>
+          )}</For>
+        </ol>
+      </Show>
     </form>
   );
 }
