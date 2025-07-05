@@ -475,9 +475,9 @@ function UserRow(props) {
             </button>
           </label>
           <label>
-            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Exclude <button>?
+            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Filter out <button>?
               <Tooltip tipPosition="bottom">
-                Remove all {params.type} that {mediaList()?.data?.user?.name || props.name} has on their list
+                Filters out all {params.type} from user {mediaList()?.data?.user?.name || props.name}
               </Tooltip>
             </button>
           </label>
