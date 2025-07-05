@@ -64,7 +64,29 @@
       align-items: center;
       --loader-size: 2rem;
       --loader-border-size: .35rem;
+      transition: opacity .2s, filter .2s;
+
+      &:hover {
+        z-index: 1; // Fix tooltip z-index that filter breaks;
+      }
+
+      &.disabled {
+        filter: grayscale(1) brightness(.75);
+
+        &::after {
+          content: "";
+          position: absolute;
+          width: calc(100% - 1rem);
+          left: 50%;
+          transform: translateX(-50%);
+          height: .2rem;
+          background-color: var(--background-800);
+          pointer-events: none;
+          opacity: .5;
+        }
+      }
     }
+
 
     img {
       aspect-ratio: 1/1;
