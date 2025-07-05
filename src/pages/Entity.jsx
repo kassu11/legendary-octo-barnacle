@@ -9,6 +9,7 @@ import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useAuthentication } from "../context/providers";
+import { wrapToArray } from "../utils/arrays.js";
 
 export function Character() {
   const params = useParams();
@@ -58,7 +59,7 @@ function Body(props) {
           <img src={props.entityInfo().data.image.large} class="cover" alt={capitalize(props.type) + " profile"} />
           <div className="row">
             <h1>{props.entityInfo().data.name.userPreferred}</h1>
-            <p class="entity-page-alternative-names">{[props.entityInfo().data.name.native, ...props.entityInfo().data.name.alternative].join(", ")}</p>
+            <p class="entity-page-alternative-names">{[...wrapToArray(props.entityInfo().data.name.native), ...wrapToArray(props.entityInfo().data.name.alternative)].join(", ")}</p>
             <FavouriteToggle 
               checked={favourite()} 
               staffId={props.type === "STAFF" ? params.id : undefined} 
