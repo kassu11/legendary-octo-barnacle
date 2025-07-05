@@ -161,6 +161,13 @@ export const formatTitleToUrl = (title) => {
   return encodeURI(title.toLowerCase().replace(/[#%?]+/g, "").replace(/[/\\\-\u2010-\u2015_{}[\]]+/g, " ").trim().replace(/ +/g, "-"));
 }
 
+export const mediaUrl = (media) => {
+  assert(media.type, "type is missing");
+  assert("id" in media, "id is missing");
+
+  return "/" + media.type.toLowerCase() + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred);
+}
+
 export const formatAnilistDate = (dateObject) => {
   assert("year" in dateObject, "No year found");
   assert("month" in dateObject, "No month found");

@@ -1,6 +1,6 @@
-import { A, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
-import { ErrorBoundary, For, Show, Switch, createEffect, createSignal, on } from "solid-js";
+import { ErrorBoundary, For, Show, Switch, createEffect, createSignal, on, onCleanup, onMount } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import Banner from "../components/media/Banner.jsx";
@@ -19,6 +19,7 @@ import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import Recommendations from "../components/media/Recommendations.jsx";
 import { useAuthentication, useEditMediaEntries } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
+import { navigateToMediaPage } from "../utils/navigateUtils.js";
 
 export function AnimeInfo() {
   const params = useParams();
@@ -73,10 +74,39 @@ function MediaInfo(props) {
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();
   const [isFavourite, setIsFavourite] = createSignal(props.media?.isFavourite ?? false);
+  const navigate = useNavigate();
   
   createEffect(() => {
     setIsFavourite(props.media?.isFavourite ?? false);
   });
+
+  const controller = new AbortController();
+
+  onMount(() => {
+    window.addEventListener("keydown", e => {
+      if (e.target !== document.body || e.shiftKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+
+      function findTypeAndPreventDefault(type) {
+        e.preventDefault();
+        return props?.media?.relations?.edges?.find(relation => relation?.relationType === type)?.node;
+      }
+
+      if (e.key === "l") {
+        navigateToMediaPage(navigate, findTypeAndPreventDefault("SEQUEL"));
+      } else if (e.key === "h") {
+        navigateToMediaPage(navigate, findTypeAndPreventDefault("PREQUEL"));
+      } else if (e.key === "j") {
+        const media = findTypeAndPreventDefault("ADAPTATION") || findTypeAndPreventDefault("ALTERNATIVE");
+        navigateToMediaPage(navigate, media);
+      } else if (e.key === "k") {
+        navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE"));
+      }
+    }, { signal: controller.signal });
+  });
+
+  onCleanup(() => controller.abort());
 
   return (
     <ErrorBoundary fallback="Error">
