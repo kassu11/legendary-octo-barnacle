@@ -442,7 +442,7 @@ function UserRow(props) {
   });
 
   return (
-    <li>
+    <li classList={{disabled: !enabled()}}>
       <Switch>
         <Match when={mediaList.error}>
           <p class="error">No user found with name: "{props.name}"</p>
@@ -463,7 +463,11 @@ function UserRow(props) {
             </Show>
           </p>
           <label>
-            <input type="checkbox" name="enable" checked={!enabled()} onChange={e => setEnabled(!e.target.checked)} /> Disable user
+            <input type="checkbox" name="enable" checked={!enabled()} onChange={e => setEnabled(!e.target.checked)} /> Disable <button>?
+              <Tooltip tipPosition="bottom">
+                Disabling a user removes them from search and filtering, just like removing them.
+              </Tooltip>
+            </button>
           </label>
           <label>
             <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Hide {params.type} from this user
