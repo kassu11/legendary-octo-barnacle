@@ -152,7 +152,7 @@ function generateSortFunction(sort, direction = 1) {
     case "popularity":
       return (a, b) => (sortFunctions.popularity(a, b) * direction) || sortFunctions.title(a, b);
     case "repeat":
-      return (a, b) => ((sortFunctions.repeat(a, b) || sortFunctions.progress(a, b)) * direction) || sortFunctions.title(a, b);
+      return (a, b) => ((sortFunctions.repeat(a, b) || sortFunctions.episodes(a, b) || sortFunctions.chapters(a, b) || sortFunctions.volumes(a, b) || sortFunctions.score(a, b)) * direction) || sortFunctions.title(a, b);
     default:
       console.error("No sort given");
       return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
