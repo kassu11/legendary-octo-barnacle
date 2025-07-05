@@ -442,7 +442,7 @@ function UserRow(props) {
   });
 
   return (
-    <li classList={{disabled: !enabled()}}>
+    <li classList={{disabled: !enabled(), exclude: exclude()}}>
       <Switch>
         <Match when={mediaList.error}>
           <p class="error">No user found with name: "{props.name}"</p>
@@ -470,7 +470,11 @@ function UserRow(props) {
             </button>
           </label>
           <label>
-            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Hide {params.type} from this user
+            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Exclude <button>?
+              <Tooltip tipPosition="bottom">
+                Remove all {params.type} that {mediaList()?.data?.user?.name || props.name} has on their list
+              </Tooltip>
+            </button>
           </label>
         </Match>
       </Switch>

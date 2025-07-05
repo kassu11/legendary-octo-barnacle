@@ -64,7 +64,7 @@
       align-items: center;
       --loader-size: 2rem;
       --loader-border-size: .35rem;
-      transition: opacity .2s, filter .2s;
+      transition: opacity .2s, filter .2s, background-color .2s;
 
       &:hover {
         z-index: 1; // Fix tooltip z-index that filter breaks;
@@ -84,6 +84,10 @@
           pointer-events: none;
           opacity: .5;
         }
+      }
+
+      &.exclude:not(.disabled) {
+        background-color: var(--red-100);
       }
     }
 
