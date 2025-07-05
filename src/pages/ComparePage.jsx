@@ -533,7 +533,7 @@ function ContentPage() {
         <div class="wrapper">
           <Show when={cardsVisibility[i()]}>
             <Show when={media.bannerImage}>
-              <img src={media.bannerImage} class="bg" inert alt="Background banner" />
+              <img src={media.bannerImage} loading="lazy" class="bg" inert alt="Background banner" />
             </Show>
             <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
               <div class="header flex-space-between">
@@ -549,7 +549,7 @@ function ContentPage() {
                   <Star /> {(media.averageScore / 10) || "N/A"}
                 </div>
               </div>
-              <img class="cover" src={media.coverImage.large} alt="Media cover" />
+              <img class="cover" loading="lazy" src={media.coverImage.large} alt="Media cover" />
               <Show when={media.episodes || media.chapters || media.volumes || media.score}>
                 <div class="footer flex-space-between">
                   <span>
