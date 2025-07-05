@@ -121,6 +121,13 @@
 
   .pg-compare-media-card {
     transition: opacity .2s;
+    &:has(.cover-link:hover) {
+      .bg {
+        filter: brightness(90%) grayscale(10%);
+        opacity: 80%;
+        scale: 1.01;
+      }
+    }
     .wrapper {
       background-color: color-mix(in oklch, var(--background-400), var(--color, var(--neutral-color-60)) 30%);
       position: relative;
@@ -132,6 +139,7 @@
       padding: .5rem;
       border-radius: .5rem;
       gap: 1rem;
+
       @container (width < 32rem) {
         gap: .5rem;
         height: auto;
@@ -188,6 +196,7 @@
       border-radius: inherit;
       opacity: 70%;
       filter: brightness(50%) grayscale(50%);
+      transition: .25s scale, .5s filter;
     }
 
     .cover-wrapper {
@@ -203,6 +212,10 @@
         width: 100%;
         align-items: flex-end;
       }
+    }
+
+    .cover-link {
+      border-radius: inherit;
     }
 
     .header {

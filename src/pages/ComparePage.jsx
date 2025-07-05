@@ -535,7 +535,7 @@ function ContentPage() {
             <Show when={media.bannerImage}>
               <img src={media.bannerImage} loading="lazy" class="bg" inert alt="Background banner" />
             </Show>
-            <A class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+            <div class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
               <div class="header flex-space-between">
                 <Show when={media.repeat}>
                   <div class="cp-card-repeat">
@@ -549,7 +549,9 @@ function ContentPage() {
                   <Star /> {(media.averageScore / 10) || "N/A"}
                 </div>
               </div>
-              <img class="cover" loading="lazy" src={media.coverImage.large} alt="Media cover" />
+              <A class="cover-link" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+                <img class="cover" loading="lazy" src={media.coverImage.large} alt="Media cover" />
+              </A>
               <Show when={media.episodes || media.chapters || media.volumes || media.score}>
                 <div class="footer flex-space-between">
                   <span>
@@ -571,7 +573,7 @@ function ContentPage() {
                   </Show>
                 </div>
               </Show>
-            </A>
+            </div>
             <div class="pg-compare-card-content">
               <p class="title">{media.title.userPreferred}</p>
               <ol class="pg-compare-media-users">
