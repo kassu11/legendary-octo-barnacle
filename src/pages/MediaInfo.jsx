@@ -84,7 +84,7 @@ function MediaInfo(props) {
 
   onMount(() => {
     window.addEventListener("keydown", e => {
-      if (e.target !== document.body || e.shiftKey || e.ctrlKey || e.altKey) {
+      if (e.target !== document.body || e.shiftKey || e.altKey) {
         return;
       }
 
@@ -93,14 +93,14 @@ function MediaInfo(props) {
         return props?.media?.relations?.edges?.find(relation => relation?.relationType === type)?.node;
       }
 
-      if (e.key === "l") {
+      if ((e.key === "l" && !e.ctrlKey) || (e.key === "ArrowRight" && e.ctrlKey)) {
         navigateToMediaPage(navigate, findTypeAndPreventDefault("SEQUEL"));
-      } else if (e.key === "h") {
+      } else if ((e.key === "h" && !e.ctrlKey) || (e.key === "ArrowLeft" && e.ctrlKey)) {
         navigateToMediaPage(navigate, findTypeAndPreventDefault("PREQUEL"));
-      } else if (e.key === "j") {
+      } else if ((e.key === "j" && !e.ctrlKey) || (e.key === "ArrowDown" && e.ctrlKey)) {
         const media = findTypeAndPreventDefault("ADAPTATION") || findTypeAndPreventDefault("ALTERNATIVE");
         navigateToMediaPage(navigate, media);
-      } else if (e.key === "k") {
+      } else if ((e.key === "k" && !e.ctrlKey) || (e.key === "ArrowUp" && e.ctrlKey)) {
         navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE"));
       }
     }, { signal: controller.signal });
