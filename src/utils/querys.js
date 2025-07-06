@@ -231,6 +231,25 @@ export const anilistMediaById = format`query media($id: Int, $type: MediaType, $
   }
 }`
 
+export const anilistGetActivityLikes = format`query ($page: Int, $id: Int, $type: LikeableType) {
+  Page(page: $page, perPage: 5) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    likes(likeableId: $id, type: $type) {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+  }
+}`;
+
 export const anilistUserSearch = format`query (
   $page: Int = 1
   $search: String

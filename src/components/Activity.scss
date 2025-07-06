@@ -24,6 +24,26 @@
   }
 }
 
+.cp-activity-like {
+  ol {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: .25rem;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  img {
+    aspect-ratio: 1/1;
+    width: 2rem;
+    border-radius: .25rem;
+  }
+}
+
 
 .activity-profile-header {
   display: flex;
