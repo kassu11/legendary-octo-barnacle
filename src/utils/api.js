@@ -209,6 +209,10 @@ const api = {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityById, { id }, res => res.data.Activity);
     }),
+    listOfActivityLikes: fetchOnce((id, token) => {
+      assert(id, "Id is missing");
+      return Fetch.authAnilist(token, queries.anilistGetActivityLikes, { id, type: "ACTIVITY" }, res => res.data.Page);
+    }),
     activityRepliesById: reloadCache((id, page, token) => {
       assert(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityRepliedById, { id, page }, res => res.data.Page);

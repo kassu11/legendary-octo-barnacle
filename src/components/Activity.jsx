@@ -7,6 +7,7 @@ import { assert } from "../utils/assert.js";
 import { capitalize, formatTitleToUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
+import { Tooltip } from "./Tooltips.jsx";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false }, _props);
@@ -80,6 +81,8 @@ function Footer(props) {
   const [isLiked, setIsLiked] = createSignal(props.activity.isLiked);
   const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
   const { accessToken } = useAuthentication();
+  const [showActivityLikeUserList, setShowActivityLikeUserList] = createSignal(undefined);
+  const [activityLikes] = api.anilist.listOfActivityLikes(props.activity.id, accessToken, showActivityLikeUserList);
 
   let serverIsLiked = props.activity.isLiked;
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, id, liked) => {
@@ -103,7 +106,7 @@ function Footer(props) {
 
   return (
     <>
-      <button classList={{active: isLiked()}} onClick={() => {
+      <button class="cp-activity-like" classList={{active: isLiked()}} onMouseMove={() => likeCount() && setShowActivityLikeUserList(true)} onClick={() => {
         setIsLiked(liked => {
           assert(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
@@ -111,7 +114,20 @@ function Footer(props) {
           triggerLikeToggle(accessToken(), props.activity.id, !liked);
           return !liked
         });
-      }}>Like {likeCount()}</button>
+      }}>Like {likeCount()}
+        <Show when={showActivityLikeUserList() && activityLikes()?.data.likes.length}>
+          <Tooltip tipPosition="left">
+            <ol>
+              <For each={activityLikes().data.likes}>{user => (
+                <li>
+                  <img src={user.avatar.large} alt="Profile picture" />
+                  {user.name}
+                </li>
+              )}</For>
+            </ol>
+          </Tooltip>
+        </Show>
+      </button>
       {/* <button>Reply {props.activity.replyCount}</button> */}
     </>
   )
