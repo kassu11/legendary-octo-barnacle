@@ -110,6 +110,7 @@ export default function ComparePage() {
   }
 
   createEffect(updateCompareScores);
+  document.title = `Compare ${params.type} - LOB`;
 
   return (
     <CompareMediaListContext.Provider value={{ compareMediaList, includeKeys, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
