@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import { Show, createSignal, createEffect, onMount } from "solid-js";
+import { Show, createSignal, createEffect, onMount, createResource } from "solid-js";
 import style from "./Home.module.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
@@ -7,6 +7,8 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
+import { createSignalFetcher, send } from "../utils/fetchers/fetcherUtils.js";
+import { getActivity, searchMedia } from "../utils/fetchers/anilist.js";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -51,9 +53,18 @@ function Activity() {
     });
   });
 
+  // const [page, setPage] = createSignal(1);
+  //
+  // const fetcher = createSignalFetcher(searchMedia, null, [], page);
+  // const [data] = send(fetcher, { storeName: "results", type: "default", expiresInSeconds: 60 * 60 * 24 * 365 });
+
+
   return (
     <>
       <h2>Activity</h2>
+      <button onClick={() => setPage(v => v + 1)}>test</button>
+      {/* {console.log(data())} */}
+      <hr />
       <div>
         <button onClick={() => setActivityType(undefined)}>All</button>
         <button onClick={() => setActivityType("TEXT")}>Text Status</button>
@@ -79,7 +90,8 @@ function Activity() {
 
 function ActivityContent(props) {
   const { accessToken } = useAuthentication();
-  const [activityData, { mutateCache }] = api.anilist.getActivity(accessToken, props.variables, props.page);
+  const fetcher = createSignalFetcher(getActivity, accessToken, props.variables, props.page);
+  const [activityData, { mutateCache }] = send(fetcher);
   const [showMore, setShowMore] = createSignal(false);
 
   onMount(() => {
