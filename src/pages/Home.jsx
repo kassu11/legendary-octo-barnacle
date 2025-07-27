@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import { Show, createSignal, createEffect, onMount, createResource } from "solid-js";
+import { Show, createSignal, createEffect, onMount, createResource, on, For, onCleanup, batch } from "solid-js";
 import style from "./Home.module.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
@@ -7,8 +7,13 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { createSignalFetcher, send } from "../utils/fetchers/fetcherUtils.js";
+import { createAnilistPagelessSignalFetcher, createSignalFetcher } from "../utils/fetchers/fetcherUtils.js";
 import { getActivity, searchMedia } from "../utils/fetchers/anilist.js";
+import { send2 } from "../utils/fetchers/Fetcher.js";
+import { createStore, produce, reconcile, unwrap } from "solid-js/store";
+import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
+import { binarySearchFindIndex } from "../utils/arrays.js";
+import { setProperty } from "solid-js/web";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -71,18 +76,23 @@ function Activity() {
         <button onClick={() => setActivityType("MEDIA_LIST")}>List Progress</button>
       </div>
       <button onClick={() => {
-        setIsFollowing(true); 
-        setHasReplies(undefined);
+        batch(() => {
+          setIsFollowing(true); 
+          setHasReplies(undefined);
+        });
       }}>Following</button>
       <button onClick={() => {
-        setIsFollowing(false);
-        setHasReplies(true);
+        batch(() => {
+          setIsFollowing(false);
+          setHasReplies(true);
+        })
       }}>Global</button>
-      <div class="grid-column-auto-fill activity">
+      <ol class="flex-space-between activity">
         <Show when={variables()} keyed>
-          <ActivityContent page={1} variables={variables()} loadMoreButton={loadMoreButton} />
+          {/* <ActivityContent page={1} variables={variables()} loadMoreButton={loadMoreButton} /> */}
+          <ActivityReel page={1} variables={variables()} loadMoreButton={loadMoreButton} />
         </Show>
-      </div>
+      </ol>
       {loadMoreButton}
     </>
   );
@@ -90,25 +100,264 @@ function Activity() {
 
 function ActivityContent(props) {
   const { accessToken } = useAuthentication();
+  const pagelessFetcher = createAnilistPagelessSignalFetcher(getActivity, accessToken, props.variables, props.page);
   const fetcher = createSignalFetcher(getActivity, accessToken, props.variables, props.page);
-  const [activityData, { mutateCache }] = send(fetcher);
+  // TODO: New api should be done
+  // Just test that it works
+  const [test, { mutate: mutateTest }] = send2(pagelessFetcher);
+  const [activityData, { mutateCache }] = send2(fetcher);
   const [showMore, setShowMore] = createSignal(false);
 
   onMount(() => {
     props.loadMoreButton.addEventListener("click", () => setShowMore(true), { once: true });
   });
-  
+
   return (
-    <Show when={activityData()}>
-      <For each={activityData().data.activities}>{activity => (
-        <ActivityCard activity={activity} mutateCache={mutateCache} />
-      )}</For>
-      <Show when={activityData().data.pageInfo.hasNextPage && showMore()}>
-        <ActivityContent page={props.page + 1} variables={props.variables} loadMoreButton={props.loadMoreButton} />
+    <>
+      <Show when={activityData()}>
+        {console.log("test", test())}
+        <For each={activityData().data.activities}>{activity => (
+          <ActivityCard activity={activity} mutateCache={mutateCache} />
+        )}</For>
+        <Show when={activityData().data.pageInfo.hasNextPage && showMore()}>
+          <ActivityContent page={props.page + 1} variables={props.variables} loadMoreButton={props.loadMoreButton} />
+        </Show>
       </Show>
-    </Show>
+    </>
   );
 }
+
+function ActivityReel(props) {
+  const { accessToken } = useAuthentication();
+  const pagelessFetcher = createAnilistPagelessSignalFetcher(getActivity, accessToken, props.variables, props.page);
+  const [pagelessCacheData, { mutateCache }] = send2(pagelessFetcher);
+  const [store, setStore] = createStore([]);
+
+  const updateCache = apiResponse => {
+    if (!apiResponse?.data?.activities?.length) {
+      return;
+    }
+
+    const length = Math.min(store.length, apiResponse.data.activities.length);
+    if (apiResponse.data.pageInfo.currentPage === 1) {
+      const lastNewId = apiResponse.data.activities.at(-1).id;
+      const isLargest = hasLargestId(store, lastNewId, 0, length);
+
+      if (isLargest) {
+        setStore(reconcile(apiResponse.data.activities, []));
+        mutateCache(api => {
+          api.data ??= [];
+          api.data.unshift(apiResponse.data.activities);
+          api.data.length = Math.min(api.data.length, 5);
+          return api;
+        });
+      } else {
+        setStore(produce(arr => {
+          const lastNewIdsCacheIndex = arr.findIndex(activity => activity.id <= lastNewId);
+          arr.splice(0, lastNewIdsCacheIndex + 1, ...apiResponse.data.activities);
+        }));
+        mutateCache(api => {
+          api.data[0] = unwrap(store);
+          return api;
+        });
+      }
+    } else {
+      mutateCache(api => {
+        const firstId = apiResponse.data.activities[0].id;
+        const startIndex = binarySearchFindIndex(store, activity => activity.id - firstId);
+
+        setStore(produce(arr => {
+          if (startIndex === -1) {
+            if (firstId < store.at(-1).id) {
+              arr.push(...apiResponse.data.activities);
+            } else {
+              api.data.unshift(apiResponse.data.activities);
+              api.data.length = Math.min(api.data.length, 5);
+            }
+          } else {
+            const lastId = apiResponse.data.activities.at(-1).id;
+            const endIndex = binarySearchFindIndex(store, activity => activity.id - lastId);
+            if (endIndex === -1) {
+              arr.splice(startIndex, arr.length, ...apiResponse.data.activities);
+            } else {
+              arr.splice(startIndex, endIndex - startIndex + 1, ...apiResponse.data.activities);
+            }
+          }
+
+          if (api.data.length > 1) {
+            const lastId = apiResponse.data.activities.at(-1).id;
+            const lastIdIndexInOldBuffer = binarySearchFindIndex(api.data[1], activity => activity.id - lastId) + 1;
+            if (lastIdIndexInOldBuffer !== -1) {
+              for (let i = lastIdIndexInOldBuffer; i < api.data[1].length; i++) {
+                arr.push(api.data[1][i]);
+              }
+              api.data.splice(1, 1);
+            }
+          }
+        }));
+
+        api.data[0] = unwrap(store);
+        return api;
+      });
+    }
+  }
+
+  const hasLargestId = (array, id, start, end) => {
+    for (let i = start; i < end; i++) {
+      if (array[i].id >= id) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  console.warn("Rendering reel again");
+
+
+  createEffect(on(pagelessCacheData, apiRes => {
+    if (apiRes?.data) {
+      setStore(apiRes.data[0]);
+    }
+  }));
+
+  return (
+    <ActivityPage cache={store} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+  );
+}
+
+let initialPageLoad = true;
+function ActivityPage(props) {
+  const [page, setPage] = createSignal(initialPageLoad ? 1 : undefined);
+  const [pageSuggestion, setPageSuggestion] = createSignal(undefined);
+
+  let minIndex = null;
+  let maxIndex = null;
+  let maxPage = null;
+  let firstPageIsFresh = false;
+  let isMounted = false;
+  const observerList = [];
+  const freshActivityIDs = new Set();
+  const visibleIndices = new Set();
+
+  function observe(target) {
+    if (isMounted) {
+      intersectionObserver.observe(target);
+    } else {
+      observerList.push(target);
+    }
+  }
+
+  onMount(() => {
+    observerList.forEach(elem => intersectionObserver.observe(elem));
+    isMounted = true;
+  });
+
+  onMount(() => {
+    props.loadMoreButton.addEventListener("click", () => setPage(p => Math.max(p + 1, Math.ceil(props.cache.length / 25) + 1)));
+  });
+
+  onCleanup(() => {
+    intersectionObserver.disconnect();
+  });
+
+  const options = { rootMargin: "500px" }
+  const callback = (entries) => {
+    for (const entry of entries) {
+      const index = parseInt(entry.target.dataset.index)
+      if (entry.isIntersecting) {
+        visibleIndices.add(index);
+      } else {
+        visibleIndices.delete(index);
+      }
+    }
+    minIndex = null;
+    maxIndex = null;
+
+    visibleIndices.forEach(value => {
+      minIndex = Math.min(value, minIndex ?? value);
+      maxIndex = Math.max(value, maxIndex ?? value);
+    });
+
+    const halfInnerHeight = window.innerHeight / 2;
+    const scrollCenter = document.body.parentElement.scrollTop + halfInnerHeight;
+    const halfScrollHeight = document.body.parentElement.scrollHeight / 2;
+    minIndex ??= scrollCenter < halfScrollHeight ? 0 : props.cache.length;
+    maxIndex ??= scrollCenter < halfScrollHeight ? 0 : props.cache.length;
+
+    sendNewPageSuggestion();
+  };
+
+  createEffect(on(pageSuggestion, p => {
+    triggerFetcherSend(p);
+  }));
+
+  const intersectionObserver = new IntersectionObserver(callback, options);
+
+  const { accessToken } = useAuthentication();
+  const fetcher = createSignalFetcher(getActivity, accessToken, props.variables, page);
+  const [activityData] = send2(fetcher, { type: "no-store" });
+
+  const triggerFetcherSend = leadingAndTrailing(debounce, (num) => {
+    if (num && !activityData.loading) {
+      setPage(num);
+    }
+  }, 1000);
+
+  createEffect(on(activityData, apiResponse => {
+    console.log(apiResponse);
+    if (apiResponse?.data) {
+      apiResponse.data.activities.forEach(activity => {
+        freshActivityIDs.add(activity.id);
+      });
+      props.updateCache(apiResponse);
+    }
+  }));
+
+  createEffect(on(() => activityData.loading, loading => {
+    if (loading) {
+      return;
+    }
+
+    sendNewPageSuggestion();
+  }));
+
+  function sendNewPageSuggestion() {
+    if (maxIndex === props.cache.length) {
+      if (props.cache.length % 25 === 0) {
+        maxPage = Math.max(maxPage + 1, Math.round(props.cache.length / 25) + 1);
+      } else {
+        maxPage = Math.max(maxPage + 1, Math.ceil(props.cache.length / 25));
+      }
+
+      setPageSuggestion(maxPage);
+    } else if (minIndex === 0) {
+      setPageSuggestion(1);
+    } else {
+      const oldIndices = [];
+      for (let i = minIndex; i < maxIndex; i++) {
+        if (!freshActivityIDs.has(props.cache[i].id)) {
+          oldIndices.push(i);
+        }
+      }
+
+      if (oldIndices.length) {
+        setPageSuggestion(Math.ceil((oldIndices[Math.floor(oldIndices.length / 2)] + 1) / 25));
+      }
+    }
+  }
+
+  return (
+    <>
+      <For each={props.cache}>{(activity, i) => (
+        <ActivityCard activity={activity} mutateCache={props.mutateCache} wrapper={props => (
+          <li use:observe attr:data-index={i()} {...props} />
+        )}/>
+      )}</For>
+    </>
+  )
+}
+
 
 
 function CurrentWatchingMedia(props) {

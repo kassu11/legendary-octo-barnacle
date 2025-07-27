@@ -1,5 +1,7 @@
 import { Fetch } from "./Fetch";
 import * as queries from "../querys.js";
+import * as fetchers from "./fetchers.js";
+import { Fetcher } from "./Fetcher.js";
 
 export const searchMedia = (token, variables, page, extraVariables = {}) => {
   const variableObject = variables.reduce((acc, v) => {
@@ -22,6 +24,7 @@ export const searchMedia = (token, variables, page, extraVariables = {}) => {
 }
 
 export const getActivity = (token, variables, page = 1) => {
+  return fetchers.anilistAuth(token, queries.anilistActivity, { ...variables, page }, res => res.data.Page);
   return Fetch.authAnilist(token, queries.anilistActivity, { ...variables, page }, res => res.data.Page)
     // .cacheKeyGenerator(keyObj => {
     //   console.log("generator", keyObj)

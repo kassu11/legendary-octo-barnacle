@@ -73,8 +73,23 @@ export class Fetch {
     this.cacheKey = this.#generateCacheKey(this);
   }
 
+  clone() {
+    const fetchClone = new Fetch(this.url, this, this.#formatResponse);
 
-  cacheKeyGenerator(generatorCallback) {
+    fetchClone.#cacheKeyGeneratorObject = this.#cacheKeyGeneratorObject;
+    fetchClone.#formatLoad = this.#formatLoad 
+    fetchClone.#formatResponse = this.#formatResponse;
+    fetchClone.#formatSave = this.#formatSave;
+    fetchClone.#settings = this.#settings;
+    fetchClone.cacheKey = this.cacheKey;
+    fetchClone.data = this.data;
+    fetchClone.fromCache = this.fromCache;
+
+    return fetchClone;
+  }
+
+
+  setCacheKeyGenerator(generatorCallback) {
     const cacheKeyObj = generatorCallback(structuredClone({ url: this.url, body: this.body }));
     this.#cacheKeyGeneratorObject = cacheKeyObj;
     this.cacheKey = this.#generateCacheKey(cacheKeyObj);
@@ -203,7 +218,7 @@ export class Fetch {
   }
 
   /** 
-   * @param {FetchSettings} 
+   * @param {FetchSettings} settings
    * @returns {Fetch}
   */
   setSettings(settings) {
