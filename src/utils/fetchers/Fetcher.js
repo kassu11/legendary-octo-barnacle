@@ -6,7 +6,7 @@ import { TokenBucket } from "../TokenBucket";
 import { CacheObject } from "./CacheObject";
 import { Fetch } from "./Fetch";
 import { FetchSettings } from "./FetchSettings";
-import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { batch, createEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 
 const DEBUG = location.origin.includes("localhost");
 
@@ -127,6 +127,30 @@ class ApiResponse {
   }
 }
 
+function createCustomSignal(initialValue) {
+  const [trackingSignal, setTrackingSignal] = createSignal(0);
+  let currentValue = initialValue;
+
+  const value = () => {
+    trackingSignal(); // track in reactive scopes
+    return currentValue;
+  };
+
+  const setValue = (mutation) => {
+    const newValue = typeof mutation === "function" ? mutation(currentValue) : mutation;
+    currentValue = newValue;
+    setTrackingSignal((n) => n + 1); // trigger change
+    return currentValue;
+  };
+
+  const setValueWithoutUpdate = (mutation) => {
+    currentValue = typeof mutation === "function" ? mutation(currentValue) : mutation;
+    return currentValue;
+  };
+
+  return [value, setValue, setValueWithoutUpdate];
+}
+
 
 /** @type {Object.<string, CacheObject>} */
 const cacheObjects = {};
@@ -136,28 +160,36 @@ const cacheObjects = {};
  * @param {FetchSettings} [overwriteSettings] - Custom settings to overwrite fetch settings
  */
 export const send2 = (fetcherSignal, overwriteSettings = {}) => {
-  /** @type {[() => null|ApiResponse, (ApiResponse) => void]} */
-  const [response, setResponse] = createSignal(undefined);
+  /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
+  const [response, setResponse, setResponseWithoutUpdate] = createCustomSignal(undefined);
   const [error, setError] = createSignal(false);
   const [loading, setLoading] = createSignal(false);
   const [indexedDBClosed, setIndexedDBClosed] = createSignal(true);
   /** @type {null|Fetcher} */
   let currentFetcher = null;
-  /** @type {[null|any]} */
-  let currentCacheData = null;
 
   /**
-   * @param {ApiResponse|(data: ApiResponse) => ApiResponse} mutated
+   * @param {ApiResponse|(data: ApiResponse) => ApiResponse} possibleCallback
+   * @returns {ApiResponse}
+   */
+  const unwrapMutation = possibleCallback => {
+    if (typeof possibleCallback === "function") {
+      const { data, cacheType } = untrack(response) || {};
+      return possibleCallback(new ApiResponse(currentFetcher.cacheKey, data, cacheType));
+    }
+
+    return possibleCallback;
+  }
+
+  /**
+   * @param {ApiResponse|(data: ApiResponse) => ApiResponse} cacheMutation
    * @param {() => any} callback
    */
-  const mutateCache = (mutated, callback) => {
-    if (typeof mutated === "function") {
-      const { data, cacheType } = untrack(response) || {};
-      mutated = mutated(new ApiResponse(currentFetcher.cacheKey, currentCacheData || data, cacheType));
-    }
+  const mutateCache = (mutation, callback) => {
+    const processedMutation = unwrapMutation(mutation);
     // Create a deepcopy because onsuccess events are not instant so mutations could leak into cache.
-    currentCacheData = structuredClone(mutated.data);
-    mutated = new CacheObject(currentFetcher, currentCacheData);
+    const cacheMutation = new CacheObject(currentFetcher, structuredClone(processedMutation.data));
+    setResponseWithoutUpdate(processedMutation);
 
     const {type, storeName} = currentFetcher.settings;
 
@@ -165,15 +197,15 @@ export const send2 = (fetcherSignal, overwriteSettings = {}) => {
       return;
     }
 
-    currentFetcher.settings.saveToSessionStorage?.(mutated);
-    cacheObjects[mutated.cacheKey] = mutated;
+    currentFetcher.settings.saveToSessionStorage?.(cacheMutation);
+    cacheObjects[cacheMutation.cacheKey] = cacheMutation;
 
     setIndexedDBClosed(false);
     const cacheReq = IndexedDB.fetchCache();
     cacheReq.onsuccess = evt => {
       const db = evt.target.result;
       const store = IndexedDB.store(db, storeName, "readwrite", () => setIndexedDBClosed(true), () => setIndexedDBClosed(true));
-      const putReq = store.put(mutated);
+      const putReq = store.put(cacheMutation);
       if (callback) {
         putReq.onsuccess = callback;
       }
@@ -188,14 +220,23 @@ export const send2 = (fetcherSignal, overwriteSettings = {}) => {
     }
   }
 
-  /** @param {ApiResponse|(data: ApiResponse) => ApiResponse} mutateData */
-  const mutate = mutateData => {
-    if (typeof mutateData === "function") {
-      mutateData = mutateData(untrack(response));
-    }
+  /** @param {ApiResponse|(data: ApiResponse) => ApiResponse} mutation */
+  const mutate = mutation => {
+    mutation = unwrapMutation(mutation);
 
-    assert(mutateData instanceof ApiResponse);
-    setResponse(mutateData);
+    assert(mutation instanceof ApiResponse);
+    setResponse(mutation);
+  }
+
+  /**
+   * @param {ApiResponse|(data: ApiResponse) => ApiResponse} mutation
+   * @param {() => any} callback
+   */
+  const mutateBoth = (mutation, callback) => {
+    mutation = unwrapMutation(mutation);
+
+    mutateCache(mutation, callback);
+    mutate(mutation);
   }
 
   const refetch = async () => {
@@ -232,7 +273,6 @@ export const send2 = (fetcherSignal, overwriteSettings = {}) => {
 
     currentFetcher?.controller.abort();
     currentFetcher = fetcherSignal();
-    currentCacheData = null;
     assert(currentFetcher instanceof Fetcher);
 
     Object.assign(currentFetcher.settings, overwriteSettings);
@@ -254,6 +294,7 @@ export const send2 = (fetcherSignal, overwriteSettings = {}) => {
         return;
       }
     } else if (type !== "no-store" && currentFetcher.settings.storeName) {
+      console.log(currentFetcher.cacheKey);
       const cacheReq = IndexedDB.fetchCache();
       const safeRefetch = () => !sendFetchEvenWhenCacheIsFound && refetch();
       cacheReq.onerror = safeRefetch;
@@ -284,8 +325,6 @@ export const send2 = (fetcherSignal, overwriteSettings = {}) => {
       }
     }
 
-    console.log(sendFetchEvenWhenCacheIsFound, isOnDebugSoDontFetch);
-
     if (sendFetchEvenWhenCacheIsFound) {
       refetch();
     }
@@ -299,5 +338,5 @@ export const send2 = (fetcherSignal, overwriteSettings = {}) => {
 
   onCleanup(() => currentFetcher?.controller.abort());
 
-  return [response, { mutate, refetch, mutateCache }];
+  return [response, { mutate, refetch, mutateCache, mutateBoth }];
 }

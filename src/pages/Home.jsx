@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import { Show, createSignal, createEffect, onMount, createResource, on, For, onCleanup, batch } from "solid-js";
+import { Show, createSignal, createEffect, onMount, createResource, on, For, onCleanup, batch, Match } from "solid-js";
 import style from "./Home.module.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
@@ -130,73 +130,74 @@ function ActivityContent(props) {
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
   const pagelessFetcher = createAnilistPagelessSignalFetcher(getActivity, accessToken, props.variables, props.page);
-  const [pagelessCacheData, { mutateCache }] = send2(pagelessFetcher);
-  const [store, setStore] = createStore([]);
+  const [pagelessCacheData, { mutateCache, mutateBoth }] = send2(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.activities?.length) {
       return;
     }
 
-    const length = Math.min(store.length, apiResponse.data.activities.length);
+    if (!pagelessCacheData()?.data?.length) {
+      mutateBoth(api => {
+        api.data ??= [];
+        api.data.unshift(apiResponse.data.activities);
+        return api;
+      });
+      return;
+    }
+
+    const length = Math.min(pagelessCacheData().data[0].length, apiResponse.data.activities.length);
     if (apiResponse.data.pageInfo.currentPage === 1) {
       const lastNewId = apiResponse.data.activities.at(-1).id;
-      const isLargest = hasLargestId(store, lastNewId, 0, length);
+      const isLargest = hasLargestId(pagelessCacheData().data[0], lastNewId, 0, length);
 
       if (isLargest) {
-        setStore(reconcile(apiResponse.data.activities, []));
-        mutateCache(api => {
+        mutateBoth(api => {
           api.data ??= [];
           api.data.unshift(apiResponse.data.activities);
           api.data.length = Math.min(api.data.length, 5);
           return api;
         });
       } else {
-        setStore(produce(arr => {
-          const lastNewIdsCacheIndex = arr.findIndex(activity => activity.id <= lastNewId);
-          arr.splice(0, lastNewIdsCacheIndex + 1, ...apiResponse.data.activities);
-        }));
-        mutateCache(api => {
-          api.data[0] = unwrap(store);
+        mutateBoth(api => {
+          const lastNewIdsCacheIndex = api.data[0].findIndex(activity => activity.id <= lastNewId);
+          api.data[0].splice(0, lastNewIdsCacheIndex + 1, ...apiResponse.data.activities);
           return api;
         });
       }
     } else {
-      mutateCache(api => {
+      mutateBoth(api => {
         const firstId = apiResponse.data.activities[0].id;
-        const startIndex = binarySearchFindIndex(store, activity => activity.id - firstId);
+        const startIndex = binarySearchFindIndex(api.data[0], activity => activity.id - firstId);
 
-        setStore(produce(arr => {
-          if (startIndex === -1) {
-            if (firstId < store.at(-1).id) {
-              arr.push(...apiResponse.data.activities);
-            } else {
-              api.data.unshift(apiResponse.data.activities);
-              api.data.length = Math.min(api.data.length, 5);
-            }
+        if (startIndex === -1) {
+          if (firstId < api.data[0].at(-1).id) {
+            api.data[0].push(...apiResponse.data.activities);
           } else {
-            const lastId = apiResponse.data.activities.at(-1).id;
-            const endIndex = binarySearchFindIndex(store, activity => activity.id - lastId);
-            if (endIndex === -1) {
-              arr.splice(startIndex, arr.length, ...apiResponse.data.activities);
-            } else {
-              arr.splice(startIndex, endIndex - startIndex + 1, ...apiResponse.data.activities);
-            }
+            api.data.unshift(apiResponse.data.activities);
+            api.data.length = Math.min(api.data.length, 5);
           }
-
-          if (api.data.length > 1) {
-            const lastId = apiResponse.data.activities.at(-1).id;
-            const lastIdIndexInOldBuffer = binarySearchFindIndex(api.data[1], activity => activity.id - lastId) + 1;
-            if (lastIdIndexInOldBuffer !== -1) {
-              for (let i = lastIdIndexInOldBuffer; i < api.data[1].length; i++) {
-                arr.push(api.data[1][i]);
-              }
-              api.data.splice(1, 1);
-            }
+        } else {
+          const lastId = apiResponse.data.activities.at(-1).id;
+          const endIndex = binarySearchFindIndex(api.data[0], activity => activity.id - lastId);
+          if (endIndex === -1) {
+            api.data[0].splice(startIndex, api.data[0].length, ...apiResponse.data.activities);
+          } else {
+            api.data[0].splice(startIndex, endIndex - startIndex + 1, ...apiResponse.data.activities);
           }
-        }));
+        }
 
-        api.data[0] = unwrap(store);
+        if (api.data.length > 1) {
+          const lastId = apiResponse.data.activities.at(-1).id;
+          const lastIdIndexInOldBuffer = binarySearchFindIndex(api.data[1], activity => activity.id - lastId) + 1;
+          if (lastIdIndexInOldBuffer !== -1) {
+            for (let i = lastIdIndexInOldBuffer; i < api.data[1].length; i++) {
+              api.data[0].push(api.data[1][i]);
+            }
+            api.data.splice(1, 1);
+          }
+        }
+
         return api;
       });
     }
@@ -212,17 +213,14 @@ function ActivityReel(props) {
     return true;
   }
 
-  console.warn("Rendering reel again");
-
-
   createEffect(on(pagelessCacheData, apiRes => {
     if (apiRes?.data) {
-      setStore(apiRes.data[0]);
+      console.log(apiRes.data);
     }
   }));
 
   return (
-    <ActivityPage cache={store} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+    <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} updateCache={updateCache} mutateCache={mutateCache} {...props} />
   );
 }
 
