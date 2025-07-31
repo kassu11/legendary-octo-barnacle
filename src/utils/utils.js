@@ -1,3 +1,3 @@
-import * as FetcherUtils from "./fetchers/fetcherUtils.js";
+import * as fetcherUtils from "./Fetcher/fetcherUtils.js";
 
-export { FetcherUtils }
+export { fetcherUtils }

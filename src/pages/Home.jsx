@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import { Show, createSignal, createEffect, onMount, createResource, on, For, onCleanup, batch, Match } from "solid-js";
+import { Show, createSignal, createEffect, onMount, on, For, onCleanup, batch, Match } from "solid-js";
 import style from "./Home.module.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
@@ -7,13 +7,9 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { createAnilistPagelessSignalFetcher, createSignalFetcher } from "../utils/fetchers/fetcherUtils.js";
-import { getActivity, searchMedia } from "../utils/fetchers/anilist.js";
-import { send2 } from "../utils/fetchers/Fetcher.js";
-import { createStore, produce, reconcile, unwrap } from "solid-js/store";
+import { fetcherUtils } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { binarySearchFindIndex } from "../utils/arrays.js";
-import { setProperty } from "solid-js/web";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -58,17 +54,10 @@ function Activity() {
     });
   });
 
-  // const [page, setPage] = createSignal(1);
-  //
-  // const fetcher = createSignalFetcher(searchMedia, null, [], page);
-  // const [data] = send(fetcher, { storeName: "results", type: "default", expiresInSeconds: 60 * 60 * 24 * 365 });
-
-
   return (
     <>
       <h2>Activity</h2>
       <button onClick={() => setPage(v => v + 1)}>test</button>
-      {/* {console.log(data())} */}
       <hr />
       <div>
         <button onClick={() => setActivityType(undefined)}>All</button>
@@ -89,7 +78,6 @@ function Activity() {
       }}>Global</button>
       <ol class="flex-space-between activity">
         <Show when={variables()} keyed>
-          {/* <ActivityContent page={1} variables={variables()} loadMoreButton={loadMoreButton} /> */}
           <ActivityReel page={1} variables={variables()} loadMoreButton={loadMoreButton} />
         </Show>
       </ol>
@@ -98,39 +86,11 @@ function Activity() {
   );
 }
 
-function ActivityContent(props) {
-  const { accessToken } = useAuthentication();
-  const pagelessFetcher = createAnilistPagelessSignalFetcher(getActivity, accessToken, props.variables, props.page);
-  const fetcher = createSignalFetcher(getActivity, accessToken, props.variables, props.page);
-  // TODO: New api should be done
-  // Just test that it works
-  const [test, { mutate: mutateTest }] = send2(pagelessFetcher);
-  const [activityData, { mutateCache }] = send2(fetcher);
-  const [showMore, setShowMore] = createSignal(false);
-
-  onMount(() => {
-    props.loadMoreButton.addEventListener("click", () => setShowMore(true), { once: true });
-  });
-
-  return (
-    <>
-      <Show when={activityData()}>
-        {console.log("test", test())}
-        <For each={activityData().data.activities}>{activity => (
-          <ActivityCard activity={activity} mutateCache={mutateCache} />
-        )}</For>
-        <Show when={activityData().data.pageInfo.hasNextPage && showMore()}>
-          <ActivityContent page={props.page + 1} variables={props.variables} loadMoreButton={props.loadMoreButton} />
-        </Show>
-      </Show>
-    </>
-  );
-}
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = createAnilistPagelessSignalFetcher(getActivity, accessToken, props.variables, props.page);
-  const [pagelessCacheData, { mutateCache, mutateBoth }] = send2(pagelessFetcher);
+  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, props.page);
+  const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherUtils.send(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.activities?.length) {
@@ -293,8 +253,8 @@ function ActivityPage(props) {
   const intersectionObserver = new IntersectionObserver(callback, options);
 
   const { accessToken } = useAuthentication();
-  const fetcher = createSignalFetcher(getActivity, accessToken, props.variables, page);
-  const [activityData] = send2(fetcher, { type: "no-store" });
+  const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
+  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
 
   const triggerFetcherSend = leadingAndTrailing(debounce, (num) => {
     if (num && !activityData.loading) {
