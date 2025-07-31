@@ -1,6 +1,6 @@
-import { IndexedDB } from "../api";
-import { assert } from "../assert";
-import { Fetcher } from "./Fetcher";
+import { IndexedDB } from "./api";
+import { assert } from "./assert";
+import { Fetcher } from "./Fetcher/Fetcher.js";
 
 export class CacheObject {
   /**

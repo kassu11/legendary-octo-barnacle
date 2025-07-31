@@ -1,52 +1,10 @@
-import { cache } from "@solidjs/router";
 import { IndexedDB } from "../api";
 import { assert } from "../assert";
-import { assertFunction, unwrapFunction } from "../functionUtils";
-import { TokenBucket } from "../TokenBucket";
-import { CacheObject } from "./CacheObject";
-import { Fetch } from "./Fetch";
+import { CacheObject } from "../CacheObject";
 import { FetchSettings } from "./FetchSettings";
-import { batch, createEffect, createSignal, on, onCleanup, untrack } from "solid-js";
+import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 
 const DEBUG = location.origin.includes("localhost");
-
-// const fetchRateLimits = {
-//   "animeThemes": new TokenBucket({
-//     start: 90,
-//     limit: 90,
-//     interval: 60,
-//     defaultDelay: 20,
-//   }),
-//   "anilist": new TokenBucket({
-//     start: 5,
-//     limit: 5,
-//     interval: 2,
-//     defaultDelay: 20,
-//     pool: new TokenBucket({
-//       start: 60,
-//       limit: 90,
-//       interval: 60,
-//       fillAmount: 60,
-//     })
-//   }),
-//   "jikan": new TokenBucket({
-//     start: 1,
-//     limit: 1,
-//     interval: 1/3,
-//     defaultDelay: 1,
-//     pool: new TokenBucket({
-//       start: 3,
-//       limit: 3,
-//       interval: 1.25,
-//       pool: new TokenBucket({
-//         start: 60,
-//         limit: 60,
-//         interval: 60,
-//         fillAmount: 60,
-//       })
-//     })
-//   }),
-// }
 
 export class Fetcher {
   constructor(url, options, formatResponse) {
@@ -156,10 +114,10 @@ function createCustomSignal(initialValue) {
 const cacheObjects = {};
 
 /**
- * @param {() => (Fetch|null)} fetcherSignal - Fetch to be send
+ * @param {() => (Fetcher|null)} fetcherSignal - Fetch to be send
  * @param {FetchSettings} [overwriteSettings] - Custom settings to overwrite fetch settings
  */
-export const send2 = (fetcherSignal, overwriteSettings = {}) => {
+export const send = (fetcherSignal, overwriteSettings = {}) => {
   /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
   const [response, setResponse, setResponseWithoutUpdate] = createCustomSignal(undefined);
   const [error, setError] = createSignal(false);
