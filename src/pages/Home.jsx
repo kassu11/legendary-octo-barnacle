@@ -7,13 +7,9 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { createAnilistPagelessSignalFetcher, createSignalFetcher } from "../utils/fetchers/fetcherUtils.js";
-import { getActivity, searchMedia } from "../utils/fetchers/anilist.js";
-import { send2 } from "../utils/fetchers/Fetcher.js";
-import { createStore, produce, reconcile, unwrap } from "solid-js/store";
+import { fetcherUtils } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { binarySearchFindIndex } from "../utils/arrays.js";
-import { setProperty } from "solid-js/web";
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -129,8 +125,8 @@ function ActivityContent(props) {
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = createAnilistPagelessSignalFetcher(getActivity, accessToken, props.variables, props.page);
-  const [pagelessCacheData, { mutateCache, mutateBoth }] = send2(pagelessFetcher);
+  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, props.page);
+  const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherUtils.send(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.activities?.length) {
@@ -293,8 +289,8 @@ function ActivityPage(props) {
   const intersectionObserver = new IntersectionObserver(callback, options);
 
   const { accessToken } = useAuthentication();
-  const fetcher = createSignalFetcher(getActivity, accessToken, props.variables, page);
-  const [activityData] = send2(fetcher, { type: "no-store" });
+  const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
+  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
 
   const triggerFetcherSend = leadingAndTrailing(debounce, (num) => {
     if (num && !activityData.loading) {

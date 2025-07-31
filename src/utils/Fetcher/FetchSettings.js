@@ -1,6 +1,6 @@
 import { assert } from "../assert";
 import { assertFunction } from "../functionUtils";
-import { CacheObject } from "./CacheObject";
+import { CacheObject } from "../CacheObject";
 
 /**
 * @typedef {Object} FetchSettingsOptions - Cache settings.
