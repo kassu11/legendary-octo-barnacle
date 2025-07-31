@@ -8,17 +8,16 @@ import { capitalize, formatTitleToUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
-import { Dynamic } from "solid-js/web"
 
 export function ActivityCard(_props) {
-  const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);
+  const props = mergeProps({ hideProfile: false, small: false }, _props);
   assert(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
   assert(typeof props.small === "boolean", "small needs to be boolean");
 
   return (
     <Switch>
       <Match when={props.activity.type === "TEXT"}>
-        <Dynamic component={props.wrapper} class="activity-card-text">
+        <div class="activity-card-text">
           <div class="header">
             <A href={"/user/" + props.activity.user.name} class="activity-profile-header">
               <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
@@ -32,10 +31,10 @@ export function ActivityCard(_props) {
           <div class="footer">
             <Footer mutateCache={props.mutateCache} activity={props.activity}/>
           </div>
-        </Dynamic>
+        </div>
       </Match>
       <Match when={props.activity.type === "ANIME_LIST" || props.activity.type === "MANGA_LIST"}>
-        <Dynamic component={props.wrapper} class="activity-card-media" classList={{small: props.small}}>
+        <div class="activity-card-media" classList={{small: props.small}}>
           <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>
             <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
           </A>
@@ -69,10 +68,10 @@ export function ActivityCard(_props) {
             <CreatedAt createdAt={props.activity.createdAt} />
             <Footer mutateCache={props.mutateCache} activity={props.activity}/>
           </div>
-        </Dynamic>
+        </div>
       </Match>
       <Match when={props.activity.type === "MESSAGE"}>
-        <Dynamic component={props.wrapper}>message</Dynamic>
+        <div>message</div>
       </Match>
     </Switch>
   );
