@@ -7,9 +7,12 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { fetcherUtils } from "../utils/utils.js";
+import { arrayUtils, fetcherUtils } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { binarySearchFindIndex } from "../utils/arrays.js";
+import copy from './local.json'
+import page1 from './page1.json'
+import page2 from './page2.json'
 
 function Home() {
   const { accessToken, authUserData } = useAuthentication();
@@ -97,81 +100,59 @@ function ActivityReel(props) {
       return;
     }
 
-    if (!pagelessCacheData()?.data?.length) {
-      mutateBoth(api => {
-        api.data ??= [];
-        api.data.unshift(apiResponse.data.activities);
+    mutateBoth(api => {
+      if (!api?.data?.length) {
+        api.data = [apiResponse.data.activities];
         return api;
-      });
-      return;
-    }
+      }
 
-    const length = Math.min(pagelessCacheData().data[0].length, apiResponse.data.activities.length);
-    if (apiResponse.data.pageInfo.currentPage === 1) {
-      const lastNewId = apiResponse.data.activities.at(-1).id;
-      const isLargest = hasLargestId(pagelessCacheData().data[0], lastNewId, 0, length);
+      const lastId = apiResponse.data.activities.at(-1).id;
+      const lastIdIndex = arrayUtils.binarySearchFindAlwaysIndex(api.data[0], activity => activity.id - lastId);
+      const lastIdFound = api.data[0][lastIdIndex]?.id === lastId;
 
-      if (isLargest) {
-        mutateBoth(api => {
-          api.data ??= [];
+      if (apiResponse.data.pageInfo.currentPage === 1) {
+        if (!lastIdFound) {
           api.data.unshift(apiResponse.data.activities);
           api.data.length = Math.min(api.data.length, 5);
           return api;
-        });
-      } else {
-        mutateBoth(api => {
-          const lastNewIdsCacheIndex = api.data[0].findIndex(activity => activity.id <= lastNewId);
-          api.data[0].splice(0, lastNewIdsCacheIndex + 1, ...apiResponse.data.activities);
-          return api;
-        });
-      }
-    } else {
-      mutateBoth(api => {
-        const firstId = apiResponse.data.activities[0].id;
-        const startIndex = binarySearchFindIndex(api.data[0], activity => activity.id - firstId);
+        } 
 
-        if (startIndex === -1) {
-          if (firstId < api.data[0].at(-1).id) {
-            api.data[0].push(...apiResponse.data.activities);
-          } else {
-            api.data.unshift(apiResponse.data.activities);
-            api.data.length = Math.min(api.data.length, 5);
-          }
-        } else {
-          const lastId = apiResponse.data.activities.at(-1).id;
-          const endIndex = binarySearchFindIndex(api.data[0], activity => activity.id - lastId);
-          if (endIndex === -1) {
-            api.data[0].splice(startIndex, api.data[0].length, ...apiResponse.data.activities);
-          } else {
-            api.data[0].splice(startIndex, endIndex - startIndex + 1, ...apiResponse.data.activities);
-          }
-        }
-
-        if (api.data.length > 1) {
-          const lastId = apiResponse.data.activities.at(-1).id;
-          const lastIdIndexInOldBuffer = binarySearchFindIndex(api.data[1], activity => activity.id - lastId) + 1;
-          if (lastIdIndexInOldBuffer !== -1) {
-            for (let i = lastIdIndexInOldBuffer; i < api.data[1].length; i++) {
-              api.data[0].push(api.data[1][i]);
-            }
-            api.data.splice(1, 1);
-          }
-        }
-
+        api.data[0].splice(0, lastIdIndex + 1, ...apiResponse.data.activities);
         return api;
-      });
-    }
-  }
-
-  const hasLargestId = (array, id, start, end) => {
-    for (let i = start; i < end; i++) {
-      if (array[i].id >= id) {
-        return false;
       }
-    }
 
-    return true;
+      const firstId = apiResponse.data.activities[0].id;
+      const firstIdIndex = arrayUtils.binarySearchFindAlwaysIndex(api.data[0], activity => activity.id - firstId);
+      // Check that current page does not have higher id than the first page
+      const firstIdIsHigherThanFirstResults = firstIdIndex === 0 && api.data[0][firstIdIndex].id !== firstId;
+
+      // If the current apiResponse has the highest id return, because the page is not one and we don't wan't the content to jump
+      if (firstIdIsHigherThanFirstResults) {
+        return api;
+      }
+
+      api.data[0].splice(firstIdIndex, (lastIdIndex - firstIdIndex) + lastIdFound, ...apiResponse.data.activities);
+
+      if (lastIdFound || api.data.length === 1) {
+        return api;
+      }
+
+      const lastIdIndexInSecondBuffer = arrayUtils.binarySearchFindAlwaysIndex(api.data[1], activity => activity.id - lastId);
+      const lastIdNotFoundInSecondBuffer = api.data[1][lastIdIndexInSecondBuffer]?.id !== lastId;
+
+
+      if (lastIdNotFoundInSecondBuffer) {
+        return api;
+      }
+
+      const [secondBuffer] = api.data.splice(1, 1);
+      secondBuffer.splice(0, lastIdIndexInSecondBuffer + 1);
+      api.data[0].push(...secondBuffer);
+
+      return api;
+    });
   }
+
 
   createEffect(on(pagelessCacheData, apiRes => {
     if (apiRes?.data) {
@@ -180,8 +161,24 @@ function ActivityReel(props) {
   }));
 
   return (
-    <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+    <>
+      <button onClick={() => mutateBoth(api => {
+        api.data = copy;
+        return api;
+      })}>reset</button>
+      <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+    </>
   );
+}
+
+const hasLargestId = (array, id, start, end) => {
+  for (let i = start; i < end && i < array.length; i++) {
+    if (array[i].id >= id) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 let initialPageLoad = true;
@@ -191,12 +188,14 @@ function ActivityPage(props) {
 
   let minIndex = null;
   let maxIndex = null;
-  let maxPage = null;
-  let firstPageIsFresh = false;
+  let allowPageFetches = false;
+  let firstPageIsStale = true;
   let isMounted = false;
   const observerList = [];
   const freshActivityIDs = new Set();
   const visibleIndices = new Set();
+
+  const [disableUpdates, setDisableUpdates] = createSignal(true);
 
   function observe(target) {
     if (isMounted) {
@@ -254,21 +253,40 @@ function ActivityPage(props) {
 
   const { accessToken } = useAuthentication();
   const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
-  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
+  const [activityData] = fetcherUtils.send(fetcher, {
+    type: "no-store",
+    active: () => !disableUpdates()
+  });
 
   const triggerFetcherSend = leadingAndTrailing(debounce, (num) => {
+    if (disableUpdates()) {
+      return;
+    }
     if (num && !activityData.loading) {
       setPage(num);
     }
   }, 1000);
 
+  let firstPageTimeout;
   createEffect(on(activityData, apiResponse => {
-    console.log(apiResponse);
-    if (apiResponse?.data) {
-      apiResponse.data.activities.forEach(activity => {
-        freshActivityIDs.add(activity.id);
-      });
-      props.updateCache(apiResponse);
+    if (!apiResponse?.data?.activities.length) {
+      return;
+    }
+
+    apiResponse.data.activities.forEach(activity => {
+      freshActivityIDs.add(activity.id);
+    });
+
+    props.updateCache(apiResponse);
+
+    if (apiResponse.data.pageInfo.currentPage === 1) {
+      firstPageIsStale = false;
+      allowPageFetches = true;
+      clearTimeout(firstPageTimeout);
+      const {createdAt: timeA} = apiResponse.data.activities[0];
+      const {createdAt: timeB} = arrayUtils.atPercent(apiResponse.data.activities, .5);
+      const time = Math.min(1000 * 60 * 5, Math.max((timeA - timeB) * 1000, 15_000));
+      firstPageTimeout = setTimeout(() => firstPageIsStale = true, time);
     }
   }));
 
@@ -281,17 +299,11 @@ function ActivityPage(props) {
   }));
 
   function sendNewPageSuggestion() {
-    if (maxIndex === props.cache.length) {
-      if (props.cache.length % 25 === 0) {
-        maxPage = Math.max(maxPage + 1, Math.round(props.cache.length / 25) + 1);
-      } else {
-        maxPage = Math.max(maxPage + 1, Math.ceil(props.cache.length / 25));
-      }
-
-      setPageSuggestion(maxPage);
-    } else if (minIndex === 0) {
+    if (maxIndex === props.cache.length - 1 && allowPageFetches) {
+      setPageSuggestion(Math.floor(props.cache.length / 25) + 1);
+    } else if (minIndex === 0 && firstPageIsStale) {
       setPageSuggestion(1);
-    } else {
+    } else if (allowPageFetches) {
       const oldIndices = [];
       for (let i = minIndex; i < maxIndex; i++) {
         if (!freshActivityIDs.has(props.cache[i].id)) {
@@ -300,13 +312,30 @@ function ActivityPage(props) {
       }
 
       if (oldIndices.length) {
-        setPageSuggestion(Math.ceil((oldIndices[Math.floor(oldIndices.length / 2)] + 1) / 25));
+        setPageSuggestion(Math.ceil((arrayUtils.atPercent(oldIndices, .5) + 1) / 25));
       }
     }
   }
 
   return (
     <>
+      <button onClick={() => {
+        setDisableUpdates(true);
+      }}>Disable</button>
+      <button onClick={() => {
+        setDisableUpdates(false);
+      }}>Enable</button>
+      <button onClick={() => {
+        props.updateCache({data: page1});
+      }}>Json 1</button>
+      <button onClick={() => {
+        props.updateCache({data: page2});
+      }}>Json 2</button>
+      <For each={Array.from({ length: 15 }, (_, i) => i + 1)}>{v => (
+        <button onClick={() => {
+          setPageSuggestion(v);
+        }}>page {v}</button>
+      )}</For>
       <For each={props.cache}>{(activity, i) => (
         <ActivityCard activity={activity} mutateCache={props.mutateCache} wrapper={props => (
           <li use:observe attr:data-index={i()} {...props} />

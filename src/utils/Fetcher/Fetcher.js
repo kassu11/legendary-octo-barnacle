@@ -252,7 +252,6 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
         return;
       }
     } else if (type !== "no-store" && currentFetcher.settings.storeName) {
-      console.log(currentFetcher.cacheKey);
       const cacheReq = IndexedDB.fetchCache();
       const safeRefetch = () => !sendFetchEvenWhenCacheIsFound && refetch();
       cacheReq.onerror = safeRefetch;
