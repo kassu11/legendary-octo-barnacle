@@ -6,12 +6,15 @@ $radius: .2rem;
   display: grid;
   gap: 10px;
 
-  :global .grid-column-auto-fill.activity {
-    --grid-max-column-count: 2;
+  :global .activity {
 
-    :global .activity-card-text,
-    :global .activity-card-text ~ .activity-card-media:nth-child(odd):has(+ .activity-card-text) {
-      grid-column: 1/-1;
+    li {
+      width: min(100%, 30rem);
+      flex-grow: 1;
+    }
+
+    :global .activity-card-text {
+      width: 100%;
     }
   }
 
@@ -35,6 +38,7 @@ $radius: .2rem;
   margin-inline: auto;
   display: grid;
   gap: 1rem;
+  align-items: start;
 }
 
 
