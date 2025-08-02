@@ -6,7 +6,6 @@ import { CacheObject } from "../CacheObject";
 * @typedef {Object} FetchSettingsOptions - Cache settings.
 * @property {"results"|"debug"} storeName - The name of the store in IndexedDB. If not provided, data will not be stored in IndexedDB.
 * @property {boolean} fetchOnDebug - Determines whether data should be fetched in debug mode.
-* @property {() => boolean} [active] - Only active fetch request will send a request (even if the request of cache only)
 * @property {number} expiresInSeconds - The duration (in seconds) before cached data expires. Once expired, the data will not be served from cache, as outdated data is considered worse than waiting for fresh data.
 * @property {(cache: CacheObject) => void} [saveToSessionStorage] - Object you can do what ever you want. All data that is going to store cache will go through this method
 * @property {"default"|"fetch-once"|"no-store"|"only-if-cached"|"reload"} type - A cache strategy inspired by the Fetch API's {@link https://developer.mozilla.org/en-US/docs/Web/API/Request/cache Request.cache} property. Unlike fetch, expired cache entries are never returned.
@@ -18,13 +17,11 @@ import { CacheObject } from "../CacheObject";
 */
 
 export class FetchSettings {
-  #saveToSessionStorage;
   constructor(/** @type {FetchSettingsOptions} */settings = {}) {
     this.expiresInSeconds = settings.expiresInSeconds;
     this.fetchOnDebug = settings.fetchOnDebug || false;
     this.storeName = settings.storeName || "";
     this.type = settings.type || "default"; 
-    this.active = settings.active;
     this.saveToSessionStorage = settings.saveToSessionStorage;
 
     assert(typeof settings === "object", "Settings must be object");

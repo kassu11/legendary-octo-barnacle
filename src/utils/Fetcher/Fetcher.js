@@ -2,7 +2,7 @@ import { IndexedDB } from "../api";
 import { assert } from "../assert";
 import { CacheObject } from "../CacheObject";
 import { FetchSettings } from "./FetchSettings";
-import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { batch, createEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 
 const DEBUG = location.origin.includes("localhost");
 
@@ -224,13 +224,13 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     }
   }
 
-  createEffect(() => {
-    if (!fetcherSignal() || overwriteSettings?.active?.() === false) {
+  const updateFetcherInfo = fetcher => {
+    if (!fetcher) {
       return;
     };
 
     currentFetcher?.controller.abort();
-    currentFetcher = fetcherSignal();
+    currentFetcher = fetcher;
     assert(currentFetcher instanceof Fetcher);
 
     Object.assign(currentFetcher.settings, overwriteSettings);
@@ -244,7 +244,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     const isOnDebugSoDontFetch = DEBUG && !currentFetcher.settings.fetchOnDebug && type !== "no-store";
     const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
     const cacheKey = currentFetcher.cacheKey;
-    
+
     if (cacheKey in cacheObjects) {
       const response = cacheObjects[cacheKey];
       setResponse(new ApiResponse(response.cacheKey, response.data, "local"));
@@ -268,12 +268,17 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
             assert(result.data, "Cache should always have data");
 
             if (result.expires > new Date()) {
-              if (!sendFetchEvenWhenCacheIsFound) {
-                setLoading(false);
-              }
-              
               const response = new ApiResponse(result.cacheKey, result.data, "indexedDB");
-              return safeMutate(response);
+              if (!sendFetchEvenWhenCacheIsFound) {
+                batch(() => {
+                  safeMutate(response);
+                  setLoading(false);
+                });
+              } else {
+                safeMutate(response);
+              }
+
+              return
             }
           }
 
@@ -285,7 +290,10 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     if (sendFetchEvenWhenCacheIsFound) {
       refetch();
     }
-  });
+  }
+
+  updateFetcherInfo(fetcherSignal());
+  createEffect(on(fetcherSignal, updateFetcherInfo, { defer: true }));
 
   Object.defineProperties(response, {
     error: { get: () => error() },
