@@ -162,6 +162,7 @@ function ActivityReel(props) {
 
   return (
     <>
+      {console.log(pagelessCacheData.loading, pagelessCacheData()?.data?.length)}
       <button onClick={() => mutateBoth(api => {
         api.data = copy;
         return api;
@@ -171,21 +172,15 @@ function ActivityReel(props) {
   );
 }
 
-const hasLargestId = (array, id, start, end) => {
-  for (let i = start; i < end && i < array.length; i++) {
-    if (array[i].id >= id) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 let initialPageLoad = true;
 function ActivityPage(props) {
   const [page, setPage] = createSignal(initialPageLoad ? 1 : undefined);
   const [pageSuggestion, setPageSuggestion] = createSignal(undefined);
 
+  // TODO: Change variables to signals
+  // Test that eveything works and clean code uo
+  // Add some allowPageFetches timeout and add warning to bottom
+  // Also global infinite scroll does not work because variables are reseted or somethimg
   let minIndex = null;
   let maxIndex = null;
   let allowPageFetches = false;
@@ -252,11 +247,9 @@ function ActivityPage(props) {
   const intersectionObserver = new IntersectionObserver(callback, options);
 
   const { accessToken } = useAuthentication();
-  const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
-  const [activityData] = fetcherUtils.send(fetcher, {
-    type: "no-store",
-    active: () => !disableUpdates()
-  });
+  const fetcher = fetcherUtils.activationController(() => !disableUpdates(), fetcherUtils.createSignalFetcher, fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
+  // const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
+  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
 
   const triggerFetcherSend = leadingAndTrailing(debounce, (num) => {
     if (disableUpdates()) {
@@ -316,6 +309,10 @@ function ActivityPage(props) {
       }
     }
   }
+
+  createEffect(on(() => props.cache, cache => {
+    console.log(cache.length);
+  }));
 
   return (
     <>
