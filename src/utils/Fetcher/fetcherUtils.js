@@ -45,7 +45,7 @@ export const createSignalFetcher = (fetcherCreater, ...args) => {
   let counter = 0;
   createEffect(() => {
     const fetcher = unwrapFetcherArguments(fetcherCreater, ...args);
-    if (fetcher && counter++) {
+    if (counter++ && fetcher) {
       setFetcher(fetcher);
     }
   });
@@ -62,7 +62,7 @@ export const createAnilistPagelessSignalFetcher = (fetcherCreater, ...args) => {
   let counter = 0;
   createEffect(() => {
     const fetcher = unwrapFetcherArgumentsPageless(fetcherCreater, ...args);
-    if (fetcher && counter++) {
+    if (counter++ && fetcher) {
       setFetcher(fetcher);
     }
   });
