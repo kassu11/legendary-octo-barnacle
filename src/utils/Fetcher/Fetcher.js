@@ -292,7 +292,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     }
   }
 
-  updateFetcherInfo(fetcherSignal());
+  updateFetcherInfo(untrack(fetcherSignal));
   createEffect(on(fetcherSignal, updateFetcherInfo, { defer: true }));
 
   Object.defineProperties(response, {
