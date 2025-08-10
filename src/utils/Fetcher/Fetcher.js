@@ -18,13 +18,13 @@ export class Fetcher {
   }
 
   get cacheKey() {
-    return `${this.url}${JSON.stringify(this.options).replaceAll("\"", "")}${this.formatResponse || ""}`;
+    return `${this.url}${JSON.stringify(this.options)?.replaceAll("\"", "") || ""}${this.formatResponse || ""}`;
   }
 }
 
 const sendFetcher = fetcher => {
   const options = { 
-    ...fetcher.options,
+    ...(fetcher.options || {}),
     signal: fetcher.controller.signal,
   };
   options.body &&= JSON.stringify(fetcher.options.body);
@@ -33,6 +33,12 @@ const sendFetcher = fetcher => {
   if (Math.random() > 1) {
     console.log("Error route")
     return fetch("http://127.0.0.1:3000/api/version", options);
+  } else if (fetcher.delay) {
+    return new Promise((res, rej) => {
+      fetch(fetcher.url, options)
+        .then(data => setTimeout(() => res(data), fetcher.delay))
+        .catch(rej);
+    });
   } else {
     return fetch(fetcher.url, options);
   }

@@ -20,3 +20,12 @@ export const anilistAuth = (token, query, variables = {}, formatResponse) => {
     },
   }, formatResponse);
 };
+
+export const offlineFetcher = (fileName, ms = 0, formatResponse) => {
+  assert(fileName, "Filename is missing");
+  const path = location.pathname.split("/")[1];
+
+  const fetcher = new Fetcher("/" + path + "/" + fileName, undefined, formatResponse);
+  fetcher.delay = ms;
+  return fetcher;
+};

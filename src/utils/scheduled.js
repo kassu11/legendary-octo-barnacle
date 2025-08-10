@@ -1,3 +1,5 @@
+import { onCleanup } from "solid-js";
+
 export const leadingAndTrailingDebounce = (callback, ms, bufferSize = 1) => {
   const buffer = [];
   let timeout = null;
@@ -36,4 +38,17 @@ export const leadingAndTrailingDebounce = (callback, ms, bufferSize = 1) => {
       bufCallback();
     }
   }
+}
+
+export const debouncer = (callback) => {
+  let timeout;
+
+  const trigger = (ms, ...args) => {
+    clearTimeout(timeout);
+    setTimeout(() => callback(...args), ms);
+  }
+
+  onCleanup(() => clearTimeout(timeout));
+
+  return trigger;
 }
