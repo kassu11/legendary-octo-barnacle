@@ -7,7 +7,7 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { arrayUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
+import { arrayUtils, fetcherUtils, scheduleUtils, signals } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
@@ -29,10 +29,10 @@ function Home() {
 }
 
 function Activity() {
-  const [activityType, setActivityType] = createSignal(undefined);
-  const [isFollowing, setIsFollowing] = createSignal(true);
-  const [hasReplies, setHasReplies] = createSignal(undefined);
-  const [variables, setVariables] = createSignal({
+  const [activityType, setActivityType] = signals.localStorageString("LOB_ACTIVITY_TYPE", undefined);
+  const [isFollowing, setIsFollowing] = signals.localStorageBoolean("LOB_ACTIVITY_IS_FOLLOWING", true);
+  const [hasReplies, setHasReplies] = signals.localStorageBoolean("LOB_ACTIVITY_HAS_REPLIES", undefined);
+  const [variables, setVariables] = signals.localStorageJSON("LOB_ACTIVITY_QUERY", {
     "isFollowing": true,
   });
 
