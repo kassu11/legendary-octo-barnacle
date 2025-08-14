@@ -157,7 +157,6 @@ function ActivityPage(props) {
   let minIndex = null;
   let maxIndex = null;
   let maxPage = 0;
-  let lastNextPageRequest = null;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);
   const [firstPageIsStale, setFirstPageIsStale] = createSignal(true);
   let isMounted = false;
@@ -165,13 +164,16 @@ function ActivityPage(props) {
   const freshActivityIDs = new Set();
   const visibleIndices = new Set();
 
-  function updatePage() {
+  let lastNextPageRequest = null;
+  function updatePage(debounceSamePage = true) {
     const nextPage = getPageNumberByScrollPosition();
-    if (nextPage) {
+    if (nextPage && (debounceSamePage || lastNextPageRequest !== nextPage)) {
       lastNextPageRequest = nextPage;
       triggerFetcherSend(nextPage);
     }
   }
+
+  setInterval(() => updatePage(false), 200);
 
   function getPageNumberByScrollPosition() {
     const allowPages = untrack(allowPageFetches);
@@ -190,7 +192,7 @@ function ActivityPage(props) {
       }
 
       if (oldIndices.length) {
-        return Math.ceil(arrayUtils.atPercent(oldIndices, .5) / 25);
+        return Math.ceil((arrayUtils.atPercent(oldIndices, .5) + 1) / 25);
       }
     }
   }
@@ -317,7 +319,8 @@ function ActivityPage(props) {
           </LoaderCircle>
         </Match>
         <Match when={!allowPageFetches() && props.cache.length}>
-          Activity feed is too old, scroll back to top
+          Refresh activity feed to load more
+          <button onClick={() => setPage(1)}>Refresh</button>
         </Match>
       </Switch>
     </>

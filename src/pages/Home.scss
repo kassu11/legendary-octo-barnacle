@@ -7,7 +7,7 @@ $radius: .2rem;
   gap: 10px;
 
   .activity {
-    transition: opacity .2s filter .2s;
+    transition: opacity .2s, filter .2s;
     &.loading {
       opacity: .5;
       filter: grayscale(.5);
