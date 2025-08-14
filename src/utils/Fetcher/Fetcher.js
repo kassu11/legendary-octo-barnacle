@@ -13,7 +13,6 @@ export class Fetcher {
     this.url = url;
     this.options = options;
     this.formatResponse = formatResponse;
-    this.controller = new AbortController();
     this.settings = new FetchSettings({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
   }
 
@@ -22,10 +21,10 @@ export class Fetcher {
   }
 }
 
-const sendFetcher = fetcher => {
-  const options = { 
+const sendFetcher = (fetcher, signal) => {
+  const options = {
     ...(fetcher.options || {}),
-    signal: fetcher.controller.signal,
+    signal
   };
   options.body &&= JSON.stringify(fetcher.options.body);
   options.cache ??= "default";
@@ -48,12 +47,14 @@ const fetchRequests = {};
 const fetchResponses = {};
 
 /** @param {Fetcher} fetcher */
-const fetchData = async fetcher => {
+const fetchData = async (fetcher, signal) => {
   try {
-    const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher);
+    const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
     var response = await fetchRequest;
   } catch(e) {
-    console.error(e);
+    if (!signal.aborted && DEBUG) {
+      console.error(e);
+    }
     return null;
   } finally {
     delete fetchRequests[fetcher.cacheKey];
@@ -131,6 +132,8 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
   const [indexedDBClosed, setIndexedDBClosed] = createSignal(true);
   /** @type {null|Fetcher} */
   let currentFetcher = null;
+  /** @type {null|AbortController} */
+  let currentController = null;
 
   /**
    * @param {ApiResponse|(data: ApiResponse) => ApiResponse} possibleCallback
@@ -213,7 +216,10 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
       return;
     }
 
-    const data = await fetchData(currentFetcher);
+    currentController?.abort();
+    const controller = new AbortController();
+    currentController = controller;
+    const data = await fetchData(currentFetcher, controller.signal);
 
     if (data === null) { // Data should be only null if signal aborted or error
       batch(() => {
@@ -235,7 +241,6 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
       return;
     };
 
-    currentFetcher?.controller.abort();
     currentFetcher = fetcher;
     assert(currentFetcher instanceof Fetcher);
 
@@ -307,7 +312,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     indexedDBClosed: { get: () => indexedDBClosed() },
   });
 
-  onCleanup(() => currentFetcher?.controller.abort());
+  onCleanup(() => currentController?.abort());
 
   return [response, { mutate, refetch, mutateCache, mutateBoth }];
 }
