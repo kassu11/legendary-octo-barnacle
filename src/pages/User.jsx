@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api, { IndexedDB } from "../utils/api.js";
-import { createContext, createEffect, createSignal, For, Match, on, onCleanup, Show, untrack, useContext } from "solid-js";
+import { createContext, createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, untrack, useContext } from "solid-js";
 import "./User.scss";
 import { assert } from "../utils/assert.js";
 import { capitalize, formatTimeToDate, formatTitleToUrl, numberCommas } from "../utils/formating.js";
@@ -11,6 +11,7 @@ import Score from "../components/media/Score.jsx";
 import { useAuthentication, useEditMediaEntries, UserContext, UserMediaListContext, useUser, useUserMediaList } from "../context/providers.js";
 import { Tooltip } from "../components/Tooltips.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
+import { createStore } from "solid-js/store";
 
 export function User(props) {
   const params = useParams();
@@ -355,6 +356,7 @@ export function MangaList() {
 }
 
 
+const [cardsVisibility, storeCardsVisibility] = createStore({});
 function MediaList(props) {
   assert(props.type, "Type missing");
   const { user } = useUser();
@@ -505,6 +507,17 @@ function MediaList(props) {
   function isOwnProfile() {
     return user().id === authUserData()?.data.id;
   }
+
+  const callback = (entries) => {
+    for (const entry of entries) {
+      storeCardsVisibility(entry.target.dataset.list, entry.target.dataset.index, entry.isIntersecting);
+    }
+  };
+
+  const intersectionObserver = new IntersectionObserver(callback, { rootMargin: "500px" });
+  onCleanup(() => {
+    intersectionObserver.disconnect();
+  });
 
   return (
     <UserMediaListContext.Provider value={{ triggerProgressIncrease, isOwnProfile }}>
@@ -701,114 +714,123 @@ function MediaList(props) {
         </div>
         <div class="user-profile-media-list-container">
           <Show when={listData()?.data}>
-            <For each={listData().data.lists}>{list => (
-              <Show when={list.entries.length && (!params.list || decodeURI(params.list) === list.name)}>
-                <h2>{list.name}</h2>
-                <ol class="user-profile-media-list-grid">
-                  <For each={list.entries}>{entry => (
-                    <li class="horizontal-search-card">
-                      <A href={"/" + entry.media.type.toLowerCase() +  "/" + entry.media.id + "/" + formatTitleToUrl(entry.media.title.userPreferred)}>
-                        <div class="container">
-                          <img src={entry.media.coverImage.large} class="cover" alt="Cover." />
-                          <div class="user-media-card-header">
-                            <Show when={entry.repeat}>
-                              <div class="user-profile-media-repeat" label={"Rewatched " + entry.repeat + " times"}>
-                                {entry.repeat}
-                                <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
-                              </div>
-                            </Show>
-                            <Show when={entry.notes}>
-                              <div class="user-profile-media-notes" label={entry.notes}>
-                                <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 32C114.6 32 0 125.1 0 240c0 49.6 21.4 95 57 130.7C44.5 421.1 2.7 466 2.2 466.5c-2.2 2.3-2.8 5.7-1.5 8.7S4.8 480 8 480c66.3 0 116-31.8 140.6-51.4 32.7 12.3 69 19.4 107.4 19.4 141.4 0 256-93.1 256-208S397.4 32 256 32z"></path></svg>
-                              </div>
-                            </Show>
-                          </div>
-                          <div class="user-media-card-footer">
-                            <Show when={entry.media.isAdult}>
-                              <p class="user-profile-media-list-adult-warning">18+</p>
-                            </Show>
-                            <p>
-                              {entry.media.title.userPreferred}
-                            </p>
-                            <div>
-                              <MediaCardEpisodes entry={entry} />
-                              <Score score={entry.score} format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
-                            </div>
-                          </div>
-                          <Show when={isOwnProfile()}>
-                            <div class="search-card-quick-action">
-                              <ul class="search-card-quick-action-items">
-                                <li class="item" label="Edit media">
-                                  <button onClick={e => {
-                                    e.preventDefault();
-                                    openEditor({ ...entry.media, mediaListEntry: entry }, {
-                                      mutateMedia: responseEntry => {
-                                        mutateMediaListCache(res => {
-                                          function findListNameFromStatus(status) {
-                                            switch (status) {
-                                              case "COMPLETED": case "DROPPED": case "PAUSED": case "PLANNING":
-                                                return capitalize(status)
-                                              case "CURRENT":
-                                                return props.type === "anime" ? "Watching" : "Reading";
-                                              case "REPEATING":
-                                                return props.type === "anime" ? "Rewatching" : "Rereading";
-                                              default:
-                                                assert(false, "Unkown status: " + status);
+            <For each={listData().data.lists}>{list => {
+              storeCardsVisibility(list.name, {});
+              return (
+                <Show when={list.entries.length && (!params.list || decodeURI(params.list) === list.name)}>
+                  <h2>{list.name}</h2>
+                  <ol class="user-profile-media-list-grid">
+                    <For each={list.entries}>{(entry, i) => {
+                      let ref;
+                      onMount(() => intersectionObserver.observe(ref));
+                      onCleanup(() => intersectionObserver.unobserve(ref));
+
+                      return (
+                        <li ref={ref} attr:data-index={i()} attr:data-list={list.name} class="horizontal-search-card">
+                          <Show when={cardsVisibility[list.name][i()]}>
+                            <A href={"/" + entry.media.type.toLowerCase() +  "/" + entry.media.id + "/" + formatTitleToUrl(entry.media.title.userPreferred)}>
+                              <div class="container">
+                                <img src={entry.media.coverImage.large} class="cover" alt="Cover." />
+                                <div class="user-media-card-header">
+                                  <Show when={entry.repeat}>
+                                    <div class="user-profile-media-repeat" label={"Rewatched " + entry.repeat + " times"}>
+                                      {entry.repeat}
+                                      <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256.455 8c66.269.119 126.437 26.233 170.859 68.685l35.715-35.715C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.75c-30.864-28.899-70.801-44.907-113.23-45.273-92.398-.798-170.283 73.977-169.484 169.442C88.764 348.009 162.184 424 256 424c41.127 0 79.997-14.678 110.629-41.556 4.743-4.161 11.906-3.908 16.368.553l39.662 39.662c4.872 4.872 4.631 12.815-.482 17.433C378.202 479.813 319.926 504 256 504 119.034 504 8.001 392.967 8 256.002 7.999 119.193 119.646 7.755 256.455 8z"></path></svg>
+                                    </div>
+                                  </Show>
+                                  <Show when={entry.notes}>
+                                    <div class="user-profile-media-notes" label={entry.notes}>
+                                      <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 32C114.6 32 0 125.1 0 240c0 49.6 21.4 95 57 130.7C44.5 421.1 2.7 466 2.2 466.5c-2.2 2.3-2.8 5.7-1.5 8.7S4.8 480 8 480c66.3 0 116-31.8 140.6-51.4 32.7 12.3 69 19.4 107.4 19.4 141.4 0 256-93.1 256-208S397.4 32 256 32z"></path></svg>
+                                    </div>
+                                  </Show>
+                                </div>
+                                <div class="user-media-card-footer">
+                                  <Show when={entry.media.isAdult}>
+                                    <p class="user-profile-media-list-adult-warning">18+</p>
+                                  </Show>
+                                  <p>
+                                    {entry.media.title.userPreferred}
+                                  </p>
+                                  <div>
+                                    <MediaCardEpisodes entry={entry} />
+                                    <Score score={entry.score} format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
+                                  </div>
+                                </div>
+                                <Show when={isOwnProfile()}>
+                                  <div class="search-card-quick-action">
+                                    <ul class="search-card-quick-action-items">
+                                      <li class="item" label="Edit media">
+                                        <button onClick={e => {
+                                          e.preventDefault();
+                                          openEditor({ ...entry.media, mediaListEntry: entry }, {
+                                            mutateMedia: responseEntry => {
+                                              mutateMediaListCache(res => {
+                                                function findListNameFromStatus(status) {
+                                                  switch (status) {
+                                                    case "COMPLETED": case "DROPPED": case "PAUSED": case "PLANNING":
+                                                      return capitalize(status)
+                                                    case "CURRENT":
+                                                      return props.type === "anime" ? "Watching" : "Reading";
+                                                    case "REPEATING":
+                                                      return props.type === "anime" ? "Rewatching" : "Rereading";
+                                                    default:
+                                                      assert(false, "Unkown status: " + status);
+                                                  }
+                                                }
+
+                                                function pushEntryToList(name, isCustomList) {
+                                                  const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
+                                                  if (listIndex === -1) {
+                                                    res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
+                                                  }
+
+                                                  const list = res.data.lists.at(listIndex);
+                                                  list.entries.push(responseEntry);
+                                                  listData().indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
+                                                }
+
+                                                listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+                                                  res.data.lists[listIndex].entries.splice(entryIndex, 1);
+                                                });
+                                                listData().indecies[entry.media.id] = [];
+
+                                                if (!responseEntry.hiddenFromStatusLists) {
+                                                  const name = findListNameFromStatus(responseEntry.status);
+                                                  pushEntryToList(name, false);
+                                                }
+
+                                                for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
+                                                  if (enabled) {
+                                                    pushEntryToList(listName, true);
+                                                  }
+                                                }
+                                                return res;
+                                              }, updateListInfo);
+                                            },
+                                            deleteMedia: () => {
+                                              mutateMediaListCache(res => {
+                                                listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+                                                  res.data.lists[listIndex].entries.splice(entryIndex, 1);
+                                                });
+                                                return res;
+                                              }, updateListInfo);
                                             }
-                                          }
-
-                                          function pushEntryToList(name, isCustomList) {
-                                            const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
-                                            if (listIndex === -1) {
-                                              res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
-                                            }
-
-                                            const list = res.data.lists.at(listIndex);
-                                            list.entries.push(responseEntry);
-                                            listData().indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
-                                          }
-
-                                          listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                            res.data.lists[listIndex].entries.splice(entryIndex, 1);
                                           });
-                                          listData().indecies[entry.media.id] = [];
-
-                                          if (!responseEntry.hiddenFromStatusLists) {
-                                            const name = findListNameFromStatus(responseEntry.status);
-                                            pushEntryToList(name, false);
-                                          }
-
-                                          for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
-                                            if (enabled) {
-                                              pushEntryToList(listName, true);
-                                            }
-                                          }
-                                          return res;
-                                        }, updateListInfo);
-                                      },
-                                      deleteMedia: () => {
-                                        mutateMediaListCache(res => {
-                                          listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                            res.data.lists[listIndex].entries.splice(entryIndex, 1);
-                                          });
-                                          return res;
-                                        }, updateListInfo);
-                                      }
-                                    });
-                                  }}>
-                                    <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z"></path></svg>
-                                  </button>
-                                </li>
-                              </ul>
-                            </div>
+                                        }}>
+                                          <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z"></path></svg>
+                                        </button>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </Show>
+                              </div>
+                            </A> 
                           </Show>
-                        </div>
-                      </A> 
-                    </li>
-                  )}</For>
-                </ol>
-              </Show>
-            )}
+                        </li>
+                      ) }}</For>
+                  </ol>
+                </Show>
+              ) }}
             </For>
           </Show>
         </div>
