@@ -21,7 +21,7 @@ export const anilistAuth = (token, query, variables = {}, formatResponse) => {
   }, formatResponse);
 };
 
-export const offlineFetcher = (fileName, ms = 0, formatResponse) => {
+export const offlineFetcher = (fileName, formatResponse, ms = 0) => {
   assert(fileName, "Filename is missing");
   const path = location.pathname.split("/")[1];
 

@@ -152,19 +152,22 @@ function ActivityReel(props) {
 }
 
 function ActivityPage(props) {
+  const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
+  const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
+  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
 
   let maxPage = 0;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);
   const [firstPageIsStale, setFirstPageIsStale] = createSignal(true);
+  const triggerFirstPageIsStale = scheduleUtils.debouncer(setFirstPageIsStale);
   const freshActivityIDs = new Set();
+  const triggerPage = leadingAndTrailing(debounce, num => !activityData.loading && setPage(num), 1000);
 
-  let lastNextPageRequest = null;
-  function updatePage(debounceSamePage = true) {
+  function updatePage() {
     const nextPage = getPageNumberByScrollPosition();
-    if (nextPage && (debounceSamePage || lastNextPageRequest !== nextPage)) {
-      lastNextPageRequest = nextPage;
-      triggerFetcherSend(nextPage);
+    if (nextPage) {
+      triggerPage(nextPage);
     }
   }
 
@@ -193,38 +196,7 @@ function ActivityPage(props) {
     }
   }
 
-  onCleanup(() => intersectionObserver.disconnect());
-
-  const visibleIds = new Set();
-  const callback = (entries) => {
-    for (const entry of entries) {
-      const id = parseInt(entry.target.dataset.id);
-      assert(Number.isInteger(id));
-
-      if (entry.isIntersecting) {
-        visibleIds.add(id);
-      } else {
-        visibleIds.delete(id);
-      }
-    }
-
-    updatePage();
-  };
-
-  const intersectionObserver = new IntersectionObserver(callback, { rootMargin: "500px" });
-
-  const { accessToken } = useAuthentication();
-  const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
-  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
-
-  const triggerFetcherSend = leadingAndTrailing(debounce, num => {
-    if (!activityData.loading) {
-      setPage(num);
-    }
-  }, 1000);
-
   let missedNewPageFetches = 0;
-  const triggerFirstPageStaler = scheduleUtils.debouncer(() => setFirstPageIsStale(true));
   createEffect(on(activityData, apiResponse => {
     if (!apiResponse?.data?.activities.length) {
       return;
@@ -242,7 +214,8 @@ function ActivityPage(props) {
     if (apiResponse.data.pageInfo.currentPage === 1) {
       setFirstPageIsStale(false);
       setAllowPageFetches(true);
-      triggerFirstPageStaler(time);
+      triggerFirstPageIsStale(time, true);
+      maxPage = 1;
     } else if (apiResponse.data.pageInfo.currentPage > props.cache.length / 25) {
       if (apiResponse.data.activities.at(-1)?.id > props.cache.at(-1)?.id) {
         missedNewPageFetches += 1;
@@ -261,6 +234,25 @@ function ActivityPage(props) {
     props.updateCache(apiResponse);
     updatePage();
   }));
+
+  const visibleIds = new Set();
+  const intersectionCallback = (entries) => {
+    for (const entry of entries) {
+      const id = parseInt(entry.target.dataset.id);
+      assert(Number.isInteger(id));
+
+      if (entry.isIntersecting) {
+        visibleIds.add(id);
+      } else {
+        visibleIds.delete(id);
+      }
+    }
+
+    updatePage();
+  };
+
+  const intersectionObserver = new IntersectionObserver(intersectionCallback, { rootMargin: "500px" });
+  onCleanup(() => intersectionObserver.disconnect());
 
   return (
     <>
