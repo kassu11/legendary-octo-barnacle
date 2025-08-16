@@ -154,15 +154,10 @@ function ActivityReel(props) {
 function ActivityPage(props) {
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
 
-  let minIndex = null;
-  let maxIndex = null;
   let maxPage = 0;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);
   const [firstPageIsStale, setFirstPageIsStale] = createSignal(true);
-  let isMounted = false;
-  const observerList = [];
   const freshActivityIDs = new Set();
-  const visibleIndices = new Set();
 
   let lastNextPageRequest = null;
   function updatePage(debounceSamePage = true) {
@@ -173,74 +168,50 @@ function ActivityPage(props) {
     }
   }
 
-  setInterval(() => updatePage(false), 200);
-
   function getPageNumberByScrollPosition() {
     const allowPages = untrack(allowPageFetches);
     const firstStale = untrack(firstPageIsStale);
 
-    if (maxIndex === props.cache.length - 1 && allowPages) {
+    if (visibleIds.has(props.cache.at(-1)?.id) && allowPages) {
       return Math.max(Math.floor(props.cache.length / 25) + 1, maxPage + 1);
-    } else if (minIndex === 0 && firstStale) {
+    } else if (visibleIds.has(props.cache[0]?.id) && firstStale) {
       return 1;
     } else if (allowPages) {
-      const oldIndices = [];
-      for (let i = minIndex; i < maxIndex; i++) {
-        if (!freshActivityIDs.has(props.cache[i].id)) {
-          oldIndices.push(i);
-        }
+      const notFreshIndices = [...visibleIds.difference(freshActivityIDs)].sort((a, b) => b - a);
+
+      if (!notFreshIndices.length) {
+        return;
       }
 
-      if (oldIndices.length) {
-        return Math.ceil((arrayUtils.atPercent(oldIndices, .5) + 1) / 25);
+      const id = arrayUtils.atPercent(notFreshIndices, .5);
+      const index = arrayUtils.binarySearchFindIndex(props.cache, activity => activity.id - id);
+      if (index == -1) {
+        return;
       }
+
+      return Math.ceil((index + 1) / 25);
     }
   }
-
-  function observe(target) {
-    if (isMounted) {
-      intersectionObserver.observe(target);
-    } else {
-      observerList.push(target);
-    }
-  }
-
-  onMount(() => {
-    observerList.forEach(elem => intersectionObserver.observe(elem));
-    isMounted = true;
-  });
 
   onCleanup(() => intersectionObserver.disconnect());
 
-  const options = { rootMargin: "500px" }
+  const visibleIds = new Set();
   const callback = (entries) => {
     for (const entry of entries) {
-      const index = parseInt(entry.target.dataset.index)
+      const id = parseInt(entry.target.dataset.id);
+      assert(Number.isInteger(id));
+
       if (entry.isIntersecting) {
-        visibleIndices.add(index);
+        visibleIds.add(id);
       } else {
-        visibleIndices.delete(index);
+        visibleIds.delete(id);
       }
     }
-    minIndex = null;
-    maxIndex = null;
-
-    visibleIndices.forEach(value => {
-      minIndex = Math.min(value, minIndex ?? value);
-      maxIndex = Math.max(value, maxIndex ?? value);
-    });
-
-    const halfInnerHeight = window.innerHeight / 2;
-    const scrollCenter = document.body.parentElement.scrollTop + halfInnerHeight;
-    const halfScrollHeight = document.body.parentElement.scrollHeight / 2;
-    minIndex ??= scrollCenter < halfScrollHeight ? 0 : props.cache.length;
-    maxIndex ??= scrollCenter < halfScrollHeight ? 0 : props.cache.length;
 
     updatePage();
   };
 
-
-  const intersectionObserver = new IntersectionObserver(callback, options);
+  const intersectionObserver = new IntersectionObserver(callback, { rootMargin: "500px" });
 
   const { accessToken } = useAuthentication();
   const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
@@ -266,10 +237,7 @@ function ActivityPage(props) {
     const timeA = apiResponse.data.activities[0]?.createdAt || 0;
     const timeB = arrayUtils.atPercent(apiResponse.data.activities, .5)?.createdAt || timeA;
     const time = Math.min(1000 * 60 * 5, Math.max((timeA - timeB) * 1000, 15_000));
-
-    if (apiResponse.data.pageInfo.currentPage > props.cache.length / 25) {
-      maxPage = apiResponse.data.pageInfo.currentPage;
-    }
+    maxPage = Math.max(maxPage, apiResponse.data.pageInfo.currentPage);
 
     if (apiResponse.data.pageInfo.currentPage === 1) {
       setFirstPageIsStale(false);
@@ -306,11 +274,16 @@ function ActivityPage(props) {
         </LoaderCircle>
       </Show>
       <ol class="flex-space-between activity" classList={{loading: activityData.loading && page() === 1}}>
-        <For each={props.cache}>{(activity, i) => (
-          <ActivityCard activity={activity} mutateCache={props.mutateCache} wrapper={props => (
-            <li use:observe attr:data-index={i()} {...props} />
-          )}/>
-        )}</For>
+        <For each={props.cache}>{activity => {
+          let ref;
+          onMount(() => intersectionObserver.observe(ref))
+
+          return (
+            <ActivityCard activity={activity} mutateCache={props.mutateCache} wrapper={wrapperProps => (
+              <li ref={ref} attr:data-id={activity.id} {...wrapperProps} />
+            )} />
+          )
+        }}</For>
       </ol>
       <Switch>
         <Match when={activityData.loading && page() > maxPage && props.cache.length}>
@@ -326,8 +299,6 @@ function ActivityPage(props) {
     </>
   )
 }
-
-
 
 function CurrentWatchingMedia(props) {
   const [animeData, { mutateCache: mutateAnimeCache }] = api.anilist.wachingAnime(props.userId, props.token);
