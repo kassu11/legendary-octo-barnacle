@@ -545,11 +545,17 @@ class Fetch {
         const response = await this.#sendRequest();
 
         if (response.status === 429) {
-          console.warn('429 received, backing off...', this.url);
+          console.warn("429 received, backing off...", this.url);
           const time = (parseInt(response.headers.get("Retry-After")) || bucket.getDefaultDelay());
           await new Promise(res => setTimeout(res, time * 1000));
           continue;
-        } 
+        }
+
+        if (response.status === 500 && this.url.includes("anilist")) {
+          console.warn("500 received, the request was probably fine, but anilist has lot of traffic. Resend after 2 seconds");
+          await new Promise(res => setTimeout(res, 2000));
+          continue;
+        }
 
         return response;
       }
