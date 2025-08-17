@@ -1169,7 +1169,5 @@ function DeleteFavourite(props) {
   );
 }
 
-export { Socials } from "./User/Social/Social.jsx";
-
-
-
+export { Socials } from "./User/Socials/Socials.jsx";
+export { Stats } from "./User/Stats/Stats.jsx";

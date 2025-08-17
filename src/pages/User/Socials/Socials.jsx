@@ -2,7 +2,7 @@ import { createEffect, createSignal, on, Show, Switch, Match } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { Following } from "./Following.jsx";
 import { Followers } from "./Followers.jsx";
-import "./Social.scss";
+import "./Socials.scss";
 
 export function Socials() {
   const { user } = useUser();

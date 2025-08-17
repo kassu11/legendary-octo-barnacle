@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { createEffect } from "solid-js";
 import { useUser } from "../../../context/providers.js";
+import "./Stats.scss";
 
 export function Stats(props) {
   const { user } = useUser();
