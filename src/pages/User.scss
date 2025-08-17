@@ -431,32 +431,7 @@
   }
 
 
-  // Socials page
-  .user-profile-socials-page {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .user-profile-social-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
-    gap: .5rem;
-    list-style: none;
-    width: min-content;
-    flex-grow: 1;
-    padding: 0;
 
-    a {
-      text-align: center;
-      color: inherit;
-      text-decoration: none;
-    }
-
-    img {
-      aspect-ratio: 1/1;
-      object-fit: cover;
-    }
-  }
 
 
   // Stats page
