@@ -160,7 +160,8 @@
       position: relative;
       isolation: isolate;
       display: grid;
-      grid-template-columns: auto 1fr;
+      // column width auto works inside chrome, but not inside firefox so this might be changed later when firefox has fixed this issue
+      grid-template-columns: calc((16rem - 1rem) * (5.5/8)) 1fr;
       min-height: 16rem;
       height: 16rem;
       padding: .5rem;
@@ -170,6 +171,7 @@
       @container (width < 32rem) {
         gap: .5rem;
         height: auto;
+        grid-template-columns: auto 1fr;
 
         .bg {
           height: 13rem;
