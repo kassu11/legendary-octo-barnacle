@@ -18,6 +18,16 @@ export function MangaList() {
   return <MediaList type="manga" />
 }
 
+const useListNavigation = () => {
+  const navigate = useNavigate();
+  const { user } = useUser();
+  const params = useParams();
+
+  return listName => {
+    navigate(`/user/${user().name}/${params.type}${listName ? "/" + listName : ""}${location.search}`, { replace: true });
+  }
+}
+
 
 const [cardsVisibility, storeCardsVisibility] = createStore({});
 function MediaList(props) {
@@ -30,7 +40,7 @@ function MediaList(props) {
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => user().name || undefined, () => props.type.toUpperCase(), accessToken);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
-  const _navigate = useNavigate();
+  const navigate = useListNavigation();
   let worker;
   createEffect(on(user, (u) => {
     if (u) {
@@ -39,9 +49,6 @@ function MediaList(props) {
   }))
   document.title = "Authentication - LOB";
 
-  const navigate = (listName) => {
-    _navigate(`/user/${user().name}/${props.type}${listName ? "/" + listName : ""}${location.search}`, { replace: true });
-  }
   const setSearchParams = (options) => {
     _setSearchParams(options, { replace: true });
   }
@@ -74,19 +81,6 @@ function MediaList(props) {
     }
 
     mutateMediaListCache(res => {
-      function findListNameFromStatus(status) {
-        switch (status) {
-          case "COMPLETED": case "DROPPED": case "PAUSED": case "PLANNING":
-            return capitalize(status)
-          case "CURRENT":
-            return props.type === "anime" ? "Watching" : "Reading";
-          case "REPEATING":
-            return props.type === "anime" ? "Rewatching" : "Rereading";
-          default:
-            assert(false, "Unkown status: " + status);
-        }
-      }
-
       function pushEntryToList(name, isCustomList) {
         const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
         if (listIndex === -1) {
@@ -104,7 +98,7 @@ function MediaList(props) {
       listData().indecies[mediaId] = [];
 
       if (!response.data.hiddenFromStatusLists) {
-        const name = findListNameFromStatus(response.data.status);
+        const name = converStatusToListName(response.data.status, props.type);
         pushEntryToList(name, false);
       }
 
@@ -187,25 +181,7 @@ function MediaList(props) {
       <div class="user-profile-media-list-body">
         <div class="user-profile-media-list-search">
           <input type="text" placeholder="Search" onInput={e => setSearchParams({ search: e.target.value || undefined })} value={search()} />
-          <Show when={listData()?.data}>
-            <ol>
-              <li>
-                <button onClick={() => navigate("")}>
-                  <Show when={params.list === undefined}>{"> "}</Show>
-                  All {listData().data.total}
-                </button>
-              </li>
-              <For each={listData().data.lists}>{list => (
-                <li>
-                  <button onClick={() => navigate(list.name)}>
-                    <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
-                    {list.name} {list.entries.length}
-                  </button>
-                </li>
-              )}
-              </For>
-            </ol>
-          </Show>
+          <MediaListNames listData={listData} />
           <select name="format" onChange={e => setSearchParams({ format: e.target.value || undefined })} value={format() || ""}>
             <option value="" hidden>Format</option>
             <Show when={format()}>
@@ -428,19 +404,6 @@ function MediaList(props) {
                                           openEditor({ ...entry.media, mediaListEntry: entry }, {
                                             mutateMedia: responseEntry => {
                                               mutateMediaListCache(res => {
-                                                function findListNameFromStatus(status) {
-                                                  switch (status) {
-                                                    case "COMPLETED": case "DROPPED": case "PAUSED": case "PLANNING":
-                                                      return capitalize(status)
-                                                    case "CURRENT":
-                                                      return props.type === "anime" ? "Watching" : "Reading";
-                                                    case "REPEATING":
-                                                      return props.type === "anime" ? "Rewatching" : "Rereading";
-                                                    default:
-                                                      assert(false, "Unkown status: " + status);
-                                                  }
-                                                }
-
                                                 function pushEntryToList(name, isCustomList) {
                                                   const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
                                                   if (listIndex === -1) {
@@ -458,7 +421,7 @@ function MediaList(props) {
                                                 listData().indecies[entry.media.id] = [];
 
                                                 if (!responseEntry.hiddenFromStatusLists) {
-                                                  const name = findListNameFromStatus(responseEntry.status);
+                                                  const name = converStatusToListName(responseEntry.status, props.type);
                                                   pushEntryToList(name, false);
                                                 }
 
@@ -487,7 +450,7 @@ function MediaList(props) {
                                   </div>
                                 </Show>
                               </div>
-                            </A> 
+                            </A>
                           </Show>
                         </li>
                       ) }}</For>
@@ -501,3 +464,44 @@ function MediaList(props) {
     </UserMediaListContext.Provider>
   );
 }
+
+function converStatusToListName(status, type) {
+  switch (status) {
+    case "COMPLETED": case "DROPPED": case "PAUSED": case "PLANNING":
+      return capitalize(status)
+    case "CURRENT":
+      return type === "anime" ? "Watching" : "Reading";
+    case "REPEATING":
+      return type === "anime" ? "Rewatching" : "Rereading";
+    default:
+      assert(false, "Unkown status: " + status);
+  }
+}
+
+function MediaListNames(props) {
+  const navigate = useListNavigation();
+  const params = useParams();
+
+  return (
+    <Show when={props.listData()?.data}>
+      <ol>
+        <li>
+          <button onClick={() => navigate("")}>
+            <Show when={params.list === undefined}>{"> "}</Show>
+            All {props.listData().data.total}
+          </button>
+        </li>
+        <For each={props.listData().data.lists}>{list => (
+          <li>
+            <button onClick={() => navigate(list.name)}>
+              <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
+              {list.name} {list.entries.length}
+            </button>
+          </li>
+        )}
+        </For>
+      </ol>
+    </Show>
+  )
+}
+
