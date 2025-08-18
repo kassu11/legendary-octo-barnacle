@@ -7,7 +7,7 @@ import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { arrayUtils, fetcherUtils, scheduleUtils, signals } from "../utils/utils.js";
+import { arrayUtils, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
@@ -146,15 +146,22 @@ function ActivityReel(props) {
     });
   }
 
+  const [notInDebug, setNotInDebug] = signals.debug(false);
+
   return (
-    <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+    <Show when={!pagelessCacheData.loading}>
+      <Show when={modes.debug}>
+        <button onClick={() => setNotInDebug(s => !s)}>debug: {"" + !notInDebug()}</button>
+      </Show>
+      <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} notInDebug={notInDebug} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+    </Show>
   );
 }
 
 function ActivityPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.createSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
+  const fetcher = fetcherUtils.activationController(props.notInDebug, fetcherUtils.createSignalFetcher, fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
   const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
 
   let maxPage = 0;
