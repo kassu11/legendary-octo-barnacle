@@ -99,7 +99,7 @@ function Content(props) {
 }
 
 export { Overview } from "./User/Overview/Overview.jsx";
-export { AnimeList, MangaList } from "./User/MediaList/MediaList.jsx";
+export { MediaList } from "./User/MediaList/MediaList.jsx";
 export { FavouriteContainer } from "./User/Favourites/FavouriteContainer.jsx";
 export { Stats } from "./User/Stats/Stats.jsx";
 export { Socials } from "./User/Socials/Socials.jsx";
