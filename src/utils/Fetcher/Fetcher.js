@@ -258,9 +258,14 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
 
     if (cacheKey in cacheObjects) {
       const response = cacheObjects[cacheKey];
-      setResponse(new ApiResponse(response.cacheKey, response.data, "local"));
       if (isOnDebugSoDontFetch || type === "only-if-cached" || type === "fetch-once" || type === "default") {
+        batch(() => {
+          setResponse(new ApiResponse(response.cacheKey, response.data, "local"));
+          setLoading(false);
+        });
         return;
+      } else {
+        setResponse(new ApiResponse(response.cacheKey, response.data, "local"));
       }
     } else if (type !== "no-store" && currentFetcher.settings.storeName) {
       const cacheReq = IndexedDB.fetchCache();
