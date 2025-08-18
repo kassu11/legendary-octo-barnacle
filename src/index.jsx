@@ -8,7 +8,7 @@ import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { SearchBar, SearchContent } from "./pages/Search.jsx";
-import { User, Overview, AnimeList, MangaList, FavouriteContainer, Stats, Socials } from "./pages/User.jsx";
+import { User, Overview, MediaList, FavouriteContainer, Stats, Socials } from "./pages/User.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
@@ -98,8 +98,8 @@ render(
             </Route>
             <Route path="/user/:name" component={User}>
               <Route path="/" component={Overview} />
-              <Route path="/:type/:list?" matchFilters={{type: "anime"}} component={AnimeList} />
-              <Route path="/:type/:list?" matchFilters={{type: "manga"}} component={MangaList} />
+              <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={MediaList} />
+              <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={MediaList} />
               <Route path="/favourites" component={FavouriteContainer} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />
