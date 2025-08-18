@@ -1,0 +1,121 @@
+@layer layout {
+  .user-profile-media-list-body {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: .5rem;
+  }
+
+  .user-profile-media-list-search {
+    display: grid;
+    align-content: start;
+    gap: .25rem;
+  }
+
+  .user-profile-media-list-container {
+  }
+
+  .user-profile-media-list-grid {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+
+    img {
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+    }
+    .search-card-quick-action {
+      top: 0px;
+      bottom: unset;
+    }
+
+    .search-card-quick-action-items button {
+      width: 3rem;
+      height: 3rem;
+      border-radius: .25rem;
+      padding: .75rem;
+    }
+  }
+  .user-profile-media-list-adult-warning {
+    position: absolute;
+    bottom: 100%;
+    font-size: .75em;
+    padding: .1em .3em;
+    background-color: red;
+    transform: translateY(33%);
+  }
+
+  .user-media-card-header {
+    position: absolute;
+    top: 0px;
+    padding: .5rem;
+    display: flex;
+    gap: .5rem;
+
+    > div {
+      background: black;
+      display: flex;
+      gap: .5rem;
+      padding: .25rem;
+      border-radius: .25rem;
+      align-items: center;
+
+      &:hover::before {
+        left: -50%;
+        bottom: 100%;
+        max-width: 20em;
+        position: absolute;
+        content: attr(label);
+        background-color: black;
+        width: max-content;
+        font-weight: 600;
+        padding: .5em;
+        border-radius: .25em;
+        z-index: 1;
+      }
+    }
+
+    svg {
+      height: 1.25rem;
+    }
+  }
+
+  .user-media-card-footer {
+    position: absolute;
+    bottom: 0px;
+    background-color: var(--shadow-450);
+    width: 100%;
+    padding: .5rem;
+
+    > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+  }
+}
+
+@layer resize {
+  @media (width < 55em) {
+    .user-profile-media-list-body {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (width < 35em) {
+    .user-page .search-card-quick-action-items button {
+      width: 2rem;
+      height: 2rem;
+      border-radius: .25rem;
+      padding: .5rem;
+    }
+
+    .user-profile-media-list-grid {
+      grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+      font-size: .8rem;
+      gap: .25rem;
+    }
+  }
+}
