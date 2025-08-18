@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { modes } from "./utils";
 
 export const localStorageString = (key, initialValue) => {
   const [value, _setValue] = createSignal(localStorage.getItem(key) ?? initialValue);
@@ -70,3 +71,5 @@ export const localStorageJSON = (key, initialValue) => {
 
   return [value, setValue];
 }
+
+export const debug = (booleanToGiveWhenInDubugMode = true) => createSignal(modes.debug === booleanToGiveWhenInDubugMode);
