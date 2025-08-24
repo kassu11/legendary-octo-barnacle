@@ -1,6 +1,7 @@
 import { IndexedDB } from "../api";
 import { assert } from "../assert";
 import { CacheObject } from "../CacheObject";
+import { rateLimits } from "../utils";
 import { FetchSettings } from "./FetchSettings";
 import { batch, createEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 
@@ -31,7 +32,11 @@ const sendFetcher = (fetcher, signal) => {
 
   if (Math.random() > 1) {
     console.log("Error route")
-    return fetch("http://127.0.0.1:3000/api/version", options);
+    switch (Math.ceil(Math.random() * 3)) {
+      case 1: return fetch("https://http.codes/429", options);
+      case 2: return fetch("https://http.codes/500", options);
+      case 3: return fetch("https://http.codes/cors", options);
+    }
   } else if (fetcher.delay) {
     return new Promise((res, rej) => {
       fetch(fetcher.url, options)
@@ -39,42 +44,56 @@ const sendFetcher = (fetcher, signal) => {
         .catch(rej);
     });
   } else {
-    return fetch(fetcher.url, options);
+    rateLimits.addPendingRequestToUrl(fetcher.url);
+    return fetch(fetcher.url, options).finally(() => rateLimits.removePendingRequestToUrl(fetcher.url));
   }
 }
+
 
 const fetchRequests = {};
 const fetchResponses = {};
 
 /** @param {Fetcher} fetcher */
 const fetchData = async (fetcher, signal) => {
-  try {
-    const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
-    var response = await fetchRequest;
-  } catch(e) {
-    if (!signal.aborted && DEBUG) {
-      console.error(e);
+  for (let i = 0; i < 3 && !signal.aborted; i++) {
+    try {
+      const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
+      var response = await fetchRequest;
+    } catch(e) {
+      // CORS error
+      const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, "cors");
+      if (delay) {
+        await new Promise(res => setTimeout(res, delay));
+        continue;
+      }
+
+      return null;
+    } finally {
+      delete fetchRequests[fetcher.cacheKey];
     }
-    return null;
-  } finally {
-    delete fetchRequests[fetcher.cacheKey];
+
+    const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, response.status);
+    if (delay) {
+      await new Promise(res => setTimeout(res, delay));
+      continue;
+    } else if (!response.ok) {
+      return null;
+    }
+
+    try {
+      const jsonRequest = fetchResponses[fetcher.cacheKey] ??= response.json();
+      var json = await jsonRequest;
+    } catch(e) {
+      console.error(e);
+      return null;
+    } finally {
+      delete fetchResponses[fetcher.cacheKey];
+    }
+
+    return fetcher.formatResponse?.(json) || json;
   }
 
-  if (!response.ok) {
-    return null;
-  }
-
-  try {
-    const jsonRequest = fetchResponses[fetcher.cacheKey] ??= response.json();
-    var json = await jsonRequest;
-  } catch(e) {
-    console.error(e);
-    return null;
-  } finally {
-    delete fetchResponses[fetcher.cacheKey];
-  }
-
-  return fetcher.formatResponse?.(json) || json;
+  return null;
 }
 
 class ApiResponse {
@@ -237,7 +256,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
   }
 
   const updateFetcherInfo = fetcher => {
-    if (!fetcher) {
+    if (!fetcher || currentFetcher === fetcher) {
       return;
     };
 
@@ -321,3 +340,4 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
 
   return [response, { mutate, refetch, mutateCache, mutateBoth }];
 }
+
