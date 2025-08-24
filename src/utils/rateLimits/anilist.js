@@ -8,6 +8,26 @@ export const addPendingRequest = () => {
   });
 }
 
+export let waitingQueue = null;
+export const initializeWaitingQueue = resolve => {
+  if (waitingQueue === null) {
+    waitingQueue = [resolve];
+    resolve();
+  } else if (!waitingQueue.includes(resolve)) {
+    waitingQueue.push(resolve);
+  }
+}
+
+export const removeFromWaitingQueue = () => {
+  waitingQueue?.shift();
+  const resolve = waitingQueue?.[0];
+  if (resolve) {
+    resolve();
+  } else {
+    waitingQueue = null;
+  }
+}
+
 export const removePendingRequest = () => {
   setTimeout(() => setInOneSeconds(v => v - 1), 1_000);
   setTimeout(() => setInFiveSeconds(v => v - 1), 5_000);

@@ -23,6 +23,11 @@ export class Fetcher {
 }
 
 const sendFetcher = (fetcher, signal) => {
+  rateLimits.addPendingRequestToUrl(fetcher.url);
+  return fetcherToFetch(fetcher, signal).finally(() => rateLimits.removePendingRequestToUrl(fetcher.url));
+}
+
+const fetcherToFetch = (fetcher, signal) => {
   const options = {
     ...(fetcher.options || {}),
     signal
@@ -44,8 +49,7 @@ const sendFetcher = (fetcher, signal) => {
         .catch(rej);
     });
   } else {
-    rateLimits.addPendingRequestToUrl(fetcher.url);
-    return fetch(fetcher.url, options).finally(() => rateLimits.removePendingRequestToUrl(fetcher.url));
+    return fetch(fetcher.url, options);
   }
 }
 
@@ -55,42 +59,49 @@ const fetchResponses = {};
 
 /** @param {Fetcher} fetcher */
 const fetchData = async (fetcher, signal) => {
-  for (let i = 0; i < 3 && !signal.aborted; i++) {
-    try {
-      const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
-      var response = await fetchRequest;
-    } catch(e) {
-      // CORS error
-      const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, "cors");
-      if (delay) {
-        await new Promise(res => setTimeout(res, delay));
-        continue;
+  try {
+    const { resolve, promise } = Promise.withResolvers();
+    for (let i = 0; i < 3 && !signal.aborted; i++) {
+      if (rateLimits.hasWaitingQueueForUrl(fetcher.url)) {
+        rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+        await promise;
       }
 
-      return null;
-    } finally {
-      delete fetchRequests[fetcher.cacheKey];
-    }
+      try {
+        const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
+        var response = await fetchRequest;
+      } catch (e) {
+        if (signal.aborted) {
+          return null;
+        }
+      } finally {
+        delete fetchRequests[fetcher.cacheKey];
+      }
 
-    const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, response.status);
-    if (delay) {
-      await new Promise(res => setTimeout(res, delay));
-      continue;
-    } else if (!response.ok) {
-      return null;
-    }
+      const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, response?.status || "cors");
+      if (delay) {
+        rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+        await new Promise(res => setTimeout(res, delay));
+        continue;
+      } else if (!response?.ok) {
+        return null;
+      }
 
-    try {
-      const jsonRequest = fetchResponses[fetcher.cacheKey] ??= response.json();
-      var json = await jsonRequest;
-    } catch(e) {
-      console.error(e);
-      return null;
-    } finally {
-      delete fetchResponses[fetcher.cacheKey];
-    }
+      try {
+        const jsonRequest = fetchResponses[fetcher.cacheKey] ??= response.json();
+        var json = await jsonRequest;
+      } catch(e) {
+        console.error(e);
+        return null;
+      } finally {
+        delete fetchResponses[fetcher.cacheKey];
+      }
 
-    return fetcher.formatResponse?.(json) || json;
+      return fetcher.formatResponse?.(json) || json;
+    }
+  } catch (e) {
+  } finally {
+    rateLimits.removeFromWaitingQueueWithUrl(fetcher.url);
   }
 
   return null;
