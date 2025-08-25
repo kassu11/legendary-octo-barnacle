@@ -1,7 +1,6 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps } from "solid-js";
-import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl } from "../utils/formating";
 import { createStore } from "solid-js/store";
@@ -24,19 +23,20 @@ import { TwoHeadedRange } from "./Search/TwoHeadedRange";
 import { useVirtualSearchParams } from "../utils/virtualSearchParams.js";
 import { SeasonInput } from "./Search/SeasonInput.jsx";
 import { moveSeasonObject } from "../utils/dates.js";
+import { asserts } from "../utils/utils.js";
 
 
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
-    assert(!active || key, "key missing");
-    assert(hidden || name, "Name is missing");
-    assert(!canClear || !active || url, "Url is missing");
-    assert(canClear || hidden , "Don't show user meta tags they can't clear");
-    assert(typeof active === "boolean", "active is not boolean");
-    assert(typeof visuallyDisabled === "boolean", "visuallyDisabled is not boolean");
-    assert(typeof hidden === "boolean", "hidden is not boolean");
-    assert(typeof canClear === "boolean", "canClear is not boolean");
+    asserts.assertTrue(!active || key, "key missing");
+    asserts.assertTrue(hidden || name, "Name is missing");
+    asserts.assertTrue(!canClear || !active || url, "Url is missing");
+    asserts.assertTrue(canClear || hidden , "Don't show user meta tags they can't clear");
+    asserts.assertTrue(typeof active === "boolean", "active is not boolean");
+    asserts.assertTrue(typeof visuallyDisabled === "boolean", "visuallyDisabled is not boolean");
+    asserts.assertTrue(typeof hidden === "boolean", "hidden is not boolean");
+    asserts.assertTrue(typeof canClear === "boolean", "canClear is not boolean");
 
     this.name = name;
     this.url = url;
@@ -361,8 +361,8 @@ function parseURL() {
       }
     });
 
-    assert(validAniOrders.length === 0 || engine === "ani", "validAniOrder should not have anilist orders when engine is mal");
-    assert(validMalOrder === false || engine === "mal", "validMalOrder should be false if engine is ani");
+    asserts.assertTrue(validAniOrders.length === 0 || engine === "ani", "validAniOrder should not have anilist orders when engine is mal");
+    asserts.assertTrue(validMalOrder === false || engine === "mal", "validMalOrder should be false if engine is ani");
 
     if (engine === "ani") {
       if (validAniOrders.length) {
@@ -808,8 +808,8 @@ function AnilistMediaSearchContent(props) {
 
 function AnilistMediaSeasonContent(_props) {
   const props = mergeProps({groupCards: true}, _props);
-  assert(props.page, "page is missing");
-  assert(props.extraVariables, "extraVariables is missing");
+  asserts.assertTrue(props.page, "page is missing");
+  asserts.assertTrue(props.extraVariables, "extraVariables is missing");
 
   const {accessToken} = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);

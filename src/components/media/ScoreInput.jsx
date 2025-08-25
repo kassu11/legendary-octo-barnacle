@@ -1,12 +1,12 @@
 import Star from "../../assets/Star";
 import { Switch, Match, mergeProps, splitProps } from "solid-js";
 import "./ScoreInput.scss";
-import { assert } from "../../utils/assert.js";
 import Emoji from "../../assets/Emoji.jsx";
+import { asserts } from "../../utils/utils.js";
 
 function ScoreInput(props) {
-  assert(props.format, "Score format is missing");
-  assert(props.onChange, "onChange is missing (give signal)");
+  asserts.assertTrue(props.format, "Score format is missing");
+  asserts.assertTrue(props.onChange, "onChange is missing (give signal)");
   const prosDefaults = mergeProps({name: "score", id: "score", value: 0}, props);
   const [info] = splitProps(prosDefaults, ["id", "name", "value"]);
 

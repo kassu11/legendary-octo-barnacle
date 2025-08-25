@@ -2,7 +2,6 @@ import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidj
 import api, { IndexedDB } from "../../../utils/api.js";
 import { createEffect, createSignal, For, Match, on, onCleanup, onMount, Show } from "solid-js";
 import "./MediaList.scss";
-import { assert } from "../../../utils/assert.js";
 import { capitalize, formatTitleToUrl } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import Score from "../../../components/media/Score.jsx";
@@ -10,6 +9,7 @@ import { useAuthentication, useEditMediaEntries, UserMediaListContext, useUser, 
 import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
 import { createStore } from "solid-js/store";
 import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";
+import { asserts } from "../../../utils/utils.js";
 
 const useListNavigation = () => {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export function MediaList() {
   const userStatus = () => searchParams.userStatus || "";
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
-    assert(progressKey, "Progress key is undefined");
+    asserts.assertTrue(progressKey, "Progress key is undefined");
 
     const response = await api.anilist.mutateMedia(accessToken(), { mediaId, [progressKey]: newProgress });
     if (response.status !== 200) {
@@ -193,7 +193,7 @@ function converStatusToListName(status, type) {
     case "REPEATING":
       return type === "anime" ? "Rewatching" : "Rereading";
     default:
-      assert(false, "Unkown status: " + status);
+      asserts.assertTrue(false, "Unkown status: " + status);
   }
 }
 

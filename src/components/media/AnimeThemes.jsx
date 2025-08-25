@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
-import { assert } from "../../utils/assert.js";
 import style from "./AnimeThemes.module.scss";
+import { asserts } from "../../utils/utils.js";
 
 function AnimeThemes(props) {
   const videoPlayer = <video src="" controls autoPlay />;
@@ -17,8 +17,8 @@ function AnimeThemes(props) {
 }
 
 export function AnimeTheme(props) {
-  assert(props.video, "Missing video element for playback");
-  assert(props.theme, "Theme data is missing");
+  asserts.assertTrue(props.video, "Missing video element for playback");
+  asserts.assertTrue(props.theme, "Theme data is missing");
   let artistAndCharacter = false;
 
   return (

@@ -3,11 +3,10 @@ import { Show, createSignal, createEffect, onMount, on, For, onCleanup, batch, M
 import "./Home.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { assert } from "../utils/assert.js";
 import { formatTitleToUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { arrayUtils, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
+import { arrayUtils, asserts, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
@@ -246,7 +245,7 @@ function ActivityPage(props) {
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const id = parseInt(entry.target.dataset.id);
-      assert(Number.isInteger(id));
+      asserts.assertTrue(Number.isInteger(id));
 
       if (entry.isIntersecting) {
         visibleIds.add(id);
@@ -352,7 +351,7 @@ function CurrentCard(props) {
     const response = await api.anilist.mutateMedia(token, {mediaId, progress: newProgress});
     if (response.status !== 200) { return; }
 
-    assert(response.data.progress, "No progress found");
+    asserts.assertTrue(response.data.progress, "No progress found");
     props.data.progress = response.data.progress;
     if (response.data.status === "COMPLETED") {
       props.mutateCache(request => {

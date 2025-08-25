@@ -1,13 +1,13 @@
 import { batch, createContext, createSignal, Match, useContext } from "solid-js";
-import { assert } from "../utils/assert";
 import api from "../utils/api";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
 import { EditMediaEntriesContext, useAuthentication } from "./providers.js";
+import { asserts } from "../utils/utils.js";
 
 function formState(auth, initialData) {
-  assert(!initialData || auth, "Should not be able to edit if not authenticated");
+  asserts.assertTrue(!initialData || auth, "Should not be able to edit if not authenticated");
   const [score, setScore] = createSignal();
   const [advancedScores, setAdvancedScores] = createSignal();
   const [advancedScoresEnabled, setAdvancedScoresEnabled] = createSignal();
@@ -151,7 +151,7 @@ export function EditMediaEntriesProvider(props) {
       }
     }
 
-    assert(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
+    asserts.assertTrue(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
 
     if (!(form.status == "none" || mediaListEntry().mediaListEntry?.status == form.status)) {
       changes.status = form.status;
@@ -199,7 +199,7 @@ export function EditMediaEntriesProvider(props) {
       if (Object.keys(changes).length > 0) {
         changes.mediaId = mediaListEntry().id;
         for(const [key, value] of Object.entries(changes)) {
-          assert(Number.isNaN(value) === false, `Key "${key}" is NaN`);
+          asserts.assertTrue(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
         const response = await api.anilist.mutateMedia(accessToken(), changes);
         if (response.status === 200) {
@@ -217,7 +217,7 @@ export function EditMediaEntriesProvider(props) {
    * @param {undefined|Function} mutate.setIsFavourite
    */
   async function openEditor(defaultData, mutate) {
-    assert("id" in defaultData, "Missing editor id");
+    asserts.assertTrue("id" in defaultData, "Missing editor id");
 
     batch(() => {
       setMediaListEntry(defaultData);
@@ -416,7 +416,7 @@ export function EditMediaEntriesProvider(props) {
                               total += v || 0;
                             });
 
-                            assert(scoresCounted !== 0 || total === 0, "Total is 0");
+                            asserts.assertTrue(scoresCounted !== 0 || total === 0, "Total is 0");
 
                             if (Number.isNaN(total) === false && typeof total === "number" && scoresCounted > 0) {
                               state.setScore(() => {
@@ -432,7 +432,7 @@ export function EditMediaEntriesProvider(props) {
                                   case "POINT_3": 
                                     return Math.max(0, Math.min(Math.round(total / scoresCounted), 3));
                                   default:
-                                    assert(false, `Format "${state.format()}" not found`);
+                                    asserts.assertTrue(false, `Format "${state.format()}" not found`);
                                 }
                               });
                             }

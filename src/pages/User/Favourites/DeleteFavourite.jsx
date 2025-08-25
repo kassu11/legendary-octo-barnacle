@@ -1,13 +1,13 @@
 import { Show } from "solid-js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
-import { assert } from "../../../utils/assert.js";
+import { asserts } from "../../../utils/utils.js";
 
 export function DeleteFavourite(props) {
   const { authUserData, accessToken } = useAuthentication();
   const { user } = useUser();
-  assert(props.onClick, "onClick is missing");
-  assert(props.mutate, "mutate is missing");
+  asserts.assertTrue(props.onClick, "onClick is missing");
+  asserts.assertTrue(props.mutate, "mutate is missing");
 
   return (
     <Show when={user().id === authUserData()?.data.id}>

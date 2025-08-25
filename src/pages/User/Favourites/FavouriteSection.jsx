@@ -1,13 +1,13 @@
 import { Show, Switch, Match, createSignal } from "solid-js";
-import { assert } from "../../../utils/assert.js";
 import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import { FavouritesContext } from "../../../context/providers.js";
 import { FavouritesPage } from "./FavouritesPage.jsx";
+import { asserts } from "../../../utils/utils.js";
 
 export function FavouriteSection(props) {
-  assert(props.title, "title missing");
-  assert(props.type, "type missing");
+  asserts.assertTrue(props.title, "title missing");
+  asserts.assertTrue(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
   const [reorder, setReorder] = createSignal(false);
   const [allEdges, setAllEdges] = createSignal([]);

@@ -3,7 +3,6 @@ import { batch, createSignal, For, Match, on, onCleanup, onMount, Show, Switch }
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../utils/arrays";
-import { assert } from "../utils/assert";
 import { CompareMediaListContext, useAuthentication, useCompareMediaList } from "../context/providers";
 import api, { IndexedDB } from "../utils/api";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
@@ -15,6 +14,7 @@ import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
+import { asserts } from "../utils/utils.js";
 
 export default function ComparePage() {
   const location = useLocation();
@@ -412,7 +412,7 @@ function UserSearch() {
 }
 
 function UserRow(props) {
-  assert(props.name, "Name is missing");
+  asserts.assertTrue(props.name, "Name is missing");
   const params = useParams();
   const { setIncludeKeys, setExcludeKeys, storeUsers } = useCompareMediaList();
   const [searchParams, setSearchParams] = useSearchParams();

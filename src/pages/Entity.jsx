@@ -3,13 +3,13 @@ import api from "../utils/api";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import { Markdown } from "../components/Markdown";
 import "./Entity.scss";
-import { assert } from "../utils/assert";
 import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/formating";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useAuthentication } from "../context/providers";
 import { wrapToArray } from "../utils/arrays.js";
+import { asserts } from "../utils/utils.js";
 
 export function Character() {
   const params = useParams();
@@ -191,9 +191,9 @@ function Body(props) {
 } 
 
 function SubSection(props) {
-  assert(props.title, "title missing");
-  assert(props.title, "title missing");
-  assert(props.type, "type missing");
+  asserts.assertTrue(props.title, "title missing");
+  asserts.assertTrue(props.title, "title missing");
+  asserts.assertTrue(props.type, "type missing");
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
   const [visible, setVisible] = createSignal(false);
@@ -343,8 +343,8 @@ function StaffCharacterPage(props) {
 }
 
 function StaffMediaRolePage(props) {
-  assert(props.type, "Type is missing");
-  assert(props.nestLevel, "nestLevel is missing");
+  asserts.assertTrue(props.type, "Type is missing");
+  asserts.assertTrue(props.nestLevel, "nestLevel is missing");
 
   const params = useParams();
   const { accessToken } = useAuthentication();
@@ -431,8 +431,8 @@ function YearHeader(props) {
 }
 
 function CharacterAndActorCards(props) {
-  assert(props.showYears, "showYears signal is missing");
-  assert(props.language, "language signal is missing");
+  asserts.assertTrue(props.showYears, "showYears signal is missing");
+  asserts.assertTrue(props.language, "language signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
@@ -480,7 +480,7 @@ function CharacterAndActorCards(props) {
 }
 
 function MediaCards(props) {
-  assert(props.showYears, "showYears signal is missing");
+  asserts.assertTrue(props.showYears, "showYears signal is missing");
   const combine = (acc, edge) => {
     const last = acc.at(-1);
     if (last?.node.id !== edge.node.id) {
@@ -520,7 +520,7 @@ function MediaCards(props) {
 }
 
 function CharacterAndMediaCards(props) {
-  assert(props.showYears, "showYears signal is missing");
+  asserts.assertTrue(props.showYears, "showYears signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (

@@ -13,13 +13,13 @@ import Characters from "../components/media/Characters.jsx";
 import Staff from "../components/media/Staff.jsx";
 import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
-import { assert } from "../utils/assert.js";
 import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, languageFromCountry, numberCommas } from "../utils/formating.js";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import Recommendations from "../components/media/Recommendations.jsx";
 import { useAuthentication, useEditMediaEntries } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
+import { asserts } from "../utils/utils.js";
 
 export function AnimeInfo() {
   const params = useParams();
@@ -68,8 +68,8 @@ function MediaProvider(props) {
 }
 
 function MediaInfo(props) {
-  assert(props.media, "Data missing");
-  assert(props.media?.id, "Id missing");
+  asserts.assertTrue(props.media, "Data missing");
+  asserts.assertTrue(props.media?.id, "Id missing");
 
   const { accessToken } = useAuthentication();
   const { openEditor } = useEditMediaEntries();

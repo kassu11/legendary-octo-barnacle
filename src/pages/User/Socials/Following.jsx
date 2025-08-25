@@ -3,11 +3,11 @@ import { createSignal, For, Show } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { useAuthentication } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
-import { assert } from "../../../utils/assert.js";
 import { Followers } from "./Followers.jsx";
+import { asserts } from "../../../utils/utils.js";
 
 export function Following(props) {
-  assert(props.page, "Page is missing");
+  asserts.assertTrue(props.page, "Page is missing");
   const { user } = useUser();
   const { authUserData, accessToken } = useAuthentication();
   const [following] = api.anilist.userFollowing(() => user().id, props.page, accessToken);

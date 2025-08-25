@@ -1,9 +1,9 @@
 import { Match, Switch } from "solid-js";
-import { assert } from "../utils/assert";
 import "./Emoji.scss";
+import { asserts } from "../utils/utils.js";
 
 export default function Emoji(props) {
-  assert("score" in props, "Score is missing");
+  asserts.assertTrue("score" in props, "Score is missing");
   return (
     <Switch>
       <Match when={props.score >= 75}>

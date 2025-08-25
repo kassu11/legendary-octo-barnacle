@@ -1,10 +1,10 @@
 import { createEffect, onCleanup, onMount } from "solid-js";
 import { mergeProps, on } from "solid-js";
-import { assert } from "../../utils/assert";
 import "./TwoHeadedRange.scss";
+import { asserts } from "../../utils/utils";
 
 export function TwoHeadedRange(_props) {
-  assert(_props.onChange, "onChange is missing");
+  asserts.assertTrue(_props.onChange, "onChange is missing");
   const _defaults = mergeProps({min: 0, max: 100, separation: 1 }, _props);
   const props = mergeProps({value: [_defaults.min, _defaults.max]}, _defaults);
   let startPoint, endPoint;

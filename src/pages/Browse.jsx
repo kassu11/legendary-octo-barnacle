@@ -1,11 +1,11 @@
 import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch } from "solid-js";
-import { assert } from "../utils/assert";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useAuthentication, useEditMediaEntries } from "../context/providers";
+import { asserts } from "../utils/utils";
 
 export function BrowseRedirect(props) {
   const params = useParams();
@@ -79,7 +79,7 @@ export function BrowseMangaHome() {
 
 
 function VerticalCardRow(props) {
-  assert("href" in props, "Link is missing");
+  asserts.assertTrue("href" in props, "Link is missing");
 
   return (
     <section class="vertical-search-card-section">
@@ -155,7 +155,7 @@ function VerticalCardRow(props) {
 }
 
 function HorizontalCardRow(props) {
-  assert("href" in props, "Link is missing");
+  asserts.assertTrue("href" in props, "Link is missing");
 
   return (
     <section class="horizontal-search-card-section">

@@ -3,17 +3,17 @@ import { Markdown } from "../components/Markdown.jsx";
 import "./Activity.scss";
 import api from "../utils/api.js";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { assert } from "../utils/assert.js";
 import { capitalize, formatTitleToUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
 import { Dynamic } from "solid-js/web"
+import { asserts } from "../utils/utils.js";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);
-  assert(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
-  assert(typeof props.small === "boolean", "small needs to be boolean");
+  asserts.assertTrue(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
+  asserts.assertTrue(typeof props.small === "boolean", "small needs to be boolean");
 
   return (
     <Switch>
@@ -89,7 +89,7 @@ function Footer(props) {
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, id, liked) => {
     if (liked !== serverIsLiked) {
       const data = await api.anilist.toggleActivityLike(token, { id });
-      assert(!data.fromCache, "Mutation should never be cached");
+      asserts.assertTrue(!data.fromCache, "Mutation should never be cached");
 
       if (data.status === 200) {
         props.activity.likeCount = data.data.data.ToggleLike.likeCount;
@@ -109,7 +109,7 @@ function Footer(props) {
     <>
       <button class="cp-activity-like" classList={{active: isLiked()}} onMouseMove={() => likeCount() && setShowActivityLikeUserList(true)} onClick={() => {
         setIsLiked(liked => {
-          assert(typeof liked === "boolean");
+          asserts.assertTrue(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
           setLikeCount(v => v + change);
           triggerLikeToggle(accessToken(), props.activity.id, !liked);

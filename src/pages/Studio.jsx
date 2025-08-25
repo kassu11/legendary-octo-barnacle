@@ -2,12 +2,12 @@ import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import "./Studio.scss";
-import { assert } from "../utils/assert";
 import { formatTitleToUrl } from "../utils/formating";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useAuthentication } from "../context/providers";
+import { asserts } from "../utils/utils";
 
 export function Studio() {
   const params = useParams();
@@ -167,7 +167,7 @@ function YearHeader(props) {
 
 
 function MediaCards(props) {
-  assert(props.showYears, "showYears signal is missing");
+  asserts.assertTrue(props.showYears, "showYears signal is missing");
 
   const merge = (acc, edge) => {
     if (acc.at(-1)?.node.id !== edge.node.id && props.lastMediaId !== edge.node.id) {

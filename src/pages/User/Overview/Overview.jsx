@@ -2,11 +2,11 @@ import { A } from "@solidjs/router";
 import { For, Match, Show, Switch } from "solid-js";
 import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
-import { assert } from "../../../utils/assert.js";
 import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../../../utils/formating.js";
 import { ActivityCard } from "../../../components/Activity.jsx";
 import { Tooltip } from "../../../components/Tooltips.jsx";
 import "./Overview.scss";
+import { asserts } from "../../../utils/utils.js";
 
 export function Overview() {
   const { user } = useUser();
@@ -157,8 +157,8 @@ export function Overview() {
 }
 
 function GenrePreview(props) {
-  assert(props.genres, "Genres missing");
-  assert(props.title, "Title missing");
+  asserts.assertTrue(props.genres, "Genres missing");
+  asserts.assertTrue(props.title, "Title missing");
 
   const { user } = useUser();
 

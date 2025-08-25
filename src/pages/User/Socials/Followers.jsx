@@ -3,10 +3,10 @@ import { createSignal, For, Show } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { useAuthentication } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
-import { assert } from "../../../utils/assert.js";
+import { asserts } from "../../../utils/utils.js";
 
 export function Followers(props) {
-  assert(props.page, "Page is missing");
+  asserts.assertTrue(props.page, "Page is missing");
   const { user } = useUser();
   const { accessToken } = useAuthentication();
   const [followers] = api.anilist.userFollowers(() => user().id, props.page, accessToken);
