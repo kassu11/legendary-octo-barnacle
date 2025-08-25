@@ -1,18 +1,20 @@
-import { createEffect, createSignal, on } from "solid-js";
+import { createEffect, createRenderEffect, createSignal, on, untrack } from "solid-js";
 import { assertFunction, unwrapFunction } from "../functionUtils";
 import { Fetcher, send } from "./Fetcher";
 import * as fetchers from "../fetchers/fetchers.js";
+import { wrapToArray } from "../arrays.js";
+import { asserts, localizations } from "../utils.js";
 
 const DEBUG = location.origin.includes("localhost");
 
 /**
- * @param {(any) => Fetcher} fetcherCreater
+ * @param {(any) => Fetcher} fetcherCreator
  */
-const unwrapFetcherArguments = (fetcherCreater, ...args) => {
-  assertFunction(fetcherCreater);
+const createFetcherWithArguments = (fetcherCreator, args) => {
+  assertFunction(fetcherCreator);
 
   const unwrapperArgs = [];
-  for(const arg of args) {
+  for (const arg of args) {
     const value = unwrapFunction(arg);
     if (value === undefined) {
       return;
@@ -21,14 +23,32 @@ const unwrapFetcherArguments = (fetcherCreater, ...args) => {
     unwrapperArgs.push(value);
   }
 
-  return fetcherCreater(...unwrapperArgs);
+  return fetcherCreator(...unwrapperArgs);
 }
 
 /**
- * @param {(any) => Fetcher} fetcherCreater
+ * @param {(fetcherCreator, args) => Fetcher} createWithArgs
+ * @param {(args) => Fetcher} fetcherCreator
+ * @param {Array<any>} args
  */
-const unwrapFetcherArgumentsPageless = (fetcherCreater, ...args) => {
-  const fetcher = unwrapFetcherArguments(fetcherCreater, ...args);
+const fetcherSignal = (createWithArgs, fetcherCreator, args) => {
+  const [fetcher, setFetcher] = createSignal();
+
+  createRenderEffect(() => {
+    const fetcher = createWithArgs(fetcherCreator, args);
+    if (fetcher) {
+      setFetcher(fetcher);
+    }
+  });
+
+  return [fetcher, setFetcher];
+}
+
+/**
+ * @param {(any) => Fetcher} fetcherCreator
+ */
+const createPagelessFetcherWithArguments = (fetcherCreator, args) => {
+  const fetcher = createFetcherWithArguments(fetcherCreator, args);
   if (fetcher) {
     fetcher.options.body.variables.page = "pageless";
     fetcher.settings.type = "only-if-cached";
@@ -37,36 +57,18 @@ const unwrapFetcherArgumentsPageless = (fetcherCreater, ...args) => {
 }
 
 /**
- * @param {(any) => Fetcher} fetcherCreater
+ * @param {(any) => Fetcher} fetcherCreator
  */
-export const createSignalFetcher = (fetcherCreater, ...args) => {
-  const [fetcher, setFetcher] = createSignal(unwrapFetcherArguments(fetcherCreater, ...args));
-
-  let counter = 0;
-  createEffect(() => {
-    const fetcher = unwrapFetcherArguments(fetcherCreater, ...args);
-    if (counter++ && fetcher) {
-      setFetcher(fetcher);
-    }
-  });
-
+export const createSignalFetcher = (fetcherCreator, ...args) => {
+  const [fetcher] = fetcherSignal(createFetcherWithArguments, fetcherCreator, args);
   return fetcher;
 }
 
 /**
- * @param {(any) => Fetcher} fetcherCreater
+ * @param {(any) => Fetcher} fetcherCreator
  */
-export const createAnilistPagelessSignalFetcher = (fetcherCreater, ...args) => {
-  const [fetcher, setFetcher] = createSignal(unwrapFetcherArgumentsPageless(fetcherCreater, ...args));
-
-  let counter = 0;
-  createEffect(() => {
-    const fetcher = unwrapFetcherArgumentsPageless(fetcherCreater, ...args);
-    if (counter++ && fetcher) {
-      setFetcher(fetcher);
-    }
-  });
-
+export const createAnilistPagelessSignalFetcher = (fetcherCreator, ...args) => {
+  const [fetcher] = fetcherSignal(createPagelessFetcherWithArguments, fetcherCreator, args);
   return fetcher;
 }
 
@@ -80,6 +82,43 @@ export const activationController = (signal, creationFunction, ...args) => {
   }
 
   return value;
+}
+
+export const defaultOrCache = (signal, creationFunction, ...args) => {
+  const [fetcher, setFetcher] = fetcherSignal(createFetcherWithArguments, creationFunction, args);
+
+  let previousType;
+  const switchCacheType = localFetcher => {
+    if (localFetcher) {
+      [previousType, localFetcher.settings.type] = [localFetcher.settings.type, previousType];
+    }
+  }
+
+  let refreshFetcherWhenActive;
+  createRenderEffect(on(fetcher, f => {
+    previousType = localizations.onlyIfCached;
+    refreshFetcherWhenActive = !signal();
+    if (refreshFetcherWhenActive) {
+      switchCacheType(f);
+    }
+  }));
+
+  createRenderEffect(on(signal, currentState => {
+    asserts.assertFalse(!currentState && refreshFetcherWhenActive);
+
+    if (refreshFetcherWhenActive) {
+      asserts.assertTrue(currentState);
+      refreshFetcherWhenActive = false;
+      previousType = localizations.onlyIfCached;
+      const fetcher = switchCacheType(createFetcherWithArguments(creationFunction, args));
+      setFetcher(fetcher);
+    } else {
+      switchCacheType(untrack(fetcher));
+    }
+  }, { defer: true }));
+
+
+  return fetcher;
 }
 
 export { fetchers, send };

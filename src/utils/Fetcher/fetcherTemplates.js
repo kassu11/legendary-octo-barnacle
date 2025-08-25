@@ -1,10 +1,10 @@
-import { assert } from "../assert";
+import { asserts } from "../utils";
 import { Fetcher } from "./Fetcher";
 
 const DEBUG = location.origin.includes("localhost");
 
 export const anilistAuth = (token, query, variables = {}, formatResponse) => {
-  assert(query.length > 10, "Query must be above of length 10");
+  asserts.assertTrue(query.length > 10, "Query must be above of length 10");
   const headers = { "Content-Type": "application/json" };
 
   if (token) {
@@ -22,7 +22,7 @@ export const anilistAuth = (token, query, variables = {}, formatResponse) => {
 };
 
 export const offlineFetcher = (fileName, formatResponse, ms = 0) => {
-  assert(fileName, "Filename is missing");
+  asserts.assertTrue(fileName, "Filename is missing");
   const path = location.pathname.split("/")[1];
 
   const fetcher = new Fetcher("/" + path + "/" + fileName, undefined, formatResponse);

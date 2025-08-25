@@ -4,8 +4,8 @@ import { formatTitleToUrl } from "../../utils/formating";
 import api from "../../utils/api";
 import { DoomScroll } from "../utils/DoomScroll";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled";
-import { assert } from "../../utils/assert";
 import { useAuthentication } from "../../context/providers";
+import { asserts } from "../../utils/utils";
 
 function Recommendations(props) {
   const params = useParams();
@@ -98,7 +98,7 @@ function RecommendationCard(props) {
   const triggerLikeRating = leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
       const response = await api.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
-      assert(!response.fromCache, "Mutation should never be cached");
+      asserts.assertTrue(!response.fromCache, "Mutation should never be cached");
       if (response.status === 200) {
         props.mutateCache(response.data);
       }

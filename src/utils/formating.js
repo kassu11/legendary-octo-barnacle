@@ -1,4 +1,4 @@
-import { assert } from "./assert";
+import { asserts } from "./utils";
 
 export const plural = num => num !== 1 ? "s" : "";
 
@@ -148,7 +148,7 @@ export const numberCommas = num => {
 
 export const compactNumber = num => {
   if (num == undefined) return;
-  assert(typeof num === "number", "Number is not typeof number");
+  asserts.assertTrue(typeof num === "number", "Number is not typeof number");
 
   return Intl.NumberFormat('en-US', {
     notation: "compact",
@@ -157,21 +157,21 @@ export const compactNumber = num => {
 }
 
 export const formatTitleToUrl = (title) => {
-  assert(title != null, "No title given");
+  asserts.assertTrue(title != null, "No title given");
   return encodeURI(title.toLowerCase().replace(/[#%?]+/g, "").replace(/[/\\\-\u2010-\u2015_{}[\]]+/g, " ").trim().replace(/ +/g, "-"));
 }
 
 export const mediaUrl = (media) => {
-  assert(media.type, "type is missing");
-  assert("id" in media, "id is missing");
+  asserts.assertTrue(media.type, "type is missing");
+  asserts.assertTrue("id" in media, "id is missing");
 
   return "/" + media.type.toLowerCase() + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred);
 }
 
 export const formatAnilistDate = (dateObject) => {
-  assert("year" in dateObject, "No year found");
-  assert("month" in dateObject, "No month found");
-  assert("day" in dateObject, "No day found");
+  asserts.assertTrue("year" in dateObject, "No year found");
+  asserts.assertTrue("month" in dateObject, "No month found");
+  asserts.assertTrue("day" in dateObject, "No day found");
 
   if (!dateObject.year && !dateObject.month && !dateObject.day) {
     return "";

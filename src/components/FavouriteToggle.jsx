@@ -1,22 +1,22 @@
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import api from "../utils/api";
 import "./FavouriteToggle.scss";
-import { assert } from "../utils/assert";
 import { compactNumber } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
+import { asserts } from "../utils/utils.js";
 
 export function FavouriteToggle(props) {
   const { accessToken } = useAuthentication();
-  assert("checked" in props, "checked missing");
-  assert("onChange" in props, "onChange missing");
-  assert("mutateCache" in props, "mutateCache missing");
-  assert("mangaId" in props || "animeId" in props || "staffId" in props || "characterId" in props || "studioId" in props, "Id missing");
+  asserts.assertTrue("checked" in props, "checked missing");
+  asserts.assertTrue("onChange" in props, "onChange missing");
+  asserts.assertTrue("mutateCache" in props, "mutateCache missing");
+  asserts.assertTrue("mangaId" in props || "animeId" in props || "staffId" in props || "characterId" in props || "studioId" in props, "Id missing");
 
   let localChecked = null;
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, variables, checked) => {
     if (checked !== localChecked) {
       const data = await api.anilist.toggleFavourite(token, variables);
-      assert(!data.fromCache, "Mutation should never be cached");
+      asserts.assertTrue(!data.fromCache, "Mutation should never be cached");
       props.mutateCache(checked);
     }
     localChecked = checked 

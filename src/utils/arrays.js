@@ -1,4 +1,4 @@
-import { assert } from "./assert";
+import { asserts } from "./utils";
 
 export function objectFromArrayEntries(arr, defaultRetun) {
   if (!arr) {
@@ -23,7 +23,7 @@ export function wrapToSet(value) {
 }
 
 export function removeDuplicateIgnoreCaseSensitivity(array) {
-  assert(Array.isArray(array), "Not array");
+  asserts.assertTrue(Array.isArray(array), "Not array");
   const map = new Map();
   array.forEach(value => map.set(value.toLowerCase(), value));
   return Array.from(map.values());

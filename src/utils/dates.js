@@ -1,4 +1,4 @@
-import { assert } from "./assert";
+import { asserts } from "./utils";
 
 const seasons = ["WINTER", "SPRING", "SUMMER", "FALL"];
 
@@ -8,7 +8,7 @@ export const getDates = (offsetDays = 7) => {
   const year = date.getFullYear();
   const season = getSeasonFromMonth(date.getMonth());
 
-  assert(Number.isInteger(offsetDays), "Offsetdays is not an integer");
+  asserts.assertTrue(Number.isInteger(offsetDays), "Offsetdays is not an integer");
 
   return {
     "season": season,
@@ -19,8 +19,8 @@ export const getDates = (offsetDays = 7) => {
 }
 
 export function moveSeasonObject(season, year, move = 0) {
-  assert(typeof year === "number", "year is not a number");
-  assert(typeof season === "string", "season is not a string");
+  asserts.assertTrue(typeof year === "number", "year is not a number");
+  asserts.assertTrue(typeof season === "string", "season is not a string");
   const seasonMove = move % 4;
   const yearMove = Math.trunc(move / 4);
   const seasonIndex = seasons.indexOf(season.toUpperCase());

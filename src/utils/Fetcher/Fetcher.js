@@ -1,15 +1,14 @@
 import { IndexedDB } from "../api";
-import { assert } from "../assert";
 import { CacheObject } from "../CacheObject";
-import { rateLimits } from "../utils";
+import { asserts, rateLimits } from "../utils";
 import { FetchSettings } from "./FetchSettings";
-import { batch, createEffect, createSignal, on, onCleanup, untrack } from "solid-js";
+import { batch, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 
 const DEBUG = location.origin.includes("localhost");
 
 export class Fetcher {
   constructor(url, options, formatResponse) {
-    assert(url, "URL is missing");
+    asserts.assertTrue(url, "URL is missing");
 
     this.url = url;
     this.options = options;
@@ -114,7 +113,7 @@ class ApiResponse {
    * @param {undefined|"local"|"indexedDB"} cacheType
    */
   constructor(cacheKey, data, cacheType) {
-    assert(cacheKey, "CacheKey is missing");
+    asserts.assertTrue(cacheKey, "CacheKey is missing");
 
     this.cacheKey = cacheKey;
     this.data = data;
@@ -211,7 +210,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
 
   /** @param {ApiResponse} mutateData */
   const safeMutate = mutateData => {
-    assert(mutateData instanceof ApiResponse);
+    asserts.assertTrue(mutateData instanceof ApiResponse);
     if (mutateData.cacheKey === currentFetcher.cacheKey) {
       setResponse(mutateData);
     }
@@ -221,7 +220,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
   const mutate = mutation => {
     mutation = unwrapMutation(mutation);
 
-    assert(mutation instanceof ApiResponse);
+    asserts.assertTrue(mutation instanceof ApiResponse);
     setResponse(mutation);
   }
 
@@ -237,7 +236,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
   }
 
   const refetch = async () => {
-    assert(currentFetcher, "currentFetcher should not be undefined");
+    asserts.assertTrue(currentFetcher, "currentFetcher should not be undefined");
     if (currentFetcher.settings.type === "only-if-cached") {
       batch(() => {
         setResponse(new ApiResponse(currentFetcher.cacheKey, null));
@@ -272,7 +271,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     };
 
     currentFetcher = fetcher;
-    assert(currentFetcher instanceof Fetcher);
+    asserts.assertTrue(currentFetcher instanceof Fetcher);
 
     Object.assign(currentFetcher.settings, overwriteSettings);
 
@@ -310,8 +309,8 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
           /** @type {CacheObject} */
           const result = evt.target.result;
           if (result) {
-            assert(result.expires, "Cache should have a expiration date");
-            assert(result.data, "Cache should always have data");
+            asserts.assertTrue(result.expires, "Cache should have a expiration date");
+            asserts.assertTrue(result.data, "Cache should always have data");
 
             if (result.expires > new Date()) {
               const response = new ApiResponse(result.cacheKey, result.data, "indexedDB");
@@ -338,8 +337,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     }
   }
 
-  updateFetcherInfo(untrack(fetcherSignal));
-  createEffect(on(fetcherSignal, updateFetcherInfo, { defer: true }));
+  createRenderEffect(on(fetcherSignal, updateFetcherInfo));
 
   Object.defineProperties(response, {
     error: { get: () => error() },
