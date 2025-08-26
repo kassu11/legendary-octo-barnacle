@@ -2,7 +2,7 @@ import { A, Navigate, useLocation, useNavigate, useParams } from "@solidjs/route
 import api from "../utils/api.js";
 import { ErrorBoundary, For, Show, Switch, createEffect, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
 import "./MediaInfo.scss";
-import { Markdown, OldMarkdownComponent } from "../components/Markdown.jsx";
+import { Markdown } from "../components/Markdown.jsx";
 import Banner from "../components/media/Banner.jsx";
 import ExternalLinks from "../components/media/ExternalLinks.jsx";
 import ExtraInfo from "../components/media/ExtraInfo.jsx";
@@ -21,26 +21,6 @@ import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
 import { asserts, fetcherUtils, localizations } from "../utils/utils.js";
 import { fetchers } from "../utils/Fetcher/fetcherUtils.js";
-
-export function AnimeInfo() {
-  const params = useParams();
-  const [idMal, setIdMal] = createSignal();
-  const [malData] = api.myAnimeList.animeById(idMal);
-  const [themeData] = api.animeThemes.themesByAniListId(() => params.id);
-
-  return (
-    <MediaProvider setIdMal={setIdMal} theme={themeData()?.data.anime[0]} malData={malData} />
-  )
-}
-
-export function MangaInfo() {
-  const [idMal, setIdMal] = createSignal();
-  const [malData] = api.myAnimeList.mangaById(idMal);
-
-  return (
-    <MediaProvider setIdMal={setIdMal} malData={malData} />
-  )
-}
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -69,6 +49,14 @@ export function MediaInfoContent(props) {
 
   createEffect(() => {
     setIsFavourite(props.media?.isFavourite ?? false);
+  });
+
+  createRenderEffect(() => {
+    if (anilistData()?.data && params.sub) {
+      document.title = `${anilistData().data.title.userPreferred} - ${params.sub} - LOB`;
+    } else if (anilistData()?.data) {
+      document.title = `${anilistData().data.title.userPreferred} - LOB`;
+    }
   });
 
   const controller = new AbortController();
@@ -347,31 +335,6 @@ export function MediaInfoHome(props) {
   );
 }
 
-function MediaProvider(props) {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [mediaData, { mutateCache: setMediaData }] = api.anilist.mediaId(() => params.id, accessToken);
-  const [friendScoreData] = api.anilist.friendsMediaScore(accessToken, () => params.id, {page: 1, perPage: 8});
-
-  createEffect(() => {
-    if (mediaData()) {
-      document.title = `${mediaData().data.data.Media.title.userPreferred} - LOB`;
-    }
-    props.setIdMal(mediaData()?.data.data.Media.idMal ?? undefined);
-  });
-
-  return (
-    <Show when={mediaData()}>
-      <MediaInfo 
-        media={mediaData().data.data.Media} 
-        setMediaData={setMediaData} 
-        theme={props.theme} 
-        friend={friendScoreData()?.data.data.Page} 
-        malData={props.malData}
-      />
-    </Show>
-  )
-}
 
 export function MediaPageRedirect() {
   const params = useParams();
