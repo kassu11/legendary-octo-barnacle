@@ -2,7 +2,7 @@ import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.scss"
 import App from "./App.jsx"
-import { MangaInfo, AnimeInfo, MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaInfo.jsx"
+import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaInfo.jsx"
 import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
@@ -87,13 +87,13 @@ render(
             </Route>
             <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, type: ["anime", "manga"] }} component={MediaPageRedirect} />
             <Route path="/:api">
-              <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
+              <Route path="/:type/:id/:name" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
                 <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHome} />
-                <Route path="/characters">
+                <Route path="/:sub" matchFilters={{ sub: "characters" }}>
                   <Route path="/" matchFilters={{ type: "anime" }} component={AnimeCharacters} />
                   <Route path="/" matchFilters={{ type: "manga" }} component={MangaCharacters} />
                 </Route>
-                <Route path="/staff">
+                <Route path="/:sub" matchFilters={{ sub: "staff" }}>
                   <Route path="/" matchFilters={{ type: "anime" }} component={AnimeStaff} />
                   <Route path="/" matchFilters={{ type: "manga" }} component={MangaStaff} />
                 </Route>
