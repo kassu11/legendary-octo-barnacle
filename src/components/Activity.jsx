@@ -1,9 +1,9 @@
 import { Switch, Show, Match, createSignal, onCleanup, mergeProps } from "solid-js";
-import { Markdown } from "../components/Markdown.jsx";
+import { OldMarkdownComponent } from "../components/Markdown.jsx";
 import "./Activity.scss";
 import api from "../utils/api.js";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { capitalize, formatTitleToUrl, plural } from "../utils/formating.js";
+import { capitalize, formatTitleToUrl, mediaUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
@@ -27,7 +27,7 @@ export function ActivityCard(_props) {
             <CreatedAt createdAt={props.activity.createdAt} />
           </div>
           <div class="content">
-            <Markdown children={props.activity.text} />
+            <OldMarkdownComponent children={props.activity.text} />
           </div>
           <div class="footer">
             <Footer mutateCache={props.mutateCache} activity={props.activity}/>
@@ -36,7 +36,7 @@ export function ActivityCard(_props) {
       </Match>
       <Match when={props.activity.type === "ANIME_LIST" || props.activity.type === "MANGA_LIST"}>
         <Dynamic component={props.wrapper} class="activity-card-media" classList={{small: props.small}}>
-          <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>
+          <A href={mediaUrl(props.activity.media)}>
             <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
           </A>
           <div class="main">
@@ -47,7 +47,7 @@ export function ActivityCard(_props) {
                   <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
                     {props.activity.progress} of 
                   </Show>
-                  <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
+                  <A href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
                 </p>
               </Match>
               <Match when={props.hideProfile === false}>
@@ -57,7 +57,7 @@ export function ActivityCard(_props) {
                   <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
                     {props.activity.progress} of 
                   </Show>
-                  <A href={"/" + props.activity.media.type.toLowerCase() + "/" + props.activity.media.id + "/" + formatTitleToUrl(props.activity.media.title.userPreferred)}>{props.activity.media.title.userPreferred}</A>
+                  <A href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
                   <A href={"/user/" + props.activity.user.name}>
                     <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
                   </A>

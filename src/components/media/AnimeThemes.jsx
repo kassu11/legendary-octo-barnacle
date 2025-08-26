@@ -1,18 +1,32 @@
-import { A } from "@solidjs/router";
+import { A, useParams } from "@solidjs/router";
 import style from "./AnimeThemes.module.scss";
-import { asserts } from "../../utils/utils.js";
+import { asserts, fetcherUtils } from "../../utils/utils.js";
+import { fetchers } from "../../utils/Fetcher/fetcherUtils.js";
+import { createEffect } from "solid-js";
 
-function AnimeThemes(props) {
+function AnimeThemes() {
+  const params = useParams();
   const videoPlayer = <video src="" controls autoPlay />;
+  const fetcher = fetcherUtils.createSignalFetcher(fetchers.animeThemes.getThemesByIdAndApi, () => params.id, () => params.api);
+  const [themeData] = fetcherUtils.send(fetcher);
+
+  createEffect(() => {
+    params.id;
+    params.api;
+    params.type;
+    videoPlayer.src = "";
+  });
 
   return (
-    <div>
-      <h2>Themes</h2>
-      <For each={props.theme?.animethemes}>{theme => (
-        <AnimeTheme theme={theme} video={videoPlayer} />
-      )}</For>
-      {videoPlayer}
-    </div>
+    <Show when={themeData()?.data.length}>
+      <div>
+        <h2>Themes</h2>
+        <For each={themeData().data}>{theme => (
+          <AnimeTheme theme={theme} video={videoPlayer} />
+        )}</For>
+        {videoPlayer}
+      </div>
+    </Show>
   );
 }
 

@@ -23,3 +23,9 @@ export const useCompareMediaList = () => useContext(CompareMediaListContext);
 
 export const FavouritesContext = createContext();
 export const useFavourites = () => useContext(FavouritesContext);
+
+export const MediaInfoContext = createContext();
+export const useMediaInfo = () => useContext(MediaInfoContext);
+
+export const GenericTestingContext = createContext();
+export const useGenericTesting = () => useContext(GenericTestingContext);

@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { createSignal, Match, Show, Switch } from "solid-js";
-import { formatTitleToUrl } from "../../../utils/formating.js";
+import { formatTitleToUrl, mediaUrl } from "../../../utils/formating.js";
 import { useFavourites } from "../../../context/providers.js";
 import { DeleteFavourite } from "./DeleteFavourite.jsx";
 
@@ -13,13 +13,13 @@ export function FavouritePageItem(props) {
     <li classList={{hidden: hidden()}} attr:data-id={props.edge.node.id}>
       <Switch>
         <Match when={type === "anime"}>
-          <A href={"/anime/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.title.userPreferred)}>
+          <A href={mediaUrl(props.edge)}>
             <DeleteFavourite animeId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
             <img src={props.edge.node.coverImage.large} alt="Cover" />
           </A>
         </Match>
         <Match when={type === "manga"}>
-          <A href={"/manga/" + props.edge.node.id + "/" + formatTitleToUrl(props.edge.node.title.userPreferred)}>
+          <A href={mediaUrl(props.edge)}>
             <DeleteFavourite mangaId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
             <img src={props.edge.node.coverImage.large} alt="Cover" />
           </A>

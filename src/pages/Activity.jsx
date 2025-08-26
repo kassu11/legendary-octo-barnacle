@@ -3,7 +3,7 @@ import api from "../utils/api.js";
 import { createSignal, For, Match, onCleanup, Show, } from "solid-js";
 import "./Activity.scss";
 import { ActivityCard } from "../components/Activity.jsx";
-import { Markdown } from "../components/Markdown.jsx";
+import { OldMarkdownComponent } from "../components/Markdown.jsx";
 import { plural } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
 
@@ -31,7 +31,7 @@ export default function Activity() {
               <CreatedAt createdAt={reply.createdAt} />
             </div>
             <div class="content">
-              <Markdown children={reply.text} />
+              <OldMarkdownComponent children={reply.text} />
             </div>
           </div>
         )}</For>

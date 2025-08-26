@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import { For, Match, Show, Switch } from "solid-js";
 import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
-import { formatTimeToDate, formatTitleToUrl, numberCommas } from "../../../utils/formating.js";
+import { formatTimeToDate, formatTitleToUrl, mediaUrl, numberCommas } from "../../../utils/formating.js";
 import { ActivityCard } from "../../../components/Activity.jsx";
 import { Tooltip } from "../../../components/Tooltips.jsx";
 import "./Overview.scss";
@@ -34,7 +34,7 @@ export function Overview() {
             <ol class="grid-reel-auto-fill">
               <For each={user().favourites.anime.edges}>{anime => (
                 <li class="item">
-                  <A href={"/anime/" + anime.node.id + "/" + formatTitleToUrl(anime.node.title.userPreferred)}>
+                  <A href={mediaUrl(anime.node)}>
                     <img src={anime.node.coverImage.large} alt="Cover" />
                   </A>
                 </li>
@@ -48,7 +48,7 @@ export function Overview() {
             <ol class="grid-reel-auto-fill">
               <For each={user().favourites.manga.edges}>{manga => (
                 <li class="item">
-                  <A href={"/manga/" + manga.node.id + "/" + formatTitleToUrl(manga.node.title.userPreferred)}>
+                  <A href={mediaUrl(manga.node)}>
                     <img src={manga.node.coverImage.large} alt="Cover" />
                   </A>
                 </li>

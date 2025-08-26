@@ -1,9 +1,9 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
-import { Markdown } from "../components/Markdown";
+import { OldMarkdownComponent } from "../components/Markdown";
 import "./Entity.scss";
-import { capitalize, formatAnilistDate, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../utils/formating";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
@@ -62,8 +62,8 @@ function Body(props) {
             <p class="entity-page-alternative-names">{[...wrapToArray(props.entityInfo().data.name.native), ...wrapToArray(props.entityInfo().data.name.alternative)].join(", ")}</p>
             <FavouriteToggle 
               checked={favourite()} 
-              staffId={props.type === "STAFF" ? params.id : undefined} 
-              characterId={props.type === "CHARACTER" ? params.id : undefined} 
+              idType={props.type} 
+              variableId={props.entityInfo().data.id} 
               favourites={props.entityInfo().data.favourites} 
               onChange={setFavourite} 
               mutateCache={(isFavourite) => {
@@ -104,7 +104,7 @@ function Body(props) {
             </Show>
             <Show when={props.entityInfo().data.description}>
               <li>
-                <Markdown>{props.entityInfo().data.description}</Markdown>
+                <OldMarkdownComponent>{props.entityInfo().data.description}</OldMarkdownComponent>
               </li>
             </Show>
           </ul>
@@ -440,10 +440,10 @@ function CharacterAndActorCards(props) {
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language())}>{roles => (
           <li class="entity-page-media-voice-actor">
-            <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <A href={mediaUrl(edge.node)}>
               <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
             </A>
-            <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <A href={mediaUrl(edge.node)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
@@ -497,7 +497,7 @@ function MediaCards(props) {
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <li>
-          <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+          <A href={mediaUrl(edge.node)}>
             <img src={edge.node.coverImage.large} alt="Character" class="background"/>
             <p>
               <Show when={edge.node.mediaListEntry?.status}>
@@ -532,7 +532,7 @@ function CharacterAndMediaCards(props) {
               <A href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
                 <img src={character.image.large} alt="Character" class="background"/>
               </A>
-              <A class="media" href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+              <A class="media" href={mediaUrl(edge.node)}>
                 <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
               </A>
             </div>
@@ -540,7 +540,7 @@ function CharacterAndMediaCards(props) {
               <span>{character.name.userPreferred}</span>
               <span class="role"> {capitalize(edge.characterRole)}</span>
             </A>
-            <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+            <A href={mediaUrl(edge.node)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />

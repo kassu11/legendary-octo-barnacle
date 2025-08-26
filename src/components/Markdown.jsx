@@ -1,6 +1,7 @@
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
 import style from "./Markdown.module.scss";
+import { createRenderEffect, createSignal } from "solid-js";
 
 const spoilerExtension = {
   name: "spoiler",
@@ -26,10 +27,26 @@ const spoilerExtension = {
 
 marked.use({ extensions: [spoilerExtension] });
 
-export function Markdown(props) {
+export function OldMarkdownComponent(props) {
   if (!props.children) return null;
   const dirty = marked(props.children)
   const clean = DOMPurify.sanitize(dirty);
   const elem = <div innerHTML={clean}></div>; 
   return <For each={elem.childNodes}>{e => e}</For>
+}
+
+export function Markdown(props) {
+  const [children, setChildren] = createSignal([]);
+
+  createRenderEffect(() => {
+    if (!props.text) {
+      return;
+    }
+    const dirty = marked(props.text)
+    const clean = DOMPurify.sanitize(dirty);
+    const elem = <div innerHTML={clean}></div>; 
+    setChildren([...elem.childNodes]);
+  });
+
+  return <For each={children()}>{e => e}</For>
 }

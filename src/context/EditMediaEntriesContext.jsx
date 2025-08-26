@@ -215,6 +215,8 @@ export function EditMediaEntriesProvider(props) {
    * @param {undefined|number} defaultData.score - Default score
    * @param {Object} mutate - Default score
    * @param {undefined|Function} mutate.setIsFavourite
+   * @param {undefined|Function} mutate.mutateMedia
+   * @param {undefined|Function} mutate.deteleMedia
    */
   async function openEditor(defaultData, mutate) {
     asserts.assertTrue("id" in defaultData, "Missing editor id");
@@ -249,26 +251,14 @@ export function EditMediaEntriesProvider(props) {
               <img src={mediaListEntry().coverImage?.large} class="cover" alt="Cover" />
               <h2 class="line-clamp header">{mediaListEntry().title?.userPreferred}</h2>
               <div class="container">
-                <Switch>
-                  <Match when={mediaListEntry().type === "MANGA"}>
-                    <FavouriteToggle 
-                      checked={state.isFavourite()} 
-                      mangaId={mediaListEntry().id} 
-                      onChange={state.setIsFavourite} 
-                      mutateCache={(isFavourite) => {
-                        mutates()?.setIsFavourite?.(isFavourite);
-                      }} />
-                  </Match>
-                  <Match when={mediaListEntry().type === "ANIME"}>
-                    <FavouriteToggle 
-                      checked={state.isFavourite()} 
-                      animeId={mediaListEntry().id} 
-                      onChange={state.setIsFavourite} 
-                      mutateCache={(isFavourite) => {
-                        mutates()?.setIsFavourite?.(isFavourite);
-                      }} />
-                  </Match>
-                </Switch>
+                <FavouriteToggle 
+                  checked={state.isFavourite()}
+                  idType={mediaListEntry().type}
+                  variableId={mediaListEntry().id}
+                  onChange={state.setIsFavourite}
+                  mutateCache={(isFavourite, variables) => {
+                    mutates()?.setIsFavourite?.(isFavourite, variables);
+                  }} />
                 <button type="submit">Save</button>
               </div>
             </header>

@@ -21,6 +21,13 @@ export const anilistAuth = (token, query, variables = {}, formatResponse) => {
   }, formatResponse);
 };
 
+export const getJSON = (url, formatResponse) => new Fetcher(url, {
+  method: "GET",
+  cache: "default",
+  headers: { "Content-Type": "application/json" },
+}, formatResponse);
+
+
 export const offlineFetcher = (fileName, formatResponse, ms = 0) => {
   asserts.assertTrue(fileName, "Filename is missing");
   const path = location.pathname.split("/")[1];

@@ -3,7 +3,7 @@ import { Show, createSignal, createEffect, onMount, on, For, onCleanup, batch, M
 import "./Home.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { formatTitleToUrl } from "../utils/formating.js";
+import { formatTitleToUrl, mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { arrayUtils, asserts, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
@@ -368,7 +368,7 @@ function CurrentCard(props) {
   });
 
   return (
-    <A href={"/" + props.data.media.type.toLowerCase() + "/" + props.data.media.id + "/" + formatTitleToUrl(props.data.media.title.userPreferred)} class="cp-current-card" >
+    <A href={mediaUrl(props.data.media)} class="cp-current-card" >
       <img src={props.data.media.coverImage.large} alt="Cover." />
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class="cp-current-card-info">

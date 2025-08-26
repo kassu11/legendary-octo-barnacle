@@ -8,7 +8,7 @@ import api, { IndexedDB } from "../utils/api";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
 import { Tooltip } from "../components/Tooltips.jsx";
 import CompareMediaListWorker from "../worker/compare-media-list.js?worker";
-import { capitalize, formatMediaFormat, formatTitleToUrl, formatUsersMediaStatus, languageFromCountry } from "../utils/formating.js";
+import { capitalize, formatMediaFormat, formatTitleToUrl, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../utils/formating.js";
 import "./ComparePage.scss";
 import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
@@ -549,7 +549,7 @@ function ContentPage() {
             <Show when={media.bannerImage}>
               <img src={media.bannerImage} loading="lazy" class="bg" inert alt="Background banner" />
             </Show>
-            <div class="cover-wrapper" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+            <div class="cover-wrapper" href={mediaUrl(media)}>
               <div class="header flex-space-between">
                 <Show when={media.repeat}>
                   <div class="cp-card-repeat">
@@ -563,7 +563,7 @@ function ContentPage() {
                   <Star /> {(media.averageScore / 10) || "N/A"}
                 </div>
               </div>
-              <A class="cover-link" href={"/" + params.type + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred)}>
+              <A class="cover-link" href={mediaUrl(media)}>
                 <img class="cover" loading="lazy" src={media.coverImage.large} alt="Media cover" />
               </A>
               <Show when={media.episodes || media.chapters || media.volumes || media.score}>

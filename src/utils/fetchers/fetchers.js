@@ -1,4 +1,3 @@
-import * as anilist from "./anilist.js";
-import * as jikan from "./jikan.js";
-
-export { anilist, jikan };
+export * as anilist from "./anilist.js";
+export * as jikan from "./jikan.js";
+export * as animeThemes from "./animeThemes.js";

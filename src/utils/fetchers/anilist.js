@@ -1,8 +1,17 @@
-import * as queries from "../querys.js";
-import * as fetcherTemplates from "../Fetcher/fetcherTemplates.js";
+import { fetcherTemplates, queries } from "../utils.js";
+
+const formatPage = res => res.data.Page;
 
 export const getActivity = (token, variables, page = 1) => {
-  return fetcherTemplates.anilistAuth(token, queries.anilistActivity, { ...variables, page }, res => res.data.Page);
+  return fetcherTemplates.anilistAuth(token, queries.anilistActivity, { ...variables, page }, formatPage);
+};
+
+export const getMediaById = (token, id) => {
+  return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { id }, res => res.data.Media);
+};
+
+export const getFrendScoresFromMedia = (token, id, variables) => {
+  return fetcherTemplates.anilistAuth(token, queries.anilistGetFriendMediaScore, { id, ...variables }, formatPage);
 };
 
 
