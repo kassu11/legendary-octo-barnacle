@@ -6,7 +6,7 @@ import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { formatTitleToUrl, mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { arrayUtils, asserts, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
+import { arrayUtils, asserts, fetchers, fetcherSenders, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
@@ -84,8 +84,8 @@ function Activity() {
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, 1);
-  const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherUtils.send(pagelessFetcher);
+  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetchers.anilist.getActivity, accessToken, props.variables, 1);
+  const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.activities?.length) {
@@ -160,8 +160,8 @@ function ActivityReel(props) {
 function ActivityPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.activationController(props.notInDebug, fetcherUtils.createSignalFetcher, fetcherUtils.fetchers.anilist.getActivity, accessToken, props.variables, page);
-  const [activityData] = fetcherUtils.send(fetcher, { type: "no-store" });
+  const fetcher = fetcherUtils.activationController(props.notInDebug, fetcherUtils.createSignalFetcher, fetchers.anilist.getActivity, accessToken, props.variables, page);
+  const [activityData] = fetcherSenders.oldSendChangeName(fetcher, { type: "no-store" });
 
   let maxPage = 0;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);

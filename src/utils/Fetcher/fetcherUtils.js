@@ -1,7 +1,6 @@
-import { createRenderEffect, createSignal, on, untrack } from "solid-js";
+import { createComputed, createEffect, createRenderEffect, createSignal, on, untrack } from "solid-js";
 import { assertFunction, unwrapFunction } from "../functionUtils";
-import { Fetcher, send } from "./Fetcher";
-import * as fetchers from "../fetchers/fetchers.js";
+import { Fetcher } from "./Fetcher";
 import { asserts, localizations } from "../utils.js";
 
 /**
@@ -81,7 +80,7 @@ export const activationController = (signal, creationFunction, ...args) => {
   return value;
 }
 
-export const defaultOrCache = (signal, creationFunction, ...args) => {
+export const cacheOnly = (cacheOnlySignal, creationFunction, ...args) => {
   const [fetcher, setFetcher] = fetcherSignal(createFetcherWithArguments, creationFunction, args);
 
   let previousType;
@@ -94,13 +93,13 @@ export const defaultOrCache = (signal, creationFunction, ...args) => {
   let refreshFetcherWhenActive;
   createRenderEffect(on(fetcher, f => {
     previousType = localizations.onlyIfCached;
-    refreshFetcherWhenActive = !signal();
+    refreshFetcherWhenActive = !cacheOnlySignal();
     if (refreshFetcherWhenActive) {
       switchCacheType(f);
     }
   }));
 
-  createRenderEffect(on(signal, currentState => {
+  createRenderEffect(on(cacheOnlySignal, currentState => {
     asserts.assertFalse(!currentState && refreshFetcherWhenActive);
 
     if (refreshFetcherWhenActive) {
@@ -119,4 +118,64 @@ export const defaultOrCache = (signal, creationFunction, ...args) => {
   return fetcher;
 }
 
-export { fetchers, send };
+export const defaultOrCacheOnly = (defaultSignal, cacheOnlySignal, creationFunction, ...args) => {
+  const [fetcher, setFetcher] = fetcherSignal(createFetcherWithArguments, creationFunction, args);
+
+  let originalType, updateDefault, updateFresh;
+  createRenderEffect(on(fetcher, localFetcher => {
+    originalType = updateDefault = updateFresh = null;
+    if (!localFetcher) {
+      return;
+    };
+
+    originalType = localFetcher.settings.type;
+    if (!defaultSignal() && !cacheOnlySignal()) {
+      return;
+    }
+
+    if (cacheOnlySignal()) {
+      updateDefault = updateFresh = true;
+      localFetcher.settings.type = localizations.onlyIfCached;
+    } else if (defaultSignal()) {
+      updateFresh = true;
+      localFetcher.settings.type = localizations.defaultVal;
+    }
+  }));
+
+  createRenderEffect(on(() => [defaultSignal(), cacheOnlySignal()], ([defaultState, cacheState]) => {
+    const localFetcher = untrack(fetcher);
+    if (!localFetcher) {
+      return;
+    }
+
+    asserts.assertTrue(originalType);
+
+    if (cacheState) {
+      localFetcher.settings.type = localizations.onlyIfCached;
+    } else if (defaultState) {
+      if (updateDefault) {
+        const fetcher = createFetcherWithArguments(creationFunction, args);
+        if (fetcher) {
+          fetcher.settings.type = localizations.defaultVal;
+          updateDefault = false;
+          setFetcher(fetcher);
+        }
+      } else {
+        localFetcher.settings.type = localizations.defaultVal;
+      }
+    } else {
+      if (updateFresh) {
+        const fetcher = createFetcherWithArguments(creationFunction, args);
+        if (fetcher) {
+          fetcher.settings.type = originalType
+          updateDefault = updateFresh = false;
+          setFetcher(fetcher);
+        }
+      } else {
+        localFetcher.settings.type = originalType;
+      }
+    }
+  }, { defer: true }));
+
+  return fetcher;
+}

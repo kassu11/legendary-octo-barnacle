@@ -1,6 +1,6 @@
 import { IndexedDB } from "../api";
 import { CacheObject } from "../CacheObject";
-import { asserts, modes, rateLimits } from "../utils";
+import { asserts, localizations, modes, rateLimits } from "../utils";
 import { FetchSettings } from "./FetchSettings";
 import { batch, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 
@@ -153,11 +153,19 @@ function createCustomSignal(initialValue) {
 /** @type {Object.<string, CacheObject>} */
 const cacheObjects = {};
 
+export const oldSendChangeName = fetcherSignal => genericSend(() => false, () => false, false, fetcherSignal);
+export const sendDefaultWithoutNullValues = (changeTypeToDefault, fetcherSignal) => genericSend(changeTypeToDefault, () => false, true, fetcherSignal);
+export const sendDefaultOrCacheOnlyWithoutNullValues = (changeTypeToDefault, changeTypeToCacheOnly, fetcherSignal) => genericSend(changeTypeToDefault, changeTypeToCacheOnly, true, fetcherSignal);
+
+
 /**
+ * @param {() => boolean} isSetCacheTypeToDefault - Change cache type to default when active
+ * @param {() => boolean} isSetCacheTypeToCacheOnly - Change cache type to cache when active
  * @param {() => (Fetcher|null)} fetcherSignal - Fetch to be send
+ * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
  * @param {FetchSettings} [overwriteSettings] - Custom settings to overwrite fetch settings
  */
-export const send = (fetcherSignal, overwriteSettings = {}) => {
+const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disableNullValues, fetcherSignal) => {
   /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
   const [response, setResponse, setResponseWithoutUpdate] = createCustomSignal(undefined);
   const [error, setError] = createSignal(false);
@@ -188,10 +196,10 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
   const mutateCache = (mutation, callback) => {
     const processedMutation = unwrapMutation(mutation);
     // Create a deepcopy because onsuccess events are not instant so mutations could leak into cache.
-    const cacheMutation = new CacheObject(currentFetcher, structuredClone(processedMutation.data));
+    const cacheMutation = new CacheObject(processedMutation.cacheKey, currentFetcher.settings.expiresInSeconds, structuredClone(processedMutation.data));
     setResponseWithoutUpdate(processedMutation);
 
-    const {type, storeName} = currentFetcher.settings;
+    const { type, storeName } = currentFetcher.settings;
 
     if (type === "no-store" || !storeName) {
       return;
@@ -239,12 +247,20 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     mutate(mutation);
   }
 
-  const refetch = async () => {
-    asserts.assertTrue(currentFetcher, "currentFetcher should not be undefined");
-    if (currentFetcher.settings.type === "only-if-cached") {
+  let previousSendFetchCacheKey;
+  const refetch = async fetcher => {
+    if (fetcher !== currentFetcher) {
+      return;
+    }
+    asserts.assertTrue(fetcher, "fetcher should not be undefined");
+    const type = untrack(() => getCacheType(fetcher));
+    if (type === "only-if-cached") {
       batch(() => {
-        setResponse(new ApiResponse(currentFetcher.cacheKey, null));
-        setLoading(false);
+        if (!disableNullValues) {
+          setResponse(new ApiResponse(fetcher.cacheKey, null));
+          setLoading(false);
+        } else {
+        }
       });
       return;
     }
@@ -252,7 +268,8 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     currentController?.abort();
     const controller = new AbortController();
     currentController = controller;
-    const data = await fetchData(currentFetcher, controller.signal);
+    previousSendFetchCacheKey = fetcher.cacheKey;
+    const data = await fetchData(fetcher, controller.signal);
 
     if (data === null) { // Data should be only null if signal aborted or error
       batch(() => {
@@ -261,7 +278,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
       });
     } else {
       batch(() => {
-        const response = new ApiResponse(currentFetcher.cacheKey, data);
+        const response = new ApiResponse(fetcher.cacheKey, data);
         mutateCache(response);
         safeMutate(response);
         setLoading(false);
@@ -269,25 +286,47 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     }
   }
 
-  const updateFetcherInfo = fetcher => {
-    if (!fetcher || currentFetcher === fetcher) {
+  const getCacheType = fetcher => {
+    if (isSetCacheTypeToCacheOnly()) {
+      return localizations.onlyIfCached;
+    } else if (isSetCacheTypeToDefault()) {
+      return localizations.defaultVal;
+    }
+
+    return fetcher.settings.type;
+  }
+
+  createRenderEffect(() => {
+    const fetcher = fetcherSignal();
+    if (!fetcher) {
       return;
     };
 
-    currentFetcher = fetcher;
-    asserts.assertTrue(currentFetcher instanceof Fetcher);
+    asserts.assertTrue(fetcher instanceof Fetcher);
 
-    Object.assign(currentFetcher.settings, overwriteSettings);
+    const type = getCacheType(fetcher);
+    const isOnDebugSoDontFetch = modes.debug && !fetcher.settings.fetchOnDebug && type !== "no-store";
+    const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
+    const cacheKey = fetcher.cacheKey;
+
+    if (currentFetcher === fetcher) {
+      if (previousSendFetchCacheKey === cacheKey) {
+        return
+      }
+
+      const res = untrack(response);
+      const previousFetcherDataWasFromNewFetcherAndWasFromCache = res.data && res.cacheKey === cacheKey && res.cacheType;
+      if (previousFetcherDataWasFromNewFetcherAndWasFromCache && !sendFetchEvenWhenCacheIsFound) {
+        return
+      }
+    }
+
+    currentFetcher = fetcher;
 
     batch(() => {
       setError(false);
       setLoading(true);
     });
-
-    const type = currentFetcher.settings.type;
-    const isOnDebugSoDontFetch = modes.debug && !currentFetcher.settings.fetchOnDebug && type !== "no-store";
-    const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
-    const cacheKey = currentFetcher.cacheKey;
 
     if (cacheKey in cacheObjects) {
       const response = cacheObjects[cacheKey];
@@ -300,13 +339,13 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
       } else {
         setResponse(new ApiResponse(response.cacheKey, response.data, "local"));
       }
-    } else if (type !== "no-store" && currentFetcher.settings.storeName) {
+    } else if (type !== "no-store" && fetcher.settings.storeName) {
       const cacheReq = IndexedDB.fetchCache();
-      const safeRefetch = () => !sendFetchEvenWhenCacheIsFound && refetch();
+      const safeRefetch = () => !sendFetchEvenWhenCacheIsFound && refetch(fetcher);
       cacheReq.onerror = safeRefetch;
       cacheReq.onsuccess = evt => {
         const db = evt.target.result;
-        const store = IndexedDB.store(db, currentFetcher.settings.storeName, "readonly");
+        const store = IndexedDB.store(db, fetcher.settings.storeName, "readonly");
         const getReg = store.get(cacheKey);
         getReg.onerror = safeRefetch;
         getReg.onsuccess = evt => {
@@ -317,7 +356,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
             asserts.assertTrue(result.data, "Cache should always have data");
 
             if (result.expires > new Date()) {
-              const response = new ApiResponse(result.cacheKey, result.data, "indexedDB");
+              const response = new ApiResponse(cacheKey, result.data, "indexedDB");
               if (!sendFetchEvenWhenCacheIsFound) {
                 batch(() => {
                   safeMutate(response);
@@ -337,11 +376,9 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     }
 
     if (sendFetchEvenWhenCacheIsFound) {
-      refetch();
+      refetch(fetcher);
     }
-  }
-
-  createRenderEffect(on(fetcherSignal, updateFetcherInfo));
+  });
 
   Object.defineProperties(response, {
     error: { get: () => error() },
@@ -353,4 +390,5 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
 
   return [response, { mutate, refetch, mutateCache, mutateBoth }];
 }
+
 

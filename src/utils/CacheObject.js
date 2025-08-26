@@ -1,19 +1,18 @@
-import { IndexedDB } from "./api";
-import { Fetcher } from "./Fetcher/Fetcher.js";
-import { asserts } from "./utils.js";
+import { asserts, dateUtils } from "./utils.js";
 
 export class CacheObject {
   /**
-  * @param {Fetcher} fetcher
+  * @param {string} cacheKey
+  * @param {expiresInSeconds} expiresInSeconds 
   * @param {object} data
   */
-  constructor(fetcher, data) {
+  constructor(cacheKey, expiresInSeconds, data) {
+    asserts.assertTrue(cacheKey, "Missing cacheKey");
     asserts.assertTrue(data, "Don't cache empty data");
-    asserts.assertTrue(fetcher.settings.expiresInSeconds, "Expiration date is missing");
+    asserts.assertTrue(expiresInSeconds, "Expiration date is missing");
 
     this.data = data;
-    this.cacheKey = fetcher.cacheKey;
-    const time = new Date();
-    this.expires = time.setSeconds(time.getSeconds() + fetcher.settings.expiresInSeconds);
+    this.cacheKey = cacheKey;
+    this.expires = dateUtils.nowPlusSeconds(expiresInSeconds);
   }
 }
