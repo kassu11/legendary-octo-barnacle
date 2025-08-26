@@ -1,5 +1,4 @@
-import { localizations } from "../utils";
-import * as requests from "./requests";
+import { apiRequestManager, localizations } from "../utils";
 
 export const getDelayByStatusCodeAndUrl = (url, status) => {
   if (url.includes(localizations.anilist)) {
@@ -23,40 +22,40 @@ export const getDelayByStatusCodeAndUrl = (url, status) => {
 
 export const initializeOrAddToWaitingQueueForUrl = (url, resolve) => {
   if (url.includes(localizations.anilist)) {
-    requests.anilist.initializeWaitingQueue(resolve);
+    apiRequestManager.anilist.initializeWaitingQueue(resolve);
   } else if (url.includes(localizations.jikan)) {
-    requests.jikan.initializeWaitingQueue(resolve);
+    apiRequestManager.jikan.initializeWaitingQueue(resolve);
   }
 }
 
 export const removeFromWaitingQueueWithUrl = (url) => {
   if (url.includes(localizations.anilist)) {
-    requests.anilist.removeFromWaitingQueue();
+    apiRequestManager.anilist.removeFromWaitingQueue();
   } else if (url.includes(localizations.jikan)) {
-    requests.jikan.removeFromWaitingQueue();
+    apiRequestManager.jikan.removeFromWaitingQueue();
   }
 }
 
 export const hasWaitingQueueForUrl = url => {
   if (url.includes(localizations.anilist)) {
-    return requests.anilist.waitingQueue !== null;
+    return apiRequestManager.anilist.waitingQueue !== null;
   } else if (url.includes(localizations.jikan)) {
-    return requests.jikan.waitingQueue !== null;
+    return apiRequestManager.jikan.waitingQueue !== null;
   }
 }
 
 export const addPendingRequestToUrl = url => {
   if (url.includes(localizations.anilist)) {
-    requests.anilist.addPendingRequest();
+    apiRequestManager.anilist.addPendingRequest();
   } else if (url.includes(localizations.jikan)) {
-    requests.anilist.addPendingRequest();
+    apiRequestManager.anilist.addPendingRequest();
   }
 }
 
 export const removePendingRequestToUrl = url => {
   if (url.includes(localizations.anilist)) {
-    requests.anilist.removePendingRequest();
+    apiRequestManager.anilist.removePendingRequest();
   } else if (url.includes(localizations.jikan)) {
-    requests.anilist.removePendingRequest();
+    apiRequestManager.anilist.removePendingRequest();
   }
 }

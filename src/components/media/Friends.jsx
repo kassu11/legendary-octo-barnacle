@@ -4,8 +4,7 @@ import Score from "./Score";
 import style from "./Friends.module.scss";
 import { A, useParams } from "@solidjs/router";
 import { useAuthentication, useMediaInfo } from "../../context/providers";
-import { fetcherUtils } from "../../utils/utils";
-import { fetchers } from "../../utils/Fetcher/fetcherUtils";
+import { apiRequestManager, fetchers, fetcherSenders, fetcherUtils } from "../../utils/utils";
 
 function Friends() {
   const params = useParams();
@@ -13,14 +12,14 @@ function Friends() {
 
   const { anilistData } = useMediaInfo();
   const friendScoreFetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.getFrendScoresFromMedia, accessToken, () => params.id, { page: 1, perPage: 8 });
-  const [friendScoreData] = fetcherUtils.send(friendScoreFetcher);
+  const [friendScoreData] = fetcherSenders.sendDefaultOrCacheOnlyWithoutNullValues(() => apiRequestManager.anilist.inFiveSeconds() > 1, () => apiRequestManager.anilist.inFiveSeconds() > 2, friendScoreFetcher);
 
   const [ownProfileInfo, setOwnProfileInfo] = createSignal();
 
   createRenderEffect(() => {
-    if (anilistData()?.data.mediaListEntry && authUserData()) {
+    if (anilistData()?.data?.mediaListEntry && authUserData()) {
       setOwnProfileInfo({
-        ...anilistData().data.mediaListEntry,
+        ...anilistData().data?.mediaListEntry,
         user: authUserData().data,
       });
     }
@@ -28,7 +27,7 @@ function Friends() {
 
   return (
     <ErrorBoundary fallback="Friends error">
-      <Show when={friendScoreData()?.data.mediaList.length && anilistData() && authUserData()}>
+      <Show when={friendScoreData()?.data?.mediaList.length && anilistData() && authUserData()}>
         <div class={style.friendContainer}>
           <ul>
             <Show when={ownProfileInfo()}>

@@ -20,6 +20,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     gap: 1rem;
+    margin-bottom: 3rem;
 
     img {
       aspect-ratio: 5.5/8;
