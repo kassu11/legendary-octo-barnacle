@@ -2,7 +2,7 @@ import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidj
 import api, { IndexedDB } from "../../../utils/api.js";
 import { createEffect, createSignal, For, Match, on, onCleanup, onMount, Show } from "solid-js";
 import "./MediaList.scss";
-import { capitalize, formatTitleToUrl } from "../../../utils/formating.js";
+import { capitalize, formatTitleToUrl, mediaUrl } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import Score from "../../../components/media/Score.jsx";
 import { useAuthentication, useEditMediaEntries, UserMediaListContext, useUser, useUserMediaList } from "../../../context/providers.js";
@@ -450,7 +450,7 @@ function MediaListContainer(props) {
                   return (
                     <li ref={ref} attr:data-index={i()} attr:data-list={list.name} class="horizontal-search-card">
                       <Show when={cardsVisibility[list.name][i()]}> 
-                        <A href={"/" + entry.media.type.toLowerCase() +  "/" + entry.media.id + "/" + formatTitleToUrl(entry.media.title.userPreferred)}>
+                        <A href={mediaUrl(entry.media)}>
                           <div class="container">
                             <img src={entry.media.coverImage.large} class="cover" alt="Cover." />
                             <div class="user-media-card-header">

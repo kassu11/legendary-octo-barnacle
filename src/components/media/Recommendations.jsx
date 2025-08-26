@@ -1,6 +1,6 @@
-import { createEffect, createSignal, For, on, Show } from "solid-js";
+import { batch, createEffect, createSignal, For, on, Show } from "solid-js";
 import { A, useParams } from "@solidjs/router";
-import { formatTitleToUrl } from "../../utils/formating";
+import { formatTitleToUrl, mediaUrl } from "../../utils/formating";
 import api from "../../utils/api";
 import { DoomScroll } from "../utils/DoomScroll";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled";
@@ -18,7 +18,7 @@ function Recommendations(props) {
   }));
 
   return (
-    <Show when={props.recommendations.nodes.length > 0}>
+    <Show when={props.recommendations?.nodes.length > 0}>
       <div>
         <div class="flex-space-between">
           <h2>Recommendations</h2>
@@ -66,7 +66,7 @@ function RecommendationsPage(props) {
       loading={props.loading}
     >{fetchCooldown => (
         <>
-          <RecommendationCards nodes={recommendations().data.nodes} mutateCache={mutateCache} />
+          <RecommendationCards nodes={recommendations().data.nodes} mutateCache={mutateCache} mutateOldCardsCache={props.mutateOldCardsCache} oldCards={props.oldCards} />
           <Show when={recommendations().data.pageInfo.hasNextPage}>
             <Show when={fetchCooldown === false} fallback="Fetch cooldown">
               <RecommendationsPage id={id()} page={props.page + 1} loading={recommendations.loading} />
@@ -79,10 +79,19 @@ function RecommendationsPage(props) {
 }
 
 function RecommendationCards(props)  {
+  asserts.assertTrue(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
+
   return (
     <For each={props.nodes}>{(node, i) => (
       <Show when={node.mediaRecommendation}>
-        <RecommendationCard node={node} mutateCache={n => props.mutateCache(i(), n)} />
+        <RecommendationCard node={node} mutateCache={n => {
+          batch(() => {
+            if (i() < props.oldCards?.length) {
+              props.mutateOldCardsCache(i(), n);
+            }
+            props.mutateCache(i(), n);
+          });
+        }} />
       </Show>
     )}</For>
   );
@@ -108,7 +117,7 @@ function RecommendationCard(props) {
 
   return (
     <li>
-      <A href={"/" + props.node.mediaRecommendation.type.toLowerCase() + "/" + props.node.mediaRecommendation.id + "/" + formatTitleToUrl(props.node.mediaRecommendation.title.userPreferred)}>
+      <A href={mediaUrl(props.node.mediaRecommendation)}>
         <div class="wrapper">
           <img src={props.node.mediaRecommendation.coverImage.large} alt="Media cover" />
         </div>

@@ -2,7 +2,7 @@ import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.scss"
 import App from "./App.jsx"
-import { MangaInfo, AnimeInfo } from "./pages/MediaInfo.jsx"
+import { MangaInfo, AnimeInfo, MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaInfo.jsx"
 import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
@@ -22,7 +22,6 @@ import { Staff, Character } from "./pages/Entity.jsx";
 import { Studio } from "./pages/Studio.jsx";
 import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
-import { RedirectSearchHeaders } from "./pages/SearchHeaderRedirect.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
 
@@ -86,15 +85,22 @@ render(
               <Route path="/staff/:id/:name?" matchFilters={idFilter} component={Staff} />
               <Route path="/studio/:id/:name?" matchFilters={idFilter} component={Studio} />
             </Route>
-            <Route path="/anime">
-              <Route path="/:id/:name?" matchFilters={idFilter} component={AnimeInfo} />
-              <Route path="/:id/:name?/characters" matchFilters={idFilter} component={AnimeCharacters} />
-              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={AnimeStaff} />
-            </Route>
-            <Route path="/manga">
-              <Route path="/:id/:name?" matchFilters={idFilter} component={MangaInfo} />
-              <Route path="/:id/:name?/characters" matchFilters={idFilter} component={MangaCharacters} />
-              <Route path="/:id/:name?/staff" matchFilters={idFilter} component={MangaStaff} />
+            <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, type: ["anime", "manga"] }} component={MediaPageRedirect} />
+            <Route path="/:api">
+              <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
+                <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHome} />
+                <Route path="/characters">
+                  <Route path="/" matchFilters={{ type: "anime" }} component={AnimeCharacters} />
+                  <Route path="/" matchFilters={{ type: "manga" }} component={MangaCharacters} />
+                </Route>
+                <Route path="/staff">
+                  <Route path="/" matchFilters={{ type: "anime" }} component={AnimeStaff} />
+                  <Route path="/" matchFilters={{ type: "manga" }} component={MangaStaff} />
+                </Route>
+              </Route>
+              <Route path="/:type" matchFilters={{ api: "mal" }}>
+                MAL media page
+              </Route>
             </Route>
             <Route path="/user/:name" component={User}>
               <Route path="/" component={Overview} />

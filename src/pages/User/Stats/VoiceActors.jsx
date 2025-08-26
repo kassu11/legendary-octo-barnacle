@@ -187,7 +187,7 @@ function Cards(props) {
           <Match when={props.pageType === "media"}>
             <For each={props.mediaIds}>{mediaId => (
               <li>
-                <A href={"/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.mediaStore[mediaId]?.title.userPreferred || "")}>
+                <A href={"/ani/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.mediaStore[mediaId]?.title.userPreferred || "")}>
                   <Show when={props.mediaStore[mediaId]} fallback={<div class="cover-image"> </div>}>
                     <img class="cover-image" src={props.mediaStore[mediaId].coverImage.large} alt="Media cover" />
                   </Show>

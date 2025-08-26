@@ -1,7 +1,7 @@
-export const assertTrue = (condition, message = "Assertion was not true") => {
+export const assertTrue = (condition, message = "Not true") => {
   if (!condition) {
     throw new Error(message);
   }
 }
 
-export const assertFalse = (condition, message = "Assertion was not false") => assertTrue(!condition, message);
+export const assertFalse = (condition, message = "Not false") => assertTrue(!condition, message);

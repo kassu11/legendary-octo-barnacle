@@ -1,10 +1,8 @@
 import { IndexedDB } from "../api";
 import { CacheObject } from "../CacheObject";
-import { asserts, rateLimits } from "../utils";
+import { asserts, modes, rateLimits } from "../utils";
 import { FetchSettings } from "./FetchSettings";
 import { batch, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
-
-const DEBUG = location.origin.includes("localhost");
 
 export class Fetcher {
   constructor(url, options, formatResponse) {
@@ -281,7 +279,7 @@ export const send = (fetcherSignal, overwriteSettings = {}) => {
     });
 
     const type = currentFetcher.settings.type;
-    const isOnDebugSoDontFetch = DEBUG && !currentFetcher.settings.fetchOnDebug && type !== "no-store";
+    const isOnDebugSoDontFetch = modes.debug && !currentFetcher.settings.fetchOnDebug && type !== "no-store";
     const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
     const cacheKey = currentFetcher.cacheKey;
 

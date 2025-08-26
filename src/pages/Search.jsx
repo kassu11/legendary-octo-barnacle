@@ -2,7 +2,7 @@ import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps } from "solid-js";
 import "./Search.scss";
-import { capitalize, formatMediaFormat, formatTitleToUrl } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl } from "../utils/formating";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../context/providers";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
@@ -943,7 +943,7 @@ function AniCard(props) {
 
   return ( 
     <li class="horizontal-search-card">
-      <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + formatTitleToUrl(props.card.title.userPreferred)}>
+      <A href={mediaUrl(props.card)}>
         <div class="container">
           <img src={props.card.coverImage.large} alt="Cover." />
           <div class="search-card-quick-action">

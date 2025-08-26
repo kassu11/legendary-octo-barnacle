@@ -1,11 +1,8 @@
-import { createEffect, createRenderEffect, createSignal, on, untrack } from "solid-js";
+import { createRenderEffect, createSignal, on, untrack } from "solid-js";
 import { assertFunction, unwrapFunction } from "../functionUtils";
 import { Fetcher, send } from "./Fetcher";
 import * as fetchers from "../fetchers/fetchers.js";
-import { wrapToArray } from "../arrays.js";
 import { asserts, localizations } from "../utils.js";
-
-const DEBUG = location.origin.includes("localhost");
 
 /**
  * @param {(any) => Fetcher} fetcherCreator
@@ -111,6 +108,7 @@ export const defaultOrCache = (signal, creationFunction, ...args) => {
       refreshFetcherWhenActive = false;
       previousType = localizations.onlyIfCached;
       const fetcher = switchCacheType(createFetcherWithArguments(creationFunction, args));
+      asserts.assertTrue(fetcher, "This might cause a weird edge case but not sure if this will ever really happen.");
       setFetcher(fetcher);
     } else {
       switchCacheType(untrack(fetcher));

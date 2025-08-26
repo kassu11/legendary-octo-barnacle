@@ -1,17 +1,21 @@
-import { For } from "solid-js";
-import style from "./Rankings.module.scss";
+import { ErrorBoundary, For } from "solid-js";
+import "./Rankings.scss";
 
 const Rankings = (props) => {
   return (
-    <div class={style.rankingContainer}>
-      <h2>Ranking</h2>
-      <ul>
-        <For each={props.rankings}>{ranking => (
-          <li class={style.ranking}>#{ranking.rank} {ranking.context} {ranking.season} {ranking.year}</li>
-        )}</For>
-      </ul>
-    </div>
+    <ErrorBoundary fallback="Ranking error">
+      <Show when={props.rankings}>
+        <div class="pg-media-ranking" classList={{loading: props.loading}}>
+          <h2>Ranking</h2>
+          <ul>
+            <For each={props.rankings}>{ranking => (
+              <li>#{ranking.rank} {ranking.context} {ranking.season} {ranking.year}</li>
+            )}</For>
+          </ul>
+        </div>
+      </Show>
+    </ErrorBoundary>
   );
 };
 
-export default Rankings; 
+export default Rankings;

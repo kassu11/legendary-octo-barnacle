@@ -165,7 +165,7 @@ export const mediaUrl = (media) => {
   asserts.assertTrue(media.type, "type is missing");
   asserts.assertTrue("id" in media, "id is missing");
 
-  return "/" + media.type.toLowerCase() + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred);
+  return "/ani/" + media.type.toLowerCase() + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred);
 }
 
 export const formatAnilistDate = (dateObject) => {

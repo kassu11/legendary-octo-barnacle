@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import api from "../utils/api.js";
 import { createSignal, For, Match, onCleanup, Show } from "solid-js";
 import "./Notifications.scss";
-import { formatTitleToUrl, plural } from "../utils/formating.js";
+import { formatTitleToUrl, mediaUrl, plural } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
 
 export default function Notifications() {
@@ -28,12 +28,12 @@ export default function Notifications() {
             <li>
               <Switch fallback={"Notification type \"" + notification.type + "\" not supported."}>
                 <Match when={notification.type === "RELATED_MEDIA_ADDITION"}>
-                  <A href={"/" + notification.media.type.toLowerCase() + "/" + notification.media.id + "/" + formatTitleToUrl(notification.media.title.userPreferred)}>
+                  <A href={mediaUrl(notification.media)}>
                     <img src={notification.media.coverImage.large} alt="Media cover" />
                   </A>
                   <div class="content">
                     <p>
-                      <A href={"/" + notification.media.type.toLowerCase() + "/" + notification.media.id + "/" + formatTitleToUrl(notification.media.title.userPreferred)}>
+                      <A href={mediaUrl(notification.media)}>
                         {notification.media.title.userPreferred}
                       </A>
                       {notification.context}
@@ -42,7 +42,7 @@ export default function Notifications() {
                   </div>
                 </Match>
                 <Match when={notification.type === "AIRING"}>
-                  <A href={"/" + notification.media.type.toLowerCase() + "/" + notification.media.id + "/" + formatTitleToUrl(notification.media.title.userPreferred)}>
+                  <A href={mediaUrl(notification.media)}>
                     <img src={notification.media.coverImage.large} alt="Media cover" />
                   </A>
                   <div class="content">
@@ -50,7 +50,7 @@ export default function Notifications() {
                       {notification.contexts[0]}
                       {notification.episode}
                       {notification.contexts[1]}
-                      <A href={"/" + notification.media.type.toLowerCase() + "/" + notification.media.id + "/" + formatTitleToUrl(notification.media.title.userPreferred)}>
+                      <A href={mediaUrl(notification.media)}>
                         {notification.media.title.userPreferred}
                       </A>
                       {notification.contexts[2]}

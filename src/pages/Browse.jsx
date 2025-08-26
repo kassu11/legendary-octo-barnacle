@@ -2,7 +2,7 @@ import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch } from "solid-js";
 import "./Search.scss";
-import { capitalize, formatMediaFormat, formatTitleToUrl, numberCommas } from "../utils/formating";
+import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useAuthentication, useEditMediaEntries } from "../context/providers";
 import { asserts } from "../utils/utils";
@@ -98,11 +98,11 @@ function VerticalCardRow(props) {
               <div class="vertical-search-card-body">
                 <A 
                   class="cover-container"
-                  href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+                  href={mediaUrl(card)}>
                   <img src={card.coverImage.large} class="cover" alt="Cover." />
                 </A> 
                 <div class="vertical-search-card-content clamp">
-                  <A class="line-clamp" href={"/" + card.type.toLowerCase() +  "/" + card.id + "/" + formatTitleToUrl(card.title.userPreferred)}>
+                  <A class="line-clamp" href={mediaUrl(card)}>
                     {card.title.userPreferred}
                   </A> 
                   <ol class="vertical-search-card-genre-list">
@@ -180,7 +180,7 @@ function Card(props) {
 
   return ( 
     <li class="horizontal-search-card">
-      <A href={"/" + props.card.type.toLowerCase() +  "/" + props.card.id + "/" + formatTitleToUrl(props.card.title.userPreferred)}>
+      <A href={mediaUrl(props.card)}>
         <div class="container">
           <img src={props.card.coverImage.large} class="cover" alt="Cover." />
           <div class="search-card-quick-action">

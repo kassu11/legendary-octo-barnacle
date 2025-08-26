@@ -2,7 +2,7 @@ import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import "./Studio.scss";
-import { formatTitleToUrl } from "../utils/formating";
+import { formatTitleToUrl, mediaUrl } from "../utils/formating";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
@@ -39,7 +39,8 @@ export function Studio() {
           <h1>{studioInfo().data.name}</h1>
           <FavouriteToggle 
             checked={favourite()} 
-            studioId={params.id} 
+            variableId={params.id} 
+            idType="STUDIO"
             favourites={studioInfo().data.favourites} 
             onChange={setFavourite} 
             mutateCache={(isFavourite) => {
@@ -181,7 +182,7 @@ function MediaCards(props) {
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <li>
-          <A href={"/" + edge.node.type.toLowerCase() + "/" + edge.node.id + "/" + formatTitleToUrl(edge.node.title.userPreferred)}>
+          <A href={mediaUrl(edge.node)}>
             <img src={edge.node.coverImage.large} alt="Character" />
             <p>
               <Show when={edge.node.mediaListEntry?.status}>
