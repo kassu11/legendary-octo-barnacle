@@ -21,7 +21,8 @@ export class Fetcher {
 
 const sendFetcher = (fetcher, signal) => {
   rateLimits.addPendingRequestToUrl(fetcher.url);
-  return fetcherToFetch(fetcher, signal).finally(() => rateLimits.removePendingRequestToUrl(fetcher.url));
+  const request = fetcherToFetch(fetcher, signal).finally(() => rateLimits.removePendingRequestToUrl(fetcher.url));
+  return request;
 }
 
 const fetcherToFetch = (fetcher, signal) => {
@@ -76,7 +77,12 @@ const fetchData = async (fetcher, signal) => {
       }
 
       const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, response?.status || "cors");
-      if (delay) {
+      if (response?.status === 429 && response.headers.get("Retry-After")) {
+        rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+        const time = parseInt(response.headers.get("Retry-After"));
+        await new Promise(res => setTimeout(res, time * 1000));
+        continue;
+      } else if (delay) {
         rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
         await new Promise(res => setTimeout(res, delay));
         continue;
