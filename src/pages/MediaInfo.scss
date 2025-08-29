@@ -2,6 +2,10 @@
   .media-page-banner {
     background-color: var(--background-200);
 
+    &.loading {
+      opacity: .6;
+    }
+
     img {
       opacity: .9;
       height: 22rem;
@@ -18,6 +22,10 @@
     gap: 1rem;
     margin-top: 1rem;
     margin-inline: auto;
+
+    &.loading {
+      opacity: .6;
+    }
 
     .recommendations {
       --grid-column-width: 8rem;
