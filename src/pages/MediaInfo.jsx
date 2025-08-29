@@ -85,7 +85,7 @@ export function MediaInfoContent(props) {
 
   onCleanup(() => controller.abort());
 
-  const loading = () => !anilistData() && anilistData.loading;
+  const loading = () => anilistData.loading && anilistData()?.data.id != params.id;
 
   const mutateBothFavourite = (isFavourite, variables) => {
     const id = variables[anilistData()?.data?.type] ?? null;
@@ -102,7 +102,7 @@ export function MediaInfoContent(props) {
     <ErrorBoundary fallback="Media page error">
       <MediaInfoContext.Provider value={{ anilistData, mutateBothAnilistData }}>
         <Banner src={anilistData()?.data?.bannerImage} loading={loading()} />
-        <div class="media-page-content">
+        <div class="media-page-content" classList={{loading: loading()}}>
           <aside class="media-page-left-aside">
             <Show when={anilistData()?.data}>
               <img src={anilistData()?.data?.coverImage.large} alt="Cover" class="media-page-cover" />
