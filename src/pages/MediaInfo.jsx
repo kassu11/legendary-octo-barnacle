@@ -18,7 +18,7 @@ import Recommendations from "../components/media/Recommendations.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
-import { apiRequestManager, asserts, fetchers, fetcherSenders, fetcherUtils, localizations } from "../utils/utils.js";
+import { apiRequestManager, fetchers, fetcherSenders, fetcherUtils } from "../utils/utils.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -78,7 +78,7 @@ export function MediaInfoContent(props) {
         const media = findTypeAndPreventDefault("ADAPTATION") || findTypeAndPreventDefault("ALTERNATIVE");
         navigateToMediaPage(navigate, media);
       } else if ((e.key === "k" && !e.ctrlKey) || (e.key === "ArrowUp" && e.ctrlKey)) {
-        navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE"));
+        navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE") || findTypeAndPreventDefault("PARENT"));
       }
     }, { signal: controller.signal });
   });
