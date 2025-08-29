@@ -1,5 +1,4 @@
 import { A, Navigate, useLocation, useNavigate, useParams } from "@solidjs/router";
-import api from "../utils/api.js";
 import { ErrorBoundary, For, Show, Switch, createEffect, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
