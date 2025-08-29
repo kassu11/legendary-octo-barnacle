@@ -197,7 +197,9 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
     const processedMutation = unwrapMutation(mutation);
     // Create a deepcopy because onsuccess events are not instant so mutations could leak into cache.
     const cacheMutation = new CacheObject(processedMutation.cacheKey, currentFetcher.settings.expiresInSeconds, structuredClone(processedMutation.data));
-    setResponseWithoutUpdate(processedMutation);
+    if (cacheMutation.cacheKey === currentFetcher.cacheKey) {
+      setResponseWithoutUpdate(processedMutation);
+    }
 
     const { type, storeName } = currentFetcher.settings;
 
