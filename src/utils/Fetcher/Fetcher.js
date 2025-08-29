@@ -274,16 +274,20 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
     const data = await fetchData(fetcher, controller.signal);
 
     if (data === null) { // Data should be only null if signal aborted or error
-      batch(() => {
-        setError(true);
-        setLoading(false);
-      });
+      if (fetcher.cacheKey === previousSendFetchCacheKey) {
+        batch(() => {
+          setError(true);
+          setLoading(false);
+        });
+      }
     } else {
       batch(() => {
         const response = new ApiResponse(fetcher.cacheKey, data);
         mutateCache(response);
         safeMutate(response);
-        setLoading(false);
+        if (fetcher.cacheKey === previousSendFetchCacheKey) {
+          setLoading(false);
+        }
       });
     }
   }
@@ -317,7 +321,7 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
       }
 
       const res = untrack(response);
-      const previousFetcherDataWasFromNewFetcherAndWasFromCache = res.data && res.cacheKey === cacheKey && res.cacheType;
+      const previousFetcherDataWasFromNewFetcherAndWasFromCache = res?.data && res.cacheKey === cacheKey && res.cacheType;
       if (previousFetcherDataWasFromNewFetcherAndWasFromCache && !sendFetchEvenWhenCacheIsFound) {
         return
       }
