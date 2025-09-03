@@ -156,6 +156,7 @@ const cacheObjects = {};
 export const oldSendChangeName = fetcherSignal => genericSend(() => false, () => false, false, fetcherSignal);
 export const sendDefaultWithoutNullValues = (changeTypeToDefault, fetcherSignal) => genericSend(changeTypeToDefault, () => false, true, fetcherSignal);
 export const sendDefaultOrCacheOnlyWithoutNullValues = (changeTypeToDefault, changeTypeToCacheOnly, fetcherSignal) => genericSend(changeTypeToDefault, changeTypeToCacheOnly, true, fetcherSignal);
+export const sendCacheOnlyWithoutNullValues = (changeTypeToCacheOnly, fetcherSignal) => genericSend(() => false, changeTypeToCacheOnly, true, fetcherSignal);
 
 
 /**
