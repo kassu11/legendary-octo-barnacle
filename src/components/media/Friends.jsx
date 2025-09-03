@@ -1,4 +1,4 @@
-import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, on, Show } from "solid-js";
+import { createRenderEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import Status from "./Status";
 import Score from "./Score";
 import style from "./Friends.module.scss";
@@ -22,18 +22,20 @@ function Friends() {
         ...anilistData().data?.mediaListEntry,
         user: authUserData().data,
       });
+    } else {
+      setOwnProfileInfo(null);
     }
   });
 
   return (
     <ErrorBoundary fallback="Friends error">
-      <Show when={friendScoreData()?.data?.mediaList.length && anilistData() && authUserData()}>
+      <Show when={(friendScoreData()?.data?.mediaList.length || ownProfileInfo()) && anilistData() && authUserData()}>
         <div class={style.friendContainer}>
           <ul>
             <Show when={ownProfileInfo()}>
               <Friend friend={ownProfileInfo()} />
             </Show>
-            <For each={friendScoreData().data.mediaList}>{friend => (
+            <For each={friendScoreData()?.data?.mediaList}>{friend => (
               <Show when={friend.user.id !== authUserData()?.data.id}>
                 <Friend friend={friend} />
               </Show>
