@@ -1,4 +1,5 @@
-import { apiRequestManager, localizations } from "../utils";
+import { apiRequestManager } from "../utils";
+import { localizations } from "../../collections/collections.js";
 
 export const getDelayByStatusCodeAndUrl = (url, status) => {
   if (url.includes(localizations.anilist)) {

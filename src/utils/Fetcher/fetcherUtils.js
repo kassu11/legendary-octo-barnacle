@@ -1,7 +1,8 @@
 import { createComputed, createEffect, createMemo, createRenderEffect, createSignal, on, untrack } from "solid-js";
 import { unwrapFunction } from "../functionUtils";
 import { Fetcher } from "./Fetcher";
-import { asserts, functionUtils, localizations } from "../utils.js";
+import { asserts, functionUtils } from "../utils.js";
+import { localizations } from "../../collections/collections.js";
 
 /**
  * @param {(any) => Fetcher} fetcherCreator

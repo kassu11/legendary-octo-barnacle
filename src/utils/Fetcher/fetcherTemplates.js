@@ -1,4 +1,5 @@
-import { asserts, fetcherUtils, localizations } from "../utils";
+import { asserts, fetcherUtils } from "../utils";
+import { localizations } from "../../collections/collections.js";
 import { Fetcher } from "./Fetcher";
 
 const DEBUG = location.origin.includes("localhost");
