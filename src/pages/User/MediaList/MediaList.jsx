@@ -9,7 +9,7 @@ import { useAuthentication, useEditMediaEntries, UserMediaListContext, useUser, 
 import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
 import { createStore } from "solid-js/store";
 import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";
-import { asserts } from "../../../utils/utils.js";
+import { asserts } from "../../../collections/collections.js";
 
 const useListNavigation = () => {
   const navigate = useNavigate();

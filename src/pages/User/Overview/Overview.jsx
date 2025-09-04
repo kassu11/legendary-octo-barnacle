@@ -6,7 +6,7 @@ import { formatTimeToDate, formatTitleToUrl, mediaUrl, numberCommas } from "../.
 import { ActivityCard } from "../../../components/Activity.jsx";
 import { Tooltip } from "../../../components/Tooltips.jsx";
 import "./Overview.scss";
-import { asserts } from "../../../utils/utils.js";
+import { asserts } from "../../../collections/collections.js";
 
 export function Overview() {
   const { user } = useUser();

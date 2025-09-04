@@ -14,7 +14,7 @@ import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
-import { asserts } from "../utils/utils.js";
+import { asserts } from "../collections/collections.js";
 
 export default function ComparePage() {
   const location = useLocation();

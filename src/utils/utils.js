@@ -1,5 +1,3 @@
-export * as asserts from "./asserts.js";
-
 export * as arrayUtils from "./arrays.js";
 export * as functionUtils from "./functionUtils.js";
 export * as fetcherUtils from "./Fetcher/fetcherUtils.js";

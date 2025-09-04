@@ -3,7 +3,7 @@ import { createSignal, For, Show } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { useAuthentication } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
-import { asserts } from "../../../utils/utils.js";
+import { asserts } from "../../../collections/collections.js";
 
 export function Followers(props) {
   asserts.assertTrue(props.page, "Page is missing");

@@ -3,7 +3,7 @@ import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import { FavouritesContext } from "../../../context/providers.js";
 import { FavouritesPage } from "./FavouritesPage.jsx";
-import { asserts } from "../../../utils/utils.js";
+import { asserts } from "../../../collections/collections.js";
 
 export function FavouriteSection(props) {
   asserts.assertTrue(props.title, "title missing");

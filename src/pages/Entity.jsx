@@ -9,7 +9,7 @@ import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useAuthentication } from "../context/providers";
 import { wrapToArray } from "../utils/arrays.js";
-import { asserts } from "../utils/utils.js";
+import { asserts } from "../collections/collections.js";
 
 export function Character() {
   const params = useParams();

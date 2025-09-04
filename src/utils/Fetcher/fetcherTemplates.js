@@ -1,4 +1,5 @@
-import { asserts, fetcherUtils } from "../utils";
+import { fetcherUtils } from "../utils";
+import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
 import { Fetcher } from "./Fetcher";
 
