@@ -2,12 +2,14 @@ import { A, useParams } from "@solidjs/router";
 import style from "./AnimeThemes.module.scss";
 import { asserts, fetchers, fetcherSenders, fetcherUtils, localizations } from "../../utils/utils.js";
 import { createEffect } from "solid-js";
+import { useMediaInfo } from "../../context/providers.js";
 
 function AnimeThemes() {
   const params = useParams();
+  const { anilistData } = useMediaInfo();
   const videoPlayer = <video src="" controls autoPlay />;
-  const fetcher = fetcherUtils.createSignalFetcher(fetchers.animeThemes.getThemesByIdAndApi, () => params.id, () => params.api);
-  const [themeData] = fetcherSenders.sendCacheOnlyWithoutNullValues(() => params.type !== localizations.anime, fetcher);
+  const fetcher = fetcherUtils.createSignalFetcher(fetchers.animeThemes.getThemesByIdAndApi, () => params.id, () => params.api, () => params.type);
+  const [themeData] = fetcherSenders.oldSendChangeName(fetcher);
 
   createEffect(() => {
     params.id;
@@ -17,7 +19,7 @@ function AnimeThemes() {
   });
 
   return (
-    <Show when={themeData()?.data.length}>
+    <Show when={themeData() && anilistData()?.data?.type === localizations.ANIME}>
       <div>
         <h2>Themes</h2>
         <For each={themeData().data}>{theme => (

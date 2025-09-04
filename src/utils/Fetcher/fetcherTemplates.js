@@ -1,4 +1,4 @@
-import { asserts } from "../utils";
+import { asserts, fetcherUtils, localizations } from "../utils";
 import { Fetcher } from "./Fetcher";
 
 const DEBUG = location.origin.includes("localhost");
@@ -19,6 +19,11 @@ export const anilistAuth = (token, query, variables = {}, formatResponse) => {
       variables,
     },
   }, formatResponse);
+};
+
+export const anilistAuthNoStore = (token, query, variables = {}, formatResponse) => {
+  const fetcher = anilistAuth(token, query, variables, formatResponse);
+  return fetcherUtils.changeCacheType(fetcher, localizations.noStore);
 };
 
 export const getJSON = (url, formatResponse) => new Fetcher(url, {

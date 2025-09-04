@@ -10,6 +10,9 @@ export const mal = "mal";
 // Fetcher
 export const onlyIfCached = "only-if-cached";
 export const defaultVal = "default";
+export const fetchOnce = "fetch-once";
+export const reload = "reload";
+export const noStore = "no-store";
 
 // Types and queries
 export const anime = "anime";
