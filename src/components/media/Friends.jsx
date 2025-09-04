@@ -4,7 +4,8 @@ import Score from "./Score";
 import style from "./Friends.module.scss";
 import { A, useParams } from "@solidjs/router";
 import { useAuthentication, useMediaInfo } from "../../context/providers";
-import { apiRequestManager, fetchers, fetcherSenders, fetcherUtils } from "../../utils/utils";
+import { apiRequestManager, fetcherUtils } from "../../utils/utils";
+import { fetchers, fetcherSenders } from "../../collections/collections.js";
 
 function Friends() {
   const params = useParams();

@@ -1,6 +1,6 @@
 import { IndexedDB } from "../api";
 import { CacheObject } from "../CacheObject";
-import { modes, rateLimits } from "../utils";
+import { modes, rateLimits } from "../../collections/collections.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
 import { FetchSettings } from "./FetchSettings";
