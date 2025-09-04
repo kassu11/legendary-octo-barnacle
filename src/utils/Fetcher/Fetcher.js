@@ -1,6 +1,7 @@
 import { IndexedDB } from "../api";
 import { CacheObject } from "../CacheObject";
-import { asserts, localizations, modes, rateLimits } from "../utils";
+import { asserts, modes, rateLimits } from "../utils";
+import { localizations } from "../../collections/collections.js";
 import { FetchSettings } from "./FetchSettings";
 import { batch, createMemo, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 

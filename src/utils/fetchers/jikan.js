@@ -1,4 +1,5 @@
-import { asserts, fetcherTemplates, localizations, queries } from "../utils";
+import { asserts, fetcherTemplates, queries } from "../utils";
+import { localizations } from "../../collections/collections.js";
 
 export const getMediaById = (type, id) => {
   asserts.assertTrue(id);

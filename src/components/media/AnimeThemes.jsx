@@ -1,6 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import style from "./AnimeThemes.module.scss";
-import { asserts, fetchers, fetcherSenders, fetcherUtils, localizations } from "../../utils/utils.js";
+import { asserts, fetchers, fetcherSenders, fetcherUtils } from "../../utils/utils.js";
+import { localizations } from "../../collections/collections.js";
 import { createEffect } from "solid-js";
 import { useMediaInfo } from "../../context/providers.js";
 
