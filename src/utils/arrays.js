@@ -1,4 +1,4 @@
-import { asserts } from "./utils";
+import { asserts } from "../collections/collections";
 
 export function objectFromArrayEntries(arr, defaultRetun) {
   if (!arr) {

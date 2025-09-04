@@ -1,7 +1,7 @@
 import { Show } from "solid-js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
-import { asserts } from "../../../utils/utils.js";
+import { asserts } from "../../../collections/collections.js";
 
 export function DeleteFavourite(props) {
   const { authUserData, accessToken } = useAuthentication();

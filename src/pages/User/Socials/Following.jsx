@@ -4,7 +4,7 @@ import { useUser } from "../../../context/providers.js";
 import { useAuthentication } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
 import { Followers } from "./Followers.jsx";
-import { asserts } from "../../../utils/utils.js";
+import { asserts } from "../../../collections/collections.js";
 
 export function Following(props) {
   asserts.assertTrue(props.page, "Page is missing");

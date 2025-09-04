@@ -10,3 +10,5 @@ export const assertTypeString = (string, message = "Value is not type string") =
 export const typeFunction = value => assertTrue(typeof value === "function", "Value is not type function");
 
 export const unreachable = (message = "Assert unreachable") => assertTrue(false, message);
+
+

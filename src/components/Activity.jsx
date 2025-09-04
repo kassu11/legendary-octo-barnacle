@@ -8,7 +8,7 @@ import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
 import { Dynamic } from "solid-js/web"
-import { asserts } from "../utils/utils.js";
+import { asserts } from "../collections/collections.js";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);

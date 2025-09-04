@@ -3,7 +3,7 @@ import api from "../utils/api";
 import "./FavouriteToggle.scss";
 import { compactNumber } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
-import { asserts } from "../utils/utils.js";
+import { asserts } from "../collections/collections.js";
 import { createSignal } from "solid-js";
 
 export function FavouriteToggle(props) {

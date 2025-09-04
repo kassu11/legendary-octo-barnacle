@@ -1,5 +1,5 @@
 import { CacheObject } from "../CacheObject";
-import { asserts } from "../utils";
+import { asserts } from "../../collections/collections.js";
 
 /**
 * @typedef {Object} FetchSettingsOptions - Cache settings.

@@ -4,7 +4,7 @@ import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
 import { EditMediaEntriesContext, useAuthentication } from "./providers.js";
-import { asserts } from "../utils/utils.js";
+import { asserts } from "../collections/collections.js";
 
 function formState(auth, initialData) {
   asserts.assertTrue(!initialData || auth, "Should not be able to edit if not authenticated");

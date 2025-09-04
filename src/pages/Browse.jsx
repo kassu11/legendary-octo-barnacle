@@ -5,7 +5,7 @@ import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useAuthentication, useEditMediaEntries } from "../context/providers";
-import { asserts } from "../utils/utils";
+import { asserts } from "../collections/collections";
 
 export function BrowseRedirect(props) {
   const params = useParams();

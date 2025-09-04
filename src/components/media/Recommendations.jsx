@@ -5,7 +5,7 @@ import api from "../../utils/api";
 import { DoomScroll } from "../utils/DoomScroll";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled";
 import { useAuthentication } from "../../context/providers";
-import { asserts } from "../../utils/utils";
+import { asserts } from "../../collections/collections";
 
 function Recommendations(props) {
   const params = useParams();

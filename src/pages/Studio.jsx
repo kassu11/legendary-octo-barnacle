@@ -7,7 +7,7 @@ import { FavouriteToggle } from "../components/FavouriteToggle";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useAuthentication } from "../context/providers";
-import { asserts } from "../utils/utils";
+import { asserts } from "../collections/collections";
 
 export function Studio() {
   const params = useParams();

@@ -1,6 +1,6 @@
 import { Match, Switch } from "solid-js";
 import "./Emoji.scss";
-import { asserts } from "../utils/utils.js";
+import { asserts } from "../collections/collections.js";
 
 export default function Emoji(props) {
   asserts.assertTrue("score" in props, "Score is missing");

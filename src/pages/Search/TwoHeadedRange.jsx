@@ -1,7 +1,7 @@
 import { createEffect, onCleanup, onMount } from "solid-js";
 import { mergeProps, on } from "solid-js";
 import "./TwoHeadedRange.scss";
-import { asserts } from "../../utils/utils";
+import { asserts } from "../../collections/collections";
 
 export function TwoHeadedRange(_props) {
   asserts.assertTrue(_props.onChange, "onChange is missing");
