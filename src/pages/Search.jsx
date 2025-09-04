@@ -205,7 +205,7 @@ function parseURL() {
     hasEndDateSet = true;
     hasStartDateSet = true;
     if (engine === "ani") {
-      if (season) {
+      if (season && type === "anime") {
         variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "seasonYear", value: year }));
       } else {
         variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
