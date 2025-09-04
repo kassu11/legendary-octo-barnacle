@@ -1,4 +1,3 @@
-import { assertFunction } from "../functionUtils";
 import { CacheObject } from "../CacheObject";
 import { asserts } from "../utils";
 

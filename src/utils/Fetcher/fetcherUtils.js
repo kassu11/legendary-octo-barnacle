@@ -1,13 +1,13 @@
 import { createComputed, createEffect, createMemo, createRenderEffect, createSignal, on, untrack } from "solid-js";
-import { assertFunction, unwrapFunction } from "../functionUtils";
+import { unwrapFunction } from "../functionUtils";
 import { Fetcher } from "./Fetcher";
-import { asserts, localizations } from "../utils.js";
+import { asserts, functionUtils, localizations } from "../utils.js";
 
 /**
  * @param {(any) => Fetcher} fetcherCreator
  */
 const createFetcherWithArguments = (fetcherCreator, args) => {
-  assertFunction(fetcherCreator);
+  asserts.typeFunction(fetcherCreator);
 
   const unwrapperArgs = [];
   for (const arg of args) {
@@ -194,6 +194,12 @@ export const defaultOrCacheOnly = (defaultSignal, cacheOnlySignal, creationFunct
  *    Serves data from cache only; returns null if no cache exists.
  */
 
+// *     1 - `"no-store"`: Skips cache entirely and fetches fresh data.
+// *     1 - `"reload"`: Always fetches fresh data and updates the cache.
+// *     2 - `"fetch-once"`: Always fetches fresh data once and after that use the cache.
+// *     3 - `"default"`: Uses the cache if data exists; otherwise, fetches from the server.
+// *     4 - `"only-if-cached"`: Serves data from cache only; returns null if no cache exists.
+const cacheTypesInLeastFetchableOrder = [localizations.onlyIfCached, localizations.defaultVal, localizations.fetchOnce, localizations.reload, localizations.noStore];
 /**
  * Creates a dynamic cache type configuration.
  *
@@ -201,26 +207,11 @@ export const defaultOrCacheOnly = (defaultSignal, cacheOnlySignal, creationFunct
  * @returns {}
  */
 export const dynamicCacheType = cacheTypeObjects => {
-    // *     1 - `"no-store"`: Skips cache entirely and fetches fresh data.
-    // *     1 - `"reload"`: Always fetches fresh data and updates the cache.
-    // *     2 - `"fetch-once"`: Always fetches fresh data once and after that use the cache.
-    // *     3 - `"default"`: Uses the cache if data exists; otherwise, fetches from the server.
-    // *     4 - `"only-if-cached"`: Serves data from cache only; returns null if no cache exists.
   return createMemo(() => {
-    if (cacheTypeObjects[localizations.onlyIfCached]?.()) {
-      return localizations.onlyIfCached;
-    }
-    if (cacheTypeObjects[localizations.defaultVal]?.()) {
-      return localizations.defaultVal;
-    }
-    if (cacheTypeObjects[localizations.fetchOnce]?.()) {
-      return localizations.fetchOnce;
-    }
-    if (cacheTypeObjects[localizations.reload]?.()) {
-      return localizations.reload;
-    }
-    if (cacheTypeObjects[localizations.noStore]?.()) {
-      return localizations.noStore;
+    for (const cacheTypeName of cacheTypesInLeastFetchableOrder) {
+      if (unwrapFunction(cacheTypeObjects[cacheTypeName])) {
+        return cacheTypeName;
+      }
     }
   });
 }
