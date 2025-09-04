@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { modes } from "./utils";
+import { modes } from "../collections/collections.js";
 
 export const localStorageString = (key, initialValue) => {
   const [value, _setValue] = createSignal(localStorage.getItem(key) ?? initialValue);

@@ -18,7 +18,8 @@ import Recommendations from "../components/media/Recommendations.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
-import { apiRequestManager, fetchers, fetcherSenders, fetcherUtils } from "../utils/utils.js";
+import { apiRequestManager, fetcherUtils } from "../utils/utils.js";
+import { fetchers, fetcherSenders } from "../collections/collections.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
