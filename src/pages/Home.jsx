@@ -3,7 +3,7 @@ import { Show, createSignal, createEffect, onMount, on, For, onCleanup, batch, M
 import "./Home.scss";
 import { ActivityCard } from "../components/Activity.jsx";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { formatTitleToUrl, mediaUrl } from "../utils/formating.js";
+import { mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { arrayUtils, asserts, fetchers, fetcherSenders, fetcherUtils, modes, scheduleUtils, signals } from "../utils/utils.js";
@@ -84,7 +84,7 @@ function Activity() {
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetchers.anilist.getActivity, accessToken, props.variables, 1);
+  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
   const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
@@ -160,8 +160,8 @@ function ActivityReel(props) {
 function ActivityPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.activationController(props.notInDebug, fetcherUtils.createSignalFetcher, fetchers.anilist.getActivity, accessToken, props.variables, page);
-  const [activityData] = fetcherSenders.oldSendChangeName(fetcher, { type: "no-store" });
+  const fetcher = fetcherUtils.activationController(props.notInDebug, fetcherUtils.createSignalFetcher, fetchers.anilist.activityPage, accessToken, props.variables, page);
+  const [activityData] = fetcherSenders.oldSendChangeName(fetcher);
 
   let maxPage = 0;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);

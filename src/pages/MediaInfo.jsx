@@ -27,7 +27,8 @@ export function MediaInfoContent(props) {
   const [isFavourite, setIsFavourite] = createSignal();
 
   const anilistFetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
-  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendDefaultWithoutNullValues(() => apiRequestManager.anilist.inFiveSeconds() > 2, anilistFetcher);
+  const cacheType = fetcherUtils.dynamicCacheType({ default: () => apiRequestManager.anilist.inFiveSeconds() > 2 })
+  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
   createRenderEffect(() => {
     params.type;
@@ -320,7 +321,7 @@ export function MediaInfoHome(props) {
         <Show when={accessToken()}>
           <Friends />
         </Show>
-        <Show when={anilistData().data.type === "ANIME"} children={<AnimeThemes theme={props.theme} />} />
+        <AnimeThemes />
         <StreamingEpisodes streamingEpisodes={anilistData().data.streamingEpisodes} />
         <Recommendations
           recommendations={anilistData().data.recommendations}

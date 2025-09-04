@@ -1,9 +1,14 @@
-import { fetcherTemplates, queries } from "../utils.js";
+import { fetcherTemplates, fetcherUtils, localizations, queries } from "../utils.js";
 
 const formatPage = res => res.data.Page;
 
-export const getActivity = (token, variables, page = 1) => {
-  return fetcherTemplates.anilistAuth(token, queries.anilistActivity, { ...variables, page }, formatPage);
+export const activityPage = (token, variables, page = 1) => {
+  return fetcherTemplates.anilistAuthNoStore(token, queries.anilistActivity, { ...variables, page }, formatPage);
+};
+
+export const activityPageless = (token, variables) => {
+  const fetcher = activityPage(token, variables, "pageless");
+  return fetcherUtils.changeCacheType(fetcher, localizations.onlyIfCached);
 };
 
 export const getMediaById = (token, id) => {
@@ -28,5 +33,5 @@ export const getDemoActivity = (token, variables, page = 1) => {
       case 4: return fetcherTemplates.offlineFetcher("local-activity-page-4.json", res => res.Page, 200);
     }
   }
-  return getActivity(token, variables, page);
+  return activityPage(token, variables, page);
 };

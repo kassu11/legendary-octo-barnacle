@@ -12,7 +12,12 @@ function Friends() {
 
   const { anilistData } = useMediaInfo();
   const friendScoreFetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.getFrendScoresFromMedia, accessToken, () => params.id, { page: 1, perPage: 8 });
-  const [friendScoreData] = fetcherSenders.sendDefaultOrCacheOnlyWithoutNullValues(() => apiRequestManager.anilist.inFiveSeconds() > 1, () => apiRequestManager.anilist.inFiveSeconds() > 2, friendScoreFetcher);
+  const cacheType = fetcherUtils.dynamicCacheType({
+    "default": () => apiRequestManager.anilist.inFiveSeconds() > 1,
+    "only-if-cached": () => apiRequestManager.anilist.inFiveSeconds() > 2
+  });
+
+  const [friendScoreData] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, friendScoreFetcher);
 
   const [ownProfileInfo, setOwnProfileInfo] = createSignal();
 

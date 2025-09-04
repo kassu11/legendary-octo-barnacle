@@ -2,7 +2,7 @@ import { IndexedDB } from "../api";
 import { CacheObject } from "../CacheObject";
 import { asserts, localizations, modes, rateLimits } from "../utils";
 import { FetchSettings } from "./FetchSettings";
-import { batch, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
+import { batch, createMemo, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
 
 export class Fetcher {
   constructor(url, options, formatResponse) {
@@ -153,20 +153,15 @@ function createCustomSignal(initialValue) {
 /** @type {Object.<string, CacheObject>} */
 const cacheObjects = {};
 
-export const oldSendChangeName = fetcherSignal => genericSend(() => false, () => false, false, fetcherSignal);
-export const sendDefaultWithoutNullValues = (changeTypeToDefault, fetcherSignal) => genericSend(changeTypeToDefault, () => false, true, fetcherSignal);
-export const sendDefaultOrCacheOnlyWithoutNullValues = (changeTypeToDefault, changeTypeToCacheOnly, fetcherSignal) => genericSend(changeTypeToDefault, changeTypeToCacheOnly, true, fetcherSignal);
-export const sendCacheOnlyWithoutNullValues = (changeTypeToCacheOnly, fetcherSignal) => genericSend(() => false, changeTypeToCacheOnly, true, fetcherSignal);
+export const oldSendChangeName = fetcherSignal => genericSend2(() => null, false, false, fetcherSignal);
+export const dynamicCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, false, fetcherSignal);
+export const dynamicCacheTypeWithoutNullUpdatesDebug = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, true, fetcherSignal);
 
 
 /**
- * @param {() => boolean} isSetCacheTypeToDefault - Change cache type to default when active
- * @param {() => boolean} isSetCacheTypeToCacheOnly - Change cache type to cache when active
- * @param {() => (Fetcher|null)} fetcherSignal - Fetch to be send
  * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
- * @param {FetchSettings} [overwriteSettings] - Custom settings to overwrite fetch settings
  */
-const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disableNullValues, fetcherSignal) => {
+const genericSend2 = (cacheTypeSignal, disableNullValues, enableDebugLogs, fetcherSignal) => {
   /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
   const [response, setResponse, setResponseWithoutUpdate] = createCustomSignal(undefined);
   const [error, setError] = createSignal(false);
@@ -250,19 +245,16 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
     mutate(mutation);
   }
 
-  let previousSendFetchCacheKey;
-  const refetch = async fetcher => {
+  const refetch = async (fetcher, type) => {
     if (fetcher !== currentFetcher) {
       return;
     }
     asserts.assertTrue(fetcher, "fetcher should not be undefined");
-    const type = untrack(() => getCacheType(fetcher));
     if (type === "only-if-cached") {
       batch(() => {
         if (!disableNullValues) {
           setResponse(new ApiResponse(fetcher.cacheKey, null));
           setLoading(false);
-        } else {
         }
       });
       return;
@@ -271,11 +263,10 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
     currentController?.abort();
     const controller = new AbortController();
     currentController = controller;
-    previousSendFetchCacheKey = fetcher.cacheKey;
     const data = await fetchData(fetcher, controller.signal);
 
     if (data === null) { // Data should be only null if signal aborted or error
-      if (fetcher.cacheKey === previousSendFetchCacheKey) {
+      if (fetcher === currentFetcher) {
         batch(() => {
           setError(true);
           setLoading(false);
@@ -286,22 +277,44 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
         const response = new ApiResponse(fetcher.cacheKey, data);
         mutateCache(response);
         safeMutate(response);
-        if (fetcher.cacheKey === previousSendFetchCacheKey) {
+        if (fetcher === currentFetcher) {
           setLoading(false);
         }
       });
     }
   }
 
-  const getCacheType = fetcher => {
-    if (isSetCacheTypeToCacheOnly()) {
-      return localizations.onlyIfCached;
-    } else if (isSetCacheTypeToDefault()) {
-      return localizations.defaultVal;
+  const cacheType = createMemo(prev => {
+    const fetcher = fetcherSignal();
+    const type = cacheTypeSignal() || fetcher?.settings.type || prev;
+
+    if (currentFetcher !== fetcher) {
+      return type;
     }
 
-    return fetcher.settings.type;
-  }
+    asserts.assertTypeString(prev, "If fetcher is same as currentFetcher why is there no previous cacheType");
+
+    // 1 = Highest fresh data
+    // 4 = Lowest cache data
+    // *     1 - `"no-store"`: Skips cache entirely and fetches fresh data.
+    // *     1 - `"reload"`: Always fetches fresh data and updates the cache.
+    // *     2 - `"fetch-once"`: Always fetches fresh data once and after that use the cache.
+    // *     3 - `"default"`: Uses the cache if data exists; otherwise, fetches from the server.
+    // *     4 - `"only-if-cached"`: Serves data from cache only; returns null if no cache exists.
+    switch(prev) {
+      case "only-if-cached": {
+        if (type === "default") return type;
+      }
+      case "default": {
+        if (type === "fetch-once") return type;
+      }
+      case "fetch-once": {
+        if (type === "reload" || type === "no-store") return type;
+      }
+    }
+    return prev;
+  });
+
 
   createRenderEffect(() => {
     const fetcher = fetcherSignal();
@@ -311,22 +324,11 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
 
     asserts.assertTrue(fetcher instanceof Fetcher);
 
-    const type = getCacheType(fetcher);
+    const type = cacheType();
+    asserts.assertTypeString(type);
     const isOnDebugSoDontFetch = modes.debug && !fetcher.settings.fetchOnDebug && type !== "no-store";
     const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
     const cacheKey = fetcher.cacheKey;
-
-    if (currentFetcher === fetcher) {
-      if (previousSendFetchCacheKey === cacheKey) {
-        return
-      }
-
-      const res = untrack(response);
-      const previousFetcherDataWasFromNewFetcherAndWasFromCache = res?.data && res.cacheKey === cacheKey && res.cacheType;
-      if (previousFetcherDataWasFromNewFetcherAndWasFromCache && !sendFetchEvenWhenCacheIsFound) {
-        return
-      }
-    }
 
     currentFetcher = fetcher;
 
@@ -348,7 +350,7 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
       }
     } else if (type !== "no-store" && fetcher.settings.storeName) {
       const cacheReq = IndexedDB.fetchCache();
-      const safeRefetch = () => !sendFetchEvenWhenCacheIsFound && refetch(fetcher);
+      const safeRefetch = () => !sendFetchEvenWhenCacheIsFound && refetch(fetcher, type);
       cacheReq.onerror = safeRefetch;
       cacheReq.onsuccess = evt => {
         const db = evt.target.result;
@@ -383,7 +385,7 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
     }
 
     if (sendFetchEvenWhenCacheIsFound) {
-      refetch(fetcher);
+      refetch(fetcher, type);
     }
   });
 
@@ -395,7 +397,5 @@ const genericSend = (isSetCacheTypeToDefault, isSetCacheTypeToCacheOnly, disable
 
   onCleanup(() => currentController?.abort());
 
-  return [response, { mutate, refetch, mutateCache, mutateBoth }];
+  return [response, { mutate, refetch: () => refetch(untrack(fetcherSignal), untrack(fetcherSignal).settings.type), mutateCache, mutateBoth }];
 }
-
-

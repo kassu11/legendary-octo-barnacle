@@ -1,4 +1,4 @@
-import { createComputed, createEffect, createRenderEffect, createSignal, on, untrack } from "solid-js";
+import { createComputed, createEffect, createMemo, createRenderEffect, createSignal, on, untrack } from "solid-js";
 import { assertFunction, unwrapFunction } from "../functionUtils";
 import { Fetcher } from "./Fetcher";
 import { asserts, localizations } from "../utils.js";
@@ -176,6 +176,59 @@ export const defaultOrCacheOnly = (defaultSignal, cacheOnlySignal, creationFunct
       }
     }
   }, { defer: true }));
+
+  return fetcher;
+}
+
+/**
+ * @typedef {Object} CacheTypeObject
+ * @property {undefined | import("solid-js").Accessor<boolean>} [no-store]
+ *    Skips cache entirely and fetches fresh data.
+ * @property {undefined | import("solid-js").Accessor<boolean>} [reload]
+ *    Always fetches fresh data and updates the cache.
+ * @property {undefined | import("solid-js").Accessor<boolean>} [fetch-once]
+ *    Always fetches fresh data once and after that use the cache.
+ * @property {undefined | import("solid-js").Accessor<boolean>} [default]
+ *    Uses the cache if data exists; otherwise, fetches from the server.
+ * @property {undefined | import("solid-js").Accessor<boolean>} [only-if-cached]
+ *    Serves data from cache only; returns null if no cache exists.
+ */
+
+/**
+ * Creates a dynamic cache type configuration.
+ *
+ * @param {CacheTypeObject} cacheTypeObjects - The cache behavior configuration.
+ * @returns {}
+ */
+export const dynamicCacheType = cacheTypeObjects => {
+    // *     1 - `"no-store"`: Skips cache entirely and fetches fresh data.
+    // *     1 - `"reload"`: Always fetches fresh data and updates the cache.
+    // *     2 - `"fetch-once"`: Always fetches fresh data once and after that use the cache.
+    // *     3 - `"default"`: Uses the cache if data exists; otherwise, fetches from the server.
+    // *     4 - `"only-if-cached"`: Serves data from cache only; returns null if no cache exists.
+  return createMemo(() => {
+    if (cacheTypeObjects[localizations.onlyIfCached]?.()) {
+      return localizations.onlyIfCached;
+    }
+    if (cacheTypeObjects[localizations.defaultVal]?.()) {
+      return localizations.defaultVal;
+    }
+    if (cacheTypeObjects[localizations.fetchOnce]?.()) {
+      return localizations.fetchOnce;
+    }
+    if (cacheTypeObjects[localizations.reload]?.()) {
+      return localizations.reload;
+    }
+    if (cacheTypeObjects[localizations.noStore]?.()) {
+      return localizations.noStore;
+    }
+  });
+}
+
+export const changeCacheType = (fetcher, type) => {
+  if (fetcher) {
+    fetcher.settings.type = type;
+  }
 
   return fetcher;
 }
