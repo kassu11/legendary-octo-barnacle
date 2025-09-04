@@ -7,7 +7,7 @@ import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { SearchBar, SearchContent } from "./pages/Search.jsx";
+import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search.jsx";
 import { User, Overview, MediaList, FavouriteContainer, Stats, Socials } from "./pages/User.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
@@ -76,7 +76,7 @@ render(
                 <Route path="/:type/:header?" matchFilters={animeSearch} />
                 <Route path="/:type/:header?" matchFilters={mangaSearch} />
                 <Route path="/:type/:header?" matchFilters={bothSearch} />
-                {/* <Route path="/:type/:header?" component={RedirectSearchHeaders} /> */}
+                <Route path="/:type/:header?" component={RedirectSearchHeaders} />
               </Route>
             </Route>
             <Route path="/artist/:name" component={Artist} />

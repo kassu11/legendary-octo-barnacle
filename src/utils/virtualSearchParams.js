@@ -46,20 +46,40 @@ export function useVirtualSearchParams() {
   ];
 }
 
+export function useVirtualType() {
+  const params = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  return type => virtualChangeType(searchParams, params, navigate, location, type);
+}
+
+export function useVirtualHeaderRedirect() {
+  const params = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  return () => navigate(`/search/${params.type}${searchQueryStringFromObject(searchParams, params, location, {})}`, { scroll: false });
+}
+
 // Gives search results that are not present in the actual url, but all virtualSearchParams must be removable
 function virtualSearchParams(searchParams, params, key) {
   return searchParams[key] || getVirtualObject(searchParams, params)[key];
 }
 
 function getVirtualObject(searchParams, params, currentHeader) {
-  const header = currentHeader || params.header;
+  return getVirtualObjectManual(searchParams.malSearch === "true", params.header, params.type, currentHeader) || {};
+}
+
+function getVirtualObjectManual(isMal, paramsHeader, paramsType, currentHeader) {
+  const header = currentHeader || paramsHeader;
   if (header?.match(/^(summer|fall|spring|winter)-\d+$/)) {
     const [season, year] = header.split("-");
     return { year, season, order: "title_romaji", sort: "ASC" }
   }
 
-  const engine = searchParams.malSearch === "true" ? "mal" : "ani";
-  return headers[header] || headers[engine]?.[header] || headers[engine]?.[params.type]?.[header] || {};
+  const engine = isMal ? "mal" : "ani";
+  return headers[header] || headers[engine]?.[header] || headers[engine]?.[paramsType]?.[header];
 }
 
 function setVirtualSearchParams(searchParams, setSearchParams, params, navigate, location, sParams, options) {
@@ -88,6 +108,16 @@ function setVirtualSearchParams(searchParams, setSearchParams, params, navigate,
 
   // No need to redirect, set search params normally
   setSearchParams(sParams, options);
+}
+
+function virtualChangeType(searchParams, params, navigate, location, type) {
+  const virtualObj = getVirtualObjectManual(searchParams.malSearch === "true", params.header, params.type);
+  const newVirtualObj = getVirtualObjectManual(searchParams.malSearch === "true", params.header, type);
+  if (!virtualObj || newVirtualObj) {
+    return navigate("/" + params.mode + "/" + type + (params.header ? "/" + params.header : "") + location.search);
+  }
+
+  return navigate(`/search/${type}${searchQueryStringFromObject(searchParams, params, location, {}, true)}`, { scroll: false });
 }
 
 function searchQueryStringFromObject(searchParams, params, location, sParams, addVirtualParams = true, header) {

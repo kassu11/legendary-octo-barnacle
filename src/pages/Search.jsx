@@ -20,7 +20,7 @@ import { CountryInput } from "./Search/CountryInput";
 import { SourceInput } from "./Search/SourceInput";
 import { ExternalSourceInput } from "./Search/ExternalSourcesInput";
 import { TwoHeadedRange } from "./Search/TwoHeadedRange";
-import { useVirtualSearchParams } from "../utils/virtualSearchParams.js";
+import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../utils/virtualSearchParams.js";
 import { SeasonInput } from "./Search/SeasonInput.jsx";
 import { moveSeasonObject } from "../utils/dates.js";
 import { asserts } from "../collections/collections.js";
@@ -464,6 +464,7 @@ const [externalSourceStore, setExternalSourceStore] = createStore({});
 
 export function SearchBar(props) {
   const navigate = useNavigate();
+  const changeType = useVirtualType();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -541,9 +542,7 @@ export function SearchBar(props) {
     <div class="search-page">
       <div class="header-row">
         <h1>{capitalize(params.mode)}</h1>
-        <select name="type" id="type" value={params.type} onChange={e => {
-          navigate("/" + params.mode + "/" + e.target.value + (params.header ? "/" + params.header : "") + location.search);
-        }}>
+        <select name="type" id="type" value={params.type} onChange={e => changeType(e.target.value) }>
           <option value="anime">Anime</option>
           <option value="manga">Manga</option>
           <option value="media">Media</option>
@@ -769,6 +768,11 @@ export function SearchContent(props) {
       </section>
     </div>
   );
+}
+
+export function RedirectSearchHeaders() {
+  const redirect = useVirtualHeaderRedirect();
+  redirect();
 }
 
 function AnilistMediaSearchContent(props) {
