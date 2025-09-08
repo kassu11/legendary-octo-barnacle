@@ -4,8 +4,8 @@ import Score from "./Score";
 import style from "./Friends.module.scss";
 import { A, useParams } from "@solidjs/router";
 import { useAuthentication, useMediaInfo } from "../../context/providers";
-import { apiRequestManager, fetcherSenderUtils, fetcherUtils } from "../../utils/utils";
-import { fetchers, fetcherSenders } from "../../collections/collections.js";
+import { fetcherSenderUtils, fetcherUtils } from "../../utils/utils";
+import { fetchers, fetcherSenders, requests } from "../../collections/collections.js";
 
 function Friends() {
   const params = useParams();
@@ -14,8 +14,8 @@ function Friends() {
   const { anilistData } = useMediaInfo();
   const friendScoreFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getFrendScoresFromMedia, accessToken, () => params.id, { page: 1, perPage: 8 });
   const cacheType = fetcherSenderUtils.dynamicCacheType({
-    "default": () => apiRequestManager.anilist.inFiveSeconds() > 1,
-    "only-if-cached": () => apiRequestManager.anilist.inFiveSeconds() > 2
+    "default": () => requests.anilist.inFiveSeconds() > 1,
+    "only-if-cached": () => requests.anilist.inFiveSeconds() > 2
   });
 
   const [friendScoreData] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, friendScoreFetcher);

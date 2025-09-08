@@ -1,10 +1,11 @@
 import { IndexedDB } from "../api";
 import { CacheObject } from "../CacheObject";
-import { modes, rateLimits } from "../../collections/collections.js";
+import { modes } from "../../collections/collections.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
 import { FetchSettings } from "./FetchSettings";
 import { batch, createMemo, createRenderEffect, createSignal, on, onCleanup, untrack } from "solid-js";
+import { requestUtils } from "../utils.js";
 
 export class Fetcher {
   constructor(url, options, formatResponse) {
@@ -22,8 +23,8 @@ export class Fetcher {
 }
 
 const sendFetcher = (fetcher, signal) => {
-  rateLimits.addPendingRequestToUrl(fetcher.url);
-  const request = fetcherToFetch(fetcher, signal).finally(() => rateLimits.removePendingRequestToUrl(fetcher.url));
+  requestUtils.addPendingRequestToUrl(fetcher.url);
+  const request = fetcherToFetch(fetcher, signal).finally(() => requestUtils.removePendingRequestToUrl(fetcher.url));
   return request;
 }
 
@@ -62,8 +63,8 @@ const fetchData = async (fetcher, signal) => {
   try {
     const { resolve, promise } = Promise.withResolvers();
     for (let i = 0; i < 3 && !signal.aborted; i++) {
-      if (rateLimits.hasWaitingQueueForUrl(fetcher.url)) {
-        rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+      if (requestUtils.hasWaitingQueueForUrl(fetcher.url)) {
+        requestUtils.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
         await promise;
       }
 
@@ -78,14 +79,14 @@ const fetchData = async (fetcher, signal) => {
         delete fetchRequests[fetcher.cacheKey];
       }
 
-      const delay = rateLimits.getDelayByStatusCodeAndUrl(fetcher.url, response?.status || "cors");
+      const delay = requestUtils.getDelayByStatusCodeAndUrl(fetcher.url, response?.status || "cors");
       if (response?.status === 429 && response.headers.get("Retry-After")) {
-        rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+        requestUtils.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
         const time = parseInt(response.headers.get("Retry-After"));
         await new Promise(res => setTimeout(res, time * 1000));
         continue;
       } else if (delay) {
-        rateLimits.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+        requestUtils.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
         await new Promise(res => setTimeout(res, delay));
         continue;
       } else if (!response?.ok) {
@@ -106,7 +107,7 @@ const fetchData = async (fetcher, signal) => {
     }
   } catch (e) {
   } finally {
-    rateLimits.removeFromWaitingQueueWithUrl(fetcher.url);
+    requestUtils.removeFromWaitingQueueWithUrl(fetcher.url);
   }
 
   return null;
