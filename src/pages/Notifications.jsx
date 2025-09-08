@@ -32,7 +32,7 @@ export default function Notifications() {
 
 function NotificationsReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.notificationPageless, accessToken, props.type);
+  const pagelessFetcher = fetcherUtils.createFetcher(fetchers.anilist.notificationPageless, accessToken, props.type);
   const [pagelessCacheData, { mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
@@ -108,7 +108,7 @@ function NotificationsReel(props) {
 function NotificationsPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.notificationPage, accessToken, props.type, page);
+  const fetcher = fetcherUtils.createFetcher(fetchers.anilist.notificationPage, accessToken, props.type, page);
   const [notificationsData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
 

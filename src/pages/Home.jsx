@@ -86,7 +86,7 @@ function Activity() {
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
+  const pagelessFetcher = fetcherUtils.createFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
   const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
@@ -162,7 +162,7 @@ function ActivityReel(props) {
 function ActivityPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);
+  const fetcher = fetcherUtils.createFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);
   const [activityData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
   let maxPage = 0;

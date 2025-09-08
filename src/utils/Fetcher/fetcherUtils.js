@@ -1,4 +1,4 @@
-import { createMemo, createRenderEffect, createSignal } from "solid-js";
+import { createMemo } from "solid-js";
 import { unwrapFunction } from "../functionUtils";
 import { Fetcher } from "./Fetcher";
 import { asserts } from "../../collections/collections.js";
@@ -24,31 +24,11 @@ const createFetcherWithArguments = (fetcherCreator, args) => {
 }
 
 /**
- * @param {(fetcherCreator, args) => Fetcher} createWithArgs
- * @param {(args) => Fetcher} fetcherCreator
- * @param {Array<any>} args
- */
-const fetcherSignal = (createWithArgs, fetcherCreator, args) => {
-  const [fetcher, setFetcher] = createSignal();
-
-  createRenderEffect(() => {
-    const fetcher = createWithArgs(fetcherCreator, args);
-    if (fetcher) {
-      setFetcher(fetcher);
-    }
-  });
-
-  return [fetcher, setFetcher];
-}
-
-/**
  * @param {(any) => Fetcher} fetcherCreator
  */
-export const createSignalFetcher = (fetcherCreator, ...args) => {
-  const [fetcher] = fetcherSignal(createFetcherWithArguments, fetcherCreator, args);
-  return fetcher;
+export const createFetcher = (fetcherCreator, ...args) => {
+  return createMemo(prev => createFetcherWithArguments(fetcherCreator, args) ?? prev);
 }
-
 
 /**
  * @typedef {Object} CacheTypeObject
