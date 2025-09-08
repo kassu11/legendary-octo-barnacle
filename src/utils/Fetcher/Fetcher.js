@@ -155,15 +155,20 @@ function createCustomSignal(initialValue) {
 /** @type {Object.<string, CacheObject>} */
 const cacheObjects = {};
 
-export const oldSendChangeName = fetcherSignal => genericSend2(() => null, false, false, fetcherSignal);
-export const dynamicCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, false, fetcherSignal);
-export const dynamicCacheTypeWithoutNullUpdatesDebug = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, true, fetcherSignal);
+export const oldSendChangeName = fetcherSignal => genericSend2(() => null, false, () => false, false, fetcherSignal);
+export const dynamicCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, () => false, false, fetcherSignal);
+export const dynamicCacheTypeWithoutNullUpdatesDebug = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, () => false, true, fetcherSignal);
+export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => genericSend2(() => null, true, disabledSignal, true, fetcherSignal);
 
 
 /**
  * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
  */
-const genericSend2 = (cacheTypeSignal, disableNullValues, enableDebugLogs, fetcherSignal) => {
+const genericSend2 = (cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal) => {
+  asserts.typeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
+  asserts.typeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
+  asserts.typeFunction(fetcherSignal, "fetcherSignal is not a function");
+
   /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
   const [response, setResponse, setResponseWithoutUpdate] = createCustomSignal(undefined);
   const [error, setError] = createSignal(false);
@@ -317,10 +322,20 @@ const genericSend2 = (cacheTypeSignal, disableNullValues, enableDebugLogs, fetch
     return prev;
   });
 
+  const isDisabled = createMemo(() => {
+    const fetcher = fetcherSignal();
+    const disabled = senderDisabledSignal();
+
+    if (currentFetcher !== fetcher) {
+      return disabled;
+    }
+
+    return false;
+  });
 
   createRenderEffect(() => {
     const fetcher = fetcherSignal();
-    if (!fetcher) {
+    if (!fetcher || isDisabled()) {
       return;
     };
 

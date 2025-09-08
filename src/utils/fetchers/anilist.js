@@ -1,4 +1,4 @@
-import { fetcherTemplates, localizations, queries } from "../../collections/collections.js";
+import { asserts, fetcherTemplates, localizations, queries } from "../../collections/collections.js";
 import { fetcherUtils } from "../utils.js";
 
 const formatPage = res => res.data.Page;
@@ -18,6 +18,28 @@ export const getMediaById = (token, id) => {
 
 export const getFrendScoresFromMedia = (token, id, variables) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistGetFriendMediaScore, { id, ...variables }, formatPage);
+};
+
+const notificationTypes = type => {
+  switch (type) {
+    case "airing": return [ "AIRING" ];
+    case "activity": return [ "ACTIVITY_MESSAGE", "ACTIVITY_MENTION", "ACTIVITY_REPLY", "ACTIVITY_LIKE", "ACTIVITY_REPLY_LIKE" ];
+    case "forum": return [ "THREAD_COMMENT_REPLY", "THREAD_SUBSCRIBED", "THREAD_COMMENT_MENTION", "THREAD_LIKE", "THREAD_COMMENT_LIKE" ];
+    case "follows": return [ "FOLLOWING" ];
+    case "media": return [ "RELATED_MEDIA_ADDITION", "MEDIA_DATA_CHANGE", "MEDIA_MERGE", "MEDIA_DELETION" ];
+    case "all": return undefined;
+    default: asserts.unreachable("Unknown notification type");
+  }
+};
+
+export const notificationPage = (token, type, page = 1) => {
+  const types = notificationTypes(type);
+  return fetcherTemplates.anilistAuthNoStore(token, queries.anilistUserNotifications, { page, types }, formatPage);
+};
+
+export const notificationPageless = (token, type) => {
+  const fetcher = notificationPage(token, type, "pageless");
+  return fetcherUtils.changeCacheType(fetcher, localizations.onlyIfCached);
 };
 
 
