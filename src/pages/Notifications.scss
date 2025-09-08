@@ -6,12 +6,32 @@
   .flex-space-between {
     justify-content: left;
   }
+
+  .cp-loader-circle {
+    left: 50%;
+    transform: translateX(-50%);
+
+    &.refresh {
+      position: absolute;
+      z-index: 1;
+      margin-top: 3rem;
+    }
+
+    &.new {
+      margin-top: 1rem;
+    }
+  }
 }
 .notifications-container {
   display: grid;
   list-style: none;
   padding: 0;
   gap: .25rem;
+
+  &.loading {
+    opacity: .5;
+    filter: grayscale(.5);
+  }
 
   li {
     display: grid;
