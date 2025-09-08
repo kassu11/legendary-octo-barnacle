@@ -4,7 +4,7 @@ import "./Notifications.scss";
 import { mediaUrl } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
 import { CreatedAt } from "./CreatedAt.jsx";
-import { arrayUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
+import { arrayUtils, fetcherSenderUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
 import { asserts, fetchers, fetcherSenders, modes, signals } from "../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
@@ -32,7 +32,7 @@ export default function Notifications() {
 
 function NotificationsReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createFetcher(fetchers.anilist.notificationPageless, accessToken, props.type);
+  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.notificationPageless, accessToken, props.type);
   const [pagelessCacheData, { mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
@@ -108,7 +108,7 @@ function NotificationsReel(props) {
 function NotificationsPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.createFetcher(fetchers.anilist.notificationPage, accessToken, props.type, page);
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.notificationPage, accessToken, props.type, page);
   const [notificationsData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
 
