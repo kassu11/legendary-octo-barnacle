@@ -1,5 +1,5 @@
-import { asserts, fetcherTemplates, localizations, queries } from "../../collections/collections.js";
-import { fetcherUtils } from "../utils.js";
+import { asserts, fetcherTemplates, localizations, queries } from "../collections.js";
+import { fetcherUtils } from "../../utils/utils.js";
 
 const formatPage = res => res.data.Page;
 
