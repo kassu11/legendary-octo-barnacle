@@ -86,7 +86,7 @@ function Activity() {
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createAnilistPagelessSignalFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
+  const pagelessFetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
   const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
@@ -147,14 +147,14 @@ function ActivityReel(props) {
     });
   }
 
-  const [notInDebug, setNotInDebug] = signals.debug(false);
+  const [isDebug, setIsDebug] = signals.debug();
 
   return (
     <Show when={!pagelessCacheData.loading}>
       <Show when={modes.debug}>
-        <button onClick={() => setNotInDebug(s => !s)}>debug: {"" + !notInDebug()}</button>
+        <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
       </Show>
-      <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} notInDebug={notInDebug} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+      <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} isDebug={isDebug} updateCache={updateCache} mutateCache={mutateCache} {...props} />
     </Show>
   );
 }
@@ -162,8 +162,8 @@ function ActivityReel(props) {
 function ActivityPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.activationController(props.notInDebug, fetcherUtils.createSignalFetcher, fetchers.anilist.activityPage, accessToken, props.variables, page);
-  const [activityData] = fetcherSenders.oldSendChangeName(fetcher);
+  const fetcher = fetcherUtils.createSignalFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);
+  const [activityData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
   let maxPage = 0;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);
