@@ -86,15 +86,16 @@
 }
 
 
-.activity-created-at {
-  margin-bottom: auto;
-}
 
 .activity-card-media, .activity-card-text {
   .profile {
     margin-top: .5rem;
     height: 3rem;
     width: 3rem;
+  }
+
+  .cp-created-at {
+    margin-bottom: auto;
   }
 
   button.active {
