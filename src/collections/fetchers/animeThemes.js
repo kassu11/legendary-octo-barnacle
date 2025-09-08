@@ -1,5 +1,4 @@
-import { fetcherTemplates, queries } from "../../collections/collections.js";
-import { localizations } from "../../collections/collections.js";
+import { fetcherTemplates, localizations, queries } from "../collections.js";
 
 const formatThemes = res => res.anime?.[0]?.animethemes ?? [];
 
