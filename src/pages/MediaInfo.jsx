@@ -1,5 +1,5 @@
 import { A, Navigate, useLocation, useNavigate, useParams } from "@solidjs/router";
-import { ErrorBoundary, For, Show, Switch, createEffect, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
+import { ErrorBoundary, For, Show, Switch, createEffect, createMemo, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import Banner from "../components/media/Banner.jsx";
@@ -24,20 +24,21 @@ import { fetchers, fetcherSenders, requests } from "../collections/collections.j
 export function MediaInfoContent(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [idMal, setIdMal] = createSignal();
   const [isFavourite, setIsFavourite] = createSignal();
 
   const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
   const cacheType = fetcherSenderUtils.dynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
   const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
-  createRenderEffect(() => {
-    params.type;
-    setIdMal(undefined);
+  const idMal = createMemo(() => {
+    const data = anilistData()?.data;
+    if (!data || data.idMal == null || data.type.toLowerCase() !== params.type) {
+      return;
+    }
+    return data.idMal;
   });
 
   createRenderEffect(on(anilistData, apiResponse => {
-    setIdMal(apiResponse?.data?.idMal || undefined);
     setIsFavourite(apiResponse?.data?.isFavourite ?? false);
   }));
 
