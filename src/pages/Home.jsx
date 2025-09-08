@@ -6,7 +6,7 @@ import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { arrayUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
+import { arrayUtils, fetcherSenderUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
 import { fetchers, fetcherSenders, modes, signals } from "../collections/collections.js";
 import { asserts } from "../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
@@ -86,7 +86,7 @@ function Activity() {
 
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherUtils.createFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
+  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
   const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
 
   const updateCache = apiResponse => {
@@ -162,7 +162,7 @@ function ActivityReel(props) {
 function ActivityPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherUtils.createFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);
   const [activityData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
   let maxPage = 0;

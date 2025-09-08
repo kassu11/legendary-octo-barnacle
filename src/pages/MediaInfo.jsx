@@ -18,7 +18,7 @@ import Recommendations from "../components/media/Recommendations.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
-import { apiRequestManager, fetcherUtils } from "../utils/utils.js";
+import { apiRequestManager, fetcherSenderUtils } from "../utils/utils.js";
 import { fetchers, fetcherSenders } from "../collections/collections.js";
 
 export function MediaInfoContent(props) {
@@ -27,8 +27,8 @@ export function MediaInfoContent(props) {
   const [idMal, setIdMal] = createSignal();
   const [isFavourite, setIsFavourite] = createSignal();
 
-  const anilistFetcher = fetcherUtils.createFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
-  const cacheType = fetcherUtils.dynamicCacheType({ default: () => apiRequestManager.anilist.inFiveSeconds() > 2 })
+  const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
+  const cacheType = fetcherSenderUtils.dynamicCacheType({ default: () => apiRequestManager.anilist.inFiveSeconds() > 2 })
   const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
   createRenderEffect(() => {
@@ -41,7 +41,7 @@ export function MediaInfoContent(props) {
     setIsFavourite(apiResponse?.data?.isFavourite ?? false);
   }));
 
-  const jikanFetcher = fetcherUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, idMal);
+  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, idMal);
   const [jikanData] = fetcherSenders.oldSendChangeName(jikanFetcher);
 
   const { openEditor } = useEditMediaEntries();
@@ -283,7 +283,7 @@ export function MediaInfoContent(props) {
   )
 }
 
-export function MediaInfoHome(props) {
+export function MediaInfoHome() {
   const { accessToken } = useAuthentication();
   const { anilistData, mutateBothAnilistData } = useMediaInfo();
 
