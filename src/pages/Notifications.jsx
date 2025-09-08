@@ -33,7 +33,7 @@ export default function Notifications() {
 function NotificationsReel(props) {
   const { accessToken } = useAuthentication();
   const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.notificationPageless, accessToken, props.type);
-  const [pagelessCacheData, { mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
+  const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.notifications?.length) {
