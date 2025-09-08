@@ -1,8 +1,8 @@
 export * as localizations from "./localizations.js";
 export * as asserts from "./asserts.js";
-export * as fetcherTemplates from "../utils/Fetcher/fetcherTemplates.js";
+export * as fetcherTemplates from "./fetcherTemplates.js";
 export * as fetchers from "./fetchers/fetchers.js";
-export * as fetcherSenders from "../utils/Fetcher/Fetcher.js";
+export * as fetcherSenders from "./fetcherSenders.js";
 export * as modes from "../utils/modes.js";
 export * as queries from "../utils/querys.js";
 export * as signals from "./signals.js";

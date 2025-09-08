@@ -73,3 +73,27 @@ export const localStorageJSON = (key, initialValue) => {
 }
 
 export const debug = (booleanToGiveWhenInDubugMode = true) => createSignal(modes.debug === booleanToGiveWhenInDubugMode);
+
+export const createCustomSignal = initialValue => {
+  const [trackingSignal, setTrackingSignal] = createSignal(0);
+  let currentValue = initialValue;
+
+  const value = () => {
+    trackingSignal(); // track in reactive scopes
+    return currentValue;
+  };
+
+  const setValue = (mutation) => {
+    const newValue = typeof mutation === "function" ? mutation(currentValue) : mutation;
+    currentValue = newValue;
+    setTrackingSignal((n) => n + 1); // trigger change
+    return currentValue;
+  };
+
+  const setValueWithoutUpdate = (mutation) => {
+    currentValue = typeof mutation === "function" ? mutation(currentValue) : mutation;
+    return currentValue;
+  };
+
+  return [value, setValue, setValueWithoutUpdate];
+}

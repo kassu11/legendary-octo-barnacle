@@ -1,9 +1,5 @@
-import { fetcherUtils } from "../utils";
-import { asserts } from "../../collections/collections.js";
-import { localizations } from "../../collections/collections.js";
-import { Fetcher } from "./Fetcher";
-
-const DEBUG = location.origin.includes("localhost");
+import { fetcherUtils } from "../utils/utils";
+import { asserts, localizations } from "./collections.js";
 
 export const anilistAuth = (token, query, variables = {}, formatResponse) => {
   asserts.assertTrue(query.length > 10, "Query must be above of length 10");
@@ -13,7 +9,7 @@ export const anilistAuth = (token, query, variables = {}, formatResponse) => {
     headers["Authorization"] = "Bearer " + token;
   }
 
-  return new Fetcher("https://graphql.anilist.co", {
+  return new fetcherUtils.Fetcher("https://graphql.anilist.co", {
     method: "POST",
     headers,
     body: {
@@ -28,7 +24,7 @@ export const anilistAuthNoStore = (token, query, variables = {}, formatResponse)
   return fetcherUtils.changeCacheType(fetcher, localizations.noStore);
 };
 
-export const getJSON = (url, formatResponse) => new Fetcher(url, {
+export const getJSON = (url, formatResponse) => new fetcherUtils.Fetcher(url, {
   method: "GET",
   cache: "default",
   headers: { "Content-Type": "application/json" },
@@ -39,7 +35,7 @@ export const offlineFetcher = (fileName, formatResponse, ms = 0) => {
   asserts.assertTrue(fileName, "Filename is missing");
   const path = location.pathname.split("/")[1];
 
-  const fetcher = new Fetcher("/" + path + "/" + fileName, undefined, formatResponse);
+  const fetcher = new fetcherUtils.Fetcher("/" + path + "/" + fileName, undefined, formatResponse);
   fetcher.delay = ms;
   return fetcher;
 };
