@@ -18,8 +18,8 @@ import Recommendations from "../components/media/Recommendations.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
-import { apiRequestManager, fetcherSenderUtils } from "../utils/utils.js";
-import { fetchers, fetcherSenders } from "../collections/collections.js";
+import { fetcherSenderUtils } from "../utils/utils.js";
+import { fetchers, fetcherSenders, requests } from "../collections/collections.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -28,7 +28,7 @@ export function MediaInfoContent(props) {
   const [isFavourite, setIsFavourite] = createSignal();
 
   const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
-  const cacheType = fetcherSenderUtils.dynamicCacheType({ default: () => apiRequestManager.anilist.inFiveSeconds() > 2 })
+  const cacheType = fetcherSenderUtils.dynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
   const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
   createRenderEffect(() => {
