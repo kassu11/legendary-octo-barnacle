@@ -27,8 +27,8 @@ export function MediaInfoContent(props) {
   const [isFavourite, setIsFavourite] = createSignal();
 
   const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
-  const cacheType = fetcherSenderUtils.dynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
-  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.dynamicCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
+  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
   const idMal = createMemo(() => {
     const data = anilistData()?.data;
@@ -43,7 +43,7 @@ export function MediaInfoContent(props) {
   }));
 
   const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, idMal);
-  const [jikanData] = fetcherSenders.oldSendChangeName(jikanFetcher);
+  const [jikanData] = fetcherSenders.sendWithNullUpdates(jikanFetcher);
 
   const { openEditor } = useEditMediaEntries();
   const navigate = useNavigate();

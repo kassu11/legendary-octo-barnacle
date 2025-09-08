@@ -12,7 +12,7 @@ function AnimeThemes() {
   const { anilistData } = useMediaInfo();
   const videoPlayer = <video src="" controls autoPlay />;
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.animeThemes.getThemesByIdAndApi, () => params.id, () => params.api, () => params.type);
-  const [themeData] = fetcherSenders.oldSendChangeName(fetcher);
+  const [themeData] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   createEffect(() => {
     params.id;

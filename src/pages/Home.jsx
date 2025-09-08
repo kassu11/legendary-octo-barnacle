@@ -87,7 +87,7 @@ function Activity() {
 function ActivityReel(props) {
   const { accessToken } = useAuthentication();
   const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
-  const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.oldSendChangeName(pagelessFetcher);
+  const [pagelessCacheData, { mutateCache, mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.activities?.length) {

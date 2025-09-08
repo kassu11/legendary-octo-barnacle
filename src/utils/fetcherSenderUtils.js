@@ -52,7 +52,7 @@ const cacheTypesInLeastFetchableOrder = [localizations.onlyIfCached, localizatio
  * @param {CacheTypeObject} cacheTypeObjects - The cache behavior configuration.
  * @returns {}
  */
-export const dynamicCacheType = cacheTypeObjects => {
+export const createDynamicCacheType = cacheTypeObjects => {
   return createMemo(() => {
     for (const cacheTypeName of cacheTypesInLeastFetchableOrder) {
       if (functionUtils.unwrapFunction(cacheTypeObjects[cacheTypeName])) {

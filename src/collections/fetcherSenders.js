@@ -22,16 +22,15 @@ class ApiResponse {
 /** @type {Object.<string, CacheObject>} */
 const cacheObjects = {};
 
-export const oldSendChangeName = fetcherSignal => genericSend2(() => null, false, () => false, false, fetcherSignal);
-export const dynamicCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, () => false, false, fetcherSignal);
-export const dynamicCacheTypeWithoutNullUpdatesDebug = (cacheTypeSignal, fetcherSignal) => genericSend2(cacheTypeSignal, true, () => false, true, fetcherSignal);
-export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => genericSend2(() => null, true, disabledSignal, true, fetcherSignal);
+export const sendWithNullUpdates = fetcherSignal => sendGeneric(() => null, false, () => false, false, fetcherSignal);
+export const sendWithCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => sendGeneric(cacheTypeSignal, true, () => false, false, fetcherSignal);
+export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => sendGeneric(() => null, true, disabledSignal, false, fetcherSignal);
 
 
 /**
  * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
  */
-const genericSend2 = (cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal) => {
+const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal) => {
   asserts.typeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
   asserts.typeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
   asserts.typeFunction(fetcherSignal, "fetcherSignal is not a function");
