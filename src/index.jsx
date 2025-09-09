@@ -24,6 +24,7 @@ import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
+import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJikan.jsx";
 
 const root = document.getElementById("root")
 
@@ -98,8 +99,8 @@ render(
                   <Route path="/" matchFilters={{ type: "manga" }} component={MangaStaff} />
                 </Route>
               </Route>
-              <Route path="/:type" matchFilters={{ api: "mal" }}>
-                MAL media page
+              <Route path="/:type/:id/:name" matchFilters={{ ...idFilter, api: "mal" }} component={MediaInfoWrapperJikan}>
+                <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHomeJikan} />
               </Route>
             </Route>
             <Route path="/user/:name" component={User}>

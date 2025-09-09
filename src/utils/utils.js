@@ -4,5 +4,7 @@ export * as fetcherSenderUtils from "./fetcherSenderUtils.js";
 export * as fetcherUtils from "./Fetcher/fetcherUtils.js";
 export * as scheduleUtils from "./scheduled.js";
 export * as dateUtils from "./dateUtils.js";
+export * as numberUtils from "./numberUtils.js";
+export * as stringUtils from "./stringUtils.js";
 
 export * as requestUtils from "./requestUtils.js";
