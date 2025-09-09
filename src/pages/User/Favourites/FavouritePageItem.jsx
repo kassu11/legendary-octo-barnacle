@@ -13,13 +13,13 @@ export function FavouritePageItem(props) {
     <li classList={{hidden: hidden()}} attr:data-id={props.edge.node.id}>
       <Switch>
         <Match when={type === "anime"}>
-          <A href={mediaUrl(props.edge)}>
+          <A href={mediaUrl(props.edge.node)}>
             <DeleteFavourite animeId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
             <img src={props.edge.node.coverImage.large} alt="Cover" />
           </A>
         </Match>
         <Match when={type === "manga"}>
-          <A href={mediaUrl(props.edge)}>
+          <A href={mediaUrl(props.edge.node)}>
             <DeleteFavourite mangaId={props.edge.node.id} onClick={() => setHidden(true)} mutate={() => removeEdgeId(props.edge.node.id)} />
             <img src={props.edge.node.coverImage.large} alt="Cover" />
           </A>
