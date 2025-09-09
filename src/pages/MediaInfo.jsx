@@ -10,6 +10,7 @@ import Genres from "../components/media/Genres.jsx";
 import Tags from "../components/media/Tags.jsx";
 import Characters from "../components/media/Characters.jsx";
 import Staff from "../components/media/Staff.jsx";
+import { MediaScores } from "./MediaPage/MediaScores.jsx";
 import Friends from "../components/media/Friends.jsx";
 import AnimeThemes from "../components/media/AnimeThemes.jsx";
 import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, languageFromCountry, mediaUrl, numberCommas } from "../utils/formating.js";
@@ -20,6 +21,7 @@ import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
 import { fetcherSenderUtils } from "../utils/utils.js";
 import { fetchers, fetcherSenders, requests } from "../collections/collections.js";
+import { Trailer } from "./MediaPage/Trailer.jsx";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -43,7 +45,13 @@ export function MediaInfoContent(props) {
   }));
 
   const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, idMal);
-  const [jikanData] = fetcherSenders.sendWithNullUpdates(jikanFetcher);
+  const [_jikanData] = fetcherSenders.sendWithNullUpdates(jikanFetcher);
+  const jikanData = createMemo(() => {
+    if (anilistData()?.data.idMal && _jikanData()?.data?.mal_id === anilistData()?.data.idMal) {
+      return _jikanData();
+    }
+    return undefined
+  });
 
   const { openEditor } = useEditMediaEntries();
   const navigate = useNavigate();
@@ -103,53 +111,14 @@ export function MediaInfoContent(props) {
 
   return (
     <ErrorBoundary fallback="Media page error">
-      <MediaInfoContext.Provider value={{ anilistData, mutateBothAnilistData }}>
+      {console.log(jikanData())}
+      <MediaInfoContext.Provider value={{ anilistData, mutateBothAnilistData, jikanData }}>
         <Banner src={anilistData()?.data?.bannerImage} loading={loading()} />
         <div class="media-page-content" classList={{loading: loading()}}>
           <aside class="media-page-left-aside">
             <Show when={anilistData()?.data}>
               <img src={anilistData()?.data?.coverImage.large} alt="Cover" class="media-page-cover" />
-              <div class="media-page-score-container">
-                <div>
-                  <p>Mean</p>
-                  <span>
-                    <Show when={anilistData()?.data?.meanScore > 0} fallback="N/A">
-                      {((anilistData()?.data?.meanScore || 0) / 10).toFixed(1)}
-                    </Show>
-                  </span>
-                </div>
-                <div>
-                  <p>Average</p>
-                  <span>
-                    <Show when={anilistData()?.data?.averageScore > 0} fallback="N/A">
-                      {((anilistData()?.data?.averageScore || 0) / 10).toFixed(1)}
-                    </Show>
-                  </span>
-                </div>
-                <p class="media-page-score-anilist-users">
-                  <Show when={anilistData()?.data?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)} fallback="-">
-                    {numberCommas(anilistData()?.data?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0))}
-                  </Show>
-                  {" "}Users
-                </p>
-                <div>
-                  <p>MAL</p>
-                  <span>
-                    <Switch fallback="N/A">
-                      <Match when={jikanData.loading}>...</Match>
-                      <Match when={jikanData()?.data.score > 0 && anilistData()?.data?.idMal}>
-                        {((jikanData().data.score || 0)).toFixed(2)}
-                      </Match>
-                    </Switch>
-                  </span>
-                </div>
-                <p>
-                  <Show when={jikanData()?.data?.scored_by && anilistData()?.data?.idMal} fallback="-">
-                    {numberCommas(jikanData().data.scored_by)}
-                  </Show>
-                  {" "}Users
-                </p>
-              </div>
+              <MediaScores />
               <Show when={accessToken()}>
                 <button onClick={() => {
                   openEditor(anilistData()?.data, {
@@ -173,7 +142,7 @@ export function MediaInfoContent(props) {
                   mutateCache={mutateBothFavourite} 
                 />
               </Show>
-              <Trailer trailer={anilistData()?.data.trailer} />
+              <Trailer id={anilistData()?.data.trailer.id} site={anilistData()?.data.trailer.site} />
               <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain)}>{edges => (
                 <Show when={edges().length > 0}>
                   <div>
@@ -345,39 +314,6 @@ export function MediaPageRedirect() {
 
   return (
     <Navigate href={"/ani/" + params.type + "/" + params.id + "/" + (params.name || "") + location.search} />
-  );
-}
-
-function Trailer(props) {
-  const [open, setOpen] = createSignal(false);
-  const [id, setId] = createSignal();
-  let dialog;
-
-  createEffect(on(() => props.trailer?.id, id => {
-    setId(id);
-  }));
-
-  return (
-    <Show when={props.trailer}>
-      <button  onClick={() => {
-        dialog.showModal();
-        setOpen(true);
-      }}>Watch trailer</button>
-      <dialog class="trailer-dialog" onClose={() => setOpen(false)} ref={dialog} onClick={e => e.target === dialog && dialog.close()}>
-        <div class="wrapper">
-          <Show when={open()}>
-            <Switch>
-              <Match when={props.trailer.site === "youtube"}>
-                <iframe src={"https://www.youtube-nocookie.com/embed/" + id() + "?enablejsapi=1&wmode=opaque&autoplay=1"} frameborder="0" allowFullScreen></iframe>
-              </Match>
-            </Switch>
-          </Show>
-          <form method="dialog" class="close">
-            <button>Close trailer</button>
-          </form>
-        </div>
-      </dialog>
-    </Show>
   );
 }
 

@@ -1,0 +1,12 @@
+.pg-media-info-jikan {
+  background-color: red;
+  width: min(100% - 1rem, 80rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: 1rem;
+
+  .header {
+    background-color: green;
+  }
+}
