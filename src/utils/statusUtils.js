@@ -1,4 +1,4 @@
-import { mediaStatuses } from "../collections/collections";
+import { localizations, mediaStatuses } from "../collections/collections";
 
 export const anilistEnumToFlavorText = status => {
   if (!status?.length) {
@@ -25,11 +25,17 @@ export const jikanEnumToFlavorText = status => {
 
   switch(status) {
     case mediaStatuses.jikan.FinishedAiring:
-      return "Finished"
+    case mediaStatuses.jikan.Finished:
+      return localizations.Finished;
     case mediaStatuses.jikan.NotYetAired:
       return "Not yet released"
     case mediaStatuses.jikan.CurrentlyAiring:
+    case mediaStatuses.jikan.Publishing:
       return "Releasing"
+    case mediaStatuses.jikan.Discontinued:
+      return "Cancelled"
+    case mediaStatuses.jikan.OnHiatus:
+      return "On hiatus"
     default:
       console.error("Unknown media format");
       return status;
