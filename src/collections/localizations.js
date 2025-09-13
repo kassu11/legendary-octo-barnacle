@@ -25,6 +25,10 @@ export const MANGA = "MANGA";
 export const NotYetAired = "Not yet aired";
 export const FinishedAiring = "Finished Airing";
 export const CurrentlyAiring = "Currently Airing";
+export const Publishing = "Publishing";
+export const Finished = "Finished";
+export const Discontinued = "Discontinued";
+export const OnHiatus = "On Hiatus";
 
 export const CANCELLED = "CANCELLED";
 export const FINISHED = "FINISHED";

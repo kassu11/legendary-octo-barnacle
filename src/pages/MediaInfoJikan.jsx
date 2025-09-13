@@ -71,7 +71,7 @@ export function MediaInfoWrapperJikan(props) {
                 mutateCache={mutateBothFavourite}
               />
               <Trailer id={jikanData()?.data.trailer?.youtube_id} site="youtube" />
-              <Show when={jikanData()?.data.studios.length}>
+              <Show when={jikanData()?.data.studios?.length}>
                 <div>
                   <h2>Studios</h2>
                   <ol>
@@ -83,7 +83,7 @@ export function MediaInfoWrapperJikan(props) {
                   </ol>
                 </div>
               </Show>
-              <Show when={jikanData()?.data.producers.length}>
+              <Show when={jikanData()?.data.producers?.length}>
                 <div>
                   <h2>Producers</h2>
                   <ol>
@@ -116,10 +116,10 @@ export function MediaInfoWrapperJikan(props) {
                       <Match when={jikanData().data.year}>
                         <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&malSearch=true"}>{jikanData().data.year}</A>
                       </Match>
-                      <Match when={jikanData().data.aired?.prop?.from?.year}>{year => (
+                      <Match when={jikanData().data.aired?.prop?.from?.year || jikanData().data.published?.prop?.from?.year}>{year => (
                         <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
                       )}</Match>
-                      <Match when={jikanData().data.aired?.prop?.to?.year}>{year => (
+                      <Match when={jikanData().data.aired?.prop?.to?.year || jikanData().data.published?.prop?.to?.year}>{year => (
                         <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
                       )}</Match>
                       <Match when={jikanData().data.status == mediaStatuses.jikan.NotYetAired}>
@@ -169,7 +169,6 @@ export function MediaInfoHomeJikan() {
           <Markdown text={jikanData().data.background} />
         </div>
       </Show>
-      <div>home</div>
       <Show when={jikanData().data.relations?.length}>
         <div class="relations">
           <h2>Relations</h2>
