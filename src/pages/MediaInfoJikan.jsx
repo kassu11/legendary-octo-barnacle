@@ -1,13 +1,14 @@
 import { A, useParams } from "@solidjs/router";
-import { MediaInfoContext, useAuthentication } from "../context/providers";
+import { MediaInfoContext, useAuthentication, useMediaInfo } from "../context/providers";
 import { fetchers, fetcherSenders, mediaStatuses } from "../collections/collections";
-import { fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils } from "../utils/utils";
+import { fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../utils/utils";
 import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
 import "./MediaInfoJikan.scss";
 import { MediaScores } from "./MediaPage/MediaScores";
 import { Trailer } from "./MediaPage/Trailer";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import ExternalLinks from "../components/media/ExternalLinks";
+import { Markdown } from "../components/Markdown";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -162,8 +163,36 @@ export function MediaInfoWrapperJikan(props) {
   );
 }
 
-export function MediaInfoHomeJikan(props) {
+export function MediaInfoHomeJikan() {
+  const { jikanData } = useMediaInfo();
   return (
-    <div>home</div>
+    <>
+      <Show when={jikanData().data.synopsis}>
+        <Markdown text={jikanData().data.synopsis} />
+      </Show>
+      <Show when={jikanData().data.background}>
+        <br />
+        <p>Background</p>
+        <Markdown text={jikanData().data.background} />
+      </Show>
+      <div>home</div>
+      <Show when={jikanData().data.relations?.length}>
+        <div class="relations">
+          <h2>Relations</h2>
+          <ol class="grid-column-auto-fill">
+            <For each={jikanData().data.relations}>{relation => (
+              <For each={relation.entry}>{entry => (
+                <li>
+                  <A class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
+                    <p class="name line-clamp">{entry.name}</p>
+                    <p class="type">{relation.relation} ({formatingUtils.capitalize(entry.type)})</p>
+                  </A>
+                </li>
+              )}</For>
+            )}</For>
+          </ol>
+        </div>
+      </Show>
+    </>
   );
 }
