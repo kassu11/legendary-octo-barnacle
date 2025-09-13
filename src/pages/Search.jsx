@@ -24,6 +24,7 @@ import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from
 import { SeasonInput } from "./Search/SeasonInput.jsx";
 import { moveSeasonObject } from "../utils/dates.js";
 import { asserts } from "../collections/collections.js";
+import { urlUtils } from "../utils/utils.js";
 
 
 
@@ -896,9 +897,10 @@ function MalCardRow(props) {
 }
 
 function MalCard(props) {
+  const params = useParams();
   return (
     <li class="horizontal-search-card">
-      <a href={props.card.url} target="_blank">
+      <A href={urlUtils.jikanMediaUrl(params.type, props.card)} >
         <img src={props.card.images.webp.image_url} alt="Anime cover" />
         <p class="line-clamp">
           <Switch>
@@ -906,7 +908,7 @@ function MalCard(props) {
             <Match when={props.card.titles.Default}>{props.card.titles.Default}</Match>
           </Switch>
         </p>
-      </a>
+      </A>
     </li>
   );
 }

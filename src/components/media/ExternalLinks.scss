@@ -1,0 +1,19 @@
+.cp-external-link {
+  display: flex;
+  gap: .5rem;
+  padding-block: .1rem;
+
+  .icon {
+    background-color: darkblue;
+    padding: .25rem;
+    height: max-content;
+
+    img, svg {
+      aspect-ratio: 1/1;
+      width: 1.25rem;
+      color: white;
+      object-fit: contain;
+    }
+  }
+}
+

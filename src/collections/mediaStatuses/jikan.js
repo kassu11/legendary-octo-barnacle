@@ -1,2 +1,2 @@
-export { NotYetAired, FinishedAiring  } from "../localizations";
+export { NotYetAired, FinishedAiring, CurrentlyAiring } from "../localizations";
 
