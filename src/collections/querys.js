@@ -1,5 +1,5 @@
-export const anilistMediaById = format`query media($id: Int, $type: MediaType, $isAdult: Boolean) {
-  Media(id: $id, type: $type, isAdult: $isAdult) {
+export const anilistMediaById = format`query media($id: Int, $idMal: Int, $type: MediaType, $isAdult: Boolean) {
+  Media(id: $id, idMal: $idMal, type: $type, isAdult: $isAdult) {
     id
     idMal
     title {

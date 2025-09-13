@@ -16,6 +16,10 @@ export const getMediaById = (token, id) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { id }, res => res.data.Media);
 };
 
+export const getMediaByTypeAndMalId = (token, type, idMal) => {
+  return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { idMal, type: type.toUpperCase() }, res => res.data.Media);
+};
+
 export const getFrendScoresFromMedia = (token, id, variables) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistGetFriendMediaScore, { id, ...variables }, formatPage);
 };

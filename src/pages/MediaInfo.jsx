@@ -142,7 +142,7 @@ export function MediaInfoContent(props) {
                   mutateCache={mutateBothFavourite} 
                 />
               </Show>
-              <Trailer id={anilistData()?.data.trailer.id} site={anilistData()?.data.trailer.site} />
+              <Trailer id={anilistData()?.data?.trailer?.id} site={anilistData()?.data?.trailer?.site} />
               <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain)}>{edges => (
                 <Show when={edges().length > 0}>
                   <div>

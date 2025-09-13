@@ -74,10 +74,13 @@ render(
                 <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHome} />
               </Route>
               <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}>
-                <Route path="/:type/:header?" matchFilters={animeSearch} />
-                <Route path="/:type/:header?" matchFilters={mangaSearch} />
-                <Route path="/:type/:header?" matchFilters={bothSearch} />
-                <Route path="/:type/:header?" component={RedirectSearchHeaders} />
+                <Route path="/" component={() => <Navigate href="media" />} />
+                <Route path="/:type" matchFilters={{ type: ["anime", "manga", "media"] }}>
+                  <Route path="/:header?" matchFilters={animeSearch} />
+                  <Route path="/:header?" matchFilters={mangaSearch} />
+                  <Route path="/:header?" matchFilters={bothSearch} />
+                  <Route path="/:header?" component={RedirectSearchHeaders} />
+                </Route>
               </Route>
             </Route>
             <Route path="/artist/:name" component={Artist} />
