@@ -8,6 +8,7 @@ import { MediaScores } from "./MediaPage/MediaScores";
 import { Trailer } from "./MediaPage/Trailer";
 import { FavouriteToggle } from "../components/FavouriteToggle";
 import ExternalLinks from "../components/media/ExternalLinks";
+import ExternalSource from "../assets/ExternalSource.jsx";
 import { Markdown } from "../components/Markdown";
 
 export function MediaInfoWrapperJikan(props) {
@@ -58,38 +59,30 @@ export function MediaInfoWrapperJikan(props) {
                 mutateCache={mutateBothFavourite}
               />
               <Trailer id={jikanData()?.data.trailer?.youtube_id} site="youtube" />
-              {/* <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain)}>{edges => ( */}
-              {/*   <Show when={edges().length > 0}> */}
-              {/*     <div> */}
-              {/*       <h2>Studios</h2> */}
-              {/*       <ol> */}
-              {/*         <For each={edges()}>{edge => ( */}
-              {/*           <li> */}
-              {/*             <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}> */}
-              {/*               {edge.node.name} */}
-              {/*             </A> */}
-              {/*           </li> */}
-              {/*         )}</For> */}
-              {/*       </ol> */}
-              {/*     </div> */}
-              {/*   </Show> */}
-              {/* )}</Show> */}
-              {/* <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain === false)}>{edges => ( */}
-              {/*   <Show when={edges().length > 0}> */}
-              {/*     <div> */}
-              {/*       <h2>Producers</h2> */}
-              {/*       <ol> */}
-              {/*         <For each={edges()}>{edge => ( */}
-              {/*           <li> */}
-              {/*             <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}> */}
-              {/*               {edge.node.name} */}
-              {/*             </A> */}
-              {/*           </li> */}
-              {/*         )}</For> */}
-              {/*       </ol> */}
-              {/*     </div> */}
-              {/*   </Show> */}
-              {/* )}</Show> */}
+              <Show when={jikanData()?.data.studios.length}>
+                <div>
+                  <h2>Studios</h2>
+                  <ol>
+                    <For each={jikanData()?.data.studios}>{studio => (
+                      <li>
+                        <a href={studio.url} target="_black">{studio.name}</a>
+                      </li>
+                    )}</For>
+                  </ol>
+                </div>
+              </Show>
+              <Show when={jikanData()?.data.producers.length}>
+                <div>
+                  <h2>Producers</h2>
+                  <ol>
+                    <For each={jikanData()?.data.producers}>{producer => (
+                      <li>
+                        <a href={producer.url} target="_black">{producer.name}</a>
+                      </li>
+                    )}</For>
+                  </ol>
+                </div>
+              </Show>
               <ExternalLinks
                 type={params.type}
                 idMal={jikanData()?.data.mal_id}
@@ -104,36 +97,36 @@ export function MediaInfoWrapperJikan(props) {
               {/* <Tags tags={anilistData()?.data.tags} type={anilistData()?.data.type} loading={loading()} /> */}
             </aside>
             <div class="body">
-              <h1>{jikanData().data.title}</h1>
-              <ul class="flex-bullet-separator">
-                <li>
-                  <Switch>
-                    <Match when={jikanData().data.year && jikanData().data.season}>
-                      <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&season=" + jikanData().data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.season)} {jikanData().data.year}</A>
-                    </Match>
-                    <Match when={jikanData().data.season}>
-                      <A href={"/search/" + params.type + "?season=" + jikanData().data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.season)}</A>
-                    </Match>
-                    <Match when={jikanData().data.year}>
-                      <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&malSearch=true"}>{jikanData().data.year}</A>
-                    </Match>
-                    <Match when={jikanData().data.aired?.prop?.from?.year}>{year => (
-                      <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
-                    )}</Match>
-                    <Match when={jikanData().data.aired?.prop?.to?.year}>{year => (
-                      <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
-                    )}</Match>
-                    <Match when={jikanData().data.status == mediaStatuses.jikan.NotYetAired}>
-                      <A href={"/search/" + params.type + "/tba" }>TBA</A>
-                    </Match>
-                  </Switch>
-                </li>
-                <li>
-                  <A href={"/search/" + params.type + "?format=" + jikanData().data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.type}</A>
-                </li>
-                <li>{statusUtils.jikanEnumToFlavorText(jikanData()?.data.status)}</li>
-              </ul>
               <div class="header">
+                <h1>{jikanData().data.title}</h1>
+                <ul class="flex-bullet-separator">
+                  <li>
+                    <Switch>
+                      <Match when={jikanData().data.year && jikanData().data.season}>
+                        <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&season=" + jikanData().data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.season)} {jikanData().data.year}</A>
+                      </Match>
+                      <Match when={jikanData().data.season}>
+                        <A href={"/search/" + params.type + "?season=" + jikanData().data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.season)}</A>
+                      </Match>
+                      <Match when={jikanData().data.year}>
+                        <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&malSearch=true"}>{jikanData().data.year}</A>
+                      </Match>
+                      <Match when={jikanData().data.aired?.prop?.from?.year}>{year => (
+                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                      )}</Match>
+                      <Match when={jikanData().data.aired?.prop?.to?.year}>{year => (
+                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                      )}</Match>
+                      <Match when={jikanData().data.status == mediaStatuses.jikan.NotYetAired}>
+                        <A href={"/search/" + params.type + "/tba" }>TBA</A>
+                      </Match>
+                    </Switch>
+                  </li>
+                  <li>
+                    <A href={"/search/" + params.type + "?format=" + jikanData().data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.type}</A>
+                  </li>
+                  <li>{statusUtils.jikanEnumToFlavorText(jikanData()?.data.status)}</li>
+                </ul>
                 <ul>
                   <Show when={jikanData()?.data.source}>
                     <li>Source: 
@@ -147,13 +140,6 @@ export function MediaInfoWrapperJikan(props) {
                   <li>Popularity #{jikanData().data.popularity || "N/A"}</li>
                 </ul>
               </div>
-                <ol>
-                  <For each={jikanData().data.studios}>{studio => (
-                    <li>
-                      <a href={studio.url} target="_black">{studio.name}</a>
-                    </li>
-                  )}</For>
-                </ol>
               {props.children}
             </div>
           </div>
@@ -168,12 +154,15 @@ export function MediaInfoHomeJikan() {
   return (
     <>
       <Show when={jikanData().data.synopsis}>
-        <Markdown text={jikanData().data.synopsis} />
+        <div>
+          <Markdown text={jikanData().data.synopsis} />
+        </div>
       </Show>
       <Show when={jikanData().data.background}>
-        <br />
-        <p>Background</p>
-        <Markdown text={jikanData().data.background} />
+        <div>
+          <strong>Background</strong>
+          <Markdown text={jikanData().data.background} />
+        </div>
       </Show>
       <div>home</div>
       <Show when={jikanData().data.relations?.length}>
