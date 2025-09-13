@@ -64,7 +64,7 @@ function Body(props) {
               checked={favourite()} 
               idType={props.type} 
               variableId={props.entityInfo().data.id} 
-              favourites={props.entityInfo().data.favourites} 
+              anilistValue={props.entityInfo().data.favourites} 
               onChange={setFavourite} 
               mutateCache={(isFavourite) => {
                 props.entityInfo().data.isFavourite = isFavourite;

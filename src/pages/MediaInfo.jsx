@@ -56,10 +56,6 @@ export function MediaInfoContent(props) {
   const { openEditor } = useEditMediaEntries();
   const navigate = useNavigate();
 
-  createEffect(() => {
-    setIsFavourite(props.media?.isFavourite ?? false);
-  });
-
   createRenderEffect(() => {
     if (anilistData()?.data && params.sub) {
       document.title = `${anilistData().data.title.userPreferred} - ${params.sub} - LOB`;
@@ -133,13 +129,14 @@ export function MediaInfoContent(props) {
                     }
                   });
                 }}>{anilistData()?.data.mediaListEntry?.status || "Edit"}</button>
-                <FavouriteToggle 
-                  checked={isFavourite()} 
-                  onChange={setIsFavourite} 
+                <FavouriteToggle
+                  checked={isFavourite()}
+                  onChange={setIsFavourite}
                   idType={anilistData()?.data.type}
                   variableId={anilistData()?.data.id}
-                  favourites={anilistData()?.data.favourites}
-                  mutateCache={mutateBothFavourite} 
+                  anilistValue={anilistData()?.data.favourites}
+                  jikanValue={jikanData()?.data.favorites}
+                  mutateCache={mutateBothFavourite}
                 />
               </Show>
               <Trailer id={anilistData()?.data?.trailer?.id} site={anilistData()?.data?.trailer?.site} />

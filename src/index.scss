@@ -179,6 +179,25 @@
     }
   }
 
+  .grid-center {
+    display: grid;
+    place-items: center;
+  }
+
+  .hide-if-empty:empty {
+    display: none;
+  }
+
+  .flex-no-shrink {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+
+    > * {
+      flex-shrink: 0;
+    }
+  }
+
   .grid-column-auto-fill {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--grid-column-width, 20rem), 100% / var(--grid-max-column-count, 999) - var(--gap, .5rem))), 1fr));
