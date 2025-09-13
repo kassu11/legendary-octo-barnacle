@@ -1,5 +1,5 @@
 import { A, Navigate, useLocation, useNavigate, useParams } from "@solidjs/router";
-import { ErrorBoundary, For, Show, Switch, createEffect, createMemo, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
+import { ErrorBoundary, For, Show, Switch, createMemo, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
 import "./MediaInfo.scss";
 import { Markdown } from "../components/Markdown.jsx";
 import Banner from "../components/media/Banner.jsx";
@@ -19,9 +19,12 @@ import Recommendations from "../components/media/Recommendations.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../context/providers.js";
 import { searchFormats, searchSources } from "../utils/searchObjects.js";
 import { navigateToMediaPage } from "../utils/navigateUtils.js";
-import { fetcherSenderUtils, formatingUtils, urlUtils } from "../utils/utils.js";
+import { fetcherSenderUtils } from "../utils/utils.js";
 import { fetchers, fetcherSenders, requests } from "../collections/collections.js";
 import { Trailer } from "./MediaPage/Trailer.jsx";
+import MyAnimeList from "../assets/MyAnimeList.jsx";
+import ExternalSource from "../assets/ExternalSource.jsx";
+import Anilist from "../assets/Anilist.jsx";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -114,9 +117,21 @@ export function MediaInfoContent(props) {
           <aside class="media-page-left-aside">
             <Show when={anilistData()?.data}>
               <img src={anilistData()?.data?.coverImage.large} alt="Cover" class="media-page-cover" />
-              <Show when={anilistData()?.data.idMal}>
-                <A href={"/mal/" + params.type + "/" + anilistData()?.data.idMal + "/" + formatingUtils.titleToUrl(anilistData()?.data.title.userPreferred)}>Switch to mal</A>
-              </Show>
+              <div class="cp-media-api-switcher">
+                <Show when={anilistData()?.data.id}>
+                  <a href={"https://anilist.co/" + params.type + "/" + params.id} target="_black" class="active">
+                    <span class="visually-hidden">Go to Anilist</span>
+                    <Anilist />
+                    <ExternalSource />
+                  </a>
+                </Show>
+                <Show when={anilistData()?.data.idMal}>
+                  <A href={"/mal/" + params.type + "/" + anilistData()?.data.idMal + "/" + params.name}>
+                    <span class="visually-hidden">Switch to MyAnimeList mode</span>
+                    <MyAnimeList />
+                  </A>
+                </Show>
+              </div>
               <MediaScores />
               <Show when={accessToken()}>
                 <button onClick={() => {
@@ -176,15 +191,7 @@ export function MediaInfoContent(props) {
                 </Show>
               )}</Show>
               {console.log(anilistData()?.data)}
-              <ExternalLinks
-                type={anilistData().data.type.toLowerCase()}
-                idMal={anilistData()?.data.idMal}
-                title={anilistData()?.data.title.userPreferred}
-                idAni={anilistData()?.data.id}
-                media={anilistData()?.data}
-                hashtag={anilistData()?.data.hashtag}
-                externalLinks={anilistData()?.data.externalLinks}
-              />
+              <ExternalLinks hashtag={anilistData()?.data.hashtag} externalLinks={anilistData()?.data.externalLinks} />
               <ExtraInfo media={anilistData()?.data} loading={loading()} />
               <Rankings rankings={anilistData()?.data.rankings} loading={loading()} />
               <Genres genres={anilistData()?.data.genres} type={anilistData()?.data.type} loading={loading()} />

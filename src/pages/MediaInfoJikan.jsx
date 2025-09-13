@@ -10,6 +10,8 @@ import { FavouriteToggle } from "../components/FavouriteToggle";
 import ExternalLinks from "../components/media/ExternalLinks";
 import ExternalSource from "../assets/ExternalSource.jsx";
 import { Markdown } from "../components/Markdown";
+import MyAnimeList from "../assets/MyAnimeList";
+import Anilist from "../assets/Anilist";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -45,9 +47,19 @@ export function MediaInfoWrapperJikan(props) {
             <aside class="left">
               {console.log(jikanData().data)}
               <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
-              <Show when={anilistData()?.data.id}>
-                <A href={"/ani/" + params.type + "/" + anilistData()?.data.id + "/" + formatingUtils.titleToUrl(anilistData()?.data.title.userPreferred)}>Switch to ani</A>
-              </Show>
+              <div class="cp-media-api-switcher">
+                <Show when={anilistData()?.data.id}>
+                  <A href={"/ani/" + params.type + "/" + anilistData()?.data.id + "/" + formatingUtils.titleToUrl(anilistData()?.data.title.userPreferred)}>
+                    <span class="visually-hidden">Switch to anilist mode</span>
+                    <Anilist />
+                  </A>
+                </Show>
+                <a href={jikanData()?.data.url} class="active" target="_black">
+                  <span class="visually-hidden">Go to MyAnimeList</span>
+                  <MyAnimeList />
+                  <ExternalSource />
+                </a>
+              </div>
               <MediaScores />
               <FavouriteToggle
                 checked={isFavourite()}
@@ -83,14 +95,7 @@ export function MediaInfoWrapperJikan(props) {
                   </ol>
                 </div>
               </Show>
-              <ExternalLinks
-                type={params.type}
-                idMal={jikanData()?.data.mal_id}
-                title={jikanData()?.data.title}
-                idAni={anilistData()?.data.id}
-                media={anilistData()?.data}
-                externalLinks={jikanData()?.data.external}
-              />
+              <ExternalLinks externalLinks={jikanData()?.data.external} />
               {/* <ExtraInfo media={anilistData()?.data} loading={loading()} /> */}
               {/* <Rankings rankings={anilistData()?.data.rankings} loading={loading()} /> */}
               {/* <Genres genres={anilistData()?.data.genres} type={anilistData()?.data.type} loading={loading()} /> */}

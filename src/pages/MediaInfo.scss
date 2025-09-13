@@ -146,7 +146,7 @@
       margin-top: -8rem;
     }
 
-    > div {
+    > div:not(.cp-media-api-switcher) {
       background-color: var(--background-400);
     }
   }
