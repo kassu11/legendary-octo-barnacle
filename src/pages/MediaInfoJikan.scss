@@ -1,12 +1,28 @@
 .pg-media-info-jikan {
-  background-color: red;
   width: min(100% - 1rem, 80rem);
   margin-inline: auto;
   display: grid;
   grid-template-columns: 15rem 1fr;
   gap: 1rem;
 
-  .header {
-    background-color: green;
+  .relations {
+    li {
+      background-color: var(--background-400);
+      padding: .5rem 1rem;
+      border-radius: .25rem;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .name {
+      font-weight: 600;
+    }
+
+    .type {
+      color: var(--text-300);
+    }
   }
 }
