@@ -41,7 +41,7 @@ export function Studio() {
             checked={favourite()} 
             variableId={params.id} 
             idType="STUDIO"
-            favourites={studioInfo().data.favourites} 
+            anilistValue={studioInfo().data.favourites} 
             onChange={setFavourite} 
             mutateCache={(isFavourite) => {
               studioInfo().data.isFavourite = isFavourite;

@@ -1,11 +1,15 @@
-.toggle-favourite-button {
+.cp-toggle-favourite-button {
   display: flex;
   background-color: var(--background-400);
   border-radius: .5rem;
   align-items: center;
-  gap: .5rem;
-  padding: .5rem;
+  gap: 1.5rem;
+  padding: .75rem;
   cursor: pointer;
+
+  .svg-heart {
+    height: 2.25rem;
+  }
 
   input {
     all: unset;
@@ -17,8 +21,11 @@
     }
   }
 
-  svg {
-    width: 2rem;
-    height: 2rem;
+  .flex-no-shrink {
+    gap: 2rem;
+
+    svg {
+      height: 1rem;
+    }
   }
 }

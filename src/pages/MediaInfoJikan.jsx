@@ -2,10 +2,11 @@ import { A, useParams } from "@solidjs/router";
 import { MediaInfoContext, useAuthentication } from "../context/providers";
 import { fetchers, fetcherSenders, mediaStatuses } from "../collections/collections";
 import { fetcherSenderUtils, numberUtils, statusUtils, stringUtils } from "../utils/utils";
-import { ErrorBoundary } from "solid-js";
+import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
 import "./MediaInfoJikan.scss";
 import { MediaScores } from "./MediaPage/MediaScores";
 import { Trailer } from "./MediaPage/Trailer";
+import { FavouriteToggle } from "../components/FavouriteToggle";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -15,7 +16,23 @@ export function MediaInfoWrapperJikan(props) {
   const [jikanData] = fetcherSenders.sendWithNullUpdates(jikanFetcher);
 
   const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaByTypeAndMalId, accessToken, () => params.type, () => params.id);
-  const [anilistData] = fetcherSenders.sendWithNullUpdates(anilistFetcher);
+  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithNullUpdates(anilistFetcher);
+
+  const [isFavourite, setIsFavourite] = createSignal();
+  createRenderEffect(on(anilistData, apiResponse => {
+    setIsFavourite(apiResponse?.data?.isFavourite ?? false);
+  }));
+
+  const mutateBothFavourite = (isFavourite, variables) => {
+    const id = variables[anilistData()?.data?.type] ?? null;
+    if (anilistData()?.data?.id === id) {
+      setIsFavourite(isFavourite);
+      mutateBothAnilistData(api => {
+        api.data.isFavourite = isFavourite;
+        return api;
+      });
+    }
+  };
 
   return (
     <ErrorBoundary fallback="Jikan media error">
@@ -26,6 +43,15 @@ export function MediaInfoWrapperJikan(props) {
               {console.log(jikanData().data)}
               <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
               <MediaScores />
+              <FavouriteToggle
+                checked={isFavourite()}
+                onChange={setIsFavourite}
+                idType={anilistData()?.data.type}
+                variableId={anilistData()?.data.id}
+                anilistValue={anilistData()?.data.favourites}
+                jikanValue={jikanData()?.data.favorites}
+                mutateCache={mutateBothFavourite}
+              />
               <Trailer id={jikanData()?.data.trailer?.youtube_id} site="youtube" />
               {/* <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain)}>{edges => ( */}
               {/*   <Show when={edges().length > 0}> */}
@@ -105,7 +131,6 @@ export function MediaInfoWrapperJikan(props) {
                     </li>
                   </Show>
                   <li>Members: {numberUtils.numberCommas(jikanData().data.members || 0) || "N/A"}</li>
-                  <li>Favourites: {numberUtils.numberCommas(jikanData().data.favorites || 0) || "N/A"}</li>
                   <li>Ranked #{jikanData().data.rank || "N/A"}</li>
                   <li>Popularity #{jikanData().data.popularity || "N/A"}</li>
                 </ul>
