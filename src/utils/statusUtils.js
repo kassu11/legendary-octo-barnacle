@@ -28,6 +28,8 @@ export const jikanEnumToFlavorText = status => {
       return "Finished"
     case mediaStatuses.jikan.NotYetAired:
       return "Not yet released"
+    case mediaStatuses.jikan.CurrentlyAiring:
+      return "Releasing"
     default:
       console.error("Unknown media format");
       return status;

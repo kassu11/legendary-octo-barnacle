@@ -24,6 +24,7 @@ export const MANGA = "MANGA";
 // Media statuses
 export const NotYetAired = "Not yet aired";
 export const FinishedAiring = "Finished Airing";
+export const CurrentlyAiring = "Currently Airing";
 
 export const CANCELLED = "CANCELLED";
 export const FINISHED = "FINISHED";

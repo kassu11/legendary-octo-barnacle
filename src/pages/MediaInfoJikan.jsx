@@ -1,12 +1,13 @@
 import { A, useParams } from "@solidjs/router";
 import { MediaInfoContext, useAuthentication } from "../context/providers";
 import { fetchers, fetcherSenders, mediaStatuses } from "../collections/collections";
-import { fetcherSenderUtils, numberUtils, statusUtils, stringUtils } from "../utils/utils";
+import { fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils } from "../utils/utils";
 import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
 import "./MediaInfoJikan.scss";
 import { MediaScores } from "./MediaPage/MediaScores";
 import { Trailer } from "./MediaPage/Trailer";
 import { FavouriteToggle } from "../components/FavouriteToggle";
+import ExternalLinks from "../components/media/ExternalLinks";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -42,6 +43,9 @@ export function MediaInfoWrapperJikan(props) {
             <aside class="left">
               {console.log(jikanData().data)}
               <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
+              <Show when={anilistData()?.data.id}>
+                <A href={"/ani/" + params.type + "/" + anilistData()?.data.id + "/" + formatingUtils.titleToUrl(anilistData()?.data.title.userPreferred)}>Switch to ani</A>
+              </Show>
               <MediaScores />
               <FavouriteToggle
                 checked={isFavourite()}
@@ -85,7 +89,14 @@ export function MediaInfoWrapperJikan(props) {
               {/*     </div> */}
               {/*   </Show> */}
               {/* )}</Show> */}
-              {/* <ExternalLinks media={anilistData()?.data} loading={loading()} /> */}
+              <ExternalLinks
+                type={params.type}
+                idMal={jikanData()?.data.mal_id}
+                title={jikanData()?.data.title}
+                idAni={anilistData()?.data.id}
+                media={anilistData()?.data}
+                externalLinks={jikanData()?.data.external}
+              />
               {/* <ExtraInfo media={anilistData()?.data} loading={loading()} /> */}
               {/* <Rankings rankings={anilistData()?.data.rankings} loading={loading()} /> */}
               {/* <Genres genres={anilistData()?.data.genres} type={anilistData()?.data.type} loading={loading()} /> */}
