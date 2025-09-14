@@ -31,6 +31,7 @@ function modifyMediaListData(listData, type, options) {
     year: options.year,
     private: options.private,
     studio: +options.studio || null,
+    tag: options.tag,
     notes: options.notes,
     repeat: options.repeat,
     userStatus: options.userStatus,
@@ -48,6 +49,7 @@ function modifyMediaListData(listData, type, options) {
   }
 
   const mediaSet = new Set();
+  const tagsSet = new Set();
   listData.data.indecies = {};
   listData.data.studios = {};
   listData.data.lists.forEach((list, i) => {
@@ -58,6 +60,13 @@ function modifyMediaListData(listData, type, options) {
       for (const studio of entry.media.studios.edges) {
         if (studio.isMain) {
           listData.data.studios[studio.node.id] = studio.node.name;
+        } else {
+          break;
+        }
+      }
+      for (const tag of entry.media.tags) {
+        if (tag.rank > 50) {
+          tagsSet.add(tag.name);
         } else {
           break;
         }
@@ -76,6 +85,7 @@ function modifyMediaListData(listData, type, options) {
   });
   listData.data.total = mediaSet.size;
   listData.data.studios = Object.entries(listData.data.studios).sort((a, b) => a[1].localeCompare(b[1]));
+  listData.data.tags = Array.from(tagsSet).sort();
   const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
   listData.data.lists.forEach(list => {
     list.entries.sort(sortFunction);
@@ -190,6 +200,14 @@ function filter(entry, filterObject) {
     for (const studio of entry.media.studios.edges) {
       if (studio.isMain && studio.node.id === filterObject.studio) {
         break studio;
+      }
+    }
+    return false;
+  }
+  if (filterObject.tag) tag: {
+    for (const tag of entry.media.tags) {
+      if (tag.rank > 50 && tag.name=== filterObject.tag) {
+        break tag;
       }
     }
     return false;
