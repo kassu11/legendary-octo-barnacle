@@ -59,6 +59,7 @@ export function MediaList() {
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
   const studio = () => searchParams.studio || "";
+  const tag = () => searchParams.tag || "";
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
     asserts.assertTrue(progressKey, "Progress key is undefined");
@@ -122,6 +123,7 @@ export function MediaList() {
         studio: studio(),
         type: params.type,
         userStatus: userStatus(),
+        tag: tag(),
       };
 
       worker.postMessage(postObject);
@@ -176,6 +178,7 @@ export function MediaList() {
           sort={sort}
           userStatus={userStatus}
           studio={studio}
+          tag={tag}
         />
         <MediaListContainer
           listData={listData}
@@ -338,6 +341,15 @@ function SearchControls(props) {
           )}</For>
         </select>
       </Show>
+      <select name="tag" onChange={e => props.setSearchParams({ tag: e.target.value || undefined })} value={props.tag()}>
+        <option value="" hidden>Tag</option>
+        <Show when={props.tag()}>
+          <option value="">All tags</option>
+        </Show>
+        <For each={props.listData()?.data?.tags}>{tag => (
+          <option value={tag} selected={tag == props.tag()}>{tag}</option>
+        )}</For>
+      </select>
       <input type="number" placeholder="Release year" max="9999" min="0" value={props.year()} onInput={e => props.setSearchParams({ year: e.target.value || undefined })} />
       <Show when={isOwnProfile()}>
         <label htmlFor="private">
@@ -417,6 +429,7 @@ function SearchControls(props) {
               sort: undefined,
               userStatus: undefined,
               studio: undefined,
+              tag: undefined,
             });
           }}>Remove filters</button>
         </Match>
