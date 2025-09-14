@@ -4,7 +4,7 @@ import { formatTitleToUrl, numberCommas, plural } from "../../../utils/formating
 import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
-import { useAuthentication } from "../../../context/providers";
+import { useAuthentication, useUser } from "../../../context/providers";
 
 export function StatsAnimeTags() {
   const params = useParams();
@@ -31,6 +31,7 @@ export function StatsMangaTags() {
 
 function StatsTags(props) {
   const params = useParams();
+  const { user } = useUser();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
@@ -103,6 +104,10 @@ function StatsTags(props) {
               </ol>
             </div>
             <div class="wrapper tags">
+              <div className="flex-space-between">
+                <p>User {params.type}</p>
+                <A href={"/user/" + user().name + "/" + params.type + "?tag=" + genre.tag.name}>Show all</A>
+              </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
             </div>
           </li>
