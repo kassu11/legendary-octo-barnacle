@@ -58,6 +58,7 @@ export function MediaList() {
   const reverse = () => searchParams.reverse === "true";
   const sort = () => searchParams.sort || "score";
   const userStatus = () => searchParams.userStatus || "";
+  const studio = () => searchParams.studio || "";
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
     asserts.assertTrue(progressKey, "Progress key is undefined");
@@ -76,13 +77,13 @@ export function MediaList() {
 
         const list = res.data.lists.at(listIndex);
         list.entries.push(response.data);
-        listData().indecies[mediaId].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
+        listData().data.indecies[mediaId].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
       }
 
-      listData().indecies[mediaId].forEach(([listIndex, entryIndex]) => {
+      listData().data.indecies[mediaId].forEach(([listIndex, entryIndex]) => {
         res.data.lists[listIndex].entries.splice(entryIndex, 1);
       });
-      listData().indecies[mediaId] = [];
+      listData().data.indecies[mediaId] = [];
 
       if (!response.data.hiddenFromStatusLists) {
         const name = converStatusToListName(response.data.status, params.type);
@@ -118,6 +119,7 @@ export function MediaList() {
         notes: notesFilter(),
         repeat: rewatchedFilter(),
         sort: sort(),
+        studio: studio(),
         type: params.type,
         userStatus: userStatus(),
       };
@@ -173,6 +175,7 @@ export function MediaList() {
           reverse={reverse}
           sort={sort}
           userStatus={userStatus}
+          studio={studio}
         />
         <MediaListContainer
           listData={listData}
@@ -281,7 +284,7 @@ function SearchControls(props) {
         <option value="NOT_YET_RELEASED">Not Yet Released</option>
         <option value="CANCELLED">Cancelled</option>
       </select>
-      <select name="genre" onChange={e => props.setSearchParams({ genre: e.target.value || undefined })} value={props.genre() || ""}>
+      <select name="genre" onChange={e => props.setSearchParams({ genre: e.target.value || undefined })} value={props.genre()}>
         <option value="" hidden>Genre</option>
         <Show when={props.genre()}>
           <option value="">All genres</option>
@@ -324,6 +327,17 @@ function SearchControls(props) {
         <option value="false">R-17+</option>
         <option value="true">R-18</option>
       </select>
+      <Show when={params.type === "anime"}>
+        <select name="studio" onChange={e => props.setSearchParams({ studio: e.target.value || undefined })} value={props.studio()}>
+          <option value="" hidden>Studio</option>
+          <Show when={props.studio()}>
+            <option value="">All studios</option>
+          </Show>
+          <For each={props.listData()?.data?.studios}>{([id, name]) => (
+            <option value={id} selected={id == props.studio()}>{name}</option>
+          )}</For>
+        </select>
+      </Show>
       <input type="number" placeholder="Release year" max="9999" min="0" value={props.year()} onInput={e => props.setSearchParams({ year: e.target.value || undefined })} />
       <Show when={isOwnProfile()}>
         <label htmlFor="private">
@@ -401,7 +415,8 @@ function SearchControls(props) {
               notes: undefined,
               repeat: undefined,
               sort: undefined,
-              userStatus: undefined
+              userStatus: undefined,
+              studio: undefined,
             });
           }}>Remove filters</button>
         </Match>
@@ -495,13 +510,13 @@ function MediaListContainer(props) {
 
                                               const list = res.data.lists.at(listIndex);
                                               list.entries.push(responseEntry);
-                                              props.listData().indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
+                                              props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
                                             }
 
-                                            props.listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+                                            props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
                                               res.data.lists[listIndex].entries.splice(entryIndex, 1);
                                             });
-                                            props.listData().indecies[entry.media.id] = [];
+                                            props.listData().data.indecies[entry.media.id] = [];
 
                                             if (!responseEntry.hiddenFromStatusLists) {
                                               const name = converStatusToListName(responseEntry.status, params.type);
@@ -518,7 +533,7 @@ function MediaListContainer(props) {
                                         },
                                         deleteMedia: () => {
                                           props.mutateMediaListCache(res => {
-                                            props.listData().indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+                                            props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
                                               res.data.lists[listIndex].entries.splice(entryIndex, 1);
                                             });
                                             return res;
