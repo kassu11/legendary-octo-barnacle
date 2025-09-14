@@ -336,8 +336,8 @@ function SearchControls(props) {
           <Show when={props.studio()}>
             <option value="">All studios</option>
           </Show>
-          <For each={props.listData()?.data?.studios}>{([id, name]) => (
-            <option value={id} selected={id == props.studio()}>{name}</option>
+          <For each={props.listData()?.data?.studios}>{studio => (
+            <option value={studio} selected={studio == props.studio()}>{studio}</option>
           )}</For>
         </select>
       </Show>

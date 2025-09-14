@@ -30,7 +30,7 @@ function modifyMediaListData(listData, type, options) {
     isAdult: options.isAdult,
     year: options.year,
     private: options.private,
-    studio: +options.studio || null,
+    studio: options.studio,
     tag: options.tag,
     notes: options.notes,
     repeat: options.repeat,
@@ -50,8 +50,8 @@ function modifyMediaListData(listData, type, options) {
 
   const mediaSet = new Set();
   const tagsSet = new Set();
+  const studiosSet = new Set();
   listData.data.indecies = {};
-  listData.data.studios = {};
   listData.data.lists.forEach((list, i) => {
     let tail = 0;
     list.entries.forEach((entry, j, arr) => {
@@ -59,7 +59,7 @@ function modifyMediaListData(listData, type, options) {
       listData.data.indecies[entry.media.id].push([i, j]);
       for (const studio of entry.media.studios.edges) {
         if (studio.isMain) {
-          listData.data.studios[studio.node.id] = studio.node.name;
+          studiosSet.add(studio.node.name);
         } else {
           break;
         }
@@ -84,7 +84,7 @@ function modifyMediaListData(listData, type, options) {
     list.entries.length = tail;
   });
   listData.data.total = mediaSet.size;
-  listData.data.studios = Object.entries(listData.data.studios).sort((a, b) => a[1].localeCompare(b[1]));
+  listData.data.studios = Array.from(studiosSet).sort();
   listData.data.tags = Array.from(tagsSet).sort();
   const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
   listData.data.lists.forEach(list => {
@@ -198,7 +198,7 @@ function filter(entry, filterObject) {
   }
   if (filterObject.studio) studio: {
     for (const studio of entry.media.studios.edges) {
-      if (studio.isMain && studio.node.id === filterObject.studio) {
+      if (studio.isMain && studio.node.name === filterObject.studio) {
         break studio;
       }
     }
