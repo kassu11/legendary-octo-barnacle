@@ -9,6 +9,10 @@
     display: grid;
     align-content: start;
     gap: .25rem;
+
+    select {
+      width: 100%;
+    }
   }
 
   .user-profile-media-list-container {
