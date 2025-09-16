@@ -110,7 +110,6 @@ export function MediaInfoContent(props) {
 
   return (
     <ErrorBoundary fallback="Media page error">
-      {console.log(jikanData())}
       <MediaInfoContext.Provider value={{ anilistData, mutateBothAnilistData, jikanData }}>
         <Banner src={anilistData()?.data?.bannerImage} loading={loading()} />
         <div class="media-page-content" classList={{loading: loading()}}>
@@ -190,7 +189,6 @@ export function MediaInfoContent(props) {
                   </div>
                 </Show>
               )}</Show>
-              {console.log(anilistData()?.data)}
               <ExternalLinks hashtag={anilistData()?.data.hashtag} externalLinks={anilistData()?.data.externalLinks} />
               <ExtraInfo media={anilistData()?.data} loading={loading()} />
               <Rankings rankings={anilistData()?.data.rankings} loading={loading()} />

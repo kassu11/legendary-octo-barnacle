@@ -50,44 +50,12 @@ export function MangaStaff() {
 
 function Entities(props) {
   const params = useParams();
-  const [languages, setLanguages] = createSignal([]);
-  const [language, setLanguage] = createSignal({language: "Japanese", dubGroup: null});
-  const [countryOfOrigin, setCountryOfOrigin] = createSignal("JP");
-
-  if (props.type === "CHARACTER") {
-    createRenderEffect(() => {
-      if (languages().length) {
-        const language = languageFromCountry(countryOfOrigin());
-        const countryOfOriginIndex = languages().findIndex(lang => lang.language === language);
-        const defaultLanguage = countryOfOriginIndex !== -1 ? countryOfOriginIndex : languages().findIndex(lang => lang.language === "Japanese");
-        setLanguage(languages()[defaultLanguage === -1 ? 0 : defaultLanguage]);
-      }
-    });
-  }
 
   return (
     <div class="entities-page">
-      <Show when={languages().length}>
-        <select onChange={e => setLanguage(languages()[e.target.value])} value={languages().findIndex(v => v === language())}>
-          <For each={languages()}>{(lang, i) => (
-            <option value={i()}>
-              {lang.language}
-              <Show when={lang.dubGroup}> ({lang.dubGroup})</Show>
-            </option>
-          )}</For>
-        </select>
-      </Show>
       <Switch>
         <Match when={props.type === "CHARACTER"}>
-          <CharactersReel
-            id={params.id}
-            page={1}
-            setLanguages={setLanguages}
-            setCountryOfOrigin={setCountryOfOrigin}
-            language={language().language}
-            dubGroup={language().dubGroup}
-            setIdMal={props.setIdMal}
-          />
+          <CharactersReel />
         </Match>
         <Match when={props.type === "STAFF"}>
           <ol class="grid-column-auto-fill">
@@ -112,8 +80,9 @@ function updateCacheMap(start, end, cacheMap, entries) {
 }
 
 function CharactersReel(props) {
+  const params = useParams();
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPageless, accessToken, () => props.id);
+  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPageless, accessToken, () => params.id);
   const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = (apiResponse, voiceActorRoles) => {
@@ -173,10 +142,11 @@ function CharactersReel(props) {
 }
 
 function CharactersPage(props) {
+  const params = useParams();
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
   const [hasNextPage, setHasNextPage] = createSignal(true);
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPage, accessToken, props.id, page);
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPage, accessToken, () => params.id, page);
   const [charactersData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
   const [voiceActorRole, setVoiceActorRole] = createSignal({ language: "Japanese", dubGroup: null });
