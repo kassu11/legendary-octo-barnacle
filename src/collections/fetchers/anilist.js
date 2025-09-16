@@ -46,6 +46,15 @@ export const notificationPageless = (token, type) => {
   return fetcherUtils.changeCacheType(fetcher, localizations.onlyIfCached);
 };
 
+export const charactersPage = (token, id, page = 1) => {
+  return fetcherTemplates.anilistAuthNoStore(token, queries.anilistCharacters, { id, page }, res => res.data.Media);
+};
+
+export const charactersPageless = (token, id) => {
+  const fetcher = charactersPage(token, id, "pageless");
+  return fetcherUtils.changeCacheType(fetcher, localizations.onlyIfCached);
+};
+
 
 export const getDemoActivity = (token, variables, page = 1) => {
   if (!variables.isFollowing) {
