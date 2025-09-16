@@ -215,7 +215,7 @@ function NotificationsPage(props) {
         <LoaderCircle class="refresh">
           <Tooltip tipPosition="bottom">
             <Show when={props.cache.length === 0} fallback="Fetching fresh notifications">
-              Loading activities
+              Loading notifications
             </Show>
           </Tooltip>
         </LoaderCircle>
