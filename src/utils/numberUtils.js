@@ -12,3 +12,11 @@ export const compactNumber = num => {
     maximumFractionDigits: 1
   }).format(num);
 }
+
+export const min = (a, b) => {
+  return Math.min(a ?? b, b ?? a);
+}
+
+export const max = (a, b) => {
+  return Math.max(a ?? b, b ?? a);
+}
