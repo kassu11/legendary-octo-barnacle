@@ -90,7 +90,7 @@ function Entities(props) {
           />
         </Match>
         <Match when={props.type === "STAFF"}>
-          <ol class="entities-page-grid">
+          <ol class="grid-column-auto-fill">
             <StaffPage
               id={params.id}
               page={1}
@@ -278,7 +278,7 @@ function CharactersPage(props) {
   return (
     <>
       <Show when={voiceActorRoles().length}>
-        <select onChange={e => setVoiceActorRole(voiceActorRoles()[e.target.value])} value={voiceActorRoles().findIndex(v => v === voiceActorRole())}>
+        <select name="roles" id="roles" onChange={e => setVoiceActorRole(voiceActorRoles()[e.target.value])} value={voiceActorRoles().findIndex(v => v === voiceActorRole())}>
           <For each={voiceActorRoles()}>{(lang, i) => (
             <option value={i()}>
               {lang.language}
@@ -287,7 +287,7 @@ function CharactersPage(props) {
           )}</For>
         </select>
       </Show>
-      <ol class="entities-page-grid">
+      <ol class="grid-column-auto-fill">
         <For each={props.cache}>{(edge, i) => (
           <Show when={edge.voiceActorRoles.filter(role =>
             role.voiceActor.language === voiceActorRole().language && role.dubGroup === voiceActorRole().dubGroup
