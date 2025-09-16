@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api";
-import { batch, createEffect, createMemo, createRenderEffect, createSignal, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createRenderEffect, createSignal, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../utils/formating";
 import { DoomScroll } from "../components/utils/DoomScroll";
@@ -79,17 +79,6 @@ function Entities(props) {
       </Show>
       <Switch>
         <Match when={props.type === "CHARACTER"}>
-          {/* <ol class="entities-page-grid"> */}
-          {/*   <CharactersPage */}
-          {/*     id={params.id} */}
-          {/*     page={1} */}
-          {/*     setLanguages={setLanguages} */}
-          {/*     setCountryOfOrigin={setCountryOfOrigin} */}
-          {/*     language={language().language} */}
-          {/*     dubGroup={language().dubGroup} */}
-          {/*     setIdMal={props.setIdMal} */}
-          {/*   /> */}
-          {/* </ol> */}
           <CharactersReel
             id={params.id}
             page={1}
@@ -127,7 +116,7 @@ function CharactersReel(props) {
   const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPageless, accessToken, () => props.id);
   const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
 
-  const updateCache = apiResponse => {
+  const updateCache = (apiResponse, voiceActorRoles) => {
     if (!apiResponse?.data?.characters.edges?.length) {
       return;
     }
@@ -137,6 +126,7 @@ function CharactersReel(props) {
         api.data = {
           items: apiResponse.data.characters.edges,
           indices: updateCacheMap(0, apiResponse.data.characters.edges.length - 1, {}, apiResponse.data.characters.edges),
+          roles: voiceActorRoles,
         };
         return api;
       }
@@ -165,7 +155,7 @@ function CharactersReel(props) {
         }
       }
 
-
+      api.data.roles = voiceActorRoles;
       return api;
     });
   }
@@ -177,17 +167,50 @@ function CharactersReel(props) {
       <Show when={modes.debug}>
         <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
       </Show>
-      <CharactersPage2 cache={pagelessCacheData()?.data?.items || []} updateCache={updateCache} isDebug={isDebug} {...props} />
+      <CharactersPage cache={pagelessCacheData()?.data?.items || []} roles={pagelessCacheData()?.data?.roles || []} updateCache={updateCache} isDebug={isDebug} {...props} />
     </Show>
   );
 }
 
-function CharactersPage2(props) {
+function CharactersPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
   const [hasNextPage, setHasNextPage] = createSignal(true);
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPage, accessToken, props.id, page);
   const [charactersData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
+
+  const [voiceActorRole, setVoiceActorRole] = createSignal({ language: "Japanese", dubGroup: null });
+  const countryOfOrigin = createMemo(() => charactersData()?.data?.countryOfOrigin || "JP");
+  const voiceActorRoles = createMemo(() => {
+    if (charactersData()?.data?.characters?.pageInfo.currentPage !== 1) {
+      return props.roles;
+    }
+
+    const newLanguages = new Map();
+    for (const edge of charactersData().data.characters.edges) {
+      for (const actorRole of edge.voiceActorRoles) {
+        const key = actorRole.voiceActor.language + actorRole.dubGroup;
+        if (newLanguages.has(key) === false) {
+          newLanguages.set(key, {
+            language: actorRole.voiceActor.language,
+            dubGroup: actorRole.dubGroup
+          });
+        }
+      }
+    }
+
+    return [...newLanguages.values()];
+  });
+
+  createRenderEffect(() => {
+    if (voiceActorRoles().length) {
+      const language = languageFromCountry(countryOfOrigin());
+      const countryOfOriginIndex = voiceActorRoles().findIndex(lang => lang.language === language);
+      const defaultLanguage = countryOfOriginIndex !== -1 ? countryOfOriginIndex : voiceActorRoles().findIndex(lang => lang.language === "Japanese");
+      setVoiceActorRole(voiceActorRoles()[defaultLanguage === -1 ? 0 : defaultLanguage]);
+    }
+  });
+
 
   const freshPages = new Set();
   const triggerPage = leadingAndTrailing(debounce, num => !charactersData.loading && setPage(num), 1000);
@@ -229,7 +252,7 @@ function CharactersPage2(props) {
     setHasNextPage(apiResponse.data.characters.pageInfo.hasNextPage);
 
 
-    props.updateCache(apiResponse);
+    props.updateCache(apiResponse, voiceActorRoles());
     updatePage();
   }));
 
@@ -252,48 +275,11 @@ function CharactersPage2(props) {
   const intersectionObserver = new IntersectionObserver(intersectionCallback, { rootMargin: "500px" });
   onCleanup(() => intersectionObserver.disconnect());
 
-
-
-
-
-  const countryOfOrigin = createMemo(() => charactersData()?.data?.countryOfOrigin || "JP");
-  const languages = createMemo(() => {
-    if (charactersData()?.data?.characters?.pageInfo.currentPage !== 1) {
-      return [];
-    }
-
-    const newLanguages = new Map();
-    for (const edge of charactersData().data.characters.edges) {
-      for (const actorRole of edge.voiceActorRoles) {
-        const key = actorRole.voiceActor.language + actorRole.dubGroup;
-        if (newLanguages.has(key) === false) {
-          newLanguages.set(key, {
-            language: actorRole.voiceActor.language,
-            dubGroup: actorRole.dubGroup
-          });
-        }
-      }
-    }
-
-    return [...newLanguages.values()];
-  });
-
-  const [language, setLanguage] = createSignal({ language: "Japanese", dubGroup: null });
-
-  createRenderEffect(() => {
-    if (languages().length) {
-      const language = languageFromCountry(countryOfOrigin());
-      const countryOfOriginIndex = languages().findIndex(lang => lang.language === language);
-      const defaultLanguage = countryOfOriginIndex !== -1 ? countryOfOriginIndex : languages().findIndex(lang => lang.language === "Japanese");
-      setLanguage(languages()[defaultLanguage === -1 ? 0 : defaultLanguage]);
-    }
-  });
-
   return (
     <>
-      <Show when={languages().length}>
-        <select onChange={e => setLanguage(languages()[e.target.value])} value={languages().findIndex(v => v === language())}>
-          <For each={languages()}>{(lang, i) => (
+      <Show when={voiceActorRoles().length}>
+        <select onChange={e => setVoiceActorRole(voiceActorRoles()[e.target.value])} value={voiceActorRoles().findIndex(v => v === voiceActorRole())}>
+          <For each={voiceActorRoles()}>{(lang, i) => (
             <option value={i()}>
               {lang.language}
               <Show when={lang.dubGroup}> ({lang.dubGroup})</Show>
@@ -301,19 +287,10 @@ function CharactersPage2(props) {
           )}</For>
         </select>
       </Show>
-      <Show when={charactersData.loading && page() === 1}>
-        <LoaderCircle class="refresh">
-          <Tooltip tipPosition="bottom">
-            <Show when={props.cache.length === 0} fallback="Fetching fresh characters">
-              Loading characters
-            </Show>
-          </Tooltip>
-        </LoaderCircle>
-      </Show>
-      <ol class="entities-page-grid" classList={{loading: charactersData.loading && page() === 1}}>
+      <ol class="entities-page-grid">
         <For each={props.cache}>{(edge, i) => (
           <Show when={edge.voiceActorRoles.filter(role =>
-            role.voiceActor.language === language().language && role.dubGroup === language().dubGroup
+            role.voiceActor.language === voiceActorRole().language && role.dubGroup === voiceActorRole().dubGroup
           )}>{voiceActorRoles => (
               <Show when={voiceActorRoles().length} fallback={<CharacterCard edge={edge} page={Math.ceil((i() + 1) / hardcodedPageCount)} intersectionObserver={intersectionObserver} />}>
                 <For each={voiceActorRoles()}>{actorRole => (
@@ -329,66 +306,6 @@ function CharactersPage2(props) {
         </LoaderCircle>
       </Show>
     </>
-  );
-}
-
-function CharactersPage(props) {
-  const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
-  const { accessToken } = useAuthentication();
-  const [characters] = api.anilist.characters(() => props.id, page, accessToken);
-
-  createEffect(() => {
-    if (props.page !== 1 || characters() == null) {
-      return;
-    }
-
-    const newLanguages = new Map();
-    for(const edge of characters().data.characters.edges) {
-      for(const actorRole of edge.voiceActorRoles) {
-        const key = actorRole.voiceActor.language + actorRole.dubGroup;
-        if (newLanguages.has(key) === false) {
-          newLanguages.set(key, { 
-            language: actorRole.voiceActor.language, 
-            dubGroup: actorRole.dubGroup 
-          });
-        }
-      }
-    }
-
-    batch(() => {
-      props.setCountryOfOrigin(characters().data.countryOfOrigin || "JP");
-      props.setLanguages([...newLanguages.values()]);
-      props.setIdMal(characters().data.idMal ?? undefined);
-    });
-  });
-
-  return (
-    <DoomScroll onIntersection={() => setPage(props.page)} fetchResponse={characters} loadingElement={<LoadingCard />} loading={props.loading}>{fetchCooldown => (
-      <>
-        <For each={characters().data.characters.edges}>{edge => (
-          <Show when={edge.voiceActorRoles.filter(role => 
-            role.voiceActor.language === props.language && role.dubGroup === props.dubGroup
-          )}>{voiceActorRoles => (
-              <Show when={voiceActorRoles().length} fallback={<CharacterCard edge={edge}></CharacterCard>}>
-                <For each={voiceActorRoles()}>{actorRole => (
-                  <CharacterCard edge={edge} actorRole={actorRole} />
-                )}</For>
-              </Show>
-            )}</Show>
-        )}</For>
-        <Show when={characters().data.characters.pageInfo.hasNextPage}>
-          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-            <CharactersPage 
-              id={props.id} 
-              page={props.page + 1} 
-              language={props.language} 
-              dubGroup={props.dubGroup} 
-              loading={characters.loading} 
-            />
-          </Show>
-        </Show>
-      </>
-    )}</DoomScroll>
   );
 }
 
