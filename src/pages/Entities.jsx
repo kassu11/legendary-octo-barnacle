@@ -145,10 +145,10 @@ function CharactersPage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const [hasNextPage, setHasNextPage] = createSignal(true);
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPage, accessToken, () => params.id, page);
   const [charactersData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
+  const hasNextPage = createMemo(prev => prev && !(charactersData()?.data?.characters.pageInfo.hasNextPage === false), true);
   const [voiceActorRole, setVoiceActorRole] = createSignal({ language: "Japanese", dubGroup: null });
   const countryOfOrigin = createMemo(() => charactersData()?.data?.countryOfOrigin || "JP");
   const voiceActorRoles = createMemo(() => {
@@ -219,8 +219,6 @@ function CharactersPage(props) {
     asserts.assertTrue(hardcodedPageCount === apiResponse.data.characters.pageInfo.perPage, "Page count is wrong");
 
     freshPages.add(apiResponse.data.characters.pageInfo.currentPage);
-    setHasNextPage(apiResponse.data.characters.pageInfo.hasNextPage);
-
 
     props.updateCache(apiResponse, voiceActorRoles());
     updatePage();
@@ -270,7 +268,7 @@ function CharactersPage(props) {
             )}</Show>
         )}</For>
       </ol>
-      <Show when={charactersData.loading && page() > props.cache.length / hardcodedPageCount && props.cache.length}>
+      <Show when={charactersData.loading &&  page() > Math.ceil(props.cache.length / hardcodedPageCount) && props.cache.length}>
         <LoaderCircle class="new">
           <Tooltip tipPosition="bottom">Loading characters</Tooltip>
         </LoaderCircle>
