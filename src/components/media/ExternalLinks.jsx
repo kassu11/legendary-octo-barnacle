@@ -11,7 +11,7 @@ export default function ExternalLinks(props) {
           <ul>
             <Show when={props.hashtag}>
               <li>
-                <a href={`https://x.com/search?q=${props.hashtag}&src=typd`} target="_blank">{props.hashtag}</a>
+                <a href={`https://nitter.net/search?q=${props.hashtag.replaceAll("#", "%23")}`} target="_blank">{props.hashtag}</a>
               </li>
             </Show>
             <For each={props.externalLinks}>{link => (
