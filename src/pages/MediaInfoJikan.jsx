@@ -48,8 +48,8 @@ export function MediaInfoWrapperJikan(props) {
               {console.log(jikanData().data)}
               <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
               <div class="cp-media-api-switcher">
-                <Show when={anilistData()?.data.id}>
-                  <A href={"/ani/" + params.type + "/" + anilistData()?.data.id + "/" + formatingUtils.titleToUrl(anilistData()?.data.title.userPreferred)}>
+                <Show when={anilistData()?.data?.id}>
+                  <A href={"/ani/" + params.type + "/" + anilistData()?.data?.id + "/" + formatingUtils.titleToUrl(anilistData()?.data?.title.userPreferred)}>
                     <span class="visually-hidden">Switch to anilist mode</span>
                     <Anilist />
                   </A>
@@ -64,9 +64,9 @@ export function MediaInfoWrapperJikan(props) {
               <FavouriteToggle
                 checked={isFavourite()}
                 onChange={setIsFavourite}
-                idType={anilistData()?.data.type}
-                variableId={anilistData()?.data.id}
-                anilistValue={anilistData()?.data.favourites}
+                idType={anilistData()?.data?.type}
+                variableId={anilistData()?.data?.id}
+                anilistValue={anilistData()?.data?.favourites}
                 jikanValue={jikanData()?.data.favorites}
                 mutateCache={mutateBothFavourite}
               />
@@ -97,9 +97,9 @@ export function MediaInfoWrapperJikan(props) {
               </Show>
               <ExternalLinks externalLinks={jikanData()?.data.external} />
               {/* <ExtraInfo media={anilistData()?.data} loading={loading()} /> */}
-              {/* <Rankings rankings={anilistData()?.data.rankings} loading={loading()} /> */}
-              {/* <Genres genres={anilistData()?.data.genres} type={anilistData()?.data.type} loading={loading()} /> */}
-              {/* <Tags tags={anilistData()?.data.tags} type={anilistData()?.data.type} loading={loading()} /> */}
+              {/* <Rankings rankings={anilistData()?.data?.rankings} loading={loading()} /> */}
+              {/* <Genres genres={anilistData()?.data?.genres} type={anilistData()?.data?.type} loading={loading()} /> */}
+              {/* <Tags tags={anilistData()?.data?.tags} type={anilistData()?.data?.type} loading={loading()} /> */}
             </aside>
             <div class="body">
               <div class="header">

@@ -143,6 +143,9 @@ const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, e
         batch(() => {
           setError(true);
           setLoading(false);
+          if (!controller.signal.aborted && !disableNullValues) {
+            setResponse(new ApiResponse(fetcher.cacheKey, null));
+          }
         });
       }
     } else {
