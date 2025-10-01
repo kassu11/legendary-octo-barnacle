@@ -1,6 +1,6 @@
 import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
-import "./index.scss"
+import "./index.css"
 import App from "./App.jsx"
 import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaInfo.jsx"
 import Home from "./pages/Home.jsx"
@@ -91,7 +91,7 @@ render(
             </Route>
             <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, type: ["anime", "manga"] }} component={MediaPageRedirect} />
             <Route path="/:api">
-              <Route path="/:type/:id/:name" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
+              <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
                 <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHome} />
                 <Route path="/:sub" matchFilters={{ sub: "characters" }}>
                   <Route path="/" matchFilters={{ type: "anime" }} component={AnimeCharacters} />
@@ -102,7 +102,7 @@ render(
                   <Route path="/" matchFilters={{ type: "manga" }} component={MangaStaff} />
                 </Route>
               </Route>
-              <Route path="/:type/:id/:name" matchFilters={{ ...idFilter, api: "mal" }} component={MediaInfoWrapperJikan}>
+              <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "mal" }} component={MediaInfoWrapperJikan}>
                 <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHomeJikan} />
               </Route>
             </Route>
