@@ -62,16 +62,6 @@
       }
     }
   }
-  .search-page-content {
-    --grid-column-width: 13rem;
-    // --grid-column-width: 20rem;
-    --line-clamp: 3;
-  }
-
-  .search-result-container {
-    container-type: inline-size;
-    container-name: media-search-results;
-  }
 
   .search-home-content {
     display: grid;
@@ -109,10 +99,6 @@
     a {
       color: inherit;
       text-decoration: none;
-
-      &:not(:hover) .search-card-quick-action {
-        display: none;
-      }
     }
 
     img {
@@ -123,63 +109,6 @@
 
     .container {
       position: relative;
-    }
-  }
-  .search-card-quick-action {
-    position: absolute;
-    right: 0px;
-    bottom: 0px;
-    display: grid;
-    padding: .25rem;
-
-    &:not(:hover) li:nth-child(n + 2) {
-      display: none;
-    }
-  }
-  .search-card-quick-action-items {
-    display: flex;
-    flex-direction: column-reverse;
-    list-style: none;
-    padding: 0;
-    gap: .25rem;
-    align-items: flex-end;
-
-    .item {
-      position: relative;
-      
-      &:hover::before {
-        --tooltip-padding: .5em;
-        left: calc(-1 * var(--tooltip-padding));
-        transform: translateX(-100%) translateY(-50%);
-        top: 50%;
-        position: absolute;
-        content: attr(label);
-        background-color: black;
-        white-space: nowrap;
-        font-weight: 600;
-        padding: .5em;
-        border-radius: .25em;
-        z-index: 1;
-      }
-    }
-
-
-    svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    button {
-      height: 2rem;
-      width: 2rem;
-      padding: .5rem;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-
-      &:hover {
-        background-color: grey;
-      }
     }
   }
 
@@ -339,78 +268,6 @@
     .vertical-search-card-score {
       grid-template-columns: 1.1em auto;
       gap: .5rem;
-    }
-  }
-
-  // Switch hover tooltop to right when when grid-column: auto-fit: 2 columns (small)
-  @container media-search-results (calc(2 * 7em + 1 * .5em) <= width < calc(3 * 7em + 2 * .5em)) {
-    .horizontal-search-card:nth-child(odd) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 3 columns (small)
-  @container media-search-results (calc(3 * 7em + 2 * .5em) <= width < calc(4 * 7em + 3 * .5em)) {
-    .horizontal-search-card:nth-child(3n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 4 columns (small)
-  @container media-search-results (calc(4 * 7em + 3 * .5em) <= width < calc(5 * 7em + 4 * .5em)) {
-    .horizontal-search-card:nth-child(4n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 5 columns (small)
-  @container media-search-results (calc(5 * 7em + 4 * .5em) <= width < calc(6 * 7em + 5 * .5em)) {
-    .horizontal-search-card:nth-child(5n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 3 columns (big)
-  @container media-search-results (calc(6 * 7em + 5 * .5em) <= width < calc(4 * 13em + 3 * 1em)) {
-    .horizontal-search-card:nth-child(3n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 4 columns (big)
-  @container media-search-results (calc(4 * 13em + 3 * 1em) <= width < calc(5 * 13em + 4 * 1em)) {
-    .horizontal-search-card:nth-child(4n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 5 columns (big)
-  @container media-search-results (calc(5 * 13em + 4 * 1em) <= width < calc(6 * 13em + 5 * 1em)) {
-    .horizontal-search-card:nth-child(5n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-  // Switch hover tooltop to right when when grid-column: auto-fit: 6 columns (big)
-  @container media-search-results (calc(6 * 13em + 5 * 1em) <= width < calc(7 * 13em + 6 * 1em)) {
-    .horizontal-search-card:nth-child(6n + 1) .item::before {
-      right: calc(-1 * var(--tooltip-padding)); 
-      left: unset;
-      transform: translateX(100%);
-    } 
-  }
-
-
-  @container media-search-results (width < calc(6 * 7em + 5 * .5em)) {
-    .search-page-content {
-      --grid-column-width: 7rem;
     }
   }
 }

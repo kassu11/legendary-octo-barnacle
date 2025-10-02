@@ -3,7 +3,7 @@ import { functionUtils } from "./utils.js";
 import { asserts, localizations } from "../collections/collections.js";
 
 const createFetcherWithArguments = (fetcherCreator, args) => {
-  asserts.typeFunction(fetcherCreator);
+  asserts.isTypeFunction(fetcherCreator);
 
   const unwrapperArgs = [];
   for (const arg of args) {
