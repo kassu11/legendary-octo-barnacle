@@ -32,10 +32,6 @@
 
       li {
         position: relative;
-
-        &:not(:has(img:hover), :has(:focus-visible)) .recommendation-rating-wrapper:not(:hover) {
-          opacity: 0;
-        }
       }
 
       img {
@@ -90,50 +86,6 @@
       height: 100%;
       aspect-ratio: 16/9;
       object-fit: cover;
-    }
-  }
-
-  .recommendation-rating-wrapper {
-    aspect-ratio: 5.5/8;
-    width: 100%;
-    background-color: transparent;
-    pointer-events: none;
-    position: absolute;
-    display: grid;
-    align-items: end;
-    padding: .5rem;
-    top: 0;
-    transition: backdrop-filter .2s;
-
-    &:hover, &:has(:focus-visible) {
-      backdrop-filter: blur(5px);
-    }
-
-    button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      padding: .25rem;
-
-      &:hover, &:focus-visible {
-        transform: scale(1.2);
-      }
-
-      &.active {
-        color: var(--color, orange);
-      }
-    }
-
-    .flex-space-between {
-      background-color: var(--shadow-300);
-      padding: .5rem .25rem;
-      cursor: default;
-      pointer-events: all;
-      align-items: center;
-    }
-
-    svg {
-      width: 1rem;
     }
   }
 

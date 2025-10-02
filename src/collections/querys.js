@@ -156,6 +156,7 @@ export const anilistMediaById = format`query media($id: Int, $idMal: Int, $type:
           title {
             userPreferred
           }
+          averageScore
           format
           type
           status(version: 2)
@@ -301,6 +302,7 @@ export const anilistRecommendationsById = format`query media($id: Int, $page: In
           }
           format
           type
+          averageScore
           status(version: 2)
           bannerImage
           coverImage {
