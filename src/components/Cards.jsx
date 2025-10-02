@@ -13,11 +13,17 @@ import { QuickActionListButton } from "./Buttons";
 import ThumbUp from "../assets/ThumbUp";
 import ThumbDown from "../assets/ThumbDown";
 
+export function MediaCardContainer(props) {
+  return (
+    <section class="cp-media-card-container" {...props} />
+  );
+}
+
 function AnilistMediaCardListBody(props) {
   asserts.assertTrue(props.media, "Missing media");
 
   return (
-    <li class="cp-media-card">
+    <li class="cp-media-card inline-container">
       <A class="clean-link" href={urlUtils.anilistMediaUrl(props.media)}>
         <div class="wrapper">
           <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />

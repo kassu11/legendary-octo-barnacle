@@ -342,6 +342,86 @@
 
 
 @layer components {
+  .cp-media-card-container {
+    container: media-cards / inline-size;
+    --grid-column-width: 13rem;
+    --gap: 16px;
+
+    @container media-cards (width < calc(6 * 7em + 5 * 8px)) {
+      > * {
+        --grid-column-width: 7rem;
+        --gap: 8px;
+      }
+    }
+
+    .cp-media-card {
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 2 columns (small) */
+      @container media-cards (calc(2 * 7rem + 1 * 8px) <= width < calc(3 * 7rem + 2 * 8px)) {
+        &:nth-child(odd) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 3 columns (small) */
+      @container media-cards (calc(3 * 7rem + 2 * 8px) <= width < calc(4 * 7rem + 3 * 8px)) {
+        &:nth-child(3n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 4 columns (small) */
+      @container media-cards (calc(4 * 7rem + 3 * 8px) <= width < calc(5 * 7rem + 4 * 8px)) {
+        &:nth-child(4n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 5 columns (small) */
+      @container media-cards (calc(5 * 7rem + 4 * 8px) <= width < calc(6 * 7rem + 5 * 8px)) {
+        &:nth-child(5n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 3 columns (big) */
+      @container media-cards (calc(6 * 7rem + 5 * 8px) <= width < calc(4 * 13rem + 3 * 16px)) {
+        &:nth-child(3n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 4 columns (big) */
+      @container media-cards (calc(4 * 13rem + 3 * 16px) <= width < calc(5 * 13rem + 4 * 16px)) {
+        &:nth-child(4n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 5 columns (big) */
+      @container media-cards (calc(5 * 13rem + 4 * 16px) <= width < calc(6 * 13rem + 5 * 16px)) {
+        &:nth-child(5n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+      /* Switch hover tooltop to right when when grid-column: auto-fit: 6 columns (big) */
+      @container media-cards (calc(6 * 13rem + 5 * 16px) <= width < calc(7 * 13rem + 6 * 16px)) {
+        &:nth-child(6n + 1) .cp-media-action-item::before {
+          right: calc(-1 * var(--tooltip-padding));
+          left: unset;
+          transform: translateX(100%) translateY(-50%);
+        }
+      }
+    }
+  }
+
   .cp-media-card-quick-action-items {
     position: absolute;
     right: 0;
@@ -395,6 +475,14 @@
   }
 
   .cp-media-card {
+    &:first-child, .full-span + & {
+      .cp-media-action-item::before {
+        right: calc(-1 * var(--tooltip-padding));
+        left: unset;
+        transform: translateX(100%) translateY(-50%);
+      }
+    }
+
     &:not(:has(.wrapper:hover), :has(:focus-visible)) .cp-media-card-quick-action-items {
       pointer-events: none;
       opacity: 0;
@@ -477,17 +565,17 @@
       padding: 4px 8px;
       border-radius: 8px;
 
+      @container (width < 12rem) {
+        top: 4px;
+        right: 4px;
+      }
+
       svg {
         width: 1rem;
         height: 1rem;
         color: var(--gold-400);
       }
     }
-  }
-
-  .search-page-content {
-    --grid-column-width: 13rem;
-    --gap: 16px;
   }
 
   .horizontal-search-card-section .grid-reel-auto-fill {
@@ -505,85 +593,6 @@
       .search-page-content {
         --grid-column-width: 7rem;
         --gap: 8px;
-      }
-
-      .cp-media-card .score {
-        top: 4px;
-        right: 4px;
-      }
-    }
-
-    .cp-media-card {
-      &:first-child, .full-span + & {
-        .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 2 columns (small) */
-      @container (calc(2 * 7em + 1 * 8px) <= width < calc(3 * 7em + 2 * 8px)) {
-        &:nth-child(odd) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 3 columns (small) */
-      @container (calc(3 * 7em + 2 * 8px) <= width < calc(4 * 7em + 3 * 8px)) {
-        &:nth-child(3n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 4 columns (small) */
-      @container (calc(4 * 7em + 3 * 8px) <= width < calc(5 * 7em + 4 * 8px)) {
-        &:nth-child(4n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 5 columns (small) */
-      @container (calc(5 * 7em + 4 * 8px) <= width < calc(6 * 7em + 5 * 8px)) {
-        &:nth-child(5n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 3 columns (big) */
-      @container (calc(6 * 7em + 5 * 8px) <= width < calc(4 * 13em + 3 * 16px)) {
-        &:nth-child(3n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 4 columns (big) */
-      @container (calc(4 * 13em + 3 * 16px) <= width < calc(5 * 13em + 4 * 16px)) {
-        &:nth-child(4n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 5 columns (big) */
-      @container (calc(5 * 13em + 4 * 16px) <= width < calc(6 * 13em + 5 * 16px)) {
-        &:nth-child(5n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
-      }
-      /* Switch hover tooltop to right when when grid-column: auto-fit: 6 columns (big) */
-      @container (calc(6 * 13em + 5 * 16px) <= width < calc(7 * 13em + 6 * 16px)) {
-        &:nth-child(6n + 1) .cp-media-action-item::before {
-          right: calc(-1 * var(--tooltip-padding)); 
-          left: unset;
-          transform: translateX(100%) translateY(-50%);
-        }
       }
     }
   }

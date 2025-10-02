@@ -25,7 +25,7 @@ import { SeasonInput } from "./Search/SeasonInput.jsx";
 import { moveSeasonObject } from "../utils/dates.js";
 import { asserts } from "../collections/collections.js";
 import { urlUtils } from "../utils/utils.js";
-import { AnilistMediaCard } from "../components/Cards.jsx";
+import { AnilistMediaCard, MediaCardContainer } from "../components/Cards.jsx";
 
 
 
@@ -630,7 +630,7 @@ export function SearchContent(props) {
   const navigate = useNavigate();
 
   return (
-    <div class="inline-container">
+    <>
       <Switch>
         <Match when={params.header?.match(/^(summer|fall|spring|winter)-\d+$/) || params.header === "this-season" || params.header === "next-season"}>
           <ol class="flex-space-between cp-search-season-controls">
@@ -724,7 +724,7 @@ export function SearchContent(props) {
         </Show>
       )}
       </Show>
-      <section>
+      <MediaCardContainer>
         <ol class="search-page-content grid-column-auto-fill">
           <Switch>
             <Match when={debouncedSearchEngine() === "ani"}>
@@ -767,8 +767,8 @@ export function SearchContent(props) {
             </Match>
           </Switch>
         </ol>
-      </section>
-    </div>
+      </MediaCardContainer>
+    </>
   );
 }
 
