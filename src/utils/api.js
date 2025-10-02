@@ -134,9 +134,6 @@ const api = {
     mediaId: reloadCache((id, token) => {
       return Fetch.authAnilist(token, queries.anilistMediaById, { id, perPage: 6 });
     }),
-    recommendationsId: reloadCache((id, page, token) => {
-      return Fetch.authAnilist(token, queries.anilistRecommendationsById, { id, page: page || 1 }, res => res.data.Media.recommendations);
-    }),
     rateRecommendation: async (token, id, rating, mediaId, mediaRecommendationId) => {
       asserts.assertTrue(token, "Token is missing");
       asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");

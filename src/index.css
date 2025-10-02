@@ -128,6 +128,17 @@
     width: 1px;
   }
 
+  .clean-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .absolute-inset {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
   .hidden {
     display: none;
   }
@@ -390,22 +401,63 @@
       position: absolute;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
+    &:not(:hover, :has(:focus-visible)) .recommendation-rating-wrapper {
+      opacity: 0;
     }
 
     .wrapper {
       aspect-ratio: 5.5/8;
       position: relative;
       margin-bottom: 4px;
+    }
 
-      img {
-        position: absolute;
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-        border-radius: 8px;
+    .absolute-inset {
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .recommendation-rating-wrapper {
+      pointer-events: none;
+      display: grid;
+      align-items: end;
+      padding: 8px;
+      transition: backdrop-filter .2s;
+
+
+      &:hover, &:has(:focus-visible) {
+        backdrop-filter: blur(5px);
+      }
+
+      button {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 8px;
+
+        &:hover, &:focus-visible {
+          transform: scale(1.2);
+        }
+
+        &.active {
+          color: var(--color, orange);
+        }
+      }
+
+      .flex-space-between {
+        background-color: var(--shadow-400);
+        padding: 4px;
+        padding-right: 8px;
+        cursor: default;
+        pointer-events: all;
+        align-items: center;
+        border-radius: 4px;
+        font-weight: 500;
+
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -566,10 +618,10 @@
 
 
 /* Debugging styling */
-html {
-  /* font-size: 32px; */
-}
+/* html { */
+/*   font-size: 32px; */
+/* } */
 
-* > * > * {
-  /* background-color: color-mix(in hsl, transparent, red 10%); */
-}
+/* * > * > * { */
+/*   background-color: color-mix(in hsl, transparent, red 10%); */
+/* } */
