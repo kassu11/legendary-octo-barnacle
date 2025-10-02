@@ -31,9 +31,9 @@ export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => sendGen
  * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
  */
 const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal) => {
-  asserts.typeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
-  asserts.typeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
-  asserts.typeFunction(fetcherSignal, "fetcherSignal is not a function");
+  asserts.isTypeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
+  asserts.isTypeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
+  asserts.isTypeFunction(fetcherSignal, "fetcherSignal is not a function");
 
   /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
   const [response, setResponse, setResponseWithoutUpdate] = signals.createCustomSignal(undefined);
@@ -168,7 +168,7 @@ const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, e
       return type;
     }
 
-    asserts.assertTypeString(prev, "If fetcher is same as currentFetcher why is there no previous cacheType");
+    asserts.isTypeString(prev, "prev", "If fetcher is same as currentFetcher why is there no previous cacheType");
 
     // 1 = Highest fresh data
     // 4 = Lowest cache data
@@ -211,7 +211,7 @@ const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, e
     asserts.assertTrue(fetcher instanceof fetcherUtils.Fetcher);
 
     const type = cacheType();
-    asserts.assertTypeString(type);
+    asserts.isTypeString(type, "caheType");
     const isOnDebugSoDontFetch = modes.debug && !fetcher.settings.fetchOnDebug && type !== "no-store";
     const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
     const cacheKey = fetcher.cacheKey;

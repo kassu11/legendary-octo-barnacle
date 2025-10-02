@@ -10,6 +10,8 @@ import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
 import { createStore } from "solid-js/store";
 import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";
 import { asserts } from "../../../collections/collections.js";
+import { QuickActionButton } from "../../../components/Buttons.jsx";
+import Edit from "../../../assets/Edit.jsx";
 
 const useListNavigation = () => {
   const navigate = useNavigate();
@@ -507,58 +509,105 @@ function MediaListContainer(props) {
                               </div>
                             </div>
                             <Show when={isOwnProfile()}>
-                              <div class="search-card-quick-action">
-                                <ul class="search-card-quick-action-items">
-                                  <li class="item" label="Edit media">
-                                    <button onClick={e => {
-                                      e.preventDefault();
-                                      openEditor({ ...entry.media, mediaListEntry: entry }, {
-                                        mutateMedia: responseEntry => {
-                                          props.mutateMediaListCache(res => {
-                                            function pushEntryToList(name, isCustomList) {
-                                              const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
-                                              if (listIndex === -1) {
-                                                res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
-                                              }
+                              <QuickActionButton
+                                big
+                                label="Edit media"
+                                onClick={e => {
+                                  e.preventDefault();
+                                  openEditor({ ...entry.media, mediaListEntry: entry }, {
+                                    mutateMedia: responseEntry => {
+                                      props.mutateMediaListCache(res => {
+                                        function pushEntryToList(name, isCustomList) {
+                                          const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
+                                          if (listIndex === -1) {
+                                            res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
+                                          }
 
-                                              const list = res.data.lists.at(listIndex);
-                                              list.entries.push(responseEntry);
-                                              props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
-                                            }
-
-                                            props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                              res.data.lists[listIndex].entries.splice(entryIndex, 1);
-                                            });
-                                            props.listData().data.indecies[entry.media.id] = [];
-
-                                            if (!responseEntry.hiddenFromStatusLists) {
-                                              const name = converStatusToListName(responseEntry.status, params.type);
-                                              pushEntryToList(name, false);
-                                            }
-
-                                            for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
-                                              if (enabled) {
-                                                pushEntryToList(listName, true);
-                                              }
-                                            }
-                                            return res;
-                                          }, props.updateListInfo);
-                                        },
-                                        deleteMedia: () => {
-                                          props.mutateMediaListCache(res => {
-                                            props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                              res.data.lists[listIndex].entries.splice(entryIndex, 1);
-                                            });
-                                            return res;
-                                          }, props.updateListInfo);
+                                          const list = res.data.lists.at(listIndex);
+                                          list.entries.push(responseEntry);
+                                          props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
                                         }
-                                      });
-                                    }}>
-                                      <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z"></path></svg>
-                                    </button>
-                                  </li>
-                                </ul>
-                              </div>
+
+                                        props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+                                          res.data.lists[listIndex].entries.splice(entryIndex, 1);
+                                        });
+                                        props.listData().data.indecies[entry.media.id] = [];
+
+                                        if (!responseEntry.hiddenFromStatusLists) {
+                                          const name = converStatusToListName(responseEntry.status, params.type);
+                                          pushEntryToList(name, false);
+                                        }
+
+                                        for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
+                                          if (enabled) {
+                                            pushEntryToList(listName, true);
+                                          }
+                                        }
+                                        return res;
+                                      }, props.updateListInfo);
+                                    },
+                                    deleteMedia: () => {
+                                      props.mutateMediaListCache(res => {
+                                        props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+                                          res.data.lists[listIndex].entries.splice(entryIndex, 1);
+                                        });
+                                        return res;
+                                      }, props.updateListInfo);
+                                    }
+                                  });
+                                }}>
+                                <Edit />
+                              </QuickActionButton>
+                              {/* <ul class="cp-media-card-quick-action-items"> */}
+                              {/*   <li class="item" label="Edit media"> */}
+                              {/*     <button onClick={e => { */}
+                              {/*       e.preventDefault(); */}
+                              {/*       openEditor({ ...entry.media, mediaListEntry: entry }, { */}
+                              {/*         mutateMedia: responseEntry => { */}
+                              {/*           props.mutateMediaListCache(res => { */}
+                              {/*             function pushEntryToList(name, isCustomList) { */}
+                              {/*               const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList); */}
+                              {/*               if (listIndex === -1) { */}
+                              {/*                 res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] }); */}
+                              {/*               } */}
+                              {/**/}
+                              {/*               const list = res.data.lists.at(listIndex); */}
+                              {/*               list.entries.push(responseEntry); */}
+                              {/*               props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]); */}
+                              {/*             } */}
+                              {/**/}
+                              {/*             props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => { */}
+                              {/*               res.data.lists[listIndex].entries.splice(entryIndex, 1); */}
+                              {/*             }); */}
+                              {/*             props.listData().data.indecies[entry.media.id] = []; */}
+                              {/**/}
+                              {/*             if (!responseEntry.hiddenFromStatusLists) { */}
+                              {/*               const name = converStatusToListName(responseEntry.status, params.type); */}
+                              {/*               pushEntryToList(name, false); */}
+                              {/*             } */}
+                              {/**/}
+                              {/*             for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) { */}
+                              {/*               if (enabled) { */}
+                              {/*                 pushEntryToList(listName, true); */}
+                              {/*               } */}
+                              {/*             } */}
+                              {/*             return res; */}
+                              {/*           }, props.updateListInfo); */}
+                              {/*         }, */}
+                              {/*         deleteMedia: () => { */}
+                              {/*           props.mutateMediaListCache(res => { */}
+                              {/*             props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => { */}
+                              {/*               res.data.lists[listIndex].entries.splice(entryIndex, 1); */}
+                              {/*             }); */}
+                              {/*             return res; */}
+                              {/*           }, props.updateListInfo); */}
+                              {/*         } */}
+                              {/*       }); */}
+                              {/*     }}> */}
+                              {/*       <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z"></path></svg> */}
+                              {/*     </button> */}
+                              {/*   </li> */}
+                              {/* </ul> */}
                             </Show>
                           </div>
                         </A>

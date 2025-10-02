@@ -30,12 +30,8 @@
       aspect-ratio: 5.5/8;
       object-fit: cover;
     }
-    .search-card-quick-action {
-      top: 0px;
-      bottom: unset;
-    }
 
-    .search-card-quick-action-items button {
+    .cp-media-card-quick-action-items button {
       width: 3rem;
       height: 3rem;
       border-radius: .25rem;
@@ -110,11 +106,9 @@
   }
 
   @media (width < 35em) {
-    .user-page .search-card-quick-action-items button {
-      width: 2rem;
-      height: 2rem;
-      border-radius: .25rem;
-      padding: .5rem;
+    .user-page .cp-media-action-item {
+      width: 32px;
+      height: 32px;
     }
 
     .user-profile-media-list-grid {
