@@ -334,7 +334,7 @@ export function MediaPageRedirect() {
 function StreamingEpisodes(props) {
   return (
     <Show when={props.streamingEpisodes?.length}>
-      <div class="media-page-watch-episodes">
+      <div class="no-overflow media-page-watch-episodes">
         <h2>Watch</h2>
         <ol class="grid-reel-auto-fill">
           <For each={props.streamingEpisodes}>{episode => (
