@@ -8,6 +8,7 @@ import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../components/utils/DoomScroll";
 import { useAuthentication } from "../context/providers";
 import { asserts } from "../collections/collections";
+import { AnilistMediaCard, MediaCardContainer } from "../components/Cards";
 
 export function Studio() {
   const params = useParams();
@@ -98,9 +99,11 @@ export function Studio() {
             <option value="UPDATED_AT_DESC">UPDATED_AT_DESC</option>
           </select>
         </form>
-        <ol class="grid-column-auto-fill">
-          <CharacterMediaPage variables={variables()} studioInfo={studioInfo} showYears={showYears} nestLevel={1} />
-        </ol>
+        <MediaCardContainer>
+          <ol class="grid-column-auto-fill">
+            <CharacterMediaPage variables={variables()} studioInfo={studioInfo} showYears={showYears} nestLevel={1} />
+          </ol>
+        </MediaCardContainer>
       </Show>
     </div>
   )
@@ -176,22 +179,12 @@ function MediaCards(props) {
     }
     return acc;
   }
-  
-  return ( 
+
+  return (
     <For each={props.edges.reduce(merge, [])}>{(edge, i) => (
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
-        <li>
-          <A href={mediaUrl(edge.node)}>
-            <img src={edge.node.coverImage.large} alt="Character" />
-            <p>
-              <Show when={edge.node.mediaListEntry?.status}>
-                <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
-              </Show>
-              {edge.node.title.userPreferred}
-            </p>
-          </A>
-        </li>
+        <AnilistMediaCard media={edge.node} />
       </>
     )}</For>
   );
