@@ -128,6 +128,11 @@
     width: 1px;
   }
 
+  .no-wrap {
+    text-wrap: nowrap;
+    white-space: nowrap;
+  }
+
   .clean-link {
     color: inherit;
     text-decoration: none;
