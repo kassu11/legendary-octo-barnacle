@@ -271,7 +271,7 @@ function StatsEpisodeCountBars(props) {
         <ol>
           <For each={props.data}>{stat => (
             <li>
-              <p>{stat.length || "Unknown"}</p>
+              <p class="no-wrap">{stat.length || "Unknown"}</p>
               <div style={{height: `${stat[state()] / max() * 85}%`}}></div>
               <p>
                 <Show when={state() === "minutesWatched"} fallback={numberCommas(stat[state()])}>
