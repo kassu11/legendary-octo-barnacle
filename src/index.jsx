@@ -25,6 +25,7 @@ import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } fro
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJikan.jsx";
+import "./libs/tooltips.js";
 
 const root = document.getElementById("root")
 
