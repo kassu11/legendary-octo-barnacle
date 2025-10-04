@@ -47,14 +47,14 @@ function updateActiveTooltips() {
 function updateTooltipPositions(tooltip) {
   const positions = tooltip.dataset.tooltipPositions.split(" ");
   const tooltipWrapper = tooltip.closest("[data-tooltip-wrapper]");
+  const wrapperRect = tooltipWrapper?.getBoundingClientRect();
 
   for (const position of positions) {
     tooltip.classList.remove(...positions);
     tooltip.classList.add(position);
     let rect = tooltip.getBoundingClientRect();
 
-    if (tooltipWrapper) {
-      const wrapperRect = tooltipWrapper.getBoundingClientRect();
+    if (wrapperRect) {
       if (rect.left < wrapperRect.left || rect.right > wrapperRect.right || rect.top < wrapperRect.top || rect.bottom > wrapperRect.bottom) {
         continue;
       }
