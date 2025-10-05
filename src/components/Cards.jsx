@@ -121,7 +121,6 @@ export function AnilistMediaRecommendationCard(props) {
 }
 
 export function MalCharacterCard(props) {
-  asserts.assertTrue(props.voiceActors, "voiceActors");
   asserts.assertTrue(props.character, "character");
   asserts.isTypeString(props.role, "role");
 
