@@ -133,16 +133,16 @@ export function MalCharacterCard(props) {
         extra={props.role}
         alt="Character."
       />
-      <Show when={arrayUtils.findOrFirst(props.voiceActors, (voiceActor => (voiceActor.language === localizations.Japanese)))}>{(voiceActor) => (
+      <Show when={props.voiceActor}>
         <CharacterSection
-          href={voiceActor().person.url}
-          src={voiceActor().person.images.jpg.image_url}
-          name={voiceActor().person.name}
-          extra={voiceActor().language}
+          href={props.voiceActor.person.url}
+          src={props.voiceActor.person.images.jpg.image_url}
+          name={props.voiceActor.person.name}
+          extra={props.voiceActor.language}
           alt="Voice actor."
           class="dir-rtl"
         />
-      )}</Show>
+      </Show>
     </li>
   );
 }

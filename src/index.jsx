@@ -26,6 +26,7 @@ import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx"
 import ComparePage from "./pages/ComparePage.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJikan.jsx";
 import "./libs/tooltips.js";
+import { MediaInfoCharactersJikan } from "./pages/MediaInfoCharactersJikan.jsx";
 
 const root = document.getElementById("root")
 
@@ -105,6 +106,7 @@ render(
               </Route>
               <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "mal" }} component={MediaInfoWrapperJikan}>
                 <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHomeJikan} />
+                <Route path="/:sub" matchFilters={{ sub: "characters", type: ["anime", "manga"] }} component={MediaInfoCharactersJikan} />
               </Route>
             </Route>
             <Route path="/user/:name" component={User}>

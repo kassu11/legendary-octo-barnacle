@@ -198,10 +198,15 @@ export function MediaInfoHomeJikan() {
         </Show>
         <Show when={jikanCharactersData()}>
           <div>
-            <h2>Characters</h2>
+            <A href="characters">
+              <h2>Characters</h2>
+            </A>
             <ol class="grid-column-auto-fill">
               <For each={jikanCharactersData().data.slice(0, 6)}>{({voice_actors, ...rest}) => (
-                <MalCharacterCard voiceActors={voice_actors} {...rest} />
+                <MalCharacterCard
+                  voiceActor={arrayUtils.findOrFirst(voice_actors, (({language}) => (language === localizations.Japanese)))}
+                  {...rest}
+                />
               )}</For>
             </ol>
           </div>
