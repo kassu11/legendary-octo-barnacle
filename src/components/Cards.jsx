@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
-import { asserts, localizations } from "../collections/collections";
-import { arrayUtils, urlUtils } from "../utils/utils";
+import { asserts, globalState } from "../collections/collections";
+import { urlUtils } from "../utils/utils";
 import Edit from "../assets/Edit";
 import Planning from "../assets/Planning";
 import Watching from "../assets/Watching";
@@ -45,49 +45,96 @@ function AnilistMediaCardListBody(props) {
   )
 }
 
+function JikanMediaCardListBody(props) {
+  asserts.assertTrue(props.media, "Missing media");
+
+  return (
+    <li class="cp-media-card inline-container">
+      <A class="clean-link" href={urlUtils.jikanMediaUrl(props.type, props.media)}>
+        <div class="wrapper">
+          <img class="absolute-inset" src={props.media.images.webp.image_url} alt="Cover." />
+          <Show when={props.media.score}>
+            <div class="score">
+              <Star /> {(props.media.score)}
+            </div>
+          </Show>
+          {props.children}
+        </div>
+        <p class="line-clamp">
+          <Switch>
+            <Match when={props.media.titles.English}>{props.media.titles.English}</Match>
+            <Match when={props.media.titles.Default}>{props.media.titles.Default}</Match>
+          </Switch>
+        </p>
+      </A>
+    </li>
+  )
+}
+
 export function AnilistMediaCard(props) {
   asserts.assertTrue(props.media, "Missing media");
 
+  return (
+    <AnilistMediaCardListBody {...props}>
+      <QuickActionItemList {...props} />
+    </AnilistMediaCardListBody>
+  );
+}
+
+export function JikanMediaCard(props) {
+  asserts.assertTrue(props.media, "Missing media");
+  asserts.isTypeString(props.type);
+
+  return (
+    <JikanMediaCardListBody {...props}>
+      <Show when={globalState.mediaWithMalId[props.media.mal_id]}>
+        <QuickActionItemList media={globalState.mediaWithMalId[props.media.mal_id]} />
+      </Show>
+    </JikanMediaCardListBody>
+  );
+}
+
+function QuickActionItemList(props) {
   const { openEditor } = useEditMediaEntries();
   const { accessToken } = useAuthentication();
 
+  asserts.assertTrue(props.media, "Missing media");
+
   return (
-    <AnilistMediaCardListBody {...props}>
-      <Show when={accessToken()}>
-        <ul class="cp-media-card-quick-action-items">
-          <QuickActionListButton label="Edit media" onClick={e => {
-            e.preventDefault();
-            openEditor(props.media);
-          }}>
-            <Edit />
-          </QuickActionListButton>
-          <QuickActionListButton label="Set to planning" onClick={e => {
-            e.preventDefault();
-            api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "PLANNING" });
-          }}>
-            <Planning />
-          </QuickActionListButton>
-          <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={e => {
-            e.preventDefault();
-            api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "CURRENT" });
-          }}>
-            <Watching />
-          </QuickActionListButton>
-          <QuickActionListButton label="Set to completed" onClick={e => {
-            e.preventDefault();
-            api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "COMPLETED" });
-          }}>
-            <Complete />
-          </QuickActionListButton>
-          <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={e => {
-            e.preventDefault();
-            api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "REPEAT" });
-          }}>
-            <Rewatched />
-          </QuickActionListButton>
-        </ul>
-      </Show>
-    </AnilistMediaCardListBody>
+    <Show when={accessToken()}>
+      <ul class="cp-media-card-quick-action-items">
+        <QuickActionListButton label="Edit media" onClick={e => {
+          e.preventDefault();
+          openEditor(props.media);
+        }}>
+          <Edit />
+        </QuickActionListButton>
+        <QuickActionListButton label="Set to planning" onClick={e => {
+          e.preventDefault();
+          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "PLANNING" });
+        }}>
+          <Planning />
+        </QuickActionListButton>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={e => {
+          e.preventDefault();
+          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "CURRENT" });
+        }}>
+          <Watching />
+        </QuickActionListButton>
+        <QuickActionListButton label="Set to completed" onClick={e => {
+          e.preventDefault();
+          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "COMPLETED" });
+        }}>
+          <Complete />
+        </QuickActionListButton>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={e => {
+          e.preventDefault();
+          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "REPEAT" });
+        }}>
+          <Rewatched />
+        </QuickActionListButton>
+      </ul>
+    </Show>
   );
 }
 

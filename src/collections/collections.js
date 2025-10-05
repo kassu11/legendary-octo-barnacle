@@ -8,3 +8,4 @@ export * as modes from "./modes.js";
 export * as queries from "./querys.js";
 export * as signals from "./signals.js";
 export * as requests from "./requests/requests.js";
+export * as globalState from "../context/global.js";

@@ -1,6 +1,6 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../utils/api";
-import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps } from "solid-js";
+import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createRenderEffect, createMemo } from "solid-js";
 import "./Search.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl } from "../utils/formating";
 import { createStore } from "solid-js/store";
@@ -23,9 +23,9 @@ import { TwoHeadedRange } from "./Search/TwoHeadedRange";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../utils/virtualSearchParams.js";
 import { SeasonInput } from "./Search/SeasonInput.jsx";
 import { moveSeasonObject } from "../utils/dates.js";
-import { asserts } from "../collections/collections.js";
-import { urlUtils } from "../utils/utils.js";
-import { AnilistMediaCard, MediaCardContainer } from "../components/Cards.jsx";
+import { asserts, fetchers, fetcherSenders, globalState, requests } from "../collections/collections.js";
+import { fetcherSenderUtils, urlUtils } from "../utils/utils.js";
+import { AnilistMediaCard, JikanMediaCard, MediaCardContainer } from "../components/Cards.jsx";
 
 
 
@@ -854,12 +854,40 @@ function AnilistMediaSeasonContent(_props) {
   );
 }
 
+const malIds = new Set();
 function MyAnimeListMediaSearchContent(props) {
+  const { accessToken } = useAuthentication();
   const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
   const [cacheData] = api.myAnimeList.mediaSearchCache(props.type, debouncedSearchVariables, props.page);
   const [mediaData] = api.myAnimeList.mediaSearch(props.type, props.nestLevel === 1 ? () => props.variables : variables, props.page);
   const [newestData, setNewestData] = createSignal();
+
+  const mediaIds = createMemo(prev => {
+    const ids = new Set();
+    newestData()?.forEach(series => ids.add(series.mal_id));
+    const uniqueIds = [...ids.difference(malIds)];
+    if (uniqueIds.length) {
+      uniqueIds.forEach(val => malIds.add(val));
+      return uniqueIds;
+    }
+
+    return prev || [];
+  });
+
+  const mediaVariables = () => ({ idMal_in: mediaIds(), type: props.type.toUpperCase() });
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariables);
+  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+
+  createEffect(on(mediaById, media => {
+    if (!media?.data?.length) {
+      return;
+    }
+
+    const responseAsObject = Object.fromEntries(Object.values(media.data).map(series => ([series.idMal, series])))
+
+    globalState.storeMediaWithMalId(responseAsObject);
+  }));
 
   createEffect(on(cacheData, data => data && setNewestData(data.data.data)));
   createEffect(on(mediaData, data => data && setNewestData(data.data.data)));
@@ -872,7 +900,7 @@ function MyAnimeListMediaSearchContent(props) {
             <Show when={props.variables}>
               {vars => (
                 <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <MyAnimeListMediaSearchContent 
+                  <MyAnimeListMediaSearchContent
                     variables={vars()}
                     type={props.type}
                     page={props.page + 1}
@@ -899,6 +927,10 @@ function MalCardRow(props) {
 
 function MalCard(props) {
   const params = useParams();
+
+  return (
+    <JikanMediaCard media={props.card} type={params.type} />
+  )
   return (
     <li class="horizontal-search-card">
       <A href={urlUtils.jikanMediaUrl(params.type, props.card)} >
