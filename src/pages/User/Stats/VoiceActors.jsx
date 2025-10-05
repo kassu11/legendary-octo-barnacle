@@ -5,6 +5,8 @@ import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
 import { useAuthentication } from "../../../context/providers";
+import { fetchers, fetcherSenders } from "../../../collections/collections";
+import { fetcherSenderUtils } from "../../../utils/utils";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();
@@ -25,7 +27,9 @@ function StatsVoiceActors(props) {
   const [characterIds, setCharacterIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
   const [pageType, setPageType] = createSignal("media");
-  const [mediaById] = api.anilist.mediaIds(() => mediaIds().size > 0 && pageType() === "media" ? [...mediaIds()] : undefined, accessToken);
+  const mediaVariable = () => pageType() === "media" ? ({ id_in: [...mediaIds()] }) : undefined;
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [characterById] = api.anilist.characterIds(() => characterIds().size > 0 && pageType() === "characters" ? [...characterIds()] : undefined, accessToken);
   const [mediaStore, setMediaStore] = createStore({});
   const [characterStore, setCharacterStore] = createStore({});
@@ -133,7 +137,9 @@ function Cards(props) {
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [characterIds, setCharacterIds] = createSignal(new Set());
-  const [mediaById] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
+  const mediaVariable = () => ({ id_in: [...mediaIds()] });
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [characterById] = api.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
   let gridReel;
 

@@ -5,6 +5,8 @@ import { createEffect, createSignal, on } from "solid-js";
 import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
 import { useAuthentication } from "../../../context/providers";
+import { fetcherSenderUtils } from "../../../utils/utils";
+import { fetchers, fetcherSenders } from "../../../collections/collections";
 
 export function StatsAnimeStaff() {
   const params = useParams();
@@ -34,7 +36,9 @@ function StatsStaff(props) {
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
-  const [mediaById, { mutate }] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
+  const mediaVariable = () => ({ id_in: [...mediaIds()] });
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById, { mutate }] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
 
   createEffect(on(() => props.genres, genres => {
@@ -119,7 +123,9 @@ function Cards(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
-  const [mediaById] = api.anilist.mediaIds(() => mediaIds().size > 0 ? [...mediaIds()] : undefined, accessToken);
+  const mediaVariable = () => ({ id_in: [...mediaIds()] });
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {

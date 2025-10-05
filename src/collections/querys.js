@@ -951,10 +951,10 @@ const anilistGetUserMediaStaff = type => format`query ($name: String) {
 export const anilistGetUserMangaStaff = anilistGetUserMediaStaff("manga");
 export const anilistGetUserAnimeStaff = anilistGetUserMediaStaff("anime");
 
-export const anilistGetMediaIds = ids => format`query ($ids: [Int]) {
-  ${[...Array(Math.ceil(ids.length / 50))].map((_, i) => {
+export const anilistGetMediasWithIds = count => format`query ($type: MediaType, $id_in: [Int], $idMal_in: [Int]) {
+  ${[...Array(Math.ceil(count / 50))].map((_, i) => {
     return `page${i + 1}: Page(page: ${i + 1}) {
-      media(id_in: $ids) {
+      media(type: $type, id_in: $id_in, idMal_in: $idMal_in) {
         ...media
       }
     }`;
@@ -963,6 +963,7 @@ export const anilistGetMediaIds = ids => format`query ($ids: [Int]) {
 
 fragment media on Media {
   id
+  idMal
   type
   bannerImage
   title {
