@@ -15,6 +15,18 @@ export const activityPageless = (token, variables) => {
 export const getMediaById = (token, id) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { id }, res => res.data.Media);
 };
+
+export const getMediasWithIds = (token, variables) => {
+  asserts.assertTrue(variables.id_in || variables.idMal_in, "Missing list for ids");
+  const count = variables.id_in?.length || variables.idMal_in?.length;
+  if (!count) {
+    return;
+  }
+
+
+  return fetcherTemplates.anilistAuth(token, queries.anilistGetMediasWithIds(count), variables, res => Object.values(res.data).map(page => page.media).flat());
+};
+
 export const getRecommendationsByid = (token, id, page = 1) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistRecommendationsById, { id, page }, res => res.data.Media.recommendations);
 };
