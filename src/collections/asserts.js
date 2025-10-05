@@ -13,3 +13,9 @@ export const isTypeString = (value, varName = "Value", message = "") => assertTr
 export const isTypeFunction = (value, varName = "Value", message = "") => assertTrue(typeof value === "function", varName + " is not type of function. " + message);
 export const isTypeInteger = (value, varName = "Value", message = "") => assertTrue(Number.isInteger(value), varName + " is not type of integer. " + message);
 
+export const isInteger = (value, varName = "Value", message = "") => {
+  const localMessage = varName + " is not integer. " + message;
+  assertTrue(typeof value === "string" || Number.isInteger(value), localMessage);
+  assertTrue(value && Number.isInteger(+value), localMessage);
+}
+

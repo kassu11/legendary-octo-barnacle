@@ -49,7 +49,7 @@ export const addPendingRequestToUrl = url => {
   if (url.includes(localizations.anilist)) {
     requests.anilist.addPendingRequest();
   } else if (url.includes(localizations.jikan)) {
-    requests.anilist.addPendingRequest();
+    requests.jikan.addPendingRequest();
   }
 }
 
@@ -57,6 +57,6 @@ export const removePendingRequestToUrl = url => {
   if (url.includes(localizations.anilist)) {
     requests.anilist.removePendingRequest();
   } else if (url.includes(localizations.jikan)) {
-    requests.anilist.removePendingRequest();
+    requests.jikan.removePendingRequest();
   }
 }

@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
-import { asserts } from "../collections/collections";
-import { urlUtils } from "../utils/utils";
+import { asserts, localizations } from "../collections/collections";
+import { arrayUtils, urlUtils } from "../utils/utils";
 import Edit from "../assets/Edit";
 import Planning from "../assets/Planning";
 import Watching from "../assets/Watching";
@@ -118,4 +118,46 @@ export function AnilistMediaRecommendationCard(props) {
       </div>
     </AnilistMediaCardListBody>
   );
+}
+
+export function MalCharacterCard(props) {
+  asserts.assertTrue(props.voiceActors, "voiceActors");
+  asserts.assertTrue(props.character, "character");
+  asserts.isTypeString(props.role, "role");
+
+  return (
+    <li class="cp-character-card">
+      <CharacterSection
+        href={props.character.url}
+        src={props.character.images.webp.image_url}
+        name={props.character.name}
+        extra={props.role}
+        alt="Character."
+      />
+      <Show when={arrayUtils.findOrFirst(props.voiceActors, (voiceActor => (voiceActor.language === localizations.Japanese)))}>{(voiceActor) => (
+        <CharacterSection
+          href={voiceActor().person.url}
+          src={voiceActor().person.images.jpg.image_url}
+          name={voiceActor().person.name}
+          extra={voiceActor().language}
+          alt="Voice actor."
+          class="dir-rtl"
+        />
+      )}</Show>
+    </li>
+  );
+}
+
+function CharacterSection(props) {
+  asserts.isTypeString(props.alt);
+
+  return (
+    <a className="clean-link flex" class={props.class} href={props.href}>
+      <img src={props.src} alt={props.alt} />
+      <div class="full-width grid">
+        <span>{props.name}</span>
+        <span>{props.extra}</span>
+      </div>
+    </a>
+  )
 }
