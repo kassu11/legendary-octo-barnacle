@@ -1,7 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import { MediaInfoContext, useAuthentication, useMediaInfo } from "../context/providers";
-import { fetchers, fetcherSenders, mediaStatuses } from "../collections/collections";
-import { fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../utils/utils";
+import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from "../collections/collections";
+import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../utils/utils";
 import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
 import "./MediaInfoJikan.scss";
 import { MediaScores } from "./MediaPage/MediaScores";
@@ -12,6 +12,7 @@ import ExternalSource from "../assets/ExternalSource.jsx";
 import { Markdown } from "../components/Markdown";
 import MyAnimeList from "../assets/MyAnimeList";
 import Anilist from "../assets/Anilist";
+import { MalCharacterCard } from "../components/Cards.jsx";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -41,9 +42,9 @@ export function MediaInfoWrapperJikan(props) {
 
   return (
     <ErrorBoundary fallback="Jikan media error">
-      <Show when={jikanData()}>
-        <MediaInfoContext.Provider value={{ anilistData, jikanData }}>
-          <div class="pg-media-info-jikan">
+      <MediaInfoContext.Provider value={{ anilistData, jikanData }}>
+        <div class="pg-media-info-jikan">
+          <Show when={jikanData()}>
             <aside class="left">
               {console.log(jikanData().data)}
               <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
@@ -101,7 +102,9 @@ export function MediaInfoWrapperJikan(props) {
               {/* <Genres genres={anilistData()?.data?.genres} type={anilistData()?.data?.type} loading={loading()} /> */}
               {/* <Tags tags={anilistData()?.data?.tags} type={anilistData()?.data?.type} loading={loading()} /> */}
             </aside>
-            <div class="body">
+          </Show>
+          <div class="body">
+            <Show when={jikanData()}>
               <div class="header">
                 <h1>{jikanData().data.title}</h1>
                 <ul class="flex-bullet-separator">
@@ -145,47 +148,67 @@ export function MediaInfoWrapperJikan(props) {
                   <li>Popularity #{jikanData().data.popularity || "N/A"}</li>
                 </ul>
               </div>
-              {props.children}
-            </div>
+            </Show>
+            {props.children}
           </div>
-        </MediaInfoContext.Provider>
-      </Show>
+        </div>
+      </MediaInfoContext.Provider>
     </ErrorBoundary>
   );
 }
 
 export function MediaInfoHomeJikan() {
+  const params = useParams();
   const { jikanData } = useMediaInfo();
+
+  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() > 0 })
+  const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
+
   return (
     <>
-      <Show when={jikanData().data.synopsis}>
-        <div>
-          <Markdown text={jikanData().data.synopsis} />
-        </div>
-      </Show>
-      <Show when={jikanData().data.background}>
-        <div>
-          <strong>Background</strong>
-          <Markdown text={jikanData().data.background} />
-        </div>
-      </Show>
-      <Show when={jikanData().data.relations?.length}>
-        <div class="relations">
-          <h2>Relations</h2>
-          <ol class="grid-column-auto-fill">
-            <For each={jikanData().data.relations}>{relation => (
-              <For each={relation.entry}>{entry => (
-                <li>
-                  <A class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
-                    <p class="name line-clamp">{entry.name}</p>
-                    <p class="type">{relation.relation} ({formatingUtils.capitalize(entry.type)})</p>
-                  </A>
-                </li>
+      <Show when={jikanData()}>
+        <Show when={jikanData().data.synopsis}>
+          <div>
+            <Markdown text={jikanData().data.synopsis} />
+          </div>
+        </Show>
+        <Show when={jikanData().data.background}>
+          <div>
+            <strong>Background</strong>
+            <Markdown text={jikanData().data.background} />
+          </div>
+        </Show>
+        <Show when={jikanData().data.relations?.length}>
+          <div class="relations">
+            <h2>Relations</h2>
+            <ol class="grid-column-auto-fill">
+              <For each={jikanData().data.relations}>{relation => (
+                <For each={relation.entry}>{entry => (
+                  <li>
+                    <A class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
+                      <p class="name line-clamp">{entry.name}</p>
+                      <p class="type">{relation.relation} ({formatingUtils.capitalize(entry.type)})</p>
+                    </A>
+                  </li>
+                )}</For>
               )}</For>
-            )}</For>
-          </ol>
-        </div>
+            </ol>
+          </div>
+        </Show>
+        <Show when={jikanCharactersData()}>
+          <div>
+            <h2>Characters</h2>
+            <ol class="grid-column-auto-fill">
+              <For each={jikanCharactersData().data.slice(0, 6)}>{({voice_actors, ...rest}) => (
+                <MalCharacterCard voiceActors={voice_actors} {...rest} />
+              )}</For>
+            </ol>
+          </div>
+        </Show>
+        {console.log("jikan", jikanData())}
       </Show>
+      {console.log("characters", jikanCharactersData())}
     </>
   );
 }

@@ -152,14 +152,14 @@ function YearHeader(props) {
       <Switch>
         <Match when={props.index() === 0}>
           <Show when={props.lastYearGroup !== (props.edge.node.startDate?.year || "TBA")}>
-            <li class="full-span">
+            <li class="grid-full-span">
               <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
             </li>
           </Show>
         </Match>
         <Match when={true}>
           <Show when={props.edges[props.index() - 1].node.startDate?.year !== props.edge.node.startDate?.year}>
-            <li class="full-span">
+            <li class="grid-full-span">
               <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
             </li>
           </Show>

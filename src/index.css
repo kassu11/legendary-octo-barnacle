@@ -304,8 +304,26 @@
   }
 
 
-  .full-span {
+  .grid-full-span {
     grid-column: 1/-1;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .dir-rtl {
+    direction: rtl;
+  }
+
+  .flex {
+    display: flex;
+    gap: 8px;
+  }
+
+  .grid {
+    display: grid;
+    gap: 8px;
   }
 
   .flex-space-between {
@@ -524,6 +542,32 @@
         height: 1rem;
         color: var(--gold-400);
       }
+    }
+  }
+
+  .cp-character-card {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+    word-break: break-word;
+    background-color: var(--bg);
+
+    .grid-column-auto-fill:has(> &) {
+      --grid-column-width: 25rem;
+    }
+
+    .grid {
+      padding-block: 8px;
+      gap: 4px;
+      align-content: space-between;
+    }
+
+    img {
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+      width: 64px;
+      height: 100%;
     }
   }
 

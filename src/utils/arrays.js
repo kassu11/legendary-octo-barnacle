@@ -1,15 +1,17 @@
 import { asserts } from "../collections/collections";
 
+const isArray = value => Array.isArray(value);
+
 export function objectFromArrayEntries(arr, defaultRetun) {
   if (!arr) {
     return defaultRetun || null;
-  } else if (Array.isArray(arr)) {
+  } else if (isArray(arr)) {
     return Object.fromEntries(arr.map(v => ([v, true])));
   } return {[arr]: true};
 }
 
 export function wrapToArray(value) {
-  if (Array.isArray(value)) {
+  if (isArray(value)) {
     return value;
   } else if (value) {
     return [value];
@@ -23,7 +25,7 @@ export function wrapToSet(value) {
 }
 
 export function removeDuplicateIgnoreCaseSensitivity(array) {
-  asserts.assertTrue(Array.isArray(array), "Not array");
+  asserts.assertTrue(isArray(array), "Not array");
   const map = new Map();
   array.forEach(value => map.set(value.toLowerCase(), value));
   return Array.from(map.values());
@@ -36,7 +38,7 @@ export function compare(a, b) {
   if (typeof a !== typeof b) {
     return false;
   } 
-  if (Array.isArray(a)) {
+  if (isArray(a)) {
     return a.length === b.length && a.every((v, i) => compare(v, b[i]))
   }
 
@@ -44,7 +46,7 @@ export function compare(a, b) {
 }
 
 export function first(value) {
-  return Array.isArray(value) ? value[0] : value;
+  return isArray(value) ? value[0] : value;
 }
 
 export function binarySearchFindIndex(arr, callback, left = 0, right = arr.length - 1) {
@@ -93,6 +95,16 @@ export function binarySearchFindAlwaysIndex(arr, callback, left = 0, right = arr
   } else {
     return left - 1;
   }
+}
+
+export const findOrFirst = (array, findCallback, defaultReturn) => {
+  asserts.isTypeFunction(findCallback);
+
+  if (!isArray(array) || array.length === 0) {
+    return defaultReturn;
+  }
+
+  return array.find(findCallback) ?? array[0] ?? defaultReturn;
 }
 
 // const test = (finder, arr, valueToFind, expect, desc = "") => {
@@ -148,7 +160,7 @@ export function binarySearchIndexOf(arr, el, left = 0, right = arr.length - 1) {
 }
 
 export function atPercent(array, percent) {
-  if (!Array.isArray(array)) {
+  if (!isArray(array)) {
     return undefined;
   }
 

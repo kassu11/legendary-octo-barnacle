@@ -11,7 +11,7 @@
     height: fit-content;
   }
 
-  .left > div:not(.cp-media-api-switcher) {
+  > .left > div:not(.cp-media-api-switcher) {
     background-color: var(--background-400);
   }
 

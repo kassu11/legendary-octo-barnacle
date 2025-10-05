@@ -830,7 +830,7 @@ function AnilistMediaSeasonContent(_props) {
   return (
     <Show when={mediaData()}>
       <Show when={props.title && mediaData().data.media.length}>
-        <li class="full-span">
+        <li class="grid-full-span">
           <h2>{props.title}</h2>
         </li>
       </Show>
@@ -918,14 +918,14 @@ function AniCardRowWithFormatHeader(props) {
   return (
     <>
       <Show when={props.data[0] && props.lastFormat !== props.data[0].format}>
-        <li class="full-span">
+        <li class="grid-full-span">
           <h2>{formatMediaFormat(props.data[0].format) || "Unknown format"}</h2>
         </li>
       </Show>
       <For each={props.data}>{(media, i) => (
         <>
           <Show when={i() > 0 && props.data[i() - 1].format !== media.format}>
-            <li class="full-span">
+            <li class="grid-full-span">
               <h2>{formatMediaFormat(media.format)}</h2>
             </li>
           </Show>

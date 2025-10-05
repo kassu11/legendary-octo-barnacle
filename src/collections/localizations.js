@@ -21,6 +21,9 @@ export const ANIME = "ANIME";
 export const MANGA = "MANGA";
 
 
+export const Japanese = "Japanese";
+
+
 // Media statuses
 export const NotYetAired = "Not yet aired";
 export const FinishedAiring = "Finished Airing";
