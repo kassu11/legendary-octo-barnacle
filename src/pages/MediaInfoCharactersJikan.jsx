@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { useMediaInfo } from "../context/providers";
-import { fetchers, fetcherSenders, localizations, requests } from "../collections/collections";
+import { fetchers, fetcherSenders, localizations, requests, signals } from "../collections/collections";
 import { fetcherSenderUtils } from "../utils/utils";
 import { createMemo, createSignal } from "solid-js";
 import { MalCharacterCard } from "../components/Cards.jsx";
@@ -13,7 +13,7 @@ export function MediaInfoCharactersJikan() {
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() > 0 })
   const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 
-  const [language, setLanguage] = createSignal(localizations.Japanese);
+  const [language, setLanguage] = signals.localStorageString(localizations.Japanese);
   const languages = createMemo(() => {
     const uniqueLanguages = new Set();
     const characters = jikanCharactersData()?.data;
