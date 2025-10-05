@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { useMediaInfo } from "../context/providers";
 import { fetchers, fetcherSenders, localizations, requests, signals } from "../collections/collections";
 import { fetcherSenderUtils } from "../utils/utils";
-import { createMemo, createSignal } from "solid-js";
+import { createMemo } from "solid-js";
 import { MalCharacterCard } from "../components/Cards.jsx";
 
 export function MediaInfoCharactersJikan() {
