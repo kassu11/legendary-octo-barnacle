@@ -555,6 +555,9 @@
 
     .grid-column-auto-fill:has(> &) {
       --grid-column-width: 25rem;
+      &.manga {
+        --grid-column-width: 20rem;
+      }
     }
 
     .grid {

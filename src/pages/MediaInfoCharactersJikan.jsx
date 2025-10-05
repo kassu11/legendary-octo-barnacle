@@ -1,0 +1,61 @@
+import { useParams } from "@solidjs/router";
+import { useMediaInfo } from "../context/providers";
+import { fetchers, fetcherSenders, localizations, requests } from "../collections/collections";
+import { fetcherSenderUtils } from "../utils/utils";
+import { createMemo, createSignal } from "solid-js";
+import { MalCharacterCard } from "../components/Cards.jsx";
+
+export function MediaInfoCharactersJikan() {
+  const params = useParams();
+  const { jikanData } = useMediaInfo();
+
+  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() > 0 })
+  const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
+
+  const [language, setLanguage] = createSignal(localizations.Japanese);
+  const languages = createMemo(() => {
+    const uniqueLanguages = new Set();
+    const characters = jikanCharactersData()?.data;
+    if (!characters?.length) {
+      return [];
+    }
+
+    characters.forEach(char => {
+      char.voice_actors?.forEach(actor => uniqueLanguages.add(actor.language));
+    });
+
+    const returnValues = [...uniqueLanguages].sort();
+
+    setLanguage(lang => uniqueLanguages.has(lang) ? lang : returnValues[0]);
+
+    return returnValues;
+  });
+
+  return (
+    <>
+      <Show when={jikanData()}>
+        <Show when={jikanCharactersData()}>
+          <div>
+            <Show when={languages().length}>
+              <select onChange={e => setLanguage(e.target.value)} value={language()}>
+                <For each={languages()}>{lang => (
+                  <option value={lang}>{lang}</option>
+                )}</For>
+              </select>
+            </Show>
+            <ol className="grid-column-auto-fill" class={params.type}>
+              <For each={jikanCharactersData().data}>{({voice_actors, ...rest}) => (
+                <MalCharacterCard
+                  voiceActor={voice_actors?.find(actor => (actor.language === language()))}
+                  language={language()}
+                  {...rest}
+                />
+              )}</For>
+            </ol>
+          </div>
+        </Show>
+      </Show>
+    </>
+  );
+}
