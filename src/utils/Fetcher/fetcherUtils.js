@@ -1,5 +1,5 @@
 import { FetchSettings } from "./FetchSettings";
-import { asserts } from "../../collections/collections.js";
+import { asserts, localizations } from "../../collections/collections.js";
 import { requestUtils } from "../utils.js";
 
 export class Fetcher {
@@ -62,6 +62,8 @@ export const fetcherToFetch = (fetcher, signal) => {
 const fetchRequests = {};
 const fetchResponses = {};
 
+let invalidTokenErrorsInARow = 0;
+
 /** @param {Fetcher} fetcher */
 export const fetchData = async (fetcher, signal) => {
   try {
@@ -89,12 +91,25 @@ export const fetchData = async (fetcher, signal) => {
         const time = parseInt(response.headers.get("Retry-After"));
         await new Promise(res => setTimeout(res, time * 1000));
         continue;
+      } else if (response?.status === 400 && invalidTokenErrorsInARow < 3) {
+        // Anilist sometimes sends invalid token errors when the token is infact valid
+        requestUtils.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
+        const json = await response.json();
+        if (json.errors.some(error => error.message === "Invalid token")) {
+          invalidTokenErrorsInARow++;
+          await new Promise(res => setTimeout(res, 3_000));
+          continue;
+        }
       } else if (delay) {
         requestUtils.initializeOrAddToWaitingQueueForUrl(fetcher.url, resolve);
         await new Promise(res => setTimeout(res, delay));
         continue;
       } else if (!response?.ok) {
         return null;
+      }
+
+      if (fetcher.url.includes(localizations.anilist)) {
+        invalidTokenErrorsInARow = 0;
       }
 
       try {
