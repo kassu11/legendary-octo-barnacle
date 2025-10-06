@@ -137,9 +137,13 @@
     white-space: nowrap;
   }
 
-  .clean-link {
+  .clean-link, .block-link {
     color: inherit;
     text-decoration: none;
+  }
+
+  .block-link {
+    display: block;
   }
 
   .absolute-inset {

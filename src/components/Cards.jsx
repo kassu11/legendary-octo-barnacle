@@ -24,7 +24,7 @@ function AnilistMediaCardListBody(props) {
 
   return (
     <li class="cp-media-card inline-container">
-      <A class="clean-link" href={urlUtils.anilistMediaUrl(props.media)}>
+      <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
         <div class="wrapper">
           <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />
           <Show when={props.media.averageScore}>
@@ -50,7 +50,7 @@ function JikanMediaCardListBody(props) {
 
   return (
     <li class="cp-media-card inline-container">
-      <A class="clean-link" href={urlUtils.jikanMediaUrl(props.type, props.media)}>
+      <A class="block-link" href={urlUtils.jikanMediaUrl(props.type, props.media)}>
         <div class="wrapper">
           <img class="absolute-inset" src={props.media.images.webp.image_url} alt="Cover." />
           <Show when={props.media.score}>
@@ -198,7 +198,7 @@ function CharacterSection(props) {
   asserts.isTypeString(props.alt);
 
   return (
-    <a className="clean-link flex" class={props.class} href={props.href}>
+    <a className="block-link flex" class={props.class} href={props.href}>
       <img src={props.src} alt={props.alt} />
       <div class="full-width grid">
         <span>{props.name}</span>
