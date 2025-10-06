@@ -358,7 +358,6 @@ export const myAnimeListMangaById = id => `https://api.jikan.moe/v4/manga/${id}/
 export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/anime/${id}/characters`;
 export const myAnimeListMangaCharactersById = id => `https://api.jikan.moe/v4/manga/${id}/characters`;
 export const myAnimeListAnimeStaffById = id => `https://api.jikan.moe/v4/anime/${id}/staff`;
-export const myAnimeListMangaStaffById = id => `https://api.jikan.moe/v4/manga/${id}/staff`;
 export const myAnimeListMediaSearch = (type, query) => `https://api.jikan.moe/v4/${type}?${query}`;
 export const myAnimeListMediaGenres = (type) => `https://api.jikan.moe/v4/genres/${type}`;
 
