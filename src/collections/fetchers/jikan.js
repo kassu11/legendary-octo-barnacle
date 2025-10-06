@@ -21,8 +21,8 @@ export const getCharactersByMediaId = (type, id) => {
 export const getStaffByMediaId = (type, id) => {
   asserts.isTypeString(type, "type");
   asserts.isInteger(id, "id");
-  switch (type) {
-    case localizations.anime: return fetcherTemplates.getJSON(queries.myAnimeListAnimeStaffById(id), res => res.data);
-    case localizations.manga: return fetcherTemplates.getJSON(queries.myAnimeListMangaStaffById(id), res => res.data);
+
+  if (type === localizations.anime) {
+    return fetcherTemplates.getJSON(queries.myAnimeListAnimeStaffById(id), res => res.data);
   }
 };

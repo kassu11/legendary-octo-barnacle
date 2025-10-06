@@ -203,8 +203,14 @@ const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, e
   });
 
   createRenderEffect(() => {
+    if (isDisabled()) {
+      return;
+    };
+
     const fetcher = fetcherSignal();
-    if (!fetcher || isDisabled()) {
+    if (!fetcher) {
+      currentFetcher = null;
+      setResponse(undefined);
       return;
     };
 
