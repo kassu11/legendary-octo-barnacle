@@ -12,7 +12,7 @@ import ExternalSource from "../assets/ExternalSource.jsx";
 import { Markdown } from "../components/Markdown";
 import MyAnimeList from "../assets/MyAnimeList";
 import Anilist from "../assets/Anilist";
-import { MalCharacterCard } from "../components/Cards.jsx";
+import { MalCharacterCard, MalStaffCard } from "../components/Cards.jsx";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -161,9 +161,12 @@ export function MediaInfoHomeJikan() {
   const params = useParams();
   const { jikanData } = useMediaInfo();
 
-  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
+  const jikanCharacterFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() > 0 })
-  const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
+  const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanCharacterFetcher);
+
+  const jikanStaffFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getStaffByMediaId, () => params.type, () => params.id);
+  const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanStaffFetcher);
 
   return (
     <>
@@ -207,6 +210,18 @@ export function MediaInfoHomeJikan() {
                   voiceActor={arrayUtils.findOrFirst(voice_actors, (({language}) => (language === localizations.Japanese)))}
                   {...rest}
                 />
+              )}</For>
+            </ol>
+          </div>
+        </Show>
+        <Show when={jikanStaffData()}>
+          <div>
+            <A href="staff">
+              <h2>Staff</h2>
+            </A>
+            <ol class="grid-column-auto-fill">
+              <For each={jikanStaffData().data.slice(0, 6)}>{({person, positions}) => (
+                <MalStaffCard staff={person} positions={positions} />
               )}</For>
             </ol>
           </div>
