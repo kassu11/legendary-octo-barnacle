@@ -575,6 +575,7 @@
       object-fit: cover;
       width: 64px;
       height: 100%;
+      flex-shrink: 0;
     }
   }
 

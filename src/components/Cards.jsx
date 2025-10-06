@@ -194,13 +194,30 @@ export function MalCharacterCard(props) {
   );
 }
 
+export function MalStaffCard(props) {
+  asserts.assertTrue(props.staff, "staff");
+  asserts.assertTrue(props.positions, "positions");
+
+  return (
+    <li class="cp-character-card">
+      <CharacterSection
+        href={props.staff.url}
+        src={props.staff.images.jpg.image_url}
+        name={props.staff.name}
+        extra={props.positions.join(", ")}
+        alt="Staff."
+      />
+    </li>
+  );
+}
+
 function CharacterSection(props) {
   asserts.isTypeString(props.alt);
 
   return (
-    <a className="block-link flex" class={props.class} href={props.href}>
+    <a className="clean-link flex" class={props.class} href={props.href}>
       <img src={props.src} alt={props.alt} />
-      <div class="full-width grid">
+      <div class="grid">
         <span>{props.name}</span>
         <span>{props.extra}</span>
       </div>
