@@ -617,13 +617,13 @@ export function SearchBar(props) {
         />
         <Show when={params.type === "anime"}>
           <div>
-            <A href="/search/anime/tba">
+            <A href={"/search/anime/tba" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
               <button>TBA</button>
             </A>
-            <A href="/search/anime/this-season">
+            <A href={"/search/anime/this-season" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
               <button>Current season</button>
             </A>
-            <A href="/search/anime/next-season">
+            <A href={"/search/anime/next-season" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
               <button>Next season</button>
             </A>
           </div>
