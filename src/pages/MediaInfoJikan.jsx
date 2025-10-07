@@ -47,7 +47,6 @@ export function MediaInfoWrapperJikan(props) {
         <div class="pg-media-info-jikan">
           <Show when={jikanData()}>
             <aside class="left">
-              {console.log(jikanData().data)}
               <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
               <div class="cp-media-api-switcher">
                 <Show when={anilistData()?.data?.id}>
@@ -145,8 +144,18 @@ export function MediaInfoWrapperJikan(props) {
                     </li>
                   </Show>
                   <li>Members: {numberUtils.numberCommas(jikanData().data.members || 0) || "N/A"}</li>
-                  <li>Ranked #{jikanData().data.rank || "N/A"}</li>
-                  <li>Popularity #{jikanData().data.popularity || "N/A"}</li>
+                  <li>Ranked: #{jikanData().data.rank || "N/A"}</li>
+                  <li>Popularity: #{jikanData().data.popularity || "N/A"}</li>
+                  <Show when={jikanData().data.authors?.length}>{size => (
+                    <li>Author{formatingUtils.plural(size())}: 
+                      <For each={jikanData().data.authors}>{(author, i) => (
+                        <>
+                          <a href={author.url}>{author.name}</a>
+                          <Show when={i() < size() - 1}> & </Show>
+                        </>
+                      )}</For>
+                    </li>
+                  )}</Show>
                 </ul>
               </div>
             </Show>
