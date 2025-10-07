@@ -10,7 +10,7 @@ export function MediaInfoCharactersJikan() {
   const { jikanData } = useMediaInfo();
 
   const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
-  const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() > 0 })
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
   const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 
   const [language, setLanguage] = signals.localStorageString(localizations.Japanese);
