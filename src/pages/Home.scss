@@ -22,19 +22,6 @@ $radius: .2rem;
     }
   }
 
-  .grid-column-auto-fill.current {
-    background-color: var(--background-400);
-    --grid-column-width: 5rem;
-    --gap: 1.5rem;
-    padding: 1rem;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: $radius;
-    }
-  }
 
   .cp-loader-circle {
     left: 50%;
@@ -68,89 +55,5 @@ $radius: .2rem;
   }
 }
 
-.cp-current-card-info {
-  background-color: var(--shadow-400);
-  padding-block: .75em 1rem;
-  position: absolute;
-  width: 100%;
-  bottom: 0px;
-  text-align: center;
-  font-size: .75rem;
-  border-radius: 0px 0px $radius $radius;
-  overflow: hidden;
-}
-
-.cp-current-card-hover-info {
-  background-color: var(--shadow-400);
-  padding-block: .75em;
-  position: absolute;
-  width: 100%;
-  bottom: 0px;
-  text-align: center;
-  font-size: 0.75rem;
-  opacity: 0;
-  font-weight: 700;
-  border-radius: 0px 0px $radius $radius;
-  overflow: hidden;
-
-  &:hover {
-    background-color: var(--shadow-300);
-  }
-
-  .plus {
-    font-size: 1rem;
-  }
-
-  &.normal {
-    font-size: .9rem;
-    font-weight: 500;
-  }
-}
 
 
-.cp-current-card {
-  position: relative;
-  aspect-ratio: 5.5/8;
-  color: inherit;
-  border-radius: $radius;
-  text-decoration: none;
-
-  &:hover {
-    border-radius: $radius 0px 0px $radius;
-
-    img {
-      border-radius: $radius 0px 0px $radius;
-    }
-
-    .cp-current-card-info {
-      opacity: 0;
-      border-radius: 0px 0px 0px $radius;
-    }
-
-    .cp-current-card-hover-info {
-      opacity: 1;
-      border-radius: 0px 0px 0px $radius;
-    }
-    .card-right{
-      display: flex;
-      flex-direction: column;
-    }
-  }
-
-  .progress-status {
-    margin-top: auto;
-  }
-
-  .card-right {
-    position: absolute;
-    top: 0px;
-    bottom: 0px;
-    left: 100%;
-    width: 16rem;
-    background-color: var(--background-350);
-    z-index: 1;
-    display: none;
-    pointer-events: none;
-    padding: .5rem;
-  }
-}

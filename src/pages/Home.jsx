@@ -370,7 +370,7 @@ function CurrentCard(props) {
   });
 
   return (
-    <A href={mediaUrl(props.data.media)} class="cp-current-card" >
+    <A href={mediaUrl(props.data.media)} data-tooltip-trigger class="cp-current-card" >
       <img src={props.data.media.coverImage.large} alt="Cover." />
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class="cp-current-card-info">
@@ -398,7 +398,7 @@ function CurrentCard(props) {
           </div>
         </Match>
       </Switch>
-      <div class="card-right">
+      <div class="hover" data-tooltip-positions="right left middle">
         <Switch>
           <Match when={props.data.media.nextAiringEpisode?.episode && isBehind()}>
             <p>{airingEpisode() - (progress() + 1)} episode
@@ -416,7 +416,7 @@ function CurrentCard(props) {
             </p>
           </Match>
         </Switch>
-        <p>{props.data.media.title.userPreferred}</p>
+        <p class="line-clamp">{props.data.media.title.userPreferred}</p>
         <p class="progress-status">
           Progress: {progress()}
           <Show when={props.data.media.episodes}>/{props.data.media.episodes}</Show>
