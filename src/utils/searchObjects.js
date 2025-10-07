@@ -141,6 +141,14 @@ export const searchSeasons = {
       fall: { api: "FALL", flavorText: "Fall" },
       tba: { api: null, flavorText: "TBA" },
     },
+  },
+  mal: {
+    anime: {
+      winter: { api: "winter", flavorText: "Winter" },
+      spring: { api: "spring", flavorText: "Spring" },
+      summer: { api: "summer", flavorText: "Summer" },
+      fall: { api: "fall", flavorText: "Fall" },
+    },
   }
 }
 searchSeasons.flavorTexts = extractFlavorTexts(searchSeasons);
