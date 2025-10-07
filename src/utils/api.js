@@ -51,12 +51,32 @@ const fetchRateLimits = {
 }
 
 function malMediaSearch(type, variables, page) {
+  let seasonQuery = null;
   const query = variables.reduce((acc, v) => {
-    if (v.active) { acc.push(`${v.key}=${v.value}`) };
+    if (v.active) {
+      if (v.key === "season") {
+        seasonQuery = v.value;
+      } else {
+        acc.push(`${v.key}=${v.value}`) 
+      }
+    };
     return acc;
   }, []);
   if (page > 1) {
     query.push(`page=${page}`);
+  }
+
+  if (seasonQuery) {
+    return Fetch.getJson(queries.myAnimeListMediaSeasonSearch(seasonQuery, query.sort().join("&")), res => {
+      res.data.forEach(media => {
+        media.titles = media.titles.reduce((acc, title) => {
+          acc[title.type] = title.title;
+          return acc;
+        }, {});
+      })
+
+      return res;
+    });
   }
 
   return Fetch.getJson(queries.myAnimeListMediaSearch(type, query.sort().join("&")), res => {

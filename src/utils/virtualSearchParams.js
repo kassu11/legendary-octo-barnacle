@@ -9,12 +9,12 @@ const headers = {
   novel: { format: "lightnovel" },
   finished: { order: "end_date_filtered", status: "complete" },
   new: { order: "id" },
-  tba: { season: "tba", status: "upcoming" },
   "top-100": { order: "score" },
   "finished-manga": { order: "end_date_filtered", status: "complete", format: "manga" },
   "finished-novel": { order: "end_date_filtered", status: "complete", format: "lightnovel" },
 
   ani: {
+    tba: { season: "tba", status: "upcoming" },
     anime: {
       "this-season": { year: dates.seasonYear, season: dates.season.toLowerCase(), order: "title_romaji", sort: "ASC" },
       "next-season": { year: dates.nextYear, season: dates.nextSeason.toLowerCase(), order: "title_romaji", sort: "ASC" },
@@ -22,6 +22,11 @@ const headers = {
     manhwa: { country: "KR" },
   },
   mal: {
+    tba: { status: "upcoming" },
+    anime: {
+      "this-season": { year: dates.seasonYear, season: dates.season.toLowerCase(), order: "title_romaji", sort: "ASC" },
+      "next-season": { year: dates.nextYear, season: dates.nextSeason.toLowerCase(), order: "title_romaji", sort: "ASC" },
+    },
     manhwa: { format: "manhwa" },
   }
 };

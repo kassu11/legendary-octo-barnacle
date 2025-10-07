@@ -23,7 +23,7 @@ import { TwoHeadedRange } from "./Search/TwoHeadedRange";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../utils/virtualSearchParams.js";
 import { SeasonInput } from "./Search/SeasonInput.jsx";
 import { moveSeasonObject } from "../utils/dates.js";
-import { asserts, fetchers, fetcherSenders, globalState, requests } from "../collections/collections.js";
+import { asserts, fetchers, fetcherSenders, globalState, localizations, requests } from "../collections/collections.js";
 import { fetcherSenderUtils, urlUtils } from "../utils/utils.js";
 import { AnilistMediaCard, JikanMediaCard, MediaCardContainer } from "../components/Cards.jsx";
 
@@ -89,12 +89,47 @@ function parseURL() {
   const variables = [];
   let preventFetch = searchParams.preventFetch === "true";
 
+  const [season] = wrapToArray(virtualSearchParams("season"));
+  if (season && engine === localizations.ani) {
+    const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
+    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
+  }
+
+  const [year] = wrapToArray(virtualSearchParams("year"));
+  let hasEndDateSet = false;
+  let hasStartDateSet = false;
+  let disabledBySeasonSearch = false;
+  if (season && year && engine === localizations.mal) {
+    const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
+    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: year + "/" + api, active: api !== undefined, visuallyDisabled: api === undefined}));
+    variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: false }));
+    disabledBySeasonSearch = true;
+  } else if (year) {
+    hasEndDateSet = true;
+    hasStartDateSet = true;
+    if (engine === "ani") {
+      if (season && type === "anime") {
+        variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "seasonYear", value: year }));
+      } else {
+        variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
+      }
+    }
+    else if (engine === "mal") {
+      variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "start_date", value: `${year}-01-01` }));
+      variables.push(new SearchVariable({ hidden: true, canClear: false, key: "end_date", value: `${year}-12-31` }));
+    }
+  }
+
+  asserts.assertFalse(disabledBySeasonSearch && engine === localizations.ani, "Season disabling should only have on MAL search");
+
   if (searchParams.q) {
     variables.push(new SearchVariable({ 
       url: "q=" + searchParams.q, 
       key: engine === "ani" ? "search" : "q",
       value: searchParams.q,
       name: "Search: " + searchParams.q,
+      active: !disabledBySeasonSearch,
+      visuallyDisabled: disabledBySeasonSearch
     }));
   }
 
@@ -123,16 +158,16 @@ function parseURL() {
       if (engine === "ani") {
         variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", key: "isAdult", value: undefined }));
       } else if(engine === "mal") {
-        variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", active: false }));
+        variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", active: false, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
       }
     } else {
       const names = { g: "G - All ages", pg: "PG - Children", pg13: "PG-13", r17: "R - 17+", r: "R+", rx: "Rx - Hentai" };
       const ratingSet = new Set([searchParams.rating].flat());
       ratingSet.forEach(value => {
         if (value === "g" || value === "pg" || value === "pg13" || value === "r17") {
-          variables.push(new SearchVariable({ name: names[value], url: `rating=${value}`, key: "rating", value, visuallyDisabled: engine === "ani", active: engine === "mal" }));
+          variables.push(new SearchVariable({ name: names[value], url: `rating=${value}`, key: "rating", value, visuallyDisabled: engine === "ani" || disabledBySeasonSearch, active: engine === "mal" && !disabledBySeasonSearch }));
         } else if (value === "r" || value === "rx") {
-          variables.push(new SearchVariable({ name: names[value], url: `rating=${value}`, key: "rating", value, active: engine === "mal" }));
+          variables.push(new SearchVariable({ name: names[value], url: `rating=${value}`, key: "rating", value, active: engine === "mal" && !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       });
 
@@ -158,7 +193,7 @@ function parseURL() {
       }
     }
     else if(engine === "mal" && genres.length) {
-      variables.push(new SearchVariable({ key: "genres", value: genres.join(","), hidden: true, canClear: false }));
+      variables.push(new SearchVariable({ key: "genres", value: genres.join(","), hidden: true, canClear: false, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
     }
   }
   if (searchParams.excludeGenre) {
@@ -173,7 +208,7 @@ function parseURL() {
       }
     }
     else if(engine === "mal" && excludeGenres.length) {
-      variables.push(new SearchVariable({ key: "genres_exclude", value: excludeGenres.join(","), hidden: true, canClear: false }));
+      variables.push(new SearchVariable({ key: "genres_exclude", value: excludeGenres.join(","), hidden: true, canClear: false, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
     }
   }
   function parseGenres([urlKey, validGenres = [], validTags = []], genre) {
@@ -190,34 +225,9 @@ function parseURL() {
       else { disabled = true }
     }
 
-    variables.push(new SearchVariable({ name: genre, url: `${urlKey}=${genre}`, active: false, visuallyDisabled: disabled }));
+    variables.push(new SearchVariable({ name: genre, url: `${urlKey}=${genre}`, active: false, visuallyDisabled: disabled || disabledBySeasonSearch }));
     return [urlKey, validGenres, validTags];
   };
-
-  const [season] = wrapToArray(virtualSearchParams("season"));
-  if (season) {
-    const { api, flavorText } = searchSeasons[engine]?.[type]?.[season] || { flavorText: searchStatuses.flavorTexts[season] || season }
-    variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
-  }
-
-  let hasEndDateSet = false;
-  let hasStartDateSet = false;
-  const [year] = wrapToArray(virtualSearchParams("year"));
-  if (year) {
-    hasEndDateSet = true;
-    hasStartDateSet = true;
-    if (engine === "ani") {
-      if (season && type === "anime") {
-        variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "seasonYear", value: year }));
-      } else {
-        variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "year", value: `${year}%` }));
-      }
-    }
-    else if (engine === "mal") {
-      variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: true, key: "start_date", value: `${year}-01-01` }));
-      variables.push(new SearchVariable({ hidden: true, canClear: false, key: "end_date", value: `${year}-12-31` }));
-    }
-  } 
 
   const [startYear] = [+searchParams.startYear].flat();
   if (startYear) {
@@ -226,7 +236,7 @@ function parseURL() {
       variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearGreater", value: parseInt(`${startYear - 1}9999`) }));
     }
     else if (engine === "mal") {
-      variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01` }));
+      variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
     }
   }
   const [endYear] = [+searchParams.endYear].flat();
@@ -236,7 +246,7 @@ function parseURL() {
       variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearLesser", value: parseInt(`${endYear + 1}0000`) }));
     }
     else if (engine === "mal") {
-      variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31` }));
+      variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
     }
   }
 
@@ -256,7 +266,12 @@ function parseURL() {
         validFormats.push(api);
       }
       if (api) {
-        variables.push(new SearchVariable({ name: "Format: " + flavorText, active: engine === "mal", key: "type", value: api, url: `format=${format}` }));
+        if (disabledBySeasonSearch && engine === localizations.mal) {
+          // Season search has different query key
+          variables.push(new SearchVariable({ name: "Format: " + flavorText, key: "filter", value: api, url: `format=${format}` }));
+        } else {
+          variables.push(new SearchVariable({ name: "Format: " + flavorText, active: engine === "mal", key: "type", value: api, url: `format=${format}` }));
+        }
       } else {
         variables.push(new SearchVariable({ name: "Format: " + flavorTextFallback, active: false, visuallyDisabled: true, url: `format=${format}` }));
       }
@@ -299,7 +314,7 @@ function parseURL() {
           }
         }
         else if (engine === "mal") {
-          variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete" }));
+          variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete", active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
       else if (order === sortOrders.mal.manga.volumes.alternative_key) {
@@ -309,14 +324,14 @@ function parseURL() {
             name: "Volumes greater than 0", 
             url: `order=${order}`, 
             addUrl: `order=${orderWithoutAlternativeKey}`, 
-            active: type === "manga",
-            visuallyDisabled: type !== "manga",
+            active: type === "manga" && !disabledBySeasonSearch,
+            visuallyDisabled: type !== "manga" || disabledBySeasonSearch,
             key: "volumeGreater", 
             value: 0 
           }));
         }
         else if (engine === "mal") {
-          variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete" }));
+          variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete", active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
       else if (order === sortOrders.mal.anime.end_date.alternative_key) {
@@ -326,7 +341,7 @@ function parseURL() {
           variables.push(new SearchVariable({ ...base, key: "endDateGreater", value: 0 }));
         }
         else if (engine === "mal") {
-          variables.push(new SearchVariable({ ...base, key: "end_date", value: `${new Date().getFullYear() + 100}-01-01` }));
+          variables.push(new SearchVariable({ ...base, key: "end_date", value: `${new Date().getFullYear() + 100}-01-01`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
       else if (order === sortOrders.mal.anime.start_date.alternative_key) {
@@ -336,7 +351,7 @@ function parseURL() {
           variables.push(new SearchVariable({ ...base, key: "yearGreater", value: 0 }));
         }
         else if (engine === "mal") {
-          variables.push(new SearchVariable({ ...base, key: "start_date", value: `0000-01-01` }));
+          variables.push(new SearchVariable({ ...base, key: "start_date", value: `0000-01-01`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
 
@@ -357,7 +372,7 @@ function parseURL() {
       if (searchParams.sort) { url.push(`sort=${searchParams.sort}`); }
       if (api) {
         validMalOrder ||= engine === "mal";
-        variables.push(new SearchVariable({ name: "Sort: " + flavorText, active: engine === "mal", key: "order_by", value: api, url }));
+        variables.push(new SearchVariable({ name: "Sort: " + flavorText, active: engine === "mal" && !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch, key: "order_by", value: api, url }));
       } else {
         variables.push(new SearchVariable({ name: "Sort: " + flavorTextFallback, active: false, visuallyDisabled: true, url }));
       }
@@ -378,12 +393,12 @@ function parseURL() {
     else if (engine === "mal") {
       if (!validMalOrder && !searchParams.q) {
         reverseMalSort = true;
-        variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true }));
+        variables.push(new SearchVariable({ key: "order_by", value: "popularity", canClear: false, hidden: true, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
       }
       if (reverseMalSort) {
-        variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "desc" : "asc", hidden: true, canClear: false }));
+        variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "desc" : "asc", hidden: true, canClear: false, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
       } else {
-        variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "asc" : "desc", hidden: true, canClear: false }));
+        variables.push(new SearchVariable({ key: "sort", value: searchParams.sort === "ASC" ? "asc" : "desc", hidden: true, canClear: false, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
       }
     }
   }
@@ -918,31 +933,11 @@ function MyAnimeListMediaSearchContent(props) {
 }
 
 function MalCardRow(props) {
-  return (
-    <For each={props.data}>
-      {card => <MalCard card={card} />}
-    </For>
-  );
-}
-
-function MalCard(props) {
   const params = useParams();
-
   return (
-    <JikanMediaCard media={props.card} type={params.type} />
-  )
-  return (
-    <li class="horizontal-search-card">
-      <A href={urlUtils.jikanMediaUrl(params.type, props.card)} >
-        <img src={props.card.images.webp.image_url} alt="Anime cover" />
-        <p class="line-clamp">
-          <Switch>
-            <Match when={props.card.titles.English}>{props.card.titles.English}</Match>
-            <Match when={props.card.titles.Default}>{props.card.titles.Default}</Match>
-          </Switch>
-        </p>
-      </A>
-    </li>
+    <For each={props.data}>{media => (
+      <JikanMediaCard media={media} type={params.type} />
+    )}</For>
   );
 }
 
