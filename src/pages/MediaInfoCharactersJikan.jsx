@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { useMediaInfo } from "../context/providers";
 import { fetchers, fetcherSenders, localizations, requests, signals } from "../collections/collections";
 import { fetcherSenderUtils } from "../utils/utils";
-import { createMemo } from "solid-js";
+import { createMemo, ErrorBoundary } from "solid-js";
 import { MalCharacterCard } from "../components/Cards.jsx";
 
 export function MediaInfoCharactersJikan() {
@@ -33,7 +33,7 @@ export function MediaInfoCharactersJikan() {
   });
 
   return (
-    <>
+    <ErrorBoundary fallback="MAL characters error">
       <Show when={jikanData()}>
         <Show when={jikanCharactersData()}>
           <div>
@@ -56,6 +56,6 @@ export function MediaInfoCharactersJikan() {
           </div>
         </Show>
       </Show>
-    </>
+    </ErrorBoundary>
   );
 }

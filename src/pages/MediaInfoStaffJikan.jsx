@@ -3,6 +3,7 @@ import { useMediaInfo } from "../context/providers";
 import { fetchers, fetcherSenders, localizations, requests } from "../collections/collections";
 import { fetcherSenderUtils } from "../utils/utils";
 import { MalStaffCard } from "../components/Cards.jsx";
+import { ErrorBoundary } from "solid-js";
 
 export function MediaInfoStaffJikan() {
   const params = useParams();
@@ -13,7 +14,7 @@ export function MediaInfoStaffJikan() {
   const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 
   return (
-    <>
+    <ErrorBoundary fallback="MAL staff page error">
       <Show when={jikanData()}>
         <Show when={jikanStaffData()}>
           <div>
@@ -25,6 +26,6 @@ export function MediaInfoStaffJikan() {
           </div>
         </Show>
       </Show>
-    </>
+    </ErrorBoundary>
   );
 }
