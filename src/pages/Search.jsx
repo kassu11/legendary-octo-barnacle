@@ -158,7 +158,7 @@ function parseURL() {
       if (engine === "ani") {
         variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", key: "isAdult", value: undefined }));
       } else if(engine === "mal") {
-        variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", active: false, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
+        variables.push(new SearchVariable({ name: "Any rating", url: "rating=any", active: false, visuallyDisabled: disabledBySeasonSearch }));
       }
     } else {
       const names = { g: "G - All ages", pg: "PG - Children", pg13: "PG-13", r17: "R - 17+", r: "R+", rx: "Rx - Hentai" };
@@ -236,7 +236,7 @@ function parseURL() {
       variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearGreater", value: parseInt(`${startYear - 1}9999`) }));
     }
     else if (engine === "mal") {
-      variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
+      variables.push(new SearchVariable({ name: `Year greater than ${startYear - 1}`, active: !year && !disabledBySeasonSearch, visuallyDisabled: !!year || disabledBySeasonSearch, url: `startYear=${startYear}`, key: "start_date", value: `${startYear}-01-01` }));
     }
   }
   const [endYear] = [+searchParams.endYear].flat();
@@ -246,7 +246,7 @@ function parseURL() {
       variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `startYear=${startYear}`, key: "yearLesser", value: parseInt(`${endYear + 1}0000`) }));
     }
     else if (engine === "mal") {
-      variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year, visuallyDisabled: !!year, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
+      variables.push(new SearchVariable({ name: `Year lesser than ${endYear + 1}`, active: !year && !disabledBySeasonSearch, visuallyDisabled: !!year || disabledBySeasonSearch, url: `endYear=${endYear}`, key: "start_date", value: `${endYear}-12-31` }));
     }
   }
 
@@ -336,22 +336,22 @@ function parseURL() {
       }
       else if (order === sortOrders.mal.anime.end_date.alternative_key) {
         orderWithoutAlternativeKey = "end_date";
-        const base = { name: "Only valid dates", active: !hasEndDateSet, hidden: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
+        const base = { name: "Only valid dates", active: !hasEndDateSet && !disabledBySeasonSearch, hidden: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
           variables.push(new SearchVariable({ ...base, key: "endDateGreater", value: 0 }));
         }
         else if (engine === "mal") {
-          variables.push(new SearchVariable({ ...base, key: "end_date", value: `${new Date().getFullYear() + 100}-01-01`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
+          variables.push(new SearchVariable({ ...base, key: "end_date", value: `${new Date().getFullYear() + 100}-01-01`, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
       else if (order === sortOrders.mal.anime.start_date.alternative_key) {
         orderWithoutAlternativeKey = "start_date";
-        const base = { name: "Only valid dates", active: !hasStartDateSet, hidden: hasStartDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
+        const base = { name: "Only valid dates", active: !hasStartDateSet && !disabledBySeasonSearch, hidden: hasStartDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
           variables.push(new SearchVariable({ ...base, key: "yearGreater", value: 0 }));
         }
         else if (engine === "mal") {
-          variables.push(new SearchVariable({ ...base, key: "start_date", value: `0000-01-01`, active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
+          variables.push(new SearchVariable({ ...base, key: "start_date", value: `0000-01-01`, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
 
