@@ -164,7 +164,7 @@ function HorizontalCardRow(props) {
         <h2>{props.title}</h2>
         <span>View all</span>
       </A>
-      <ol class="grid-reel-auto-fill" data-tooltip-wrapper>
+      <ol class="grid-reel-auto-fill">
         <For each={props.data}>{media => (
           <AnilistMediaCard media={media} />
         )}</For>
