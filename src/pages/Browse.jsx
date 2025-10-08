@@ -32,7 +32,7 @@ export function BrowseMediaHome() {
         <HorizontalCardRow data={homeData().data.data.newManga.media} href="/search/manga/new" title="Newly added manga" />
         <HorizontalCardRow data={homeData().data.data.finishedAnime.media} href="/search/anime/finished" title="Recently finished anime" />
         <HorizontalCardRow data={homeData().data.data.finishedManga.media} href="/search/manga/finished" title="Recently finished manga" />
-        <VerticalCardRow data={homeData().data.data.top.media} href="/search/media/top-100" title="Top 100 anime and manga" />
+        <VerticalCardRow data={homeData().data.data.top.media} type="media" href="/search/media/top-100" title="Top 100 anime and manga" />
       </div>
     </Show>
   );
@@ -51,7 +51,7 @@ export function BrowseAnimeHome() {
         <HorizontalCardRow data={animeData().data.data.nextSeason.media} href="/search/anime/next-season?order=popularity" title="Upcoming next season" />
         <HorizontalCardRow data={animeData().data.data.finished.media} href="/search/anime/finished" title="Recently finished" />
         <HorizontalCardRow data={animeData().data.data.popular.media} href="/search/anime/popular" title="All time popular" />
-        <VerticalCardRow data={animeData().data.data.top.media} type="manga" href="/search/anime/top-100" title="Top 100 anime" />
+        <VerticalCardRow data={animeData().data.data.top.media} type="anime" href="/search/anime/top-100" title="Top 100 anime" />
       </div>
     </Show>
   );
@@ -81,6 +81,7 @@ export function BrowseMangaHome() {
 
 function VerticalCardRow(props) {
   asserts.assertTrue("href" in props, "Link is missing");
+  asserts.isTypeString(props.type, "type");
 
   return (
     <section class="vertical-search-card-section">
