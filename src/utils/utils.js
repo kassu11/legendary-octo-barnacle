@@ -1,4 +1,5 @@
 export * as arrayUtils from "./arrays.js";
+export * as objectUtils from "./objectUtils.js";
 export * as functionUtils from "./functionUtils.js";
 export * as fetcherSenderUtils from "./fetcherSenderUtils.js";
 export * as fetcherUtils from "./Fetcher/fetcherUtils.js";

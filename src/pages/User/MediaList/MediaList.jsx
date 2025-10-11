@@ -12,6 +12,7 @@ import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";
 import { asserts } from "../../../collections/collections.js";
 import { QuickActionButton } from "../../../components/Buttons.jsx";
 import Edit from "../../../assets/Edit.jsx";
+import { objectUtils } from "../../../utils/utils.js";
 
 const useListNavigation = () => {
   const navigate = useNavigate();
@@ -516,6 +517,7 @@ function MediaListContainer(props) {
                                   e.preventDefault();
                                   openEditor({ ...entry.media, mediaListEntry: entry }, {
                                     mutateMedia: responseEntry => {
+                                      responseEntry = objectUtils.mergeObjects(entry, responseEntry);
                                       props.mutateMediaListCache(res => {
                                         function pushEntryToList(name, isCustomList) {
                                           const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
