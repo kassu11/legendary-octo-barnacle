@@ -35,9 +35,19 @@ function StatsVoiceActors(props) {
   const [characterStore, setCharacterStore] = createStore({});
 
   createEffect(on(() => props.genres, genres => {
-    setMediaStore(reconcile({}));
-    setCharacterStore(reconcile({}));
-    setMediaIds(new Set(genres.map(genre => genre.mediaIds.slice(0, 6)).flat()));
+    setMediaIds(current => {
+      const newSet = new Set(genres.map(genre => genre.mediaIds.slice(0, 6)).flat())
+      // This works basically as a store
+      // When props.genres update check if the new set has anything that the old set did not have
+      // If so update, otherwise don't
+      // This is a quick fix https://github.com/kassu11/legendary-octo-barnacle/issues/235
+      // Remake this whole component when you have time :P
+      if (newSet.difference(current).size) {
+        return newSet;
+      }
+
+      return current;
+    });
     setCharacterIds(new Set(genres.map(genre => genre.characterIds.slice(0, 6)).flat()));
   }));
 
