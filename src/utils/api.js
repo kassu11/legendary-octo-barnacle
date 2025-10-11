@@ -1,9 +1,9 @@
-import { asserts } from "../collections/collections.js";
+import { asserts, modes } from "../collections/collections.js";
 import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import * as queries from "../collections/querys";
 import { getDates } from "./dates";
 import { TokenBucket } from "./TokenBucket";
-const DEBUG = location.origin.includes("localhost");
+const DEBUG = modes.debug;
 
 const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
 const fastReload = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 7 });

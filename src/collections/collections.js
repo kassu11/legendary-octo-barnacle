@@ -1,10 +1,10 @@
+export * as modes from "./modes.js";
 export * as localizations from "./localizations.js";
 export * as asserts from "./asserts.js";
 export * as fetcherTemplates from "./fetcherTemplates.js";
 export * as mediaStatuses from "./mediaStatuses/mediaStatuses.js";
 export * as fetchers from "./fetchers/fetchers.js";
 export * as fetcherSenders from "./fetcherSenders.js";
-export * as modes from "./modes.js";
 export * as queries from "./querys.js";
 export * as signals from "./signals.js";
 export * as requests from "./requests/requests.js";
