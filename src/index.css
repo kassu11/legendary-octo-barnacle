@@ -715,6 +715,9 @@
       }
     }
   }
+  .pg-media-info-extra-info  {
+    word-break: break-word;
+  }
 
 
   .user-profile-media-list-container {
