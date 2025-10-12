@@ -71,7 +71,7 @@ function modifyMediaListData(listData, type, options) {
           break;
         }
       }
-      listData.data.indecies[entry.media.id].push([i, j]);
+
       if (filter(entry, filterObject)) {
         mediaSet.add(entry.media.id);
 
