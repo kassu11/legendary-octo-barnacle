@@ -1,5 +1,5 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
+import { batch, createRenderEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../utils/arrays";
@@ -14,7 +14,8 @@ import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
-import { asserts } from "../collections/collections.js";
+import { asserts, signals } from "../collections/collections.js";
+import { arrayUtils } from "../utils/utils.js";
 
 export default function ComparePage() {
   const location = useLocation();
@@ -82,6 +83,7 @@ export default function ComparePage() {
 
       if (postObject.includeKeys.length === 0) {
         setCompareMediaList([]);
+        setLoading(false);
         return;
       }
 
@@ -417,8 +419,8 @@ function UserRow(props) {
   const { setIncludeKeys, setExcludeKeys, storeUsers } = useCompareMediaList();
   const [searchParams, setSearchParams] = useSearchParams();
   const { accessToken } = useAuthentication();
-  const [enabled, setEnabled] = createSignal(true);
-  const [exclude, setExclude] = createSignal(false);
+  const [enabled, setEnabled] = signals.createSignalWithSignal(() => !arrayUtils.includes(searchParams.disabled, props.name));
+  const [exclude, setExclude] = signals.createSignalWithSignal(() => arrayUtils.includes(searchParams.exclude, props.name));;
   const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => props.name, () => params.type.toUpperCase(), accessToken);
 
   function setKeys(keys, excludedValue) {
@@ -447,6 +449,16 @@ function UserRow(props) {
     }
   });
 
+  const handleEnabledChange = e => {
+    setEnabled(!e.target.checked);
+    setSearchParams({ disabled: arrayUtils.toggle(searchParams.disabled, props.name, !e.target.checked) });
+  }
+
+  const handleExcludeChange = e => {
+    setExclude(!e.target.checked);
+    setSearchParams({ exclude: arrayUtils.toggle(searchParams.exclude, props.name, !e.target.checked) });
+  }
+
   return (
     <li classList={{disabled: !enabled(), exclude: exclude()}}>
       <Switch>
@@ -469,14 +481,14 @@ function UserRow(props) {
             </Show>
           </p>
           <label>
-            <input type="checkbox" name="enable" checked={!enabled()} onChange={e => setEnabled(!e.target.checked)} /> Disable <button>?
+            <input type="checkbox" name="enable" checked={!enabled()} onChange={handleEnabledChange} /> Disable <button>?
               <Tooltip tipPosition="bottom">
                 Disabling a user removes them from search and filtering, just like removing them.
               </Tooltip>
             </button>
           </label>
           <label>
-            <input type="checkbox" name="enable" checked={exclude()} onChange={e => setExclude(e.target.checked)} /> Filter out <button>?
+            <input type="checkbox" name="enable" checked={exclude()} onChange={handleExcludeChange} /> Filter out <button>?
               <Tooltip tipPosition="bottom">
                 Filters out all {params.type} from user {mediaList()?.data?.user?.name || props.name}
               </Tooltip>

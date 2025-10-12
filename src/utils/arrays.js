@@ -20,6 +20,33 @@ export function wrapToArray(value) {
   return [];
 }
 
+export const push = (array, ...values) => {
+  array = wrapToArray(array);
+  array.push(...values);
+  return array;
+}
+
+export const includes = (array, value) => {
+  array = wrapToArray(array);
+  return array.includes(value);
+}
+
+export const remove = (array, ...values) => {
+  return wrapToArray(array).filter(value => !values.includes(value));
+}
+
+export const toggle = (array, value, condition) => {
+  array = wrapToArray(array);
+  const state = condition === undefined ? array.includes(value) : condition;
+  if (state) {
+    array = remove(array, value);
+  } else {
+    array.push(value);
+  }
+
+  return array;
+}
+
 export function wrapToSet(value) {
   return new Set(wrapToArray(value));
 }

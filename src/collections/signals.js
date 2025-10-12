@@ -1,5 +1,5 @@
-import { createSignal } from "solid-js";
-import { modes } from "../collections/collections.js";
+import { createRenderEffect, createSignal } from "solid-js";
+import { asserts, modes } from "../collections/collections.js";
 
 export const localStorageString = (key, initialValue) => {
   const [value, _setValue] = createSignal(localStorage.getItem(key) ?? initialValue);
@@ -73,6 +73,18 @@ export const localStorageJSON = (key, initialValue) => {
 }
 
 export const debug = (booleanToGiveWhenInDubugMode = true) => createSignal(modes.debug === booleanToGiveWhenInDubugMode);
+
+export const createSignalWithSignal = signal => {
+  asserts.isTypeFunction(signal);
+
+  const [value, setValue] = createSignal();
+  createRenderEffect(() => {
+    const val = signal();
+    setValue(val);
+  });
+
+  return [value, setValue];
+}
 
 export const createCustomSignal = initialValue => {
   const [trackingSignal, setTrackingSignal] = createSignal(0);
