@@ -7,7 +7,7 @@ const ExtraInfo = (props) => {
   return (
     <ErrorBoundary fallback="ExtraInfo error">
       <Show when={props.media}>
-        <div classList={{loading: props.loading}}>
+        <div class="pg-media-info-extra-info" classList={{loading: props.loading}}>
           <h2>Extra info</h2>
           <ul>
             <Show when={props.media.episodes}>
