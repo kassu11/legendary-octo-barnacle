@@ -289,6 +289,13 @@ const api = {
         type,
       }, res => res.data.MediaListCollection);
     }),
+    mediaListByUserNameFetchOnce: fetchOnce((name, type, token) => {
+      asserts.assertTrue(name, "Name is missing");
+      return Fetch.authAnilist(token, queries.anilistUserMediaList, {
+        userName: name.toLowerCase(),
+        type,
+      }, res => res.data.MediaListCollection);
+    }),
     favouritesByUserId: reloadCache((id, page, token) => {
       asserts.assertTrue(id, "Id is missing");
       asserts.assertTrue(page, "Page is missing");
