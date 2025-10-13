@@ -65,57 +65,53 @@ export default function ComparePage() {
 
   let worker;
   function updateCompareScores() {
-    if (window.Worker) {
-      worker = worker instanceof Worker ? worker : new CompareMediaListWorker();
+    if (!window.Worker) {
+      return;
+    }
 
-      const postObject = {
-        includeKeys: includeKeys(),
-        excludeKeys: excludeKeys(),
-        search: search(),
-        format: format(),
-        status: status(),
-        genre: genre(),
-        reverse: reverse(),
-        countryOfOrigin: countryOfOrigin(),
-        missingStart: missingStartFilter(),
-        missingScore: missingScoreFilter(),
-        isAdult: isAdult(),
-        year: +year() || undefined,
-        private: privateFilter(),
-        notes: notesFilter(),
-        repeat: rewatchedFilter(),
-        reviewsNeeded: reviewsNeeded(),
-        sort: sort(),
-        type: params.type,
-        userStatus: userStatus(),
-      };
+    worker = worker instanceof Worker ? worker : new CompareMediaListWorker();
 
-      if (postObject.includeKeys.length === 0) {
-        setCompareMediaList(initialMediaCompareList());
-        setLoading(false);
-        return;
-      }
+    const postObject = {
+      includeKeys: includeKeys(),
+      excludeKeys: excludeKeys(),
+      search: search(),
+      format: format(),
+      status: status(),
+      genre: genre(),
+      reverse: reverse(),
+      countryOfOrigin: countryOfOrigin(),
+      missingStart: missingStartFilter(),
+      missingScore: missingScoreFilter(),
+      isAdult: isAdult(),
+      year: +year() || undefined,
+      private: privateFilter(),
+      notes: notesFilter(),
+      repeat: rewatchedFilter(),
+      reviewsNeeded: reviewsNeeded(),
+      sort: sort(),
+      type: params.type,
+      userStatus: userStatus(),
+    };
 
-      worker.postMessage(postObject);
-      setLoading(true);
+    worker.postMessage(postObject);
+    setLoading(true);
 
-      worker.onmessage = message => {
-        if (message.data === "success") {
-          const cacheReq = IndexedDB.user();
-          cacheReq.onsuccess = evt => {
-            const db = evt.target.result;
-            const store = IndexedDB.store(db, "data", "readonly");
-            const getReq = store.get("compare_list");
-            getReq.onerror = () => setLoading(false);
-            getReq.onsuccess = (evt) => {
-              setLoading(false);
-              setCompareMediaList(evt.target.result || []);
-            }
+    worker.onmessage = message => {
+      if (message.data === "success") {
+        const cacheReq = IndexedDB.user();
+        cacheReq.onsuccess = evt => {
+          const db = evt.target.result;
+          const store = IndexedDB.store(db, "data", "readonly");
+          const getReq = store.get("compare_list");
+          getReq.onerror = () => setLoading(false);
+          getReq.onsuccess = (evt) => {
+            setLoading(false);
+            setCompareMediaList(evt.target.result || []);
           }
-        } else {
-          setLoading(false);
-          console.error("Error");
         }
+      } else {
+        setLoading(false);
+        console.error("Error");
       }
     }
   }
