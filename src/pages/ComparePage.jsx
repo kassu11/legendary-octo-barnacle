@@ -426,7 +426,7 @@ function UserRow(props) {
   const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = signals.createSignalWithSignal(() => !arrayUtils.includes(searchParams.disabled, props.name));
   const [exclude, setExclude] = signals.createSignalWithSignal(() => arrayUtils.includes(searchParams.exclude, props.name));;
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => props.name, () => params.type.toUpperCase(), accessToken);
+  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserNameFetchOnce(() => props.name, () => params.type.toUpperCase(), accessToken);
 
   function setKeys(keys, excludedValue) {
     if (enabled() && exclude() === excludedValue) {
