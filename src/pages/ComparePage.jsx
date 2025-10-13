@@ -1,5 +1,5 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createRenderEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
+import { batch, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../utils/arrays";
@@ -8,14 +8,19 @@ import api, { IndexedDB } from "../utils/api";
 import { LoaderCircle } from "../components/LoaderCircle.jsx";
 import { Tooltip } from "../components/Tooltips.jsx";
 import CompareMediaListWorker from "../worker/compare-media-list.js?worker";
-import { capitalize, formatMediaFormat, formatTitleToUrl, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../utils/formating.js";
+import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../utils/formating.js";
 import "./ComparePage.scss";
 import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
 import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
 import { asserts, signals } from "../collections/collections.js";
-import { arrayUtils } from "../utils/utils.js";
+import { arrayUtils, numberUtils } from "../utils/utils.js";
+
+const initialMediaCompareList = () => {
+  const count = numberUtils.parse(sessionStorage.getItem(window.location.href), 0);
+  return Array(count).fill({ id: -1, coverImage: {} });
+}
 
 export default function ComparePage() {
   const location = useLocation();
@@ -23,7 +28,11 @@ export default function ComparePage() {
   const params = useParams();
   const [names, storeNames] = createStore([]);
   const [users, storeUsers] = createStore({});
-  const [compareMediaList, setCompareMediaList] = createSignal([]);
+  const [compareMediaList, _setCompareMediaList] = createSignal(initialMediaCompareList());
+  const setCompareMediaList = list => {
+    sessionStorage.setItem(window.location.href, list.length);
+    _setCompareMediaList(list);
+  }
   const [includeKeys, setIncludeKeys] = createSignal([]);
   const [excludeKeys, setExcludeKeys] = createSignal([]);
   const [loading, setLoading] = createSignal(true);
@@ -82,7 +91,7 @@ export default function ComparePage() {
       };
 
       if (postObject.includeKeys.length === 0) {
-        setCompareMediaList([]);
+        setCompareMediaList(initialMediaCompareList());
         setLoading(false);
         return;
       }
@@ -557,7 +566,7 @@ function ContentPage() {
     <For each={compareMediaList()}>{(media, i) => (
       <li use:observe attr:data-index={i()} class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
         <div class="wrapper">
-          <Show when={cardsVisibility[i()]}>
+          <Show when={cardsVisibility[i()] && media.id !== -1}>
             <Show when={media.bannerImage}>
               <img src={media.bannerImage} loading="lazy" class="bg" inert alt="Background banner" />
             </Show>
