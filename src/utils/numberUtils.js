@@ -3,6 +3,13 @@ export const numberCommas = num => {
   return Intl.NumberFormat("ja-JP").format(num)
 }
 
+export const isNumber = num => !isNaN(num) && typeof num === "number";
+
+export const parse = (string, fallback) => {
+  const num = Number(string);
+  return isNumber(num) ? num : fallback;
+}
+
 export const compactNumber = num => {
   if (num == undefined) return;
   asserts.assertTrue(typeof num === "number", "Number is not typeof number");
