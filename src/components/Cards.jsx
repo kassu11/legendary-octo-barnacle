@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { asserts, globalState } from "../collections/collections";
-import { urlUtils } from "../utils/utils";
+import { stringUtils, urlUtils } from "../utils/utils";
 import Edit from "../assets/Edit";
 import Planning from "../assets/Planning";
 import Watching from "../assets/Watching";
@@ -52,7 +52,7 @@ function JikanMediaCardListBody(props) {
     <li class="cp-media-card inline-container">
       <A class="block-link" href={urlUtils.jikanMediaUrl(props.type, props.media)}>
         <div class="wrapper">
-          <img class="absolute-inset" src={props.media.images.webp.image_url} alt="Cover." />
+          <img class="absolute-inset" src={props.media.images.webp.large_image_url} alt="Cover." />
           <Show when={props.media.score}>
             <div class="score">
               <Star /> {(props.media.score)}
@@ -61,10 +61,12 @@ function JikanMediaCardListBody(props) {
           {props.children}
         </div>
         <p class="line-clamp">
-          <Switch>
-            <Match when={props.media.titles.English}>{props.media.titles.English}</Match>
-            <Match when={props.media.titles.Default}>{props.media.titles.Default}</Match>
-          </Switch>
+          <Show when={props.media.titles} fallback={props.media.title}>
+            <Switch>
+              <Match when={props.media.titles.English}>{props.media.titles.English}</Match>
+              <Match when={props.media.titles.Default}>{props.media.titles.Default}</Match>
+            </Switch>
+          </Show>
         </p>
       </A>
     </li>
@@ -174,7 +176,7 @@ export function MalCharacterCard(props) {
   return (
     <li class="cp-character-card">
       <CharacterSection
-        href={props.character.url}
+        href={urlUtils.jikanCharacterUrl(props.character)}
         src={props.character.images.webp.image_url}
         name={props.character.name}
         extra={props.role}
@@ -215,12 +217,12 @@ function CharacterSection(props) {
   asserts.isTypeString(props.alt);
 
   return (
-    <a className="clean-link flex" class={props.class} href={props.href}>
+    <A className="clean-link flex" class={props.class} href={props.href}>
       <img src={props.src} alt={props.alt} />
       <div class="grid">
         <span>{props.name}</span>
         <span>{props.extra}</span>
       </div>
-    </a>
+    </A>
   )
 }

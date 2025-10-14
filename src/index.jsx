@@ -18,8 +18,8 @@ import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff.jsx";
 import Artist from "./pages/Artist.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
-import { Staff, Character } from "./pages/Entity.jsx";
-import { Studio } from "./pages/Studio.jsx";
+import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity.jsx";
+import { Studio as AnilistStudio } from "./pages/Studio.jsx";
 import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
@@ -28,6 +28,7 @@ import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJika
 import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaInfoStaffJikan.jsx";
+import { Character as JikanCharacter } from "./pages/CharacterJikan.jsx";
 
 const root = document.getElementById("root")
 
@@ -87,10 +88,17 @@ render(
               </Route>
             </Route>
             <Route path="/artist/:name" component={Artist} />
-            <Route path="/ani">
-              <Route path="/character/:id/:name?" matchFilters={idFilter} component={Character} />
-              <Route path="/staff/:id/:name?" matchFilters={idFilter} component={Staff} />
-              <Route path="/studio/:id/:name?" matchFilters={idFilter} component={Studio} />
+            <Route path="/:api">
+              <Route path="/:sub/:id/:name?" matchFilters={{ api: "ani" }}>
+                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={AnilistCharacter} />
+                <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={AnilistStaff} />
+                <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={AnilistStudio} />
+              </Route>
+              <Route path="/:sub/:id/:name?" matchFilters={{ api: "mal" }}>
+                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={JikanCharacter} />
+                {/* <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={Staff} /> */}
+                {/* <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={Studio} /> */}
+              </Route>
             </Route>
             <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, type: ["anime", "manga"] }} component={MediaPageRedirect} />
             <Route path="/:api">
