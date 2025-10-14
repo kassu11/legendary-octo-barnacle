@@ -6,7 +6,7 @@ import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
-import { arrayUtils, fetcherSenderUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
+import { arrayUtils, fetcherSenderUtils, scheduleUtils } from "../utils/utils.js";
 import { fetchers, fetcherSenders, modes, signals } from "../collections/collections.js";
 import { asserts } from "../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
@@ -387,14 +387,14 @@ function CurrentCard(props) {
           triggerProgressIncrease(accessToken(), props.data.media.id, progress() + 1);
           setProgress(val => val + 1);
         }}>
-          <p>{progress} <span class="plus">+</span></p>
+          {progress} <span class="plus">+</span>
         </button>
       }>
         <Match when={
           props.data.media.episodes === progress() || props.data.media.chapters === progress()
         }>
           <button class="cp-current-card-hover-info normal" onClick={e => e.preventDefault()}>
-            <p>Completed</p>
+            Completed
           </button>
         </Match>
       </Switch>
