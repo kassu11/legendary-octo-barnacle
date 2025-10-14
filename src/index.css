@@ -437,7 +437,7 @@
     position: relative;
     aspect-ratio: 5.5/8;
     color: inherit;
-    border-radius: 8px;
+    border-radius: 4px;
     text-decoration: none;
 
     img {
@@ -447,12 +447,13 @@
       border-radius: inherit
     }
 
-    &:hover {
+    &:hover, &:has(:focus-visible), &:focus-visible {
+      z-index: 1;
       &:has(>.right) {
-        border-radius: 8px 0px 0px 8px;
+        border-radius: 4px 0px 0px 4px;
       }
       &:has(>.left) {
-        border-radius: 0px 8px 8px 0px;
+        border-radius: 0px 4px 4px 0px;
       }
 
       .cp-current-card-hover-info, .hover {
@@ -487,17 +488,17 @@
 
       &.right {
         left: 100%;
-        border-radius: 0px 8px 8px 0px;
+        border-radius: 0px 4px 4px 0px;
       }
       &.left {
         right: 100%;
         direction: rtl;
-        border-radius: 8px 0px 0px 8px;
+        border-radius: 4px 0px 0px 4px;
       }
       &.middle {
         left: 50%;
         transform: translateX(-50%);
-        border-radius: 8px;
+        border-radius: 4px;
         top: calc(100% + var(--gap) / 2);
         outline: 2px solid var(--bg);
       }
@@ -526,6 +527,8 @@
     opacity: 0;
     font-weight: 700;
     overflow: hidden;
+    border: none;
+    border-radius: 0;
     border-bottom-right-radius: inherit;
     border-bottom-left-radius: inherit;
 
