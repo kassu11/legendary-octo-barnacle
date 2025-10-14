@@ -26,3 +26,9 @@ export const getStaffByMediaId = (type, id) => {
     return fetcherTemplates.getJSON(queries.myAnimeListAnimeStaffById(id), res => res.data);
   }
 };
+
+export const getCharacterById = id => {
+  asserts.isInteger(id, "id");
+
+  return fetcherTemplates.getJSON(queries.myAnimeListCharacterById(id), res => res.data);
+};

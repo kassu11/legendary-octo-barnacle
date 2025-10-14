@@ -5,6 +5,10 @@ export const jikanMediaUrl= (type, card) => {
   return "/mal/" + type + "/" + card.mal_id + "/" + formatingUtils.titleToUrl(card.title);
 }
 
+export const jikanCharacterUrl= character => {
+  return "/mal/character/" + character.mal_id + "/" + formatingUtils.titleToUrl(character.name);
+}
+
 export const anilistMediaUrl = media => {
   asserts.isTypeString(media.type, "Media type");
   asserts.isTypeInteger(media.id, "Media id");
