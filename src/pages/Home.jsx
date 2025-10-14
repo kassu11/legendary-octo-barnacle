@@ -382,20 +382,20 @@ function CurrentCard(props) {
         </div>
       </Show>
       <Switch fallback={
-        <div class="cp-current-card-hover-info" onClick={e => {
+        <button class="cp-current-card-hover-info" onClick={e => {
           e.preventDefault();
           triggerProgressIncrease(accessToken(), props.data.media.id, progress() + 1);
           setProgress(val => val + 1);
         }}>
           <p>{progress} <span class="plus">+</span></p>
-        </div>
+        </button>
       }>
         <Match when={
           props.data.media.episodes === progress() || props.data.media.chapters === progress()
         }>
-          <div class="cp-current-card-hover-info normal" onClick={e => e.preventDefault()}>
+          <button class="cp-current-card-hover-info normal" onClick={e => e.preventDefault()}>
             <p>Completed</p>
-          </div>
+          </button>
         </Match>
       </Switch>
       <div class="hover" data-tooltip-positions="right left middle">
