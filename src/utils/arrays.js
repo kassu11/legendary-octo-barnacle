@@ -20,6 +20,15 @@ export function wrapToArray(value) {
   return [];
 }
 
+export const from = (...values) => {
+  const array = [];
+  for (const value of values) {
+    array.push(...wrapToArray(value));
+  }
+
+  return array;
+}
+
 export const push = (array, ...values) => {
   array = wrapToArray(array);
   array.push(...values);

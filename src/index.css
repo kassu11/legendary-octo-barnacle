@@ -132,6 +132,11 @@
     width: 1px;
   }
 
+  .page-normal {
+    width: min(1360px, 100% - 16px);
+    margin-inline: auto;
+  }
+
   .no-wrap {
     text-wrap: nowrap;
     white-space: nowrap;
@@ -226,8 +231,24 @@
 
   .grid-column-auto-fill {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--grid-column-width, 20rem), 100% / var(--grid-max-column-count, 999) - var(--gap, .5rem))), 1fr));
-    gap: var(--gap, .5rem);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--grid-column-width, 20rem), 100% / var(--grid-max-column-count, 999) - var(--gap, 8px))), 1fr));
+    gap: var(--gap, 8px);
+
+    &.card {
+      --grid-column-width: 13rem;
+      --gap: 16px;
+      gap: 32px var(--gap, 8px);
+
+      @media (width < 700px) {
+        --grid-column-width: 8rem;
+        --gap: 16px;
+      }
+
+      @media (width < 450px) {
+        --grid-column-width: 6rem;
+        --gap: 8px;
+      }
+    }
   }
 
   .grid-column-auto-fit {
@@ -717,6 +738,74 @@
   }
   .pg-media-info-extra-info  {
     word-break: break-word;
+  }
+
+  .pg-jikan-character-header {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 16px;
+    max-width: calc(192px + 75ch);
+    margin-inline: auto;
+    margin-bottom: 16px;
+
+    img {
+      width: 192px;
+      grid-row: span 2;
+    }
+
+    > div {
+      display: grid;
+      gap: 16px;
+    }
+
+    > .grid {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
+
+    @media (width < 720px) {
+      grid-template-columns: unset;
+      justify-items: center;
+
+      .grid {
+        order: -1;
+        grid-template-columns: unset;
+        justify-items: center;
+        text-align: center;
+      }
+    }
+  }
+
+  .pg-jikan-details-header {
+    &[open] + & {
+      margin-top: 32px;
+    }
+
+    summary {
+      position: sticky;
+      top: 48px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 7ch 1fr 7ch;
+      place-items: center;
+      padding: 8px;
+      z-index: 1;
+      gap: 16px;
+
+      .pg-jikan-details-header & {
+        background-color: var(--bg);
+        &::before {
+          content: "[closed]";
+        }
+      }
+
+      .pg-jikan-details-header[open] & {
+        background-color: var(--bg-light);
+        &::before {
+          content: "[open]";
+        }
+      }
+    }
   }
 
 
