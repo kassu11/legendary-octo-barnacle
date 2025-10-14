@@ -458,6 +458,9 @@
       .cp-current-card-hover-info, .hover {
         opacity: 1;
       }
+      .cp-current-card-info {
+        display: none;
+      }
       .hover {
         display: flex;
       }
@@ -509,7 +512,6 @@
     bottom: 0px;
     text-align: center;
     font-size: .75rem;
-    border-radius: inherit;
     overflow: hidden;
   }
 
