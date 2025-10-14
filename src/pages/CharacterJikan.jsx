@@ -1,15 +1,9 @@
-import { A, useParams, useSearchParams } from "@solidjs/router";
-import api from "../utils/api";
-import { Switch, Match, Show, createSignal, createEffect, on, For, createRenderEffect } from "solid-js";
-import { Markdown, OldMarkdownComponent } from "../components/Markdown";
+import { useParams } from "@solidjs/router";
+import { Show, For, createRenderEffect } from "solid-js";
+import { Markdown } from "../components/Markdown";
 import "./Entity.scss";
-import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../utils/formating";
 import { FavouriteToggle } from "../components/FavouriteToggle";
-import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../components/utils/DoomScroll";
-import { useAuthentication } from "../context/providers";
-import { wrapToArray } from "../utils/arrays.js";
-import { asserts, fetchers, fetcherSenders } from "../collections/collections.js";
+import { fetchers, fetcherSenders } from "../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "../components/Cards.jsx";
 
@@ -17,10 +11,12 @@ export function Character() {
   const params = useParams();
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharacterById, () => params.id);
   const [characterData] = fetcherSenders.sendWithNullUpdates(fetcher);
-  document.title = "Character";
 
   createRenderEffect(() => {
-    console.log(characterData());
+    const name = characterData().data.name;
+    if (name) {
+      document.title = name;
+    }
   });
 
   return (
