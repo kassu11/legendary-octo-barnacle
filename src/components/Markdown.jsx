@@ -34,15 +34,16 @@ export function OldMarkdownComponent(props) {
   const elem = <div innerHTML={clean}></div>; 
   return <For each={elem.childNodes}>{e => e}</For>
 }
-
+const singleLineBreakCharacterRegex = /([^\n])\n([^\n])/g;
+const replaceSingleLineBreakWithBrElement = (_, p1, p2) => p1 + "<br>" + p2;
 export function Markdown(props) {
   const children = createMemo(() => {
     if (!props.text) {
       return [];
     }
-    const dirty = marked(props.text)
+    const dirty = marked(props.text.replace(singleLineBreakCharacterRegex, replaceSingleLineBreakWithBrElement));
     const clean = DOMPurify.sanitize(dirty);
-    const elem = <div innerHTML={clean}></div>; 
+    const elem = <div innerHTML={clean}></div>;
     return [...elem.childNodes];
   });
 
