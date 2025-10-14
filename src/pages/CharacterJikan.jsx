@@ -13,7 +13,7 @@ export function Character() {
   const [characterData] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   createRenderEffect(() => {
-    const name = characterData().data.name;
+    const name = characterData()?.data?.name;
     if (name) {
       document.title = name;
     }
