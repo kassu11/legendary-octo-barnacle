@@ -198,7 +198,9 @@ function CharactersPage(props) {
     const nextPage = untrack(hasNextPage);
     const pageCount = Math.ceil(props.cache.length / hardcodedPageCount)
 
-    if (visiblePages.has(pageCount) && nextPage) {
+    if (visiblePages.has(pageCount) && !freshPages.has(pageCount)) {
+      return pageCount;
+    } else if (visiblePages.has(pageCount) && nextPage && freshPages.has(pageCount)) {
       return pageCount + 1;
     } else {
       const notFreshPages = [...visiblePages.difference(freshPages)].sort((a, b) => b - a);
