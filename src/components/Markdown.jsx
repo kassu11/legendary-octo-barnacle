@@ -41,7 +41,9 @@ export function Markdown(props) {
     if (!props.text) {
       return [];
     }
-    const dirty = marked(props.text.replace(singleLineBreakCharacterRegex, replaceSingleLineBreakWithBrElement));
+
+    const text = props.singleLineBreaks ? props.text.replace(singleLineBreakCharacterRegex, replaceSingleLineBreakWithBrElement) : props.text;
+    const dirty = marked(text);
     const clean = DOMPurify.sanitize(dirty);
     const elem = <div innerHTML={clean}></div>;
     return [...elem.childNodes];

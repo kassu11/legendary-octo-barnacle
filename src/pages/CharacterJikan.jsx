@@ -33,7 +33,7 @@ export function Character() {
               <FavouriteToggle jikanValue={characterData().data.favorites} />
             </div>
             <div>
-              <Markdown text={characterData().data.about} />
+              <Markdown text={characterData().data.about} singleLineBreaks={true} />
             </div>
           </div>
           <SummarySection title="Anime">

@@ -183,8 +183,8 @@ export function MediaInfoHomeJikan() {
     <>
       <Show when={jikanData()}>
         <Show when={jikanData().data.synopsis}>
-          <div>
-            <Markdown text={jikanData().data.synopsis} />
+          <div class="pg-media-jikan-desc">
+            <Markdown text={jikanData().data.synopsis} singleLineBreaks={true} />
           </div>
         </Show>
         <Show when={jikanData().data.background}>
