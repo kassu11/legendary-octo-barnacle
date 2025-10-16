@@ -828,6 +828,11 @@
       right: 4px;
     }
   }
+
+  .pg-media-jikan-desc {
+    display: grid;
+    gap: 16px;
+  }
 }
 
 
