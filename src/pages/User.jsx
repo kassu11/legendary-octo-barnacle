@@ -1,7 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../utils/api.js";
 import { createEffect, createSignal, Match, on, Show } from "solid-js";
-import "./User.scss";
+import "./User.scoped.css";
 import { formatTimeToDate } from "../utils/formating.js";
 import { useAuthentication, UserContext, useUser } from "../context/providers.js";
 

@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
+import scopedStyling from './solidjs-scoped-styling';
 
 export default defineConfig({
-  plugins: [solid()],
+  plugins: [scopedStyling(), solid()],
   base: "/legendary-octo-barnacle",
   css: {
     devSourcemap: true,
