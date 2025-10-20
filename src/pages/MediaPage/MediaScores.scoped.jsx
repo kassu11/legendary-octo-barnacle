@@ -1,12 +1,8 @@
-import { useMediaInfo } from "../../context/providers"
-import { numberUtils } from "../../utils/utils";
-import "./MediaScores.scss";
-
 export function MediaScores() {
   const { anilistData, jikanData } = useMediaInfo();
 
   return (
-    <div class="cp-media-scores">
+    <div class="scores">
       <div>
         <p>Mean</p>
         <span>
@@ -23,7 +19,7 @@ export function MediaScores() {
           </Show>
         </span>
       </div>
-      <p class="media-page-score-anilist-users">
+      <p class="anilist-users">
         <Show when={anilistData()?.data?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)} fallback="-">
           {numberUtils.numberCommas(anilistData()?.data?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0))}
         </Show>

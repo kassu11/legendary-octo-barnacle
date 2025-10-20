@@ -1,8 +1,7 @@
 import { createEffect, createSignal, ErrorBoundary, For, on, Show } from "solid-js";
-import "./Tags.scss";
 import { A } from "@solidjs/router";
 
-const Tags = (props) => {
+export const Tags = (props) => {
   const [showSpoilers, setShowSpoilers] = createSignal(false);
 
   createEffect(on(() => props.tags, () => {
@@ -11,7 +10,7 @@ const Tags = (props) => {
 
   function nonSpoilerAndHighRankTags() {
     const tags = [];
-    for(const tag of props.tags) {
+    for (const tag of props.tags) {
       if (tag.rank < 90 && tags.length >= 3) {
         break;
       }
@@ -40,7 +39,6 @@ const Tags = (props) => {
             <For each={props.tags}>{tag => (
               <li 
                 classList={{
-                  "pg-media-tag": true, 
                   spoiler: tag.isMediaSpoiler || tag.isGeneralSpoiler,
                   hidden: (tag.isMediaSpoiler || tag.isGeneralSpoiler) && !showSpoilers()
                 }} 
@@ -55,5 +53,3 @@ const Tags = (props) => {
     </ErrorBoundary>
   );
 };
-
-export default Tags; 

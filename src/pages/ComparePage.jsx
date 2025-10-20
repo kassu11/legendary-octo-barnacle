@@ -12,9 +12,8 @@ import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCoun
 import "./ComparePage.scss";
 import Score from "../components/media/Score.jsx";
 import Star from "../assets/Star.jsx";
-import { searchFormats } from "../utils/searchObjects.js";
 import { debounce } from "@solid-primitives/scheduled";
-import { asserts, signals } from "../collections/collections.js";
+import { asserts, searchObjects, signals } from "../collections/collections.js";
 import { arrayUtils, numberUtils } from "../utils/utils.js";
 
 const initialMediaCompareList = () => {
@@ -628,7 +627,7 @@ function ContentPage() {
                 )}</For>
               </ol>
               <ul class="flex-bullet-separator">
-                <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
+                <Show when={Object.entries(searchObjects.searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
                   <li>
                     <Switch>
                       <Match when={media.countryOfOrigin !== "JP"}> 

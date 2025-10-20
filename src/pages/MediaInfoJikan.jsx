@@ -4,11 +4,8 @@ import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from
 import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../utils/utils";
 import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
 import "./MediaInfoJikan.scss";
-import { MediaScores } from "./MediaPage/MediaScores";
 import { Trailer } from "./MediaPage/Trailer";
 import { FavouriteToggle } from "../components/FavouriteToggle";
-import ExternalLinks from "../components/media/ExternalLinks";
-import ExternalSource from "../assets/ExternalSource.jsx";
 import { Markdown } from "../components/Markdown";
 import MyAnimeList from "../assets/MyAnimeList";
 import Anilist from "../assets/Anilist";

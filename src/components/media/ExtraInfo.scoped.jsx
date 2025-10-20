@@ -2,12 +2,12 @@ import { ErrorBoundary, For, Show } from "solid-js";
 import { formatAnilistDate } from "../../utils/formating";
 import { useAuthentication } from "../../context/providers";
 
-const ExtraInfo = (props) => {
+export const ExtraInfo = (props) => {
   const { authUserData } = useAuthentication();
   return (
     <ErrorBoundary fallback="ExtraInfo error">
       <Show when={props.media}>
-        <div class="pg-media-info-extra-info" classList={{loading: props.loading}}>
+        <div classList={{loading: props.loading}}>
           <h2>Extra info</h2>
           <ul>
             <Show when={props.media.episodes}>
@@ -53,5 +53,3 @@ const ExtraInfo = (props) => {
     </ErrorBoundary>
   );
 };
-
-export default ExtraInfo;

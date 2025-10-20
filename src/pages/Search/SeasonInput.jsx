@@ -3,7 +3,6 @@ import "./RatingInput.scss";
 import { useParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchSeasons } from "../../utils/searchObjects";
 import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
 import { useResponsive } from "../../context/providers";
 
@@ -96,7 +95,7 @@ export function SeasonInput() {
 
     return (
       <ol>
-        <For each={Object.entries(searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
+        <For each={Object.entries(searchObjects.searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
           <Show when={key !== "tba"}>
             <li>
               <label>

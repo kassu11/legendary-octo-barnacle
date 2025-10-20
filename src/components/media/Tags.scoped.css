@@ -1,0 +1,20 @@
+.pg-media-tags {
+  background-color: var(--background-400);
+
+  ol {
+    list-style: none;
+    padding: 0px;
+
+    li {
+      &.spoiler {
+        background-color: var(--red-400);
+        color: var(--red-100);
+        font-weight: 600;
+      }
+
+      span {
+        float: right;
+      }
+    }
+  }
+}

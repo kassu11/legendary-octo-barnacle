@@ -1,0 +1,12 @@
+.recommendations {
+  --grid-column-width: 8rem;
+
+  li {
+    position: relative;
+  }
+
+  img {
+    aspect-ratio: 5.5/8;
+    object-fit: cover;
+  }
+}

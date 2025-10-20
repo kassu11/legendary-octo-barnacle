@@ -1,30 +1,4 @@
-import { A, Navigate, useLocation, useNavigate, useParams } from "@solidjs/router";
-import { ErrorBoundary, For, Show, Switch, createMemo, createRenderEffect, createSignal, on, onCleanup, onMount } from "solid-js";
-import "./MediaInfo.scss";
-import { Markdown } from "../components/Markdown.jsx";
-import Banner from "../components/media/Banner.jsx";
-import ExternalLinks from "../components/media/ExternalLinks.jsx";
-import ExtraInfo from "../components/media/ExtraInfo.jsx";
-import Rankings from "../components/media/Rankings.jsx";
-import Genres from "../components/media/Genres.jsx";
-import Tags from "../components/media/Tags.jsx";
-import Characters from "../components/media/Characters.jsx";
-import Staff from "../components/media/Staff.jsx";
-import { MediaScores } from "./MediaPage/MediaScores.jsx";
-import Friends from "../components/media/Friends.jsx";
-import AnimeThemes from "../components/media/AnimeThemes.jsx";
-import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, formatTitleToUrl, languageFromCountry, mediaUrl, numberCommas } from "../utils/formating.js";
-import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
-import Recommendations from "../components/media/Recommendations.jsx";
-import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../context/providers.js";
-import { searchFormats, searchSources } from "../utils/searchObjects.js";
-import { navigateToMediaPage } from "../utils/navigateUtils.js";
-import { fetcherSenderUtils } from "../utils/utils.js";
-import { fetchers, fetcherSenders, requests } from "../collections/collections.js";
-import { Trailer } from "./MediaPage/Trailer.jsx";
-import MyAnimeList from "../assets/MyAnimeList.jsx";
-import ExternalSource from "../assets/ExternalSource.jsx";
-import Anilist from "../assets/Anilist.jsx";
+import { useParams } from "@solidjs/router";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -81,14 +55,14 @@ export function MediaInfoContent(props) {
       }
 
       if ((e.key === "l" && !e.ctrlKey) || (e.key === "ArrowRight" && e.ctrlKey)) {
-        navigateToMediaPage(navigate, findTypeAndPreventDefault("SEQUEL"));
+        navigationUtils.navigateToMediaPage(navigate, findTypeAndPreventDefault("SEQUEL"));
       } else if ((e.key === "h" && !e.ctrlKey) || (e.key === "ArrowLeft" && e.ctrlKey)) {
-        navigateToMediaPage(navigate, findTypeAndPreventDefault("PREQUEL"));
+        navigationUtils.navigateToMediaPage(navigate, findTypeAndPreventDefault("PREQUEL"));
       } else if ((e.key === "j" && !e.ctrlKey) || (e.key === "ArrowDown" && e.ctrlKey)) {
         const media = findTypeAndPreventDefault("ADAPTATION") || findTypeAndPreventDefault("ALTERNATIVE");
-        navigateToMediaPage(navigate, media);
+        navigationUtils.navigateToMediaPage(navigate, media);
       } else if ((e.key === "k" && !e.ctrlKey) || (e.key === "ArrowUp" && e.ctrlKey)) {
-        navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE") || findTypeAndPreventDefault("PARENT"));
+        navigationUtils.navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE") || findTypeAndPreventDefault("PARENT"));
       }
     }, { signal: controller.signal });
   });
@@ -111,7 +85,7 @@ export function MediaInfoContent(props) {
   return (
     <ErrorBoundary fallback="Media page error">
       <MediaInfoContext.Provider value={{ anilistData, mutateBothAnilistData, jikanData }}>
-        <Banner src={anilistData()?.data?.bannerImage} loading={loading()} />
+        <MediaBanner src={anilistData()?.data?.bannerImage} loading={loading()} />
         <div class="media-page-content" classList={{loading: loading()}}>
           <aside class="media-page-left-aside">
             <Show when={anilistData()?.data}>
@@ -164,7 +138,7 @@ export function MediaInfoContent(props) {
                     <ol>
                       <For each={edges()}>{edge => (
                         <li>
-                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+                          <A href={"/ani/studio/" + edge.node.id + "/" + formatingUtils.titleToUrl(edge.node.name)}>
                             {edge.node.name}
                           </A>
                         </li>
@@ -180,7 +154,7 @@ export function MediaInfoContent(props) {
                     <ol>
                       <For each={edges()}>{edge => (
                         <li>
-                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+                          <A href={"/ani/studio/" + edge.node.id + "/" + formatingUtils.titleToUrl(edge.node.name)}>
                             {edge.node.name}
                           </A>
                         </li>
@@ -197,68 +171,7 @@ export function MediaInfoContent(props) {
             </Show>
           </aside>
           <section class="media-page-main">
-            <div class="media-page-title-info">
-              <Show when={anilistData()?.data}>
-                <h1>{anilistData()?.data.title.userPreferred}</h1>
-                <ul class="flex-bullet-separator">
-                  <li>
-                    <Switch>
-                      <Match when={anilistData()?.data.type === "MANGA"}>
-                        <Switch>
-                          <Match when={anilistData()?.data.startDate?.year}>
-                            <A href={"/search/manga?year=" + anilistData()?.data.startDate.year}>{anilistData()?.data.startDate.year}</A>
-                          </Match>
-                          <Match when={anilistData()?.data.startDate?.year == null}>
-                            <A href="/search/manga/tba">TBA</A>
-                          </Match>
-                        </Switch>
-                      </Match>
-                      <Match when={anilistData()?.data.type === "ANIME"}>
-                        <Switch>
-                          <Match when={anilistData()?.data.seasonYear && anilistData()?.data.season}>
-                            <A href={"/search/anime/" + anilistData()?.data.season.toLowerCase() + "-" + anilistData()?.data.seasonYear}>{capitalize(anilistData()?.data.season)} {anilistData()?.data.seasonYear}</A>
-                          </Match>
-                          <Match when={anilistData()?.data.startDate?.year}>
-                            <A href={"/search/anime?year=" + anilistData()?.data.startDate.year}>{anilistData()?.data.startDate.year}</A>
-                          </Match>
-                          <Match when={anilistData()?.data.startDate?.year == null}>
-                            <A href="/search/anime/tba">TBA</A>
-                          </Match>
-                        </Switch>
-                      </Match>
-                    </Switch>
-                  </li>
-                  <Show when={Object.entries(searchFormats.ani.media).find(([, val]) => val.api === anilistData()?.data.format)?.[0]}>{formatApiValue => (
-                    <li>
-                      <Switch>
-                        <Match when={anilistData()?.data.countryOfOrigin !== "JP"}> 
-                          <A href={"/search/" + anilistData()?.data.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + anilistData()?.data.countryOfOrigin}>
-                            {formatMediaFormat(anilistData()?.data.format)} ({languageFromCountry(anilistData()?.data.countryOfOrigin)})
-                          </A>
-                        </Match>
-                        <Match when={anilistData()?.data.countryOfOrigin === "JP"}> 
-                          <A href={"/search/" + anilistData()?.data.type.toLowerCase() + "?format=" + formatApiValue()}>
-                            {formatMediaFormat(anilistData()?.data.format)}
-                          </A>
-                        </Match>
-                      </Switch>
-                    </li>
-                  )}</Show>
-                  <li>{formatMediaStatus(anilistData()?.data.status)}</li>
-                </ul>
-                <ul>
-                  <Show when={anilistData()?.data.source}>
-                    <li>Source: 
-                      <A href={"/search/" + anilistData()?.data.type.toLowerCase() + "?source=" + Object.entries(searchSources).find(([, val]) => val.api === anilistData()?.data.source)[0]}>
-                        {formatMediaSource(anilistData()?.data.source)}
-                      </A>
-                    </li>
-                  </Show>
-                  <li>Members: {numberCommas(anilistData()?.data.popularity)}</li>
-                  <li>Favourites: {numberCommas(anilistData()?.data.favourites)}</li>
-                </ul>
-              </Show>
-            </div>
+            <AnilistMediaInfo />
             {props.children}
           </section>
         </div>
@@ -279,30 +192,9 @@ export function MediaInfoHome() {
             <Markdown text={anilistData().data.description} />
           </div>
         </Show>
-        <Show when={anilistData().data.relations?.edges.length}>
-          <div class="media-page-relation-container">
-            <h2>Relations</h2>
-            <ol class="grid-column-auto-fill">
-              <For each={anilistData().data.relations.edges}>{relation => (
-                <li>
-                  <A
-                    href={mediaUrl(relation.node)}
-                    class="media-page-relation"
-                  >
-                    <img src={relation.node.coverImage.large} alt="Cover" />
-                    <div class="content">
-                      <p class="type">{relation.relationType}</p>
-                      <p class="line-clamp">{relation.node.title.userPreferred}</p>
-                      <p class="format">{relation.node.format} - {relation.node.status}</p>
-                    </div>
-                  </A>
-                </li>
-              )}</For>
-            </ol>
-          </div>
-        </Show>
+        <AnilistRelationsPreview relations={anilistData().data.relations}/>
         <Characters characters={anilistData().data.characterPreview.edges} countryOfOrigin={anilistData().data.countryOfOrigin} />
-        <Staff staff={anilistData().data.staffPreview.edges} />
+        <StaffPreview staff={anilistData().data.staffPreview.edges} />
         <Show when={accessToken()}>
           <Friends />
         </Show>

@@ -15,26 +15,29 @@ export default defineConfig({
         /\.js$/,
       ],
       imports: [
-        "@solidjs/router",
         "solid-js",
+        {
+          "@solidjs/router": [
+            "A", "Navigate", "useLocation", "useNavigate", "useParams"
+          ],
+        },
       ],
       dirsScanOptions: {
         fileFilter: file => {
-          return file.endsWith(".js") || file.endsWith(".jsx");
+          return file.endsWith(".js") || file.endsWith(".jsx") || file.endsWith(".ts") || file.endsWith(".tsx");;
         }
       },
       dirs: [
         "./src/assets",
-        "./src/components",
+        "./src/components/**",
         "./src/context",
         "./src/hooks",
-        "./src/pages",
+        "./src/pages/**",
         "./src/libs",
         "./src/collections/collections.js",
         "./src/utils/utils.js",
         "./src/utils/api.js",
       ],
-      defaultExportByFilename: true,
     })
   ],
   base: "/legendary-octo-barnacle",

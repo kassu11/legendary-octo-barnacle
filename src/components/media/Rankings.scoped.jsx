@@ -1,7 +1,6 @@
 import { ErrorBoundary, For } from "solid-js";
-import "./Rankings.scss";
 
-const Rankings = (props) => {
+export const Rankings = (props) => {
   return (
     <ErrorBoundary fallback="Ranking error">
       <Show when={props.rankings}>
@@ -17,5 +16,3 @@ const Rankings = (props) => {
     </ErrorBoundary>
   );
 };
-
-export default Rankings;

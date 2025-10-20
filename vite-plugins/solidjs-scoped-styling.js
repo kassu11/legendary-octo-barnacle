@@ -1,4 +1,4 @@
-export default function solidSfcPlugin() {
+export default function solidJsScopedStyling() {
   return {
     name: "vite-solidjs-scoped-styling",
     transform(src, id) {
@@ -32,14 +32,14 @@ export default function solidSfcPlugin() {
             };
 
             for (let i = 0; i < query.length; i++) {
-              // Position starts with either attribute or string
-              if (queries[i - 1] !== "\\" && queries[i] in attributeScopeCharacters) {
-                attributeScope.push(queries[i]);
+              // Position ends either attribute or string selector
+              if (attributeScope.length && query[i - 1] !== "\\" && query[i] === attributeScopeCharacters[attributeScope.at(-1)]) {
+                attributeScope.pop();
                 returnQuery += query[i];
               }
-              // Position ends with either attribute or string
-              else if (attributeScope.length && queries[i - 1] !== "\\" && queries[i] === attributeScopeCharacters[attributeScope.at(-1)]) {
-                attributeScope.pop();
+              // Position starts either attribute or string selector
+              else if (query[i - 1] !== "\\" && query[i] in attributeScopeCharacters) {
+                attributeScope.push(query[i]);
                 returnQuery += query[i];
               }
               // Prevent selector splitting inside attribute or string inside attribute
@@ -79,11 +79,11 @@ export default function solidSfcPlugin() {
                 // Pseudo class that we want to scope could be :has, :where: :is, :not etc.
                 if (
                   equalsBackwards("child(", query, i) ||
-                    equalsBackwards("type(", query, i) ||
-                    equalsBackwards(":dir(", query, i) ||
-                    equalsBackwards(":state(", query, i) ||
-                    equalsBackwards(":host(", query, i) ||
-                    equalsBackwards(":context(", query, i)
+                  equalsBackwards("type(", query, i) ||
+                  equalsBackwards(":dir(", query, i) ||
+                  equalsBackwards(":state(", query, i) ||
+                  equalsBackwards(":host(", query, i) ||
+                  equalsBackwards(":context(", query, i)
                 ) {
                   scopeCurrentSelector = false;
                 } else {
@@ -96,7 +96,7 @@ export default function solidSfcPlugin() {
               // args: :not(.class) no args: :hover
               else if (query[i] === ":") {
                 // Don't scope :root, if there are any other pseudo selectors that you should not scope add them here
-                if (equalsforwards(queries, ":root", i)) {
+                if (equalsforwards(":root", query, i)) {
                   scopeCurrentSelector = false;
                 }
                 else if (scopeCurrentSelector) {
@@ -107,7 +107,7 @@ export default function solidSfcPlugin() {
                 returnQuery += query[i];
               }
               // Selector is prefixed with "_" don't scope the selector
-              else if (hasSelector === false && queries[i] === "_") {
+              else if (hasSelector === false && query[i] === "_") {
                 scopeCurrentSelector = false;
               }
               // Position should have ".", "#", and rest of UTF-8 characters

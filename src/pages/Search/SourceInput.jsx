@@ -3,7 +3,6 @@ import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchSources } from "../../utils/searchObjects";
 import { useResponsive } from "../../context/providers";
 
 export function SourceInput() {
@@ -96,7 +95,7 @@ export function SourceInput() {
       setStore(reconcile(objectFromArrayEntries(searchParams.source, {})));
     });
 
-    const sourceEntries = () => Object.entries(searchSources).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const sourceEntries = () => Object.entries(searchObjects.searchSources).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

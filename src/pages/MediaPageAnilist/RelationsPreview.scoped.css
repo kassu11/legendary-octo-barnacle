@@ -1,0 +1,32 @@
+@layer layout {
+  li _a {
+    background-color: var(--background-400);
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: .5rem;
+    text-decoration: none;
+    color: var(--text-400);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      aspect-ratio: 5.5/8;
+    }
+
+    .content {
+      padding: .5rem .5rem .5rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .type {
+      color: var(--text-500);
+      font-weight: 700;
+    }
+
+    p {
+      margin-top: auto;
+    }
+  }
+}

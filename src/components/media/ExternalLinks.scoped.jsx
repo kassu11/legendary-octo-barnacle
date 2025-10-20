@@ -1,11 +1,8 @@
-import { ErrorBoundary, For, Match, Switch } from "solid-js";
-import "./ExternalLinks.scss";
-
-export default function ExternalLinks(props) {
+export function ExternalLinks(props) {
   return (
     <ErrorBoundary fallback="External links error">
       <Show when={props.hastag || props.externalLinks?.length}>
-        <div>
+        <div class="external">
           <h2>External links</h2>
           <ul>
             <Show when={props.hashtag}>

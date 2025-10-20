@@ -3,7 +3,6 @@ import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchCountries } from "../../utils/searchObjects";
 import { useResponsive } from "../../context/providers";
 
 export function CountryInput() {
@@ -89,7 +88,7 @@ export function CountryInput() {
       setStore(reconcile(objectFromArrayEntries(searchParams.country, {})));
     });
 
-    const countryEntries = () => Object.entries(searchCountries).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const countryEntries = () => Object.entries(searchObjects.searchCountries).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

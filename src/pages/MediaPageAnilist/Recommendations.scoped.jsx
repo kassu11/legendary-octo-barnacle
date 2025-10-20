@@ -1,14 +1,8 @@
-import { batch, createEffect, createSignal, For, Match, on, Show } from "solid-js";
 import { useParams } from "@solidjs/router";
-import api from "../../utils/api";
-import { DoomScroll } from "../utils/DoomScroll";
-import { leadingAndTrailingDebounce } from "../../utils/scheduled";
-import { useAuthentication } from "../../context/providers";
-import { asserts, fetchers, fetcherSenders } from "../../collections/collections";
-import { AnilistMediaRecommendationCard } from "../Cards";
-import { fetcherSenderUtils } from "../../utils/utils";
+import { scheduleUtils } from "../../utils/utils";
+import { fetchers } from "../../collections/collections";
 
-function Recommendations(props) {
+export function Recommendations(props) {
   const params = useParams();
   const [showMore, setShowMore] = createSignal(false);
   const [id, setId] = createSignal();
@@ -20,11 +14,10 @@ function Recommendations(props) {
 
   return (
     <Show when={props.recommendations?.nodes.length > 0}>
-      <div>
+      <div class="recommendations">
         <div class="flex-space-between">
           <h2>Recommendations</h2>
           <div>
-            <button>Add</button>
             <Show when={props.recommendations.pageInfo.total > props.recommendations.nodes.length}>
               <button onClick={() => setShowMore(state => !state)}>
                 Show
@@ -106,7 +99,7 @@ function RecommendationCard(props) {
   const [rating, setRating] = createSignal(props.node.rating);
 
   let localRating = props.node.userRating;
-  const triggerLikeRating = leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
+  const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
       const response = await api.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
       asserts.assertTrue(!response.fromCache, "Mutation should never be cached");
@@ -158,5 +151,3 @@ function RecommendationCard(props) {
     />
   )
 };
-
-export default Recommendations; 

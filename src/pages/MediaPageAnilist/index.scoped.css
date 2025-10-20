@@ -1,19 +1,4 @@
 @layer layout {
-  .media-page-banner {
-    background-color: var(--background-200);
-
-    &.loading {
-      opacity: .6;
-    }
-
-    img {
-      opacity: .9;
-      height: 22rem;
-      width: 100%;
-      object-fit: cover;
-    }
-  }
-
   .media-page-content {
     position: relative;
     max-width: 80rem;
@@ -26,30 +11,16 @@
     &.loading {
       opacity: .6;
     }
-
-    .recommendations {
-      --grid-column-width: 8rem;
-
-      li {
-        position: relative;
-      }
-
-      img {
-        aspect-ratio: 5.5/8;
-        object-fit: cover;
-      }
-    }
   }
-
 
   .media-page-watch-episodes {
     --grid-column-width: 20rem;
     --padding: 0px;
-    // This fixes the scroll snapping of the child reel
+    /* This fixes the scroll snapping of the child reel */
     position: relative;
 
     .grid-reel-auto-fill {
-      // Setting background color to the same as background because other wise the scroll snapping is broken ¯\_(ツ)_/¯
+      /* Setting background color to the same as background because otherwise the scroll snapping will break ¯\_(ツ)_/¯ */
       background-color: var(--background-200);
     }
 
@@ -94,7 +65,7 @@
     height: fit-content;
     gap: 1rem;
 
-    .media-page-banner + .media-page-content & {
+    _.pg-media-banner + .media-page-content & {
       margin-top: -8rem;
     }
 
@@ -111,17 +82,14 @@
     border-radius: .25rem;
   }
 
-  .media-page-score-anilist-users {
-    grid-column: span 2;
-    grid-row: 2;
-  }
 
   .media-page-main {
     display: grid;
     gap: 1rem;
     height: fit-content;
   }
-  .media-page-title-info h1 {
+
+  h1 {
     line-height: 1.1;
   }
 
@@ -151,36 +119,6 @@
   }
 
 
-  .media-page-relation {
-    background-color: var(--background-400);
-    display: grid;
-    grid-template-columns: 5.5rem 1fr;
-    gap: .5rem;
-    text-decoration: none;
-    color: var(--text-400);
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      aspect-ratio: 5.5/8;
-    }
-
-    .content {
-      padding: .5rem .5rem .5rem 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .type {
-      color: var(--text-500);
-      font-weight: 700;
-    }
-
-    .format {
-      margin-top: auto;
-    }
-  }
 }
 
 @layer resize {
@@ -189,12 +127,11 @@
       --media-page-banner-height: max(min(15.5rem, 35vw), 8rem);
       --media-page-cover-padding: .5rem;
     }
-    .media-page-banner img {
-      height: var(--media-page-banner-height);
+    _.pg-media-banner _img {
       opacity: .4;
     }
 
-    .media-page-banner + .media-page-content {
+    _.pg-media-banner + .media-page-content {
       margin-top: calc(var(--media-page-banner-height) * -1 + var(--media-page-cover-padding));
       margin-inline: var(--media-page-cover-padding);
     }
@@ -203,20 +140,21 @@
       gap: .5rem;
       background-color: unset;
     }
-    .media-page-main, .media-page-left-aside {
+    :where(.media-page-main, .media-page-left-aside) {
       display: contents;
-      > * {
+      > _* {
         order: 10;
         grid-column: 1/-1;
       }
     }
 
-    .media-page-cover { 
+    .media-page-cover {
       grid-column: 1;
       order: 0; 
     }
-    .media-page-title-info {
-      order: 0; 
+
+    _.pg-ani-media-info {
+      order: 0;
       grid-column: 2;
 
       * {
@@ -227,7 +165,8 @@
         font-size: 1.2rem;
       }
     }
-    .media-page-description { 
+
+    .media-page-description {
       order: 0; 
     }
   }
