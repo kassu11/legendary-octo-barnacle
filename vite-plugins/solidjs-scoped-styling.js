@@ -2,12 +2,12 @@ export default function solidSfcPlugin() {
   return {
     name: "vite-solidjs-scoped-styling",
     transform(src, id) {
-      if (id.endsWith(".jsx")) {
+      if (id.endsWith(".scoped.jsx")) {
         const attribute = localDataAttributeFromFilePath(id);
         return src.replace(/(<[^>=+< /]+)/g, (_, tag) => `${tag} ${attribute}`);
       }
       else if (id.endsWith(".scoped.css")) {
-        const attribute = "[" + localDataAttributeFromFilePath(removeFileType(id)) + "]";
+        const attribute = "[" + localDataAttributeFromFilePath(id) + "]";
 
         // Get list of all queries inside the file
         return src.replace(/(}|;|^|{)(\s*)([^;}]+?)(\s*)(?={)/g, (match, start = "", leftPad1 = "", queries, rightPad1 = "") => {

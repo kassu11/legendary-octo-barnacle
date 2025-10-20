@@ -1,11 +1,13 @@
 import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
-import scopedStyling from "./solidjs-scoped-styling";
+import scopedStyling from "./vite-plugins/solidjs-scoped-styling";
+import autoImportScopedStyles from "./vite-plugins/auto-import-scoped-styles";
 import AutoImport from "unplugin-auto-import/vite"
 
 export default defineConfig({
   plugins: [
     scopedStyling(),
+    autoImportScopedStyles(),
     solid(),
     AutoImport({
       include: [
