@@ -28,7 +28,7 @@ import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJika
 import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaInfoStaffJikan.jsx";
-import { Character as JikanCharacter } from "./pages/CharacterJikan.jsx";
+import { CharacterJikan } from "./pages/CharacterJikan.jsx";
 
 const root = document.getElementById("root")
 
@@ -95,7 +95,7 @@ render(
                 <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={AnilistStudio} />
               </Route>
               <Route path="/:sub/:id/:name?" matchFilters={{ api: "mal" }}>
-                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={JikanCharacter} />
+                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikan} />
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={Staff} /> */}
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={Studio} /> */}
               </Route>

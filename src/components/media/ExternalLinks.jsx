@@ -1,6 +1,5 @@
 import { ErrorBoundary, For, Match, Switch } from "solid-js";
 import "./ExternalLinks.scss";
-import Link from "../../assets/Link";
 
 export default function ExternalLinks(props) {
   return (
@@ -18,7 +17,7 @@ export default function ExternalLinks(props) {
               <li class="cp-external-link">
                 <div class="icon" style={{background: link.color}}>
                   <Show when={link.icon} fallback={
-                    <Link />
+                    <IconLink />
                   }>
                     <img src={link.icon} alt="Site favicon." />
                   </Show>
