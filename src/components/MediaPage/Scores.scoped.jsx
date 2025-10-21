@@ -1,4 +1,6 @@
-export function MediaScores() {
+import {Show, Switch} from "solid-js";
+
+export function MediaPageScores() {
   const { anilistData, jikanData } = useMediaInfo();
 
   return (

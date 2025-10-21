@@ -1,8 +1,8 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../utils/api.js";
+import api from "../../utils/api.js";
 import { createEffect, createSignal, Match, on, Show } from "solid-js";
-import { formatTimeToDate } from "../utils/formating.js";
-import { useAuthentication, UserContext, useUser } from "../context/providers.js";
+import { formatTimeToDate } from "../../utils/formating.js";
+import { useAuthentication, UserContext, useUser } from "../../context/providers.js";
 
 export function User(props) {
   const params = useParams();
@@ -97,8 +97,8 @@ function Content(props) {
   );
 }
 
-export { Overview } from "./User/Overview/Overview.jsx";
-export { MediaList } from "./User/MediaList/MediaList.jsx";
-export { FavouriteContainer } from "./User/Favourites/FavouriteContainer.jsx";
-export { Stats } from "./User/Stats/Stats.jsx";
-export { Socials } from "./User/Socials/Socials.jsx";
+export { Overview } from "./Overview/Overview.jsx";
+export { MediaList } from "./MediaList/MediaList.jsx";
+export { FavouriteContainer } from "./Favourites/FavouriteContainer.jsx";
+export { Stats } from "./Stats/Stats.jsx";
+export { Socials } from "./Socials/Socials.jsx";

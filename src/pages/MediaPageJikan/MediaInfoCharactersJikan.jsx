@@ -1,9 +1,9 @@
 import { useParams } from "@solidjs/router";
-import { useMediaInfo } from "../context/providers";
-import { fetchers, fetcherSenders, localizations, requests, signals } from "../collections/collections";
-import { fetcherSenderUtils } from "../utils/utils";
+import { useMediaInfo } from "../../context/providers.js";
+import { fetchers, fetcherSenders, localizations, requests, signals } from "../../collections/collections.js";
+import { fetcherSenderUtils } from "../../utils/utils.js";
 import { createMemo, ErrorBoundary } from "solid-js";
-import { MalCharacterCard } from "../components/Cards.jsx";
+import { MalCharacterCard } from "../../components/Cards.jsx";
 
 export function MediaInfoCharactersJikan() {
   const params = useParams();

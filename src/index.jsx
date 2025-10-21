@@ -6,8 +6,8 @@ import Home from "./pages/Home.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search.jsx";
-import { User, Overview, MediaList, FavouriteContainer, Stats, Socials } from "./pages/User.scoped.jsx";
+import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index.jsx";
+import { User, Overview, MediaList, FavouriteContainer, Stats, Socials } from "./pages/User/index.scoped.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
@@ -23,10 +23,10 @@ import Activity from "./pages/Activity.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
-import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJikan.jsx";
+import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.jsx";
 import "./libs/tooltips.js";
-import { MediaInfoCharactersJikan } from "./pages/MediaInfoCharactersJikan.jsx";
-import { MediaInfoStaffJikan } from "./pages/MediaInfoStaffJikan.jsx";
+import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
+import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
 import { CharacterJikan } from "./pages/CharacterJikan.jsx";
 
 const root = document.getElementById("root")

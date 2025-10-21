@@ -1,8 +1,8 @@
 import { useParams } from "@solidjs/router";
-import { useMediaInfo } from "../context/providers";
-import { fetchers, fetcherSenders, localizations, requests } from "../collections/collections";
-import { fetcherSenderUtils } from "../utils/utils";
-import { MalStaffCard } from "../components/Cards.jsx";
+import { useMediaInfo } from "../../context/providers.js";
+import { fetchers, fetcherSenders, localizations, requests } from "../../collections/collections.js";
+import { fetcherSenderUtils } from "../../utils/utils.js";
+import { MalStaffCard } from "../../components/Cards.jsx";
 import { ErrorBoundary } from "solid-js";
 
 export function MediaInfoStaffJikan() {

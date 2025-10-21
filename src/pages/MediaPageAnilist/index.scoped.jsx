@@ -1,4 +1,31 @@
-import { useParams } from "@solidjs/router";
+import {Navigate, useLocation, useNavigate, useParams} from "@solidjs/router";
+import {AnilistRelationsPreview} from "./RelationsPreview.scoped.jsx";
+import Characters from "../../components/media/Characters.jsx";
+import {
+    createMemo,
+    createRenderEffect,
+    createSignal,
+    ErrorBoundary,
+    For, Match,
+    on,
+    onCleanup,
+    onMount,
+    Show,
+    Switch
+} from "solid-js";
+import {Markdown} from "../../components/Markdown.jsx";
+import {StaffPreview} from "./StaffPreview.scoped.jsx";
+import Friends from "../../components/media/Friends.jsx";
+import AnimeThemes from "../../components/media/AnimeThemes.jsx";
+import {Recommendations} from "./Recommendations.scoped.jsx";
+import {useAuthentication, useMediaInfo} from "../../context/providers.js";
+import {AnilistMediaInfo} from "./MediaInfo.jsx";
+import {Tags} from "../../components/media/Tags.scoped.jsx";
+import {Genres} from "../../components/media/Genres.scoped.jsx";
+import {Rankings} from "../../components/media/Rankings.scoped.jsx";
+import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
+import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
+import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -105,7 +132,7 @@ export function MediaInfoContent(props) {
                   </A>
                 </Show>
               </div>
-              <MediaScores />
+              <MediaPageScores />
               <Show when={accessToken()}>
                 <button onClick={() => {
                   openEditor(anilistData()?.data, {

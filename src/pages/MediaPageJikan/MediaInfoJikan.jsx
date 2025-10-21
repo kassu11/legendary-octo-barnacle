@@ -1,15 +1,16 @@
 import { A, useParams } from "@solidjs/router";
-import { MediaInfoContext, useAuthentication, useMediaInfo } from "../context/providers";
-import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from "../collections/collections";
-import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../utils/utils";
+import { MediaInfoContext, useAuthentication, useMediaInfo } from "../../context/providers.js";
+import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from "../../collections/collections.js";
+import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
 import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
 import "./MediaInfoJikan.scss";
-import { Trailer } from "./MediaPage/Trailer";
-import { FavouriteToggle } from "../components/FavouriteToggle";
-import { Markdown } from "../components/Markdown";
-import MyAnimeList from "../assets/MyAnimeList";
-import Anilist from "../assets/Anilist";
-import { MalCharacterCard, MalStaffCard } from "../components/Cards.jsx";
+import { Trailer } from "../MediaPage/Trailer.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { Markdown } from "../../components/Markdown.jsx";
+import MyAnimeList from "../../assets/MyAnimeList.jsx";
+import Anilist from "../../assets/Anilist.jsx";
+import { MalCharacterCard, MalStaffCard } from "../../components/Cards.jsx";
+import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
@@ -58,7 +59,7 @@ export function MediaInfoWrapperJikan(props) {
                   <ExternalSource />
                 </a>
               </div>
-              <MediaScores />
+              <MediaPageScores />
               <FavouriteToggle
                 checked={isFavourite()}
                 onChange={setIsFavourite}
