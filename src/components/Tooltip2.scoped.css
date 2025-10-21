@@ -1,0 +1,28 @@
+tool-tip2 {
+  display: block;
+  background-color: var(--bg-dark);
+  width: max-content;
+  padding: 4px 8px;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 1;
+
+  &.left {
+    right: calc(100% + 8px);
+  }
+  &.right {
+    left: calc(100% + 8px);
+  }
+  &.left, &.right {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  _:not(_:hover, _:focus-visible) > & {
+    display: none;
+  }
+
+  _:has(> &) {
+    position: relative;
+  }
+}

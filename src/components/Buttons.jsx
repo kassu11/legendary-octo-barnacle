@@ -1,5 +1,6 @@
 import { asserts } from "../collections/collections";
-import { Tooltip2 } from "./Tooltips";
+
+import {Tooltip2Scoped} from "./Tooltip2.scoped.jsx";
 
 export function QuickActionListButton(props) {
 
@@ -17,9 +18,9 @@ export function QuickActionButton(props) {
   return (
     <button class="cp-media-action-item" classList={{ big: props.big }} data-tooltip-trigger onClick={props.onClick}>
       {props.children}
-      <Tooltip2 positions="left right">
+      <Tooltip2Scoped positions="left right">
         {props.label}
-      </Tooltip2>
+      </Tooltip2Scoped>
     </button>
   );
 }

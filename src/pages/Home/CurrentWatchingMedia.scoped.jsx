@@ -1,6 +1,6 @@
 import api from "../../utils/api.js";
 import {Show} from "solid-js";
-import {CurrentCards} from "./CurrentCards.jsx";
+import {CurrentCardsScoped} from "./CurrentCards.scoped.jsx";
 
 export function CurrentWatchingMediaScoped(props) {
   const [animeData, {mutateCache: mutateAnimeCache}] = api.anilist.wachingAnime(props.userId, props.token);
@@ -21,17 +21,17 @@ export function CurrentWatchingMediaScoped(props) {
   return (
     <div class="pg-home-current">
       <Show when={animeData()}>
-        <CurrentCards
+        <CurrentCardsScoped
           cards={animeData().data.data.Page.mediaList.filter(anime => anime.media.status !== "FINISHED").toSorted(sortAiringTime)}
           mutateCache={mutateAnimeCache}
         />
-        <CurrentCards
+        <CurrentCardsScoped
           cards={animeData().data.data.Page.mediaList.filter(anime => anime.media.status === "FINISHED")}
           mutateCache={mutateAnimeCache}
         />
       </Show>
       <Show when={mangaData()}>
-        <CurrentCards cards={mangaData().data.data.Page.mediaList} mutateCache={mutateMangaCache}/>
+        <CurrentCardsScoped cards={mangaData().data.data.Page.mediaList} mutateCache={mutateMangaCache}/>
       </Show>
     </div>
   );
