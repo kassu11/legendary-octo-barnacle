@@ -98,7 +98,7 @@ function Content(props) {
 }
 
 export { Overview } from "./Overview/Overview.jsx";
-export { MediaList } from "./MediaList/MediaList.jsx";
+export { UserMediaList } from "./MediaList/index.scoped.jsx";
 export { FavouriteContainer } from "./Favourites/FavouriteContainer.jsx";
 export { Stats } from "./Stats/Stats.jsx";
 export { Socials } from "./Socials/Socials.jsx";

@@ -9,7 +9,7 @@ import Rewatched from "../assets/Rewatched";
 import { useAuthentication, useEditMediaEntries } from "../context/providers";
 import Star from "../assets/Star";
 import api from "../utils/api";
-import { QuickActionListButton } from "./Buttons";
+import { QuickActionListButton } from "./Buttons.scoped.jsx";
 import ThumbUp from "../assets/ThumbUp";
 import ThumbDown from "../assets/ThumbDown";
 
