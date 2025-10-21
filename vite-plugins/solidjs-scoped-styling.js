@@ -24,6 +24,7 @@ export default function solidJsScopedStyling() {
             let hasSelector = false;
             let isPseudoClass = false;
             const pseudoSelectorScope = [];
+            let isCommend = false;
             const attributeScope = [];
             const attributeScopeCharacters = {
               "\"": "\"",
@@ -32,18 +33,31 @@ export default function solidJsScopedStyling() {
             };
 
             for (let i = 0; i < query.length; i++) {
-              // Position ends either attribute or string selector
-              if (attributeScope.length && query[i - 1] !== "\\" && query[i] === attributeScopeCharacters[attributeScope.at(-1)]) {
-                attributeScope.pop();
+              // Positions is inside commend block
+              // Early exit scoping
+              if (isCommend) {
+                if (query[i] === "/" && query[i - 1] === "*" && query[i - 2] !== "\\") {
+                  isCommend = false;
+                }
+                returnQuery += query[i];
+              }
+              // Position is either inside attribute or string inside attribute
+              // Early exit scoping
+              else if (attributeScope.length) {
+                // Position ends either attribute or string inside attribute selector
+                if (query[i - 1] !== "\\" && query[i] === attributeScopeCharacters[attributeScope.at(-1)]) {
+                  attributeScope.pop();
+                }
+                returnQuery += query[i];
+              }
+              // Positions starts a commend block
+              else if (!isCommend && query[i - 1] !== "\\" && query[i] === "/" && query[i + 1] === "*") {
+                isCommend = true;
                 returnQuery += query[i];
               }
               // Position starts either attribute or string selector
               else if (query[i - 1] !== "\\" && query[i] in attributeScopeCharacters) {
                 attributeScope.push(query[i]);
-                returnQuery += query[i];
-              }
-              // Prevent selector splitting inside attribute or string inside attribute
-              else if (attributeScope.length) {
                 returnQuery += query[i];
               }
               // Position char ends the current selector
@@ -167,7 +181,7 @@ const stringBetweenTwoChars = (a, b) => {
 }
 
 
-const chars = stringBetweenTwoChars("0", "9") + stringBetweenTwoChars("a", "z") + stringBetweenTwoChars("A", "Z");
+const chars = stringBetweenTwoChars("0", "9") + stringBetweenTwoChars("a", "z");
 
 const removeFileType = filePath => filePath.replace(/\.[^.]+$/, "");
 
