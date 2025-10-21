@@ -1,6 +1,6 @@
 import {useAuthentication} from "../../context/providers.js";
 import {Show} from "solid-js";
-import {ActivityPage} from "./ActivityPage.jsx";
+import {ActivityPage} from "./ActivityPage.scoped.jsx";
 
 export function ActivityReel(props) {
   const {accessToken} = useAuthentication();

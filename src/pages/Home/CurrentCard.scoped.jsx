@@ -6,7 +6,7 @@ import {A} from "@solidjs/router";
 import {mediaUrl} from "../../utils/formating.js";
 import {EpisodeTime} from "./EpisodeTime.jsx";
 
-export function CurrentCard(props) {
+export function CurrentCardScoped(props) {
   const {accessToken} = useAuthentication();
   const [progress, setProgress] = createSignal(props.data.progress);
   const [airingEpisode, setAiringEpisode] = createSignal(props.data.media.nextAiringEpisode?.episode);

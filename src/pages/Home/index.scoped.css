@@ -1,0 +1,21 @@
+.pg-home {
+  margin-inline: auto;
+  width: min(100%, 80rem);
+  display: grid;
+  gap: 10px;
+
+  _.cp-loader-circle {
+    left: 50%;
+    transform: translateX(-50%);
+
+    &.refresh {
+      position: absolute;
+      z-index: 1;
+      margin-top: 3rem;
+    }
+
+    &.new {
+      margin-top: 1rem;
+    }
+  }
+}

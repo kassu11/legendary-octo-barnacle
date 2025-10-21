@@ -2,7 +2,7 @@ import api from "../../utils/api.js";
 import {Show} from "solid-js";
 import {CurrentCards} from "./CurrentCards.jsx";
 
-export function CurrentWatchingMedia(props) {
+export function CurrentWatchingMediaScoped(props) {
   const [animeData, {mutateCache: mutateAnimeCache}] = api.anilist.wachingAnime(props.userId, props.token);
   const [mangaData, {mutateCache: mutateMangaCache}] = api.anilist.readingManga(props.userId, props.token);
 

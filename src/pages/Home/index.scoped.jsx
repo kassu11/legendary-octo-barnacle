@@ -1,7 +1,7 @@
 import {Show} from "solid-js";
-import "./index.scss";
+import "./index.scoped.css";
 import {useAuthentication} from "../../context/providers.js";
-import {CurrentWatchingMedia} from "./CurrentWatchingMedia.jsx";
+import {CurrentWatchingMediaScoped} from "./CurrentWatchingMedia.scoped.jsx";
 import {Activity} from "./Activity.jsx";
 
 export function Home() {
@@ -12,7 +12,7 @@ export function Home() {
   return (
     <Show when={authUserData()}>
       <div class="pg-home">
-        <CurrentWatchingMedia token={accessToken()} userId={authUserData().data.id} />
+        <CurrentWatchingMediaScoped token={accessToken()} userId={authUserData().data.id} />
         <Activity token={accessToken()}/>
       </div>
     </Show>
