@@ -19,7 +19,7 @@ import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio.jsx";
-import Activity from "./pages/Activity.jsx";
+import {ActivityPage} from "./pages/Activity/index.scoped.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
@@ -63,7 +63,7 @@ render(
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />
-            <Route path="/activity/:id" matchFilters={idFilter} component={Activity} />
+            <Route path="/activity/:id" matchFilters={idFilter} component={ActivityPage} />
             {/* <Route path="/compare/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} /> */}
             <Route path="/compare">
               <Route path="/" component={() => <Navigate href="anime" />} />

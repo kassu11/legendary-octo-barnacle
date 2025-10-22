@@ -16,7 +16,7 @@ import {
 import {Markdown} from "../../components/Markdown.jsx";
 import {StaffPreview} from "./StaffPreview.scoped.jsx";
 import Friends from "../../components/media/Friends.jsx";
-import AnimeThemes from "../../components/media/AnimeThemes.jsx";
+import AnimeThemes from "../../components/MediaPage/AnimeThemes.jsx";
 import {Recommendations} from "./Recommendations.scoped.jsx";
 import {useAuthentication, useMediaInfo} from "../../context/providers.js";
 import {AnilistMediaInfo} from "./MediaInfo.jsx";

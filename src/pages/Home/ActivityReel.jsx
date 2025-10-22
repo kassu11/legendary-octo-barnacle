@@ -1,8 +1,8 @@
 import {useAuthentication} from "../../context/providers.js";
 import {Show} from "solid-js";
-import {ActivityPage} from "./ActivityPage.scoped.jsx";
+import {HomePageActivityReelContent} from "./ActivityPage.scoped.jsx";
 
-export function ActivityReel(props) {
+export function HomePageActivityReel(props) {
   const {accessToken} = useAuthentication();
   const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
   const [pagelessCacheData, {mutateCache, mutateBoth}] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
@@ -72,8 +72,8 @@ export function ActivityReel(props) {
       <Show when={modes.debug}>
         <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
       </Show>
-      <ActivityPage cache={pagelessCacheData()?.data?.[0] || []} isDebug={isDebug} updateCache={updateCache}
-                    mutateCache={mutateCache} {...props} />
+      <HomePageActivityReelContent cache={pagelessCacheData()?.data?.[0] || []} isDebug={isDebug} updateCache={updateCache}
+                                   mutateCache={mutateCache} {...props} />
     </Show>
   );
 }

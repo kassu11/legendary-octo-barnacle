@@ -7,7 +7,7 @@ import {Tooltip} from "../../components/Tooltips.jsx";
 import {ActivityCard} from "../../components/Activity.jsx";
 import { fetchers } from "../../collections/collections.js";
 
-export function ActivityPage(props) {
+export function HomePageActivityReelContent(props) {
   const {accessToken} = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);

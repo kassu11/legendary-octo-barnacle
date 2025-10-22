@@ -1,5 +1,5 @@
 import {batch, createEffect, Show} from "solid-js";
-import {ActivityReel} from "./ActivityReel.jsx";
+import {HomePageActivityReel} from "./ActivityReel.jsx";
 import { signals } from "../../collections/collections.js";
 
 export function Activity() {
@@ -52,7 +52,7 @@ export function Activity() {
       }}>Global
       </button>
       <Show when={variables()} keyed>
-        <ActivityReel variables={variables()}/>
+        <HomePageActivityReel variables={variables()}/>
       </Show>
     </div>
   );

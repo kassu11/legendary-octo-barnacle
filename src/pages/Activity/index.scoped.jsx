@@ -1,14 +1,14 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../utils/api.js";
+import api from "../../utils/api.js";
 import { createSignal, For, Match, onCleanup, Show, } from "solid-js";
-import "./Activity.scss";
-import { ActivityCard } from "../components/Activity.jsx";
-import { OldMarkdownComponent } from "../components/Markdown.jsx";
-import { plural } from "../utils/formating.js";
-import { useAuthentication } from "../context/providers.js";
-import { CreatedAt } from "./CreatedAt.jsx";
+import "./index.scoped.css";
+import { ActivityCard } from "../../components/Activity.jsx";
+import { OldMarkdownComponent } from "../../components/Markdown.jsx";
+import { plural } from "../../utils/formating.js";
+import { useAuthentication } from "../../context/providers.js";
+import { CreatedAt } from "../CreatedAt.jsx";
 
-export default function Activity() {
+export function ActivityPage() {
   const { accessToken } = useAuthentication();
   const params = useParams();
   const [activity] = api.anilist.activityById(() => params.id, accessToken);
