@@ -1,7 +1,7 @@
 import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import api from "../utils/api";
 import { Show, For, Match, Switch } from "solid-js";
-import "./Search.scss";
+import "./Search/index.scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl, numberCommas } from "../utils/formating";
 import Emoji from "../assets/Emoji";
 import { useAuthentication, useEditMediaEntries } from "../context/providers";

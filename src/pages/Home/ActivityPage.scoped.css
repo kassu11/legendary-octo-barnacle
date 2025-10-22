@@ -1,0 +1,15 @@
+.activity {
+  transition: opacity .2s, filter .2s;
+  &.loading {
+    opacity: .5;
+    filter: grayscale(.5);
+  }
+  li {
+    width: min(100%, 30rem);
+    flex-grow: 1;
+  }
+
+  .activity-card-text {
+    width: 100%;
+  }
+}

@@ -3,7 +3,6 @@ import "./RatingInput.scss";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { sortOrders } from "../../utils/searchObjects";
 import { useResponsive } from "../../context/providers";
 
 export function SortInput() {
@@ -94,7 +93,7 @@ export function SortInput() {
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
-    const sortEntries = () => Object.entries(sortOrders[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const sortEntries = () => Object.entries(searchObjects.sortOrders[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

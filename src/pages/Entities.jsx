@@ -9,7 +9,7 @@ import { asserts, fetchers, fetcherSenders, modes, signals } from "../collection
 import { arrayUtils, fetcherSenderUtils } from "../utils/utils";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../components/LoaderCircle";
-import { Tooltip } from "../components/Tooltips";
+import { Tooltip } from "../components/Tooltips.jsx";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();

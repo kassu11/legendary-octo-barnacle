@@ -7,7 +7,7 @@ import { fetchers, fetcherSenders } from "../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "../components/Cards.jsx";
 
-export function Character() {
+export function CharacterJikan() {
   const params = useParams();
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharacterById, () => params.id);
   const [characterData] = fetcherSenders.sendWithNullUpdates(fetcher);

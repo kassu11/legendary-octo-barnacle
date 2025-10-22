@@ -1,0 +1,11 @@
+@layer layout {
+  .user-profile-media-list-search {
+    display: grid;
+    align-content: start;
+    gap: .25rem;
+
+    select {
+      width: 100%;
+    }
+  }
+}

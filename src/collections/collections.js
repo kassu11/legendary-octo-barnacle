@@ -1,4 +1,5 @@
 export * as modes from "./modes.js";
+export * as searchObjects from "./searchObjects.js";
 export * as localizations from "./localizations.js";
 export * as asserts from "./asserts.js";
 export * as fetcherTemplates from "./fetcherTemplates.js";

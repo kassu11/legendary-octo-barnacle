@@ -1,0 +1,6 @@
+.grid-column-auto-fill.current {
+  background-color: var(--background-400);
+  --grid-column-width: 5rem;
+  --gap: 1.5rem;
+  padding: 1rem;
+}

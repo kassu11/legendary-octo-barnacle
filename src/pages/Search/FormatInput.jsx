@@ -3,8 +3,8 @@ import "./RatingInput.scss";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchFormats } from "../../utils/searchObjects";
 import { useResponsive } from "../../context/providers";
+import { searchObjects } from "../../collections/collections";
 
 export function FormatInput() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -96,7 +96,7 @@ export function FormatInput() {
 
     return (
       <ol>
-        <For each={Object.entries(searchFormats[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, format]) => (
+        <For each={Object.entries(searchObjects.searchFormats[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, format]) => (
           <li>
             <label>
               {format.flavorText}

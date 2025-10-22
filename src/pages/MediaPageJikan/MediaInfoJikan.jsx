@@ -1,0 +1,243 @@
+import { A, useParams } from "@solidjs/router";
+import { MediaInfoContext, useAuthentication, useMediaInfo } from "../../context/providers.js";
+import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from "../../collections/collections.js";
+import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
+import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
+import "./MediaInfoJikan.scss";
+import { Trailer } from "../MediaPage/Trailer.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { Markdown } from "../../components/Markdown.jsx";
+import MyAnimeList from "../../assets/MyAnimeList.jsx";
+import Anilist from "../../assets/Anilist.jsx";
+import { MalCharacterCard, MalStaffCard } from "../../components/Cards.jsx";
+import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
+
+export function MediaInfoWrapperJikan(props) {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+
+  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, () => params.id);
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() })
+  const [jikanData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
+
+  const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaByTypeAndMalId, accessToken, () => params.type, () => params.id);
+  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithNullUpdates(anilistFetcher);
+
+  const [isFavourite, setIsFavourite] = createSignal();
+  createRenderEffect(on(anilistData, apiResponse => {
+    setIsFavourite(apiResponse?.data?.isFavourite ?? false);
+  }));
+
+  const mutateBothFavourite = (isFavourite, variables) => {
+    const id = variables[anilistData()?.data?.type] ?? null;
+    if (anilistData()?.data?.id === id) {
+      setIsFavourite(isFavourite);
+      mutateBothAnilistData(api => {
+        api.data.isFavourite = isFavourite;
+        return api;
+      });
+    }
+  };
+
+  return (
+    <ErrorBoundary fallback="Jikan media error">
+      <MediaInfoContext.Provider value={{ anilistData, jikanData }}>
+        <div class="pg-media-info-jikan">
+          <Show when={jikanData()}>
+            <aside class="left">
+              <img src={jikanData().data.images.webp.large_image_url} alt="Cover" />
+              <div class="cp-media-api-switcher">
+                <Show when={anilistData()?.data?.id}>
+                  <A href={"/ani/" + params.type + "/" + anilistData()?.data?.id + "/" + formatingUtils.titleToUrl(anilistData()?.data?.title.userPreferred)}>
+                    <span class="visually-hidden">Switch to anilist mode</span>
+                    <Anilist />
+                  </A>
+                </Show>
+                <a href={jikanData()?.data.url} class="active" target="_black">
+                  <span class="visually-hidden">Go to MyAnimeList</span>
+                  <MyAnimeList />
+                  <ExternalSource />
+                </a>
+              </div>
+              <MediaPageScores />
+              <FavouriteToggle
+                checked={isFavourite()}
+                onChange={setIsFavourite}
+                idType={anilistData()?.data?.type}
+                variableId={anilistData()?.data?.id}
+                anilistValue={anilistData()?.data?.favourites}
+                jikanValue={jikanData()?.data.favorites}
+                mutateCache={mutateBothFavourite}
+              />
+              <Trailer id={jikanData()?.data.trailer?.youtube_id} site="youtube" />
+              <Show when={jikanData()?.data.studios?.length}>
+                <div>
+                  <h2>Studios</h2>
+                  <ol>
+                    <For each={jikanData()?.data.studios}>{studio => (
+                      <li>
+                        <a href={studio.url} target="_black">{studio.name}</a>
+                      </li>
+                    )}</For>
+                  </ol>
+                </div>
+              </Show>
+              <Show when={jikanData()?.data.producers?.length}>
+                <div>
+                  <h2>Producers</h2>
+                  <ol>
+                    <For each={jikanData()?.data.producers}>{producer => (
+                      <li>
+                        <a href={producer.url} target="_black">{producer.name}</a>
+                      </li>
+                    )}</For>
+                  </ol>
+                </div>
+              </Show>
+              <ExternalLinks externalLinks={jikanData()?.data.external} />
+              {/* <ExtraInfo media={anilistData()?.data} loading={loading()} /> */}
+              {/* <Rankings rankings={anilistData()?.data?.rankings} loading={loading()} /> */}
+              {/* <Genres genres={anilistData()?.data?.genres} type={anilistData()?.data?.type} loading={loading()} /> */}
+              {/* <Tags tags={anilistData()?.data?.tags} type={anilistData()?.data?.type} loading={loading()} /> */}
+            </aside>
+          </Show>
+          <div class="body">
+            <Show when={jikanData()}>
+              <div class="header">
+                <h1>{jikanData().data.title}</h1>
+                <ul class="flex-bullet-separator">
+                  <li>
+                    <Switch>
+                      <Match when={jikanData().data.year && jikanData().data.season}>
+                        <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&season=" + jikanData().data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.season)} {jikanData().data.year}</A>
+                      </Match>
+                      <Match when={jikanData().data.season}>
+                        <A href={"/search/" + params.type + "?season=" + jikanData().data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.season)}</A>
+                      </Match>
+                      <Match when={jikanData().data.year}>
+                        <A href={"/search/" + params.type + "?year=" + jikanData().data.year + "&malSearch=true"}>{jikanData().data.year}</A>
+                      </Match>
+                      <Match when={jikanData().data.aired?.prop?.from?.year || jikanData().data.published?.prop?.from?.year}>{year => (
+                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                      )}</Match>
+                      <Match when={jikanData().data.aired?.prop?.to?.year || jikanData().data.published?.prop?.to?.year}>{year => (
+                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                      )}</Match>
+                      <Match when={jikanData().data.status == mediaStatuses.jikan.NotYetAired}>
+                        <A href={"/search/" + params.type + "/tba" }>TBA</A>
+                      </Match>
+                    </Switch>
+                  </li>
+                  <li>
+                    <A href={"/search/" + params.type + "?format=" + jikanData().data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.type}</A>
+                  </li>
+                  <li>{statusUtils.jikanEnumToFlavorText(jikanData()?.data.status)}</li>
+                </ul>
+                <ul>
+                  <Show when={jikanData()?.data.source}>
+                    <li>Source: 
+                      <A href={"/search/" + params.type + "?source=" + jikanData().data.source}>
+                        {jikanData()?.data.source}
+                      </A>
+                    </li>
+                  </Show>
+                  <li>Members: {numberUtils.numberCommas(jikanData().data.members || 0) || "N/A"}</li>
+                  <li>Ranked: #{jikanData().data.rank || "N/A"}</li>
+                  <li>Popularity: #{jikanData().data.popularity || "N/A"}</li>
+                  <Show when={jikanData().data.authors?.length}>{size => (
+                    <li>Author{formatingUtils.plural(size())}: 
+                      <For each={jikanData().data.authors}>{(author, i) => (
+                        <>
+                          <a href={author.url}>{author.name}</a>
+                          <Show when={i() < size() - 1}> & </Show>
+                        </>
+                      )}</For>
+                    </li>
+                  )}</Show>
+                </ul>
+              </div>
+            </Show>
+            {props.children}
+          </div>
+        </div>
+      </MediaInfoContext.Provider>
+    </ErrorBoundary>
+  );
+}
+
+export function MediaInfoHomeJikan() {
+  const params = useParams();
+  const { jikanData } = useMediaInfo();
+
+  const jikanCharacterFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
+  const characterCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
+  const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(characterCacheType, jikanCharacterFetcher);
+
+  const jikanStaffFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getStaffByMediaId, () => params.type, () => params.id);
+  const staffCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inTwoSeconds() || jikanCharactersData.loading})
+  const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(staffCacheType, jikanStaffFetcher);
+
+  return (
+    <>
+      <Show when={jikanData()}>
+        <Show when={jikanData().data.synopsis}>
+          <div class="pg-media-jikan-desc">
+            <Markdown text={jikanData().data.synopsis} singleLineBreaks={true} />
+          </div>
+        </Show>
+        <Show when={jikanData().data.background}>
+          <div>
+            <strong>Background</strong>
+            <Markdown text={jikanData().data.background} />
+          </div>
+        </Show>
+        <Show when={jikanData().data.relations?.length}>
+          <div class="relations">
+            <h2>Relations</h2>
+            <ol class="grid-column-auto-fill">
+              <For each={jikanData().data.relations}>{relation => (
+                <For each={relation.entry}>{entry => (
+                  <li>
+                    <A class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
+                      <p class="name line-clamp">{entry.name}</p>
+                      <p class="type">{relation.relation} ({formatingUtils.capitalize(entry.type)})</p>
+                    </A>
+                  </li>
+                )}</For>
+              )}</For>
+            </ol>
+          </div>
+        </Show>
+        <Show when={jikanCharactersData()}>
+          <div>
+            <A href="characters">
+              <h2>Characters</h2>
+            </A>
+            <ol class="grid-column-auto-fill">
+              <For each={jikanCharactersData().data.slice(0, 6)}>{({voice_actors, ...rest}) => (
+                <MalCharacterCard
+                  voiceActor={arrayUtils.findOrFirst(voice_actors, (({language}) => (language === localizations.Japanese)))}
+                  {...rest}
+                />
+              )}</For>
+            </ol>
+          </div>
+        </Show>
+        <Show when={jikanStaffData()}>
+          <div>
+            <A href="staff">
+              <h2>Staff</h2>
+            </A>
+            <ol class="grid-column-auto-fill">
+              <For each={jikanStaffData().data.slice(0, 6)}>{({person, positions}) => (
+                <MalStaffCard staff={person} positions={positions} />
+              )}</For>
+            </ol>
+          </div>
+        </Show>
+        {console.log("jikan", jikanData())}
+      </Show>
+      {console.log("characters", jikanCharactersData())}
+    </>
+  );
+}

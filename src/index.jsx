@@ -2,13 +2,12 @@ import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
 import App from "./App.jsx"
-import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaInfo.jsx"
-import Home from "./pages/Home.jsx"
+import {Home} from "./pages/Home/index.scoped.jsx"
 import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search.jsx";
-import { User, Overview, MediaList, FavouriteContainer, Stats, Socials } from "./pages/User.jsx";
+import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index.jsx";
+import { User, Overview, UserMediaList, FavouriteContainer, Stats, Socials } from "./pages/User/index.scoped.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
@@ -20,15 +19,15 @@ import Notifications from "./pages/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio.jsx";
-import Activity from "./pages/Activity.jsx";
+import {ActivityPage} from "./pages/Activity/index.scoped.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
-import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaInfoJikan.jsx";
+import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.jsx";
 import "./libs/tooltips.js";
-import { MediaInfoCharactersJikan } from "./pages/MediaInfoCharactersJikan.jsx";
-import { MediaInfoStaffJikan } from "./pages/MediaInfoStaffJikan.jsx";
-import { Character as JikanCharacter } from "./pages/CharacterJikan.jsx";
+import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
+import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
+import { CharacterJikan } from "./pages/CharacterJikan.jsx";
 
 const root = document.getElementById("root")
 
@@ -64,7 +63,7 @@ render(
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />
-            <Route path="/activity/:id" matchFilters={idFilter} component={Activity} />
+            <Route path="/activity/:id" matchFilters={idFilter} component={ActivityPage} />
             {/* <Route path="/compare/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} /> */}
             <Route path="/compare">
               <Route path="/" component={() => <Navigate href="anime" />} />
@@ -95,7 +94,7 @@ render(
                 <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={AnilistStudio} />
               </Route>
               <Route path="/:sub/:id/:name?" matchFilters={{ api: "mal" }}>
-                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={JikanCharacter} />
+                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikan} />
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={Staff} /> */}
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={Studio} /> */}
               </Route>
@@ -123,8 +122,8 @@ render(
             </Route>
             <Route path="/user/:name" component={User}>
               <Route path="/" component={Overview} />
-              <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={MediaList} />
-              <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={MediaList} />
+              <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={UserMediaList} />
+              <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={UserMediaList} />
               <Route path="/favourites" component={FavouriteContainer} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />

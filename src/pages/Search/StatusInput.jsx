@@ -3,8 +3,8 @@ import "./RatingInput.scss";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../utils/arrays";
-import { searchStatuses } from "../../utils/searchObjects";
 import { useResponsive } from "../../context/providers";
+import { searchObjects } from "../../collections/collections";
 
 export function StatusInput() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,7 +91,7 @@ export function StatusInput() {
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
-    const statusEntries = () => Object.entries(searchStatuses[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const statusEntries = () => Object.entries(searchObjects.searchStatuses[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

@@ -1,0 +1,126 @@
+_.cp-current-card {
+  position: relative;
+  aspect-ratio: 5.5/8;
+  color: inherit;
+  border-radius: 4px;
+  text-decoration: none;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit
+  }
+
+  .cp-current-card-info {
+    background-color: var(--shadow-400);
+    padding-block: .75em 1rem;
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    text-align: center;
+    font-size: .75rem;
+    overflow: hidden;
+
+    .is-behind {
+      position: absolute;
+      background-color: var(--red-400);
+      height: .3rem;
+      width: 100%;
+      bottom: 0px;
+    }
+  }
+
+  .cp-current-card-hover-info {
+    background-color: var(--shadow-400);
+    padding-block: .75em;
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: 0;
+    font-weight: 700;
+    overflow: hidden;
+    border: none;
+    border-radius: 0;
+    border-bottom-right-radius: inherit;
+    border-bottom-left-radius: inherit;
+
+    &.normal {
+      font-size: .9rem;
+      font-weight: 500;
+    }
+
+    &:hover {
+      background-color: var(--shadow-300);
+    }
+
+    .plus {
+      font-size: 1rem;
+    }
+  }
+
+  .hover {
+    position: absolute;
+    display: flex;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    top: 0;
+    opacity: 0;
+    height: 100%;
+    width: min(15rem, calc(100vw - 150%));
+    z-index: 1;
+    pointer-events: none;
+    background-color: var(--bg-light);
+    padding: 4px 8px;
+
+    &.right {
+      left: 100%;
+      border-radius: 0px 4px 4px 0px;
+    }
+
+    &.left {
+      right: 100%;
+      direction: rtl;
+      border-radius: 4px 0px 0px 4px;
+    }
+
+    &.middle {
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 4px;
+      top: calc(100% + var(--gap) / 2);
+      outline: 2px solid var(--bg);
+    }
+
+    .progress-status {
+      margin-top: auto;
+    }
+  }
+
+  &:hover, &:has(_:focus-visible), &:focus-visible {
+    z-index: 1;
+
+    &:has(>.right) {
+      border-radius: 4px 0px 0px 4px;
+    }
+
+    &:has(>.left) {
+      border-radius: 0px 4px 4px 0px;
+    }
+
+    .cp-current-card-hover-info, .hover {
+      opacity: 1;
+    }
+
+    .cp-current-card-info {
+      display: none;
+    }
+
+    .hover {
+      display: flex;
+    }
+  }
+}

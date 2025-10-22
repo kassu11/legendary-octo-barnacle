@@ -1,0 +1,30 @@
+@layer layout {
+  .user-profile-media-list-body {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: .5rem;
+  }
+}
+
+@layer resize {
+  .user-profile-media-list-body {
+    @media (width < 55em) {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    @media (width < 35em) {
+      _.user-profile-media-list-grid {
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+        font-size: .8rem;
+        gap: .25rem;
+
+        _.cp-media-action-item {
+          width: 32px;
+          height: 32px;
+          padding: 8px;
+        }
+      }
+    }
+  }
+}
