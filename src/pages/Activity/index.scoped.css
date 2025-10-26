@@ -16,14 +16,15 @@
         display: flex;
         gap: .75rem;
         align-items: center;
+
+        .profile {
+          margin-top: .5rem;
+          height: 3rem;
+          width: 3rem;
+        }
       }
     }
 
-    .profile {
-      margin-top: .5rem;
-      height: 3rem;
-      width: 3rem;
-    }
 
     button.active {
       background-color: pink;
