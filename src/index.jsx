@@ -7,7 +7,7 @@ import Authentication from "./pages/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index.jsx";
-import { User, Overview, UserMediaList, FavouriteContainer, Stats, Socials } from "./pages/User/index.scoped.jsx";
+import { User } from "./pages/User/index.scoped.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
@@ -28,6 +28,12 @@ import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
 import { CharacterJikan } from "./pages/CharacterJikan.jsx";
+import {Overview} from "./pages/User/Overview/Overview.jsx";
+import {UserMediaList} from "./pages/User/MediaList/index.scoped.jsx";
+import {FavouriteContainer} from "./pages/User/Favourites/FavouriteContainer.jsx";
+import {Stats} from "./pages/User/Stats/Stats.jsx";
+import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index.scoped.jsx";
+import {Socials} from "./pages/User/Socials/Socials.jsx";
 
 const root = document.getElementById("root")
 
