@@ -27,3 +27,7 @@ export const min = (a, b) => {
 export const max = (a, b) => {
   return Math.max(a ?? b, b ?? a);
 }
+
+export const lerp = (a, b, t) => {
+  return a + t * (b - a);
+}

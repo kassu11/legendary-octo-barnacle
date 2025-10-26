@@ -1,10 +1,10 @@
 import {useParams} from "@solidjs/router";
 import {createEffect, createMemo, createSignal, For, Match, on, Show, Switch} from "solid-js";
 import {useWidth} from "./UseWidth.jsx";
-import {lerp} from "./Lerp.jsx";
 import {DraggableScrollContainerScoped} from "./DraggableScrollContainer.scoped.jsx";
 import {numberCommas} from "../../../../utils/formating.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
+import { numberUtils } from "../../../../utils/utils.js";
 
 export function StatsYearLineChartsScoped(props) {
   let container;
@@ -40,9 +40,9 @@ export function StatsYearLineChartsScoped(props) {
         return "M" + getX(i) + " " + getY(year[state()]);
       }
       if (i < arr.length - 1) {
-        return "S" + lerp(getX(i), getX(i - 1), rounding) + " " + lerp(getY(year[state()]), getY(year[state()]) + (getY(arr[i - 1][state()]) - getY(arr[i + 1][state()])) / 2, rounding) + "," + getX(i) + " " + getY(year[state()]);
+        return "S" + numberUtils.lerp(getX(i), getX(i - 1), rounding) + " " + numberUtils.lerp(getY(year[state()]), getY(year[state()]) + (getY(arr[i - 1][state()]) - getY(arr[i + 1][state()])) / 2, rounding) + "," + getX(i) + " " + getY(year[state()]);
       }
-      return "S" + lerp(getX(i), getX(i - 1), rounding) + " " + lerp(getY(year[state()]), getY(arr[i - 1][state()]), rounding) + "," + getX(i) + " " + getY(year[state()]);
+      return "S" + numberUtils.lerp(getX(i), getX(i - 1), rounding) + " " + numberUtils.lerp(getY(year[state()]), getY(arr[i - 1][state()]), rounding) + "," + getX(i) + " " + getY(year[state()]);
     }).join("");
   });
 
