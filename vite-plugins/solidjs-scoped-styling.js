@@ -198,5 +198,9 @@ function randomHasFromFilePath(filePath) {
 }
 
 function localDataAttributeFromFilePath(filePath) {
+  if (process.env.NODE_ENV !== "production") {
+    return "data-vite-dev-path=\"" + removeFileType(removeFileType(filePath)).split("/src/")[1] + "\"";
+  }
+
   return "data-k-" + randomHasFromFilePath(filePath);
 }
