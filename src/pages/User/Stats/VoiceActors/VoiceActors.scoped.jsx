@@ -1,12 +1,11 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../../utils/api";
-import { formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
+import api from "../../../../utils/api.js";
+import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import { createEffect, createSignal, on } from "solid-js";
-import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
-import { useAuthentication } from "../../../context/providers";
-import { fetchers, fetcherSenders } from "../../../collections/collections";
-import { fetcherSenderUtils } from "../../../utils/utils";
+import { useAuthentication } from "../../../../context/providers.js";
+import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
+import { fetcherSenderUtils } from "../../../../utils/utils.js";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();

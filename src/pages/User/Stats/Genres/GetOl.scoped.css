@@ -1,0 +1,6 @@
+@layer layout {
+  .value {
+    font-size: var(--fs-500);
+    font-weight: 500;
+  }
+}

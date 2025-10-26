@@ -1,32 +1,42 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../../utils/api";
-import { formatTitleToUrl, numberCommas, plural } from "../../../utils/formating";
+import api from "../../../../utils/api.js";
+import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import { createEffect, createSignal, on } from "solid-js";
-import "./Genres.scss";
 import { createStore, reconcile } from "solid-js/store";
-import { useAuthentication } from "../../../context/providers";
-import { fetcherSenderUtils } from "../../../utils/utils";
-import { fetchers, fetcherSenders } from "../../../collections/collections";
+import { useAuthentication, useUser } from "../../../../context/providers.js";
+import { fetcherSenderUtils, fetcherUtils } from "../../../../utils/utils.js";
+import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
 
-export function StatsAnimeStudios() {
+export function StatsAnimeTags() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeStudios(() => params.name, accessToken);
+  const [userStats] = api.anilist.userAnimeTags(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
-      <StatsStudios genres={userStats().data} />
+      <StatsTags genres={userStats().data} />
+    </Show>
+  )
+}
+export function StatsMangaTags() {
+  const params = useParams();
+  const { accessToken } = useAuthentication();
+  const [userStats] = api.anilist.userMangaTags(() => params.name, accessToken);
+
+  return (
+    <Show when={userStats()}>
+      <StatsTags genres={userStats().data} />
     </Show>
   )
 }
 
-function StatsStudios(props) {
+function StatsTags(props) {
   const params = useParams();
+  const { user } = useUser();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
-  const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
   const [mediaById, { mutate }] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
 
@@ -53,7 +63,7 @@ function StatsStudios(props) {
   return (
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
-        <h2>Studios</h2>
+        <h2>Tags</h2>
         <div>
           <button onClick={() => setState("count")}>Count</button>
           <Switch>
@@ -68,13 +78,13 @@ function StatsStudios(props) {
         </div>
       </div>
       <ol class="grid-column-auto-fill">
-        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.studio.name.localeCompare(b.studio.name))}>{(genre, i) => (
+        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.tag.name.localeCompare(b.tag.name))}>{(genre, i) => (
           <li class="item">
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/ani/studio/" + genre.studio.id + "/" + formatTitleToUrl(genre.studio.name)}>
-                    {genre.studio.name}
+                  <A href={"/search/" + params.type + "?onList=false&tag=" + genre.tag.name}>
+                    {genre.tag.name}
                   </A>
                 </h2>
                 <p class="ranking">#{i() + 1}</p>
@@ -107,6 +117,10 @@ function StatsStudios(props) {
               </ol>
             </div>
             <div class="wrapper tags">
+              <div className="flex-space-between">
+                <p>User {params.type}</p>
+                <A href={"/user/" + user().name + "/" + params.type + "?tag=" + genre.tag.name}>Show all</A>
+              </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
             </div>
           </li>
@@ -120,8 +134,7 @@ function Cards(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
-  const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   let fetchNewCards = false;

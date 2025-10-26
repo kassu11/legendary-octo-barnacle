@@ -1,0 +1,30 @@
+@layer layout {
+  section {
+    background-color: var(--background-400);
+
+    ol {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      height: 14rem;
+      gap: .25rem;
+
+      li {
+        display: flex;
+        flex-direction: column-reverse;
+        width: 100%;
+        text-align: center;
+
+        div {
+          background-color: var(--user-color);
+          max-width: 3rem;
+          border-radius: .25rem;
+          width: 100%;
+          margin-inline: auto;
+          transition: height .7s;
+        }
+      }
+    }
+  }
+}
+
