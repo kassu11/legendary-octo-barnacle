@@ -2,7 +2,7 @@ import {useParams} from "@solidjs/router";
 import {numberCommas, plural} from "../../../../utils/formating.js";
 import {Match, Show, Switch} from "solid-js";
 
-export function GetOlScoped(props) {
+export function GenresCardStats(props) {
   const params = useParams();
 
   return (

@@ -1,7 +1,7 @@
 import {A, useParams} from "@solidjs/router";
 import {useUser} from "../../../../context/providers.js";
 import {For} from "solid-js";
-import {GetOlScoped} from "./GetOl.scoped.jsx";
+import {GenresCardStats} from "./GenresCardStats.scoped.jsx";
 import {GenreMediaCardsScoped} from "./GenreMediaCards.scoped.jsx";
 
 export function GenreItems(props) {
@@ -22,7 +22,7 @@ export function GenreItems(props) {
               </h2>
               <p class="ranking">#{i() + 1}</p>
             </div>
-            <GetOlScoped genre={genre}/>
+            <GenresCardStats genre={genre}/>
           </div>
           <div class="wrapper">
             <div className="flex-space-between">
