@@ -31,7 +31,7 @@ import { CharacterJikan } from "./pages/CharacterJikan.jsx";
 import {Overview} from "./pages/User/Overview/Overview.jsx";
 import {UserMediaList} from "./pages/User/MediaList/index.scoped.jsx";
 import {FavouriteContainer} from "./pages/User/Favourites/FavouriteContainer.jsx";
-import {Stats} from "./pages/User/Stats/index(user-stats).jsx";
+import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
 import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index.scoped.jsx";
 import {Socials} from "./pages/User/Socials/Socials.jsx";
 

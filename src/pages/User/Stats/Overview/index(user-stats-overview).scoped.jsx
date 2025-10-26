@@ -3,7 +3,7 @@ import api from "../../../../utils/api.js";
 import {numberCommas} from "../../../../utils/formating.js";
 import {Match, Show, Switch} from "solid-js";
 import {useAuthentication, useUser} from "../../../../context/providers.js";
-import "../index(user-stats).css";
+import "../index(user-stats).scoped.css";
 import {StatsDistributionListsScoped} from "./StatsDistributionLists.scoped.jsx";
 import {StatsScoreDistributionBarsScoped} from "./StatsScoreDistributionBars.scoped.jsx";
 import {StatsEpisodeCountBarsScoped} from "./StatsEpisodeCountBars.scoped.jsx";
