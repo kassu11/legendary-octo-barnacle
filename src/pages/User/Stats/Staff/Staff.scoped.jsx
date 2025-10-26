@@ -1,11 +1,12 @@
 import { A, useParams } from "@solidjs/router";
 import api from "../../../../utils/api.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
-import { createEffect, createSignal, on } from "solid-js";
+import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
 import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
+import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 
 export function StatsAnimeStaff() {
   const params = useParams();
@@ -64,18 +65,7 @@ function StatsStaff(props) {
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
         <h2>Staff</h2>
-        <div>
-          <button onClick={() => setState("count")}>Count</button>
-          <Switch>
-            <Match when={params.type === "anime"}>
-              <button onClick={() => setState("minutesWatched")}>Time Watched</button>
-            </Match>
-            <Match when={params.type === "manga"}>
-              <button onClick={() => setState("chaptersRead")}>Chapters Read</button>
-            </Match>
-          </Switch>
-          <button onClick={() => setState("meanScore")}>Mean Score</button>
-        </div>
+        <SortHeaderButtons setState={ setState } />
       </div>
       <ol class="grid-column-auto-fill staff">
         <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.staff.name.userPreferred.localeCompare(b.staff.name.userPreferred))}>{(genre, i) => (

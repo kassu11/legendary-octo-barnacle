@@ -6,7 +6,7 @@ import {useAuthentication } from "../../../../context/providers.js";
 import {fetcherSenderUtils} from "../../../../utils/utils.js";
 import {fetchers, fetcherSenders} from "../../../../collections/collections.js";
 import {GenreItems} from "./GenreItems.scoped.jsx";
-import {SortHeaderButtonsScoped} from "./SortHeaderButtons.scoped.jsx";
+import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 
 export function StatsAnimeGenres() {
   const params = useParams();
@@ -64,7 +64,7 @@ function StatsGenres(props) {
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
         <h2>Genres</h2>
-        <SortHeaderButtonsScoped setState={ setState } />
+        <SortHeaderButtons setState={ setState } />
       </div>
       <GenreItems genres={props.genres} state={state} store={store} setStore={setStore} mediaIds={mediaIds} mutate={mutate} />
     </section>

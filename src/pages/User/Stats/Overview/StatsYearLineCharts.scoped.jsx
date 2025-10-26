@@ -4,6 +4,7 @@ import {useWidth} from "./UseWidth.jsx";
 import {lerp} from "./Lerp.jsx";
 import {DraggableScrollContainerScoped} from "./DraggableScrollContainer.scoped.jsx";
 import {numberCommas} from "../../../../utils/formating.js";
+import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 
 export function StatsYearLineChartsScoped(props) {
   let container;
@@ -54,23 +55,7 @@ export function StatsYearLineChartsScoped(props) {
       <section class="no-motion" ref={container}>
         <div class="flex-space-between">
           <h2>{props.heading}</h2>
-          <div>
-            <button onClick={() => setState("count")}>
-              <Switch>
-                <Match when={params.type === "anime"}>Titles Watched</Match>
-                <Match when={params.type === "manga"}>Titles read</Match>
-              </Switch>
-            </button>
-            <Switch>
-              <Match when={params.type === "anime"}>
-                <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
-              </Match>
-              <Match when={params.type === "manga"}>
-                <button onClick={() => setState("chaptersRead")}>Chapters Read</button>
-              </Match>
-            </Switch>
-            <button onClick={() => setState("meanScore")}>Mean Score</button>
-          </div>
+          <SortHeaderButtons setState={ setState } />
         </div>
         <DraggableScrollContainerScoped>
           <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>

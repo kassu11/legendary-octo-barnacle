@@ -2,6 +2,7 @@ import {useParams} from "@solidjs/router";
 import {createEffect, createSignal, For, Match, Show, Switch} from "solid-js";
 import {DraggableScrollContainerScoped2} from "./DraggableScrollContainer.scoped.jsx";
 import {numberCommas} from "../../../../utils/formating.js";
+import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 
 export function StatsEpisodeCountBarsScoped(props) {
   const params = useParams();
@@ -17,23 +18,7 @@ export function StatsEpisodeCountBarsScoped(props) {
     <section>
       <div class="flex-space-between">
         <h2>Episode count</h2>
-        <div>
-          <button onClick={() => setState("count")}>
-            <Switch>
-              <Match when={params.type === "anime"}>Titles Watched</Match>
-              <Match when={params.type === "manga"}>Titles read</Match>
-            </Switch>
-          </button>
-          <Switch>
-            <Match when={params.type === "anime"}>
-              <button onClick={() => setState("minutesWatched")}>Hours Watched</button>
-            </Match>
-            <Match when={params.type === "manga"}>
-              <button onClick={() => setState("chaptersRead")}>Chapters Read</button>
-            </Match>
-          </Switch>
-          <button onClick={() => setState("meanScore")}>Mean Score</button>
-        </div>
+        <SortHeaderButtons setState={ setState } />
       </div>
       <DraggableScrollContainerScoped2>
         <ol>
