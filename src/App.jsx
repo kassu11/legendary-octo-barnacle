@@ -3,10 +3,10 @@ import "./App.scss"
 import { useAuthentication } from "./context/providers.js";
 import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 import { createEffect } from "solid-js";
+import { urlUtils } from "./utils/utils.js";
 
 function App(props) {
-  const clientId = location.hostname === "kassu11.github.io" ? 24951 : 7936;
-  const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${clientId}&response_type=token`;
+  const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;
 
   const { accessToken, authUserData, logoutUser } = useAuthentication();
 
