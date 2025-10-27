@@ -1,23 +1,17 @@
-import { A } from "@solidjs/router";
-import { asserts, globalState } from "../collections/collections";
-import { stringUtils, urlUtils } from "../utils/utils";
-import Edit from "../assets/Edit";
-import Planning from "../assets/Planning";
-import Watching from "../assets/Watching";
-import Complete from "../assets/Complete";
-import Rewatched from "../assets/Rewatched";
-import { useAuthentication, useEditMediaEntries } from "../context/providers";
-import Star from "../assets/Star";
-import api from "../utils/api";
-import { QuickActionListButton } from "./Buttons.scoped.jsx";
-import ThumbUp from "../assets/ThumbUp";
-import ThumbDown from "../assets/ThumbDown";
-
-export function MediaCardContainer(props) {
-  return (
-    <section class="cp-media-card-container" {...props} />
-  );
-}
+import {A} from "@solidjs/router";
+import {asserts, globalState} from "../../collections/collections.js";
+import {urlUtils} from "../../utils/utils.js";
+import Edit from "../../assets/Edit.jsx";
+import Planning from "../../assets/Planning.jsx";
+import Watching from "../../assets/Watching.jsx";
+import Complete from "../../assets/Complete.jsx";
+import Rewatched from "../../assets/Rewatched.jsx";
+import {useAuthentication, useEditMediaEntries} from "../../context/providers.js";
+import Star from "../../assets/Star.jsx";
+import api from "../../utils/api.js";
+import {QuickActionListButton} from "../Buttons.scoped.jsx";
+import ThumbUp from "../../assets/ThumbUp.jsx";
+import ThumbDown from "../../assets/ThumbDown.jsx";
 
 function AnilistMediaCardListBody(props) {
   asserts.assertTrue(props.media, "Missing media");

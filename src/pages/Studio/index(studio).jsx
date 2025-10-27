@@ -1,14 +1,15 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import api from "../../utils/api.js";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
-import "./Studio.scss";
+import "./index(studio).scss";
 import { formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { useAuthentication } from "../../context/providers.js";
 import { asserts } from "../../collections/collections.js";
-import { AnilistMediaCard, MediaCardContainer } from "../../components/Cards.scoped.jsx";
+import { AnilistMediaCard } from "../../components/Cards/Cards.scoped.jsx";
+import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
 
 export function Studio() {
   const params = useParams();
@@ -99,11 +100,11 @@ export function Studio() {
             <option value="UPDATED_AT_DESC">UPDATED_AT_DESC</option>
           </select>
         </form>
-        <MediaCardContainer>
+        <MediaCardContainerScoped>
           <ol class="grid-column-auto-fill">
             <CharacterMediaPage variables={variables()} studioInfo={studioInfo} showYears={showYears} nestLevel={1} />
           </ol>
-        </MediaCardContainer>
+        </MediaCardContainerScoped>
       </Show>
     </div>
   )

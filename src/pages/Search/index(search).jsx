@@ -1,7 +1,7 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../../utils/api.js";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createRenderEffect, createMemo } from "solid-js";
-import "./index.scss";
+import "./index(search).scss";
 import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../../context/providers.js";
@@ -24,7 +24,8 @@ import { SeasonInput } from "./SeasonInput.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
 import { asserts, fetchers, fetcherSenders, globalState, localizations, requests, searchObjects } from "../../collections/collections.js";
 import { fetcherSenderUtils, urlUtils } from "../../utils/utils.js";
-import { AnilistMediaCard, JikanMediaCard, MediaCardContainer } from "../../components/Cards.scoped.jsx";
+import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
+import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
 
 
 
@@ -738,7 +739,7 @@ export function SearchContent(props) {
         </Show>
       )}
       </Show>
-      <MediaCardContainer>
+      <MediaCardContainerScoped>
         <ol class="search-page-content grid-column-auto-fill">
           <Switch>
             <Match when={debouncedSearchEngine() === "ani"}>
@@ -781,7 +782,7 @@ export function SearchContent(props) {
             </Match>
           </Switch>
         </ol>
-      </MediaCardContainer>
+      </MediaCardContainerScoped>
     </>
   );
 }

@@ -1,0 +1,14 @@
+@layer layout {
+  section {
+    container: media-cards / inline-size;
+    --grid-column-width: 13rem;
+    --gap: 16px;
+
+    @container media-cards (width < calc(6 * 7em + 5 * 8px)) {
+      > _* {
+        --grid-column-width: 7rem;
+        --gap: 8px;
+      }
+    }
+  }
+}

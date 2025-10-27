@@ -6,7 +6,7 @@ import {Home} from "./pages/Home/index.scoped.jsx"
 import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index.jsx";
+import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).jsx";
 import { User } from "./pages/User/index(user).scoped.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
@@ -18,7 +18,7 @@ import Artist from "./pages/Artist/Artist.jsx";
 import Notifications from "./pages/Notifications/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.jsx";
-import { Studio as AnilistStudio } from "./pages/Studio/Studio.jsx";
+import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
 import {ActivityPage} from "./pages/Activity/index(activity).scoped.jsx";
 import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";

@@ -1,17 +1,4 @@
 @layer layout {
-  .cp-media-card-container {
-    container: media-cards / inline-size;
-    --grid-column-width: 13rem;
-    --gap: 16px;
-
-    @container media-cards (width < calc(6 * 7em + 5 * 8px)) {
-      > * {
-        --grid-column-width: 7rem;
-        --gap: 8px;
-      }
-    }
-  }
-
   .cp-media-card-quick-action-items {
     position: absolute;
     right: 0;
@@ -25,17 +12,17 @@
   }
 
   .cp-media-card {
-    &:not(:has(.wrapper:hover), :has(:focus-visible)) .cp-media-card-quick-action-items {
+    &:not(:has(.wrapper:hover), :has(_:focus-visible)) .cp-media-card-quick-action-items {
       pointer-events: none;
       opacity: 0;
     }
-    .cp-media-card-quick-action-items:not(:hover, :has(:focus-visible)) li:nth-child(n + 2) {
+    .cp-media-card-quick-action-items:not(:hover, :has(_:focus-visible)) li:nth-child(n + 2) {
       pointer-events: none;
       opacity: 0;
       position: absolute;
     }
 
-    &:not(:hover, :has(:focus-visible)) .recommendation-rating-wrapper {
+    &:not(:hover, :has(_:focus-visible)) .recommendation-rating-wrapper {
       opacity: 0;
     }
 
