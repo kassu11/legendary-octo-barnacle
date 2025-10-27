@@ -1,15 +1,15 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import api from "../utils/api";
+import api from "../../utils/api.js";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
-import { OldMarkdownComponent } from "../components/Markdown";
+import { OldMarkdownComponent } from "../../components/Markdown.jsx";
 import "./Entity.scss";
-import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../utils/formating";
-import { FavouriteToggle } from "../components/FavouriteToggle";
+import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
+import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../components/utils/DoomScroll";
-import { useAuthentication } from "../context/providers";
-import { wrapToArray } from "../utils/arrays.js";
-import { asserts } from "../collections/collections.js";
+import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
+import { useAuthentication } from "../../context/providers.js";
+import { wrapToArray } from "../../utils/arrays.js";
+import { asserts } from "../../collections/collections.js";
 
 export function Character() {
   const params = useParams();

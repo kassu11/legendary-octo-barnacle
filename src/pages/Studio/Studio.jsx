@@ -1,14 +1,14 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import api from "../utils/api";
+import api from "../../utils/api.js";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import "./Studio.scss";
-import { formatTitleToUrl, mediaUrl } from "../utils/formating";
-import { FavouriteToggle } from "../components/FavouriteToggle";
+import { formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
+import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../components/utils/DoomScroll";
-import { useAuthentication } from "../context/providers";
-import { asserts } from "../collections/collections";
-import { AnilistMediaCard, MediaCardContainer } from "../components/Cards";
+import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
+import { useAuthentication } from "../../context/providers.js";
+import { asserts } from "../../collections/collections.js";
+import { AnilistMediaCard, MediaCardContainer } from "../../components/Cards.jsx";
 
 export function Studio() {
   const params = useParams();

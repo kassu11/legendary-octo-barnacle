@@ -9,7 +9,7 @@ import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
 import { Dynamic } from "solid-js/web"
 import { asserts } from "../collections/collections.js";
-import { CreatedAt } from "../pages/CreatedAt.jsx";
+import { CreatedAt } from "./CreatedAt.jsx";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);

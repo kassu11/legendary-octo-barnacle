@@ -1,14 +1,14 @@
 import { A } from "@solidjs/router";
-import { createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
+import {createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch, untrack} from "solid-js";
 import "./Notifications.scss";
-import { mediaUrl } from "../utils/formating.js";
-import { useAuthentication } from "../context/providers.js";
-import { CreatedAt } from "./CreatedAt.jsx";
-import { arrayUtils, fetcherSenderUtils, fetcherUtils, scheduleUtils } from "../utils/utils.js";
-import { asserts, fetchers, fetcherSenders, modes, signals } from "../collections/collections.js";
+import { mediaUrl } from "../../utils/formating.js";
+import { useAuthentication } from "../../context/providers.js";
+import { CreatedAt } from "../../components/CreatedAt.jsx";
+import { arrayUtils, fetcherSenderUtils, fetcherUtils, scheduleUtils } from "../../utils/utils.js";
+import { asserts, fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { LoaderCircle } from "../components/LoaderCircle.jsx";
-import { Tooltip } from "../components/Tooltips.jsx";
+import { LoaderCircle } from "../../components/LoaderCircle.jsx";
+import { Tooltip } from "../../components/Tooltips.jsx";
 
 export default function Notifications() {
   const [type, setType] = createSignal("all");

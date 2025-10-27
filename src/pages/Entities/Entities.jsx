@@ -1,15 +1,15 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../utils/api";
+import api from "../../utils/api.js";
 import { createEffect, createMemo, createRenderEffect, createSignal, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
 import "./Entities.scss";
-import { capitalize, languageFromCountry } from "../utils/formating";
-import { DoomScroll } from "../components/utils/DoomScroll";
-import { useAuthentication } from "../context/providers";
-import { asserts, fetchers, fetcherSenders, modes, signals } from "../collections/collections";
-import { arrayUtils, fetcherSenderUtils } from "../utils/utils";
+import { capitalize, languageFromCountry } from "../../utils/formating.js";
+import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
+import { useAuthentication } from "../../context/providers.js";
+import { asserts, fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
+import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { LoaderCircle } from "../components/LoaderCircle";
-import { Tooltip } from "../components/Tooltips.jsx";
+import { LoaderCircle } from "../../components/LoaderCircle.jsx";
+import { Tooltip } from "../../components/Tooltips.jsx";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();

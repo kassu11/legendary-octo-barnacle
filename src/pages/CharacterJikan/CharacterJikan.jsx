@@ -1,11 +1,11 @@
 import { useParams } from "@solidjs/router";
 import { Show, For, createRenderEffect } from "solid-js";
-import { Markdown } from "../components/Markdown";
-import "./Entity.scss";
-import { FavouriteToggle } from "../components/FavouriteToggle";
-import { fetchers, fetcherSenders } from "../collections/collections.js";
-import { arrayUtils, fetcherSenderUtils } from "../utils/utils.js";
-import { JikanMediaCard, MalStaffCard } from "../components/Cards.jsx";
+import { Markdown } from "../../components/Markdown.jsx";
+import "../Entity/Entity.scss";
+import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { fetchers, fetcherSenders } from "../../collections/collections.js";
+import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
+import { JikanMediaCard, MalStaffCard } from "../../components/Cards.jsx";
 
 export function CharacterJikan() {
   const params = useParams();

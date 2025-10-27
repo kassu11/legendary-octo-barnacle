@@ -3,7 +3,7 @@ import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
 import App from "./App.jsx"
 import {Home} from "./pages/Home/index.scoped.jsx"
-import Authentication from "./pages/Authentication.jsx";
+import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index.jsx";
@@ -14,20 +14,20 @@ import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags/Tags.sco
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
 import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
-import Artist from "./pages/Artist.jsx";
-import Notifications from "./pages/Notifications.jsx";
-import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
-import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity.jsx";
-import { Studio as AnilistStudio } from "./pages/Studio.jsx";
-import {ActivityPage} from "./pages/Activity/index.scoped.jsx";
-import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
+import Artist from "./pages/Artist/Artist.jsx";
+import Notifications from "./pages/Notifications/Notifications.jsx";
+import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.jsx";
+import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.jsx";
+import { Studio as AnilistStudio } from "./pages/Studio/Studio.jsx";
+import {ActivityPage} from "./pages/Activity/index(activity).scoped.jsx";
+import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse/Browse.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
-import ComparePage from "./pages/ComparePage.jsx";
+import ComparePage from "./pages/Compare/ComparePage.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.jsx";
 import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
-import { CharacterJikan } from "./pages/CharacterJikan.jsx";
+import { CharacterJikan } from "./pages/CharacterJikan/CharacterJikan.jsx";
 import {Overview} from "./pages/User/Overview/Overview.jsx";
 import {UserMediaList} from "./pages/User/MediaList/index.scoped.jsx";
 import {FavouriteContainer} from "./pages/User/Favourites/FavouriteContainer.jsx";
