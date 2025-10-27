@@ -9,7 +9,7 @@ import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { Markdown } from "../../components/Markdown.jsx";
 import MyAnimeList from "../../assets/MyAnimeList.jsx";
 import Anilist from "../../assets/Anilist.jsx";
-import { MalCharacterCard, MalStaffCard } from "../../components/Cards.jsx";
+import { MalCharacterCard, MalStaffCard } from "../../components/Cards.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 
 export function MediaInfoWrapperJikan(props) {

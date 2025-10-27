@@ -6,7 +6,7 @@ import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl, numberCommas
 import Emoji from "../../assets/Emoji.jsx";
 import { useAuthentication, useEditMediaEntries } from "../../context/providers.js";
 import { asserts } from "../../collections/collections.js";
-import { AnilistMediaCard } from "../../components/Cards.jsx";
+import { AnilistMediaCard } from "../../components/Cards.scoped.jsx";
 
 export function BrowseRedirect(props) {
   const params = useParams();

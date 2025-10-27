@@ -8,7 +8,7 @@ import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { useAuthentication } from "../../context/providers.js";
 import { asserts } from "../../collections/collections.js";
-import { AnilistMediaCard, MediaCardContainer } from "../../components/Cards.jsx";
+import { AnilistMediaCard, MediaCardContainer } from "../../components/Cards.scoped.jsx";
 
 export function Studio() {
   const params = useParams();

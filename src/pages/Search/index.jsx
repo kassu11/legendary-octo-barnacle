@@ -24,7 +24,7 @@ import { SeasonInput } from "./SeasonInput.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
 import { asserts, fetchers, fetcherSenders, globalState, localizations, requests, searchObjects } from "../../collections/collections.js";
 import { fetcherSenderUtils, urlUtils } from "../../utils/utils.js";
-import { AnilistMediaCard, JikanMediaCard, MediaCardContainer } from "../../components/Cards.jsx";
+import { AnilistMediaCard, JikanMediaCard, MediaCardContainer } from "../../components/Cards.scoped.jsx";
 
 
 

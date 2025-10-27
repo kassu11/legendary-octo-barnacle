@@ -5,7 +5,7 @@ import "../Entity/Entity.scss";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { fetchers, fetcherSenders } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
-import { JikanMediaCard, MalStaffCard } from "../../components/Cards.jsx";
+import { JikanMediaCard, MalStaffCard } from "../../components/Cards.scoped.jsx";
 
 export function CharacterJikan() {
   const params = useParams();
