@@ -1,9 +1,10 @@
 import { A } from "@solidjs/router";
-import "./App.scss"
+import "./App.scoped.css"
 import { useAuthentication } from "./context/providers.js";
 import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 import { createEffect } from "solid-js";
 import { urlUtils } from "./utils/utils.js";
+import {Show} from "solid-js";
 
 function App(props) {
   const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;
@@ -41,10 +42,10 @@ function App(props) {
             </li>
             <Show when={authUserData()}>
               <li><A href="/notifications">Notifications ({authUserData().data.unreadNotificationCount})</A></li>
-              <li class="main-navigation-profile">
+              <li class="profile">
                 <A href={"/user/" + authUserData().data.name}>
                   {authUserData().data.name}
-                  <img class="main-navigation-profile-image" src={authUserData().data.avatar.large} alt="Profile avatar" />
+                  <img src={authUserData().data.avatar.large} alt="Profile avatar" />
                 </A>
               </li>
             </Show>
