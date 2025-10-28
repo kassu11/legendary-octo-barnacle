@@ -117,9 +117,6 @@ const api = {
     animeStaffById: fetchOnce(id => {
       return Fetch.getJson(queries.myAnimeListAnimeStaffById(id));
     }),
-    mangaStaffById: fetchOnce(id => {
-      return Fetch.getJson(queries.myAnimeListMangaStaffById(id));
-    }),
     mediaSearch: fetchOnce(malMediaSearch),
     mediaSearchCache: onlyIfCache(malMediaSearch),
     genresAndThemes: fetchOnce(type => {
