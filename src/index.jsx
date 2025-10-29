@@ -6,7 +6,7 @@ import {Home} from "./pages/Home/index.scoped.jsx"
 import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).jsx";
+import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).scoped.jsx";
 import { User } from "./pages/User/index(user).scoped.jsx";
 import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
@@ -20,7 +20,7 @@ import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./page
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
 import {ActivityPage} from "./pages/Activity/index(activity).scoped.jsx";
-import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse/Browse.jsx";
+import { BrowseRedirect } from "./pages/Browse/Browse.scoped.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/Compare/ComparePage.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.jsx";
@@ -34,6 +34,9 @@ import {FavouriteContainer} from "./pages/User/Favourites/FavouriteContainer.jsx
 import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
 import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index.scoped.jsx";
 import {Socials} from "./pages/User/Socials/Socials.jsx";
+import {BrowseMangaHomeScoped} from "./pages/Browse/BrowseMangaHome.scoped.jsx";
+import {BrowseAnimeHome} from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
+import {BrowseMediaHomeScoped} from "./pages/Browse/BrowseMediaHome.scoped.jsx";
 
 const root = document.getElementById("root")
 
@@ -78,9 +81,9 @@ render(
             </Route>
             <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}>
               <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}>
-                <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHome} />
+                <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHomeScoped} />
                 <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} />
-                <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHome} />
+                <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHomeScoped} />
               </Route>
               <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}>
                 <Route path="/" component={() => <Navigate href="media" />} />

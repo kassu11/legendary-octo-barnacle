@@ -394,13 +394,6 @@
 
 
 @layer components {
-  .horizontal-search-card-section .grid-reel-auto-fill {
-    margin-inline: -16px;
-    --spill-ratio: 1;
-    --padding: 16px;
-    --spill-ration-correction-padding: 0px;
-    --gap: 16px;
-  }
 }
 
 @layer layout {

@@ -1,7 +1,7 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import api from "../../utils/api.js";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createRenderEffect, createMemo } from "solid-js";
-import "./index(search).scss";
+import "./index(search).scoped.css";
 import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../../context/providers.js";
