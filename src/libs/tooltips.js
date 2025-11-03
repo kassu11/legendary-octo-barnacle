@@ -57,6 +57,7 @@ function updateTooltipPositions(tooltip) {
   const tooltipWrapper = tooltip.closest("[data-tooltip-wrapper]");
   const wrapperRect = tooltipWrapper?.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
+  const oldClasses = tooltip.classList.value;
 
   for (const position of positions) {
     tooltip.classList.remove(...positions);
@@ -74,8 +75,10 @@ function updateTooltipPositions(tooltip) {
       continue;
     }
 
-    break;
+    return;
   }
+
+  tooltip.classList = oldClasses;
 }
 
 // Update tooltips when focusing or hovering
