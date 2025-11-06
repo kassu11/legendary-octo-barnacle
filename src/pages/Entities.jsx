@@ -40,10 +40,9 @@ export function AnimeStaff() {
 
 export function MangaStaff() {
   const [idMal, setIdMal] = createSignal();
-  const [malStaff] = api.myAnimeList.mangaStaffById(idMal);
 
   return (
-    <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
+    <Entities type="STAFF" setIdMal={setIdMal} />
   );
 }
 
