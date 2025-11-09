@@ -157,11 +157,11 @@
       order: 0;
       grid-column: 2;
 
-      * {
+      _* {
         text-shadow: 0 0 2px #000000, 0 0 4px #000000;
       }
 
-      h1 {
+      _h1 {
         font-size: 1.2rem;
       }
     }
