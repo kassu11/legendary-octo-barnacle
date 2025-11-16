@@ -13,7 +13,10 @@ export default function autoStyleImport() {
       const scopedCssFilePath = id.replace(/\.jsx$/, ".css");
       if (fs.existsSync(scopedCssFilePath)) {
         const relative = "./" + path.basename(scopedCssFilePath);
-        return `\nimport "${relative}";\n` + code;
+        if (!code.includes(relative)) {
+          console.log(id, "missing css import\n" + `import "${relative}";\n`);
+          return `\nimport "${relative}";\n` + code;
+        }
       }
     },
   }

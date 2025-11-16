@@ -5,6 +5,7 @@ import {DraggableScrollContainerScoped} from "./DraggableScrollContainer.scoped.
 import {numberCommas} from "../../../../utils/formating.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 import { numberUtils } from "../../../../utils/utils.js";
+import "./StatsYearLineCharts.scoped.css";
 
 export function StatsYearLineChartsScoped(props) {
   let container;

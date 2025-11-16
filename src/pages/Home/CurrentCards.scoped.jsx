@@ -1,5 +1,6 @@
 import {For, Show} from "solid-js";
 import {CurrentCardScoped} from "./CurrentCard.scoped.jsx";
+import "./CurrentCards.scoped.css";
 
 export function CurrentCardsScoped(props) {
   return (

@@ -3,6 +3,7 @@ import api from "../../utils/api.js";
 import { createEffect, createSignal, Match, on, Show } from "solid-js";
 import { formatTimeToDate } from "../../utils/formating.js";
 import { useAuthentication, UserContext, useUser } from "../../context/providers.js";
+import "./index(user).scoped.css";
 
 export function User(props) {
   const params = useParams();

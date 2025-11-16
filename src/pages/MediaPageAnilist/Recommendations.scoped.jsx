@@ -1,6 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { scheduleUtils } from "../../utils/utils";
 import { fetchers } from "../../collections/collections";
+import "./Recommendations.scoped.css";
 
 export function Recommendations(props) {
   const params = useParams();

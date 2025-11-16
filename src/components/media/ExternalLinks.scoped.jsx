@@ -1,3 +1,5 @@
+import "./ExternalLinks.scoped.css";
+
 export function ExternalLinks(props) {
   return (
     <ErrorBoundary fallback="External links error">

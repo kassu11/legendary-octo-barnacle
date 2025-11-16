@@ -1,4 +1,5 @@
 import { formatingUtils, urlUtils } from "../../utils/utils";
+import "./RelationsPreview.scoped.css";
 
 export function AnilistRelationsPreview(props) {
   return (

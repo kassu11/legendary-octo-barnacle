@@ -1,3 +1,5 @@
+import "./DraggableScrollContainer.scoped.css";
+
 export function DraggableScrollContainerScoped(props) {
   let xStart = 0;
   let xScroll = 0;

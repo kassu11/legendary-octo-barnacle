@@ -3,6 +3,7 @@ import {A, useParams} from "@solidjs/router";
 import {useUser} from "../../../../context/providers.js";
 import {capitalize, countryNameFromCountryCode, formatMediaFormat, numberCommas} from "../../../../utils/formating.js";
 import {DistributionFooterScoped} from "./DistributionFooter.scoped.jsx";
+import "./StatsDistributionLists.scoped.css";
 
 export function StatsDistributionListsScoped(props) {
   const [formats, setFormats] = createSignal();

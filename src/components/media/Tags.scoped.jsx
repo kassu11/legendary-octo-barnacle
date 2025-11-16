@@ -1,5 +1,6 @@
 import { createEffect, createSignal, ErrorBoundary, For, on, Show } from "solid-js";
 import { A } from "@solidjs/router";
+import "./Tags.scoped.css";
 
 export const Tags = (props) => {
   const [showSpoilers, setShowSpoilers] = createSignal(false);

@@ -3,6 +3,7 @@ import api from "../../utils/api.js";
 import {Show} from "solid-js";
 import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
 import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
+import "./BrowseMediaHome.scoped.css";
 
 export function BrowseMediaHomeScoped() {
   const {accessToken} = useAuthentication();

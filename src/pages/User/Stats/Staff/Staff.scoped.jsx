@@ -7,6 +7,7 @@ import { useAuthentication } from "../../../../context/providers.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
 import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
+import "./Staff.scoped.css";
 
 export function StatsAnimeStaff() {
   const params = useParams();

@@ -1,6 +1,7 @@
 import api from "../../utils/api.js";
 import {Show} from "solid-js";
 import {CurrentCardsScoped} from "./CurrentCards.scoped.jsx";
+import "./CurrentWatchingMedia.scoped.css";
 
 export function CurrentWatchingMediaScoped(props) {
   const [animeData, {mutateCache: mutateAnimeCache}] = api.anilist.wachingAnime(props.userId, props.token);

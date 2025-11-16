@@ -5,6 +5,7 @@ import api from "../../utils/api.js";
 import {A} from "@solidjs/router";
 import {mediaUrl} from "../../utils/formating.js";
 import {EpisodeTime} from "./EpisodeTime.jsx";
+import "./CurrentCard.scoped.css";
 
 export function CurrentCardScoped(props) {
   const {accessToken} = useAuthentication();

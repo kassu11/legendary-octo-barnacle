@@ -3,6 +3,7 @@ import {useAuthentication, useUser, useUserMediaList} from "../../../context/pro
 import {For, Match, Show, Switch} from "solid-js";
 import {useListNavigation} from "./index(user-media-list).scoped.jsx";
 import {MediaListNames} from "./MediaListNames.jsx";
+import "./SearchControls.scoped.css";
 
 export function SearchControlsScoped(props) {
   const navigate = useListNavigation();

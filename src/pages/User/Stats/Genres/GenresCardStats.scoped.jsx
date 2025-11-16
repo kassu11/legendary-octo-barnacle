@@ -1,6 +1,7 @@
 import {useParams} from "@solidjs/router";
 import {numberCommas, plural} from "../../../../utils/formating.js";
 import {Match, Show, Switch} from "solid-js";
+import "./GenresCardStats.scoped.css";
 
 export function GenresCardStats(props) {
   const params = useParams();

@@ -8,6 +8,7 @@ import { fetcherSenderUtils, fetcherUtils } from "../../../../utils/utils.js";
 import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
 import {GenresCardStats} from "../Genres/GenresCardStats.scoped.jsx";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
+import "./Tags.scoped.css";
 
 export function StatsAnimeTags() {
   const params = useParams();

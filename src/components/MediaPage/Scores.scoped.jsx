@@ -1,4 +1,5 @@
 import {Show, Switch} from "solid-js";
+import "./Scores.scoped.css";
 
 export function MediaPageScores() {
   const { anilistData, jikanData } = useMediaInfo();

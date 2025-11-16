@@ -6,6 +6,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
 import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
+import "./VoiceActors.scoped.css";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();

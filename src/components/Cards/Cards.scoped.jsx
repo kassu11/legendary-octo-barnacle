@@ -12,6 +12,7 @@ import api from "../../utils/api.js";
 import {QuickActionListButton} from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
+import "./Cards.scoped.css";
 
 function AnilistMediaCardListBody(props) {
   asserts.assertTrue(props.media, "Missing media");

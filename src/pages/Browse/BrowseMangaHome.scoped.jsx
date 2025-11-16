@@ -3,6 +3,7 @@ import api from "../../utils/api.js";
 import {Show} from "solid-js";
 import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
 import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
+import "./BrowseMangaHome.scoped.css";
 
 export function BrowseMangaHomeScoped() {
   const {accessToken} = useAuthentication();

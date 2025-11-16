@@ -3,6 +3,7 @@ import {useAuthentication} from "../../../../context/providers.js";
 import {createEffect, createSignal, For, on, Show} from "solid-js";
 import {formatTitleToUrl} from "../../../../utils/formating.js";
 import { fetchers } from "../../../../collections/collections.js";
+import "./GenreMediaCards.scoped.css";
 
 export function GenreMediaCardsScoped(props) {
   const params = useParams();

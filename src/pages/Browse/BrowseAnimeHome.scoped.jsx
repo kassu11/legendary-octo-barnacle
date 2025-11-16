@@ -3,6 +3,7 @@ import api from "../../utils/api.js";
 import {Show} from "solid-js";
 import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
 import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
+import "./BrowseAnimeHome.scoped.css";
 
 export function BrowseAnimeHome() {
   const {accessToken} = useAuthentication();

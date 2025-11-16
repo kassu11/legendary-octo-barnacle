@@ -6,6 +6,7 @@ import {LoaderCircle} from "../../components/LoaderCircle.jsx";
 import {Tooltip} from "../../components/Tooltips.jsx";
 import {ActivityCard} from "../../components/Activity.jsx";
 import { fetchers } from "../../collections/collections.js";
+import "./ActivityPage.scoped.css";
 
 export function HomePageActivityReelContent(props) {
   const {accessToken} = useAuthentication();
