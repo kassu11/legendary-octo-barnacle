@@ -61,6 +61,10 @@
       &.grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+
+        @media (width < 55em) {
+          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        }
       }
 
       /* Studio favourites will use flex */
@@ -79,12 +83,6 @@
 }
 
 @layer resize {
-  @media (width < 55em) {
-    .grid {
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    }
-  }
-
   @media (width < 35em) {
     ol {
       gap: 8px;

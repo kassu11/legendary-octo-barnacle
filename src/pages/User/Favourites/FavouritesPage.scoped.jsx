@@ -3,7 +3,6 @@ import { DoomScroll } from "../../../components/utils/DoomScroll.jsx";
 import api from "../../../utils/api.js";
 import { useAuthentication, useUser, useFavourites } from "../../../context/providers.js";
 import { FavouritePageItemScoped } from "./FavouritePageItem.scoped.jsx";
-import "./FavouritesPage.scoped.css";
 
 export function FavouritesPageScoped(props) {
   const { user } = useUser();
