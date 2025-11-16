@@ -1,7 +1,7 @@
 import {A} from "@solidjs/router";
 import {For, Match, Show, Switch} from "solid-js";
 import {capitalize, formatMediaFormat, mediaUrl, numberCommas} from "../../utils/formating.js";
-import Emoji from "../../assets/Emoji.jsx";
+import EmojiByScoreScoped from "../../components/EmojiByScore.scoped.jsx";
 
 export function VerticalCardRowScoped(props) {
   asserts.assertTrue("href" in props, "Link is missing");
@@ -41,7 +41,7 @@ export function VerticalCardRowScoped(props) {
                 </div>
                 <div class="vertical-search-card-info">
                   <div class="vertical-search-card-score">
-                    <Emoji score={card.averageScore}/>
+                    <EmojiByScoreScoped score={card.averageScore}/>
                     <div class="clamp">
                       <p>{card.averageScore}%</p>
                       <p>{numberCommas(card.popularity)} users</p>

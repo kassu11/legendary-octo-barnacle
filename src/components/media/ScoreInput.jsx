@@ -1,7 +1,7 @@
 import Star from "../../assets/Star";
 import { Switch, Match, mergeProps, splitProps } from "solid-js";
 import "./ScoreInput.scss";
-import Emoji from "../../assets/Emoji.jsx";
+import EmojiByScoreScoped from "../EmojiByScore.scoped.jsx";
 import { asserts } from "../../collections/collections.js";
 
 function ScoreInput(props) {
@@ -104,7 +104,7 @@ function EmojiRadioRange(props) {
             }
           }}
           name={props.name} id={props.id} value={i} checked={props.value == i}/>
-        <Emoji score={values[i]} />
+        <EmojiByScoreScoped score={values[i]} />
       </label>
     )}</For>
   );
