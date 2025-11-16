@@ -41,9 +41,9 @@ export function MediaListContainerScoped(props) {
                   onCleanup(() => intersectionObserver.unobserve(ref));
 
                   return (
-                    <li ref={ref} attr:data-index={i()} attr:data-list={list.name} class="horizontal-search-card">
+                    <li ref={ref} attr:data-index={i()} attr:data-list={list.name} class="card">
                       <Show when={cardsVisibility[list.name][i()]}>
-                        <A href={mediaUrl(entry.media)}>
+                        <A class="clean-link" href={mediaUrl(entry.media)}>
                           <div class="container">
                             <img src={entry.media.coverImage.large} class="cover" alt="Cover."/>
                             <div class="card-header">
