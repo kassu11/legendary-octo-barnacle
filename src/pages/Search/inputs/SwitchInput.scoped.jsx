@@ -1,6 +1,6 @@
-import "./SwitchInput.scss";
+import "./SwitchInput.scoped.css";
 
-export function SwitchInput(props) {
+export function SwitchInputScoped(props) {
   return (
     <label class="switch">
       <input type="checkbox" {...props} />

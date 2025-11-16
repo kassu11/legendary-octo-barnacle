@@ -1,23 +1,23 @@
-import { createEffect, createSignal, For, on } from "solid-js";
-import "./RatingInput.scss";
-import { useSearchParams } from "@solidjs/router";
+import { createEffect, For, on, Show } from "solid-js";
+import "./SeasonInput.scoped.css";
+import { useParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { objectFromArrayEntries } from "../../utils/arrays";
-import { useResponsive } from "../../context/providers";
+import { objectFromArrayEntries } from "../../../utils/arrays.js";
+import { useVirtualSearchParams } from "../../../utils/virtualSearchParams.js";
+import { useResponsive } from "../../../context/providers.js";
 
-export function ExternalSourceInput(props) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [filter, setFilter] = createSignal("");
+export function SeasonInputScoped() {
+  const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
-  let oldExternalSources;
+  let oldSeasons;
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
     dialog.close();
     open = false;
     controller?.abort();
-    setSearchParams({preventFetch: undefined});
+    setVirtualSearchParams({preventFetch: undefined});
   }
 
   function preventMobileDragOverFlow() {
@@ -29,7 +29,8 @@ export function ExternalSourceInput(props) {
   return (
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
       const formData = new FormData(e.currentTarget);
-      setSearchParams({[e.target.name]: formData.getAll(e.target.name)});
+      const seasons = formData.getAll("season");
+      setVirtualSearchParams({ season: seasons, year: virtualSearchParams("year") });
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
@@ -37,11 +38,11 @@ export function ExternalSourceInput(props) {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldExternalSources = searchParams.externalSource;
+          oldSeasons = virtualSearchParams("season");
 
           if(isTouch()) {
             dialog.showModal();
-            setSearchParams({preventFetch: true});
+            setVirtualSearchParams({preventFetch: true});
             preventMobileDragOverFlow();
             window.addEventListener("resize", preventMobileDragOverFlow, { signal });
 
@@ -62,15 +63,9 @@ export function ExternalSourceInput(props) {
           }
           open = true;
         }
-      }}>ExternalSources</button>
+      }}>Seasons</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
-          <div class="multi-input-header">
-            <input type="search" placeholder="Filter external sources" onInput={e => {
-              e.stopPropagation();
-              setFilter(e.target.value.toLowerCase());
-            }} />
-          </div>
           <div class="scroll-wrapper" ref={scrollWrapper}>
             <Content />
           </div>
@@ -78,7 +73,7 @@ export function ExternalSourceInput(props) {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({externalSource: oldExternalSources});
+                setVirtualSearchParams({season: oldSeasons});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -89,32 +84,26 @@ export function ExternalSourceInput(props) {
   );
 
   function Content() {
-    const [searchParams] = useSearchParams();
-    const [externalSourceStore, setExternalSourceStore] = createStore({});
+    const params = useParams();
+    const [seasonStore, setSeasonStore] = createStore({});
 
     createEffect(() => {
-      setExternalSourceStore(reconcile(objectFromArrayEntries(searchParams.externalSource, {})));
+      setSeasonStore(reconcile(objectFromArrayEntries(virtualSearchParams("season"), {})));
     });
+
+    const engine = () => (virtualSearchParams("malSearch") === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
 
     return (
       <ol>
-        <For each={props.sources()?.data || []} fallback={"Loading"}>{source => (
-          <li classList={{hidden: !source.site.toLowerCase().includes(filter())}}>
-            <label>
-              <div class="grid-wrapper">
-                <Show when={source.icon}>
-                  <img src={source.icon} style={{"background-color": source.color}} alt="External source logo" />
-                </Show>
-                <span>
-                  {source.site}
-                  <Show when={source.language}>
-                    <sup>{source.language}</sup>
-                  </Show>
-                </span>
-              </div>
-              <input type="checkbox" name="externalSource" value={source.id} checked={externalSourceStore[source.id]} />
-            </label>
-          </li>
+        <For each={Object.entries(searchObjects.searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
+          <Show when={key !== "tba"}>
+            <li>
+              <label>
+                {season.flavorText}
+                <input type="radio" name="season" value={key} checked={seasonStore[key]} />
+              </label>
+            </li>
+          </Show>
         )}</For>
       </ol>
     );

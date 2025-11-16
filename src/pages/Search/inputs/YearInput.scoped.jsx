@@ -1,11 +1,11 @@
 import { createEffect, createSignal, For, on, Show } from "solid-js";
-import "./RatingInput.scss";
+import "./YearInput.scoped.css";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { TwoHeadedRange } from "./TwoHeadedRange";
-import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
-import { useResponsive } from "../../context/providers";
+import { TwoHeadedRangeScoped } from "./TwoHeadedRange.scoped.jsx";
+import { useVirtualSearchParams } from "../../../utils/virtualSearchParams.js";
+import { useResponsive } from "../../../context/providers.js";
 
-export function YearInput() {
+export function YearInputScoped() {
   const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
   const { isTouch } = useResponsive()
   const [filter, setFilter] = createSignal("");
@@ -88,7 +88,7 @@ export function YearInput() {
             <Content />
           </div>
           <div class="multi-input-footer">
-            <TwoHeadedRange 
+            <TwoHeadedRangeScoped
               min={1970} 
               max={currentYearPlusTwo} 
               separation={1} 

@@ -1,11 +1,11 @@
 import { createEffect, For, on } from "solid-js";
-import "./RatingInput.scss";
+import "./SortInput.scoped.css";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { objectFromArrayEntries } from "../../utils/arrays";
-import { useResponsive } from "../../context/providers";
+import { objectFromArrayEntries } from "../../../utils/arrays.js";
+import { useResponsive } from "../../../context/providers.js";
 
-export function SortInput() {
+export function SortInputScoped() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;

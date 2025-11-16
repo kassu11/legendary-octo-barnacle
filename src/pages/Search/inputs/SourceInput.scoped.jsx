@@ -1,23 +1,23 @@
-import { createEffect, For, on, Show } from "solid-js";
-import "./RatingInput.scss";
-import { useParams } from "@solidjs/router";
+import { createEffect, createSignal, For, on } from "solid-js";
+import "./SourceInput.scoped.css";
+import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { objectFromArrayEntries } from "../../utils/arrays";
-import { useVirtualSearchParams } from "../../utils/virtualSearchParams";
-import { useResponsive } from "../../context/providers";
+import { objectFromArrayEntries } from "../../../utils/arrays.js";
+import { useResponsive } from "../../../context/providers.js";
 
-export function SeasonInput() {
-  const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
+export function SourceInputScoped() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = createSignal("");
   const { isTouch } = useResponsive()
   let open = false;
-  let oldSeasons;
+  let oldOrder;
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
     dialog.close();
     open = false;
     controller?.abort();
-    setVirtualSearchParams({preventFetch: undefined});
+    setSearchParams({preventFetch: undefined});
   }
 
   function preventMobileDragOverFlow() {
@@ -28,9 +28,7 @@ export function SeasonInput() {
 
   return (
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
-      const formData = new FormData(e.currentTarget);
-      const seasons = formData.getAll("season");
-      setVirtualSearchParams({ season: seasons, year: virtualSearchParams("year") });
+      setSearchParams({[e.target.name]: e.target.value});
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
@@ -38,11 +36,11 @@ export function SeasonInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldSeasons = virtualSearchParams("season");
+          oldOrder = searchParams.source;
 
           if(isTouch()) {
             dialog.showModal();
-            setVirtualSearchParams({preventFetch: true});
+            setSearchParams({preventFetch: true});
             preventMobileDragOverFlow();
             window.addEventListener("resize", preventMobileDragOverFlow, { signal });
 
@@ -63,9 +61,15 @@ export function SeasonInput() {
           }
           open = true;
         }
-      }}>Seasons</button>
+      }}>Source</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
+          <div class="multi-input-header">
+            <input type="search" placeholder="Filter sources" onInput={e => {
+              e.stopPropagation();
+              setFilter(e.target.value.toLowerCase());
+            }} />
+          </div>
           <div class="scroll-wrapper" ref={scrollWrapper}>
             <Content />
           </div>
@@ -73,7 +77,7 @@ export function SeasonInput() {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setVirtualSearchParams({season: oldSeasons});
+                setSearchParams({source: oldOrder});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -84,26 +88,24 @@ export function SeasonInput() {
   );
 
   function Content() {
-    const params = useParams();
-    const [seasonStore, setSeasonStore] = createStore({});
+    const [searchParams] = useSearchParams();
+    const [store, setStore] = createStore({});
 
     createEffect(() => {
-      setSeasonStore(reconcile(objectFromArrayEntries(virtualSearchParams("season"), {})));
+      setStore(reconcile(objectFromArrayEntries(searchParams.source, {})));
     });
 
-    const engine = () => (virtualSearchParams("malSearch") === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
+    const sourceEntries = () => Object.entries(searchObjects.searchSources).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>
-        <For each={Object.entries(searchObjects.searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
-          <Show when={key !== "tba"}>
-            <li>
-              <label>
-                {season.flavorText}
-                <input type="radio" name="season" value={key} checked={seasonStore[key]} />
-              </label>
-            </li>
-          </Show>
+        <For each={sourceEntries()} fallback={"Something went wrong"}>{([key, order]) => (
+          <li classList={{hidden: !order.flavorText.toLowerCase().includes(filter())}}>
+            <label>
+              {order.flavorText}
+              <input type="radio" name="source" value={key} checked={store[key]} />
+            </label>
+          </li>
         )}</For>
       </ol>
     );

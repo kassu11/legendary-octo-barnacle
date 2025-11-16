@@ -7,20 +7,20 @@ import { createStore } from "solid-js/store";
 import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../../context/providers.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
-import { RatingInput } from "./RatingInput.jsx";
-import { SwitchInput } from "./SwitchInput.jsx";
-import { GenresInput } from "./GenresInput.jsx";
-import { YearInput } from "./YearInput.jsx";
+import { RatingInputScoped } from "./inputs/RatingInput.scoped.jsx";
+import { SwitchInputScoped } from "./inputs/SwitchInput.scoped.jsx";
+import { GenresInputScoped } from "./inputs/GenresInput.scoped.jsx";
+import { YearInputScoped } from "./inputs/YearInput.scoped.jsx";
 import { compare, first, objectFromArrayEntries, wrapToArray, wrapToSet } from "../../utils/arrays.js";
-import { FormatInput } from "./FormatInput.jsx";
-import { SortInput } from "./SortInput.jsx";
-import { StatusInput } from "./StatusInput.jsx";
-import { CountryInput } from "./CountryInput.jsx";
-import { SourceInput } from "./SourceInput.jsx";
-import { ExternalSourceInput } from "./ExternalSourcesInput.jsx";
-import { TwoHeadedRange } from "./TwoHeadedRange.jsx";
+import { FormatInputScoped } from "./inputs/FormatInput.scoped.jsx";
+import { SortInputScoped } from "./inputs/SortInput.scoped.jsx";
+import { StatusInputScoped } from "./inputs/StatusInput.scoped.jsx";
+import { CountryInputScoped } from "./inputs/CountryInput.scoped.jsx";
+import { SourceInputScoped } from "./inputs/SourceInput.scoped.jsx";
+import { ExternalSourceInput } from "./inputs/ExternalSourcesInput.scoped.jsx";
+import { TwoHeadedRangeScoped } from "./inputs/TwoHeadedRange.scoped.jsx";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../../utils/virtualSearchParams.js";
-import { SeasonInput } from "./SeasonInput.jsx";
+import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
 import { asserts, fetchers, fetcherSenders, globalState, localizations, requests, searchObjects } from "../../collections/collections.js";
 import { fetcherSenderUtils, urlUtils } from "../../utils/utils.js";
@@ -571,7 +571,7 @@ export function SearchBar(props) {
         }} />
         <span>
           <p>Search MAL</p>
-          <SwitchInput disabled={params.type === "media"} name="malSearch" checked={searchParams.malSearch === "true" && params.type !== "media"} onInput={e => {
+          <SwitchInputScoped disabled={params.type === "media"} name="malSearch" checked={searchParams.malSearch === "true" && params.type !== "media"} onInput={e => {
           setSearchParams({ malSearch: e.target.checked || undefined });
         }}/>
         </span>
@@ -597,17 +597,17 @@ export function SearchBar(props) {
           }} />
           <label htmlFor="hasLicense"> Unlicensed</label>
         </div>
-        <RatingInput />
-        <GenresInput aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
-        <YearInput />
-        <FormatInput />
-        <SortInput />
-        <StatusInput />
-        <CountryInput />
-        <SourceInput />
-        <SeasonInput />
+        <RatingInputScoped />
+        <GenresInputScoped aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
+        <YearInputScoped />
+        <FormatInputScoped />
+        <SortInputScoped />
+        <StatusInputScoped />
+        <CountryInputScoped />
+        <SourceInputScoped />
+        <SeasonInputScoped />
         <ExternalSourceInput sources={externalSources} />
-        <TwoHeadedRange 
+        <TwoHeadedRangeScoped
           min={0} 
           max={500} 
           separation={1} 

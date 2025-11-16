@@ -1,10 +1,10 @@
 import { createEffect, createSignal, on } from "solid-js";
-import "./RatingInput.scss";
+import "./RatingInput.scoped.css";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { useResponsive } from "../../context/providers";
+import { useResponsive } from "../../../context/providers.js";
 
-export function RatingInput(props) {
+export function RatingInputScoped(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;

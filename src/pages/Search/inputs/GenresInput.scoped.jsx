@@ -1,11 +1,11 @@
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
-import "./RatingInput.scss";
+import "./GenresInput.scoped.css";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { objectFromArrayEntries } from "../../utils/arrays";
-import { useResponsive } from "../../context/providers";
+import { objectFromArrayEntries } from "../../../utils/arrays.js";
+import { useResponsive } from "../../../context/providers.js";
 
-export function GenresInput(props) {
+export function GenresInputScoped(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   const [filter, setFilter] = createSignal("");

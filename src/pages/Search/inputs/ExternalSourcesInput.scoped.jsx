@@ -1,16 +1,16 @@
 import { createEffect, createSignal, For, on } from "solid-js";
-import "./RatingInput.scss";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { objectFromArrayEntries } from "../../utils/arrays";
-import { useResponsive } from "../../context/providers";
+import { objectFromArrayEntries } from "../../../utils/arrays.js";
+import { useResponsive } from "../../../context/providers.js";
+import "./ExternalSourcesInput.scoped.css";
 
-export function SourceInput() {
+export function ExternalSourceInput(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = createSignal("");
   const { isTouch } = useResponsive()
   let open = false;
-  let oldOrder;
+  let oldExternalSources;
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
@@ -28,7 +28,8 @@ export function SourceInput() {
 
   return (
     <form class="multi-input" classList={{mobile: isTouch()}} ref={form} onSubmit={e => {e.preventDefault()}} onInput={e => {
-      setSearchParams({[e.target.name]: e.target.value});
+      const formData = new FormData(e.currentTarget);
+      setSearchParams({[e.target.name]: formData.getAll(e.target.name)});
     }}>
       <button class="open-multi-input" ref={button} onClick={() => {
         if (open) {
@@ -36,7 +37,7 @@ export function SourceInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldOrder = searchParams.source;
+          oldExternalSources = searchParams.externalSource;
 
           if(isTouch()) {
             dialog.showModal();
@@ -61,11 +62,11 @@ export function SourceInput() {
           }
           open = true;
         }
-      }}>Source</button>
+      }}>ExternalSources</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
           <div class="multi-input-header">
-            <input type="search" placeholder="Filter sources" onInput={e => {
+            <input type="search" placeholder="Filter external sources" onInput={e => {
               e.stopPropagation();
               setFilter(e.target.value.toLowerCase());
             }} />
@@ -77,7 +78,7 @@ export function SourceInput() {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({source: oldOrder});
+                setSearchParams({externalSource: oldExternalSources});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -89,21 +90,29 @@ export function SourceInput() {
 
   function Content() {
     const [searchParams] = useSearchParams();
-    const [store, setStore] = createStore({});
+    const [externalSourceStore, setExternalSourceStore] = createStore({});
 
     createEffect(() => {
-      setStore(reconcile(objectFromArrayEntries(searchParams.source, {})));
+      setExternalSourceStore(reconcile(objectFromArrayEntries(searchParams.externalSource, {})));
     });
-
-    const sourceEntries = () => Object.entries(searchObjects.searchSources).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>
-        <For each={sourceEntries()} fallback={"Something went wrong"}>{([key, order]) => (
-          <li classList={{hidden: !order.flavorText.toLowerCase().includes(filter())}}>
+        <For each={props.sources()?.data || []} fallback={"Loading"}>{source => (
+          <li classList={{hidden: !source.site.toLowerCase().includes(filter())}}>
             <label>
-              {order.flavorText}
-              <input type="radio" name="source" value={key} checked={store[key]} />
+              <div class="grid-wrapper">
+                <Show when={source.icon}>
+                  <img src={source.icon} style={{"background-color": source.color}} alt="External source logo" />
+                </Show>
+                <span>
+                  {source.site}
+                  <Show when={source.language}>
+                    <sup>{source.language}</sup>
+                  </Show>
+                </span>
+              </div>
+              <input type="checkbox" name="externalSource" value={source.id} checked={externalSourceStore[source.id]} />
             </label>
           </li>
         )}</For>

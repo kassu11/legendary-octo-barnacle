@@ -1,11 +1,12 @@
 import { createEffect, For, on } from "solid-js";
-import "./RatingInput.scss";
-import { useSearchParams } from "@solidjs/router";
+import "./StatusInput.scoped.css";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
-import { objectFromArrayEntries } from "../../utils/arrays";
-import { useResponsive } from "../../context/providers";
+import { objectFromArrayEntries } from "../../../utils/arrays.js";
+import { useResponsive } from "../../../context/providers.js";
+import { searchObjects } from "../../../collections/collections.js";
 
-export function CountryInput() {
+export function StatusInputScoped() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
@@ -35,7 +36,7 @@ export function CountryInput() {
         } else {
           controller = new AbortController();
           const signal = controller.signal;
-          oldOrder = searchParams.country;
+          oldOrder = searchParams.status;
 
           if(isTouch()) {
             dialog.showModal();
@@ -60,7 +61,7 @@ export function CountryInput() {
           }
           open = true;
         }
-      }}>Country</button>
+      }}>Status</button>
       <dialog ref={dialog} onClose={close}>
         <div class="wrapper">
           <div class="scroll-wrapper" ref={scrollWrapper}>
@@ -70,7 +71,7 @@ export function CountryInput() {
             <div class="multi-input-footer">
               <button onClick={() => {
                 close();
-                setSearchParams({country: oldOrder});
+                setSearchParams({status: oldOrder});
               }}>Cancel</button>
               <button onClick={close}>Ok</button>
             </div>
@@ -83,20 +84,22 @@ export function CountryInput() {
   function Content() {
     const [searchParams] = useSearchParams();
     const [store, setStore] = createStore({});
+    const params = useParams();
 
     createEffect(() => {
-      setStore(reconcile(objectFromArrayEntries(searchParams.country, {})));
+      setStore(reconcile(objectFromArrayEntries(searchParams.status, {})));
     });
 
-    const countryEntries = () => Object.entries(searchObjects.searchCountries).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
+    const statusEntries = () => Object.entries(searchObjects.searchStatuses[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>
-        <For each={countryEntries()} fallback={"Something went wrong"}>{([key, order]) => (
+        <For each={statusEntries()} fallback={"Something went wrong"}>{([key, order]) => (
           <li>
             <label>
               {order.flavorText}
-              <input type="radio" name="country" value={key} checked={store[key]} />
+              <input type="radio" name="status" value={key} checked={store[key]} />
             </label>
           </li>
         )}</For>
