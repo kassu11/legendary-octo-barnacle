@@ -12,7 +12,7 @@ export function DeleteFavouriteScoped(props) {
 
   return (
     <Show when={user().id === authUserData()?.data.id}>
-      <button class="profile-favourites-delete-button" onClick={async (e) => {
+      <button class="cp-delete-favourite" onClick={async (e) => {
         e.preventDefault();
         props.onClick();
         const response = await api.anilist.toggleFavourite(accessToken(), {

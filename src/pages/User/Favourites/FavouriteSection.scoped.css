@@ -1,9 +1,5 @@
 @layer layout {
-  .user-profile-favourites {
-    display: grid;
-  }
-
-  .user-profile-favourites-details {
+  details {
     &:not([open]) {
       summary {
         background-color: var(--background-300);
@@ -12,102 +8,89 @@
         display: none;
       }
     }
+
     summary {
       position: sticky;
-      top: 3rem;
-      padding: 1rem;
+      top: 48px;
+      padding: 16px;
       background-color: var(--background-400);
       z-index: 1;
+
       h3 {
         display: inline;
       }
 
       button {
-        margin-left: 1rem;
+        margin-left: 16px;
       }
     }
 
     ol {
       list-style: none;
       padding: 0;
-      gap: 1rem;
-    }
-    li {
-      position: relative;
-    }
+      gap: 16px;
 
-    .reorder {
-      touch-action: none;
-      &:has(.dragging) {
-        cursor: grabbing;
-      }
-      li {
-        cursor: grab;
-        &.dragging {
-          pointer-events: none;
-          user-select: none;
-          z-index: 1;
+      &.reorder {
+        touch-action: none;
+
+        _li {
+          cursor: grab;
+
+          _.cp-delete-favourite {
+            display: none;
+          }
+
+          _* {
+            pointer-events: none;
+            user-select: none;
+          }
+
+          &.dragging {
+            pointer-events: none;
+            user-select: none;
+            z-index: 1;
+          }
         }
 
-        * {
-          pointer-events: none;
-          user-select: none;
+        &:has(_.dragging) {
+          cursor: grabbing;
         }
       }
 
-      .profile-favourites-delete-button {
-        display: none;
+      /* Everything but studio favourites will use grid */
+      &.grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+      }
+
+      /* Studio favourites will use flex */
+      &.flex {
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 16px;
+
+        _li {
+          padding: 16px;
+          background-color: var(--background-500);
+        }
       }
     }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    }
-
-    .flex {
-      display: flex;
-      flex-wrap: wrap;
-      font-size: 1rem;
-      li {
-        padding: 1rem;
-        background-color: var(--background-500);
-      }
-    }
-
-    img {
-      aspect-ratio: 5.5/8;
-      width: 100%;
-      object-fit: cover;
-    }
-
-    li:not(:hover, :focus-within) .profile-favourites-delete-button {
-      display: none;
-    }
-  }
-
-  .profile-favourites-delete-button {
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    transform: translate(20%, -50%);
-    z-index: 1;
   }
 }
 
 @layer resize {
   @media (width < 55em) {
-    .user-profile-favourites-details .grid {
-      grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     }
   }
 
   @media (width < 35em) {
-    .user-profile-favourites-details ol {
-      gap: .5rem;
+    ol {
+      gap: 8px;
 
-      &.flex li {
-        padding: .5rem;
+      &.flex _li {
+        padding: 8px;
       }
     }
   }

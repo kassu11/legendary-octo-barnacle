@@ -99,7 +99,7 @@ export function FavouriteSectionScoped(props) {
   }
 
   return (
-    <details class="user-profile-favourites-details" classList={{hidden: !visible()}} open>
+    <details classList={{hidden: !visible()}} open>
       <summary>
         <h3>{props.title}</h3>
         <Show when={user().id === authUserData()?.data.id}>
@@ -120,7 +120,7 @@ export function FavouriteSectionScoped(props) {
                   response = await api.anilist.mutateFavourites(accessToken(), {staffIds: newIds, staffOrder: newOrder});
                 } else if (props.type === "characters") {
                   response = await api.anilist.mutateFavourites(accessToken(), {characterIds: newIds, characterOrder: newOrder});
-                } 
+                }
 
                 if (response.status === 200) {
                   setAllEdges(edges => {
@@ -141,13 +141,13 @@ export function FavouriteSectionScoped(props) {
           </Switch>
         </Show>
       </summary>
-      <ol 
+      <ol
         ref={el => ol = el}
-        classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} 
-        onMouseMove={dragMove} 
-        onTouchMove={dragMove} 
-        onTouchEnd={dragEnd} 
-        onMouseDown={dragStart} 
+        classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}}
+        onMouseMove={dragMove}
+        onTouchMove={dragMove}
+        onTouchEnd={dragEnd}
+        onMouseDown={dragStart}
         onTouchStart={dragStart}
       >
         <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges}}>
