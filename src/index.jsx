@@ -29,7 +29,7 @@ import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharac
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
 import { CharacterJikan } from "./pages/CharacterJikan/CharacterJikan.jsx";
 import {Overview} from "./pages/User/Overview/Overview.jsx";
-import {UserMediaList} from "./pages/User/MediaList/index.scoped.jsx";
+import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
 import {FavouriteContainer} from "./pages/User/Favourites/FavouriteContainer.jsx";
 import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
 import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index.scoped.jsx";

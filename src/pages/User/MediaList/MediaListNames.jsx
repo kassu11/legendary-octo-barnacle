@@ -1,6 +1,6 @@
 import {useParams} from "@solidjs/router";
 import {For, Show} from "solid-js";
-import {useListNavigation} from "./index.scoped.jsx";
+import {useListNavigation} from "./index(user-media-list).scoped.jsx";
 
 export function MediaListNames(props) {
   const navigate = useListNavigation();

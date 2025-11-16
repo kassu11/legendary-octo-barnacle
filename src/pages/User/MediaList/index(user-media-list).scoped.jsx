@@ -1,7 +1,7 @@
 import {useNavigate, useParams, useSearchParams} from "@solidjs/router";
 import api, {IndexedDB} from "../../../utils/api.js";
 import {createEffect, createSignal, on, onCleanup} from "solid-js";
-import "./index.scoped.css";
+import "./index(user-media-list).scoped.css";
 import {capitalize} from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import {useAuthentication, UserMediaListContext, useUser} from "../../../context/providers.js";
