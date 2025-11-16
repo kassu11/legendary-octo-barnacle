@@ -50,11 +50,11 @@ export function FavouriteSectionScoped(props) {
   }
 
   const dragMove = e => {
-    if (!reorder()) {
+    if (!reorder() || !dragging) {
       return;
     }
 
-    if (dragging && e.type === "touchmove") {
+    if (e.type === "touchmove") {
       const touch = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest("li");
       if (target) { 
@@ -63,7 +63,7 @@ export function FavouriteSectionScoped(props) {
       }
       translateMove();
     }
-    else if (dragging && e.buttons === 1 && e.target?.tagName === "LI") {
+    else if (e.buttons === 1 && e.target?.tagName === "LI") {
       if (dragging.nextElementSibling === e.target) { e.target.after(dragging); } 
       else { e.target.before(dragging); } 
     } else if(e.buttons !== 1) {
