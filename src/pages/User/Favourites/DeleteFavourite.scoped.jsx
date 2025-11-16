@@ -2,8 +2,9 @@ import { Show } from "solid-js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import api from "../../../utils/api.js";
 import { asserts } from "../../../collections/collections.js";
+import "./DeleteFavourite.scoped.css"
 
-export function DeleteFavourite(props) {
+export function DeleteFavouriteScoped(props) {
   const { authUserData, accessToken } = useAuthentication();
   const { user } = useUser();
   asserts.assertTrue(props.onClick, "onClick is missing");

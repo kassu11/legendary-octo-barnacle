@@ -30,7 +30,7 @@ import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.
 import { CharacterJikan } from "./pages/CharacterJikan/CharacterJikan.jsx";
 import {Overview} from "./pages/User/Overview/Overview.jsx";
 import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
-import {FavouriteContainer} from "./pages/User/Favourites/FavouriteContainer.jsx";
+import {IndexFavouriteScoped} from "./pages/User/Favourites/index-(favourite).scoped.jsx";
 import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
 import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index.scoped.jsx";
 import {Socials} from "./pages/User/Socials/Socials.jsx";
@@ -133,7 +133,7 @@ render(
               <Route path="/" component={Overview} />
               <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={UserMediaList} />
               <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={UserMediaList} />
-              <Route path="/favourites" component={FavouriteContainer} />
+              <Route path="/favourites" component={IndexFavouriteScoped} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />
                 <Route path="/:type" matchFilters={{ type: "anime" }}>

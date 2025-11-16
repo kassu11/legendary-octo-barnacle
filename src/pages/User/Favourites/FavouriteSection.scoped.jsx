@@ -2,10 +2,11 @@ import { Show, Switch, Match, createSignal } from "solid-js";
 import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import { FavouritesContext } from "../../../context/providers.js";
-import { FavouritesPage } from "./FavouritesPage.jsx";
+import { FavouritesPageScoped } from "./FavouritesPage.scoped.jsx";
 import { asserts } from "../../../collections/collections.js";
+import "./FavouriteSection.scoped.css"
 
-export function FavouriteSection(props) {
+export function FavouriteSectionScoped(props) {
   asserts.assertTrue(props.title, "title missing");
   asserts.assertTrue(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
@@ -151,7 +152,7 @@ export function FavouriteSection(props) {
       >
         <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges}}>
           <Show when={user().id} keyed>
-            <FavouritesPage page={1} setVisible={setVisible} />
+            <FavouritesPageScoped page={1} setVisible={setVisible} />
           </Show>
         </FavouritesContext.Provider>
       </ol>
