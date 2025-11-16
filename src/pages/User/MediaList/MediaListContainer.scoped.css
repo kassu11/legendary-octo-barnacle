@@ -33,7 +33,7 @@
             border-radius: .25rem;
             align-items: center;
 
-            svg {
+            _svg {
               height: 1.25rem;
             }
 
