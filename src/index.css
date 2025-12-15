@@ -392,19 +392,7 @@
   }
 }
 
-
-@layer components {
-}
-
 @layer layout {
-  .search-page {
-    @container (width < calc(6 * 7em + 5 * 8px)) {
-      .search-page-content {
-        --grid-column-width: 7rem;
-        --gap: 8px;
-      }
-    }
-  }
 
   .pg-jikan-character-header {
     display: grid;

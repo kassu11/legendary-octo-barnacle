@@ -5,6 +5,13 @@
     margin-inline: auto;
     background-color: var(--background-400);
 
+    @container (width < calc(6 * 7em + 5 * 8px)) {
+      .search-page-content {
+        --grid-column-width: 7rem;
+        --gap: 8px;
+      }
+    }
+
     .header-row {
       display: flex;
     }
