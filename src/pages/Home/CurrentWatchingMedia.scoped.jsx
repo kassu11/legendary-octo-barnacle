@@ -12,18 +12,16 @@ export function CurrentWatchingMediaScoped(props) {
 
   const today = new Date() / 1000;
   const sortAiringTime = (a, b) => {
-    const [aTime, bTime] = [
-      timeCollection.weekInSeconds -
-        Math.abs(
-          (a.media.nextAiringEpisode?.airingAt - today) %
-            timeCollection.weekInSeconds,
-        ),
-      timeCollection.weekInSeconds -
-        Math.abs(
-          (b.media.nextAiringEpisode?.airingAt - today) %
-            timeCollection.weekInSeconds,
-        ),
-    ];
+    const aDelta =
+      (a.media.nextAiringEpisode?.airingAt - today) %
+      timeCollection.weekInSeconds;
+    const aTime =
+      aDelta >= 0 ? aDelta : timeCollection.weekInSeconds - Math.abs(aDelta);
+    const bDelta =
+      (b.media.nextAiringEpisode?.airingAt - today) %
+      timeCollection.weekInSeconds;
+    const bTime =
+      bDelta >= 0 ? bDelta : timeCollection.weekInSeconds - Math.abs(bDelta);
 
     if (aTime && bTime) {
       return aTime - bTime;
