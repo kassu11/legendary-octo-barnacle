@@ -45,18 +45,21 @@ export function CurrentWatchingMediaScoped(props) {
             )
             .toSorted(sortAiringTime)}
           mutateCache={mutateAnimeCache}
+          loading={animeData.loading}
         />
         <CurrentCardsScoped
           cards={animeData().data.data.Page.mediaList.filter(
             (anime) => anime.media.status === "FINISHED",
           )}
           mutateCache={mutateAnimeCache}
+          loading={animeData.loading}
         />
       </Show>
       <Show when={mangaData()}>
         <CurrentCardsScoped
           cards={mangaData().data.data.Page.mediaList}
           mutateCache={mutateMangaCache}
+          loading={mangaData.loading}
         />
       </Show>
     </div>
