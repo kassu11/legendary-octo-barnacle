@@ -1,0 +1,20 @@
+@layer layout {
+  .user-profile-stats-page {
+    display: grid;
+    position: relative;
+    width: 100%;
+    grid-template-columns: 11rem 1fr;
+    gap: 1rem;
+
+    @media (width < 55em) {
+      grid-template-columns: 1fr;
+    }
+
+    .content {
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+}

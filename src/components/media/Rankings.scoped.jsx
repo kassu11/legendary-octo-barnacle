@@ -1,4 +1,5 @@
 import { ErrorBoundary, For } from "solid-js";
+import "./Rankings.scoped.css";
 
 export const Rankings = (props) => {
   return (

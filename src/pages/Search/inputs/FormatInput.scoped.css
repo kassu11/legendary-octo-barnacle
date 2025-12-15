@@ -1,0 +1,137 @@
+@layer layout {
+  .multi-input {
+    position: relative;
+
+    &.mobile {
+      dialog {
+        margin: auto;
+        max-width: unset;
+        max-height: calc(100dvh - .5rem);
+        width: min(calc(100dvw - .5rem), 30rem);
+      }
+
+      input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      label {
+        gap: 1rem;
+        padding: .5rem 1rem;
+      }
+    }
+
+    .open-button-wrapper {
+      display: flex;
+    }
+
+    dialog {
+      width: 100%;
+      z-index: 1;
+      padding: 0;
+      border: none;
+      max-height: min(calc(100dvh - .5rem), 30rem);
+      overscroll-behavior: contain;
+      touch-action: none;
+      &[open] {
+        display: flex;
+      }
+
+      &::backdrop {
+        background-color: rgb(0 0 0 / 60%);
+        backdrop-filter: blur(5px);
+      }
+    }
+
+    .wrapper {
+      overflow: hidden;
+      display: grid;
+      width: 100%;
+      border: 1px solid black;
+    }
+
+    .scroll-wrapper {
+      overflow: auto;
+      overscroll-behavior: contain;
+      &:not(.has-scroll-bar) {
+        touch-action: none;
+      }
+
+      > *:not(ol) {
+        padding-inline: .5rem;
+      }
+    }
+
+    .multi-input-header {
+      padding: .25rem .5rem;
+      background-color: var(--background-300);
+    }
+
+    input[type="search"] {
+      width: 100%;
+      padding: .25rem .5rem;
+      margin-inline: auto;
+    }
+
+    ol {
+      padding: 0;
+      list-style: none;
+    }
+
+    li ~ li {
+      border-top: 1px solid black;;
+    }
+
+    label {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: .5rem;
+      padding: .25rem .5rem;
+      align-items: center;
+    }
+
+    .grid-wrapper {
+      display: grid;
+      gap: 0.5rem;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+    img {
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      display: inline-block;
+      width: 1.5rem;
+      padding: 0.2rem;
+    }
+
+    .flex-space-between {
+      width: 100%;
+      input {
+        max-width: 4rem;
+      }
+    }
+
+
+
+    .exclude input[data-steps="2"] {
+      accent-color: var(--crimson-400);
+    }
+
+    input[data-steps="2"] {
+      accent-color: var(--lime-400);
+    }
+  }
+
+  .open-multi-input {
+    width: 100%;
+  }
+
+  .multi-input-footer {
+    display: flex;
+    justify-content: end;
+    gap: .25rem 1rem;
+    padding: .5rem 1rem;
+    background-color: var(--background-300);
+    flex-wrap: wrap;
+  }
+}

@@ -1,8 +1,9 @@
 import {A, useLocation, useParams} from "@solidjs/router";
 import {useAuthentication, useUser, useUserMediaList} from "../../../context/providers.js";
 import {For, Match, Show, Switch} from "solid-js";
-import {useListNavigation} from "./index.scoped.jsx";
+import {useListNavigation} from "./index(user-media-list).scoped.jsx";
 import {MediaListNames} from "./MediaListNames.jsx";
+import "./SearchControls.scoped.css";
 
 export function SearchControlsScoped(props) {
   const navigate = useListNavigation();

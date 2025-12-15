@@ -1,6 +1,7 @@
 import { asserts } from "../collections/collections";
 
 import {Tooltip2Scoped} from "./Tooltip2.scoped.jsx";
+import "./Buttons.scoped.css";
 
 export function QuickActionListButton(props) {
 

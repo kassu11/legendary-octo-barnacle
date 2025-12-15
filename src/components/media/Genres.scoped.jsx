@@ -1,3 +1,5 @@
+import "./Genres.scoped.css";
+
 export const Genres = (props) => {
   return (
     <ErrorBoundary fallback="Genres error">

@@ -1,0 +1,6 @@
+@layer layout {
+  .browse-content {
+    display: grid;
+    gap: 2rem;
+  }
+}

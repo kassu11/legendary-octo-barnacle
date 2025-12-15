@@ -41,6 +41,10 @@ export default defineConfig({
     })
   ],
   base: "/legendary-octo-barnacle",
+  build: {
+    chunkSizeWarningLimit: 1000,
+    cssTarget: ["es2024"]
+  },
   css: {
     devSourcemap: true,
     modules: {

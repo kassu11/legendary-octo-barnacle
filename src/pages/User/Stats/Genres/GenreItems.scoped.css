@@ -1,0 +1,30 @@
+@layer layout {
+  .grid-column-auto-fill {
+    --grid-column-width: 22rem;
+    gap: 2rem;
+
+    .item {
+      background-color: var(--background-400);
+
+      .header {
+        display: grid;
+        gap: .5rem;
+        padding: 1rem;
+
+        .ranking {
+          font-size: var(--fs-600);
+          font-weight: 500;
+        }
+      }
+
+      .wrapper {
+        background-color: var(--background-350);
+
+        .flex-space-between {
+          padding-inline: 1rem;
+          padding-block: .25rem;
+        }
+      }
+    }
+  }
+}

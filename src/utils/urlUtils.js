@@ -21,3 +21,15 @@ export const anilistMediaUrl = media => {
 
   return base + "/" + formatingUtils.titleToUrl(media.title.userPreferred);
 }
+
+export const anilistClientId = () => {
+  if (location.hostname === "kassu11.github.io") {
+    return 24951;
+  } else if (location.port === "5173") {
+    return 7936;
+  } else if (location.port === "5174") {
+    return 31649;
+  }
+
+  return -1;
+}

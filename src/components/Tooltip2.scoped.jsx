@@ -1,4 +1,5 @@
 import { asserts } from "../collections/collections";
+import "./Tooltip2.scoped.css";
 
 export function Tooltip2Scoped(props) {
   asserts.isTypeString(props.positions, "positions");

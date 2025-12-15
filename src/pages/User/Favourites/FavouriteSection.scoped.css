@@ -1,0 +1,95 @@
+@layer layout {
+  details {
+    &:not([open]) {
+      summary {
+        background-color: var(--background-300);
+      }
+      button {
+        display: none;
+      }
+    }
+
+    summary {
+      position: sticky;
+      top: 48px;
+      padding: 16px;
+      background-color: var(--background-400);
+      z-index: 1;
+
+      h3 {
+        display: inline;
+      }
+
+      button {
+        margin-left: 16px;
+      }
+    }
+
+    ol {
+      list-style: none;
+      padding: 0;
+      gap: 16px;
+
+      &.reorder {
+        touch-action: none;
+
+        _li {
+          cursor: grab;
+
+          _.cp-delete-favourite {
+            display: none;
+          }
+
+          _* {
+            pointer-events: none;
+            user-select: none;
+          }
+
+          &.dragging {
+            pointer-events: none;
+            user-select: none;
+            z-index: 1;
+          }
+        }
+
+        &:has(_.dragging) {
+          cursor: grabbing;
+        }
+      }
+
+      /* Everything but studio favourites will use grid */
+      &.grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+
+        @media (width < 55em) {
+          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        }
+      }
+
+      /* Studio favourites will use flex */
+      &.flex {
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 16px;
+
+        _li {
+          padding: 16px;
+          background-color: var(--background-500);
+        }
+      }
+    }
+  }
+}
+
+@layer resize {
+  @media (width < 35em) {
+    ol {
+      gap: 8px;
+
+      &.flex _li {
+        padding: 8px;
+      }
+    }
+  }
+}

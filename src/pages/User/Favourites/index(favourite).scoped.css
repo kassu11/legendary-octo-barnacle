@@ -1,0 +1,5 @@
+@layer layout {
+  .user-profile-favourites {
+    display: grid;
+  }
+}

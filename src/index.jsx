@@ -1,33 +1,42 @@
 import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
-import App from "./App.jsx"
-import {Home} from "./pages/Home/index.scoped.jsx"
-import Authentication from "./pages/Authentication.jsx";
+import App from "./App.scoped.jsx"
+import {Home} from "./pages/Home/index(home).scoped.jsx"
+import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index.jsx";
-import { User, Overview, UserMediaList, FavouriteContainer, Stats, Socials } from "./pages/User/index.scoped.jsx";
-import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview.jsx";
-import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres.jsx";
-import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags.jsx";
-import { StatsAnimeStudios } from "./pages/User/Stats/Studios.jsx";
-import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors.jsx";
-import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff.jsx";
-import Artist from "./pages/Artist.jsx";
-import Notifications from "./pages/Notifications.jsx";
-import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities.jsx";
-import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity.jsx";
-import { Studio as AnilistStudio } from "./pages/Studio.jsx";
-import {ActivityPage} from "./pages/Activity/index.scoped.jsx";
-import { BrowseAnimeHome, BrowseMangaHome, BrowseMediaHome, BrowseRedirect } from "./pages/Browse.jsx";
+import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).scoped.jsx";
+import { User } from "./pages/User/index(user).scoped.jsx";
+import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
+import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
+import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
+import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
+import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
+import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
+import Artist from "./pages/Artist/Artist.jsx";
+import Notifications from "./pages/Notifications/Notifications.jsx";
+import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.jsx";
+import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.jsx";
+import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
+import {ActivityPage} from "./pages/Activity/index(activity).scoped.jsx";
+import { BrowseRedirect } from "./pages/Browse/Browse.scoped.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
-import ComparePage from "./pages/ComparePage.jsx";
+import ComparePage from "./pages/Compare/ComparePage.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.jsx";
 import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
-import { CharacterJikan } from "./pages/CharacterJikan.jsx";
+import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikan.scoped.jsx";
+import {Overview} from "./pages/User/Overview/Overview.jsx";
+import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
+import {IndexFavouriteScoped} from "./pages/User/Favourites/index(favourite).scoped.jsx";
+import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
+import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index(media-page-anilist).scoped.jsx";
+import {Socials} from "./pages/User/Socials/Socials.jsx";
+import {BrowseMangaHomeScoped} from "./pages/Browse/BrowseMangaHome.scoped.jsx";
+import {BrowseAnimeHome} from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
+import {BrowseMediaHomeScoped} from "./pages/Browse/BrowseMediaHome.scoped.jsx";
 
 const root = document.getElementById("root")
 
@@ -72,9 +81,9 @@ render(
             </Route>
             <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}>
               <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}>
-                <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHome} />
+                <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHomeScoped} />
                 <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} />
-                <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHome} />
+                <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHomeScoped} />
               </Route>
               <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}>
                 <Route path="/" component={() => <Navigate href="media" />} />
@@ -94,7 +103,7 @@ render(
                 <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={AnilistStudio} />
               </Route>
               <Route path="/:sub/:id/:name?" matchFilters={{ api: "mal" }}>
-                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikan} />
+                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikanScoped} />
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={Staff} /> */}
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={Studio} /> */}
               </Route>
@@ -124,7 +133,7 @@ render(
               <Route path="/" component={Overview} />
               <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={UserMediaList} />
               <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={UserMediaList} />
-              <Route path="/favourites" component={FavouriteContainer} />
+              <Route path="/favourites" component={IndexFavouriteScoped} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />
                 <Route path="/:type" matchFilters={{ type: "anime" }}>

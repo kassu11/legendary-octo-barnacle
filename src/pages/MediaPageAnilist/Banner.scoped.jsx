@@ -1,3 +1,5 @@
+import "./Banner.scoped.css";
+
 export const MediaBanner = (props) => {
   return (
     <Show when={props.src}>

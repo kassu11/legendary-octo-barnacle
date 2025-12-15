@@ -1,0 +1,41 @@
+@layer layout {
+  section {
+    svg {
+      max-width: unset;
+      margin-inline: auto;
+
+      circle {
+        fill: var(--user-color);
+
+        .item:hover & {
+          r: 8;
+        }
+      }
+
+      path {
+        stroke: var(--user-color);
+      }
+
+      .text {
+        font-weight: 600;
+      }
+      .year {
+        font-weight: 600;
+      }
+    }
+
+    &:not(.no-motion) {
+      circle {
+        transition: cy .65s, cx .65s, r .15s;
+      }
+
+      path {
+        transition: d .65s;
+      }
+
+      text {
+        transition: translate .65s;
+      }
+    }
+  }
+}

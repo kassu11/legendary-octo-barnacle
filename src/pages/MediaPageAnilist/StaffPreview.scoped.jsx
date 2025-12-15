@@ -1,3 +1,5 @@
+import "./StaffPreview.scoped.css";
+
 export function StaffPreview(props) {
   return (
     <ErrorBoundary fallback="Anilist staff preview error">

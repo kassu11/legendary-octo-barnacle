@@ -1,0 +1,139 @@
+@layer layout {
+  .cp-media-card-quick-action-items {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column-reverse;
+    list-style: none;
+    padding: 4px;
+    gap: 4px;
+
+  }
+
+  .cp-media-card {
+    &:not(:has(.wrapper:hover), :has(_:focus-visible)) .cp-media-card-quick-action-items {
+      pointer-events: none;
+      opacity: 0;
+    }
+    .cp-media-card-quick-action-items:not(:hover, :has(_:focus-visible)) li:nth-child(n + 2) {
+      pointer-events: none;
+      opacity: 0;
+      position: absolute;
+    }
+
+    &:not(:hover, :has(_:focus-visible)) .recommendation-rating-wrapper {
+      opacity: 0;
+    }
+
+    .wrapper {
+      aspect-ratio: 5.5/8;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .absolute-inset {
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .recommendation-rating-wrapper {
+      pointer-events: none;
+      display: grid;
+      align-items: end;
+      padding: 8px;
+      transition: backdrop-filter .2s;
+
+
+      &:hover, &:has(:focus-visible) {
+        backdrop-filter: blur(5px);
+      }
+
+      button {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 8px;
+
+        &:hover, &:focus-visible {
+          transform: scale(1.2);
+        }
+
+        &.active {
+          color: var(--color, orange);
+        }
+      }
+
+      .flex-space-between {
+        background-color: var(--shadow-400);
+        padding: 4px;
+        padding-right: 8px;
+        cursor: default;
+        pointer-events: all;
+        align-items: center;
+        border-radius: 4px;
+        font-weight: 500;
+
+      }
+
+      _svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .score {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      width: max-content;
+      gap: 0.5rem;
+      align-items: center;
+      background-color: var(--shadow-450);
+      padding: 4px 8px;
+      border-radius: 8px;
+
+      @container (width < 12rem) {
+        top: 4px;
+        right: 4px;
+      }
+
+      _svg {
+        width: 1rem;
+        height: 1rem;
+        color: var(--gold-400);
+      }
+    }
+  }
+
+  .cp-character-card {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+    word-break: break-word;
+    background-color: var(--bg);
+
+    _.grid-column-auto-fill:has(> &) {
+      --grid-column-width: 25rem;
+      &.manga {
+        --grid-column-width: 20rem;
+      }
+    }
+
+    .grid {
+      padding-block: 8px;
+      gap: 4px;
+      align-content: space-between;
+    }
+
+    img {
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+      width: 64px;
+      height: 100%;
+      flex-shrink: 0;
+    }
+  }
+}

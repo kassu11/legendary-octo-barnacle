@@ -1,0 +1,61 @@
+@layer layout {
+  .user-profile-stats-formats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+
+    > div {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      --height: 3.5rem;
+      --gap: .25rem;
+
+      ol {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: var(--gap);
+        padding: 0;
+        list-style: none;
+        justify-content: space-between;
+
+        li {
+          display: grid;
+          grid-template-columns: subgrid;
+          grid-column: 1/-1;
+          background-color: var(--background-400);
+          padding: .25rem;
+          min-height: var(--height);
+          align-items: center;
+
+          .container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+
+            _.title {
+              font-weight: 700;
+              font-size: 1.1rem;
+            }
+          }
+
+          .right {
+            text-align: right;
+          }
+        }
+      }
+
+      .filler {
+        height: 100%;
+        background: repeating-linear-gradient(
+          var(--background-500) var(--gap),
+          var(--background-500) calc(var(--height) + var(--gap)),
+          transparent calc(var(--height) + var(--gap)),
+          transparent calc(var(--height) + var(--gap) * 2)
+          );
+      }
+    }
+  }
+}

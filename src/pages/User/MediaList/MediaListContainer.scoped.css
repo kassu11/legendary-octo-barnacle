@@ -7,83 +7,89 @@
     gap: 1rem;
     margin-bottom: 3rem;
 
+    .card {
+      aspect-ratio: 5.5 / 8;
 
-    _a {
-      img {
-        aspect-ratio: 5.5/8;
-        object-fit: cover;
-      }
+      .container {
+        position: relative;
 
-      .card-header {
-        position: absolute;
-        top: 0px;
-        padding: .5rem;
-        display: flex;
-        gap: .5rem;
+        img {
+          aspect-ratio: 5.5/8;
+          object-fit: cover;
+        }
 
-        .badge {
-          background: black;
+        .card-header {
+          position: absolute;
+          top: 0px;
+          padding: .5rem;
           display: flex;
           gap: .5rem;
-          padding: .25rem;
-          border-radius: .25rem;
-          align-items: center;
 
-          svg {
-            height: 1.25rem;
-          }
+          .badge {
+            background: black;
+            display: flex;
+            gap: .5rem;
+            padding: .25rem;
+            border-radius: .25rem;
+            align-items: center;
 
-          &:hover::before {
-            left: -50%;
-            bottom: 100%;
-            max-width: 20em;
-            position: absolute;
-            content: attr(label);
-            background-color: black;
-            width: max-content;
-            font-weight: 600;
-            padding: .5em;
-            border-radius: .25em;
-            z-index: 1;
+            _svg {
+              height: 1.25rem;
+            }
+
+            &:hover::before {
+              left: -50%;
+              bottom: 100%;
+              max-width: 20em;
+              position: absolute;
+              content: attr(label);
+              background-color: black;
+              width: max-content;
+              font-weight: 600;
+              padding: .5em;
+              border-radius: .25em;
+              z-index: 1;
+            }
           }
         }
-      }
 
-      .card-footer {
-        position: absolute;
-        bottom: 0px;
-        background-color: var(--shadow-450);
-        width: 100%;
-        padding: .5rem;
-
-        .adult-warning {
+        .card-footer {
           position: absolute;
-          bottom: 100%;
-          font-size: .75em;
-          padding: .1em .3em;
-          background-color: red;
-          transform: translateY(33%);
+          bottom: 0px;
+          background-color: var(--shadow-450);
+          width: 100%;
+          padding: .5rem;
+
+          .adult-warning {
+            position: absolute;
+            bottom: 100%;
+            font-size: .75em;
+            padding: .1em .3em;
+            background-color: red;
+            transform: translateY(33%);
+          }
+
+          .scores {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+          }
         }
 
-        .scores {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-        }
-      }
-
-      _.cp-media-action-item {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        opacity: 0;
-      }
-
-      &:hover, &:focus-visible, &:has(_:focus-visible) {
         _.cp-media-action-item {
-          opacity: 1;
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          opacity: 0;
+        }
+
+        &:hover, &:focus-visible, &:has(_:focus-visible) {
+          _.cp-media-action-item {
+            opacity: 1;
+          }
         }
       }
     }
+
   }
 }

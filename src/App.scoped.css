@@ -1,0 +1,45 @@
+@layer layout {
+  nav {
+    position: sticky;
+    top: 0px;
+    height: auto;
+    padding: 8px;
+    background-color: var(--shadow-400);
+    backdrop-filter: blur(5px);
+    display: flow-root;
+    z-index: 100;
+
+    ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      height: 100%;
+      width: min(100% - 16px, 80rem);
+      margin-inline: auto;
+      padding: 0 32px;
+      align-items: center;
+      justify-content: space-between;
+
+      .profile {
+        height: 32px;
+
+        _a {
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          height: 100%;
+
+          img {
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+
+  footer {
+    min-height: 20rem;
+    background-color: var(--background-350);
+  }
+}
