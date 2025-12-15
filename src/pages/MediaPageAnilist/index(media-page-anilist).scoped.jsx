@@ -26,7 +26,7 @@ import {Rankings} from "../../components/media/Rankings.scoped.jsx";
 import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
 import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
-import "./index.scoped.css";
+import "./index(media-page-anilist).scoped.css";
 
 export function MediaInfoContent(props) {
   const params = useParams();

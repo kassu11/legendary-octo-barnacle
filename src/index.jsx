@@ -2,7 +2,7 @@ import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
 import App from "./App.scoped.jsx"
-import {Home} from "./pages/Home/index.scoped.jsx"
+import {Home} from "./pages/Home/index(home).scoped.jsx"
 import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
@@ -30,9 +30,9 @@ import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.
 import { CharacterJikan } from "./pages/CharacterJikan/CharacterJikan.jsx";
 import {Overview} from "./pages/User/Overview/Overview.jsx";
 import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
-import {IndexFavouriteScoped} from "./pages/User/Favourites/index-(favourite).scoped.jsx";
+import {IndexFavouriteScoped} from "./pages/User/Favourites/index(favourite).scoped.jsx";
 import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
-import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index.scoped.jsx";
+import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index(media-page-anilist).scoped.jsx";
 import {Socials} from "./pages/User/Socials/Socials.jsx";
 import {BrowseMangaHomeScoped} from "./pages/Browse/BrowseMangaHome.scoped.jsx";
 import {BrowseAnimeHome} from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
