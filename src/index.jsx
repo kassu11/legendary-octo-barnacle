@@ -27,7 +27,7 @@ import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJika
 import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
-import { CharacterJikan } from "./pages/CharacterJikan/CharacterJikan.jsx";
+import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikan.scoped.jsx";
 import {Overview} from "./pages/User/Overview/Overview.jsx";
 import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
 import {IndexFavouriteScoped} from "./pages/User/Favourites/index(favourite).scoped.jsx";
@@ -103,7 +103,7 @@ render(
                 <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={AnilistStudio} />
               </Route>
               <Route path="/:sub/:id/:name?" matchFilters={{ api: "mal" }}>
-                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikan} />
+                <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikanScoped} />
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={Staff} /> */}
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={Studio} /> */}
               </Route>

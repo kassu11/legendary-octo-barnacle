@@ -38,6 +38,11 @@
   }
 }
 
+.pg-media-jikan-desc {
+  display: grid;
+  gap: 16px;
+}
+
 
 // TODO: Move this to its own component file
 .cp-media-api-switcher {

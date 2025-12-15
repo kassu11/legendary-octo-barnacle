@@ -6,8 +6,9 @@ import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { fetchers, fetcherSenders } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
+import "./CharacterJikan.scoped.css";
 
-export function CharacterJikan() {
+export function CharacterJikanScoped() {
   const params = useParams();
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharacterById, () => params.id);
   const [characterData] = fetcherSenders.sendWithNullUpdates(fetcher);
@@ -23,7 +24,7 @@ export function CharacterJikan() {
     <ErrorBoundary fallback="Jikan character error">
       <Show when={characterData()}>
         <div class="page-normal pg-jikan-character">
-          <div class="pg-jikan-character-header">
+          <div class="header">
             <img src={characterData().data.images.webp.image_url} alt="Character profile." />
             <div class="grid">
               <div>
@@ -65,7 +66,7 @@ export function CharacterJikan() {
 
 function SummarySection(props) {
   return (
-    <details open class="pg-jikan-details-header">
+    <details open>
       <summary>
         <h2>{props.title}</h2>
       </summary>
