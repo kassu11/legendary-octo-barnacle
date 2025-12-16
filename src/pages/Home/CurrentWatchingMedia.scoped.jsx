@@ -11,17 +11,24 @@ export function CurrentWatchingMediaScoped(props) {
     api.anilist.readingManga(props.userId, props.token);
 
   const today = new Date() / 1000;
+
+  const wrapOldCacheAiringTimes = (airingAt) => {
+    if (airingAt == null) {
+      return null;
+    }
+
+    // Keep the same day but move airingAt time ahead of today
+    if (airingAt < today) {
+      const delta = (airingAt - today) % timeCollection.weekInSeconds;
+      return today + delta;
+    }
+
+    return airingAt;
+  };
+
   const sortAiringTime = (a, b) => {
-    const aDelta =
-      (a.media.nextAiringEpisode?.airingAt - today) %
-      timeCollection.weekInSeconds;
-    const aTime =
-      aDelta >= 0 ? aDelta : timeCollection.weekInSeconds - Math.abs(aDelta);
-    const bDelta =
-      (b.media.nextAiringEpisode?.airingAt - today) %
-      timeCollection.weekInSeconds;
-    const bTime =
-      bDelta >= 0 ? bDelta : timeCollection.weekInSeconds - Math.abs(bDelta);
+    const aTime = wrapOldCacheAiringTimes(a.media.nextAiringEpisode?.airingAt);
+    const bTime = wrapOldCacheAiringTimes(b.media.nextAiringEpisode?.airingAt);
 
     if (aTime && bTime) {
       return aTime - bTime;
