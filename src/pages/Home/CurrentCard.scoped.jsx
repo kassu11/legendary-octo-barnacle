@@ -1,12 +1,5 @@
 import { useAuthentication } from "../../context/providers.js";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled.js";
 import api from "../../utils/api.js";
 import { A } from "@solidjs/router";
@@ -128,8 +121,7 @@ export function CurrentCardScoped(props) {
           <Match when={airingEpisode() && isBehind()}>
             <p>
               {airingEpisode() - (progress() + 1)} episode
-              <Show when={airingEpisode() - (progress() + 1) > 1}>s</Show>{" "}
-              behind
+              {airingEpisode() - (progress() + 1) > 1 && "s"} behind
             </p>
           </Match>
           <Match
@@ -140,19 +132,13 @@ export function CurrentCardScoped(props) {
           >
             <p>
               {props.data.media.episodes - progress()} episode
-              <Show when={props.data.media.episodes - progress() > 1}>
-                s
-              </Show>{" "}
-              left
+              {props.data.media.episodes - progress() > 1 && "s"} left
             </p>
           </Match>
           <Match when={props.data.media.chapters - progress() > 0}>
             <p>
               {props.data.media.chapters - progress()} chapter
-              <Show when={props.data.media.chapters - progress() > 1}>
-                s
-              </Show>{" "}
-              left
+              {props.data.media.chapters - progress() > 1 && "s"} left
             </p>
           </Match>
         </Switch>
