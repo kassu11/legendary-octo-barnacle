@@ -19,8 +19,8 @@ export function CurrentWatchingMediaScoped(props) {
 
     // Keep the same day but move airingAt time ahead of today
     if (airingAt < today) {
-      const delta = (airingAt - today) % timeCollection.weekInSeconds;
-      return today + delta;
+      const delta = (today - airingAt) % timeCollection.weekInSeconds;
+      return today + (timeCollection.weekInSeconds - delta);
     }
 
     return airingAt;
