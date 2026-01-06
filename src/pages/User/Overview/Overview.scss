@@ -7,70 +7,6 @@
     align-items: start;
   }
 
-  .activity-history-container {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: .25rem;
-    padding: .5rem;
-  }
-  .activity-history-list {
-    display: grid;
-    gap: .15rem;
-    padding: 0;
-    grid-template-rows: repeat(7, auto);
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    list-style: none;
-  }
-  .activity-history-header-list {
-    display: grid;
-    list-style: none;
-    padding: 0;
-    align-items: center;
-
-  }
-  .activity-history-header {
-    line-height: 0;
-    font-size: .9em;
-  }
-  .activity-item {
-    position: relative;
-    aspect-ratio: 1/1;
-    border-radius: .2rem;
-    background-color: grey;
-
-    &[data-level="1"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), black 30%);
-    }
-    &[data-level="2"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), black 20%);
-    }
-    &[data-level="3"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), black 10%);
-    }
-    &[data-level="4"] {
-      background-color: var(--user-color, orange);
-    }
-    &[data-level="5"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), white 10%);
-    }
-    &[data-level="6"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), white 20%);
-    }
-    &[data-level="7"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), white 20%);
-    }
-    &[data-level="8"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), white 30%);
-    }
-    &[data-level="9"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), white 40%);
-    }
-    &[data-level="10"] {
-      background-color: color-mix(in hsl, var(--user-color, orange), white 50%);
-    }
-  }
-
   .user-info-container {
     display: grid;
     gap: 2rem;
@@ -186,15 +122,11 @@
       }
     }
 
-    .user-profile-progress, 
+    .user-profile-progress,
     .user-profile-genres {
       order: 0;
     }
 
-    .activity-history-container {
-      padding: 1rem;
-      gap: .25rem;
-    }
     .user-profile-overview-body {
       grid-template-columns: 1fr;
     }
@@ -209,24 +141,8 @@
   }
 
   @media (width < 35em) {
-    .activity-history-container {
-      padding: .5rem;
-      gap: .15rem;
-    }
-
     .user-profile-activity {
       grid-template-columns: 1fr;
-    }
-  }
-
-  @media (width < 22em) {
-    .activity-history-container {
-      padding: .5rem;
-      gap: .15rem;
-    }
-    .activity-history-list {
-      gap: 0.05rem;
-      border-radius: .05rem;
     }
   }
 }
