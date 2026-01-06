@@ -143,6 +143,14 @@ export const findOrFirst = (array, findCallback, defaultReturn) => {
   return array.find(findCallback) ?? array[0] ?? defaultReturn;
 }
 
+export const at = (array, index, defaultReturn) => {
+  if (!isArray(array) || array.length === 0) {
+    return defaultReturn;
+  }
+
+  return array.at(index % array.length);
+}
+
 // const test = (finder, arr, valueToFind, expect, desc = "") => {
 //   const res = binarySearchFindAlwaysIndex(arr, finder(valueToFind));
 //   const msg = desc || `Searching for ${valueToFind} in [${arr.join(', ')}]`;

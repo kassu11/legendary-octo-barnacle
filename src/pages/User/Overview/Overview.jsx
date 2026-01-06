@@ -1,12 +1,13 @@
 import { A } from "@solidjs/router";
-import { For, Match, Show, Switch } from "solid-js";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
 import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import { formatTimeToDate, formatTitleToUrl, mediaUrl, numberCommas } from "../../../utils/formating.js";
 import { ActivityCard } from "../../../components/Activity.jsx";
 import { Tooltip } from "../../../components/Tooltips.jsx";
 import "./Overview.scss";
-import { asserts } from "../../../collections/collections.js";
+import { asserts, timeCollection } from "../../../collections/collections.js";
+import { arrayUtils, numberUtils } from "../../../utils/utils.js";
 
 export function Overview() {
   const { user } = useUser();
@@ -180,13 +181,50 @@ function GenrePreview(props) {
   );
 }
 
+const firstDay = 1 // Monday
+const createStartDate = () => {
+  const [date] = new Date().toISOString().split("T");
+  const start = new Date(`${date}T00:00`);
+  // Move start half a year
+  start.setDate(start.getDate() - 182);
+  // Set start to the firstDay of that week
+  start.setDate((start.getDate() - start.getDay()) + firstDay);
+  return start.getTime();
+}
+
 function ActivityHistory(props) {
-  const _now = new Date();
-  let start = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate());
-  const end = start.getTime() / 1000;
-  start.setDate(start.getDate() - 7 * 25 + (6 - start.getDay()) - 5);
-  const lastDate = props.history.at(-1).date;
-  start /= 1000;
+  const start = createStartDate() / 1000;
+
+  const days = createMemo(() => {
+    const end = new Date() / 1000;
+    const parsedHistory = [];
+
+    props.history?.forEach((cur, i, arr) => {
+      const delta = cur.date - numberUtils.max(arr[i - 1]?.date, start - timeCollection.dayAsSeconds);
+      // Date is out of range skip iteration
+      if (cur.date < start || cur.date > end + timeCollection.dayAsSeconds) {
+        return;
+      }
+
+      // Add missing empty dates in between history
+      for (let i = Math.floor(delta / timeCollection.dayAsSeconds) - 1; i > 0; i--) {
+        parsedHistory.push({ date: cur.date - timeCollection.dayAsSeconds * i });
+      }
+
+      parsedHistory.push(cur);
+    });
+
+    // Add missing empty dates at the end
+    const lastDate = props.history?.at(-1)?.date;
+    const rightPadding = Math.floor((end - lastDate) / timeCollection.dayAsSeconds);
+    for (let i = 1; i < rightPadding; i++) {
+      parsedHistory.push({ date: lastDate + timeCollection.dayAsSeconds * i });
+    }
+
+    return parsedHistory;
+  });
+
+  const dayNames = [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ];
 
   return (
     <Show when={props.history.at(-1).date > start}>
@@ -194,34 +232,14 @@ function ActivityHistory(props) {
         <h3>Activity</h3>
         <div class="activity-history-container">
           <ol class="activity-history-header-list">
-            <li class="activity-history-header">Mon</li>
-            <li class="activity-history-header">Tue</li>
-            <li class="activity-history-header">Wed</li>
-            <li class="activity-history-header">Thu</li>
-            <li class="activity-history-header">Fri</li>
-            <li class="activity-history-header">Sat</li>
-            <li class="activity-history-header">Sun</li>
+            <For each={dayNames}>{(_, i) => (
+              <li class="activity-history-header">{arrayUtils.at(dayNames, i() + firstDay)}</li>
+            )}</For>
           </ol>
           <ol class="activity-history-list">
-            <For each={props.history}>{(activity, i) => {
-
-              const emtySpace = Math.max(0, Math.round((activity.date - (props.history[i() - 1]?.date || start)) / 3600 / 24) - 1);
-              return (
-                <Show when={activity.date > start}>
-                  <For each={Array(emtySpace).fill(0)}>{(_, j) => (
-                    <li class="activity-item">
-                      <ActivityTooltip date={(activity.date + 3600 * 24 * (j() - emtySpace)) * 1000}/>
-                    </li>
-                  )}</For>
-                  <li class="activity-item" attr:data-level={activity.level}>
-                    <ActivityTooltip date={activity.date * 1000} amount={activity.amount} />
-                  </li>
-                </Show>
-              );
-            }}</For>
-            <For each={Array(Math.max(0, Math.round((end - (props.history.at(-1)?.date || start)) / 3600 / 24) - 1)).fill(0)}>{(_, j) => (
-              <li class="activity-item">
-                <ActivityTooltip date={(lastDate + 3600 * 24 * (j() + 1)) * 1000} />
+            <For each={days()}>{(activity) => (
+              <li class="activity-item" attr:data-level={activity.level}>
+                <ActivityTooltip date={activity.date * 1000} amount={activity.amount} />
               </li>
             )}</For>
           </ol>
