@@ -4,6 +4,9 @@ import scopedStyling from "./vite-plugins/solidjs-scoped-styling";
 import autoImportScopedStyles from "./vite-plugins/auto-import-scoped-styles";
 import AutoImport from "unplugin-auto-import/vite"
 
+const __PORT__ = 5173;
+const __DEBUG_PORT__ = 5174;
+
 export default defineConfig({
   plugins: [
     scopedStyling(),
@@ -51,7 +54,11 @@ export default defineConfig({
       localsConvention: "camelCaseOnly"
     }
   },
+  define: {
+    __PORT__,
+    __DEBUG_PORT__,
+  },
   server: {
-    port: 5173
+    port: __PORT__
   }
 })

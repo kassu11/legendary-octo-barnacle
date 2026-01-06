@@ -25,9 +25,9 @@ export const anilistMediaUrl = media => {
 export const anilistClientId = () => {
   if (location.hostname === "kassu11.github.io") {
     return 24951;
-  } else if (location.port === "5173") {
+  } else if (location.port == __PORT__) {
     return 7936;
-  } else if (location.port === "5174") {
+  } else if (location.port == __DEBUG_PORT__) {
     return 31649;
   }
 

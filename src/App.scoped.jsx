@@ -18,12 +18,19 @@ function App(props) {
     controller = new AbortController();
     const name = authUserData()?.data?.name;
     window.addEventListener("keydown", e => {
-      if (e.target !== document.body || e.shiftKey || e.altKey) {
+      if (e.target !== document.body || e.shiftKey || e.ctrlKey) {
         return;
       }
-      if (e.key === "d" && e.ctrlKey && name === "kassu11") {
+
+      if (e.key === "d" && e.altKey && name === "kassu11") {
         e.preventDefault();
-        window.open(location.href.replace("https://kassu11.github.io/", "http://localhost:5173/"));
+        if (location.hostname != "localhost") {
+          window.open(location.href.replace(location.origin, "http://localhost:" + __PORT__));
+        } else if (location.port == __PORT__) {
+          window.open(location.href.replace(__PORT__, __DEBUG_PORT__));
+        } else {
+          window.open(location.href.replace(location.origin, "https://kassu11.github.io"));
+        }
       }
     }, { signal: controller.signal });
   });
