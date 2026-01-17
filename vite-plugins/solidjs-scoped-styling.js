@@ -1,3 +1,5 @@
+import { createHash } from "crypto";
+
 export default function solidJsScopedStyling() {
   return {
     name: "vite-solidjs-scoped-styling",
@@ -221,18 +223,6 @@ export const transform = (src, id) => {
   }
 };
 
-const splitmix32 = (a) => {
-  return () => {
-    a |= 0;
-    a = (a + 0x9e3779b9) | 0;
-    let t = a ^ (a >>> 16);
-    t = Math.imul(t, 0x21f0aaad);
-    t = t ^ (t >>> 15);
-    t = Math.imul(t, 0x735a2d97);
-    return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
-  };
-}
-
 const equalsBackwards = (string, string2, index) => {
   return equalsforwards(string, string2, index - (string.length - 1));
 }
@@ -247,36 +237,18 @@ const equalsforwards = (string, string2, index) => {
   return true;
 }
 
-const stringBetweenTwoChars = (a, b) => {
-  const aCode = a.charCodeAt(0);
-  const bCode = b.charCodeAt(0);
-  const start = Math.min(aCode, bCode);
-  const end = Math.max(aCode, bCode) + 1;
-
-  return String.fromCharCode(...Array.from({ length: end - start }, (_, i) => start + i));
-}
-
-
-const chars = stringBetweenTwoChars("0", "9") + stringBetweenTwoChars("a", "z");
-
 const removeFileType = filePath => filePath.replace(/\.[^.]+$/, "");
 
-function randomHasFromFilePath(filePath) {
-  const filePathWithoutEnding = removeFileType(filePath);
-  const randomHash = Array(8).fill(0);
-  filePathWithoutEnding.split("").reduce((acc, char, i) => {
-    const random = splitmix32(char.charCodeAt(0) * acc);
-    randomHash[i % randomHash.length] = chars[Math.ceil(random() * 100_000) % chars.length];
-    return Math.ceil(random() * 100_000);
-  }, 3);
-
-  return randomHash.join("");
+function hashString(filePath) {
+  return createHash('sha256').update(filePath).digest('hex').substring(0, 8);
 }
 
 function localDataAttributeFromFilePath(filePath) {
   if (process.env.NODE_ENV !== "production") {
-    return "data-vite-dev-path=\"" + removeFileType(removeFileType(filePath)).split("/src/")[1] + "\"";
+    // return "data-vite-dev-path=\"" + removeFileType(removeFileType(filePath)).split("/src/")[1] + "\"";
   }
 
-  return "data-k-" + randomHasFromFilePath(filePath);
+  // First remove .jsx .tsx etc.
+  // Then remove .scoped
+  return "data-k-" + hashString(removeFileType(removeFileType(filePath)));
 }
