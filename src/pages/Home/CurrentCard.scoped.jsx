@@ -65,9 +65,9 @@ export function CurrentCardScoped(props) {
     2,
   );
 
-  const gapPercent = 0.45;
   const tiles = () => airingEpisode() - (progress() + 1);
-  const width = () => 1 / (tiles() - gapPercent) * 100;
+  const gapPercent = () => Math.min(tiles() / 10, .45);
+  const width = () => 1 / (tiles() - gapPercent()) * 100;
 
   return (
     <A
@@ -84,7 +84,7 @@ export function CurrentCardScoped(props) {
             setAiringEpisode={setAiringEpisode}
           />
           <Show when={isBehind()}>
-            <div class="is-behind-container" style={{background: `repeating-linear-gradient(45deg, var(--red-400), var(--red-400) ${width() * (1 - gapPercent)}%, transparent ${width() * (1 - gapPercent)}%, transparent ${width()}%)`}}></div>
+            <div class="is-behind-container" style={{background: `repeating-linear-gradient(90deg, var(--red-400), var(--red-400) ${width() * (1 - gapPercent())}%, transparent ${width() * (1 - gapPercent())}%, transparent ${width()}%)`}}></div>
           </Show>
         </div>
       </Show>
