@@ -1,5 +1,5 @@
 import api, { IndexedDB } from "../utils/api";
-import { createResource, Show } from "solid-js";
+import { createMemo, createResource, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
 
 export function AuthenticationProvider(props) {
@@ -53,8 +53,13 @@ export function AuthenticationProvider(props) {
     };
   };
 
+  // This should only be used when feature is soft released
+  const isDeveloper = createMemo(() => {
+    return authUserData()?.data?.id === 5137809;
+  });
+
   return (
-    <AuthenticationContext.Provider value={{ accessToken, setAccessToken, authUserData, logoutUser }}>
+    <AuthenticationContext.Provider value={{ accessToken, setAccessToken, authUserData, logoutUser, isDeveloper }}>
       <Show when={!accessToken.loading}>
         {props.children}
       </Show>
