@@ -28,15 +28,8 @@ function nextAiringEpisode(nextAiringEpisodeObject) {
   return nextAiringEpisodeObject.episode;
 }
 
-export function CurrentCardScoped(props) {
+export function ProgressButton(props) {
   const { accessToken } = useAuthentication();
-  const [progress, setProgress] = createSignal(props.data.progress);
-  const [airingEpisode, setAiringEpisode] = createSignal(
-    nextAiringEpisode(props.data.media.nextAiringEpisode),
-  );
-
-  const isBehind = createMemo(() => airingEpisode() > progress() + 1);
-
   const triggerProgressIncrease = leadingAndTrailingDebounce(
     async (token, mediaId, newProgress) => {
       const response = await api.anilist.mutateMedia(token, {
@@ -65,6 +58,51 @@ export function CurrentCardScoped(props) {
     2,
   );
 
+  return (
+    <Switch
+      fallback={
+        <button
+          class="cp-current-card-hover-info"
+          onClick={(e) => {
+            e.preventDefault();
+            triggerProgressIncrease(
+              accessToken(),
+              props.data.media.id,
+              props.progress() + 1,
+            );
+            props.setProgress((val) => val + 1);
+          }}
+        >
+          {props.progress} <span class="plus">+</span>
+        </button>
+      }
+    >
+      <Match
+        when={
+          props.data.media.episodes === props.progress() ||
+            props.data.media.chapters === props.progress()
+        }
+      >
+        <button
+          class="cp-current-card-hover-info normal"
+          onClick={(e) => e.preventDefault()}
+        >
+          Completed
+        </button>
+      </Match>
+    </Switch>
+  );
+}
+
+export function CurrentCardScoped(props) {
+  const [progress, setProgress] = createSignal(props.data.progress);
+  const [airingEpisode, setAiringEpisode] = createSignal(
+    nextAiringEpisode(props.data.media.nextAiringEpisode),
+  );
+
+  const isBehind = createMemo(() => airingEpisode() > progress() + 1);
+
+
   const tiles = () => airingEpisode() - (progress() + 1);
   const gapPercent = () => Math.min(tiles() / 10, .45);
   const width = () => 1 / (tiles() - gapPercent()) * 100;
@@ -75,7 +113,7 @@ export function CurrentCardScoped(props) {
       data-tooltip-trigger
       class="cp-current-card"
     >
-      <img src={props.data.media.coverImage.large} alt="Cover." />
+      <img src={props.data.media.coverImage.large} alt="Cover."/>
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class="cp-current-card-info">
           <p>Ep {airingEpisode()}</p>
@@ -84,42 +122,12 @@ export function CurrentCardScoped(props) {
             setAiringEpisode={setAiringEpisode}
           />
           <Show when={isBehind()}>
-            <div class="is-behind-container" style={{background: `repeating-linear-gradient(90deg, var(--red-400), var(--red-400) ${width() * (1 - gapPercent())}%, transparent ${width() * (1 - gapPercent())}%, transparent ${width()}%)`}}></div>
+            <div class="is-behind-container"
+                 style={{background: `repeating-linear-gradient(90deg, var(--red-400), var(--red-400) ${width() * (1 - gapPercent())}%, transparent ${width() * (1 - gapPercent())}%, transparent ${width()}%)`}}></div>
           </Show>
         </div>
       </Show>
-      <Switch
-        fallback={
-          <button
-            class="cp-current-card-hover-info"
-            onClick={(e) => {
-              e.preventDefault();
-              triggerProgressIncrease(
-                accessToken(),
-                props.data.media.id,
-                progress() + 1,
-              );
-              setProgress((val) => val + 1);
-            }}
-          >
-            {progress} <span class="plus">+</span>
-          </button>
-        }
-      >
-        <Match
-          when={
-            props.data.media.episodes === progress() ||
-            props.data.media.chapters === progress()
-          }
-        >
-          <button
-            class="cp-current-card-hover-info normal"
-            onClick={(e) => e.preventDefault()}
-          >
-            Completed
-          </button>
-        </Match>
-      </Switch>
+      <ProgressButton data={props.data} mutateCache={props.mutateCache} progress={progress} setProgress={setProgress} />
       <div class="hover" data-tooltip-positions="right left middle">
         <Switch>
           <Match when={airingEpisode() && isBehind()}>

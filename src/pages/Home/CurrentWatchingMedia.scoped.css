@@ -1,8 +1,58 @@
-.pg-home-current {
-  width: 100%;
-  margin-inline: auto;
-  display: grid;
-  gap: 1rem;
-  align-items: start;
+@layer layer {
+  .pg-home-current {
+    width: 100%;
+    margin-inline: auto;
+    display: grid;
+    gap: 1rem;
+    align-items: start;
 
+    /* TODO: REMOVE ALL THIS */
+    &.text {
+
+      > _.grid-column-auto-fill.current {
+        display: block;
+
+        > _a {
+          display: flex;
+          aspect-ratio: unset;
+          gap: 16px;
+          margin-bottom: 5px;
+        }
+      }
+
+      _img {
+        display: none;
+      }
+
+      _.hover {
+        all: unset;
+        display: flex;
+        gap: 8px;
+        _.line-clamp {
+          order: -1;
+          &::after {
+            content: " - ";
+          }
+        }
+      }
+
+      _.cp-current-card-hover-info {
+        all: unset;
+        order: 1;
+      }
+
+      _.cp-current-card-info {
+        all: unset;
+        display: flex;
+        gap: 8px;
+        order: 2;
+      }
+
+      _.is-behind-container {
+        position: absolute;
+        left: 0px;
+        height: 1px;
+      }
+    }
+  }
 }
