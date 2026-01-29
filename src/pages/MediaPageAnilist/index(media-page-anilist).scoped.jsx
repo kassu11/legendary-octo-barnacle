@@ -1,4 +1,4 @@
-import {Navigate, useLocation, useNavigate, useParams} from "@solidjs/router";
+import {Navigate, useLocation, useNavigate, useParams, useSearchParams} from "@solidjs/router";
 import {AnilistRelationsPreview} from "./RelationsPreview.scoped.jsx";
 import Characters from "../../components/media/Characters.jsx";
 import {
@@ -27,13 +27,15 @@ import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
 import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
+import { fetchers } from "../../collections/collections.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
+  const [searchParams] = useSearchParams();
   const { accessToken } = useAuthentication();
   const [isFavourite, setIsFavourite] = createSignal();
 
-  const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, accessToken, () => params.id);
+  const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, () => ({ token: accessToken(), id: params.id, isMalId: searchParams.isMalId != null, type: params.type }));
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
   const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
@@ -120,7 +122,7 @@ export function MediaInfoContent(props) {
               <img src={anilistData()?.data?.coverImage.large} alt="Cover" class="media-page-cover" />
               <div class="cp-media-api-switcher">
                 <Show when={anilistData()?.data.id}>
-                  <a href={"https://anilist.co/" + params.type + "/" + params.id} target="_black" class="active">
+                  <a href={"https://anilist.co/" + params.type + "/" + (anilistData()?.data.id ?? params.id)} target="_black" class="active">
                     <span class="visually-hidden">Go to Anilist</span>
                     <Anilist />
                     <ExternalSource />
