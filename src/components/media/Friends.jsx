@@ -2,7 +2,7 @@ import { createRenderEffect, createSignal, ErrorBoundary, For, Show } from "soli
 import Status from "./Status";
 import Score from "./Score";
 import style from "./Friends.module.scss";
-import { A, useParams } from "@solidjs/router";
+import { A, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useMediaInfo } from "../../context/providers";
 import { fetcherSenderUtils, fetcherUtils } from "../../utils/utils";
 import { fetchers, fetcherSenders, requests } from "../../collections/collections.js";
@@ -10,10 +10,14 @@ import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 
 function Friends() {
   const params = useParams();
+  const [searchParams] = useSearchParams();
   const { accessToken, authUserData } = useAuthentication();
 
   const { anilistData } = useMediaInfo();
-  const friendScoreFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getFrendScoresFromMedia, accessToken, () => params.id, { page: 1, perPage: 8 });
+  const friendScoreFetcher = fetcherSenderUtils.createFetcher(
+    fetchers.anilist.getFrendScoresFromMedia, 
+    () => ({ token: accessToken(), id: searchParams.isMalId != null ? anilistData()?.data?.id : params.id, page: 1, perPage: 8, })
+  );
   const cacheType = fetcherSenderUtils.createDynamicCacheType({
     "default": () => requests.anilist.inFiveSeconds() > 1,
     "only-if-cached": () => requests.anilist.inFiveSeconds() > 2
