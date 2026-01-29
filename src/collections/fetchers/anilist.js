@@ -12,7 +12,11 @@ export const activityPageless = (token, variables) => {
   return fetcherUtils.changeCacheType(fetcher, localizations.onlyIfCached);
 };
 
-export const getMediaById = (token, id) => {
+export const getMediaById = ({ token, id, isMalId, type }) => {
+  if (isMalId) {
+    return getMediaByTypeAndMalId(token, type, id);
+  }
+
   return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { id }, res => res.data.Media);
 };
 
