@@ -2,7 +2,7 @@ import { fetcherTemplates, localizations, queries } from "../collections.js";
 
 const formatThemes = res => res.anime?.[0]?.animethemes ?? [];
 
-export const getThemesByIdAndApi = (id, api, type) => {
+export const getThemesByIdAndApi = ({ id, api, type }) => {
   if (type !== localizations.anime) {
     return;
   }
