@@ -1,51 +1,169 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Build and deploy static content to GitHub Pages on every push (any branch).
+# Main branch → site root; other branches → /branches/<branch-name>/
+# In repo Settings > Pages, set source to "Deploy from a branch" and choose branch: gh-pages.
+name: Build and deploy to Pages
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ['main']
-
-  # Allows you to run this workflow manually from the Actions tab
+  push:      # runs on push to any branch
   workflow_dispatch:
 
-# Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write  # push to gh-pages branch
+  pull-requests: write # leave a message with a list to the current branch deployment
 
-# Allow one concurrent deployment
 concurrency:
   group: 'pages'
   cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Create safe artifact name
+        id: slug
+        run: echo "name=$(echo ${{ github.ref_name }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+
       - name: Build
         run: npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        env:
+          SAFE_BRANCH_NAME: ${{ steps.slug.outputs.name }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          # Upload dist repository
-          path: './dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: dist-${{ steps.slug.outputs.name }}
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Create safe artifact name
+        id: slug
+        run: echo "name=$(echo ${{ github.ref_name }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+
+      - name: Force cleanup of build directory
+        # This removes the folder that causes the 'checkout' error
+        run: rm -rf build-output/
+
+      - name: Prepare gh-pages branch
+        run: |
+          git fetch origin gh-pages 2>/dev/null || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git checkout gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf . 2>/dev/null || true
+          fi
+
+      - name: Force cleanup of output
+        run: rm -rf build-output/
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ steps.slug.outputs.name }}
+          path: build-output
+
+      - name: Deploy main to root
+        if: steps.slug.outputs.name == 'main'
+        run: |
+          # 1. Remove everything EXCEPT the 'branches' folder and '.git'
+          # This ensures old assets/ and index.html are gone.
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name 'branches' ! -name '.git' ! -name 'build-output' -exec rm -rf {} +
+
+          # 2. Move new build files to root
+          cp -r build-output/* .
+
+      - name: Deploy branch to branches/<name>
+        if: steps.slug.outputs.name != 'main'
+        run: |
+          TARGET_DIR="branches/${{ steps.slug.outputs.name }}"
+
+          # 1. Completely delete the old branch folder to clear stale assets
+          rm -rf "$TARGET_DIR"
+
+          # 2. Recreate it and move new files in
+          mkdir -p "$TARGET_DIR"
+          cp -r build-output/* "$TARGET_DIR"/
+
+      - name: Generate Branch Manifest and Sync
+        run: |
+          # 1. Generate the list based on folders that actually exist in 'branches/'
+          # This ensures the JSON is always an accurate map of the current gh-pages state
+          echo "[" > branches.json
+
+          # Add 'main' as the first entry
+          echo "  \"main\"" >> branches.json
+
+          # Loop through directories in branches/ and add them to the JSON
+          if [ -d "branches" ]; then
+            for dir in branches/*/; do
+              if [ -d "$dir" ]; then
+                branchname=$(basename "$dir")
+                echo "  , \"$branchname\"" >> branches.json
+              fi
+            done
+          fi
+          echo "]" >> branches.json
+
+          # 2. Distribute the file
+          # Copy it to root (for the main site)
+          # And copy it into every branch folder so they can 'import' it locally
+          if [ -d "branches" ]; then
+            for dir in branches/*/; do
+              cp branches.json "$dir"
+            done
+          fi
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "Deploy ${{ github.ref_name }} to Pages"
+            git push origin gh-pages
+          fi
+
+      - name: Post Deployment Link to PR
+        if: github.ref_name != 'main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the GitHub CLI to find the PR number for the current branch
+          PR_NUMBER=$(gh pr view ${{ github.ref_name }} --json number --template '{{.number}}' || echo "")
+
+          if [ -n "$PR_NUMBER" ]; then
+            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}?dev-branch=${{ steps.slug.outputs.name }}"
+
+            # Create or Update the comment
+            gh pr comment $PR_NUMBER --body "🚀 **Deployment Successful!**
+
+            You can preview the changes for this branch here:
+            [$URL]($URL)
+
+            _Note: It may take a minute for GitHub Pages to refresh._"
+          else
+            echo "No open PR found for this branch. Skipping comment."
+          fi

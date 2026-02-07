@@ -1,0 +1,71 @@
+name: Cleanup Deleted Branch Pages
+
+on:
+  delete: # Triggers when a branch or tag is deleted
+  pull_request:
+    types: [closed] # Triggers when a PR is merged/closed
+
+jobs:
+  cleanup:
+    # Only run if a branch was deleted AND it's not the main branch
+    if: github.event.ref_type == 'branch' && github.event.ref != 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove branch directory
+        run: |
+          # Convert branch name to the same slug used in build (replacing / with -)
+          SLUG=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
+          TARGET_DIR="branches/$SLUG"
+
+          if [ -d "$TARGET_DIR" ]; then
+            echo "Deleting directory: $TARGET_DIR"
+            rm -rf "$TARGET_DIR"
+          else
+            echo "Directory $TARGET_DIR not found, skipping removal."
+          fi
+
+      - name: Generate updated branches.json
+        run: |
+          echo "[" > branches.json
+          echo "  \"main\"" >> branches.json
+
+          if [ -d "branches" ] && [ "$(ls -A branches)" ]; then
+            for dir in branches/*/; do
+              branchname=$(basename "$dir")
+              echo "  , \"$branchname\"" >> branches.json
+            done
+          fi
+          echo "]" >> branches.json
+          cat branches.json # Verification for the logs
+
+      - name: Distribute JSON to all branches
+        run: |
+          if [ -d "branches" ] && [ "$(ls -A branches)" ]; then
+            for dir in branches/*/; do
+              echo "Syncing branches.json to $dir"
+              cp branches.json "$dir"
+            done
+          else
+            echo "No sub-branches found to sync."
+          fi
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Cleanup deleted branch and update manifest"
+            git push origin gh-pages
+          fi
