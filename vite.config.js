@@ -7,6 +7,8 @@ import AutoImport from "unplugin-auto-import/vite"
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
 
+const branch = process.env.SAFE_BRANCH_NAME || "main";
+
 export default defineConfig({
   plugins: [
     scopedStyling(),
@@ -43,7 +45,7 @@ export default defineConfig({
       ],
     })
   ],
-  base: "/legendary-octo-barnacle",
+  base: "/legendary-octo-barnacle" + (branch !== "main" ? "/branches/" + branch : ""),
   build: {
     chunkSizeWarningLimit: 1000,
     cssTarget: ["es2024"]
@@ -57,8 +59,10 @@ export default defineConfig({
   define: {
     __PORT__,
     __DEBUG_PORT__,
+    // Branch is definitely just a string, but this is the only way to pass a string, dont ask why
+    __BRANCH__: JSON.stringify(branch),
   },
   server: {
     port: __PORT__
   }
-})
+});
