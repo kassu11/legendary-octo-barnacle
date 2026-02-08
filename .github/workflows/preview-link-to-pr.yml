@@ -6,11 +6,15 @@ on:
 
 permissions:
   pull-requests: write
+  contents: read
 
 jobs:
   comment:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Create safe branch name
         id: slug
         run: |
@@ -25,7 +29,6 @@ jobs:
           REPO_OWNER: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          # Build the URL using the query param logic from your original script
           URL="https://${REPO_OWNER}.github.io/${REPO_NAME}?dev-branch=${BRANCH_SLUG}"
 
           gh pr comment $PR_NUMBER --body "🚀 **Preview Available!**

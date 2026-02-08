@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write  # push to gh-pages branch
+  pull-requests: write # leave a message with a list to the current branch deployment
 
 concurrency:
   group: 'pages'
@@ -145,3 +146,23 @@ jobs:
             git push origin gh-pages
           fi
 
+      - name: Post Deployment Link to PR
+        if: github.ref_name != 'main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the GitHub CLI to find the PR number for the current branch
+          PR_NUMBER=$(gh pr view ${{ github.ref_name }} --json number --template '{{.number}}' || echo "")
+
+          if [ -n "$PR_NUMBER" ]; then
+            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}?dev-branch=${{ steps.slug.outputs.name }}"
+
+            gh pr comment $PR_NUMBER --body "🚀 **Preview Available!**
+
+            Once the build finishes, you can preview this branch here:
+            [$URL]($URL)
+
+            _Note: Deployments usually take 1-2 minutes to reflect._"
+          else
+            echo "No open PR found for this branch. Skipping comment."
+          fi
