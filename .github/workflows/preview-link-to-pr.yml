@@ -1,0 +1,36 @@
+name: Comment PR Preview Link
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronized]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create safe branch name
+        id: slug
+        run: |
+          # Use the head branch name (the one being merged)
+          echo "name=$(echo ${{ github.head_ref }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+
+      - name: Post Link
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BRANCH_SLUG: ${{ steps.slug.outputs.name }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          # Build the URL using the query param logic from your original script
+          URL="https://${REPO_OWNER}.github.io/${REPO_NAME}?dev-branch=${BRANCH_SLUG}"
+
+          gh pr comment $PR_NUMBER --body "🚀 **Preview Available!**
+
+          Once the build finishes, you can preview this branch here:
+          [$URL]($URL)
+
+          _Note: Deployments usually take 1-2 minutes to reflect._"
