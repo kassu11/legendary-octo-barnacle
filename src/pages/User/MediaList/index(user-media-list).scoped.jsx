@@ -1,14 +1,15 @@
 import {useNavigate, useParams, useSearchParams} from "@solidjs/router";
-import api, {IndexedDB} from "../../../utils/api.js";
-import {createEffect, createSignal, on, onCleanup} from "solid-js";
+import api from "../../../utils/api.js";
+import {createEffect, createMemo, createSignal, on, onCleanup} from "solid-js";
 import "./index(user-media-list).scoped.css";
 import {capitalize} from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import {useAuthentication, UserMediaListContext, useUser} from "../../../context/providers.js";
 import {leadingAndTrailingDebounce} from "../../../utils/scheduled.js";
-import {asserts} from "../../../collections/collections.js";
+import {asserts, fetchers, fetcherSenders} from "../../../collections/collections.js";
 import {MediaListContainerScoped} from "./MediaListContainer.scoped.jsx";
 import {SearchControlsScoped} from "./SearchControls.scoped.jsx";
+import { fetcherSenderUtils } from "../../../utils/utils.js";
 
 export const useListNavigation = () => {
   const navigate = useNavigate();
@@ -24,7 +25,9 @@ export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
   const { accessToken, authUserData } = useAuthentication();
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => user().name || undefined, () => params.type.toUpperCase(), accessToken);
+  const anilistFetcher = createMemo(() => fetchers.anilist.mediaListByUserName({ token: accessToken(), name: user().name, type: params.type }));
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
+  const [mediaList, { mutateCache: mutateMediaListCache }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   let worker;
@@ -100,11 +103,11 @@ export function UserMediaList() {
   }, 250, 2);
 
   const updateListInfo = () => {
-    if (window.Worker && mediaList()) {
+    if (window.Worker && mediaList()?.data) {
       worker = worker instanceof Worker ? worker : new UserMediaListWorker();
 
       const postObject = {
-        cacheKey: mediaList().cacheKey,
+        data: mediaList()?.data,
         search: search(),
         format: format(),
         status: status(),
@@ -126,22 +129,7 @@ export function UserMediaList() {
       };
 
       worker.postMessage(postObject);
-
-      worker.onmessage = message => {
-        if (message.data === "success") {
-          const cacheReq = IndexedDB.user();
-          cacheReq.onsuccess = evt => {
-            const db = evt.target.result;
-            const store = IndexedDB.store(db, "data", "readonly");
-            const getReq = store.get("media_list");
-            getReq.onsuccess = (evt) => {
-              setListData(evt.target.result || {});
-            }
-          }
-        } else {
-          console.error("Error");
-        }
-      }
+      worker.onmessage = setListData;
     }
   }
 

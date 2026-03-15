@@ -21,16 +21,34 @@ class ApiResponse {
 
 /** @type {Object.<string, CacheObject>} */
 const cacheObjects = {};
+export const sendWithNullUpdates = fetcherSignal => sendGeneric({
+  cacheTypeSignal: () => null,
+  disableNullValues: false,
+  senderDisabledSignal: () => false,
+  fetcherSignal: fetcherSignal
+});
 
-export const sendWithNullUpdates = fetcherSignal => sendGeneric(() => null, false, () => false, false, fetcherSignal);
-export const sendWithCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => sendGeneric(cacheTypeSignal, true, () => false, false, fetcherSignal);
-export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => sendGeneric(() => null, true, disabledSignal, false, fetcherSignal);
+export const sendWithCacheTypeWithoutNullUpdates = (cacheTypeSignal, fetcherSignal) => sendGeneric({
+  cacheTypeSignal:  cacheTypeSignal,
+  disableNullValues: true,
+  senderDisabledSignal: () => false,
+  enableDebugLogs: false,
+  fetcherSignal: fetcherSignal
+});
+
+export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => sendGeneric({
+  cacheTypeSignal: () => null,
+  disableNullValues: true,
+  senderDisabledSignal: disabledSignal,
+  enableDebugLogs: false,
+  fetcherSignal: fetcherSignal
+});
 
 
 /**
  * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
  */
-const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal) => {
+const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal, fetchOnDebug }) => {
   asserts.isTypeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
   asserts.isTypeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
   asserts.isTypeFunction(fetcherSignal, "fetcherSignal is not a function");
@@ -218,7 +236,7 @@ const sendGeneric = (cacheTypeSignal, disableNullValues, senderDisabledSignal, e
 
     const type = cacheType();
     asserts.isTypeString(type, "caheType");
-    const isOnDebugSoDontFetch = modes.debug && !fetcher.settings.fetchOnDebug && type !== "no-store";
+    const isOnDebugSoDontFetch = modes.debug && !fetcher.settings.fetchOnDebug && !fetchOnDebug && type !== "no-store";
     const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
     const cacheKey = fetcher.cacheKey;
 

@@ -37,5 +37,6 @@ export const offlineFetcher = (fileName, formatResponse, ms = 0) => {
 
   const fetcher = new fetcherUtils.Fetcher("/" + path + "/" + fileName, undefined, formatResponse);
   fetcher.delay = ms;
+  fetcher.settings.fetchOnDebug = true;
   return fetcher;
 };

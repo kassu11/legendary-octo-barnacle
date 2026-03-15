@@ -12,6 +12,7 @@
 
       .container {
         position: relative;
+        height: 100%;
 
         img {
           aspect-ratio: 5.5/8;

@@ -1,62 +1,29 @@
-import { IndexedDB } from "../utils/api";
-
-onmessage = ({ data: { cacheKey, type, ...filtering } }) => {
-  const cacheReq = IndexedDB.fetchCache();
-  cacheReq.onerror = error;
-  cacheReq.onsuccess = evt => {
-    const db = evt.target.result;
-    const store = IndexedDB.store(db, "results", "readonly");
-    const getReg = store.get(cacheKey);
-    getReg.onerror = error;
-    getReg.onsuccess = evt => {
-      if (evt.target.result) {
-        modifyMediaListData(evt.target.result, type, filtering);
-      } else {
-        error();
-      };
-    };
-  };
+onmessage = ({ data: { data, type, ...filtering } }) => {
+  modifyMediaListData(data, type, filtering);
 }
 
 function modifyMediaListData(listData, type, options) {
-  const filterObject = {
-    format: options.format,
-    status: options.status,
-    genre: options.genre,
-    reverse: options.reverse,
-    countryOfOrigin: options.countryOfOrigin,
-    missingStart: options.missingStart,
-    missingScore: options.missingScore,
-    isAdult: options.isAdult,
-    year: options.year,
-    private: options.private,
-    studio: options.studio,
-    tag: options.tag,
-    notes: options.notes,
-    repeat: options.repeat,
-    userStatus: options.userStatus,
-  };
-
   if (options.search) {
     options.search = options.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&");
+
     if (options.search.trim() === "") {
-      filterObject.searchRegex = new RegExp(options.search, "i");
+      options.searchRegex = new RegExp(options.search, "i");
     } else if(options.search.match(/\W/)) {
-      filterObject.searchRegex = new RegExp(options.search.replace(/ +/g, "\\W"), "i");
+      options.searchRegex = new RegExp(options.search.replace(/ +/g, "\\W"), "i");
     } else {
-      filterObject.searchRegex = new RegExp(options.search.split("").join("\\W?"), "i");
+      options.searchRegex = new RegExp(options.search.split("").join("\\W?"), "i");
     }
   }
 
   const mediaSet = new Set();
   const tagsSet = new Set();
   const studiosSet = new Set();
-  listData.data.indecies = {};
-  listData.data.lists.forEach((list, i) => {
+  listData.indecies = {};
+  listData.lists.forEach((list, i) => {
     let tail = 0;
     list.entries.forEach((entry, j, arr) => {
-      listData.data.indecies[entry.media.id] ??= []
-      listData.data.indecies[entry.media.id].push([i, j]);
+      listData.indecies[entry.media.id] ??= []
+      listData.indecies[entry.media.id].push([i, j]);
       for (const studio of entry.media.studios.edges) {
         if (studio.isMain) {
           studiosSet.add(studio.node.name);
@@ -72,7 +39,7 @@ function modifyMediaListData(listData, type, options) {
         }
       }
 
-      if (filter(entry, filterObject)) {
+      if (filter(entry, options)) {
         mediaSet.add(entry.media.id);
 
         if (tail++ < j) {
@@ -83,30 +50,19 @@ function modifyMediaListData(listData, type, options) {
 
     list.entries.length = tail;
   });
-  listData.data.total = mediaSet.size;
-  listData.data.studios = Array.from(studiosSet).sort();
-  listData.data.tags = Array.from(tagsSet).sort();
+  listData.total = mediaSet.size;
+  listData.studios = Array.from(studiosSet).sort();
+  listData.tags = Array.from(tagsSet).sort();
   const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
-  listData.data.lists.forEach(list => {
+  listData.lists.forEach(list => {
     list.entries.sort(sortFunction);
   });
 
-  const sectionOrder = listData.data.user.mediaListOptions[type === "anime" ? "animeList" : "mangaList"].sectionOrder;
+  const sectionOrder = listData.user.mediaListOptions[type === "anime" ? "animeList" : "mangaList"].sectionOrder;
   const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key + 1])));
-  listData.data.lists.sort((a, b) => sectionSortOrder[a.name] - sectionSortOrder[b.name]);
+  listData.lists.sort((a, b) => sectionSortOrder[a.name] - sectionSortOrder[b.name]);
 
-  const cacheReq = IndexedDB.user();
-  cacheReq.onerror = error;
-  cacheReq.onsuccess = evt => {
-    const db = evt.target.result;
-    const store = IndexedDB.store(db, "data", "readwrite", error);
-    store.onerror = error;
-    const putReq = store.put(listData, "media_list");
-    putReq.onerror = error;
-    putReq.onsuccess = () => {
-      postMessage("success");
-    }
-  }
+  postMessage(listData);
 }
 
 function generateSortFunction(sort, direction = 1) {
@@ -132,7 +88,6 @@ function generateSortFunction(sort, direction = 1) {
     case "repeat":
       return (a, b) => ((sortFunctions.repeat(a, b) || sortFunctions.progress(a, b)) * direction) || sortFunctions.title(a, b);
     default:
-      console.error("No sort given");
       return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
   };
 }
@@ -214,9 +169,4 @@ function filter(entry, filterObject) {
   }
 
   return true;
-}
-
-function error(err) {
-  console.warn(err);
-  postMessage("error");
 }
