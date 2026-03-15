@@ -1,7 +1,7 @@
 import {createStore} from "solid-js/store";
 import {A, useParams} from "@solidjs/router";
 import {useEditMediaEntries, useUser, useUserMediaList} from "../../../context/providers.js";
-import {For, onCleanup, onMount, Show} from "solid-js";
+import {createEffect, createMemo, For, onCleanup, onMount, Show} from "solid-js";
 import {mediaUrl} from "../../../utils/formating.js";
 import {MediaCardEpisodes} from "./MediaCardEpisodes.jsx";
 import Score from "../../../components/media/Score.jsx";
@@ -28,9 +28,19 @@ export function MediaListContainerScoped(props) {
     intersectionObserver.disconnect();
   });
 
+  // Keep track of the entries sizes
+  // This is used to keep the scroll position same when navigating back
+  createEffect(() => {
+    if (!props.listData()?.data) return;
+    localListCounts[params.name] = props.listData()?.data.lists.map(list => ({
+      name: list.name,
+      entries: new Int8Array(list.entries.length),
+    }));
+  });
+
   return (
     <div>
-      <Show when={props.listData()?.data}>
+      <Show when={props.listData()?.data} fallback={<CardsLoading />}>
         <For each={props.listData().data.lists}>{list => {
           storeCardsVisibility(list.name, {});
           return (
@@ -151,3 +161,21 @@ export function MediaListContainerScoped(props) {
   );
 }
 
+const localListCounts = {};
+function CardsLoading() {
+  const params = useParams();
+  const lists = createMemo(() => localListCounts[params.name] ?? []);
+
+  return (
+    <For each={lists()}>{list => (
+      <Show when={list.entries.length && (!params.list || decodeURI(params.list) === list.name)}>
+        <h2>{list.name}</h2>
+        <ol class="user-profile-media-list-grid">
+          <For each={list.entries}>{() => (
+            <li class="card"></li>
+          )}</For>
+        </ol>
+      </Show>
+    )}</For>
+  );
+}
