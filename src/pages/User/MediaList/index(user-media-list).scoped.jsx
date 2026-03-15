@@ -1,5 +1,5 @@
 import {useNavigate, useParams, useSearchParams} from "@solidjs/router";
-import api, {IndexedDB} from "../../../utils/api.js";
+import api from "../../../utils/api.js";
 import {createEffect, createMemo, createSignal, on, onCleanup} from "solid-js";
 import "./index(user-media-list).scoped.css";
 import {capitalize} from "../../../utils/formating.js";
@@ -103,11 +103,11 @@ export function UserMediaList() {
   }, 250, 2);
 
   const updateListInfo = () => {
-    if (window.Worker && mediaList()) {
+    if (window.Worker && mediaList()?.data) {
       worker = worker instanceof Worker ? worker : new UserMediaListWorker();
 
       const postObject = {
-        cacheKey: mediaList().cacheKey,
+        data: mediaList()?.data,
         search: search(),
         format: format(),
         status: status(),
@@ -129,22 +129,7 @@ export function UserMediaList() {
       };
 
       worker.postMessage(postObject);
-
-      worker.onmessage = message => {
-        if (message.data === "success") {
-          const cacheReq = IndexedDB.user();
-          cacheReq.onsuccess = evt => {
-            const db = evt.target.result;
-            const store = IndexedDB.store(db, "data", "readonly");
-            const getReq = store.get("media_list");
-            getReq.onsuccess = (evt) => {
-              setListData(evt.target.result || {});
-            }
-          }
-        } else {
-          console.error("Error");
-        }
-      }
+      worker.onmessage = setListData;
     }
   }
 
