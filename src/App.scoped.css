@@ -38,6 +38,22 @@
     }
   }
 
+  .dev-branch {
+    position: fixed;
+    border: 1px solid currentColor;
+    padding: 8px;
+    display: grid;
+    justify-items: left;
+    gap: 8px;
+    background-color: var(--background-350);
+    border-radius: 4px;
+    left: 0px;
+    bottom: 0px;
+    z-index: 999;
+    color: var(--red-400);
+    font-weight: 600;
+  }
+
   footer {
     min-height: 20rem;
     background-color: var(--background-350);
