@@ -27,7 +27,8 @@ import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
 import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
-import { fetchers } from "../../collections/collections.js";
+import { fetchers, fetcherSenders } from "../../collections/collections.js";
+import { fetcherSenderUtils } from "../../utils/utils.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
