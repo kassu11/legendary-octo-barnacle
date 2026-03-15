@@ -3,6 +3,9 @@ export const anilist = "anilist";
 export const jikan = "jikan";
 export const animethemes = "animethemes";
 
+// Internals
+export const LOB_DEV_BRANCH = "LOB_DEV_BRANCH";
+
 // URL params
 export const ani = "ani";
 export const mal = "mal";

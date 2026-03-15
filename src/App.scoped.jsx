@@ -5,6 +5,7 @@ import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 import { createEffect } from "solid-js";
 import { urlUtils } from "./utils/utils.js";
 import {Show} from "solid-js";
+import { localizations } from "./collections/collections";
 
 function App(props) {
   const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;
@@ -59,6 +60,15 @@ function App(props) {
           </Show>
         </ul>
       </nav>
+      <Show when={localStorage.getItem(localizations.LOB_DEV_BRANCH)}>{branch => (
+        <div class="dev-branch">
+          <p>Preview: {branch}</p>
+          <button onClick={() => {
+            localStorage.removeItem(localizations.LOB_DEV_BRANCH);
+            location.reload();
+          }}>Back to Production</button>
+        </div>
+      )}</Show>
       <InstallPWAInfoPanel />
       <main id="page-content">
         {props.children}
