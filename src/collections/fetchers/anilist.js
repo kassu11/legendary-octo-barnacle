@@ -78,6 +78,14 @@ export const charactersPageless = (token, id) => {
   return fetcherUtils.changeCacheType(fetcher, localizations.onlyIfCached);
 };
 
+export const mediaListByUserName = ({ name, type, token }) => {
+  asserts.assertTrue(name, "Name is missing");
+  return fetcherTemplates.anilistAuth(token, queries.anilistUserMediaList, {
+    userName: name.toLowerCase(),
+    type: type.toUpperCase(),
+  }, res => res.data.MediaListCollection);
+}
+
 
 export const getDemoActivity = (token, variables, page = 1) => {
   if (!variables.isFollowing) {

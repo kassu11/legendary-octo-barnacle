@@ -1,14 +1,15 @@
 import {useNavigate, useParams, useSearchParams} from "@solidjs/router";
 import api, {IndexedDB} from "../../../utils/api.js";
-import {createEffect, createSignal, on, onCleanup} from "solid-js";
+import {createEffect, createMemo, createSignal, on, onCleanup} from "solid-js";
 import "./index(user-media-list).scoped.css";
 import {capitalize} from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import {useAuthentication, UserMediaListContext, useUser} from "../../../context/providers.js";
 import {leadingAndTrailingDebounce} from "../../../utils/scheduled.js";
-import {asserts} from "../../../collections/collections.js";
+import {asserts, fetchers, fetcherSenders} from "../../../collections/collections.js";
 import {MediaListContainerScoped} from "./MediaListContainer.scoped.jsx";
 import {SearchControlsScoped} from "./SearchControls.scoped.jsx";
+import { fetcherSenderUtils } from "../../../utils/utils.js";
 
 export const useListNavigation = () => {
   const navigate = useNavigate();
@@ -24,7 +25,9 @@ export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
   const { accessToken, authUserData } = useAuthentication();
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserName(() => user().name || undefined, () => params.type.toUpperCase(), accessToken);
+  const anilistFetcher = createMemo(() => fetchers.anilist.mediaListByUserName({ token: accessToken(), name: user().name, type: params.type }));
+  const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
+  const [mediaList, { mutateCache: mutateMediaListCache }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   let worker;
