@@ -4,8 +4,10 @@ import { useAuthentication } from "./context/providers.js";
 import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 import { createEffect } from "solid-js";
 import { urlUtils } from "./utils/utils.js";
-import {Show} from "solid-js";
+import { Show } from "solid-js";
 import { localizations } from "./collections/collections";
+
+const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(_ => true).catch(_ => false);
 
 function App(props) {
   const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;
@@ -17,20 +19,23 @@ function App(props) {
   createEffect(() => {
     controller.abort()
     controller = new AbortController();
-    const name = authUserData()?.data?.name;
-    window.addEventListener("keydown", e => {
+
+    window.addEventListener("keydown", async e => {
       if (e.target !== document.body || e.shiftKey || e.ctrlKey) {
         return;
       }
 
-      if (e.key === "d" && e.altKey && name === "kassu11") {
+      const { port, hostname, href, origin } = location;
+      if (e.key === "d" && e.altKey) {
         e.preventDefault();
-        if (location.hostname != "localhost") {
-          window.open(location.href.replace(location.origin, "http://localhost:" + __PORT__));
-        } else if (location.port == __PORT__) {
-          window.open(location.href.replace(__PORT__, __DEBUG_PORT__));
+
+        if (hostname === "localhost") {
+          // Open alternative debug port (used to sign in on alternative user or check behavior between big refactors)
+          if (port != __DEBUG_PORT__ && await portIsOpen(__DEBUG_PORT__)) window.open(href.replace(origin, "http://localhost:" + __DEBUG_PORT__));
+          else window.open(href.replace(origin, "https://kassu11.github.io"));
         } else {
-          window.open(location.href.replace(location.origin, "https://kassu11.github.io"));
+          if (await portIsOpen(__PORT__)) window.open(href.replace(origin, "http://localhost:" + __PORT__));
+          else if (await portIsOpen(__DEBUG_PORT__)) window.open(href.replace(origin, "http://localhost:" + __DEBUG_PORT__));
         }
       }
     }, { signal: controller.signal });
