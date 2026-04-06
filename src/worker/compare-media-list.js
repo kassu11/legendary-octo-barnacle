@@ -96,9 +96,10 @@ function formatCompareList(entries, minUserCount, filterObject) {
         scoreCount++;
       }
       repeatTotal += v.repeat;
-
-
+      entry.updatedAt = Math.max(entry.updatedAt ?? v.updatedAt, v.updatedAt);
+      entry.completedAt = Math.max(entry.completedAt ?? v.completedAt, v.completedAt);
     });
+
     entry.score = scoreTotal / scoreCount;
     entry.users = entry.mediaEntries.length;
     entry.repeat = repeatTotal;
