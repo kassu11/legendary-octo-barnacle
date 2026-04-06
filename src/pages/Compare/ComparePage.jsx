@@ -261,9 +261,11 @@ export default function ComparePage() {
             <Show when={params.type === "manga"}>
               <option value="chapters">Chapters</option>
             </Show>
+            <option value="completedAt">Completed Date</option>
             <Show when={params.type === "anime"}>
               <option value="episodes">Episodes</option>
             </Show>
+            <option value="updatedAt">Last updated</option>
             <option value="popularity">Popularity</option>
             <option value="releaseDate">Release Date</option>
             <option value="repeat">
