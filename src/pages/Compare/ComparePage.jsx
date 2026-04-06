@@ -257,7 +257,6 @@ export default function ComparePage() {
             {" "}Reverse order
           </label>
           <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
-            <option value="averageScore">Global Score</option>
             <Show when={params.type === "manga"}>
               <option value="chapters">Chapters</option>
             </Show>
@@ -265,6 +264,7 @@ export default function ComparePage() {
             <Show when={params.type === "anime"}>
               <option value="episodes">Episodes</option>
             </Show>
+            <option value="averageScore">Global Score</option>
             <option value="updatedAt">Last updated</option>
             <option value="popularity">Popularity</option>
             <option value="releaseDate">Release Date</option>
@@ -274,8 +274,8 @@ export default function ComparePage() {
                 <Match when={params.type === "manga"}>Rereads</Match>
               </Switch>
             </option>
-            <option value="score">User score</option>
             <option value="title">Title</option>
+            <option value="score">User score</option>
             <Show when={params.type === "manga"}>
               <option value="volumes">Volumes</option>
             </Show>
