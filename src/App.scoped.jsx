@@ -33,10 +33,7 @@ function App(props) {
           // Open alternative debug port (used to sign in on alternative user or check behavior between big refactors)
           if (port != __DEBUG_PORT__ && await portIsOpen(__DEBUG_PORT__)) window.open(href.replace(origin, "http://localhost:" + __DEBUG_PORT__));
           else window.open(href.replace(origin, "https://kassu11.github.io"));
-        } else {
-          if (await portIsOpen(__PORT__)) window.open(href.replace(origin, "http://localhost:" + __PORT__));
-          else if (await portIsOpen(__DEBUG_PORT__)) window.open(href.replace(origin, "http://localhost:" + __DEBUG_PORT__));
-        }
+        } else window.open(href.replace(origin, "http://localhost:" + __PORT__));
       }
     }, { signal: controller.signal });
   });
