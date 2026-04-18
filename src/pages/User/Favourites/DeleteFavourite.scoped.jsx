@@ -1,6 +1,6 @@
 import { Show } from "solid-js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
-import api from "../../../utils/api.js";
+import apiOLD from "../../../utils/api-OLD.js";
 import { asserts } from "../../../collections/collections.js";
 import "./DeleteFavourite.scoped.css"
 
@@ -15,7 +15,7 @@ export function DeleteFavouriteScoped(props) {
       <button class="cp-delete-favourite" onClick={async (e) => {
         e.preventDefault();
         props.onClick();
-        const response = await api.anilist.toggleFavourite(accessToken(), {
+        const response = await apiOLD.anilist.toggleFavourite(accessToken(), {
           mangaId: props.mangaId,
           animeId: props.animeId,
           staffId: props.staffId,

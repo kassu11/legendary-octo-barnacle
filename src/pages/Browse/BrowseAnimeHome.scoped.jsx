@@ -1,5 +1,5 @@
 import {useAuthentication} from "../../context/providers.js";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import {Show} from "solid-js";
 import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
 import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
@@ -7,7 +7,7 @@ import "./BrowseAnimeHome.scoped.css";
 
 export function BrowseAnimeHome() {
   const {accessToken} = useAuthentication();
-  const [animeData] = api.anilist.trendingAnime(accessToken);
+  const [animeData] = apiOLD.anilist.trendingAnime(accessToken);
   document.title = "Browse anime - LOB";
 
   return (

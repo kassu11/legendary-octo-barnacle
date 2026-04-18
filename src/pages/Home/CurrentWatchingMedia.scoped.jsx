@@ -1,4 +1,4 @@
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { Show } from "solid-js";
 import { CurrentCardsScoped } from "./CurrentCards.scoped.jsx";
 import "./CurrentWatchingMedia.scoped.css";
@@ -12,9 +12,9 @@ const TEXT_MODE = 1;
 export function CurrentWatchingMediaScoped(props) {
   const { isDeveloper } = useAuthentication();
   const [animeData, { mutateCache: mutateAnimeCache }] =
-    api.anilist.wachingAnime(props.userId, props.token);
+    apiOLD.anilist.wachingAnime(props.userId, props.token);
   const [mangaData, { mutateCache: mutateMangaCache }] =
-    api.anilist.readingManga(props.userId, props.token);
+    apiOLD.anilist.readingManga(props.userId, props.token);
 
   const today = new Date() / 1000;
 

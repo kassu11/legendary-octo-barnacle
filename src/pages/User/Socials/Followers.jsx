@@ -2,14 +2,14 @@ import { A } from "@solidjs/router";
 import { createSignal, For, Show } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { useAuthentication } from "../../../context/providers.js";
-import api from "../../../utils/api.js";
+import apiOLD from "../../../utils/api-OLD.js";
 import { asserts } from "../../../collections/collections.js";
 
 export function Followers(props) {
   asserts.assertTrue(props.page, "Page is missing");
   const { user } = useUser();
   const { accessToken } = useAuthentication();
-  const [followers] = api.anilist.userFollowers(() => user().id, props.page, accessToken);
+  const [followers] = apiOLD.anilist.userFollowers(() => user().id, props.page, accessToken);
   const [showNext, setShowNext] = createSignal(false);
 
   return (

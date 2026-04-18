@@ -1,5 +1,5 @@
 import { batch, createContext, createSignal, Match, useContext } from "solid-js";
-import api from "../utils/api";
+import apiOLD from "../utils/api-OLD.js";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
@@ -201,7 +201,7 @@ export function EditMediaEntriesProvider(props) {
         for(const [key, value] of Object.entries(changes)) {
           asserts.assertTrue(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
-        const response = await api.anilist.mutateMedia(accessToken(), changes);
+        const response = await apiOLD.anilist.mutateMedia(accessToken(), changes);
         if (response.status === 200) {
           mutates()?.mutateMedia?.(response.data);
         }
@@ -229,7 +229,7 @@ export function EditMediaEntriesProvider(props) {
 
     editor.showModal();
 
-    const data = await api.anilist.mediaListEntry(accessToken(), defaultData.id);
+    const data = await apiOLD.anilist.mediaListEntry(accessToken(), defaultData.id);
     batch(() => {
       setMediaListEntry(data.data.data.Media);
       setState(authUserData(), data.data.data.Media);
@@ -473,7 +473,7 @@ export function EditMediaEntriesProvider(props) {
             <form method="dialog">
               <button onClick={async () => {
                 editor.close();
-                const response = await api.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
+                const response = await apiOLD.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
                 mutates()?.deleteMedia?.();
               }}>Yes</button>
               <button>No</button>

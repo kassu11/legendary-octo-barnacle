@@ -41,7 +41,7 @@ export default defineConfig({
         "./src/libs",
         "./src/collections/collections.js",
         "./src/utils/utils.js",
-        "./src/utils/api.js",
+        "./src/utils/api-OLD.js",
       ],
     })
   ],

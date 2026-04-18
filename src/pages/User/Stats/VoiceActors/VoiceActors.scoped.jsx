@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../../../utils/api.js";
+import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import { createEffect, createSignal, on } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -11,7 +11,7 @@ import "./VoiceActors.scoped.css";
 export function StatsAnimeVoiceActors() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeVoiceActors(() => params.name, accessToken);
+  const [userStats] = apiOLD.anilist.userAnimeVoiceActors(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
@@ -30,7 +30,7 @@ function StatsVoiceActors(props) {
   const mediaVariable = () => pageType() === "media" ? ({ id_in: [...mediaIds()] }) : undefined;
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
-  const [characterById] = api.anilist.characterIds(() => characterIds().size > 0 && pageType() === "characters" ? [...characterIds()] : undefined, accessToken);
+  const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 && pageType() === "characters" ? [...characterIds()] : undefined, accessToken);
   const [mediaStore, setMediaStore] = createStore({});
   const [characterStore, setCharacterStore] = createStore({});
 
@@ -150,7 +150,7 @@ function Cards(props) {
   const mediaVariable = () => ({ id_in: [...mediaIds()] });
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
-  const [characterById] = api.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
+  const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
   let gridReel;
 
   let fetchNewCards = false;

@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Show, untrack, on } from "solid-js";
 import { DoomScroll } from "../../../components/utils/DoomScroll.jsx";
-import api from "../../../utils/api.js";
+import apiOLD from "../../../utils/api-OLD.js";
 import { useAuthentication, useUser, useFavourites } from "../../../context/providers.js";
 import { FavouritePageItemScoped } from "./FavouritePageItem.scoped.jsx";
 
@@ -9,7 +9,7 @@ export function FavouritesPageScoped(props) {
   const { type, allEdges } = useFavourites();
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(undefined);
-  const [favourites, { mutateCache: mutateFavouritesCache }] = api.anilist.favouritesByUserId(() => user().id || undefined, props.page === 1 ? () => props.page : page, accessToken);
+  const [favourites, { mutateCache: mutateFavouritesCache }] = apiOLD.anilist.favouritesByUserId(() => user().id || undefined, props.page === 1 ? () => props.page : page, accessToken);
 
   createEffect(() => {
     if (favourites()?.data[type]?.edges.length > 0) {

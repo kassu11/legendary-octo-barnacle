@@ -1,5 +1,5 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createRenderEffect, createMemo } from "solid-js";
 import "./index(search).scoped.css";
 import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
@@ -492,13 +492,13 @@ export function SearchBar(props) {
   const [debouncedSearchEngine, setDebouncedSearchEngine] = createSignal();
   const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
 
-  const [anilistGenresAndTags] = api.anilist.genresAndTags(() => searchParams.malSearch !== "true" || undefined);
-  const [externalSources] = api.anilist.externalSources(() => {
+  const [anilistGenresAndTags] = apiOLD.anilist.genresAndTags(() => searchParams.malSearch !== "true" || undefined);
+  const [externalSources] = apiOLD.anilist.externalSources(() => {
     if (searchParams.malSearch !== "true" || params.type === "media") { return null }
     else if (params.type === "anime" || params.type === "manga") { return params.type.toUpperCase(); }
     else return undefined
   });
-  const [malGenresAndThemes] = api.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
+  const [malGenresAndThemes] = apiOLD.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
   const triggerSetSearchParams = debounce(setSearchParams, 300);
   const triggerSetSearchParamsFast = leadingAndTrailing(debounce, setSearchParams, 100);
@@ -796,8 +796,8 @@ function AnilistMediaSearchContent(props) {
   const {accessToken} = useAuthentication();
   const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = api.anilist.searchMediaCache(accessToken, debouncedSearchVariables, props.page);
-  const [mediaData] = api.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables, props.page);
+  const [cacheData] = apiOLD.anilist.searchMediaCache(accessToken, debouncedSearchVariables, props.page);
+  const [mediaData] = apiOLD.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables, props.page);
   const [newestData, setNewestData] = createSignal();
 
   createEffect(on(cacheData, data => data && setNewestData(data.data.media)));
@@ -834,7 +834,7 @@ function AnilistMediaSeasonContent(_props) {
 
   const {accessToken} = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [mediaData] = api.anilist.searchMedia(accessToken, () => props.variables, props.page, () => props.extraVariables);
+  const [mediaData] = apiOLD.anilist.searchMedia(accessToken, () => props.variables, props.page, () => props.extraVariables);
 
   createEffect(on(mediaData, response => {
     if (response?.data.pageInfo.hasNextPage) {
@@ -874,8 +874,8 @@ function MyAnimeListMediaSearchContent(props) {
   const { accessToken } = useAuthentication();
   const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = api.myAnimeList.mediaSearchCache(props.type, debouncedSearchVariables, props.page);
-  const [mediaData] = api.myAnimeList.mediaSearch(props.type, props.nestLevel === 1 ? () => props.variables : variables, props.page);
+  const [cacheData] = apiOLD.myAnimeList.mediaSearchCache(props.type, debouncedSearchVariables, props.page);
+  const [mediaData] = apiOLD.myAnimeList.mediaSearch(props.type, props.nestLevel === 1 ? () => props.variables : variables, props.page);
   const [newestData, setNewestData] = createSignal();
 
   const mediaIds = createMemo(prev => {

@@ -1,5 +1,5 @@
 import {useAuthentication} from "../../context/providers.js";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import {Show} from "solid-js";
 import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
 import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
@@ -7,7 +7,7 @@ import "./BrowseMediaHome.scoped.css";
 
 export function BrowseMediaHomeScoped() {
   const {accessToken} = useAuthentication();
-  const [homeData] = api.anilist.trendingMedia(accessToken);
+  const [homeData] = apiOLD.anilist.trendingMedia(accessToken);
   document.title = "Browse media - LOB";
 
   return (

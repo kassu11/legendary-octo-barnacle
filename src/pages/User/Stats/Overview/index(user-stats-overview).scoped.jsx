@@ -1,5 +1,5 @@
 import {useParams} from "@solidjs/router";
-import api from "../../../../utils/api.js";
+import apiOLD from "../../../../utils/api-OLD.js";
 import {numberCommas} from "../../../../utils/formating.js";
 import {Match, Show, Switch} from "solid-js";
 import {useAuthentication, useUser} from "../../../../context/providers.js";
@@ -12,7 +12,7 @@ import {StatsYearLineChartsScoped} from "./StatsYearLineCharts.scoped.jsx";
 export function StatsAnimeOverview() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeStats(() => params.name, accessToken);
+  const [userStats] = apiOLD.anilist.userAnimeStats(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
@@ -23,7 +23,7 @@ export function StatsAnimeOverview() {
 export function StatsMangaOverview() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaStats(() => params.name, accessToken);
+  const [userStats] = apiOLD.anilist.userMangaStats(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>

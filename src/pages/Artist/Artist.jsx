@@ -1,12 +1,12 @@
 import { useParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { Switch, Match, Show, createEffect, createSignal } from "solid-js";
 import { AnimeTheme } from "../../components/MediaPage/AnimeThemes.jsx";
 import style from "./Artist.module.scss";
 
 function Artist() {
   const params = useParams();
-  const [artistData] = api.animeThemes.artisBySlug(() => params.name);
+  const [artistData] = apiOLD.animeThemes.artisBySlug(() => params.name);
   const video = <video src="" controls autoPlay />;
   document.title = "Artist - LOB";
 

@@ -1,5 +1,5 @@
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import api from "../utils/api";
+import apiOLD from "../utils/api-OLD.js";
 import "./FavouriteToggle.scss";
 import { compactNumber } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
@@ -15,7 +15,7 @@ export function FavouriteToggle(props) {
   let localChecked = null;
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, variables, checked) => {
     if (checked !== localChecked) {
-      const data = await api.anilist.toggleFavourite(token, variables);
+      const data = await apiOLD.anilist.toggleFavourite(token, variables);
       asserts.assertFalse(data.fromCache, "Mutation should never be cached");
       props.mutateCache(checked, variables);
     }

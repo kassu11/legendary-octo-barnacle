@@ -1,6 +1,6 @@
 import {A} from "@solidjs/router";
 import {For, Match, Show, Switch} from "solid-js";
-import api from "../../../utils/api.js";
+import apiOLD from "../../../utils/api-OLD.js";
 import {useAuthentication, useUser} from "../../../context/providers.js";
 import {formatTitleToUrl, mediaUrl, numberCommas} from "../../../utils/formating.js";
 import {ActivityCard} from "../../../components/Activity.jsx";
@@ -11,7 +11,7 @@ import {ActivityHistoryScoped} from "./ActivityHistory.scoped.jsx";
 export function Overview() {
   const { user } = useUser();
   const { accessToken } = useAuthentication();
-  const [activity, { mutateCache: mutateActivityCache }] = api.anilist.activityByUserId(() => user().id || undefined, accessToken);
+  const [activity, { mutateCache: mutateActivityCache }] = apiOLD.anilist.activityByUserId(() => user().id || undefined, accessToken);
 
   return (
     <div class="user-profile-overview-body">

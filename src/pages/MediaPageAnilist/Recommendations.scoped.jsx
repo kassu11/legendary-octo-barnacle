@@ -102,7 +102,7 @@ function RecommendationCard(props) {
   let localRating = props.node.userRating;
   const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
-      const response = await api.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
+      const response = await apiOLD.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
       asserts.assertTrue(!response.fromCache, "Mutation should never be cached");
       if (response.status === 200) {
         props.mutateCache(response.data);

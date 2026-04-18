@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../../../utils/api.js";
+import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -12,7 +12,7 @@ import "./Studio.scoped.css";
 export function StatsAnimeStudios() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeStudios(() => params.name, accessToken);
+  const [userStats] = apiOLD.anilist.userAnimeStudios(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>

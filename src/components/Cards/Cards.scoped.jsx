@@ -8,7 +8,7 @@ import Complete from "../../assets/Complete.jsx";
 import Rewatched from "../../assets/Rewatched.jsx";
 import {useAuthentication, useEditMediaEntries} from "../../context/providers.js";
 import Star from "../../assets/Star.jsx";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import {QuickActionListButton} from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
@@ -108,25 +108,25 @@ function QuickActionItemList(props) {
         </QuickActionListButton>
         <QuickActionListButton label="Set to planning" onClick={e => {
           e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "PLANNING" });
+          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "PLANNING" });
         }}>
           <Planning />
         </QuickActionListButton>
         <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={e => {
           e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "CURRENT" });
+          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "CURRENT" });
         }}>
           <Watching />
         </QuickActionListButton>
         <QuickActionListButton label="Set to completed" onClick={e => {
           e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "COMPLETED" });
+          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "COMPLETED" });
         }}>
           <Complete />
         </QuickActionListButton>
         <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={e => {
           e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "REPEAT" });
+          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "REPEAT" });
         }}>
           <Rewatched />
         </QuickActionListButton>

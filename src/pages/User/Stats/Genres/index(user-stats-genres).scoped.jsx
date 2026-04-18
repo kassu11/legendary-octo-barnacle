@@ -1,5 +1,5 @@
 import {useParams} from "@solidjs/router";
-import api from "../../../../utils/api.js";
+import apiOLD from "../../../../utils/api-OLD.js";
 import {createEffect, createSignal, on, Show} from "solid-js";
 import {createStore} from "solid-js/store";
 import {useAuthentication } from "../../../../context/providers.js";
@@ -11,7 +11,7 @@ import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 export function StatsAnimeGenres() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeGenres(() => params.name, accessToken);
+  const [userStats] = apiOLD.anilist.userAnimeGenres(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>
@@ -22,7 +22,7 @@ export function StatsAnimeGenres() {
 export function StatsMangaGenres() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaGenres(() => params.name, accessToken);
+  const [userStats] = apiOLD.anilist.userMangaGenres(() => params.name, accessToken);
 
   return (
     <Show when={userStats()}>

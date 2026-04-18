@@ -2,7 +2,7 @@ import { batch, createMemo, createRenderEffect, createSignal, onCleanup, untrack
 import { fetcherUtils } from "../utils/utils.js";
 import { asserts, modes, signals } from "./collections.js";
 import { CacheObject } from "../utils/CacheObject.js";
-import { IndexedDB } from "../utils/api.js";
+import { IndexedDB } from "../utils/api-OLD.js";
 
 class ApiResponse {
   /**

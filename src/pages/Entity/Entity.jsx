@@ -1,5 +1,5 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import { OldMarkdownComponent } from "../../components/Markdown.jsx";
 import "./Entity.scss";
@@ -14,7 +14,7 @@ import { asserts } from "../../collections/collections.js";
 export function Character() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = api.anilist.characterInfoById(() => params.id, accessToken);
+  const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = apiOLD.anilist.characterInfoById(() => params.id, accessToken);
   document.title = "Character - LOB";
 
   return (
@@ -25,7 +25,7 @@ export function Character() {
 export function Staff() {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [staffInfo, { mutateCache: mutateStaffInfoCache }] = api.anilist.staffInfoById(() => params.id, accessToken);
+  const [staffInfo, { mutateCache: mutateStaffInfoCache }] = apiOLD.anilist.staffInfoById(() => params.id, accessToken);
   document.title = "Staff - LOB";
 
   return (
@@ -260,7 +260,7 @@ function CharacterMediaPage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffCharacters] = api.anilist.characterMediaById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
+  const [staffCharacters] = apiOLD.anilist.characterMediaById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
 
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
@@ -308,7 +308,7 @@ function StaffCharacterPage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffCharacters] = api.anilist.staffCharactersById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
+  const [staffCharacters] = apiOLD.anilist.staffCharactersById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
 
   if (props.nestLevel === 1) {
     createEffect(on(staffCharacters, characters => {
@@ -349,7 +349,7 @@ function StaffMediaRolePage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
+  const [staffMedia, { mutate }] = apiOLD.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
 
   if (props.nestLevel === 1) {
     createEffect(on(staffMedia, media => {

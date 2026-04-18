@@ -92,7 +92,7 @@ function malMediaSearch(type, variables, page) {
 }
 
 
-const api = {
+const apiOLD = {
   animeThemes: {
     themesByAniListId: fetchOnce(id => {
       return Fetch.getJson(queries.animeThemesByAnilistId(id));
@@ -474,7 +474,7 @@ const api = {
   },
 };
 
-export default api;
+export default apiOLD;
 
 
 class Fetch {

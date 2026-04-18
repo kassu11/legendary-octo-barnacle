@@ -4,7 +4,7 @@ import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays.js";
 import { CompareMediaListContext, useAuthentication, useCompareMediaList } from "../../context/providers.js";
-import api, { IndexedDB } from "../../utils/api.js";
+import apiOLD, { IndexedDB } from "../../utils/api-OLD.js";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
@@ -339,7 +339,7 @@ function UserSearch() {
   const [index, setIndex] = createSignal(0);
   const [searchVar, setSearchVar] = createSignal(undefined);
   const { accessToken } = useAuthentication();
-  const [searchedUsers, { mutate: mutateSearchUsers }] = api.anilist.searchUsers(searchVar, 1, accessToken);
+  const [searchedUsers, { mutate: mutateSearchUsers }] = apiOLD.anilist.searchUsers(searchVar, 1, accessToken);
   const triggerSetSearchVar = debounce(setSearchVar, 300);
   const [searchParams, setSearchParams] = useSearchParams();
   let form;
@@ -428,7 +428,7 @@ function UserRow(props) {
   const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = signals.createSignalWithSignal(() => !arrayUtils.includes(searchParams.disabled, props.name));
   const [exclude, setExclude] = signals.createSignalWithSignal(() => arrayUtils.includes(searchParams.exclude, props.name));;
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserNameFetchOnce(() => props.name, () => params.type.toUpperCase(), accessToken);
+  const [mediaList, { mutateCache: mutateMediaListCache }] = apiOLD.anilist.mediaListByUserNameFetchOnce(() => props.name, () => params.type.toUpperCase(), accessToken);
 
   function setKeys(keys, excludedValue) {
     if (enabled() && exclude() === excludedValue) {

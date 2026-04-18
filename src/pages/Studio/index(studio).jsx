@@ -1,5 +1,5 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import "./index(studio).scss";
 import { formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
@@ -18,7 +18,7 @@ export function Studio() {
   const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
   const [variables, setVariables] = createSignal();
   const [showYears, setShowYears] = createSignal(true);
-  const [studioInfo, { mutateCache: mutateStudioInfoCache }] = api.anilist.studioInfoAndMediaById(() => params.id, variables, accessToken);
+  const [studioInfo, { mutateCache: mutateStudioInfoCache }] = apiOLD.anilist.studioInfoAndMediaById(() => params.id, variables, accessToken);
   document.title = "Studio - LOB";
 
   const [favourite, setFavourite] = createSignal(false);
@@ -114,7 +114,7 @@ function CharacterMediaPage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [studioInfo] = api.anilist.studioInfoAndMediaById(() => params.id, props.nestLevel === 1 ? undefined : variables, accessToken);
+  const [studioInfo] = apiOLD.anilist.studioInfoAndMediaById(() => params.id, props.nestLevel === 1 ? undefined : variables, accessToken);
   const studioInfo2 = props.studioInfo || studioInfo;
 
   return (

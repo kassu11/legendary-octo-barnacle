@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { createSignal, For, Match, onCleanup, Show, } from "solid-js";
 import "./index(activity).scoped.css";
 import { ActivityCard } from "../../components/Activity.jsx";
@@ -11,8 +11,8 @@ import { CreatedAt } from "../../components/CreatedAt.jsx";
 export function ActivityPage() {
   const { accessToken } = useAuthentication();
   const params = useParams();
-  const [activity] = api.anilist.activityById(() => params.id, accessToken);
-  const [replies] = api.anilist.activityRepliesById(() => params.id, 1, accessToken);
+  const [activity] = apiOLD.anilist.activityById(() => params.id, accessToken);
+  const [replies] = apiOLD.anilist.activityRepliesById(() => params.id, 1, accessToken);
 
   document.title = "Activity - LOB";
 

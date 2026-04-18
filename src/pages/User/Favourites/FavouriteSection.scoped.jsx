@@ -1,5 +1,5 @@
 import { Show, Switch, Match, createSignal } from "solid-js";
-import api from "../../../utils/api.js";
+import apiOLD from "../../../utils/api-OLD.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import { FavouritesContext } from "../../../context/providers.js";
 import { FavouritesPageScoped } from "./FavouritesPage.scoped.jsx";
@@ -111,15 +111,15 @@ export function FavouriteSectionScoped(props) {
 
                 let response;
                 if (props.type === "anime") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {animeIds: newIds, animeOrder: newOrder});
+                  response = await apiOLD.anilist.mutateFavourites(accessToken(), {animeIds: newIds, animeOrder: newOrder});
                 } else if (props.type === "manga") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {mangaIds: newIds, mangaOrder: newOrder});
+                  response = await apiOLD.anilist.mutateFavourites(accessToken(), {mangaIds: newIds, mangaOrder: newOrder});
                 } else if (props.type === "studios") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {studioIds: newIds, studioOrder: newOrder});
+                  response = await apiOLD.anilist.mutateFavourites(accessToken(), {studioIds: newIds, studioOrder: newOrder});
                 } else if (props.type === "staff") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {staffIds: newIds, staffOrder: newOrder});
+                  response = await apiOLD.anilist.mutateFavourites(accessToken(), {staffIds: newIds, staffOrder: newOrder});
                 } else if (props.type === "characters") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {characterIds: newIds, characterOrder: newOrder});
+                  response = await apiOLD.anilist.mutateFavourites(accessToken(), {characterIds: newIds, characterOrder: newOrder});
                 }
 
                 if (response.status === 200) {

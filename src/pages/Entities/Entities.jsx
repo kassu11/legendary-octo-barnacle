@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { createEffect, createMemo, createRenderEffect, createSignal, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
@@ -13,7 +13,7 @@ import { Tooltip } from "../../components/Tooltips.jsx";
 
 export function AnimeCharacters() {
   const [idMal, setIdMal] = createSignal();
-  const [malCharacters] = api.myAnimeList.animeCharactersById(idMal);
+  const [malCharacters] = apiOLD.myAnimeList.animeCharactersById(idMal);
 
   return (
     <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
@@ -22,7 +22,7 @@ export function AnimeCharacters() {
 
 export function MangaCharacters() {
   const [idMal, setIdMal] = createSignal();
-  const [malCharacters] = api.myAnimeList.mangaCharactersById(idMal);
+  const [malCharacters] = apiOLD.myAnimeList.mangaCharactersById(idMal);
 
   return (
     <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
@@ -31,7 +31,7 @@ export function MangaCharacters() {
 
 export function AnimeStaff() {
   const [idMal, setIdMal] = createSignal();
-  const [malStaff] = api.myAnimeList.animeStaffById(idMal);
+  const [malStaff] = apiOLD.myAnimeList.animeStaffById(idMal);
 
   return (
     <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
@@ -281,7 +281,7 @@ function CharactersPage(props) {
 function StaffPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
   const { accessToken } = useAuthentication();
-  const [staff] = api.anilist.allMediaStaff(() => props.id, page, accessToken);
+  const [staff] = apiOLD.anilist.allMediaStaff(() => props.id, page, accessToken);
 
   if (props.page === 1) {
     createEffect(() => {

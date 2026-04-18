@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { createEffect, createSignal, Match, on, Show } from "solid-js";
 import { formatTimeToDate } from "../../utils/formating.js";
 import { useAuthentication, UserContext, useUser } from "../../context/providers.js";
@@ -8,7 +8,7 @@ import "./index(user).scoped.css";
 export function User(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const [userData, {mutateCache: mutateUserCache}] = api.anilist.userByName(() => params.name, accessToken);
+  const [userData, {mutateCache: mutateUserCache}] = apiOLD.anilist.userByName(() => params.name, accessToken);
 
   const following = (status) => {
     mutateUserCache(response => {
@@ -63,7 +63,7 @@ function Content(props) {
                 setIsFollowing(val => {
                   return !val;
                 });
-                const response = await api.anilist.toggleFollow(accessToken(), user().id);
+                const response = await apiOLD.anilist.toggleFollow(accessToken(), user().id);
                 if (response.status === 200) {
                   following(response.data.isFollowing);
                 } else {

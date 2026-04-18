@@ -1,4 +1,4 @@
-import api, { IndexedDB } from "../utils/api";
+import apiOLD, { IndexedDB } from "../utils/api-OLD.js";
 import { createMemo, createResource, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
 
@@ -17,7 +17,7 @@ export function AuthenticationProvider(props) {
       };
     });
   });
-  const [authUserData, { mutate: setAuthUserData }] = api.anilist.getAuthUserData(() => accessToken() ?? undefined);
+  const [authUserData, { mutate: setAuthUserData }] = apiOLD.anilist.getAuthUserData(() => accessToken() ?? undefined);
 
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {

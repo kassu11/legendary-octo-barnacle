@@ -1,7 +1,7 @@
 import { Switch, Show, Match, createSignal, onCleanup, mergeProps } from "solid-js";
 import { OldMarkdownComponent } from "../components/Markdown.jsx";
 import "./Activity.scss";
-import api from "../utils/api.js";
+import apiOLD from "../utils/api-OLD.js";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { capitalize, formatTitleToUrl, mediaUrl, plural } from "../utils/formating.js";
 import { A } from "@solidjs/router";
@@ -84,12 +84,12 @@ function Footer(props) {
   const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
   const { accessToken } = useAuthentication();
   const [showActivityLikeUserList, setShowActivityLikeUserList] = createSignal(undefined);
-  const [activityLikes] = api.anilist.listOfActivityLikes(props.activity.id, accessToken, showActivityLikeUserList);
+  const [activityLikes] = apiOLD.anilist.listOfActivityLikes(props.activity.id, accessToken, showActivityLikeUserList);
 
   let serverIsLiked = props.activity.isLiked;
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, id, liked) => {
     if (liked !== serverIsLiked) {
-      const data = await api.anilist.toggleActivityLike(token, { id });
+      const data = await apiOLD.anilist.toggleActivityLike(token, { id });
       asserts.assertTrue(!data.fromCache, "Mutation should never be cached");
 
       if (data.status === 200) {

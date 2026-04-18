@@ -1,4 +1,4 @@
-import { IndexedDB } from "../utils/api";
+import { IndexedDB } from "../utils/api-OLD.js";
 
 onmessage = ({ data: { includeKeys, excludeKeys, type, ...filtering } }) => {
   const cacheReq = IndexedDB.fetchCache();

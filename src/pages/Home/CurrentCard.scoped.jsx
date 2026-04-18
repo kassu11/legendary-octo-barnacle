@@ -1,7 +1,7 @@
 import { useAuthentication } from "../../context/providers.js";
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled.js";
-import api from "../../utils/api.js";
+import apiOLD from "../../utils/api-OLD.js";
 import { A } from "@solidjs/router";
 import { mediaUrl } from "../../utils/formating.js";
 import { EpisodeTime } from "./EpisodeTime.jsx";
@@ -32,7 +32,7 @@ export function ProgressButton(props) {
   const { accessToken } = useAuthentication();
   const triggerProgressIncrease = leadingAndTrailingDebounce(
     async (token, mediaId, newProgress) => {
-      const response = await api.anilist.mutateMedia(token, {
+      const response = await apiOLD.anilist.mutateMedia(token, {
         mediaId,
         progress: newProgress,
       });

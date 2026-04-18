@@ -1,5 +1,5 @@
 import {useNavigate, useParams, useSearchParams} from "@solidjs/router";
-import api from "../../../utils/api.js";
+import apiOLD from "../../../utils/api-OLD.js";
 import {createEffect, createMemo, createSignal, on, onCleanup} from "solid-js";
 import "./index(user-media-list).scoped.css";
 import {capitalize} from "../../../utils/formating.js";
@@ -66,7 +66,7 @@ export function UserMediaList() {
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
     asserts.assertTrue(progressKey, "Progress key is undefined");
 
-    const response = await api.anilist.mutateMedia(accessToken(), { mediaId, [progressKey]: newProgress });
+    const response = await apiOLD.anilist.mutateMedia(accessToken(), { mediaId, [progressKey]: newProgress });
     if (response.status !== 200) {
       return;
     }
