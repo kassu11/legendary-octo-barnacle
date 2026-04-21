@@ -50,7 +50,7 @@ export function MediaListContainerScoped(props) {
               <h2>{list.name}</h2>
               <ol class="user-profile-media-list-grid">
                 <For each={list.entries}>{(entry, i) => {
-                  // eslint-disable-next-line 
+                  // eslint-disable-next-line no-unassigned-vars
                   let ref;
                   onMount(() => intersectionObserver.observe(ref));
                   onCleanup(() => intersectionObserver.unobserve(ref));

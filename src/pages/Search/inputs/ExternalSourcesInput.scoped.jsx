@@ -11,7 +11,7 @@ export function ExternalSourceInput(props) {
   const { isTouch } = useResponsive()
   let open = false;
   let oldExternalSources;
-  // eslint-disable-next-line 
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

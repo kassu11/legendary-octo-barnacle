@@ -7,7 +7,7 @@ import { numberUtils } from "../../../../utils/utils.js";
 import "./StatsYearLineCharts.scoped.css";
 
 export function StatsYearLineChartsScoped(props) {
-  // eslint-disable-next-line 
+  // eslint-disable-next-line no-unassigned-vars
   let container;
   const [max, setMax] = createSignal(0);
   const containerWidth = useWidth(() => container);

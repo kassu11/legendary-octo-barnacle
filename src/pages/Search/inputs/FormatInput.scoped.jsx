@@ -11,7 +11,7 @@ export function FormatInputScoped() {
   const { isTouch } = useResponsive()
   let open = false;
   let oldFormats;
-  // eslint-disable-next-line 
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

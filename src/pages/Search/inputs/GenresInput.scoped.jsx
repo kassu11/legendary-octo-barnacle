@@ -11,7 +11,7 @@ export function GenresInputScoped(props) {
   const [filter, setFilter] = createSignal("");
   let open = false;
   let oldGenres;
-  // eslint-disable-next-line 
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

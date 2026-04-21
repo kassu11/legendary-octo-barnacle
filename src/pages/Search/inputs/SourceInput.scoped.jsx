@@ -12,7 +12,7 @@ export function SourceInputScoped() {
   const { isTouch } = useResponsive()
   let open = false;
   let oldOrder;
-  // eslint-disable-next-line 
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

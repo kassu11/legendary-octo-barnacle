@@ -9,7 +9,7 @@ export function RatingInputScoped() {
   const { isTouch } = useResponsive()
   let open = false;
   let oldRatings;
-  // eslint-disable-next-line 
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
