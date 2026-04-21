@@ -3,6 +3,7 @@ import solid from "vite-plugin-solid"
 import scopedStyling from "./vite-plugins/solidjs-scoped-styling";
 import autoImportScopedStyles from "./vite-plugins/auto-import-scoped-styles";
 import checker from 'vite-plugin-checker';
+import AutoImport from "unplugin-auto-import/vite"
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
@@ -19,36 +20,36 @@ export default defineConfig({
         lintCommand: 'eslint "./src/**/*.{js,jsx}"', // Fail on Lint errors
       },
     }),
-    // AutoImport({
-    //   include: [
-    //     /\.jsx$/,
-    //     /\.js$/,
-    //   ],
-    //   imports: [
-    //     "solid-js",
-    //     {
-    //       "@solidjs/router": [
-    //         "A", "Navigate", "useLocation", "useNavigate", "useParams"
-    //       ],
-    //     },
-    //   ],
-    //   dirsScanOptions: {
-    //     fileFilter: file => {
-    //       return file.endsWith(".js") || file.endsWith(".jsx") || file.endsWith(".ts") || file.endsWith(".tsx");;
-    //     }
-    //   },
-    //   dirs: [
-    //     "./src/assets",
-    //     "./src/components/**",
-    //     "./src/context",
-    //     "./src/hooks",
-    //     "./src/pages/**",
-    //     "./src/libs",
-    //     "./src/collections/collections.js",
-    //     "./src/utils/utils.js",
-    //     "./src/utils/api-OLD.js",
-    //   ],
-    // })
+    AutoImport({
+      include: [
+        /\.jsx$/,
+        /\.js$/,
+      ],
+      imports: [
+        "solid-js",
+        {
+          "@solidjs/router": [
+            "A", "Navigate", "useLocation", "useNavigate", "useParams"
+          ],
+        },
+      ],
+      dirsScanOptions: {
+        fileFilter: file => {
+          return file.endsWith(".js") || file.endsWith(".jsx") || file.endsWith(".ts") || file.endsWith(".tsx");;
+        }
+      },
+      dirs: [
+        "./src/assets",
+        "./src/components/**",
+        "./src/context",
+        "./src/hooks",
+        "./src/pages/**",
+        "./src/libs",
+        "./src/collections/collections.js",
+        "./src/utils/utils.js",
+        "./src/utils/api-OLD.js",
+      ],
+    })
   ],
   base: "/legendary-octo-barnacle" + (branch !== "main" ? "/branches/" + branch : ""),
   build: {
