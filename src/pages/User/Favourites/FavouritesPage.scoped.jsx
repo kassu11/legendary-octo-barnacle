@@ -13,7 +13,7 @@ export function FavouritesPageScoped(props) {
 
   createEffect(() => {
     if (favourites()?.data[type]?.edges.length > 0) {
-      untrack(allEdges).splice((props.page - 1) * 25, 25, ...favourites()?.data[type]?.edges);
+      untrack(allEdges).splice((props.page - 1) * 25, 25, ...favourites().data[type].edges);
     }
     if (props.page === 1) {
       props.setVisible(favourites()?.data[type]?.edges.length > 0)

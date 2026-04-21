@@ -4,12 +4,14 @@ import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../../utils/arrays.js";
 import { useResponsive } from "../../../context/providers.js";
 import "./CountryInput.scoped.css"
+import { searchObjects } from "../../../collections/collections.js";
 
 export function CountryInputScoped() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
   let oldOrder;
+  // eslint-disable-next-line 
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

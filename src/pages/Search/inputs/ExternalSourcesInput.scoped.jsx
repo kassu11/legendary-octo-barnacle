@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on } from "solid-js";
+import { createEffect, createSignal, For, on, Show } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../../utils/arrays.js";
@@ -11,6 +11,7 @@ export function ExternalSourceInput(props) {
   const { isTouch } = useResponsive()
   let open = false;
   let oldExternalSources;
+  // eslint-disable-next-line 
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

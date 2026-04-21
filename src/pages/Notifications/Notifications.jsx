@@ -4,7 +4,7 @@ import "./Notifications.scss";
 import { mediaUrl } from "../../utils/formating.js";
 import { useAuthentication } from "../../context/providers.js";
 import { CreatedAt } from "../../components/CreatedAt.jsx";
-import { arrayUtils, fetcherSenderUtils, fetcherUtils, scheduleUtils } from "../../utils/utils.js";
+import { arrayUtils, fetcherSenderUtils, scheduleUtils } from "../../utils/utils.js";
 import { asserts, fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
@@ -194,7 +194,7 @@ function NotificationsPage(props) {
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const id = parseInt(entry.target.dataset.id);
-      asserts.assertTrue(Number.isInteger(id));
+      asserts.assertTrueOLD(Number.isInteger(id));
 
       if (entry.isIntersecting) {
         visibleIds.add(id);
@@ -222,6 +222,7 @@ function NotificationsPage(props) {
       </Show>
       <ol class="notifications-container" classList={{loading: notificationsData.loading && page() === 1}}>
         <For each={props.cache}>{notification =>  {
+          // eslint-disable-next-line no-unassigned-vars
           let ref;
           onMount(() => intersectionObserver.observe(ref))
 

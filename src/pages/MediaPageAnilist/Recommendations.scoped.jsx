@@ -1,7 +1,12 @@
 import { useParams } from "@solidjs/router";
-import { scheduleUtils } from "../../utils/utils";
-import { fetchers } from "../../collections/collections";
+import { fetcherSenderUtils, scheduleUtils } from "../../utils/utils";
+import { asserts, fetchers, fetcherSenders } from "../../collections/collections";
 import "./Recommendations.scoped.css";
+import { batch, createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
+import { useAuthentication } from "../../context/providers";
+import { DoomScroll } from "../../components/utils/DoomScroll";
+import apiOLD from "../../utils/api-OLD";
+import { AnilistMediaRecommendationCard } from "../../components/Cards/Cards.scoped";
 
 export function Recommendations(props) {
   const params = useParams();
@@ -55,7 +60,7 @@ function RecommendationsPage(props) {
   });
 
   return (
-    <DoomScroll 
+    <DoomScroll
       onIntersection={() => setId(props.id)} 
       fetchResponse={recommendations} 
       loadingElement={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />} 
@@ -75,7 +80,7 @@ function RecommendationsPage(props) {
 }
 
 function RecommendationCards(props)  {
-  asserts.assertTrue(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
+  asserts.assertTrueOLD(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
 
   return (
     <For each={props.nodes}>{(node, i) => (
@@ -103,7 +108,7 @@ function RecommendationCard(props) {
   const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
       const response = await apiOLD.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
-      asserts.assertTrue(!response.fromCache, "Mutation should never be cached");
+      asserts.assertTrueOLD(!response.fromCache, "Mutation should never be cached");
       if (response.status === 200) {
         props.mutateCache(response.data);
       }

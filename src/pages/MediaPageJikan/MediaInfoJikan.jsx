@@ -2,7 +2,7 @@ import { A, useParams } from "@solidjs/router";
 import { MediaInfoContext, useAuthentication, useMediaInfo } from "../../context/providers.js";
 import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
-import { createRenderEffect, createSignal, ErrorBoundary, on } from "solid-js";
+import { createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scss";
 import { Trailer } from "../MediaPage/Trailer.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
@@ -11,6 +11,8 @@ import MyAnimeList from "../../assets/MyAnimeList.jsx";
 import Anilist from "../../assets/Anilist.jsx";
 import { MalCharacterCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
+import ExternalSource from "../../assets/ExternalSource.jsx";
+import { ExternalLinks } from "../../components/media/ExternalLinks.scoped.jsx";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();

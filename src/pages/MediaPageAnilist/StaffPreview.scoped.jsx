@@ -1,4 +1,7 @@
+import { ErrorBoundary, For, Show } from "solid-js";
 import "./StaffPreview.scoped.css";
+import { A } from "@solidjs/router";
+import { formatingUtils } from "../../utils/utils";
 
 export function StaffPreview(props) {
   return (

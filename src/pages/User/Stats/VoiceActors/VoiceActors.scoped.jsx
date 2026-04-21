@@ -1,8 +1,8 @@
 import { A, useParams } from "@solidjs/router";
 import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
-import { createEffect, createSignal, on } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
+import { createStore } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
 import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
@@ -151,6 +151,7 @@ function Cards(props) {
   const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
+  // eslint-disable-next-line no-unassigned-vars
   let gridReel;
 
   let fetchNewCards = false;

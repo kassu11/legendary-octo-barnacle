@@ -1,5 +1,4 @@
-import {useParams} from "@solidjs/router";
-import {createEffect, createMemo, createSignal, For, Match, on, Show, Switch} from "solid-js";
+import {createEffect, createMemo, createSignal, For, on, Show} from "solid-js";
 import {useWidth} from "./UseWidth.jsx";
 import {DraggableScrollContainerScoped} from "./DraggableScrollContainer.scoped.jsx";
 import {numberCommas} from "../../../../utils/formating.js";
@@ -8,8 +7,8 @@ import { numberUtils } from "../../../../utils/utils.js";
 import "./StatsYearLineCharts.scoped.css";
 
 export function StatsYearLineChartsScoped(props) {
+  // eslint-disable-next-line 
   let container;
-  const params = useParams();
   const [max, setMax] = createSignal(0);
   const containerWidth = useWidth(() => container);
   const [state, setState] = createSignal("count");

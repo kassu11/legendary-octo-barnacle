@@ -4,7 +4,7 @@ import "./FavouriteToggle.scss";
 import { compactNumber } from "../utils/formating.js";
 import { useAuthentication } from "../context/providers.js";
 import { asserts } from "../collections/collections.js";
-import { untrack } from "solid-js";
+import { Match, Show, Switch, untrack } from "solid-js";
 import Heart from "../assets/Heart.jsx";
 import Anilist from "../assets/Anilist.jsx";
 import MyAnimeList from "../assets/MyAnimeList.jsx";
@@ -16,7 +16,7 @@ export function FavouriteToggle(props) {
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, variables, checked) => {
     if (checked !== localChecked) {
       const data = await apiOLD.anilist.toggleFavourite(token, variables);
-      asserts.assertFalse(data.fromCache, "Mutation should never be cached");
+      asserts.assertFalseOLD(data.fromCache, "Mutation should never be cached");
       props.mutateCache(checked, variables);
     }
     localChecked = checked
@@ -31,7 +31,7 @@ export function FavouriteToggle(props) {
           return;
         }
         const type = props.idType;
-        asserts.assertTrue(type === "MANGA" || type === "ANIME" || type === "STAFF" || type === "CHARACTER" || type === "STUDIO" , "Missing idType");
+        asserts.assertTrueOLD(type === "MANGA" || type === "ANIME" || type === "STAFF" || type === "CHARACTER" || type === "STUDIO" , "Missing idType");
 
         props.onChange(e.target.checked);
         triggerLikeToggle(accessToken(), {[props.idType]: props.variableId}, e.target.checked);

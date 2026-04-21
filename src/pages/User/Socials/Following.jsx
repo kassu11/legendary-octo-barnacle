@@ -7,7 +7,7 @@ import { Followers } from "./Followers.jsx";
 import { asserts } from "../../../collections/collections.js";
 
 export function Following(props) {
-  asserts.assertTrue(props.page, "Page is missing");
+  asserts.assertTrueOLD(props.page, "Page is missing");
   const { user } = useUser();
   const { authUserData, accessToken } = useAuthentication();
   const [following] = apiOLD.anilist.userFollowing(() => user().id, props.page, accessToken);
@@ -23,7 +23,7 @@ export function Following(props) {
             <Show when={user().id === authUserData()?.data.id}>
               <button onClick={async e => {
                 e.preventDefault();
-                const response = await apiOLD.anilist.toggleFollow(accessToken(), follower.id);
+                // const response = await apiOLD.anilist.toggleFollow(accessToken(), follower.id);
               }}>Unfollow</button>
             </Show>
           </A>

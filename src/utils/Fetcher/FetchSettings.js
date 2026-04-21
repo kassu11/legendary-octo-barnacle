@@ -1,4 +1,3 @@
-import { CacheObject } from "../CacheObject";
 import { asserts } from "../../collections/collections.js";
 
 /**
@@ -23,11 +22,11 @@ export class FetchSettings {
     this.type = settings.type || "default"; 
     this.saveToSessionStorage = settings.saveToSessionStorage;
 
-    asserts.assertTrue(typeof settings === "object", "Settings must be object");
-    asserts.assertTrue(!settings.active || typeof settings.active === "function", "settings.active should a signal");
-    asserts.assertTrue(settings.type === "no-store" || Number.isInteger(settings.expiresInSeconds), "Give explicit expiration time. 0 if the data never expires");
-    asserts.assertTrue(settings.type === "no-store" || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
-    asserts.assertTrue(settings.type !== "no-store" || !settings.storeName, "StoreName is not used because cache type is no-store");
-    asserts.assertTrue(!settings.saveToSessionStorage || typeof settings.saveToSessionStorage === "function", "saveToSessionStorage is not function");
+    asserts.assertTrueOLD(typeof settings === "object", "Settings must be object");
+    asserts.assertTrueOLD(!settings.active || typeof settings.active === "function", "settings.active should a signal");
+    asserts.assertTrueOLD(settings.type === "no-store" || Number.isInteger(settings.expiresInSeconds), "Give explicit expiration time. 0 if the data never expires");
+    asserts.assertTrueOLD(settings.type === "no-store" || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
+    asserts.assertTrueOLD(settings.type !== "no-store" || !settings.storeName, "StoreName is not used because cache type is no-store");
+    asserts.assertTrueOLD(!settings.saveToSessionStorage || typeof settings.saveToSessionStorage === "function", "saveToSessionStorage is not function");
   }
 }

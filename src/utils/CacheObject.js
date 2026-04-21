@@ -8,9 +8,9 @@ export class CacheObject {
   * @param {object} data
   */
   constructor(cacheKey, expiresInSeconds, data) {
-    asserts.assertTrue(cacheKey, "Missing cacheKey");
-    asserts.assertTrue(data, "Don't cache empty data");
-    asserts.assertTrue(expiresInSeconds, "Expiration date is missing");
+    asserts.assertTrueOLD(cacheKey, "Missing cacheKey");
+    asserts.assertTrueOLD(data, "Don't cache empty data");
+    asserts.assertTrueOLD(expiresInSeconds, "Expiration date is missing");
 
     this.data = data;
     this.cacheKey = cacheKey;

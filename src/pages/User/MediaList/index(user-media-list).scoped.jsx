@@ -6,7 +6,7 @@ import {capitalize} from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import {useAuthentication, UserMediaListContext, useUser} from "../../../context/providers.js";
 import {leadingAndTrailingDebounce} from "../../../utils/scheduled.js";
-import {asserts, fetchers, fetcherSenders} from "../../../collections/collections.js";
+import {asserts, fetchers, fetcherSenders, requests} from "../../../collections/collections.js";
 import {MediaListContainerScoped} from "./MediaListContainer.scoped.jsx";
 import {SearchControlsScoped} from "./SearchControls.scoped.jsx";
 import { fetcherSenderUtils } from "../../../utils/utils.js";
@@ -64,7 +64,7 @@ export function UserMediaList() {
   const tag = () => searchParams.tag || "";
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
-    asserts.assertTrue(progressKey, "Progress key is undefined");
+    asserts.assertTrueOLD(progressKey, "Progress key is undefined");
 
     const response = await apiOLD.anilist.mutateMedia(accessToken(), { mediaId, [progressKey]: newProgress });
     if (response.status !== 200) {
@@ -186,7 +186,7 @@ export function converStatusToListName(status, type) {
     case "REPEATING":
       return type === "anime" ? "Rewatching" : "Rereading";
     default:
-      asserts.assertTrue(false, "Unkown status: " + status);
+      asserts.assertTrueOLD(false, "Unkown status: " + status);
   }
 }
 

@@ -13,9 +13,10 @@ import {QuickActionListButton} from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
+import { Match, Show, Switch } from "solid-js";
 
 function AnilistMediaCardListBody(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <li class="cp-media-card inline-container">
@@ -41,7 +42,7 @@ function AnilistMediaCardListBody(props) {
 }
 
 function JikanMediaCardListBody(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <li class="cp-media-card inline-container">
@@ -69,7 +70,7 @@ function JikanMediaCardListBody(props) {
 }
 
 export function AnilistMediaCard(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <AnilistMediaCardListBody {...props}>
@@ -79,7 +80,7 @@ export function AnilistMediaCard(props) {
 }
 
 export function JikanMediaCard(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
   asserts.isTypeString(props.type);
 
   return (
@@ -95,7 +96,7 @@ function QuickActionItemList(props) {
   const { openEditor } = useEditMediaEntries();
   const { accessToken } = useAuthentication();
 
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <Show when={accessToken()}>
@@ -136,7 +137,7 @@ function QuickActionItemList(props) {
 }
 
 export function AnilistMediaRecommendationCard(props) {
-  asserts.assertTrue(props.node, "Missing node");
+  asserts.assertTrueOLD(props.node, "Missing node");
   asserts.isTypeFunction(props.handleRateUp, "handleRateUp");
   asserts.isTypeFunction(props.handleRateDown, "handleRateDown");
   asserts.isTypeString(props.userRating, "userRating");
@@ -165,7 +166,7 @@ export function AnilistMediaRecommendationCard(props) {
 }
 
 export function MalCharacterCard(props) {
-  asserts.assertTrue(props.character, "character");
+  asserts.assertTrueOLD(props.character, "character");
   asserts.isTypeString(props.role, "role");
 
   return (
@@ -192,8 +193,8 @@ export function MalCharacterCard(props) {
 }
 
 export function MalStaffCard(props) {
-  asserts.assertTrue(props.staff, "staff");
-  asserts.assertTrue(props.positions, "positions");
+  asserts.assertTrueOLD(props.staff, "staff");
+  asserts.assertTrueOLD(props.positions, "positions");
 
   return (
     <li class="cp-character-card">

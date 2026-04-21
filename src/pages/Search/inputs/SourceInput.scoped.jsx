@@ -1,9 +1,10 @@
-import { createEffect, createSignal, For, on } from "solid-js";
+import { createEffect, createSignal, For, on, Show } from "solid-js";
 import "./SourceInput.scoped.css";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../../utils/arrays.js";
 import { useResponsive } from "../../../context/providers.js";
+import { searchObjects } from "../../../collections/collections";
 
 export function SourceInputScoped() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,6 +12,7 @@ export function SourceInputScoped() {
   const { isTouch } = useResponsive()
   let open = false;
   let oldOrder;
+  // eslint-disable-next-line 
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

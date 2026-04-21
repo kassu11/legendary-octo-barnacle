@@ -5,8 +5,9 @@ import {untrack} from "solid-js/web";
 import {LoaderCircle} from "../../components/LoaderCircle.jsx";
 import {Tooltip} from "../../components/Tooltips.jsx";
 import {ActivityCard} from "../../components/Activity.jsx";
-import { fetchers } from "../../collections/collections.js";
+import { asserts, fetchers, fetcherSenders } from "../../collections/collections.js";
 import "./ActivityPage.scoped.css";
+import { arrayUtils, fetcherSenderUtils, scheduleUtils } from "../../utils/utils.js";
 
 export function HomePageActivityReelContent(props) {
   const {accessToken} = useAuthentication();
@@ -96,7 +97,7 @@ export function HomePageActivityReelContent(props) {
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const id = parseInt(entry.target.dataset.id);
-      asserts.assertTrue(Number.isInteger(id));
+      asserts.assertTrueOLD(Number.isInteger(id));
 
       if (entry.isIntersecting) {
         visibleIds.add(id);
@@ -124,6 +125,7 @@ export function HomePageActivityReelContent(props) {
       </Show>
       <ol class="flex-space-between activity" classList={{loading: activityData.loading && page() === 1}}>
         <For each={props.cache}>{activity => {
+          // eslint-disable-next-line no-unassigned-vars
           let ref;
           onMount(() => intersectionObserver.observe(ref))
 

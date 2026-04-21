@@ -152,27 +152,27 @@ const apiOLD = {
       return Fetch.authAnilist(token, queries.anilistMediaById, { id, perPage: 6 });
     }),
     rateRecommendation: async (token, id, rating, mediaId, mediaRecommendationId) => {
-      asserts.assertTrue(token, "Token is missing");
-      asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");
-      asserts.assertTrue(id != null, "Id missing");
-      asserts.assertTrue(rating != null, "Rating missing");
-      asserts.assertTrue(mediaId != null, "MediaId missing");
-      asserts.assertTrue(mediaRecommendationId != null, "MediaRecommendationId missing");
+      asserts.assertTrueOLD(token, "Token is missing");
+      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
+      asserts.assertTrueOLD(id != null, "Id missing");
+      asserts.assertTrueOLD(rating != null, "Rating missing");
+      asserts.assertTrueOLD(mediaId != null, "MediaId missing");
+      asserts.assertTrueOLD(mediaRecommendationId != null, "MediaRecommendationId missing");
 
       const request = Fetch.authAnilist(token, queries.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, res => res.data.SaveRecommendation);
       return await request.send();
     },
     userByName: reloadCache((name, token) => {
-      asserts.assertTrue(name, "Name is missing");
+      asserts.assertTrueOLD(name, "Name is missing");
       return Fetch.authAnilist(token, queries.getUserByName, { name }, res => res.data.User);
     }),
     toggleFollow: async (token, id) => {
-      asserts.assertTrue(id, "id is missing");
+      asserts.assertTrueOLD(id, "id is missing");
       const request = Fetch.authAnilist(token, queries.anilistToggleFollow, { id }, res => res.data.ToggleFollow);
       return await request.send();
     },
     userFollowing: reloadCache((id, page = 1, token) => {
-      asserts.assertTrue(id, "id is missing");
+      asserts.assertTrueOLD(id, "id is missing");
       return Fetch.authAnilist(token, queries.anilistGetUserFollowing, { id, page }, res => res.data.Page);
     }),
     userAnimeStats: reloadCache((name, token) => {
@@ -209,23 +209,23 @@ const apiOLD = {
       return Fetch.authAnilist(token, queries.anilistGetCharacterIds(ids), { ids }, res => Object.values(res.data).map(page => page.characters).flat());
     }),
     userFollowers: reloadCache((id, page = 1, token) => {
-      asserts.assertTrue(id, "id is missing");
+      asserts.assertTrueOLD(id, "id is missing");
       return Fetch.authAnilist(token, queries.anilistGetUserFollowers, { id, page }, res => res.data.Page);
     }),
     activityByUserId: reloadCache((id, token) => {
-      asserts.assertTrue(id, "Id is missing");
+      asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.profileActivity, { id });
     }),
     activityById: reloadCache((id, token) => {
-      asserts.assertTrue(id, "Id is missing");
+      asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityById, { id }, res => res.data.Activity);
     }),
     listOfActivityLikes: fetchOnce((id, token) => {
-      asserts.assertTrue(id, "Id is missing");
+      asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistGetActivityLikes, { id, type: "ACTIVITY" }, res => res.data.Page);
     }),
     activityRepliesById: reloadCache((id, page, token) => {
-      asserts.assertTrue(id, "Id is missing");
+      asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityRepliedById, { id, page }, res => res.data.Page);
     }),
     notifications: fastReload((token, type, page = 1) => {
@@ -276,26 +276,26 @@ const apiOLD = {
       }
     }),
     searchUsers: fetchOnce((search, page, token) => {
-      asserts.assertTrue(search, "Search is missing");
+      asserts.assertTrueOLD(search, "Search is missing");
       return Fetch.authAnilist(token, queries.anilistUserSearch, { search, page, }, res => res.data.Page);
     }),
     mediaListByUserName: reloadCache((name, type, token) => {
-      asserts.assertTrue(name, "Name is missing");
+      asserts.assertTrueOLD(name, "Name is missing");
       return Fetch.authAnilist(token, queries.anilistUserMediaList, {
         userName: name.toLowerCase(),
         type,
       }, res => res.data.MediaListCollection);
     }),
     mediaListByUserNameFetchOnce: fetchOnce((name, type, token) => {
-      asserts.assertTrue(name, "Name is missing");
+      asserts.assertTrueOLD(name, "Name is missing");
       return Fetch.authAnilist(token, queries.anilistUserMediaList, {
         userName: name.toLowerCase(),
         type,
       }, res => res.data.MediaListCollection);
     }),
     favouritesByUserId: reloadCache((id, page, token) => {
-      asserts.assertTrue(id, "Id is missing");
-      asserts.assertTrue(page, "Page is missing");
+      asserts.assertTrueOLD(id, "Id is missing");
+      asserts.assertTrueOLD(page, "Page is missing");
       return Fetch.authAnilist(token, queries.anilistUserFavouriteById, { id, page }, res => res.data.User.favourites);
     }),
     mutateFavourites: async (token, variables) => {
@@ -390,8 +390,8 @@ const apiOLD = {
       });
     }),
     mediaListEntry: async (token, mediaId) => {
-      asserts.assertTrue(mediaId, "MediaId missing");
-      asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");
+      asserts.assertTrueOLD(mediaId, "MediaId missing");
+      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
       const request = Fetch.authAnilist(token, queries.mediaListEntry, { mediaId });
       return await request.send();
     },
@@ -432,32 +432,32 @@ const apiOLD = {
       return Fetch.authAnilist(token, queries.anilistGetFriendMediaScore, {id, ...variables});
     }),
     mutateMedia: async (token, variables) => {
-      asserts.assertTrue(token, "Token is missing");
-      asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");
-      asserts.assertTrue(variables, "Variables missing");
-      asserts.assertTrue(variables.id || variables.mediaId, "No mutation id given");
+      asserts.assertTrueOLD(token, "Token is missing");
+      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
+      asserts.assertTrueOLD(variables, "Variables missing");
+      asserts.assertTrueOLD(variables.id || variables.mediaId, "No mutation id given");
       const request = Fetch.authAnilist(token, queries.anilistMutateMedia, variables, res => res.data.SaveMediaListEntry);
       return await request.send();
     },
     deleteMediaListEntry: async (token, id) => {
-      asserts.assertTrue(token, "Token is missing");
-      asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");
-      asserts.assertTrue(id !== undefined, "Variables missing");
+      asserts.assertTrueOLD(token, "Token is missing");
+      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
+      asserts.assertTrueOLD(id !== undefined, "Variables missing");
       const request = Fetch.authAnilist(token, queries.anilistDeleteMediaListEntry, { id });
       return await request.send();
     },
     toggleActivityLike: async (token, variables) => {
-      asserts.assertTrue(token, "Token is missing");
-      asserts.assertTrue(variables, "Variables missing");
-      asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");
-      asserts.assertTrue(variables.id || variables.mediaId, "No mutation id given");
+      asserts.assertTrueOLD(token, "Token is missing");
+      asserts.assertTrueOLD(variables, "Variables missing");
+      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
+      asserts.assertTrueOLD(variables.id || variables.mediaId, "No mutation id given");
       const request = Fetch.authAnilist(token, queries.anilistMutateToggleLike, {...variables, type: "ACTIVITY"});
       return await request.send();
     },
     toggleFavourite: async (token, variables) => {
-      asserts.assertTrue(token, "Token is missing");
-      asserts.assertTrue(variables, "Variables missing");
-      asserts.assertTrue(typeof token !== "function", "This specific api doesnt support signals");
+      asserts.assertTrueOLD(token, "Token is missing");
+      asserts.assertTrueOLD(variables, "Variables missing");
+      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
       const request = Fetch.authAnilist(token, queries.anilistMutateToggleFavourite, variables);
       return await request.send();
     },
@@ -485,9 +485,9 @@ class Fetch {
   #controller;
   #signal;
   constructor(url, { method = "POST", headers, body }, formatResponse) {
-    asserts.assertTrue(url, "Url missing");
-    asserts.assertTrue(method, "Method missing");
-    if (method === "POST") asserts.assertTrue(body, "Body is missing");
+    asserts.assertTrueOLD(url, "Url missing");
+    asserts.assertTrueOLD(method, "Method missing");
+    if (method === "POST") asserts.assertTrueOLD(body, "Body is missing");
 
     const defaultHeader = { "Content-Type": "application/json" }
     this.url = url;
@@ -526,7 +526,7 @@ class Fetch {
     } else if (this.url.startsWith("https://api.animethemes.moe")) {
       return fetchRateLimits["animeThemes"];
     } else {
-      asserts.assertTrue(false, `Fetch to url "${this.url}" does not have any rate limits`);
+      asserts.assertTrueOLD(false, `Fetch to url "${this.url}" does not have any rate limits`);
     }
   }
 
@@ -617,7 +617,7 @@ class Fetch {
   }
 
   static authAnilist(token, query, variables = {}, formatResponse) {
-    asserts.assertTrue(query.length > 10, "Query must be above of length 10");
+    asserts.assertTrueOLD(query.length > 10, "Query must be above of length 10");
     const headers = { 
       "Content-Type": "application/json",
     };
@@ -664,9 +664,9 @@ function cacheBuilder(settings) {
   settings.storeName ??= "";
   settings.fetchOnDebug ??= false;
   settings.type ??= "default"; 
-  asserts.assertTrue(settings.type === "no-store" || Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
-  asserts.assertTrue(settings.type === "no-store" || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
-  asserts.assertTrue(settings.type !== "no-store" || !settings.storeName, "StoreName is not used because cache type is no-store");
+  asserts.assertTrueOLD(settings.type === "no-store" || Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
+  asserts.assertTrueOLD(settings.type === "no-store" || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
+  asserts.assertTrueOLD(settings.type !== "no-store" || !settings.storeName, "StoreName is not used because cache type is no-store");
 
   /**
    * @param {(fetchOptions: any[]) => Fetch} fetchCallback
@@ -689,8 +689,8 @@ function cacheBuilder(settings) {
         // Create a deepcopy because onsuccess events are not instant so mutations could leak into cache.
         mutateData = structuredClone(mutateData);
 
-        asserts.assertTrue(untrack(data) !== null || settings.type !== "only-if-cached", "Can't mutate null data");
-        asserts.assertTrue(typeof mutateData === "object", "Data should always be JSON object data");
+        asserts.assertTrueOLD(untrack(data) !== null || settings.type !== "only-if-cached", "Can't mutate null data");
+        asserts.assertTrueOLD(typeof mutateData === "object", "Data should always be JSON object data");
 
 
         if (settings.type !== "no-store") {
@@ -795,8 +795,8 @@ function cacheBuilder(settings) {
             getReg.onerror = refetch;
             getReg.onsuccess = evt => {
               if (evt.target.result) {
-                asserts.assertTrue(evt.target.result.expires, "Cache should have a expiration date");
-                asserts.assertTrue(evt.target.result.data, "Cache should always have data");
+                asserts.assertTrueOLD(evt.target.result.expires, "Cache should have a expiration date");
+                asserts.assertTrueOLD(evt.target.result.data, "Cache should always have data");
 
                 if (evt.target.result.expires > new Date()) {
                   if (fetchOnStart == false) {
@@ -868,6 +868,7 @@ export class IndexedDB {
       switch(evt.oldVersion) {
         case 0: {
           IndexedDB.#createStore(db, "results", { keyPath: "cacheKey" });
+          // fallthrough
         }
         case 1: {
           IndexedDB.#createStore(db, "debug", { keyPath: "cacheKey" });

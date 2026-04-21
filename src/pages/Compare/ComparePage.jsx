@@ -1,4 +1,4 @@
-import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { batch, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -118,6 +118,8 @@ export default function ComparePage() {
 
   createEffect(updateCompareScores);
   document.title = `Compare ${params.type} - LOB`;
+
+  const navigate = useNavigate();
 
   return (
     <CompareMediaListContext.Provider value={{ compareMediaList, includeKeys, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
@@ -342,6 +344,7 @@ function UserSearch() {
   const [searchedUsers, { mutate: mutateSearchUsers }] = apiOLD.anilist.searchUsers(searchVar, 1, accessToken);
   const triggerSetSearchVar = debounce(setSearchVar, 300);
   const [searchParams, setSearchParams] = useSearchParams();
+  // eslint-disable-next-line no-unassigned-vars
   let form;
 
   createEffect(on(index, i => {
@@ -421,14 +424,14 @@ function UserSearch() {
 }
 
 function UserRow(props) {
-  asserts.assertTrue(props.name, "Name is missing");
+  asserts.assertTrueOLD(props.name, "Name is missing");
   const params = useParams();
   const { setIncludeKeys, setExcludeKeys, storeUsers } = useCompareMediaList();
   const [searchParams, setSearchParams] = useSearchParams();
   const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = signals.createSignalWithSignal(() => !arrayUtils.includes(searchParams.disabled, props.name));
   const [exclude, setExclude] = signals.createSignalWithSignal(() => arrayUtils.includes(searchParams.exclude, props.name));;
-  const [mediaList, { mutateCache: mutateMediaListCache }] = apiOLD.anilist.mediaListByUserNameFetchOnce(() => props.name, () => params.type.toUpperCase(), accessToken);
+  const [mediaList] = apiOLD.anilist.mediaListByUserNameFetchOnce(() => props.name, () => params.type.toUpperCase(), accessToken);
 
   function setKeys(keys, excludedValue) {
     if (enabled() && exclude() === excludedValue) {
@@ -538,7 +541,7 @@ function ContentPage() {
   const { compareMediaList, users } = useCompareMediaList();
   const params = useParams();
   const observerList = [];
-
+  // eslint-disable-next-line
   function observe(target) {
     observerList.push(target);
   }

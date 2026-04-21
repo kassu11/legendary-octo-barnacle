@@ -4,9 +4,10 @@ import "./TwoHeadedRange.scoped.css";
 import { asserts } from "../../../collections/collections.js";
 
 export function TwoHeadedRangeScoped(_props) {
-  asserts.assertTrue(_props.onChange, "onChange is missing");
+  asserts.assertTrueOLD(_props.onChange, "onChange is missing");
   const _defaults = mergeProps({min: 0, max: 100, separation: 1 }, _props);
   const props = mergeProps({value: [_defaults.min, _defaults.max]}, _defaults);
+  // eslint-disable-next-line 
   let startPoint, endPoint;
 
   createEffect(on(() => props.minValue, value => {
@@ -16,6 +17,7 @@ export function TwoHeadedRangeScoped(_props) {
     updateValue(endPoint, value || props.max);
   }));
 
+  // eslint-disable-next-line 
   let intersection;
 
   onMount(() => {

@@ -50,7 +50,8 @@ export const localStorageBoolean = (key, initialValue) => {
 const parseJson = (str) => {
   try {
     return JSON.parse(str);
-  } catch (e) {
+  } catch {
+    return null;
   }
 }
 

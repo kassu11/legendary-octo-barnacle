@@ -1,4 +1,4 @@
-import { createEffect, For, on } from "solid-js";
+import { createEffect, For, on, Show } from "solid-js";
 import "./FormatInput.scoped.css";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
@@ -11,6 +11,7 @@ export function FormatInputScoped() {
   const { isTouch } = useResponsive()
   let open = false;
   let oldFormats;
+  // eslint-disable-next-line 
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

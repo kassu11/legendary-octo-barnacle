@@ -1,5 +1,7 @@
-import {Show, Switch} from "solid-js";
+import {Match, Show, Switch} from "solid-js";
 import "./Scores.scoped.css";
+import { useMediaInfo } from "../../context/providers";
+import { numberUtils } from "../../utils/utils";
 
 export function MediaPageScores() {
   const { anilistData, jikanData } = useMediaInfo();

@@ -3,7 +3,7 @@ import { useMediaInfo } from "../../context/providers.js";
 import { fetchers, fetcherSenders, localizations, requests } from "../../collections/collections.js";
 import { fetcherSenderUtils } from "../../utils/utils.js";
 import { MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
-import { ErrorBoundary } from "solid-js";
+import { ErrorBoundary, For, Show } from "solid-js";
 
 export function MediaInfoStaffJikan() {
   const params = useParams();

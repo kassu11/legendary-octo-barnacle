@@ -2,8 +2,9 @@ import {A, useParams} from "@solidjs/router";
 import {useAuthentication} from "../../../../context/providers.js";
 import {createEffect, createSignal, For, on, Show} from "solid-js";
 import {formatTitleToUrl} from "../../../../utils/formating.js";
-import { fetchers } from "../../../../collections/collections.js";
+import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
 import "./GenreMediaCards.scoped.css";
+import { fetcherSenderUtils } from "../../../../utils/utils.js";
 
 export function GenreMediaCardsScoped(props) {
   const params = useParams();

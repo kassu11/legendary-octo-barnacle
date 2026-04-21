@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import apiOLD from "../../utils/api-OLD.js";
-import { createEffect, createMemo, createRenderEffect, createSignal, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createRenderEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
@@ -39,7 +39,7 @@ export function AnimeStaff() {
 }
 
 export function MangaStaff() {
-  const [idMal, setIdMal] = createSignal();
+  const [, setIdMal] = createSignal();
 
   return (
     <Entities type="STAFF" setIdMal={setIdMal} />
@@ -217,7 +217,7 @@ function CharactersPage(props) {
       return;
     }
 
-    asserts.assertTrue(hardcodedPageCount === apiResponse.data.characters.pageInfo.perPage, "Page count is wrong");
+    asserts.assertTrueOLD(hardcodedPageCount === apiResponse.data.characters.pageInfo.perPage, "Page count is wrong");
 
     freshPages.add(apiResponse.data.characters.pageInfo.currentPage);
 
@@ -229,7 +229,7 @@ function CharactersPage(props) {
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const page = parseInt(entry.target.dataset.page);
-      asserts.assertTrue(Number.isInteger(page));
+      asserts.assertTrueOLD(Number.isInteger(page));
 
       if (entry.isIntersecting) {
         visiblePages.add(page);
@@ -314,6 +314,7 @@ function StaffPage(props) {
 }
 
 function CharacterCard(props) {
+  // eslint-disable-next-line no-unassigned-vars
   let ref;
   onMount(() => props.intersectionObserver.observe(ref))
 

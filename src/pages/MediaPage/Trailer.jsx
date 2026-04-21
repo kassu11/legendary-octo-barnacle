@@ -1,8 +1,9 @@
-import { createSignal, createEffect, on, Show, Switch } from "solid-js";
+import { createSignal, Match, Show, Switch } from "solid-js";
 import "./Trailer.scss";
 
 export function Trailer(props) {
   const [open, setOpen] = createSignal(false);
+  // eslint-disable-next-line no-unassigned-vars
   let dialog;
 
   return (

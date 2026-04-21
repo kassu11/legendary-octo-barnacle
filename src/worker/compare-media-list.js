@@ -178,11 +178,11 @@ const sortFunctions = {
 
 function filter(entry, filterObject) {
   if (filterObject.searchRegex) search: {
-    if (entry.searchMatch = entry.media.title.userPreferred.match(filterObject.searchRegex)) { break search; }
-    if (entry.searchMatch = entry.media.title.native?.match(filterObject.searchRegex)) { break search; }
-    if (entry.searchMatch = entry.media.title.english?.match(filterObject.searchRegex)) { break search; }
-    if (entry.searchMatch = entry.media.title.romaji?.match(filterObject.searchRegex)) { break search; }
-    if (entry.searchMatch = entry.media.synonyms?.some(synonym => synonym.match(filterObject.searchRegex))) { break search; }
+    if ((entry.searchMatch = entry.media.title.userPreferred.match(filterObject.searchRegex))) { break search; }
+    if ((entry.searchMatch = entry.media.title.native?.match(filterObject.searchRegex))) { break search; }
+    if ((entry.searchMatch = entry.media.title.english?.match(filterObject.searchRegex))) { break search; }
+    if ((entry.searchMatch = entry.media.title.romaji?.match(filterObject.searchRegex))) { break search; }
+    if ((entry.searchMatch = entry.media.synonyms?.some(synonym => synonym.match(filterObject.searchRegex)))) { break search; }
     return false;
   }
 

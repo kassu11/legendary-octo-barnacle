@@ -6,7 +6,7 @@ import { A } from "@solidjs/router";
 import { mediaUrl } from "../../utils/formating.js";
 import { EpisodeTime } from "./EpisodeTime.jsx";
 import "./CurrentCard.scoped.css";
-import { timeCollection } from "../../collections/collections.js";
+import { asserts, timeCollection } from "../../collections/collections.js";
 
 function nextAiringEpisode(nextAiringEpisodeObject) {
   if (!nextAiringEpisodeObject?.episode) {
@@ -40,7 +40,7 @@ export function ProgressButton(props) {
         return;
       }
 
-      asserts.assertTrue(response.data.progress, "No progress found");
+      asserts.assertTrueOLD(response.data.progress, "No progress found");
       props.data.progress = response.data.progress;
       if (response.data.status === "COMPLETED") {
         props.mutateCache((request) => {

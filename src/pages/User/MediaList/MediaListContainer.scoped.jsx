@@ -9,6 +9,8 @@ import {QuickActionButton} from "../../../components/Buttons.scoped.jsx";
 import Edit from "../../../assets/Edit.jsx";
 import {RepeatIcon} from "../../../assets/RepeatIcon.jsx";
 import "./MediaListContainer.scoped.css";
+import { objectUtils } from "../../../utils/utils.js";
+import { converStatusToListName } from "./index(user-media-list).scoped.jsx";
 
 export function MediaListContainerScoped(props) {
   const [cardsVisibility, storeCardsVisibility] = createStore({});
@@ -48,6 +50,7 @@ export function MediaListContainerScoped(props) {
               <h2>{list.name}</h2>
               <ol class="user-profile-media-list-grid">
                 <For each={list.entries}>{(entry, i) => {
+                  // eslint-disable-next-line 
                   let ref;
                   onMount(() => intersectionObserver.observe(ref));
                   onCleanup(() => intersectionObserver.unobserve(ref));

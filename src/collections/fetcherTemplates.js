@@ -2,7 +2,7 @@ import { fetcherUtils } from "../utils/utils";
 import { asserts, localizations } from "./collections.js";
 
 export const anilistAuth = (token, query, variables = {}, formatResponse) => {
-  asserts.assertTrue(query.length > 10, "Query must be above of length 10");
+  asserts.assertTrueOLD(query.length > 10, "Query must be above of length 10");
   const headers = { "Content-Type": "application/json" };
 
   if (token) {
@@ -32,7 +32,7 @@ export const getJSON = (url, formatResponse) => new fetcherUtils.Fetcher(url, {
 
 
 export const offlineFetcher = (fileName, formatResponse, ms = 0) => {
-  asserts.assertTrue(fileName, "Filename is missing");
+  asserts.assertTrueOLD(fileName, "Filename is missing");
   const path = location.pathname.split("/")[1];
 
   const fetcher = new fetcherUtils.Fetcher("/" + path + "/" + fileName, undefined, formatResponse);

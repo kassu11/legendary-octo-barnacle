@@ -8,7 +8,7 @@ export const getDates = (offsetDays = 7) => {
   const year = date.getFullYear();
   const season = getSeasonFromMonth(date.getMonth());
 
-  asserts.assertTrue(Number.isInteger(offsetDays), "Offsetdays is not an integer");
+  asserts.assertTrueOLD(Number.isInteger(offsetDays), "Offsetdays is not an integer");
 
   return {
     "season": season,
@@ -19,8 +19,8 @@ export const getDates = (offsetDays = 7) => {
 }
 
 export function moveSeasonObject(season, year, move = 0) {
-  asserts.assertTrue(typeof year === "number", "year is not a number");
-  asserts.assertTrue(typeof season === "string", "season is not a string");
+  asserts.assertTrueOLD(typeof year === "number", "year is not a number");
+  asserts.assertTrueOLD(typeof season === "string", "season is not a string");
   const seasonMove = move % 4;
   const yearMove = Math.trunc(move / 4);
   const seasonIndex = seasons.indexOf(season.toUpperCase());

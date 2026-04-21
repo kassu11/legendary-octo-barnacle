@@ -1,9 +1,9 @@
-import { Switch, Show, Match, createSignal, onCleanup, mergeProps } from "solid-js";
+import { Switch, Show, Match, createSignal, mergeProps, For } from "solid-js";
 import { OldMarkdownComponent } from "../components/Markdown.jsx";
 import "./Activity.scss";
 import apiOLD from "../utils/api-OLD.js";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { capitalize, formatTitleToUrl, mediaUrl, plural } from "../utils/formating.js";
+import { capitalize, mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
 import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
@@ -13,8 +13,8 @@ import { CreatedAt } from "./CreatedAt.jsx";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);
-  asserts.assertTrue(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
-  asserts.assertTrue(typeof props.small === "boolean", "small needs to be boolean");
+  asserts.assertTrueOLD(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
+  asserts.assertTrueOLD(typeof props.small === "boolean", "small needs to be boolean");
 
   return (
     <Switch>
@@ -90,7 +90,7 @@ function Footer(props) {
   const triggerLikeToggle = leadingAndTrailingDebounce(async (token, id, liked) => {
     if (liked !== serverIsLiked) {
       const data = await apiOLD.anilist.toggleActivityLike(token, { id });
-      asserts.assertTrue(!data.fromCache, "Mutation should never be cached");
+      asserts.assertTrueOLD(!data.fromCache, "Mutation should never be cached");
 
       if (data.status === 200) {
         props.activity.likeCount = data.data.data.ToggleLike.likeCount;
@@ -110,7 +110,7 @@ function Footer(props) {
     <>
       <button class="cp-activity-like" classList={{active: isLiked()}} onMouseMove={() => likeCount() && setShowActivityLikeUserList(true)} onClick={() => {
         setIsLiked(liked => {
-          asserts.assertTrue(typeof liked === "boolean");
+          asserts.assertTrueOLD(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
           setLikeCount(v => v + change);
           triggerLikeToggle(accessToken(), props.activity.id, !liked);

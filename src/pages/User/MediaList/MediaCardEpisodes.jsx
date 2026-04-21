@@ -1,4 +1,4 @@
-import { Match } from "solid-js";
+import { Match, Switch } from "solid-js";
 import { MediaCardProgressInfo } from "./MediaCardProgressInfo.scoped.jsx";
 
 export function MediaCardEpisodes(props) {

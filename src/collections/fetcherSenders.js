@@ -11,7 +11,7 @@ class ApiResponse {
    * @param {undefined|"local"|"indexedDB"} cacheType
    */
   constructor(cacheKey, data, cacheType) {
-    asserts.assertTrue(cacheKey, "CacheKey is missing");
+    asserts.assertTrueOLD(cacheKey, "CacheKey is missing");
 
     this.cacheKey = cacheKey;
     this.data = data;
@@ -48,6 +48,7 @@ export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => sendGen
 /**
  * @param {boolean} disableNullValues - When true cache only calls that are not found will return null
  */
+// eslint-disable-next-line no-unused-vars
 const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal, fetchOnDebug }) => {
   asserts.isTypeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
   asserts.isTypeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
@@ -58,7 +59,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
   const [error, setError] = createSignal(false);
   const [loading, setLoading] = createSignal(false);
   const [indexedDBClosed, setIndexedDBClosed] = createSignal(true);
-  /** @type {null|fetcherUtils.Fetcher} */
+  /** @type {null|fetcherUtilsOLD.js.Fetcher} */
   let currentFetcher = null;
   /** @type {null|AbortController} */
   let currentController = null;
@@ -111,7 +112,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
 
   /** @param {ApiResponse} mutateData */
   const safeMutate = mutateData => {
-    asserts.assertTrue(mutateData instanceof ApiResponse);
+    asserts.assertTrueOLD(mutateData instanceof ApiResponse);
     if (mutateData.cacheKey === currentFetcher.cacheKey) {
       setResponse(mutateData);
     }
@@ -121,7 +122,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
   const mutate = mutation => {
     mutation = unwrapMutation(mutation);
 
-    asserts.assertTrue(mutation instanceof ApiResponse);
+    asserts.assertTrueOLD(mutation instanceof ApiResponse);
     setResponse(mutation);
   }
 
@@ -140,7 +141,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
     if (fetcher !== currentFetcher) {
       return;
     }
-    asserts.assertTrue(fetcher, "fetcher should not be undefined");
+    asserts.assertTrueOLD(fetcher, "fetcher should not be undefined");
     if (type === "only-if-cached") {
       batch(() => {
         if (!disableNullValues) {
@@ -198,9 +199,11 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
     switch(prev) {
       case "only-if-cached": {
         if (type === "default") return type;
+        // fallthrough
       }
       case "default": {
         if (type === "fetch-once") return type;
+        // fallthrough
       }
       case "fetch-once": {
         if (type === "reload" || type === "no-store") return type;
@@ -232,7 +235,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
       return;
     };
 
-    asserts.assertTrue(fetcher instanceof fetcherUtils.Fetcher);
+    asserts.assertTrueOLD(fetcher instanceof fetcherUtils.Fetcher);
 
     const type = cacheType();
     asserts.isTypeString(type, "caheType");
@@ -271,8 +274,8 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
           /** @type {CacheObject} */
           const result = evt.target.result;
           if (result) {
-            asserts.assertTrue(result.expires, "Cache should have a expiration date");
-            asserts.assertTrue(result.data, "Cache should always have data");
+            asserts.assertTrueOLD(result.expires, "Cache should have a expiration date");
+            asserts.assertTrueOLD(result.data, "Cache should always have data");
 
             if (result.expires > new Date()) {
               const response = new ApiResponse(cacheKey, result.data, "indexedDB");

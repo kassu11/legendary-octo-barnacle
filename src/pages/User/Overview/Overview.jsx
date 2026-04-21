@@ -157,8 +157,8 @@ export function Overview() {
 }
 
 function GenrePreview(props) {
-  asserts.assertTrue(props.genres, "Genres missing");
-  asserts.assertTrue(props.title, "Title missing");
+  asserts.assertTrueOLD(props.genres, "Genres missing");
+  asserts.assertTrueOLD(props.title, "Title missing");
 
   const { user } = useUser();
 

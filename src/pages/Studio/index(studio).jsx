@@ -1,8 +1,7 @@
-import { A, useParams, useSearchParams } from "@solidjs/router";
+import {  useParams, useSearchParams } from "@solidjs/router";
 import apiOLD from "../../utils/api-OLD.js";
 import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
 import "./index(studio).scss";
-import { formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
@@ -172,7 +171,7 @@ function YearHeader(props) {
 
 
 function MediaCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
+  asserts.assertTrueOLD(props.showYears, "showYears signal is missing");
 
   const merge = (acc, edge) => {
     if (acc.at(-1)?.node.id !== edge.node.id && props.lastMediaId !== edge.node.id) {

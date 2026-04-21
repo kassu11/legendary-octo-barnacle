@@ -3,9 +3,10 @@ import {For, Match, Show, Switch} from "solid-js";
 import {capitalize, formatMediaFormat, mediaUrl, numberCommas} from "../../utils/formating.js";
 import EmojiByScoreScoped from "../../components/EmojiByScore.scoped.jsx";
 import "./VerticalCardRow.scoped.css";
+import { asserts } from "../../collections/collections.js";
 
 export function VerticalCardRowScoped(props) {
-  asserts.assertTrue("href" in props, "Link is missing");
+  asserts.assertTrueOLD("href" in props, "Link is missing");
   asserts.isTypeString(props.type, "type");
 
   return (

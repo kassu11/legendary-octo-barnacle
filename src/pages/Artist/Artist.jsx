@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import apiOLD from "../../utils/api-OLD.js";
-import { Switch, Match, Show, createEffect, createSignal } from "solid-js";
+import {  For, Show } from "solid-js";
 import { AnimeTheme } from "../../components/MediaPage/AnimeThemes.jsx";
 import style from "./Artist.module.scss";
 

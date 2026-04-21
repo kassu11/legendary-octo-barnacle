@@ -7,8 +7,8 @@ import { asserts } from "../../../collections/collections.js";
 import "./FavouriteSection.scoped.css"
 
 export function FavouriteSectionScoped(props) {
-  asserts.assertTrue(props.title, "title missing");
-  asserts.assertTrue(props.type, "type missing");
+  asserts.assertTrueOLD(props.title, "title missing");
+  asserts.assertTrueOLD(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
   const [reorder, setReorder] = createSignal(false);
   const [allEdges, setAllEdges] = createSignal([]);

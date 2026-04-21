@@ -2720,7 +2720,7 @@ function format(strings, ...templates) {
     array.push(strings[i], templates[i] || "");
   }
 
-  const whitespaceAroundChar = /\s*([{}():,\[\]])\s*/g;
+  const whitespaceAroundChar = /\s*([{}():,[\]])\s*/g;
 
   return array.join("").replace(/\n|\r/g, " ").replace(whitespaceAroundChar, "$1").replace(/\s{2,}/g, " ");
 }

@@ -7,8 +7,8 @@ import "./DeleteFavourite.scoped.css"
 export function DeleteFavouriteScoped(props) {
   const { authUserData, accessToken } = useAuthentication();
   const { user } = useUser();
-  asserts.assertTrue(props.onClick, "onClick is missing");
-  asserts.assertTrue(props.mutate, "mutate is missing");
+  asserts.assertTrueOLD(props.onClick, "onClick is missing");
+  asserts.assertTrueOLD(props.mutate, "mutate is missing");
 
   return (
     <Show when={user().id === authUserData()?.data.id}>

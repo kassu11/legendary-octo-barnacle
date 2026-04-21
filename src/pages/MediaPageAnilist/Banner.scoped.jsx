@@ -1,3 +1,4 @@
+import { Show } from "solid-js";
 import "./Banner.scoped.css";
 
 export const MediaBanner = (props) => {

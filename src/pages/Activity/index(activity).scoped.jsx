@@ -1,10 +1,9 @@
 import { A, useParams } from "@solidjs/router";
 import apiOLD from "../../utils/api-OLD.js";
-import { createSignal, For, Match, onCleanup, Show, } from "solid-js";
+import {  For, Show, } from "solid-js";
 import "./index(activity).scoped.css";
 import { ActivityCard } from "../../components/Activity.jsx";
 import { OldMarkdownComponent } from "../../components/Markdown.jsx";
-import { plural } from "../../utils/formating.js";
 import { useAuthentication } from "../../context/providers.js";
 import { CreatedAt } from "../../components/CreatedAt.jsx";
 

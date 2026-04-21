@@ -1,4 +1,4 @@
-import { Match, Show, Switch } from "solid-js";
+import { Match, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, formatMediaSource, numberCommas } from "../../utils/formating";
 import style from "./Header.module.scss";
 

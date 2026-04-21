@@ -4,6 +4,7 @@ export function DraggableScrollContainerScoped(props) {
   let xStart = 0;
   let xScroll = 0;
   let xPrev = NaN;
+  // eslint-disable-next-line 
   let scrollContainer;
 
   return (
@@ -42,6 +43,7 @@ export function DraggableScrollContainerScoped2(props) {
   let xStart = 0;
   let xScroll = 0;
   let xPrev = NaN;
+  // eslint-disable-next-line 
   let scrollContainer;
 
   return (

@@ -21,7 +21,7 @@ export const getMediaById = ({ token, id, isMalId, type }) => {
 };
 
 export const getMediasWithIds = (token, variables) => {
-  asserts.assertTrue(variables.id_in || variables.idMal_in, "Missing list for ids");
+  asserts.assertTrueOLD(variables.id_in || variables.idMal_in, "Missing list for ids");
   const count = variables.id_in?.length || variables.idMal_in?.length;
   if (!count) {
     return;
@@ -79,7 +79,7 @@ export const charactersPageless = (token, id) => {
 };
 
 export const mediaListByUserName = ({ name, type, token }) => {
-  asserts.assertTrue(name, "Name is missing");
+  asserts.assertTrueOLD(name, "Name is missing");
   return fetcherTemplates.anilistAuth(token, queries.anilistUserMediaList, {
     userName: name.toLowerCase(),
     type: type.toUpperCase(),

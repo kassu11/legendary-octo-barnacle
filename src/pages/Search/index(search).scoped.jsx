@@ -1,10 +1,10 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import apiOLD from "../../utils/api-OLD.js";
-import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createRenderEffect, createMemo } from "solid-js";
+import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createMemo } from "solid-js";
 import "./index(search).scoped.css";
-import { capitalize, formatMediaFormat, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
+import { capitalize, formatMediaFormat } from "../../utils/formating.js";
 import { createStore } from "solid-js/store";
-import { SearchBarContext, useAuthentication, useEditMediaEntries, useSearchBar } from "../../context/providers.js";
+import { SearchBarContext, useAuthentication, useSearchBar } from "../../context/providers.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { RatingInputScoped } from "./inputs/RatingInput.scoped.jsx";
@@ -22,8 +22,8 @@ import { TwoHeadedRangeScoped } from "./inputs/TwoHeadedRange.scoped.jsx";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../../utils/virtualSearchParams.js";
 import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
-import { asserts, fetchers, fetcherSenders, globalState, localizations, requests, searchObjects } from "../../collections/collections.js";
-import { fetcherSenderUtils, urlUtils } from "../../utils/utils.js";
+import { asserts, fetchers, fetcherSenders, globalState, localizations, searchObjects } from "../../collections/collections.js";
+import { fetcherSenderUtils } from "../../utils/utils.js";
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
 
@@ -31,14 +31,14 @@ import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContaine
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
-    asserts.assertTrue(!active || key, "key missing");
-    asserts.assertTrue(hidden || name, "Name is missing");
-    asserts.assertTrue(!canClear || !active || url, "Url is missing");
-    asserts.assertTrue(canClear || hidden , "Don't show user meta tags they can't clear");
-    asserts.assertTrue(typeof active === "boolean", "active is not boolean");
-    asserts.assertTrue(typeof visuallyDisabled === "boolean", "visuallyDisabled is not boolean");
-    asserts.assertTrue(typeof hidden === "boolean", "hidden is not boolean");
-    asserts.assertTrue(typeof canClear === "boolean", "canClear is not boolean");
+    asserts.assertTrueOLD(!active || key, "key missing");
+    asserts.assertTrueOLD(hidden || name, "Name is missing");
+    asserts.assertTrueOLD(!canClear || !active || url, "Url is missing");
+    asserts.assertTrueOLD(canClear || hidden , "Don't show user meta tags they can't clear");
+    asserts.assertTrueOLD(typeof active === "boolean", "active is not boolean");
+    asserts.assertTrueOLD(typeof visuallyDisabled === "boolean", "visuallyDisabled is not boolean");
+    asserts.assertTrueOLD(typeof hidden === "boolean", "hidden is not boolean");
+    asserts.assertTrueOLD(typeof canClear === "boolean", "canClear is not boolean");
 
     this.name = name;
     this.url = url;
@@ -120,7 +120,7 @@ function parseURL() {
     }
   }
 
-  asserts.assertFalse(disabledBySeasonSearch && engine === localizations.ani, "Season disabling should only have on MAL search");
+  asserts.assertFalseOLD(disabledBySeasonSearch && engine === localizations.ani, "Season disabling should only have on MAL search");
 
   if (searchParams.q) {
     variables.push(new SearchVariable({ 
@@ -142,7 +142,7 @@ function parseURL() {
       variables.push(new SearchVariable({ key: "type", value: undefined, hidden: true, canClear: false }));
     }
   } else if (engine === "mal") {
-
+    // TODO
   }
 
 
@@ -378,8 +378,8 @@ function parseURL() {
       }
     });
 
-    asserts.assertTrue(validAniOrders.length === 0 || engine === "ani", "validAniOrder should not have anilist orders when engine is mal");
-    asserts.assertTrue(validMalOrder === false || engine === "mal", "validMalOrder should be false if engine is ani");
+    asserts.assertTrueOLD(validAniOrders.length === 0 || engine === "ani", "validAniOrder should not have anilist orders when engine is mal");
+    asserts.assertTrueOLD(validMalOrder === false || engine === "mal", "validMalOrder should be false if engine is ani");
 
     if (engine === "ani") {
       if (validAniOrders.length) {
@@ -480,7 +480,6 @@ const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
 const [externalSourceStore, setExternalSourceStore] = createStore({});
 
 export function SearchBar(props) {
-  const navigate = useNavigate();
   const changeType = useVirtualType();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -501,7 +500,7 @@ export function SearchBar(props) {
   const [malGenresAndThemes] = apiOLD.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
   const triggerSetSearchParams = debounce(setSearchParams, 300);
-  const triggerSetSearchParamsFast = leadingAndTrailing(debounce, setSearchParams, 100);
+  // const triggerSetSearchParamsFast = leadingAndTrailing(debounce, setSearchParams, 100);
   const triggerSearchValues = leadingAndTrailing(debounce, (type, engine, variables) => {
     batch(() => {
       setDebouncedSearchType(type)
@@ -829,8 +828,8 @@ function AnilistMediaSearchContent(props) {
 
 function AnilistMediaSeasonContent(_props) {
   const props = mergeProps({groupCards: true}, _props);
-  asserts.assertTrue(props.page, "page is missing");
-  asserts.assertTrue(props.extraVariables, "extraVariables is missing");
+  asserts.assertTrueOLD(props.page, "page is missing");
+  asserts.assertTrueOLD(props.extraVariables, "extraVariables is missing");
 
   const {accessToken} = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);

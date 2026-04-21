@@ -6,7 +6,7 @@ import apiOLD from "../../../utils/api-OLD.js";
 import { asserts } from "../../../collections/collections.js";
 
 export function Followers(props) {
-  asserts.assertTrue(props.page, "Page is missing");
+  asserts.assertTrueOLD(props.page, "Page is missing");
   const { user } = useUser();
   const { accessToken } = useAuthentication();
   const [followers] = apiOLD.anilist.userFollowers(() => user().id, props.page, accessToken);

@@ -1,4 +1,10 @@
-export function AnilistMediaInfo(props) {
+import { ErrorBoundary, Match, Show, Switch } from "solid-js";
+import { useMediaInfo } from "../../context/providers";
+import { A } from "@solidjs/router";
+import { formatingUtils, numberUtils } from "../../utils/utils";
+import { searchObjects } from "../../collections/collections";
+
+export function AnilistMediaInfo() {
   const { anilistData } = useMediaInfo();
 
   return (

@@ -12,6 +12,7 @@ export function YearInputScoped() {
   const currentYearPlusTwo = new Date().getFullYear() + 2;
   let open = false;
   let oldYearData = {};
+  // eslint-disable-next-line 
   let dialog, scrollWrapper, controller, button, form;
 
   const triggerSetVirtualSearchParams = leadingAndTrailing(debounce, (params, options) => setVirtualSearchParams(params, options), 100);

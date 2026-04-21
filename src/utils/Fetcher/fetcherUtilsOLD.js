@@ -4,7 +4,7 @@ import { requestUtils } from "../utils.js";
 
 export class Fetcher {
   constructor(url, options, formatResponse) {
-    asserts.assertTrue(url, "URL is missing");
+    asserts.assertTrueOLD(url, "URL is missing");
 
     this.url = url;
     this.options = options;
@@ -77,7 +77,7 @@ export const fetchData = async (fetcher, signal) => {
       try {
         const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
         var response = await fetchRequest;
-      } catch (e) {
+      } catch {
         if (signal.aborted) {
           return null;
         }
@@ -124,7 +124,6 @@ export const fetchData = async (fetcher, signal) => {
 
       return fetcher.formatResponse?.(json) || json;
     }
-  } catch (e) {
   } finally {
     requestUtils.removeFromWaitingQueueWithUrl(fetcher.url);
   }

@@ -1,7 +1,7 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import style from "./AnimeThemes.module.scss";
 import { fetchers, fetcherSenders } from "../../collections/collections.js";
-import { fetcherSenderUtils, fetcherUtils } from "../../utils/utils.js";
+import { fetcherSenderUtils } from "../../utils/utils.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
 import {createEffect, ErrorBoundary, For, Match, Show, Switch} from "solid-js";
@@ -38,8 +38,8 @@ function AnimeThemes() {
 }
 
 export function AnimeTheme(props) {
-  asserts.assertTrue(props.video, "Missing video element for playback");
-  asserts.assertTrue(props.theme, "Theme data is missing");
+  asserts.assertTrueOLD(props.video, "Missing video element for playback");
+  asserts.assertTrueOLD(props.theme, "Theme data is missing");
   let artistAndCharacter = false;
 
   return (

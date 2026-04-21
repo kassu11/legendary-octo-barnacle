@@ -4,7 +4,7 @@ import Score from "./Score";
 import style from "./Friends.module.scss";
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useMediaInfo } from "../../context/providers";
-import { fetcherSenderUtils, fetcherUtils } from "../../utils/utils";
+import { fetcherSenderUtils } from "../../utils/utils";
 import { fetchers, fetcherSenders, requests } from "../../collections/collections.js";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 

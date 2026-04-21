@@ -7,7 +7,7 @@ import { urlUtils } from "./utils/utils.js";
 import { Show } from "solid-js";
 import { localizations } from "./collections/collections";
 
-const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(_ => true).catch(_ => false);
+const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
 function App(props) {
   const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;

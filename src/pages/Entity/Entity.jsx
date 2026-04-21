@@ -34,7 +34,6 @@ export function Staff() {
 }
 
 function Body(props) {
-  const params = useParams();
   const [searchParams, _setSearchParams] = useSearchParams();
   const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
   const [variables, setVariables] = createSignal();
@@ -191,9 +190,9 @@ function Body(props) {
 } 
 
 function SubSection(props) {
-  asserts.assertTrue(props.title, "title missing");
-  asserts.assertTrue(props.title, "title missing");
-  asserts.assertTrue(props.type, "type missing");
+  asserts.assertTrueOLD(props.title, "title missing");
+  asserts.assertTrueOLD(props.title, "title missing");
+  asserts.assertTrueOLD(props.type, "type missing");
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
   const [visible, setVisible] = createSignal(false);
@@ -343,8 +342,8 @@ function StaffCharacterPage(props) {
 }
 
 function StaffMediaRolePage(props) {
-  asserts.assertTrue(props.type, "Type is missing");
-  asserts.assertTrue(props.nestLevel, "nestLevel is missing");
+  asserts.assertTrueOLD(props.type, "Type is missing");
+  asserts.assertTrueOLD(props.nestLevel, "nestLevel is missing");
 
   const params = useParams();
   const { accessToken } = useAuthentication();
@@ -431,8 +430,8 @@ function YearHeader(props) {
 }
 
 function CharacterAndActorCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
-  asserts.assertTrue(props.language, "language signal is missing");
+  asserts.assertTrueOLD(props.showYears, "showYears signal is missing");
+  asserts.assertTrueOLD(props.language, "language signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
@@ -480,7 +479,7 @@ function CharacterAndActorCards(props) {
 }
 
 function MediaCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
+  asserts.assertTrueOLD(props.showYears, "showYears signal is missing");
   const combine = (acc, edge) => {
     const last = acc.at(-1);
     if (last?.node.id !== edge.node.id) {
@@ -520,7 +519,7 @@ function MediaCards(props) {
 }
 
 function CharacterAndMediaCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
+  asserts.assertTrueOLD(props.showYears, "showYears signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (

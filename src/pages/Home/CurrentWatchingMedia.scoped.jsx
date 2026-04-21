@@ -3,7 +3,6 @@ import { Show } from "solid-js";
 import { CurrentCardsScoped } from "./CurrentCards.scoped.jsx";
 import "./CurrentWatchingMedia.scoped.css";
 import { signals, timeCollection } from "../../collections/collections.js";
-import { ProgressButton } from "./CurrentCard.scoped.jsx";
 import { useAuthentication } from "../../context/providers.js";
 
 const PICTURE_MODE = 0;
