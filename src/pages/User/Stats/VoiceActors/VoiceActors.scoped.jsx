@@ -4,7 +4,7 @@ import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/format
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
-import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
 import "./VoiceActors.scoped.css";
 
@@ -28,8 +28,8 @@ function StatsVoiceActors(props) {
   const [state, setState] = createSignal("count");
   const [pageType, setPageType] = createSignal("media");
   const mediaVariable = () => pageType() === "media" ? ({ id_in: [...mediaIds()] }) : undefined;
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
   const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 && pageType() === "characters" ? [...characterIds()] : undefined, accessToken);
   const [mediaStore, setMediaStore] = createStore({});
   const [characterStore, setCharacterStore] = createStore({});
@@ -148,8 +148,8 @@ function Cards(props) {
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [characterIds, setCharacterIds] = createSignal(new Set());
   const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
   const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
   // eslint-disable-next-line no-unassigned-vars
   let gridReel;

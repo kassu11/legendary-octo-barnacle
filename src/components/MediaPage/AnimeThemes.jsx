@@ -1,6 +1,6 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import style from "./AnimeThemes.module.scss";
-import { fetchers, fetcherSenders } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD } from "../../collections/collections.js";
 import { fetcherSenderUtils } from "../../utils/utils.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
@@ -12,8 +12,8 @@ function AnimeThemes() {
   const [searchParams] = useSearchParams();
   const { anilistData } = useMediaInfo();
   const videoPlayer = <video src="" controls autoPlay />;
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.animeThemes.getThemesByIdAndApi, () => ({ id: params.id, api: searchParams.isMalId != null ? localizations.mal : params.api, type: params.type }));
-  const [themeData] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.animeThemes.getThemesByIdAndApi, () => ({ id: params.id, api: searchParams.isMalId != null ? localizations.mal : params.api, type: params.type }));
+  const [themeData] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
 
   createEffect(() => {
     params.id;

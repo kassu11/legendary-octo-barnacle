@@ -5,7 +5,7 @@ import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
 import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { useAuthentication } from "../../context/providers.js";
-import { asserts, fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
+import { asserts, fetchersOLD, fetcherSendersOLD, modes, signals } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
@@ -81,8 +81,8 @@ function updateCacheMap(start, end, cacheMap, entries) {
 function CharactersReel(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.charactersPageless, accessToken, () => params.id);
-  const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
+  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.charactersPageless, accessToken, () => params.id);
+  const [pagelessCacheData, { mutateBoth }] = fetcherSendersOLD.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = (apiResponse, voiceActorRoles) => {
     if (!apiResponse?.data?.characters.edges?.length) {
@@ -144,8 +144,8 @@ function CharactersPage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.charactersPage, accessToken, () => params.id, page);
-  const [charactersData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.charactersPage, accessToken, () => params.id, page);
+  const [charactersData] = fetcherSendersOLD.sendWithDisabledSignal(props.isDebug, fetcher);
 
   const hasNextPage = createMemo(prev => prev && !(charactersData()?.data?.characters.pageInfo.hasNextPage === false), true);
   const [voiceActorRole, setVoiceActorRole] = createSignal({ language: "Japanese", dubGroup: null });

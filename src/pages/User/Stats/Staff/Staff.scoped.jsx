@@ -5,7 +5,7 @@ import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js
 import { createStore } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
-import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 import "./Staff.scoped.css";
 
@@ -38,8 +38,8 @@ function StatsStaff(props) {
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
   const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById, { mutate }] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById, { mutate }] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
 
   createEffect(on(() => props.genres, genres => {
@@ -125,8 +125,8 @@ function Cards(props) {
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {

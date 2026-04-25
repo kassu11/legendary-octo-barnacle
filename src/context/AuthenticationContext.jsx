@@ -1,14 +1,15 @@
-import apiOLD, { IndexedDB } from "../utils/api-OLD.js";
-import { createEffect, createMemo, createResource, Show } from "solid-js";
+import { IndexedDB } from "../utils/api-OLD.js";
+import { batch, createEffect, createMemo, createResource, createSignal, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
 import { createFetcher, sendFetcher } from "../utils/fetcherUtils.js";
 import { queries } from "../collections/collections.js";
 // import { createFetcher } from "../utils/fetcherSenderUtils.js";
 
-// const [token, setToken] = createSignal();
+export const [authUserData, setAuthUserData] = createSignal();
+export const [token2, setToken2] = createSignal();
 
 export function AuthenticationProvider(props) {
-  const [accessToken, { mutate: setToken }] = createResource(async () => {
+  const [accessToken, { mutate: setTokenOld }] = createResource(async () => {
     return new Promise((resolve) => {
       const error = () => resolve(null);
       const dbReq = IndexedDB.user(error);
@@ -22,7 +23,19 @@ export function AuthenticationProvider(props) {
       };
     });
   });
-  const [authUserData, { mutate: setAuthUserData }] = apiOLD.anilist.getAuthUserData(() => accessToken() ?? undefined);
+
+  const setToken = (data) => {
+    batch(() => {
+      setToken2(data);
+      setTokenOld(data);
+    });
+  }
+
+  // const [authUserData, { mutate: setAuthUserData }] = apiOLD.anilist.getAuthUserData(() => accessToken() ?? undefined);
+
+  createEffect(() => {
+    setToken2(accessToken());
+  });
 
   const fetcher = createMemo(() => {
     const t = accessToken();
@@ -100,7 +113,7 @@ export function AuthenticationProvider(props) {
   });
 
   return (
-    <AuthenticationContext.Provider value={{ accessToken, setAccessToken, authUserData, logoutUser, isDeveloper }}>
+    <AuthenticationContext.Provider value={{ accessToken: token2, setAccessToken, authUserData, logoutUser, isDeveloper }}>
       <Show when={!accessToken.loading}>
         {props.children}
       </Show>

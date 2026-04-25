@@ -2,7 +2,7 @@ import {A, useParams} from "@solidjs/router";
 import {useAuthentication} from "../../../../context/providers.js";
 import {createEffect, createSignal, For, on, Show} from "solid-js";
 import {formatTitleToUrl} from "../../../../utils/formating.js";
-import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
 import "./GenreMediaCards.scoped.css";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
 
@@ -11,8 +11,8 @@ export function GenreMediaCardsScoped(props) {
   const {accessToken} = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const mediaVariable = () => ({id_in: [...mediaIds()]});
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {

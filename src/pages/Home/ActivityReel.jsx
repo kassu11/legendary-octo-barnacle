@@ -1,13 +1,13 @@
 import {useAuthentication} from "../../context/providers.js";
 import {Show} from "solid-js";
 import {HomePageActivityReelContent} from "./ActivityPage.scoped.jsx";
-import { fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, modes, signals } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 
 export function HomePageActivityReel(props) {
   const {accessToken} = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.activityPageless, accessToken, props.variables);
-  const [pagelessCacheData, {mutateCache, mutateBoth}] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
+  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.activityPageless, accessToken, props.variables);
+  const [pagelessCacheData, {mutateCache, mutateBoth}] = fetcherSendersOLD.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.activities?.length) {

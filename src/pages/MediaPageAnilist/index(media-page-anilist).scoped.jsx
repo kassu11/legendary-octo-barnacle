@@ -27,7 +27,7 @@ import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
 import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
-import { fetchers, fetcherSenders, requests } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, requests } from "../../collections/collections.js";
 import { fetcherSenderUtils, formatingUtils, navigationUtils } from "../../utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
 import Anilist from "../../assets/Anilist.jsx";
@@ -42,9 +42,9 @@ export function MediaInfoContent(props) {
   const { accessToken } = useAuthentication();
   const [isFavourite, setIsFavourite] = createSignal();
 
-  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediaById, () => ({ token: accessToken(), id: params.id, isMalId: searchParams.isMalId != null, type: params.type }));
+  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediaById, () => ({ token: accessToken(), id: params.id, isMalId: searchParams.isMalId != null, type: params.type }));
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
-  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
+  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
   const idMal = createMemo(() => {
     const data = anilistData()?.data;
@@ -58,8 +58,8 @@ export function MediaInfoContent(props) {
     setIsFavourite(apiResponse?.data?.isFavourite ?? false);
   }));
 
-  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getMediaById, () => params.type, idMal);
-  const [_jikanData] = fetcherSenders.sendWithNullUpdates(jikanFetcher);
+  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getMediaById, () => params.type, idMal);
+  const [_jikanData] = fetcherSendersOLD.sendWithNullUpdates(jikanFetcher);
   const jikanData = createMemo(() => {
     if (anilistData()?.data.idMal && _jikanData()?.data?.mal_id === anilistData()?.data.idMal) {
       return _jikanData();

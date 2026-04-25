@@ -5,7 +5,7 @@ import { mediaUrl } from "../../utils/formating.js";
 import { useAuthentication } from "../../context/providers.js";
 import { CreatedAt } from "../../components/CreatedAt.jsx";
 import { arrayUtils, fetcherSenderUtils, scheduleUtils } from "../../utils/utils.js";
-import { asserts, fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
+import { asserts, fetchersOLD, fetcherSendersOLD, modes, signals } from "../../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
@@ -32,8 +32,8 @@ export default function Notifications() {
 
 function NotificationsReel(props) {
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.notificationPageless, accessToken, props.type);
-  const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
+  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.notificationPageless, accessToken, props.type);
+  const [pagelessCacheData, { mutateBoth }] = fetcherSendersOLD.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = apiResponse => {
     if (!apiResponse?.data?.notifications?.length) {
@@ -108,8 +108,8 @@ function NotificationsReel(props) {
 function NotificationsPage(props) {
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.notificationPage, accessToken, props.type, page);
-  const [notificationsData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.notificationPage, accessToken, props.type, page);
+  const [notificationsData] = fetcherSendersOLD.sendWithDisabledSignal(props.isDebug, fetcher);
 
 
   let maxPage = 0;

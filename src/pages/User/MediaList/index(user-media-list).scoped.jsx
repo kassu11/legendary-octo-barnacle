@@ -6,7 +6,7 @@ import {capitalize} from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import {useAuthentication, UserMediaListContext, useUser} from "../../../context/providers.js";
 import {leadingAndTrailingDebounce} from "../../../utils/scheduled.js";
-import {asserts, fetchers, fetcherSenders, requests} from "../../../collections/collections.js";
+import {asserts, fetchersOLD, fetcherSendersOLD, requests} from "../../../collections/collections.js";
 import {MediaListContainerScoped} from "./MediaListContainer.scoped.jsx";
 import {SearchControlsScoped} from "./SearchControls.scoped.jsx";
 import { fetcherSenderUtils } from "../../../utils/utils.js";
@@ -25,9 +25,9 @@ export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
   const { accessToken, authUserData } = useAuthentication();
-  const anilistFetcher = createMemo(() => fetchers.anilist.mediaListByUserName({ token: accessToken(), name: user().name, type: params.type }));
+  const anilistFetcher = createMemo(() => fetchersOLD.anilist.mediaListByUserName({ token: accessToken(), name: user().name, type: params.type }));
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
-  const [mediaList, { mutateCache: mutateMediaListCache }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
+  const [mediaList, { mutateCache: mutateMediaListCache }] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   let worker;

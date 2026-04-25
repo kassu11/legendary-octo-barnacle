@@ -187,6 +187,16 @@ export async function sendFetcher(fetcher, settings = {}) {
 
         const data = await settings.parse(response);
         settings.setValue({ data, cache: false });
+        if (data) {
+          const res = {
+            cacheKey: fetcher.cacheKey,
+            data,
+            expires: settings.expires || new Date().getTime() * 1000 * 60 * 60 * 24 * 30, // 1kk
+            modified: new Date().getTime(),
+          };
+          if (settings.name) res.name = settings.name;
+          settings.cache?.set?.(res, fetcher);
+        }
       } catch (err) {
         settings.onError?.(err);
       }

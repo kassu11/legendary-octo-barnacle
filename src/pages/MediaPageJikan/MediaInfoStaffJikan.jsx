@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { useMediaInfo } from "../../context/providers.js";
-import { fetchers, fetcherSenders, localizations, requests } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, localizations, requests } from "../../collections/collections.js";
 import { fetcherSenderUtils } from "../../utils/utils.js";
 import { MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
 import { ErrorBoundary, For, Show } from "solid-js";
@@ -9,9 +9,9 @@ export function MediaInfoStaffJikan() {
   const params = useParams();
   const { jikanData } = useMediaInfo();
 
-  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getStaffByMediaId, localizations.anime, () => params.id);
+  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getStaffByMediaId, localizations.anime, () => params.id);
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
-  const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
+  const [jikanStaffData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 
   return (
     <ErrorBoundary fallback="MAL staff page error">

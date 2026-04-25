@@ -5,7 +5,7 @@ import style from "./Friends.module.scss";
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useMediaInfo } from "../../context/providers";
 import { fetcherSenderUtils } from "../../utils/utils";
-import { fetchers, fetcherSenders, requests } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, requests } from "../../collections/collections.js";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 
 function Friends() {
@@ -15,7 +15,7 @@ function Friends() {
 
   const { anilistData } = useMediaInfo();
   const friendScoreFetcher = fetcherSenderUtils.createFetcherOLD(
-    fetchers.anilist.getFrendScoresFromMedia, 
+    fetchersOLD.anilist.getFrendScoresFromMedia, 
     () => ({ token: accessToken(), id: searchParams.isMalId != null ? anilistData()?.data?.id : params.id, page: 1, perPage: 8, })
   );
   const cacheType = fetcherSenderUtils.createDynamicCacheType({
@@ -23,7 +23,7 @@ function Friends() {
     "only-if-cached": () => requests.anilist.inFiveSeconds() > 2
   });
 
-  const [friendScoreData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, friendScoreFetcher);
+  const [friendScoreData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, friendScoreFetcher);
 
   const [ownProfileInfo, setOwnProfileInfo] = createSignal();
 

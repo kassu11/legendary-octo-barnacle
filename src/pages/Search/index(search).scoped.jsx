@@ -22,7 +22,7 @@ import { TwoHeadedRangeScoped } from "./inputs/TwoHeadedRange.scoped.jsx";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../../utils/virtualSearchParams.js";
 import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
-import { asserts, fetchers, fetcherSenders, globalState, localizations, searchObjects } from "../../collections/collections.js";
+import { asserts, fetchersOLD, fetcherSendersOLD, globalState, localizations, searchObjects } from "../../collections/collections.js";
 import { fetcherSenderUtils } from "../../utils/utils.js";
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
@@ -890,8 +890,8 @@ function MyAnimeListMediaSearchContent(props) {
   });
 
   const mediaVariables = () => ({ idMal_in: mediaIds(), type: props.type.toUpperCase() });
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariables);
-  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariables);
+  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
 
   createEffect(on(mediaById, media => {
     if (!media?.data?.length) {

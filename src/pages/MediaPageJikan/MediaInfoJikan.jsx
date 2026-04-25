@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import { MediaInfoContext, useAuthentication, useMediaInfo } from "../../context/providers.js";
-import { fetchers, fetcherSenders, localizations, mediaStatuses, requests } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, localizations, mediaStatuses, requests } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
 import { createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scss";
@@ -18,12 +18,12 @@ export function MediaInfoWrapperJikan(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
 
-  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getMediaById, () => params.type, () => params.id);
+  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getMediaById, () => params.type, () => params.id);
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() })
-  const [jikanData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
+  const [jikanData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 
-  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediaByTypeAndMalId, accessToken, () => params.type, () => params.id);
-  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithNullUpdates(anilistFetcher);
+  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediaByTypeAndMalId, accessToken, () => params.type, () => params.id);
+  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSendersOLD.sendWithNullUpdates(anilistFetcher);
 
   const [isFavourite, setIsFavourite] = createSignal();
   createRenderEffect(on(anilistData, apiResponse => {
@@ -171,13 +171,13 @@ export function MediaInfoHomeJikan() {
   const params = useParams();
   const { jikanData } = useMediaInfo();
 
-  const jikanCharacterFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
+  const jikanCharacterFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getCharactersByMediaId, () => params.type, () => params.id);
   const characterCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
-  const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(characterCacheType, jikanCharacterFetcher);
+  const [jikanCharactersData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(characterCacheType, jikanCharacterFetcher);
 
-  const jikanStaffFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getStaffByMediaId, () => params.type, () => params.id);
+  const jikanStaffFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getStaffByMediaId, () => params.type, () => params.id);
   const staffCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inTwoSeconds() || jikanCharactersData.loading})
-  const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(staffCacheType, jikanStaffFetcher);
+  const [jikanStaffData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(staffCacheType, jikanStaffFetcher);
 
   return (
     <>

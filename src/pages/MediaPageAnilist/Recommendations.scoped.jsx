@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { fetcherSenderUtils, scheduleUtils } from "../../utils/utils";
-import { asserts, fetchers, fetcherSenders } from "../../collections/collections";
+import { asserts, fetchersOLD, fetcherSendersOLD } from "../../collections/collections";
 import "./Recommendations.scoped.css";
 import { batch, createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { useAuthentication } from "../../context/providers";
@@ -51,8 +51,8 @@ export function Recommendations(props) {
 function RecommendationsPage(props) {
   const { accessToken } = useAuthentication();
   const [id, setId] = createSignal(undefined)
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getRecommendationsByid, accessToken, id, props.page);
-  const [recommendations, { mutateCache: mutateRecommendations }] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getRecommendationsByid, accessToken, id, props.page);
+  const [recommendations, { mutateCache: mutateRecommendations }] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
 
   const mutateCache = (i, node) => mutateRecommendations(res => {
     res.data.nodes[i] = node;

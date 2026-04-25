@@ -5,15 +5,15 @@ import {untrack} from "solid-js/web";
 import {LoaderCircle} from "../../components/LoaderCircle.jsx";
 import {Tooltip} from "../../components/Tooltips.jsx";
 import {ActivityCard} from "../../components/Activity.jsx";
-import { asserts, fetchers, fetcherSenders } from "../../collections/collections.js";
+import { asserts, fetchersOLD, fetcherSendersOLD } from "../../collections/collections.js";
 import "./ActivityPage.scoped.css";
 import { arrayUtils, fetcherSenderUtils, scheduleUtils } from "../../utils/utils.js";
 
 export function HomePageActivityReelContent(props) {
   const {accessToken} = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.activityPage, accessToken, props.variables, page);
-  const [activityData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.activityPage, accessToken, props.variables, page);
+  const [activityData] = fetcherSendersOLD.sendWithDisabledSignal(props.isDebug, fetcher);
 
   let maxPage = 0;
   const [allowPageFetches, setAllowPageFetches] = createSignal(false);

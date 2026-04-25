@@ -3,15 +3,15 @@ import { Show, For, createRenderEffect, ErrorBoundary } from "solid-js";
 import { Markdown } from "../../components/Markdown.jsx";
 import "../Entity/Entity.scss";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
-import { fetchers, fetcherSenders } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
 import "./CharacterJikan.scoped.css";
 
 export function CharacterJikanScoped() {
   const params = useParams();
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getCharacterById, () => params.id);
-  const [characterData] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getCharacterById, () => params.id);
+  const [characterData] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
 
   createRenderEffect(() => {
     const name = characterData()?.data?.name;
