@@ -395,9 +395,6 @@ const apiOLD = {
       const request = Fetch.authAnilist(token, queries.mediaListEntry, { mediaId });
       return await request.send();
     },
-    getAuthUserData: reloadCache(token => {
-      return Fetch.authAnilist(token, queries.currentUser, {}, (response) => response.data.Viewer);
-    }),
     getActivity: reloadCache((token, variables, page = 1) => {
       return Fetch.authAnilist(token, queries.anilistActivity, { ...variables, page }, res => res.data.Page);
     }),

@@ -49,7 +49,6 @@ export function addFetcherToRateLimit(fetcher) {
   const now = new Date().getTime();
   rateLimit.requests.push({ start: now });
   // Remove requests if they are over 2 min old
-  console.log(rateLimit);
   rateLimit.requests = rateLimit.requests.filter(row => now - row.start > 120_000);
 
   storeRateLimits();

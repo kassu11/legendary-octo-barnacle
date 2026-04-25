@@ -1,9 +1,6 @@
 import { IndexedDB } from "../utils/api-OLD.js";
 import { batch, createEffect, createMemo, createResource, createSignal, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
-import { createFetcher, sendFetcher } from "../utils/fetcherUtils.js";
-import { queries } from "../collections/collections.js";
-// import { createFetcher } from "../utils/fetcherSenderUtils.js";
 
 export const [authUserData, setAuthUserData] = createSignal();
 export const [token2, setToken2] = createSignal();
@@ -31,47 +28,9 @@ export function AuthenticationProvider(props) {
     });
   }
 
-  // const [authUserData, { mutate: setAuthUserData }] = apiOLD.anilist.getAuthUserData(() => accessToken() ?? undefined);
-
   createEffect(() => {
     setToken2(accessToken());
   });
-
-  const fetcher = createMemo(() => {
-    const t = accessToken();
-    if (t === undefined) return;
-
-    const headers = { "Content-Type": "application/json" };
-    if (t) headers.Authorization = `Bearer ${t}`;
-
-    return createFetcher("https://graphql.anilist.co", {
-      method: "POST",
-      headers,
-      body: {
-        query: queries.currentUser,
-        variables: {},
-      },
-      signal: new AbortController().signal
-    });
-  });
-
-  createEffect(() => {
-    const f = fetcher();
-    console.log(f);
-    sendFetcher(f, {
-      active: () => false,
-      onError: res => {
-        console.error(res.status);
-      }
-    });
-  });
-
-  // sendFetcher(fetcher, {
-  //   // active: () => false,
-  //   onError: res => {
-  //     console.log(res.status);
-  //   }
-  // });
 
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {

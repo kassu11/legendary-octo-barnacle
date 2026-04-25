@@ -53,8 +53,7 @@ async function fetcherToFetchRetry(fetcher) {
     try {
       const fetchRequest = fetchRequests[fetcher.cacheKey] ??= fetchWrapper(fetcher);
       var response = await fetchRequest;
-    } catch (e) {
-      console.log(e);
+    } catch {
       if (signal?.aborted) {
         return null;
       }
@@ -79,7 +78,6 @@ async function fetcherToFetchRetry(fetcher) {
 
 function fetchWrapper(fetcher) {
   addFetcherToRateLimit(fetcher);
-  console.log("EVENT 6", fetcher);
   return fetch(...fetcher);
 }
 
