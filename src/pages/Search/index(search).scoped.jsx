@@ -890,7 +890,7 @@ function MyAnimeListMediaSearchContent(props) {
   });
 
   const mediaVariables = () => ({ idMal_in: mediaIds(), type: props.type.toUpperCase() });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariables);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariables);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   createEffect(on(mediaById, media => {

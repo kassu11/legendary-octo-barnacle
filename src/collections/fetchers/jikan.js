@@ -1,7 +1,7 @@
 import { asserts, fetcherTemplates, localizations, queries } from "../collections.js";
 
 export const getMediaById = (type, id) => {
-  asserts.isTypeString(type, "type");
+  asserts.isTypeStringOLD(type, "type");
   asserts.isInteger(id, "id");
   switch (type) {
     case localizations.anime: return fetcherTemplates.getJSON(queries.myAnimeListAnimeById(id), res => res.data);
@@ -10,7 +10,7 @@ export const getMediaById = (type, id) => {
 };
 
 export const getCharactersByMediaId = (type, id) => {
-  asserts.isTypeString(type, "type");
+  asserts.isTypeStringOLD(type, "type");
   asserts.isInteger(id, "id");
   switch (type) {
     case localizations.anime: return fetcherTemplates.getJSON(queries.myAnimeListAnimeCharactersById(id), res => res.data);
@@ -19,7 +19,7 @@ export const getCharactersByMediaId = (type, id) => {
 };
 
 export const getStaffByMediaId = (type, id) => {
-  asserts.isTypeString(type, "type");
+  asserts.isTypeStringOLD(type, "type");
   asserts.isInteger(id, "id");
 
   if (type === localizations.anime) {

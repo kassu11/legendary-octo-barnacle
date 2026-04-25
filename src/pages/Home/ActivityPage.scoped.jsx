@@ -12,7 +12,7 @@ import { arrayUtils, fetcherSenderUtils, scheduleUtils } from "../../utils/utils
 export function HomePageActivityReelContent(props) {
   const {accessToken} = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPage, accessToken, props.variables, page);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.activityPage, accessToken, props.variables, page);
   const [activityData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
   let maxPage = 0;

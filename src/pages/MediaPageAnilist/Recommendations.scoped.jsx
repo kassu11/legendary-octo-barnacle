@@ -51,7 +51,7 @@ export function Recommendations(props) {
 function RecommendationsPage(props) {
   const { accessToken } = useAuthentication();
   const [id, setId] = createSignal(undefined)
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getRecommendationsByid, accessToken, id, props.page);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getRecommendationsByid, accessToken, id, props.page);
   const [recommendations, { mutateCache: mutateRecommendations }] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   const mutateCache = (i, node) => mutateRecommendations(res => {

@@ -187,7 +187,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
       return type;
     }
 
-    asserts.isTypeString(prev, "prev", "If fetcher is same as currentFetcher why is there no previous cacheType");
+    asserts.isTypeStringOLD(prev, "prev", "If fetcher is same as currentFetcher why is there no previous cacheType");
 
     // 1 = Highest fresh data
     // 4 = Lowest cache data
@@ -238,7 +238,7 @@ const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal,
     asserts.assertTrueOLD(fetcher instanceof fetcherUtils.Fetcher);
 
     const type = cacheType();
-    asserts.isTypeString(type, "caheType");
+    asserts.isTypeStringOLD(type, "caheType");
     const isOnDebugSoDontFetch = modes.debug && !fetcher.settings.fetchOnDebug && !fetchOnDebug && type !== "no-store";
     const sendFetchEvenWhenCacheIsFound = !isOnDebugSoDontFetch && (type === "fetch-once" || type === "reload" || type === "no-store");
     const cacheKey = fetcher.cacheKey;

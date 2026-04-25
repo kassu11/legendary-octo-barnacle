@@ -11,7 +11,7 @@ export function GenreMediaCardsScoped(props) {
   const {accessToken} = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const mediaVariable = () => ({id_in: [...mediaIds()]});
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   let fetchNewCards = false;

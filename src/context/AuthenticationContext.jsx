@@ -1,6 +1,11 @@
 import apiOLD, { IndexedDB } from "../utils/api-OLD.js";
-import { createMemo, createResource, Show } from "solid-js";
+import { createEffect, createMemo, createResource, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
+import { createFetcher, sendFetcher } from "../utils/fetcherUtils.js";
+import { queries } from "../collections/collections.js";
+// import { createFetcher } from "../utils/fetcherSenderUtils.js";
+
+// const [token, setToken] = createSignal();
 
 export function AuthenticationProvider(props) {
   const [accessToken, { mutate: setToken }] = createResource(async () => {
@@ -19,6 +24,42 @@ export function AuthenticationProvider(props) {
   });
   const [authUserData, { mutate: setAuthUserData }] = apiOLD.anilist.getAuthUserData(() => accessToken() ?? undefined);
 
+  const fetcher = createMemo(() => {
+    const t = accessToken();
+    if (t === undefined) return;
+
+    const headers = { "Content-Type": "application/json" };
+    if (t) headers.Authorization = `Bearer ${t}`;
+
+    return createFetcher("https://graphql.anilist.co", {
+      method: "POST",
+      headers,
+      body: {
+        query: queries.currentUser,
+        variables: {},
+      },
+      signal: new AbortController().signal
+    });
+  });
+
+  createEffect(() => {
+    const f = fetcher();
+    console.log(f);
+    sendFetcher(f, {
+      active: () => false,
+      onError: res => {
+        console.error(res.status);
+      }
+    });
+  });
+
+  // sendFetcher(fetcher, {
+  //   // active: () => false,
+  //   onError: res => {
+  //     console.log(res.status);
+  //   }
+  // });
+
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {
     const db = evt.target.result;
@@ -26,7 +67,7 @@ export function AuthenticationProvider(props) {
     const getProfileReq = store.get("auth_profile_info");
 
     getProfileReq.onsuccess = evt => {
-      if(evt.target.result == null) return;
+      if (evt.target.result == null) return;
       setAuthUserData(evt.target.result);
     };
   }

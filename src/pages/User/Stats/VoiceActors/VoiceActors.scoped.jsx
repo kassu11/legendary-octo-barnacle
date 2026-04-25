@@ -28,7 +28,7 @@ function StatsVoiceActors(props) {
   const [state, setState] = createSignal("count");
   const [pageType, setPageType] = createSignal("media");
   const mediaVariable = () => pageType() === "media" ? ({ id_in: [...mediaIds()] }) : undefined;
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 && pageType() === "characters" ? [...characterIds()] : undefined, accessToken);
   const [mediaStore, setMediaStore] = createStore({});
@@ -148,7 +148,7 @@ function Cards(props) {
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [characterIds, setCharacterIds] = createSignal(new Set());
   const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
   // eslint-disable-next-line no-unassigned-vars

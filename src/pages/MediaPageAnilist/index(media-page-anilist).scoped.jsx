@@ -42,7 +42,7 @@ export function MediaInfoContent(props) {
   const { accessToken } = useAuthentication();
   const [isFavourite, setIsFavourite] = createSignal();
 
-  const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaById, () => ({ token: accessToken(), id: params.id, isMalId: searchParams.isMalId != null, type: params.type }));
+  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediaById, () => ({ token: accessToken(), id: params.id, isMalId: searchParams.isMalId != null, type: params.type }));
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
   const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
 
@@ -58,7 +58,7 @@ export function MediaInfoContent(props) {
     setIsFavourite(apiResponse?.data?.isFavourite ?? false);
   }));
 
-  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, idMal);
+  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getMediaById, () => params.type, idMal);
   const [_jikanData] = fetcherSenders.sendWithNullUpdates(jikanFetcher);
   const jikanData = createMemo(() => {
     if (anilistData()?.data.idMal && _jikanData()?.data?.mal_id === anilistData()?.data.idMal) {

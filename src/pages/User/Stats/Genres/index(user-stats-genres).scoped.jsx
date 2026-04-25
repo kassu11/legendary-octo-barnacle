@@ -36,7 +36,7 @@ function StatsGenres(props) {
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
   const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
   const [mediaById, { mutate }] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
 

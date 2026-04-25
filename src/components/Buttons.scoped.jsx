@@ -13,7 +13,7 @@ export function QuickActionListButton(props) {
 }
 
 export function QuickActionButton(props) {
-  asserts.isTypeString(props.label, "label");
+  asserts.isTypeStringOLD(props.label, "label");
   asserts.isTypeFunction(props.onClick, "onClick");
 
   return (

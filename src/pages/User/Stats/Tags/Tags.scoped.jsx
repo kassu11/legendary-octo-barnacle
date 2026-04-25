@@ -38,7 +38,7 @@ function StatsTags(props) {
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
   const [mediaById, { mutate }] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
 
@@ -125,7 +125,7 @@ function Cards(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
   const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   let fetchNewCards = false;

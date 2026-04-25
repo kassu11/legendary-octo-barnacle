@@ -9,7 +9,7 @@ export function MediaInfoStaffJikan() {
   const params = useParams();
   const { jikanData } = useMediaInfo();
 
-  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getStaffByMediaId, localizations.anime, () => params.id);
+  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getStaffByMediaId, localizations.anime, () => params.id);
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
   const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 

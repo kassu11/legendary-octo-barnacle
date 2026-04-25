@@ -81,7 +81,7 @@ function updateCacheMap(start, end, cacheMap, entries) {
 function CharactersReel(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPageless, accessToken, () => params.id);
+  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.charactersPageless, accessToken, () => params.id);
   const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = (apiResponse, voiceActorRoles) => {
@@ -144,7 +144,7 @@ function CharactersPage(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPage, accessToken, () => params.id, page);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.charactersPage, accessToken, () => params.id, page);
   const [charactersData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
 
   const hasNextPage = createMemo(prev => prev && !(charactersData()?.data?.characters.pageInfo.hasNextPage === false), true);

@@ -6,7 +6,7 @@ import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 
 export function HomePageActivityReel(props) {
   const {accessToken} = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.activityPageless, accessToken, props.variables);
+  const pagelessFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.activityPageless, accessToken, props.variables);
   const [pagelessCacheData, {mutateCache, mutateBoth}] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
 
   const updateCache = apiResponse => {

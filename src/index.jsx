@@ -37,6 +37,7 @@ import {Socials} from "./pages/User/Socials/Socials.jsx";
 import {BrowseMangaHomeScoped} from "./pages/Browse/BrowseMangaHome.scoped.jsx";
 import {BrowseAnimeHome} from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
 import {BrowseMediaHomeScoped} from "./pages/Browse/BrowseMediaHome.scoped.jsx";
+import { SettingsPage } from "./pages/Settings/index(settings).scoped";
 
 const root = document.getElementById("root")
 
@@ -72,6 +73,7 @@ render(
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />
+            <Route path="/settings" component={SettingsPage} />
             <Route path="/activity/:id" matchFilters={idFilter} component={ActivityPage} />
             {/* <Route path="/compare/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} /> */}
             <Route path="/compare">

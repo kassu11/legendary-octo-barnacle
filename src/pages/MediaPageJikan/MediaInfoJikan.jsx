@@ -18,11 +18,11 @@ export function MediaInfoWrapperJikan(props) {
   const params = useParams();
   const { accessToken } = useAuthentication();
 
-  const jikanFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getMediaById, () => params.type, () => params.id);
+  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getMediaById, () => params.type, () => params.id);
   const cacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() })
   const [jikanData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(cacheType, jikanFetcher);
 
-  const anilistFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediaByTypeAndMalId, accessToken, () => params.type, () => params.id);
+  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.anilist.getMediaByTypeAndMalId, accessToken, () => params.type, () => params.id);
   const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSenders.sendWithNullUpdates(anilistFetcher);
 
   const [isFavourite, setIsFavourite] = createSignal();
@@ -171,11 +171,11 @@ export function MediaInfoHomeJikan() {
   const params = useParams();
   const { jikanData } = useMediaInfo();
 
-  const jikanCharacterFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
+  const jikanCharacterFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getCharactersByMediaId, () => params.type, () => params.id);
   const characterCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
   const [jikanCharactersData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(characterCacheType, jikanCharacterFetcher);
 
-  const jikanStaffFetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getStaffByMediaId, () => params.type, () => params.id);
+  const jikanStaffFetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getStaffByMediaId, () => params.type, () => params.id);
   const staffCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inTwoSeconds() || jikanCharactersData.loading})
   const [jikanStaffData] = fetcherSenders.sendWithCacheTypeWithoutNullUpdates(staffCacheType, jikanStaffFetcher);
 

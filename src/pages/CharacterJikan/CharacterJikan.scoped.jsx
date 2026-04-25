@@ -10,7 +10,7 @@ import "./CharacterJikan.scoped.css";
 
 export function CharacterJikanScoped() {
   const params = useParams();
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.jikan.getCharacterById, () => params.id);
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.jikan.getCharacterById, () => params.id);
   const [characterData] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   createRenderEffect(() => {

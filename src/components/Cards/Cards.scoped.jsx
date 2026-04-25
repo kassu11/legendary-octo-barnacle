@@ -81,7 +81,7 @@ export function AnilistMediaCard(props) {
 
 export function JikanMediaCard(props) {
   asserts.assertTrueOLD(props.media, "Missing media");
-  asserts.isTypeString(props.type);
+  asserts.isTypeStringOLD(props.type);
 
   return (
     <JikanMediaCardListBody {...props}>
@@ -140,7 +140,7 @@ export function AnilistMediaRecommendationCard(props) {
   asserts.assertTrueOLD(props.node, "Missing node");
   asserts.isTypeFunction(props.handleRateUp, "handleRateUp");
   asserts.isTypeFunction(props.handleRateDown, "handleRateDown");
-  asserts.isTypeString(props.userRating, "userRating");
+  asserts.isTypeStringOLD(props.userRating, "userRating");
   asserts.isTypeInteger(props.rating, "rating");
 
   return (
@@ -167,7 +167,7 @@ export function AnilistMediaRecommendationCard(props) {
 
 export function MalCharacterCard(props) {
   asserts.assertTrueOLD(props.character, "character");
-  asserts.isTypeString(props.role, "role");
+  asserts.isTypeStringOLD(props.role, "role");
 
   return (
     <li class="cp-character-card">
@@ -210,7 +210,7 @@ export function MalStaffCard(props) {
 }
 
 function CharacterSection(props) {
-  asserts.isTypeString(props.alt);
+  asserts.isTypeStringOLD(props.alt);
 
   return (
     <A className="clean-link flex" class={props.class} href={props.href}>

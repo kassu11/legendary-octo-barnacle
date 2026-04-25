@@ -12,7 +12,7 @@ function AnimeThemes() {
   const [searchParams] = useSearchParams();
   const { anilistData } = useMediaInfo();
   const videoPlayer = <video src="" controls autoPlay />;
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.animeThemes.getThemesByIdAndApi, () => ({ id: params.id, api: searchParams.isMalId != null ? localizations.mal : params.api, type: params.type }));
+  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchers.animeThemes.getThemesByIdAndApi, () => ({ id: params.id, api: searchParams.isMalId != null ? localizations.mal : params.api, type: params.type }));
   const [themeData] = fetcherSenders.sendWithNullUpdates(fetcher);
 
   createEffect(() => {

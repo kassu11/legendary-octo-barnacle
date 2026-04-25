@@ -14,7 +14,7 @@ function Friends() {
   const { accessToken, authUserData } = useAuthentication();
 
   const { anilistData } = useMediaInfo();
-  const friendScoreFetcher = fetcherSenderUtils.createFetcher(
+  const friendScoreFetcher = fetcherSenderUtils.createFetcherOLD(
     fetchers.anilist.getFrendScoresFromMedia, 
     () => ({ token: accessToken(), id: searchParams.isMalId != null ? anilistData()?.data?.id : params.id, page: 1, perPage: 8, })
   );

@@ -7,7 +7,7 @@ import { asserts } from "../../collections/collections.js";
 
 export function VerticalCardRowScoped(props) {
   asserts.assertTrueOLD("href" in props, "Link is missing");
-  asserts.isTypeString(props.type, "type");
+  asserts.isTypeStringOLD(props.type, "type");
 
   return (
     <section>

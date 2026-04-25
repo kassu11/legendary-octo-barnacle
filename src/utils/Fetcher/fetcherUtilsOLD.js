@@ -26,7 +26,7 @@ export const changeCacheType = (fetcher, type) => {
   return fetcher;
 }
 
-export const sendFetcher = (fetcher, signal) => {
+export const sendFetcherOLD = (fetcher, signal) => {
   requestUtils.addPendingRequestToUrl(fetcher.url);
   const request = fetcherToFetch(fetcher, signal).finally(() => requestUtils.removePendingRequestToUrl(fetcher.url));
   return request;
@@ -75,7 +75,7 @@ export const fetchData = async (fetcher, signal) => {
       }
 
       try {
-        const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcher(fetcher, signal);
+        const fetchRequest = fetchRequests[fetcher.cacheKey] ??= sendFetcherOLD(fetcher, signal);
         var response = await fetchRequest;
       } catch {
         if (signal.aborted) {

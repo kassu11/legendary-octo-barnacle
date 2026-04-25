@@ -21,7 +21,7 @@ const createFetcherWithArguments = (fetcherCreator, args) => {
 /**
  * @param {(any) => Fetcher} fetcherCreator
  */
-export const createFetcher = (fetcherCreator, ...args) => {
+export const createFetcherOLD = (fetcherCreator, ...args) => {
   return createMemo(() => createFetcherWithArguments(fetcherCreator, args));
 }
 

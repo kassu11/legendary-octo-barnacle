@@ -2,7 +2,7 @@ import { asserts } from "../collections/collections";
 import { formatTitleToUrl } from "./formating";
 
 export const titleToUrl = (title) => {
-  asserts.isTypeString(title, "title");
+  asserts.isTypeStringOLD(title, "title");
 
   return encodeURI(title.toLowerCase().replace(/[#%?]+/g, "").replace(/[/\\\-\u2010-\u2015_{}[\]]+/g, " ").trim().replace(/ +/g, "-"));
 }
