@@ -5,11 +5,12 @@ import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 import { createEffect } from "solid-js";
 import { urlUtils } from "./utils/utils.js";
 import { Show } from "solid-js";
-import { localizations, queries } from "./collections/collections";
+import { localizations, modes, queries } from "./collections/collections";
 import { createFetcher, sendFetcher } from "./utils/fetcherUtils";
 import { authUserData, setAuthUserData, token2 } from "./context/AuthenticationContext";
 import { assertTypeString } from "./collections/asserts";
 import { getIndexedDBValue, setIndexedDBValue } from "./utils/indexedDButils";
+import { getSessionStorageJson, setSessionStorageJson } from "./utils/sessionStorageUtils";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
@@ -31,6 +32,8 @@ function createAnilistFetcher(query, variables, signal) {
   });
 }
 
+const cache = new Set();
+
 function App(props) {
   const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;
 
@@ -46,19 +49,31 @@ function App(props) {
 
     sendFetcher(fetcher, {
       active: (res) => {
-        return !res;
+        return !(res && (modes.debug || cache.has(res.cacheKey)));
       },
       cache: {
-        get: res => getIndexedDBValue("fetches", res.cacheKey),
+        get: async res => {
+          const session = getSessionStorageJson(res.cacheKey, null);
+          if (session) return session;
+
+          const data = await getIndexedDBValue("fetches", res.cacheKey);
+          return data;
+        },
         set: async res => {
+          cache.add(res.cacheKey);
+          setSessionStorageJson(res.cacheKey, res);
           await setIndexedDBValue("fetches", res);
         }
       },
-      onError: res => {
-        console.error(res.status);
+      onError: async res => {
+        if (!res) return;
+        const { errors } = await res.json();
+        for (const { message, status } of errors) {
+          // Token has expired so lets log out the user
+          if (status === 400 && message === "Invalid token") return logoutUser()
+        }
       },
       setValue: (res) => {
-        console.log("Found", res.data.data.Viewer);
         setAuthUserData({ data: res.data.data.Viewer });
       }
     });
