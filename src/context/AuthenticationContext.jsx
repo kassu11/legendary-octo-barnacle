@@ -1,21 +1,7 @@
 import { IndexedDB } from "../utils/api-OLD.js";
-import { batch, createEffect, createMemo, createResource, createSignal, Show } from "solid-js";
+import { batch, createEffect, createMemo, createResource, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
-
-export const [authUserData, setAuthUserData] = createSignal();
-export const [token2, setToken2] = createSignal();
-
-export const logoutUser = () => {
-  const dbReq = IndexedDB.user();
-  dbReq.onsuccess = evt => {
-    const db = evt.target.result;
-    const store = IndexedDB.store(db, "data", "readwrite");
-    store.delete("access_token");
-    store.delete("auth_profile_info");
-    setToken2(null);
-    setAuthUserData(null);
-  };
-};
+import { authUserData, setAuthUserData, setToken2, token2 } from "../core/globalState.js";
 
 export function AuthenticationProvider(props) {
   const [accessToken, { mutate: setTokenOld }] = createResource(async () => {

@@ -5,8 +5,8 @@
 
 import { assertTypeArray, assertTypeString } from "../collections/asserts";
 import { localizations, modes } from "../collections/collections";
-import { logoutUser, token2 } from "../context/AuthenticationContext";
 import { addFetcherToRateLimit, getRateLimitFromFetcher } from "../core/fetchRateLimits";
+import { logoutUser, token2 } from "../core/globalState";
 import { hashKeyFNV32 } from "./hashUtils";
 import { getIndexedDBValue, setIndexedDBValue } from "./indexedDButils";
 import { safeStringifyJson } from "./jsonUtils";
@@ -258,6 +258,7 @@ export async function sendFetcher(fetcher, settings = {}) {
 
 const cache = new Set();
 const anilistBaseFetcherSettings = {
+  name: "AniList fetch",
   active: (res) => {
     return !(res && (modes.debug || cache.has(res.cacheKey)));
   },

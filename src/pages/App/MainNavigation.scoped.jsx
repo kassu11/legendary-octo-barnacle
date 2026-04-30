@@ -1,11 +1,11 @@
 import { A } from "@solidjs/router";
-import { createEffect, Match, Show, Switch } from "solid-js";
+import { batch, createEffect, Match, Show, Switch } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { queries } from "../../collections/collections";
-import { authUserData, setAuthUserData, token2 } from "../../context/AuthenticationContext";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { anilistClientId } from "../../utils/urlUtils";
 import { useAuthentication } from "../../context/providers";
+import { authUserData, setAuthedUserId, setAuthUserData, token2 } from "../../core/globalState";
 
 const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${anilistClientId()}&response_type=token`;
 
@@ -18,8 +18,12 @@ export function MainNavigation() {
 
     const fetcher = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
     sendAnilistFetcher(fetcher, {
+      name: "AniList authed user",
       setValue: (res) => {
-        setAuthUserData({ data: res.data.data.Viewer })
+        batch(() => {
+          setAuthUserData({ data: res.data.data.Viewer })
+          setAuthedUserId(res.data.data.Viewer.id);
+        });
       }
     });
   });
