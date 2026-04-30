@@ -138,8 +138,8 @@ function QuickActionItemList(props) {
 
 export function AnilistMediaRecommendationCard(props) {
   asserts.assertTrueOLD(props.node, "Missing node");
-  asserts.isTypeFunction(props.handleRateUp, "handleRateUp");
-  asserts.isTypeFunction(props.handleRateDown, "handleRateDown");
+  asserts.assertTypeFunctionOLD(props.handleRateUp, "handleRateUp");
+  asserts.assertTypeFunctionOLD(props.handleRateDown, "handleRateDown");
   asserts.isTypeStringOLD(props.userRating, "userRating");
   asserts.isTypeInteger(props.rating, "rating");
 

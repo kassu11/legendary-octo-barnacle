@@ -50,9 +50,9 @@ export const sendWithDisabledSignal = (disabledSignal, fetcherSignal) => sendGen
  */
 // eslint-disable-next-line no-unused-vars
 const sendGeneric = ({ cacheTypeSignal, disableNullValues, senderDisabledSignal, enableDebugLogs, fetcherSignal, fetchOnDebug }) => {
-  asserts.isTypeFunction(cacheTypeSignal, "cacheTypeSignal is not a function");
-  asserts.isTypeFunction(senderDisabledSignal, "senderDisabledSignal is not a function");
-  asserts.isTypeFunction(fetcherSignal, "fetcherSignal is not a function");
+  asserts.assertTypeFunctionOLD(cacheTypeSignal, "cacheTypeSignal is not a function");
+  asserts.assertTypeFunctionOLD(senderDisabledSignal, "senderDisabledSignal is not a function");
+  asserts.assertTypeFunctionOLD(fetcherSignal, "fetcherSignal is not a function");
 
   /** @type {[() => null|ApiResponse, (ApiResponse) => void, (ApiResponse) => void]} */
   const [response, setResponse, setResponseWithoutUpdate] = signals.createCustomSignal(undefined);

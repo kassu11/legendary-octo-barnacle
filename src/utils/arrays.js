@@ -134,7 +134,7 @@ export function binarySearchFindAlwaysIndex(arr, callback, left = 0, right = arr
 }
 
 export const findOrFirst = (array, findCallback, defaultReturn) => {
-  asserts.isTypeFunction(findCallback);
+  asserts.assertTypeFunctionOLD(findCallback);
 
   if (!isArray(array) || array.length === 0) {
     return defaultReturn;

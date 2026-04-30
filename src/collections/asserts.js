@@ -12,7 +12,7 @@ export const unreachable = (message = "Assert unreachable") => assertTrueOLD(fal
 
 
 export const isTypeStringOLD = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "string", varName + " is not type of string. " + message);
-export const isTypeFunction = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "function", varName + " is not type of function. " + message);
+export const assertTypeFunctionOLD = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "function", varName + " is not type of function. " + message);
 export const isTypeInteger = (value, varName = "Value", message = "") => assertTrueOLD(Number.isInteger(value), varName + " is not type of integer. " + message);
 
 export const isInteger = (value, varName = "Value", message = "") => {

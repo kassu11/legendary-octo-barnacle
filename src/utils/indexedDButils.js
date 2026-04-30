@@ -38,14 +38,14 @@ export const openIndexDBStore = (storeName, mode) => {
   });
 };
 
-export const setIndexedDBValue = (storeName, value, key) => {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async (res, rej) => {
-    const store = await openIndexDBStore(storeName, "readwrite");
-    const putReq = store.put(value, key);
-    putReq.onerror = rej;
-    putReq.onsuccess = res;
-  });
+export const setIndexedDBValue = async (storeName, value, key) => {
+  const { promise, resolve, reject } = Promise.withResolvers();
+  const store = await openIndexDBStore(storeName, "readwrite");
+  const putReq = store.put(value, key);
+  putReq.onerror = reject;
+  putReq.onsuccess = resolve;
+
+  return await promise;
 };
 
 export const getIndexedDBValue = async (storeName, key) => {
@@ -58,18 +58,18 @@ export const deleteIndexDBValue = async (storeName, key) => {
   store.delete(key);
 };
 
-export const mutateIndexDBValue = (storeName, key, mutate) => {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async (res, rej) => {
-    const getStore = await openIndexDBStore(storeName, "readwrite");
-    const value = await storeGet(getStore, key);
+export const mutateIndexDBValue = async (storeName, key, mutate) => {
+  const { promise, resolve, reject } = Promise.withResolvers();
+  const getStore = await openIndexDBStore(storeName, "readwrite");
+  const value = await storeGet(getStore, key);
 
-    const result = await mutate(value);
-    const setStore = await openIndexDBStore(storeName, "readwrite");
-    const setRequest = setStore.put(result, key);
-    setRequest.onerror = rej;
-    setRequest.onsuccess = () => res(result);
-  });
+  const result = await mutate(value);
+  const setStore = await openIndexDBStore(storeName, "readwrite");
+  const setRequest = setStore.put(result, key);
+  setRequest.onerror = reject;
+  setRequest.onsuccess = () => resolve(result);
+
+  return await promise;
 };
 
 const storeGet = (store, key) => {

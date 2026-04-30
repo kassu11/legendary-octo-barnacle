@@ -4,11 +4,14 @@
 // }
 
 import { assertTypeArray, assertTypeString } from "../collections/asserts";
-import { localizations } from "../collections/collections";
+import { localizations, modes } from "../collections/collections";
+import { logoutUser, token2 } from "../context/AuthenticationContext";
 import { addFetcherToRateLimit, getRateLimitFromFetcher } from "../core/fetchRateLimits";
 import { hashKeyFNV32 } from "./hashUtils";
+import { getIndexedDBValue, setIndexedDBValue } from "./indexedDButils";
 import { safeStringifyJson } from "./jsonUtils";
-import { isTypeObject } from "./objectUtils";
+import { isTypeObject, mergeObjects } from "./objectUtils";
+import { getSessionStorageJson, setSessionStorageJson } from "./sessionStorageUtils";
 
 
 // // Example usage:
@@ -26,6 +29,24 @@ export function createFetcher(url, params, encode = baseEncoding) {
 
   return res;
 };
+
+export function createAnilistFetcher(query, variables, signal) {
+  assertTypeString(query);
+
+  const t = token2();
+  const headers = { "Content-Type": "application/json" };
+  if (t) headers.Authorization = `Bearer ${t}`;
+
+  return createFetcher("https://graphql.anilist.co", {
+    method: "POST",
+    headers,
+    signal,
+    body: {
+      query: query,
+      variables
+    },
+  });
+}
 
 function baseEncoding(url, params) {
   const paramsAsString = safeStringifyJson(params, "missing");
@@ -101,7 +122,8 @@ async function retryDelay(fetcher, response, iteration) {
         return invalidTokenError ? 3_000 : 0;
       }
       case 429: return 25_000; // Too Many Requests but Retry-After is missing?
-      case 500: return 3_000; // Too Many Requests and missing Retry-After
+      case 500: return 3_000; // Anilist will sometimes randomly give 500 internal Sever Error, usually retry will fix
+      case 502: return 15_000; // Bad Gateway, retry after 15 seconds
       case "cors": return 60_000; // AniList CORS error should last one minute
     }
   }
@@ -152,6 +174,12 @@ const baseSettings = {
 //  Maybe this will cause raise condition if multiple tabs are opened
 // TODO: How to handle
 
+/**
+ * This is as close as normal fetch as you can get
+ * The only difference is, that this function does not return anything
+ * We will always pass values with setValue and cache.get hooks
+ * We will also make sure that the fetch rate limits are not broken
+ */
 export async function sendFetcher(fetcher, settings = {}) {
   if (!fetcher) return;
 
@@ -227,3 +255,42 @@ export async function sendFetcher(fetcher, settings = {}) {
     }
   }
 }
+
+const cache = new Set();
+const anilistBaseFetcherSettings = {
+  active: (res) => {
+    return !(res && (modes.debug || cache.has(res.cacheKey)));
+  },
+  cache: {
+    get: async res => {
+      const session = getSessionStorageJson(res.cacheKey, null);
+      if (session) return session;
+
+      const data = await getIndexedDBValue("fetches", res.cacheKey);
+      return data;
+    },
+    set: async res => {
+      cache.add(res.cacheKey);
+      setSessionStorageJson(res.cacheKey, res);
+      await setIndexedDBValue("fetches", res);
+    }
+  },
+  onError: async res => {
+    if (!res) return;
+    const { errors } = await res.json();
+    for (const { message, status } of errors) {
+      // Token has expired so lets log out the user
+      if (status === 400 && message === "Invalid token") logoutUser();
+    }
+  },
+  setValue: (res) => console.error("Missing setValue", res),
+};
+
+export function sendAnilistFetcher(fetcher, settings = anilistBaseFetcherSettings) {
+  if (settings) {
+    const { cache, ...rest } = anilistBaseFetcherSettings;
+    settings = mergeObjects({ ...rest, cache: { ...cache } }, settings);
+  }
+  sendFetcher(fetcher, settings);
+}
+

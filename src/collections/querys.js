@@ -1254,13 +1254,11 @@ export const anilistUserMediaList = format`query ($userId: Int, $userName: Strin
           sectionOrder
           customLists
           splitCompletedSectionByFormat
-          theme
         }
         mangaList {
           sectionOrder
           customLists
           splitCompletedSectionByFormat
-          theme
         }
       }
     }
@@ -1601,6 +1599,46 @@ export const currentWachingMedia = format`query ($userId: Int, $type: MediaType,
         episodes
         chapters
         bannerImage
+        title {
+          userPreferred
+        }
+        coverImage {
+          large
+        }
+        nextAiringEpisode {
+          airingAt
+          timeUntilAiring
+          episode
+        }
+      }
+    }
+  }
+}`
+
+export const anilistCurrentWachingMedia2 = format`query ($userId: Int, $statusIn: [MediaListStatus]) {
+  anime: MediaListCollection(userId: $userId type: ANIME status_in: $statusIn sort: UPDATED_TIME_DESC) {
+    ...mediaListCollection
+  }
+  manga: MediaListCollection(userId: $userId type: MANGA status_in: $statusIn sort: UPDATED_TIME_DESC) {
+    ...mediaListCollection
+  }
+}
+
+fragment mediaListCollection on MediaListCollection {
+  lists {
+    name
+    entries {
+      id
+      status
+      progress
+      progressVolumes
+      media {
+        id
+        type
+        status(version: 2)
+        format
+        episodes
+        chapters
         title {
           userPreferred
         }

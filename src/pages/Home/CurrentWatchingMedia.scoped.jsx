@@ -1,85 +1,50 @@
-import apiOLD from "../../utils/api-OLD.js";
-import { Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import { CurrentCardsScoped } from "./CurrentCards.scoped.jsx";
 import "./CurrentWatchingMedia.scoped.css";
-import { signals, timeCollection } from "../../collections/collections.js";
-import { useAuthentication } from "../../context/providers.js";
+import { modes, queries, signals, timeCollection } from "../../collections/collections.js";
+import { token2, authUserData } from "../../context/AuthenticationContext.jsx";
+import { createAnilistFetcher, createFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 
 const PICTURE_MODE = 0;
 const TEXT_MODE = 1;
 
-export function CurrentWatchingMediaScoped(props) {
-  const { isDeveloper } = useAuthentication();
-  const [animeData, { mutateCache: mutateAnimeCache }] =
-    apiOLD.anilist.wachingAnime(props.userId, props.token);
-  const [mangaData, { mutateCache: mutateMangaCache }] =
-    apiOLD.anilist.readingManga(props.userId, props.token);
+export function CurrentWatchingMediaScoped() {
+  const [data, setData] = createSignal();
 
-  const today = new Date() / 1000;
+  let controller;
+  createEffect(() => {
+    const id = authUserData()?.data.id;
+    const t = token2();
+    if (!t || !id) return;
 
-  const wrapOldCacheAiringTimes = (airingAt) => {
-    if (airingAt == null) {
-      return null;
-    }
+    controller?.abort();
+    controller = new AbortController();
 
-    // Keep the same day but move airingAt time ahead of today
-    if (airingAt < today) {
-      const delta = (today - airingAt) % timeCollection.weekInSeconds;
-      return today + (timeCollection.weekInSeconds - delta);
-    }
+    const fetcher = createAnilistFetcher(queries.anilistCurrentWachingMedia2, {
+      "userId": id,
+      "statusIn": ["CURRENT", "REPEATING"]
+    }, controller.signal);
 
-    return airingAt;
-  };
-
-  const sortAiringTime = (a, b) => {
-    const aTime = wrapOldCacheAiringTimes(a.media.nextAiringEpisode?.airingAt);
-    const bTime = wrapOldCacheAiringTimes(b.media.nextAiringEpisode?.airingAt);
-
-    if (aTime && bTime) {
-      return aTime - bTime;
-    } else if (aTime == bTime) {
-      return 0;
-    } else if (aTime == null) {
-      return 1;
-    }
-    return -1;
-  };
-
-  const [mode, setMode] = signals.localStorageString("LOB_CURRENTLY_WATCHING_MODE", PICTURE_MODE);
+    sendAnilistFetcher(fetcher, {
+      setValue: (res) => {
+        console.log(Object.values(res.data.data).map(e => e.lists).flat());
+        setData(Object.values(res.data.data).map(e => e.lists).flat());
+      }
+    });
+  });
 
   return (
     <>
-      <Show when={isDeveloper()}>
-        <button onClick={() => setMode(PICTURE_MODE)}>Picture mode</button>
-        <button onClick={() => setMode(TEXT_MODE)}>Text mode</button>
-      </Show>
-      <div class="pg-home-current" classList={{picture: mode() == PICTURE_MODE, text: mode() == TEXT_MODE}}>
-        <Show when={animeData()}>
-          <CurrentCardsScoped
-            cards={animeData()
-              .data.data.Page.mediaList.filter(
-                (anime) => anime.media.status !== "FINISHED",
-              )
-              .toSorted(sortAiringTime)}
-            mutateCache={mutateAnimeCache}
-            loading={animeData.loading}
-          />
-          <CurrentCardsScoped
-            cards={animeData().data.data.Page.mediaList.filter(
-              (anime) => anime.media.status === "FINISHED",
-            )}
-            mutateCache={mutateAnimeCache}
-            loading={animeData.loading}
-          />
-        </Show>
-        <Show when={mangaData()}>
-          <CurrentCardsScoped
-            cards={mangaData().data.data.Page.mediaList}
-            mutateCache={mutateMangaCache}
-            loading={mangaData.loading}
-          />
-        </Show>
-      </div>
+      <For each={data()}>{row => (
+        <>
+          <p>{row.name}</p>
+          <For each={row.entries}>{entry => (
+            <div style={{ "background-image": `url("${entry.media.coverImage.large}")` }}>
+              <div>{entry.media.title.userPreferred}</div>
+            </div>
+          )}</For>
+        </>
+      )}</For>
     </>
   );
 }
