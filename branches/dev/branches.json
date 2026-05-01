@@ -1,6 +1,5 @@
 [
   "main"
   , "dev"
-  , "fix-log-out-when-token-is-invalid"
   , "rework-change-fetching-and-caching"
 ]
