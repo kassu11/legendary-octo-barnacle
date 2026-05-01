@@ -206,7 +206,7 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   async function event() {
     settings.onFetch?.(performance.now() - start);
-    if (!signal?.aborded) {
+    if (signal?.aborded !== true) {
       try {
         const response = await fetcherToFetch(fetcher);
         if (!response?.ok) throw response;
@@ -262,7 +262,7 @@ const anilistBaseFetcherSettings = {
   active: (res) => {
     if (!res) return true;
     else if (modes.debug) return false;
-    else return cache.has(res.cacheKey);
+    return !cache.has(res.cacheKey);
   },
   cache: {
     get: async res => {

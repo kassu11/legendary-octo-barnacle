@@ -9,6 +9,7 @@ import { isTypeFunction } from "../../utils/functionUtils.js";
 
 export function CurrentWatchingMediaScoped() {
   const [data, setData] = createSignal();
+  const [loading, setLoading] = createSignal(false);
 
   let controller, cacheData;
   createEffect(() => {
@@ -27,12 +28,15 @@ export function CurrentWatchingMediaScoped() {
     sendAnilistFetcher(fetcher, {
       name: "Currently watching",
       // file: "watching.json",
+      onStart: () => {
+        setLoading(true);
+      },
+      onStop: () => {
+        setLoading(false);
+      },
       setValue: res => {
         cacheData = res;
-        const data = parseCurrentlyWatching(res)
-        console.log(res);
-        console.log(data);
-        setData(data);
+        setData(parseCurrentlyWatching(res));
       }
     });
   });
@@ -47,7 +51,7 @@ export function CurrentWatchingMediaScoped() {
     <>
       <div class="pg-home-current">
         <For each={data()}>{row => (
-          <CurrentCardsScoped cards={row.entries} mutateCache={mutateCache} loading={false} />
+          <CurrentCardsScoped cards={row.entries} mutateCache={mutateCache} loading={loading()} />
         )}</For>
       </div>
     </>
