@@ -1,12 +1,12 @@
-import { useAuthentication } from "../../context/providers.js";
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { leadingAndTrailingDebounce } from "../../utils/scheduled.js";
-import apiOLD from "../../utils/api-OLD.js";
 import { A } from "@solidjs/router";
 import { mediaUrl } from "../../utils/formating.js";
 import { EpisodeTime } from "./EpisodeTime.jsx";
 import "./CurrentCard.scoped.css";
-import { asserts, timeCollection } from "../../collections/collections.js";
+import { queries, timeCollection } from "../../collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
+import { assertTypeInteger } from "../../collections/asserts.js";
 
 function nextAiringEpisode(nextAiringEpisodeObject) {
   if (!nextAiringEpisodeObject?.episode) {
@@ -23,29 +23,31 @@ function nextAiringEpisode(nextAiringEpisodeObject) {
 }
 
 export function ProgressButton(props) {
+  const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, progress) => {
 
-  const { accessToken } = useAuthentication();
-  const triggerProgressIncrease = leadingAndTrailingDebounce(async (token, mediaId, newProgress) => {
-    const response = await apiOLD.anilist.mutateMedia(token, {
-      mediaId,
-      progress: newProgress,
-    });
+    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId, progress }, AbortSignal.timeout(30_000));
+    try {
+      const res = await fetcherToFetch(fetcher);
+      if (res.status !== 200) return;
 
-    if (response.status !== 200) return;
+      const json = await res.json();
 
-    asserts.assertTrueOLD(response.data.progress, "No progress found");
-    props.data.progress = response.data.progress;
-    if (response.data.status === "COMPLETED") {
-      props.mutateCache((request) => {
-        for (const { lists } of Object.values(request.data.data)) {
-          for (const list of lists) {
-            list.entries = list.entries.filter(entry => entry.id !== props.data.id);
+      assertTypeInteger(json.data.SaveMediaListEntry.progress, "No progress found");
+      props.data.progress = json.data.SaveMediaListEntry.progress;
+      if (json.data.SaveMediaListEntry.status === "COMPLETED") {
+        props.mutateCache((request) => {
+          for (const { lists } of Object.values(request.data.data)) {
+            for (const list of lists) {
+              list.entries = list.entries.filter(entry => entry.media.id !== mediaId);
+            }
           }
-        }
-        return request;
-      });
-    } else {
-      props.mutateCache((data) => data);
+          return request;
+        });
+      } else {
+        props.mutateCache((data) => data);
+      }
+    } catch {
+      console.error("Error");
     }
   }, 250, 2);
 
@@ -55,7 +57,7 @@ export function ProgressButton(props) {
         class="cp-current-card-hover-info"
         onClick={(e) => {
           e.preventDefault();
-          triggerProgressIncrease(accessToken(), props.data.media.id, props.progress() + 1);
+          triggerProgressIncrease(props.data.media.id, props.progress() + 1);
           props.setProgress((val) => val + 1);
         }}
       >
