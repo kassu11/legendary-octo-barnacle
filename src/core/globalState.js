@@ -3,8 +3,9 @@ import { IndexedDB } from "../utils/api-OLD";
 import { createLocalStorageJsonSignal } from "../utils/localStorageUtils";
 
 export const [authUserData, setAuthUserData] = createLocalStorageJsonSignal("LOB-authed-used-data");
-export const [token2, setToken2] = createSignal();
-export const [authedUserId, setAuthedUserId] = createSignal();
+export const [token2, setToken2] = createSignal(sessionStorage["LOB-token"]);
+sessionStorage.removeItem("LOB-token");
+export const [authedUserId, setAuthedUserId] = createSignal(authUserData()?.data.id);
 
 export const logoutUser = () => {
   const dbReq = IndexedDB.user();

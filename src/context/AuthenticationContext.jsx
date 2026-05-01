@@ -30,6 +30,11 @@ export function AuthenticationProvider(props) {
     setToken2(accessToken());
   });
 
+  window.addEventListener("beforeunload", () => {
+    const t = token2();
+    if (t) sessionStorage["LOB-token"] = t;
+  });
+
   const dbReq = IndexedDB.user();
   dbReq.onsuccess = evt => {
     const db = evt.target.result;
