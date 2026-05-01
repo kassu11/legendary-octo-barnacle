@@ -1,14 +1,16 @@
 import { createEffect, createSignal, For } from "solid-js";
 import { CurrentCardsScoped } from "./CurrentCards.scoped.jsx";
 import "./CurrentWatchingMedia.scoped.css";
-import { modes, queries, signals, timeCollection } from "../../collections/collections.js";
-import { createAnilistFetcher, createFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
-import { authedUserId, authUserData, token2 } from "../../core/globalState.js";
+import { queries } from "../../collections/collections.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { authedUserId, token2 } from "../../core/globalState.js";
+import { setIndexedDBValue } from "../../utils/indexedDButils.js";
+import { isTypeFunction } from "../../utils/functionUtils.js";
 
 export function CurrentWatchingMediaScoped() {
   const [data, setData] = createSignal();
 
-  let controller;
+  let controller, cacheData;
   createEffect(() => {
     const id = authedUserId();
     const t = token2();
@@ -24,26 +26,61 @@ export function CurrentWatchingMediaScoped() {
 
     sendAnilistFetcher(fetcher, {
       name: "Currently watching",
-      setValue: (res) => {
-        console.log(Object.values(res.data.data).map(e => e.lists).flat());
-        setData(Object.values(res.data.data).map(e => e.lists).flat());
+      // file: "watching.json",
+      setValue: res => {
+        cacheData = res;
+        const data = parseCurrentlyWatching(res)
+        console.log(res);
+        console.log(data);
+        setData(data);
       }
     });
   });
 
+  const mutateCache = (mutation) => {
+    if (!cacheData?.cacheKey) return;
+    mutation = isTypeFunction(mutation) ? mutation(cacheData) : mutation;
+    if (mutation) setIndexedDBValue("fetches", mutation);
+  }
+
   return (
     <>
-      <For each={data()}>{row => (
-        <>
-          <p>{row.name}</p>
-          <For each={row.entries}>{entry => (
-            <div style={{ "background-image": `url("${entry.media.coverImage.large}")` }}>
-              <div>{entry.media.title.userPreferred}</div>
-            </div>
-          )}</For>
-        </>
-      )}</For>
+      <div class="pg-home-current">
+        <For each={data()}>{row => (
+          <CurrentCardsScoped cards={row.entries} mutateCache={mutateCache} loading={false} />
+        )}</For>
+      </div>
     </>
   );
 }
 
+function parseCurrentlyWatching(res) {
+  const lists = [];
+  const splitCount = 5;
+
+  // 1. Loop manga and anime lists
+  for (const row of Object.values(res.data.data)) {
+    // 2. Loop all type specific lists like watching, rewatching etc.
+    for (const { name, entries } of row.lists) {
+      const airing = [];
+      const list = { name, entries: [] };
+      for (const entry of entries) {
+        // 3. Add entry to airing list
+        if (entry.media.nextAiringEpisode) airing.push(entry);
+        else list.entries.push(entry);
+      }
+
+      airing.sort((a, b) => {
+        return a.media.nextAiringEpisode.airingAt - b.media.nextAiringEpisode.airingAt;
+      });
+
+      // 4. There is multiple airing anime, so lets split them
+      if (airing.length < splitCount) list.entries.unshift(...airing);
+      else lists.push({ name: name + " (Airing)", entries: airing })
+
+      lists.push(list);
+    }
+  }
+
+  return lists;
+}

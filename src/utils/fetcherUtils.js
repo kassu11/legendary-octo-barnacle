@@ -185,15 +185,15 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   assertTypeArray(fetcher);
 
-  settings = Object.assign({}, baseSettings, settings);
+  settings = mergeObjects({ ...baseSettings, cache: { ...baseSettings.cache } }, settings);
 
   const start = performance.now();
-
   settings.onStart?.(performance.now() - start);
-  const res = await settings.cache?.get?.(fetcher);
+
+  var res = settings.file ? await (await fetch("/legendary-octo-barnacle/" + settings.file)).json() : await settings.cache?.get?.(fetcher);
   const active = settings.active?.(res);
 
-  if (res) settings.setValue(res);
+  if (res) settings.setValue(res, { fetcher });
 
   if (!active) {
     settings.onStop?.(performance.now() - start);
@@ -217,11 +217,11 @@ export async function sendFetcher(fetcher, settings = {}) {
           const res = {
             cacheKey: fetcher.cacheKey,
             data,
-            expires: settings.expires || new Date().getTime() * 1000 * 60 * 60 * 24 * 30, // 1kk
+            expires: settings.expires || (new Date().getTime() + 1000 * 60 * 60 * 24 * 30), // 1kk
             modified: new Date().getTime(),
           };
           if (settings.name) res.name = settings.name;
-          settings.cache?.set?.(res, fetcher);
+          settings.cache?.set?.(res, { fetcher });
         }
       } catch (err) {
         settings.onError?.(err);
@@ -260,11 +260,14 @@ const cache = new Set();
 const anilistBaseFetcherSettings = {
   name: "AniList fetch",
   active: (res) => {
-    return !(res && (modes.debug || cache.has(res.cacheKey)));
+    if (!res) return true;
+    else if (modes.debug) return false;
+    else return cache.has(res.cacheKey);
   },
   cache: {
     get: async res => {
-      const session = getSessionStorageJson(res.cacheKey, null);
+      // When debugging, we don't want to clear session storage all the time
+      const session = modes.debug ? null : getSessionStorageJson(res.cacheKey, null);
       if (session) return session;
 
       const data = await getIndexedDBValue("fetches", res.cacheKey);

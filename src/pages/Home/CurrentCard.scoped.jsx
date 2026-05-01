@@ -14,79 +14,57 @@ function nextAiringEpisode(nextAiringEpisodeObject) {
   }
 
   if (nextAiringEpisodeObject?.airingAt < timeCollection.currentTimeInSeconds) {
-    const delta = Math.abs(
-      nextAiringEpisodeObject.airingAt - timeCollection.currentTimeInSeconds,
-    );
+    const delta = Math.abs(nextAiringEpisodeObject.airingAt - timeCollection.currentTimeInSeconds);
 
-    return (
-      nextAiringEpisodeObject.episode +
-      Math.floor(delta / timeCollection.weekInSeconds) +
-      1
-    );
+    return nextAiringEpisodeObject.episode + Math.floor(delta / timeCollection.weekInSeconds) + 1;
   }
 
   return nextAiringEpisodeObject.episode;
 }
 
 export function ProgressButton(props) {
-  const { accessToken } = useAuthentication();
-  const triggerProgressIncrease = leadingAndTrailingDebounce(
-    async (token, mediaId, newProgress) => {
-      const response = await apiOLD.anilist.mutateMedia(token, {
-        mediaId,
-        progress: newProgress,
-      });
-      if (response.status !== 200) {
-        return;
-      }
 
-      asserts.assertTrueOLD(response.data.progress, "No progress found");
-      props.data.progress = response.data.progress;
-      if (response.data.status === "COMPLETED") {
-        props.mutateCache((request) => {
-          request.data.data.Page.mediaList =
-            request.data.data.Page.mediaList.filter(
-              (media) => media.id !== props.data.id,
-            );
-          return request;
-        });
-      } else {
-        props.mutateCache((data) => data);
-      }
-    },
-    250,
-    2,
-  );
+  const { accessToken } = useAuthentication();
+  const triggerProgressIncrease = leadingAndTrailingDebounce(async (token, mediaId, newProgress) => {
+    const response = await apiOLD.anilist.mutateMedia(token, {
+      mediaId,
+      progress: newProgress,
+    });
+
+    if (response.status !== 200) return;
+
+    asserts.assertTrueOLD(response.data.progress, "No progress found");
+    props.data.progress = response.data.progress;
+    if (response.data.status === "COMPLETED") {
+      props.mutateCache((request) => {
+        for (const { lists } of Object.values(request.data.data)) {
+          for (const list of lists) {
+            list.entries = list.entries.filter(entry => entry.id !== props.data.id);
+          }
+        }
+        return request;
+      });
+    } else {
+      props.mutateCache((data) => data);
+    }
+  }, 250, 2);
 
   return (
-    <Switch
-      fallback={
-        <button
-          class="cp-current-card-hover-info"
-          onClick={(e) => {
-            e.preventDefault();
-            triggerProgressIncrease(
-              accessToken(),
-              props.data.media.id,
-              props.progress() + 1,
-            );
-            props.setProgress((val) => val + 1);
-          }}
-        >
-          {props.progress} <span class="plus">+</span>
-        </button>
-      }
-    >
-      <Match
-        when={
-          props.data.media.episodes === props.progress() ||
-            props.data.media.chapters === props.progress()
-        }
+    <Switch fallback={
+      <button
+        class="cp-current-card-hover-info"
+        onClick={(e) => {
+          e.preventDefault();
+          triggerProgressIncrease(accessToken(), props.data.media.id, props.progress() + 1);
+          props.setProgress((val) => val + 1);
+        }}
       >
-        <button
-          class="cp-current-card-hover-info normal"
-          onClick={(e) => e.preventDefault()}
-        >
+        {props.progress} <span class="plus">+</span>
+      </button>
+    }
+    >
+      <Match when={props.data.media.episodes === props.progress() || props.data.media.chapters === props.progress()}>
+        <button class="cp-current-card-hover-info normal" onClick={(e) => e.preventDefault()}>
           Completed
         </button>
       </Match>
@@ -96,34 +74,23 @@ export function ProgressButton(props) {
 
 export function CurrentCardScoped(props) {
   const [progress, setProgress] = createSignal(props.data.progress);
-  const [airingEpisode, setAiringEpisode] = createSignal(
-    nextAiringEpisode(props.data.media.nextAiringEpisode),
-  );
+  const [airingEpisode, setAiringEpisode] = createSignal(nextAiringEpisode(props.data.media.nextAiringEpisode));
 
   const isBehind = createMemo(() => airingEpisode() > progress() + 1);
-
 
   const tiles = () => airingEpisode() - (progress() + 1);
   const gapPercent = () => Math.min(tiles() / 10, .45);
   const width = () => 1 / (tiles() - gapPercent()) * 100;
 
   return (
-    <A
-      href={mediaUrl(props.data.media)}
-      data-tooltip-trigger
-      class="cp-current-card"
-    >
-      <img src={props.data.media.coverImage.large} alt="Cover."/>
+    <A href={mediaUrl(props.data.media)} data-tooltip-trigger class="cp-current-card">
+      <img src={props.data.media.coverImage.large} alt="Cover." />
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class="cp-current-card-info">
           <p>Ep {airingEpisode()}</p>
-          <EpisodeTime
-            airingAt={props.data.media.nextAiringEpisode.airingAt}
-            setAiringEpisode={setAiringEpisode}
-          />
+          <EpisodeTime airingAt={props.data.media.nextAiringEpisode.airingAt} setAiringEpisode={setAiringEpisode} />
           <Show when={isBehind()}>
-            <div class="is-behind-container"
-                 style={{background: `repeating-linear-gradient(90deg, var(--red-400), var(--red-400) ${width() * (1 - gapPercent())}%, transparent ${width() * (1 - gapPercent())}%, transparent ${width()}%)`}}></div>
+            <div class="is-behind-container" style={{ background: `repeating-linear-gradient(90deg, var(--red-400), var(--red-400) ${width() * (1 - gapPercent())}%, transparent ${width() * (1 - gapPercent())}%, transparent ${width()}%)` }}></div>
           </Show>
         </div>
       </Show>
@@ -136,12 +103,7 @@ export function CurrentCardScoped(props) {
               {airingEpisode() - (progress() + 1) > 1 && "s"} behind
             </p>
           </Match>
-          <Match
-            when={
-              airingEpisode() == null &&
-              props.data.media.episodes - progress() > 0
-            }
-          >
+          <Match when={airingEpisode() == null && props.data.media.episodes - progress() > 0}>
             <p>
               {props.data.media.episodes - progress()} episode
               {props.data.media.episodes - progress() > 1 && "s"} left

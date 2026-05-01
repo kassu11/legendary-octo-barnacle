@@ -17,8 +17,8 @@ export function MediaListNames(props) {
         </li>
         <For each={props.listData().data.lists}>{list => (
           <li>
-            <button onClick={() => navigate(list.name)}>
-              <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
+            <button onClick={() => navigate(encodeURIComponent(list.name))}>
+              <Show when={decodeURIComponent(params.list) === list.name}>{"> "}</Show>
               {list.name} {list.entries.length}
             </button>
           </li>

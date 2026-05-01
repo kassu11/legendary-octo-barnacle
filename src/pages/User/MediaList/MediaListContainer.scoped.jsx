@@ -46,7 +46,7 @@ export function MediaListContainerScoped(props) {
         <For each={props.listData().data.lists}>{list => {
           storeCardsVisibility(list.name, {});
           return (
-            <Show when={list.entries.length && (!params.list || decodeURI(params.list) === list.name)}>
+            <Show when={list.entries.length && (!params.list || decodeURIComponent(params.list) === list.name)}>
               <h2>{list.name}</h2>
               <ol class="user-profile-media-list-grid">
                 <For each={list.entries}>{(entry, i) => {
@@ -171,7 +171,7 @@ function CardsLoading() {
 
   return (
     <For each={lists()}>{list => (
-      <Show when={list.entries.length && (!params.list || decodeURI(params.list) === list.name)}>
+      <Show when={list.entries.length && (!params.list || decodeURIComponent(params.list) === list.name)}>
         <h2>{list.name}</h2>
         <ol class="user-profile-media-list-grid">
           <For each={list.entries}>{() => (
