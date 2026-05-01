@@ -1,5 +1,5 @@
 import { IndexedDB } from "../utils/api-OLD.js";
-import { batch, createEffect, createMemo, createResource, Show } from "solid-js";
+import { batch, createEffect, createResource, Show } from "solid-js";
 import { AuthenticationContext } from "./providers";
 import { authUserData, setAuthUserData, setToken2, token2 } from "../core/globalState.js";
 
@@ -27,7 +27,9 @@ export function AuthenticationProvider(props) {
   }
 
   createEffect(() => {
-    setToken2(accessToken());
+    const t = accessToken();
+    if (t === undefined) return;
+    setToken2(t);
   });
 
   window.addEventListener("beforeunload", () => {
@@ -69,14 +71,9 @@ export function AuthenticationProvider(props) {
     };
   };
 
-  // This should only be used when feature is soft released
-  const isDeveloper = createMemo(() => {
-    return authUserData()?.data?.id === 5137809;
-  });
-
   return (
-    <AuthenticationContext.Provider value={{ accessToken: token2, setAccessToken, authUserData, logoutUser, isDeveloper }}>
-      <Show when={!accessToken.loading}>
+    <AuthenticationContext.Provider value={{ accessToken: token2, setAccessToken, authUserData, logoutUser }}>
+      <Show when={token2() !== undefined}>
         {props.children}
       </Show>
     </AuthenticationContext.Provider>
