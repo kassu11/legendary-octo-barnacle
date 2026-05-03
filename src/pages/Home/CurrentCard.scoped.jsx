@@ -7,6 +7,7 @@ import "./CurrentCard.scoped.css";
 import { queries, timeCollection } from "../../collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { assertTypeInteger } from "../../collections/asserts.js";
+import { mergeObjects } from "../../utils/objectUtils.js";
 
 function nextAiringEpisode(nextAiringEpisodeObject) {
   if (!nextAiringEpisodeObject?.episode) {
@@ -33,7 +34,7 @@ export function ProgressButton(props) {
       const json = await res.json();
 
       assertTypeInteger(json.data.SaveMediaListEntry.progress, "No progress found");
-      props.data.progress = json.data.SaveMediaListEntry.progress;
+      mergeObjects(props.data, json.data.SaveMediaListEntry);
       if (json.data.SaveMediaListEntry.status === "COMPLETED") {
         props.mutateCache((request) => {
           for (const { lists } of Object.values(request.data.data)) {

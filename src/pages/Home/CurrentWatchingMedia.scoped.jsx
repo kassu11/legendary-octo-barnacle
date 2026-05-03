@@ -68,6 +68,7 @@ function parseCurrentlyWatching(res) {
     for (const { name, entries } of row.lists) {
       const airing = [];
       const list = { name, entries: [] };
+      entries.sort((a, b) => b.updatedAt - a.updatedAt);
       for (const entry of entries) {
         // 3. Add entry to airing list
         if (entry.media.nextAiringEpisode) airing.push(entry);
