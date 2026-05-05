@@ -6,6 +6,12 @@ const createDbStore = (db, storeName, key) => {
   }
 };
 
+// const deleteObjectStore = (db, storeName) => {
+//   if (!db.objectStoreNames.contains(storeName)) {
+//     return db.deleteObjectStore(storeName);
+//   }
+// }
+
 export const openIndexDBStore = (storeName, mode) => {
   const request = indexedDB.open("legendary-octo-barnacle-cache2", 1);
 
@@ -26,14 +32,15 @@ export const openIndexDBStore = (storeName, mode) => {
   return new Promise((res, rej) => {
     request.onerror = rej;
     request.onsuccess = (evt) => {
-      const db = evt.target.result;
-      assertThruthy(
-        db.objectStoreNames.contains(storeName),
-        `Unknown store name "${storeName}"`,
-      );
-      const transaction = db.transaction(storeName, mode);
+      try {
+        const db = evt.target.result;
+        assertThruthy(db.objectStoreNames.contains(storeName), `Unknown store name "${storeName}"`);
+        const transaction = db.transaction(storeName, mode);
 
-      res(transaction.objectStore(storeName));
+        res(transaction.objectStore(storeName));
+      } catch (e) {
+        rej(e);
+      }
     };
   });
 };
@@ -76,7 +83,33 @@ const storeGet = (store, key) => {
   return new Promise((res, rej) => {
     const getRequest = store.get(key);
 
-    getRequest.onsuccess = (evt) => res(evt.target.result);
+    getRequest.onsuccess = (evt) => {
+      if (evt.target.result?.expires < curTime) res(null);
+      else res(evt.target.result);
+    }
     getRequest.onerror = rej;
   });
 };
+
+const curTime = new Date();
+async function deleteExpired(storeName) {
+  const store = await openIndexDBStore(storeName, "readwrite");
+  const index = store.index("Expiration");
+
+  const range = IDBKeyRange.lowerBound(curTime, true);
+  const request = index.openCursor(range);
+
+  request.onsuccess = (event) => {
+    const cursor = event.target.result;
+    if (cursor) {
+      cursor.delete();     // delete current record
+      cursor.continue();   // move to next
+    }
+  };
+}
+
+// Clean expired cache entries after 5 seconds of the page loading
+// Expired values are also filtered out whithin the getter
+setTimeout(() => {
+  deleteExpired("fetches");
+}, 5_000);
