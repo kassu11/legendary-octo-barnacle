@@ -6,10 +6,12 @@ import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUti
 import { authedUserId, token2 } from "../../core/globalState.js";
 import { setIndexedDBValue } from "../../utils/indexedDButils.js";
 import { isTypeFunction } from "../../utils/functionUtils.js";
+import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 
 export function CurrentWatchingMediaScoped() {
   const [data, setData] = createSignal();
   const [loading, setLoading] = createSignal(false);
+  const [time, startTimer, stopTimer] = createTimer();
 
   let controller, cacheData;
   createEffect(() => {
@@ -28,11 +30,13 @@ export function CurrentWatchingMediaScoped() {
     sendAnilistFetcher(fetcher, {
       name: "Currently watching",
       // file: "watching.json",
-      onStart: () => {
+      onStart: time => {
         setLoading(true);
+        startTimer(time);
       },
-      onStop: () => {
+      onStop: time => {
         setLoading(false);
+        stopTimer(time);
       },
       setValue: res => {
         cacheData = res;
@@ -50,6 +54,7 @@ export function CurrentWatchingMediaScoped() {
   return (
     <>
       <div class="pg-home-current">
+        <p>{formatMSToString(time())}</p>
         <For each={data()}>{row => (
           <CurrentCardsScoped cards={row.entries} mutateCache={mutateCache} loading={loading()} />
         )}</For>
