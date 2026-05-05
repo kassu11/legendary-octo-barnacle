@@ -1515,6 +1515,7 @@ fragment mediaListCollection on MediaListCollection {
       status
       progress
       progressVolumes
+      updatedAt
       media {
         id
         type
