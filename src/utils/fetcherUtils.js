@@ -1,23 +1,13 @@
-// const fetcher = ["url", {}];
-// export function fetcherToFetchParams(fetcher) {
-//
-// }
-
 import { assertTypeArray, assertTypeString } from "../collections/asserts";
 import { localizations, modes } from "../collections/collections";
 import { addFetcherToRateLimit, getRateLimitFromFetcher } from "../core/fetchRateLimits";
 import { logoutUser, token2 } from "../core/globalState";
 import { hashKeyFNV32 } from "./hashUtils";
-import { getIndexedDBValue, setIndexedDBValue } from "./indexedDButils";
+import { getIndexedDBValue } from "./indexedDButils";
 import { safeStringifyJson } from "./jsonUtils";
 import { isTypeObject, mergeObjects } from "./objectUtils";
-import { getSessionStorageJson, setSessionStorageJson } from "./sessionStorageUtils";
-
-
-// // Example usage:
-// const query = "{ user(id: 5) { name, email, posts { title } } }";
-// const key = `cache_${hashKey(query)}`; 
-// // Result: cache_a1b2c3d4
+import { getSessionStorageJson } from "./sessionStorageUtils";
+import { setFetcherValueToStorage } from "./storageUtils";
 
 export function createFetcher(url, params, encode = baseEncoding) {
   assertTypeString(url);
@@ -153,14 +143,29 @@ const requestQueue = [
 //   while (true) {
 //     const { done, value } = await reader.read();
 const baseSettings = {
+  active: (res, settings) => {
+    if (!res) return true;
+    else if (settings.debug) return false;
+    return !cache.has(res.cacheKey);
+  },
+  debug: modes.debug,
+  cache: {
+    get: async (res, settings) => {
+      // When debugging, we don't want to clear session storage all the time
+      const session = !settings.debug && getSessionStorageJson(res.cacheKey, null);
+      if (session) return session;
+
+      const data = await getIndexedDBValue("fetches", res.cacheKey);
+      return data;
+    },
+    set: async res => {
+      cache.add(res.cacheKey);
+      setFetcherValueToStorage(res);
+    }
+  },
+  setValue: (res) => console.error("Missing setValue", res),
   parse: res => res.json(),
   queue: true,
-  cache: {
-    get: () => null,
-    set: () => { },
-  },
-  active: () => true,
-  setValue: () => { },
   onStart: () => { },
   onError: () => { },
   onFetch: () => { },
@@ -190,8 +195,8 @@ export async function sendFetcher(fetcher, settings = {}) {
   const start = performance.now();
   settings.onStart?.(performance.now() - start);
 
-  var res = settings.file ? await (await fetch("/legendary-octo-barnacle/" + settings.file)).json() : await settings.cache?.get?.(fetcher);
-  const active = settings.active?.(res);
+  var res = settings.file ? await (await fetch("/legendary-octo-barnacle/" + settings.file)).json() : await settings.cache?.get?.(fetcher, settings);
+  const active = settings.active?.(res, settings);
 
   if (res) settings.setValue(res, { fetcher });
 
@@ -259,26 +264,6 @@ export async function sendFetcher(fetcher, settings = {}) {
 const cache = new Set();
 const anilistBaseFetcherSettings = {
   name: "AniList fetch",
-  active: (res) => {
-    if (!res) return true;
-    else if (modes.debug) return false;
-    return !cache.has(res.cacheKey);
-  },
-  cache: {
-    get: async res => {
-      // When debugging, we don't want to clear session storage all the time
-      const session = modes.debug ? null : getSessionStorageJson(res.cacheKey, null);
-      if (session) return session;
-
-      const data = await getIndexedDBValue("fetches", res.cacheKey);
-      return data;
-    },
-    set: async res => {
-      cache.add(res.cacheKey);
-      setSessionStorageJson(res.cacheKey, res);
-      await setIndexedDBValue("fetches", res);
-    }
-  },
   onError: async res => {
     if (!res) return;
     const { errors } = await res.json();
@@ -287,7 +272,6 @@ const anilistBaseFetcherSettings = {
       if (status === 400 && message === "Invalid token") logoutUser();
     }
   },
-  setValue: (res) => console.error("Missing setValue", res),
 };
 
 export function sendAnilistFetcher(fetcher, settings = anilistBaseFetcherSettings) {

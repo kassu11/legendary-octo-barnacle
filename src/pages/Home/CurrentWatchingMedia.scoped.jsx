@@ -4,9 +4,9 @@ import "./CurrentWatchingMedia.scoped.css";
 import { queries } from "../../collections/collections.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { authedUserId, token2 } from "../../core/globalState.js";
-import { setIndexedDBValue } from "../../utils/indexedDButils.js";
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 
 export function CurrentWatchingMediaScoped() {
   const [data, setData] = createSignal();
@@ -48,7 +48,7 @@ export function CurrentWatchingMediaScoped() {
   const mutateCache = (mutation) => {
     if (!cacheData?.cacheKey) return;
     mutation = isTypeFunction(mutation) ? mutation(cacheData) : mutation;
-    if (mutation) setIndexedDBValue("fetches", mutation);
+    if (mutation) setFetcherValueToStorage(mutation);
   }
 
   return (
