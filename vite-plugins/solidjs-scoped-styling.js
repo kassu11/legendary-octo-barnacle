@@ -24,6 +24,7 @@ export const transform = (src, id) => {
       "'": "'",
       "[": "]",
     };
+    let insideNonScopableBlock = 0; // don't scope inside @keyframes or @page (0 == false and higher than 0 means nesting level)
 
     const length = src.length;
     main: for (let start = 0; start < length; start++) {
@@ -57,6 +58,10 @@ export const transform = (src, id) => {
         }
         // Position is the new best selector start index
         else if ((src[end] === ";" || src[end] === "}") && src[end - 1] !== "\\") {
+          // We are inside @page or @keyframes block
+          // Because we just hit "}" remove one level of nesting
+          if (insideNonScopableBlock && src[end] === "}") insideNonScopableBlock--;
+
           returnQuery += src.substring(start, end + 1);
           start = end + 1;
         }
@@ -81,6 +86,16 @@ export const transform = (src, id) => {
           start = i;
           break;
         }
+      }
+
+      // We are inside a block that should never be scoped (@keyframes or @page)
+      // Because end index should always be "{" character we can safely deepen the nesting level
+      // Early exit untill this block is exited (insideNonScopableBlock hits 0)
+      if (insideNonScopableBlock || equalsforwards("@keyframes", src, start) || equalsforwards("@page", src, start)) {
+        insideNonScopableBlock++;
+        returnQuery += src.substring(start, end + 1);
+        start = end;
+        continue main;
       }
 
       // Selector is @media or @container early exit scoping
@@ -189,10 +204,7 @@ export const transform = (src, id) => {
         // args: :not(.class) no args: :hover
         else if (src[i] === ":") {
           // Don't scope :root, if there are any other pseudo selectors that you should not scope add them here
-          if (equalsforwards(":root", src, i)) {
-            scopeCurrentSelector = false;
-          }
-          else if (scopeCurrentSelector) {
+          if (!equalsforwards(":root", src, i) && scopeCurrentSelector) {
             returnQuery += attribute;
           }
           scopeCurrentSelector = false;
