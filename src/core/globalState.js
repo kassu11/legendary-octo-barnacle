@@ -6,6 +6,7 @@ export const [authUserData, setAuthUserData] = createLocalStorageJsonSignal("LOB
 export const [token2, setToken2] = createSignal(sessionStorage["LOB-token"]);
 sessionStorage.removeItem("LOB-token");
 export const [authedUserId, setAuthedUserId] = createSignal(authUserData()?.data.id);
+export const [mainLoadingCount, setMainLoadingCount] = createSignal(0);
 
 export const logoutUser = () => {
   const dbReq = IndexedDB.user();

@@ -1,7 +1,7 @@
 import { assertTypeArray, assertTypeString } from "../collections/asserts";
 import { localizations, modes } from "../collections/collections";
 import { addFetcherToRateLimit, getRateLimitFromFetcher } from "../core/fetchRateLimits";
-import { logoutUser, token2 } from "../core/globalState";
+import { logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
 import { hashKeyFNV32 } from "./hashUtils";
 import { getIndexedDBValue } from "./indexedDButils";
 import { safeStringifyJson } from "./jsonUtils";
@@ -149,6 +149,7 @@ const baseSettings = {
     return !cache.has(res.cacheKey);
   },
   debug: modes.debug,
+  loadingBar: true,
   cache: {
     get: async (res, settings) => {
       // When debugging, we don't want to clear session storage all the time
@@ -205,6 +206,7 @@ export async function sendFetcher(fetcher, settings = {}) {
     return;
   }
 
+  if (settings.loadingBar) setMainLoadingCount(v => v + 1);
 
   const [url, { signal }] = fetcher;
   const queueTarget = requestQueue.find(que => url.includes(que.url));
@@ -234,6 +236,7 @@ export async function sendFetcher(fetcher, settings = {}) {
     }
 
     settings.onStop?.(performance.now() - start);
+    if (settings.loadingBar) setMainLoadingCount(v => v - 1);
 
     clearTimeout(queueTarget.timeout);
     queueTarget.timeout = setTimeout(loop, 10);
