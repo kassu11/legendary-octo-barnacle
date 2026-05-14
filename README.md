@@ -2,8 +2,8 @@
 This project does not currently have any real name, but it's supposed to combine AniList and MyAnimeList APIs to one simple site.
 
 ## Current progress
-1. Make it work <---
-2. Make it good
+1. Make it work
+2. Make it good <---
 3. Make it fast
 
 > [!IMPORTANT]
@@ -12,7 +12,7 @@ This project does not currently have any real name, but it's supposed to combine
 ## Usage
 
 ```bash
-$ npm install # or pnpm install or yarn install
+$ pnpm i
 ```
 
 ### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
@@ -21,12 +21,12 @@ $ npm install # or pnpm install or yarn install
 
 In the project directory, you can run:
 
-### `npm run dev`
+### `pnpm run dev`
 
 Runs the app in the development mode.<br>
 Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
 
-### `npm run build`
+### `pnpm run build`
 
 Builds the app for production to the `dist` folder.<br>
 It correctly bundles Solid in production mode and optimizes the build for the best performance.
