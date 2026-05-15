@@ -1,6 +1,6 @@
 import { assertTypeArray, assertTypeString } from "../collections/asserts";
 import { localizations, modes } from "../collections/collections";
-import { addFetcherToRateLimit, getRateLimitFromFetcher } from "../core/fetchRateLimits";
+import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "../core/fetchRateLimits";
 import { logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
 import { hashKeyFNV32 } from "./hashUtils";
 import { getIndexedDBValue } from "./indexedDButils";
@@ -77,6 +77,9 @@ async function fetcherToFetchRetry(fetcher) {
 
     // Check if error status can be handled by just waiting it out
     const delay = await retryDelay(fetcher, response, i);
+
+    setFetchResponseToRateLimit(fetcher, response, delay);
+
     // Response was error, but we don't know how to handle the error, so return response
     if (!delay) break;
 
@@ -216,6 +219,9 @@ export async function sendFetcher(fetcher, settings = {}) {
     if (signal?.aborded !== true) {
       try {
         const response = await fetcherToFetch(fetcher);
+
+        setFetchResponseToRateLimit(fetcher, response);
+
         if (!response?.ok) throw response;
 
         const data = await settings.parse(response);

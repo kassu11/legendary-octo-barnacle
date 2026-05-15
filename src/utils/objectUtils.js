@@ -1,6 +1,6 @@
 import { assertFalsy } from "../collections/asserts";
 
-export const isTypeObject = value => typeof value === "object" && value;
+export const isTypeObject = value => typeof value === "object" && value && !Array.isArray(value);
 
 export const mergeObjects = (base, ...objs) => {
   assertFalsy(objs.length < 1, "Give more objects");
