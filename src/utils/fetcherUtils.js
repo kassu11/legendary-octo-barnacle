@@ -43,18 +43,23 @@ function baseEncoding(url, params) {
   return hashKeyFNV32(url) + hashKeyFNV32(paramsAsString) + hashKeyFNV32(url + paramsAsString);
 }
 
-export function fetcherToFetch(fetcher) {
-  // For debugging you can enable random error end points
-  if (Math.random() > 1) {
-    console.log("Error route");
-    switch (Math.ceil(Math.random() * 3)) {
-      case 1: return fetch("https://http.codes/429", fetcher[1]);
-      case 2: return fetch("https://http.codes/500", fetcher[1]);
-      case 3: return fetch("https://http.codes/cors", fetcher[1]);
+export async function fetcherToFetch(fetcher) {
+  try {
+    setMainLoadingCount(v => v + 1);
+    // For debugging you can enable random error end points
+    if (Math.random() > 1) {
+      console.log("Error route");
+      switch (Math.ceil(Math.random() * 3)) {
+        case 1: return await fetch("https://http.codes/429", fetcher[1]);
+        case 2: return await fetch("https://http.codes/500", fetcher[1]);
+        case 3: return await fetch("https://http.codes/cors", fetcher[1]);
+      }
     }
-  }
 
-  return fetcherToFetchRetry(fetcher);
+    return await fetcherToFetchRetry(fetcher);
+  } finally {
+    setMainLoadingCount(v => v - 1);
+  }
 }
 
 const fetchRequests = {};
