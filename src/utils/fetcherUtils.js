@@ -273,19 +273,14 @@ export async function sendFetcher(fetcher, settings = {}) {
     if (!queueTarget.queue.length) return;
     const { event, fetcher } = queueTarget.queue.at(-1);
     const inActiveTabPenalty = document.hidden ? 1_000 : 0;
-    // if (document.hidden) {
-    //   const { promise, resolve } = Promise.withResolvers();
-    //   document.addEventListener("visibilitychange", resolve, { once: true });
-    //   await promise;
-    // }
 
-    const ms = inActiveTabPenalty + getRateLimitFromFetcher(fetcher);
+    const ms = getRateLimitFromFetcher(fetcher);
     if (ms === 0) {
       queueTarget.queue.pop();
       event();
     } else {
       clearTimeout(queueTarget.timeout);
-      queueTarget.timeout = setTimeout(loop, ms);
+      queueTarget.timeout = setTimeout(loop, inActiveTabPenalty + ms);
     }
   }
 }
