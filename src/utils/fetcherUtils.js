@@ -2,6 +2,7 @@ import { assertTypeArray, assertTypeString } from "../collections/asserts";
 import { localizations, modes } from "../collections/collections";
 import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "../core/fetchRateLimits";
 import { logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
+import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped";
 import { hashKeyFNV32 } from "./hashUtils";
 import { getIndexedDBValue } from "./indexedDButils";
 import { safeStringifyJson } from "./jsonUtils";
@@ -50,9 +51,9 @@ export async function fetcherToFetch(fetcher) {
     if (Math.random() > 1) {
       console.log("Error route");
       switch (Math.ceil(Math.random() * 3)) {
-        case 1: return await fetch("https://http.codes/429", fetcher[1]);
-        case 2: return await fetch("https://http.codes/500", fetcher[1]);
-        case 3: return await fetch("https://http.codes/cors", fetcher[1]);
+        case 1: return await fetch("https://http.codes/429");
+        case 2: return await fetch("https://http.codes/500");
+        case 3: return await fetch("https://http.codes/cors");
       }
     }
 
@@ -81,12 +82,15 @@ async function fetcherToFetchRetry(fetcher) {
     if (response?.ok) break;
 
     // Check if error status can be handled by just waiting it out
-    const delay = await retryDelay(fetcher, response, i);
+    const { delay, message } = await retryDelay(fetcher, response, i);
 
     setFetchResponseToRateLimit(fetcher, response, delay);
 
     // Response was error, but we don't know how to handle the error, so return response
     if (!delay) break;
+
+    // We can handle the error, but we still want to display a warning to the user
+    if (message) addApplicationNotification({ type: "warning", message, duration: 3_000 });
 
     // Response was error, but we know that the error should be fixed after wayting the delay
     await new Promise(res => setTimeout(res, delay));
@@ -103,7 +107,7 @@ function fetchWrapper(fetcher) {
 async function retryDelay(fetcher, response, iteration) {
   const status = response?.status || "cors";
   const retry = response?.headers?.get("Retry-After");
-  if (retry) return parseInt(retry) * 1000;
+  if (retry) return { delay: parseInt(retry) * 1000, message: "Too Many Requests. Wait for: " + Math.ceil(retry / 1000) + " seconds" };
 
   const [url] = fetcher;
 
@@ -115,24 +119,25 @@ async function retryDelay(fetcher, response, iteration) {
       case 400: {
         if (iteration < 2) {
           const { errors } = await response.json();
+          response.json = () => ({ errors }); // Bandage fix to "body stream already read"
           var invalidTokenError = errors.some(error => error.message === "Invalid token");
         }
-        return invalidTokenError ? 3_000 : 0;
+        return { delay: invalidTokenError ? 3_000 : 0 };
       }
-      case 429: return 25_000; // Too Many Requests but Retry-After is missing?
-      case 500: return 3_000; // Anilist will sometimes randomly give 500 internal Sever Error, usually retry will fix
-      case 502: return 15_000; // Bad Gateway, retry after 15 seconds
-      case "cors": return 60_000; // AniList CORS error should last one minute
+      case 429: return { delay: 25_000, message: "Anilist Too Many Request. Wait for 25 seconds." }; // Too Many Requests but Retry-After is missing?
+      case 500: return { delay: 3_000, message: "Anilist request failed. Retrying again in 3 seconds" }; // Anilist will sometimes randomly give 500 internal Sever Error, usually retry will fix
+      case 502: return { delay: 15_000, message: "Anilist has Bad Gateway. Wait for 15 seconds" }; // Bad Gateway, retry after 15 seconds
+      case "cors": return { delay: 60_000, message: "You have send too many Anilist requests. Wait for 1 minute" }; // AniList CORS error should last one minute
     }
   }
   if (url.includes(localizations.jikan)) {
     switch (status) {
-      case 429: return 1_000; // Too Many Requests and missing Retry-After
+      case 429: return { delay: 1_000, message: "Jikan API rate limit hit" }; // Too Many Requests and missing Retry-After
     }
   }
   if (url.includes(localizations.animethemes)) {
     switch (status) {
-      case 429: return 25_000; // Too Many Requests and missing Retry-After
+      case 429: return { delay: 25_000, message: "Animethemes API rate limit hit" }; // Too Many Requests and missing Retry-After
     }
   }
 }
@@ -176,7 +181,10 @@ const baseSettings = {
   parse: res => res.json(),
   queue: true,
   onStart: () => { },
-  onError: () => { },
+  onError: res => {
+    if (!res) return;
+    addApplicationNotification({ type: "error", message: `Error status code: ${res.status}.`, duration: 10_000 });
+  },
   onFetch: () => { },
 };
 
@@ -280,10 +288,20 @@ const anilistBaseFetcherSettings = {
   name: "AniList fetch",
   onError: async res => {
     if (!res) return;
-    const { errors } = await res.json();
-    for (const { message, status } of errors) {
-      // Token has expired so lets log out the user
-      if (status === 400 && message === "Invalid token") logoutUser();
+    try {
+      const { errors } = await res.json();
+      for (const { message, status } of errors) {
+        // Token has expired so lets log out the user
+        if (status === 400 && message === "Invalid token") {
+          addApplicationNotification({ type: "info", message: "Anilist authentication token has expired. Sign in again", duration: 10_000 });
+          logoutUser();
+        } else {
+          addApplicationNotification({ type: "error", message: `Anilist errored with a status code: ${status}. ${message}`, duration: 10_000 });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      addApplicationNotification({ type: "error", message: `Anilist errored with a status code: ${res.status || "404"}.`, duration: 10_000 });
     }
   },
 };
