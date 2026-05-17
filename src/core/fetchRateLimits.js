@@ -66,8 +66,8 @@ export function setFetchResponseToRateLimit(fetcher, response) {
   const remain = parseInt(response?.headers?.get("X-Ratelimit-Remaining"));
 
   rateLimit.resetTime = retry ? retry * 1000 + now : 0;
-  rateLimit.limit = limit ? limit : Math.max(rateLimit.limit - 1, 0);
-  rateLimit.remaining = remain ? remain : Math.max(rateLimit.remaining);
+  rateLimit.limit = limit ? limit : rateLimit.limit || 15;
+  rateLimit.remaining = remain ? remain : Math.max(rateLimit.remaining - 1, 0);
 
   storeRateLimits();
 }
