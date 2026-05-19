@@ -9,12 +9,12 @@ const baseLimits = {
     resetTime: 0,
     requests: [],
     timeToWait: self => {
-      const now = new Date();
+      const now = new Date().getTime();
       // Anilist internal rate limit has been hit, resume only after reset time has passed
       if (self.resetTime > now) return self.resetTime - now;
 
       if (self.remaining === 0) {
-        const { end, start } = self.requests.at(-self.limit) ?? {};
+        const { end, start } = self.requests.at(-self.limit) ?? self.requests.at(-1) ?? {};
         const time = (end || start || now) + 60_000;
         return Math.max(time - now, 0);
       }
