@@ -6,7 +6,6 @@ import { TokenBucket } from "./TokenBucket";
 const DEBUG = modes.debug;
 
 const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
-const fastReload = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 7 });
 const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
 const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached", expiresInSeconds: 60 * 60 * 24 * 365 });
 // const noCache = cacheBuilder({ type: "no-store" });
@@ -148,9 +147,6 @@ const apiOLD = {
     }),
   },
   anilist: {
-    mediaId: reloadCache((id, token) => {
-      return Fetch.authAnilist(token, queries.anilistMediaById, { id, perPage: 6 });
-    }),
     rateRecommendation: async (token, id, rating, mediaId, mediaRecommendationId) => {
       asserts.assertTrueOLD(token, "Token is missing");
       asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
@@ -228,63 +224,9 @@ const apiOLD = {
       asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityRepliedById, { id, page }, res => res.data.Page);
     }),
-    notifications: fastReload((token, type, page = 1) => {
-      switch(type) {
-        case "airing": return Fetch.authAnilist(token, queries.anilistUserNotifications, {
-          page,
-          "types": [
-            "AIRING"
-          ]
-        }, res => res.data.Page); 
-        case "activity": return Fetch.authAnilist(token, queries.anilistUserNotifications, {
-          page,
-          "types": [
-            "ACTIVITY_MESSAGE",
-            "ACTIVITY_MENTION",
-            "ACTIVITY_REPLY",
-            "ACTIVITY_LIKE",
-            "ACTIVITY_REPLY_LIKE"
-          ]
-        }, res => res.data.Page); 
-        case "forum": return Fetch.authAnilist(token, queries.anilistUserNotifications, {
-          page,
-          "types": [
-            "THREAD_COMMENT_REPLY",
-            "THREAD_SUBSCRIBED",
-            "THREAD_COMMENT_MENTION",
-            "THREAD_LIKE",
-            "THREAD_COMMENT_LIKE"
-          ]
-        }, res => res.data.Page); 
-        case "follows": return Fetch.authAnilist(token, queries.anilistUserNotifications, {
-          page,
-          "types": [
-            "FOLLOWING"
-          ]
-        }, res => res.data.Page); 
-        case "media": return Fetch.authAnilist(token, queries.anilistUserNotifications, {
-          page,
-          "types": [
-            "RELATED_MEDIA_ADDITION",
-            "MEDIA_DATA_CHANGE",
-            "MEDIA_MERGE",
-            "MEDIA_DELETION"
-          ]
-        }, res => res.data.Page); 
-        case "all": 
-        default: return Fetch.authAnilist(token, queries.anilistUserNotifications, { page }, res => res.data.Page);  
-      }
-    }),
     searchUsers: fetchOnce((search, page, token) => {
       asserts.assertTrueOLD(search, "Search is missing");
       return Fetch.authAnilist(token, queries.anilistUserSearch, { search, page, }, res => res.data.Page);
-    }),
-    mediaListByUserName: reloadCache((name, type, token) => {
-      asserts.assertTrueOLD(name, "Name is missing");
-      return Fetch.authAnilist(token, queries.anilistUserMediaList, {
-        userName: name.toLowerCase(),
-        type,
-      }, res => res.data.MediaListCollection);
     }),
     mediaListByUserNameFetchOnce: fetchOnce((name, type, token) => {
       asserts.assertTrueOLD(name, "Name is missing");
@@ -395,9 +337,6 @@ const apiOLD = {
       const request = Fetch.authAnilist(token, queries.mediaListEntry, { mediaId });
       return await request.send();
     },
-    getActivity: reloadCache((token, variables, page = 1) => {
-      return Fetch.authAnilist(token, queries.anilistActivity, { ...variables, page }, res => res.data.Page);
-    }),
     searchMedia: fetchOnce((token, variables, page, extraVariables = {}) => {
       const variableObject = variables.reduce((acc, v) => {
         if (v.active) { acc[v.key] = v.value; }
@@ -458,16 +397,6 @@ const apiOLD = {
       const request = Fetch.authAnilist(token, queries.anilistMutateToggleFavourite, variables);
       return await request.send();
     },
-    wachingAnime: reloadCache((id, token) => {
-      return Fetch.authAnilist(token, queries.currentWachingMedia, {
-        "userId": id, "type": "ANIME", "perPage": 40
-      });
-    }),
-    readingManga: reloadCache((id, token) => {
-      return Fetch.authAnilist(token, queries.currentWachingMedia, {
-        "userId": id, "type": "MANGA", "perPage": 40
-      });
-    }),
   },
 };
 

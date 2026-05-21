@@ -124,7 +124,7 @@ export function HomePageActivityReelContent(props) {
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const id = parseInt(entry.target.dataset.id);
-      asserts.assertTrueOLD(Number.isInteger(id));
+      asserts.assertTypeInteger(id);
 
       if (entry.isIntersecting) {
         visibleIds.add(id);
