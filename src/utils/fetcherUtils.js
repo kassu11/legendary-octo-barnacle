@@ -4,11 +4,9 @@ import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateL
 import { logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped";
 import { hashKeyFNV32 } from "./hashUtils";
-import { getIndexedDBValue } from "./indexedDButils";
 import { safeStringifyJson } from "./jsonUtils";
 import { isTypeObject, mergeObjects } from "./objectUtils";
-import { getSessionStorageJson } from "./sessionStorageUtils";
-import { setFetcherValueToStorage } from "./storageUtils";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "./storageUtils";
 
 export function createFetcher(url, params, encode = baseEncoding) {
   assertTypeString(url);
@@ -164,14 +162,7 @@ const baseSettings = {
   debug: modes.debug,
   loadingBar: true,
   cache: {
-    get: async (res, settings) => {
-      // When debugging, we don't want to clear session storage all the time
-      const session = !settings.debug && getSessionStorageJson(res.cacheKey, null);
-      if (session) return session;
-
-      const data = await getIndexedDBValue("fetches", res.cacheKey);
-      return data;
-    },
+    get: res => getFetcherValueFromStorage(res, null),
     set: async res => {
       cache.add(res.cacheKey);
       setFetcherValueToStorage(res);
@@ -247,7 +238,7 @@ export async function sendFetcher(fetcher, settings = {}) {
 
         if (settings.name) res.name = settings.name;
 
-        settings.setValue({ ...res, cache: false });
+        settings.setValue({ ...res, cache: false }, { fetcher });
         if (data) settings.cache?.set?.(res, { fetcher });
       } catch (err) {
         settings.onError?.(err);
@@ -290,6 +281,10 @@ const anilistBaseFetcherSettings = {
   name: "AniList fetch",
   onError: async res => {
     if (!res) return;
+    if (Error.isError(res)) {
+      console.error(res);
+      return;
+    }
     try {
       const { errors } = await res.json();
       for (const { message, status } of errors) {

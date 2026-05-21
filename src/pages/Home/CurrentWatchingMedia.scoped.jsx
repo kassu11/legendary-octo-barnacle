@@ -30,6 +30,7 @@ export function CurrentWatchingMediaScoped() {
 
     sendAnilistFetcher(fetcher, {
       name: "Currently watching",
+      // debug: false,
       // file: "watching.json",
       onStart: time => {
         setLoading(true);
