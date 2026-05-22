@@ -47,13 +47,19 @@ export function MediaInfoContent(props) {
   const [isFavourite, setIsFavourite] = createSignal();
   const [anilistData, setAnilistData] = createSignal(undefined, { equals: false });
 
-  let fetcher;
+  let fetcher, controller;
   createEffect(() => {
-    if (searchParams.isMalId == null) fetcher = createAnilistFetcher(queries.anilistMediaById, { id: params.id });
-    else fetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() });
+    controller?.abort();
+    controller = new AbortController();
+
+    if (searchParams.isMalId == null) fetcher = createAnilistFetcher(queries.anilistMediaById, { id: params.id }, controller.signal);
+    else fetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() }, controller.signal);
 
     sendAnilistFetcher(fetcher, {
       name: "Anilist media page",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === fetcher.cacheKey) controller = null;
+      },
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === fetcher.cacheKey) setAnilistData(res);
       }
@@ -101,7 +107,7 @@ export function MediaInfoContent(props) {
     }
   });
 
-  const controller = new AbortController();
+  const keyController = new AbortController();
 
   onMount(() => {
     window.addEventListener("keydown", e => {
@@ -124,10 +130,10 @@ export function MediaInfoContent(props) {
       } else if ((e.key === "k" && !e.ctrlKey) || (e.key === "ArrowUp" && e.ctrlKey)) {
         navigationUtils.navigateToMediaPage(navigate, findTypeAndPreventDefault("SOURCE") || findTypeAndPreventDefault("PARENT"));
       }
-    }, { signal: controller.signal });
+    }, { signal: keyController.signal });
   });
 
-  onCleanup(() => controller.abort());
+  onCleanup(() => keyController.abort());
 
   const loading = () => anilistData.loading && anilistData()?.data.data.Media.id != params.id;
 

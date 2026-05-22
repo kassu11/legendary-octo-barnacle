@@ -1,30 +1,40 @@
-import { createRenderEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
+import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import Status from "./Status";
 import Score from "./Score";
 import style from "./Friends.module.scss";
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import { useAuthentication, useMediaInfo } from "../../context/providers";
-import { fetcherSenderUtils } from "../../utils/utils";
-import { fetchersOLD, fetcherSendersOLD, requests } from "../../collections/collections.js";
+import { useMediaInfo } from "../../context/providers";
+import { queries } from "../../collections/collections.js";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
+import { authUserData } from "../../core/globalState";
 
 function Friends() {
   const params = useParams();
   const [searchParams] = useSearchParams();
-  const { accessToken, authUserData } = useAuthentication();
+  const [friendScoreData, setFriendScoreData] = createSignal();
 
-  const { anilistData } = useMediaInfo();
-  const friendScoreFetcher = fetcherSenderUtils.createFetcherOLD(
-    fetchersOLD.anilist.getFrendScoresFromMedia, 
-    () => ({ token: accessToken(), id: searchParams.isMalId != null ? anilistData()?.data.data.Media?.id : params.id, page: 1, perPage: 8, })
-  );
-  const cacheType = fetcherSenderUtils.createDynamicCacheType({
-    "default": () => requests.anilist.inFiveSeconds() > 1,
-    "only-if-cached": () => requests.anilist.inFiveSeconds() > 2
+  let fetcher;
+  let controller;
+  createEffect(() => {
+    const id = searchParams.isMalId != null ? anilistData()?.data.data.Media.id : params.id;
+    if (!id) return;
+    controller?.abort();
+    controller = new AbortController();
+
+    fetcher = createAnilistFetcher(queries.anilistGetFriendMediaScore, { id, page: 1, perPage: 8 }, controller.signal);
+    sendAnilistFetcher(fetcher, {
+      name: "Anilist friends",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === fetcher.cacheKey) controller = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === fetcher.cacheKey) setFriendScoreData(res);
+      }
+    });
   });
 
-  const [friendScoreData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, friendScoreFetcher);
-
+  const { anilistData } = useMediaInfo();
   const [ownProfileInfo, setOwnProfileInfo] = createSignal();
 
   createRenderEffect(() => {
@@ -40,13 +50,13 @@ function Friends() {
 
   return (
     <ErrorBoundary fallback="Friends error">
-      <Show when={(friendScoreData()?.data?.mediaList.length || ownProfileInfo()) && anilistData() && authUserData()}>
+      <Show when={(friendScoreData()?.data.data.Page.mediaList.length || ownProfileInfo()) && anilistData() && authUserData()}>
         <div class={style.friendContainer}>
           <ul>
             <Show when={ownProfileInfo()}>
               <Friend friend={ownProfileInfo()} />
             </Show>
-            <For each={friendScoreData()?.data?.mediaList}>{friend => (
+            <For each={friendScoreData()?.data.data.Page.mediaList}>{friend => (
               <Show when={friend.user.id !== authUserData()?.data.id}>
                 <Friend friend={friend} />
               </Show>

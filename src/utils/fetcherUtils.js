@@ -235,7 +235,7 @@ export async function sendFetcher(fetcher, settings = {}) {
   const queueTarget = requestQueue.find(que => url.includes(que.url));
 
   async function event() {
-    settings.onFetch?.(performance.now() - start);
+    settings.onFetch?.(performance.now() - start, { fetcher });
     if (signal?.aborded !== true) {
       try {
         const response = await fetcherToFetch(fetcher);
