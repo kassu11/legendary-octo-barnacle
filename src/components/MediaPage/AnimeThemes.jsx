@@ -1,19 +1,18 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import style from "./AnimeThemes.module.scss";
-import { fetchersOLD, fetcherSendersOLD } from "../../collections/collections.js";
-import { fetcherSenderUtils } from "../../utils/utils.js";
+import { queries } from "../../collections/collections.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
-import {createEffect, ErrorBoundary, For, Match, Show, Switch} from "solid-js";
+import {createEffect, createSignal, ErrorBoundary, For, Match, Show, Switch} from "solid-js";
 import { useMediaInfo } from "../../context/providers.js";
+import { createAnimeThemesFetcher, sendFetcher } from "../../utils/fetcherUtils";
 
 function AnimeThemes() {
   const params = useParams();
   const [searchParams] = useSearchParams();
   const { anilistData } = useMediaInfo();
   const videoPlayer = <video src="" controls autoPlay />;
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.animeThemes.getThemesByIdAndApi, () => ({ id: params.id, api: searchParams.isMalId != null ? localizations.mal : params.api, type: params.type }));
-  const [themeData] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
+  const [themeData, setThemeData] = createSignal();
 
   createEffect(() => {
     params.id;
@@ -22,12 +21,32 @@ function AnimeThemes() {
     videoPlayer.src = "";
   });
 
+  let sessionId = 0;
+  createEffect(() => {
+    if (params.type !== localizations.anime) return;
+
+    const api = searchParams.isMalId != null ? localizations.mal : params.api;
+
+    let query;
+    if (api === localizations.ani) query = queries.animeThemesByAnilistId;
+    else if (api === localizations.mal) query = queries.animeThemesByMyAnimeListId;
+    
+    let curId = ++sessionId;
+    const fetcher = createAnimeThemesFetcher(query, { id: params.id });
+    sendFetcher(fetcher, {
+      name: "Themes",
+      setValue: res => {
+        if (curId === sessionId) setThemeData(res);
+      }
+    });
+  });
+
   return (
     <ErrorBoundary fallback="AnimeThemes error">
       <Show when={themeData() && anilistData()?.data?.type === localizations.ANIME}>
         <div>
           <h2>Themes</h2>
-          <For each={themeData().data}>{theme => (
+          <For each={themeData()?.data?.anime?.[0]?.animethemes}>{theme => (
             <AnimeTheme theme={theme} video={videoPlayer} />
           )}</For>
           {videoPlayer}

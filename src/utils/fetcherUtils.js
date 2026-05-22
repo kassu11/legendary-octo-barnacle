@@ -3,6 +3,7 @@ import { localizations, modes } from "../collections/collections";
 import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "../core/fetchRateLimits";
 import { logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped";
+import { isTypeFunction } from "./functionUtils";
 import { hashKeyFNV32 } from "./hashUtils";
 import { safeStringifyJson } from "./jsonUtils";
 import { isTypeObject, mergeObjects } from "./objectUtils";
@@ -18,6 +19,21 @@ export function createFetcher(url, params, encode = baseEncoding) {
 
   return res;
 };
+
+export function createAnimeThemesFetcher(query, variables, signal) {
+  if (isTypeFunction(query)) {
+    query =  query(variables);
+  }
+
+  assertTypeString(query);
+
+  return createFetcher(query, {
+    method: "GET",
+    cache: "default",
+    headers: { "Content-Type": "application/json" },
+    signal,
+  });
+}
 
 export function createAnilistFetcher(query, variables, signal) {
   assertTypeString(query);
@@ -144,7 +160,7 @@ async function retryDelay(fetcher, response, iteration) {
 const requestQueue = [
   { url: "anilist", queue: [], timeout: null },
   { url: "jikan", queue: [], timeout: null },
-  { url: "animeTheme", queue: [], timeout: null },
+  { url: "https://api.animethemes.moe/", queue: [], timeout: null },
 ]
 
 // const response = await fetch("/legendary-octo-barnacle/offline.json");
