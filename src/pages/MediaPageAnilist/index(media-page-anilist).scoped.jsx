@@ -2,6 +2,7 @@ import {A, Navigate, useLocation, useNavigate, useParams, useSearchParams} from 
 import {AnilistRelationsPreview} from "./RelationsPreview.scoped.jsx";
 import Characters from "../../components/media/Characters.jsx";
 import {
+    createEffect,
     createMemo,
     createRenderEffect,
     createSignal,
@@ -27,7 +28,7 @@ import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
 import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
-import { fetchersOLD, fetcherSendersOLD, requests } from "../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, queries } from "../../collections/collections.js";
 import { fetcherSenderUtils, formatingUtils, navigationUtils } from "../../utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
 import Anilist from "../../assets/Anilist.jsx";
@@ -35,19 +36,40 @@ import ExternalSource from "../../assets/ExternalSource.jsx";
 import MyAnimeList from "../../assets/MyAnimeList.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { Trailer } from "../MediaPage/Trailer.jsx";
+import { isTypeFunction } from "../../utils/functionUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
   const [searchParams] = useSearchParams();
   const { accessToken } = useAuthentication();
   const [isFavourite, setIsFavourite] = createSignal();
+  const [anilistData, setAnilistData] = createSignal(undefined, { equals: false });
 
-  const anilistFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediaById, () => ({ token: accessToken(), id: params.id, isMalId: searchParams.isMalId != null, type: params.type }));
-  const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
-  const [anilistData, { mutateBoth: mutateBothAnilistData }] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
+  let fetcher;
+  createEffect(() => {
+    if (searchParams.isMalId == null) fetcher = createAnilistFetcher(queries.anilistMediaById, { id: params.id });
+    else fetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() });
+
+    sendAnilistFetcher(fetcher, {
+      name: "Anilist media page",
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === fetcher.cacheKey) setAnilistData(res);
+      }
+    });
+  });
+
+  const mutateBothAnilistData = mutate => {
+    setAnilistData(data => {
+      if (isTypeFunction(mutate)) mutate = mutate(data);
+      setFetcherValueToStorage(mutate);
+      return mutate;
+    });
+  }
 
   const idMal = createMemo(() => {
-    const data = anilistData()?.data;
+    const data = anilistData()?.data.data.Media;
     if (!data || data.idMal == null || data.type.toLowerCase() !== params.type) {
       return;
     }
@@ -55,13 +77,13 @@ export function MediaInfoContent(props) {
   });
 
   createRenderEffect(on(anilistData, apiResponse => {
-    setIsFavourite(apiResponse?.data?.isFavourite ?? false);
+    setIsFavourite(apiResponse?.data.data.Media?.isFavourite ?? false);
   }));
 
   const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getMediaById, () => params.type, idMal);
   const [_jikanData] = fetcherSendersOLD.sendWithNullUpdates(jikanFetcher);
   const jikanData = createMemo(() => {
-    if (anilistData()?.data.idMal && _jikanData()?.data?.mal_id === anilistData()?.data.idMal) {
+    if (anilistData()?.data.data.Media.idMal && _jikanData()?.data?.mal_id === anilistData()?.data.data.Media.idMal) {
       return _jikanData();
     }
     return undefined
@@ -71,10 +93,11 @@ export function MediaInfoContent(props) {
   const navigate = useNavigate();
 
   createRenderEffect(() => {
-    if (anilistData()?.data && params.sub) {
-      document.title = `${anilistData().data.title.userPreferred} - ${params.sub} - LOB`;
-    } else if (anilistData()?.data) {
-      document.title = `${anilistData().data.title.userPreferred} - LOB`;
+    if (!anilistData()) return;
+    if (params.sub) {
+      document.title = `${anilistData().data.data.Media.title.userPreferred} - ${params.sub} - LOB`;
+    } else {
+      document.title = `${anilistData().data.data.Media.title.userPreferred} - LOB`;
     }
   });
 
@@ -88,7 +111,7 @@ export function MediaInfoContent(props) {
 
       function findTypeAndPreventDefault(type) {
         e.preventDefault();
-        return anilistData()?.data?.relations?.edges?.find(relation => relation?.relationType === type)?.node;
+        return anilistData()?.data.data.Media?.relations?.edges?.find(relation => relation?.relationType === type)?.node;
       }
 
       if ((e.key === "l" && !e.ctrlKey) || (e.key === "ArrowRight" && e.ctrlKey)) {
@@ -106,14 +129,14 @@ export function MediaInfoContent(props) {
 
   onCleanup(() => controller.abort());
 
-  const loading = () => anilistData.loading && anilistData()?.data.id != params.id;
+  const loading = () => anilistData.loading && anilistData()?.data.data.Media.id != params.id;
 
   const mutateBothFavourite = (isFavourite, variables) => {
-    const id = variables[anilistData()?.data?.type] ?? null;
-    if (anilistData()?.data?.id === id) {
+    const id = variables[anilistData()?.data.data.Media?.type] ?? null;
+    if (anilistData()?.data.data.Media?.id === id) {
       setIsFavourite(isFavourite);
       mutateBothAnilistData(api => {
-        api.data.isFavourite = isFavourite;
+        api.data.data.Media.isFavourite = isFavourite;
         return api;
       });
     }
@@ -122,21 +145,21 @@ export function MediaInfoContent(props) {
   return (
     <ErrorBoundary fallback="Media page error">
       <MediaInfoContext.Provider value={{ anilistData, mutateBothAnilistData, jikanData }}>
-        <MediaBanner src={anilistData()?.data?.bannerImage} loading={loading()} />
+        <MediaBanner src={anilistData()?.data.data.Media?.bannerImage} loading={loading()} />
         <div class="media-page-content" classList={{loading: loading()}}>
           <aside class="media-page-left-aside">
-            <Show when={anilistData()?.data}>
-              <img src={anilistData()?.data?.coverImage.large} alt="Cover" class="media-page-cover" />
+            <Show when={anilistData()}>
+              <img src={anilistData()?.data.data.Media?.coverImage.extraLarge} alt="Cover" class="media-page-cover" />
               <div class="cp-media-api-switcher">
-                <Show when={anilistData()?.data.id}>
-                  <a href={"https://anilist.co/" + params.type + "/" + (anilistData()?.data.id ?? params.id)} target="_black" class="active">
+                <Show when={anilistData()?.data.data.Media.id}>
+                  <a href={"https://anilist.co/" + params.type + "/" + (anilistData()?.data.data.Media.id ?? params.id)} target="_black" class="active">
                     <span class="visually-hidden">Go to Anilist</span>
                     <Anilist />
                     <ExternalSource />
                   </a>
                 </Show>
-                <Show when={anilistData()?.data.idMal}>
-                  <A href={"/mal/" + params.type + "/" + anilistData()?.data.idMal + "/" + params.name}>
+                <Show when={anilistData()?.data.data.Media.idMal}>
+                  <A href={"/mal/" + params.type + "/" + anilistData()?.data.data.Media.idMal + "/" + params.name}>
                     <span class="visually-hidden">Switch to MyAnimeList mode</span>
                     <MyAnimeList />
                   </A>
@@ -145,30 +168,30 @@ export function MediaInfoContent(props) {
               <MediaPageScores />
               <Show when={accessToken()}>
                 <button onClick={() => {
-                  openEditor(anilistData()?.data, {
+                  openEditor(anilistData()?.data.data.Media, {
                     setIsFavourite: mutateBothFavourite,
                     mutateMedia: response => {
-                      if (anilistData()?.data?.id === response?.media.id) {
+                      if (anilistData()?.data.data.Media?.id === response?.media.id) {
                         mutateBothAnilistData(api => {
-                          api.data.mediaListEntry = response;
+                          api.data.data.Media.mediaListEntry = response;
                           return api;
                         });
                       }
                     }
                   });
-                }}>{anilistData()?.data.mediaListEntry?.status || "Edit"}</button>
+                }}>{anilistData()?.data.data.Media.mediaListEntry?.status || "Edit"}</button>
                 <FavouriteToggle
                   checked={isFavourite()}
                   onChange={setIsFavourite}
-                  idType={anilistData()?.data.type}
-                  variableId={anilistData()?.data.id}
-                  anilistValue={anilistData()?.data.favourites}
+                  idType={anilistData()?.data.data.Media.type}
+                  variableId={anilistData()?.data.data.Media.id}
+                  anilistValue={anilistData()?.data.data.Media.favourites}
                   jikanValue={jikanData()?.data.favorites}
                   mutateCache={mutateBothFavourite}
                 />
               </Show>
-              <Trailer id={anilistData()?.data?.trailer?.id} site={anilistData()?.data?.trailer?.site} />
-              <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain)}>{edges => (
+              <Trailer id={anilistData()?.data.data.Media?.trailer?.id} site={anilistData()?.data.data.Media?.trailer?.site} />
+              <Show when={anilistData()?.data.data.Media.studios.edges.filter(edge => edge.isMain)}>{edges => (
                 <Show when={edges().length > 0}>
                   <div>
                     <h2>Studios</h2>
@@ -184,7 +207,7 @@ export function MediaInfoContent(props) {
                   </div>
                 </Show>
               )}</Show>
-              <Show when={anilistData()?.data.studios.edges.filter(edge => edge.isMain === false)}>{edges => (
+              <Show when={anilistData()?.data.data.Media.studios.edges.filter(edge => edge.isMain === false)}>{edges => (
                 <Show when={edges().length > 0}>
                   <div>
                     <h2>Producers</h2>
@@ -200,11 +223,11 @@ export function MediaInfoContent(props) {
                   </div>
                 </Show>
               )}</Show>
-              <ExternalLinks hashtag={anilistData()?.data.hashtag} externalLinks={anilistData()?.data.externalLinks} />
-              <ExtraInfo media={anilistData()?.data} loading={loading()} />
-              <Rankings rankings={anilistData()?.data.rankings} loading={loading()} />
-              <Genres genres={anilistData()?.data.genres} type={anilistData()?.data.type} loading={loading()} />
-              <Tags tags={anilistData()?.data.tags} type={anilistData()?.data.type} loading={loading()} />
+              <ExternalLinks hashtag={anilistData()?.data.data.Media.hashtag} externalLinks={anilistData()?.data.data.Media.externalLinks} />
+              <ExtraInfo media={anilistData()?.data.data.Media} loading={loading()} />
+              <Rankings rankings={anilistData()?.data.data.Media.rankings} loading={loading()} />
+              <Genres genres={anilistData()?.data.data.Media.genres} type={anilistData()?.data.data.Media.type} loading={loading()} />
+              <Tags tags={anilistData()?.data.data.Media.tags} type={anilistData()?.data.data.Media.type} loading={loading()} />
             </Show>
           </aside>
           <section class="media-page-main">
@@ -223,25 +246,25 @@ export function MediaInfoHome() {
 
   return (
     <ErrorBoundary fallback="Media page home content error">
-      <Show when={anilistData()?.data}>
-        <Show when={anilistData().data.description}>
+      <Show when={anilistData()?.data.data.Media}>
+        <Show when={anilistData().data.data.Media.description}>
           <div class="media-page-description">
-            <Markdown text={anilistData().data.description} />
+            <Markdown text={anilistData().data.data.Media.description} />
           </div>
         </Show>
-        <AnilistRelationsPreview relations={anilistData().data.relations}/>
-        <Characters characters={anilistData().data.characterPreview.edges} countryOfOrigin={anilistData().data.countryOfOrigin} />
-        <StaffPreview staff={anilistData().data.staffPreview.edges} />
+        <AnilistRelationsPreview relations={anilistData().data.data.Media.relations}/>
+        <Characters characters={anilistData().data.data.Media.characterPreview.edges} countryOfOrigin={anilistData().data.data.Media.countryOfOrigin} />
+        <StaffPreview staff={anilistData().data.data.Media.staffPreview.edges} />
         <Show when={accessToken()}>
           <Friends />
         </Show>
         <AnimeThemes />
-        <StreamingEpisodes streamingEpisodes={anilistData().data.streamingEpisodes} />
+        <StreamingEpisodes streamingEpisodes={anilistData().data.data.Media.streamingEpisodes} />
         <Recommendations
-          recommendations={anilistData().data.recommendations}
+          recommendations={anilistData().data.data.Media.recommendations}
           mutateCache={(i, node) => {
             mutateBothAnilistData(api => {
-              api.data.recommendations.nodes[i] = node;
+              api.data.data.Media.recommendations.nodes[i] = node;
               return api;
             });
           }} />

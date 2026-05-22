@@ -16,7 +16,7 @@ function Friends() {
   const { anilistData } = useMediaInfo();
   const friendScoreFetcher = fetcherSenderUtils.createFetcherOLD(
     fetchersOLD.anilist.getFrendScoresFromMedia, 
-    () => ({ token: accessToken(), id: searchParams.isMalId != null ? anilistData()?.data?.id : params.id, page: 1, perPage: 8, })
+    () => ({ token: accessToken(), id: searchParams.isMalId != null ? anilistData()?.data.data.Media?.id : params.id, page: 1, perPage: 8, })
   );
   const cacheType = fetcherSenderUtils.createDynamicCacheType({
     "default": () => requests.anilist.inFiveSeconds() > 1,
@@ -28,9 +28,9 @@ function Friends() {
   const [ownProfileInfo, setOwnProfileInfo] = createSignal();
 
   createRenderEffect(() => {
-    if (anilistData()?.data?.mediaListEntry && authUserData()) {
+    if (anilistData()?.data.data.Media?.mediaListEntry && authUserData()) {
       setOwnProfileInfo({
-        ...anilistData().data?.mediaListEntry,
+        ...anilistData().data.data.Media?.mediaListEntry,
         user: authUserData().data,
       });
     } else {
@@ -68,7 +68,7 @@ function Friend(props) {
       <A class={style.friend} href={"/user/" + props.friend.user.name}>
         <img src={props.friend.user.avatar.large} alt="User profile" />
         <p>{props.friend.user.name}</p>
-        <Status friend={props.friend} media={anilistData()?.data} type={anilistData()?.data.type} />
+        <Status friend={props.friend} media={anilistData()?.data.data.Media} type={anilistData()?.data.data.Media.type} />
         <Show when={props.friend.repeat}>
           <div class={style.friendRepeat}>
             {props.friend.repeat}

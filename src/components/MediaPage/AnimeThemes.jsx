@@ -43,7 +43,7 @@ function AnimeThemes() {
 
   return (
     <ErrorBoundary fallback="AnimeThemes error">
-      <Show when={themeData() && anilistData()?.data?.type === localizations.ANIME}>
+      <Show when={themeData() && anilistData()?.data.data.Media?.type === localizations.ANIME}>
         <div>
           <h2>Themes</h2>
           <For each={themeData()?.data?.anime?.[0]?.animethemes}>{theme => (

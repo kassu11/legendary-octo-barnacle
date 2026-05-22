@@ -3,14 +3,6 @@ import { fetcherUtils } from "../../utils/utils.js";
 
 const formatPage = res => res.data.Page;
 
-export const getMediaById = ({ token, id, isMalId, type }) => {
-  if (isMalId) {
-    return getMediaByTypeAndMalId(token, type, id);
-  }
-
-  return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { id }, res => res.data.Media);
-};
-
 export const getMediasWithIds = (token, variables) => {
   asserts.assertTrueOLD(variables.id_in || variables.idMal_in, "Missing list for ids");
   const count = variables.id_in?.length || variables.idMal_in?.length;
