@@ -3,14 +3,16 @@ import { useMediaInfo } from "../../context/providers";
 import { A } from "@solidjs/router";
 import { formatingUtils, numberUtils } from "../../utils/utils";
 import { searchObjects } from "../../collections/collections";
+import { formatMSToString } from "../../utils/timeUtils";
 
-export function AnilistMediaInfo() {
+export function AnilistMediaInfo(props) {
   const { anilistData } = useMediaInfo();
 
   return (
     <ErrorBoundary fallback="Anilist media page info error">
       <div class="pg-ani-media-info">
         <Show when={anilistData()}>
+          <p class="time">{formatMSToString(props.time())}</p>
           <h1>{anilistData()?.data.data.Media.title.userPreferred}</h1>
           <ul class="flex-bullet-separator">
             <li>

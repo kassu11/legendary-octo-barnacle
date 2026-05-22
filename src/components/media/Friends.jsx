@@ -8,14 +8,15 @@ import { queries } from "../../collections/collections.js";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { authUserData } from "../../core/globalState";
+import { createTimer, formatMSToString } from "../../utils/timeUtils";
 
 function Friends() {
   const params = useParams();
   const [searchParams] = useSearchParams();
   const [friendScoreData, setFriendScoreData] = createSignal();
+  const [time, startTimer, stopTimer] = createTimer();
 
-  let fetcher;
-  let controller;
+  let fetcher, controller;
   createEffect(() => {
     const id = searchParams.isMalId != null ? anilistData()?.data.data.Media.id : params.id;
     if (!id) return;
@@ -25,6 +26,8 @@ function Friends() {
     fetcher = createAnilistFetcher(queries.anilistGetFriendMediaScore, { id, page: 1, perPage: 8 }, controller.signal);
     sendAnilistFetcher(fetcher, {
       name: "Anilist friends",
+      onStart: time => startTimer(time),
+      onStop: time => stopTimer(time),
       onFetch: (_, { fetcher: f }) => {
         if (f.cacheKey === fetcher.cacheKey) controller = null;
       },
@@ -52,6 +55,7 @@ function Friends() {
     <ErrorBoundary fallback="Friends error">
       <Show when={(friendScoreData()?.data.data.Page.mediaList.length || ownProfileInfo()) && anilistData() && authUserData()}>
         <div class={style.friendContainer}>
+          <p>{formatMSToString(time())}</p>
           <ul>
             <Show when={ownProfileInfo()}>
               <Friend friend={ownProfileInfo()} />

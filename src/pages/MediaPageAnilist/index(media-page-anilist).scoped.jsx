@@ -20,7 +20,7 @@ import Friends from "../../components/media/Friends.jsx";
 import AnimeThemes from "../../components/MediaPage/AnimeThemes.jsx";
 import {Recommendations} from "./Recommendations.scoped.jsx";
 import {MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo} from "../../context/providers.js";
-import {AnilistMediaInfo} from "./MediaInfo.jsx";
+import {AnilistMediaInfo} from "./MediaInfo.scoped.jsx";
 import {Tags} from "../../components/media/Tags.scoped.jsx";
 import {Genres} from "../../components/media/Genres.scoped.jsx";
 import {Rankings} from "../../components/media/Rankings.scoped.jsx";
@@ -39,6 +39,7 @@ import { Trailer } from "../MediaPage/Trailer.jsx";
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
+import { createTimer } from "../../utils/timeUtils.js";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -46,6 +47,8 @@ export function MediaInfoContent(props) {
   const { accessToken } = useAuthentication();
   const [isFavourite, setIsFavourite] = createSignal();
   const [anilistData, setAnilistData] = createSignal(undefined, { equals: false });
+  const [loading, setLoading] = createSignal(false);
+  const [time, startTimer, stopTimer] = createTimer();
 
   let fetcher, controller;
   createEffect(() => {
@@ -59,6 +62,14 @@ export function MediaInfoContent(props) {
       name: "Anilist media page",
       onFetch: (_, { fetcher: f }) => {
         if (f.cacheKey === fetcher.cacheKey) controller = null;
+      },
+      onStart: time => {
+        startTimer(time);
+        setLoading(true);
+      },
+      onStop: time => {
+        stopTimer(time);
+        setLoading(false);
       },
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === fetcher.cacheKey) setAnilistData(res);
@@ -134,8 +145,6 @@ export function MediaInfoContent(props) {
   });
 
   onCleanup(() => keyController.abort());
-
-  const loading = () => anilistData.loading && anilistData()?.data.data.Media.id != params.id;
 
   const mutateBothFavourite = (isFavourite, variables) => {
     const id = variables[anilistData()?.data.data.Media?.type] ?? null;
@@ -237,7 +246,7 @@ export function MediaInfoContent(props) {
             </Show>
           </aside>
           <section class="media-page-main">
-            <AnilistMediaInfo />
+            <AnilistMediaInfo time={time} />
             {props.children}
           </section>
         </div>
