@@ -20,7 +20,7 @@ export function createFetcher(url, params, encode = baseEncoding) {
   return res;
 };
 
-export function createAnimeThemesFetcher(query, variables, signal) {
+export function createJsonGetFetcher(query, variables, signal) {
   if (isTypeFunction(query)) {
     query =  query(variables);
   }

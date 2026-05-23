@@ -94,7 +94,7 @@ const baseLimits = {
       }
 
       // Only allow 1 request in one second
-      const only1ReqIn1Sec = self.requests.at(-1)?.start + 1000 || now;
+      const only1ReqIn1Sec = self.requests.at(-1)?.start + 1500 || now;
 
       // If 10 or less tokens remain limit requests to one per second
       const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 1000) || now : now;

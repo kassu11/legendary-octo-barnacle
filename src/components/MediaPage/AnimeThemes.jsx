@@ -5,7 +5,7 @@ import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
 import {createEffect, createSignal, ErrorBoundary, For, Match, Show, Switch} from "solid-js";
 import { useMediaInfo } from "../../context/providers.js";
-import { createAnimeThemesFetcher, sendFetcher } from "../../utils/fetcherUtils";
+import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils";
 
 function AnimeThemes() {
   const params = useParams();
@@ -32,7 +32,7 @@ function AnimeThemes() {
     else if (api === localizations.mal) query = queries.animeThemesByMyAnimeListId;
     
     let curId = ++sessionId;
-    const fetcher = createAnimeThemesFetcher(query, { id: params.id });
+    const fetcher = createJsonGetFetcher(query, { id: params.id });
     sendFetcher(fetcher, {
       name: "Themes",
       setValue: res => {

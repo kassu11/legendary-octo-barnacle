@@ -34,7 +34,7 @@ import { MediaBanner } from "./Banner.scoped.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { Trailer } from "../MediaPage/Trailer.jsx";
 import { isTypeFunction } from "../../utils/functionUtils.js";
-import { createAnilistFetcher, createAnimeThemesFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
+import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { createTimer } from "../../utils/timeUtils.js";
 import { MediaPageApiSwitcher } from "../MediaPageJikan/MediaPageApiSwitcher.scoped.jsx";
@@ -104,7 +104,7 @@ export function MediaInfoContent(props) {
     jikanController?.abort();
     jikanController = new AbortController();
 
-    jikanFetcher = createAnimeThemesFetcher(queries.myAnimeListMediaById, { id, type: params.type }, jikanController.signal);
+    jikanFetcher = createJsonGetFetcher(queries.myAnimeListMediaById, { id, type: params.type }, jikanController.signal);
 
     sendFetcher(jikanFetcher, {
       name: "Jikan media page (Anilist)",

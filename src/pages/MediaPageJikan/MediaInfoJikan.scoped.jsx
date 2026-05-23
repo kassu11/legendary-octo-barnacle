@@ -1,46 +1,32 @@
-import {A, useParams} from "@solidjs/router";
-import {MediaInfoContext, useMediaInfo} from "../../context/providers.js";
-import {
-  fetcherSendersOLD,
-  fetchersOLD,
-  localizations,
-  mediaStatuses,
-  queries,
-  requests
-} from "../../collections/collections.js";
-import {
-  arrayUtils,
-  fetcherSenderUtils,
-  formatingUtils,
-  numberUtils,
-  statusUtils,
-  stringUtils,
-  urlUtils
-} from "../../utils/utils.js";
-import {createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch} from "solid-js";
+import { A, useParams } from "@solidjs/router";
+import { MediaInfoContext, useMediaInfo } from "../../context/providers.js";
+import { localizations, mediaStatuses, queries } from "../../collections/collections.js";
+import { arrayUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
+import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scoped.css";
-import {Trailer} from "../MediaPage/Trailer.jsx";
-import {FavouriteToggle} from "../../components/FavouriteToggle.jsx";
-import {Markdown} from "../../components/Markdown.jsx";
-import {MalCharacterCard, MalStaffCard} from "../../components/Cards/Cards.scoped.jsx";
-import {MediaPageScores} from "../../components/MediaPage/Scores.scoped.jsx";
-import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
-import {createTimer, formatMSToString} from "../../utils/timeUtils.js";
-import {createAnilistFetcher, createAnimeThemesFetcher, sendAnilistFetcher, sendFetcher} from "../../utils/fetcherUtils.js";
-import {isTypeFunction} from "../../utils/functionUtils.js";
-import {setFetcherValueToStorage} from "../../utils/storageUtils.js";
-import {MediaPageApiSwitcher} from "./MediaPageApiSwitcher.scoped.jsx";
+import { Trailer } from "../MediaPage/Trailer.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { Markdown } from "../../components/Markdown.jsx";
+import { MalCharacterCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
+import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
+import { ExternalLinks } from "../../components/media/ExternalLinks.scoped.jsx";
+import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
+import { isTypeFunction } from "../../utils/functionUtils.js";
+import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
+import { MediaPageApiSwitcher } from "./MediaPageApiSwitcher.scoped.jsx";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
 
+  const [time, startTimer, stopTimer] = createTimer();
   const [jikanData, setJikanData] = createSignal(undefined, { equals: false });
   let jikanFetcher, jikanController;
   createEffect(() => {
     jikanController?.abort();
     jikanController = new AbortController();
 
-    jikanFetcher = createAnimeThemesFetcher(queries.myAnimeListMediaById, { id: params.id, type: params.type }, jikanController.signal);
+    jikanFetcher = createJsonGetFetcher(queries.myAnimeListMediaById, { id: params.id, type: params.type }, jikanController.signal);
 
     sendFetcher(jikanFetcher, {
       name: "Jikan media page",
@@ -55,9 +41,7 @@ export function MediaInfoWrapperJikan(props) {
     });
   });
 
-  const [time, startTimer, stopTimer] = createTimer();
   const [anilistData, setAnilistData] = createSignal(undefined, { equals: false });
-
   const mutateBothAnilistData = mutate => {
     setAnilistData(data => {
       if (isTypeFunction(mutate)) mutate = mutate(data);
@@ -78,8 +62,6 @@ export function MediaInfoWrapperJikan(props) {
       onFetch: (_, { fetcher: f }) => {
         if (f.cacheKey === aniFetcher.cacheKey) aniController = null;
       },
-      onStart: startTimer,
-      onStop: stopTimer,
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === aniFetcher.cacheKey) setAnilistData(res);
       }
@@ -223,13 +205,46 @@ export function MediaInfoHomeJikan() {
   const params = useParams();
   const { jikanData } = useMediaInfo();
 
-  const jikanCharacterFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getCharactersByMediaId, () => params.type, () => params.id);
-  const characterCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inOneSeconds() || jikanData.loading })
-  const [jikanCharactersData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(characterCacheType, jikanCharacterFetcher);
+  const [charTime, startCharTimer, stopCharTimer] = createTimer();
+  const [staffTime, startStaffTimer, stopStaffTimer] = createTimer();
+  const [charData, setCharData] = createSignal(undefined, { equals: false });
+  const [staffData, setStaffData] = createSignal(undefined, { equals: false });
+  let charFetcher, charController, staffFetcher, staffController;
+  createEffect(() => {
+    charController?.abort();
+    staffController?.abort();
+    charController = new AbortController();
+    staffController = new AbortController();
 
-  const jikanStaffFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getStaffByMediaId, () => params.type, () => params.id);
-  const staffCacheType = fetcherSenderUtils.createDynamicCacheType({ "only-if-cached": () => requests.jikan.inTwoSeconds() || jikanCharactersData.loading})
-  const [jikanStaffData] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(staffCacheType, jikanStaffFetcher);
+    charFetcher = createJsonGetFetcher(queries.myAnimeListMediaCharactersById, { id: params.id, type: params.type }, charController.signal);
+
+    sendFetcher(charFetcher, {
+      name: "Jikan characters",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === charFetcher.cacheKey) charController = null;
+      },
+      onStart: startCharTimer,
+      onStop: stopCharTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === charFetcher.cacheKey) setCharData(res);
+      }
+    });
+
+    if (params.type !== localizations.anime) return;
+    staffFetcher = createJsonGetFetcher(queries.myAnimeListAnimeStaffById, { id: params.id }, charController.signal);
+
+    sendFetcher(staffFetcher, {
+      name: "Jikan staff",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === staffFetcher.cacheKey) staffController = null;
+      },
+      onStart: startStaffTimer,
+      onStop: stopStaffTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === staffFetcher.cacheKey) setStaffData(res);
+      }
+    });
+  });
 
   return (
     <>
@@ -262,13 +277,14 @@ export function MediaInfoHomeJikan() {
             </ol>
           </div>
         </Show>
-        <Show when={jikanCharactersData()}>
+        <Show when={charData()}>
           <div>
+            <p>{formatMSToString(charTime())}</p>
             <A href="characters">
               <h2>Characters</h2>
             </A>
             <ol class="grid-column-auto-fill">
-              <For each={jikanCharactersData().data.slice(0, 6)}>{({voice_actors, ...rest}) => (
+              <For each={charData().data.data.slice(0, 6)}>{({voice_actors, ...rest}) => (
                 <MalCharacterCard
                   voiceActor={arrayUtils.findOrFirst(voice_actors, (({language}) => (language === localizations.Japanese)))}
                   {...rest}
@@ -277,13 +293,14 @@ export function MediaInfoHomeJikan() {
             </ol>
           </div>
         </Show>
-        <Show when={jikanStaffData()}>
+        <Show when={staffData()}>
           <div>
+            <p>{formatMSToString(staffTime())}</p>
             <A href="staff">
               <h2>Staff</h2>
             </A>
             <ol class="grid-column-auto-fill">
-              <For each={jikanStaffData().data.slice(0, 6)}>{({person, positions}) => (
+              <For each={staffData().data.data.slice(0, 6)}>{({person, positions}) => (
                 <MalStaffCard staff={person} positions={positions} />
               )}</For>
             </ol>
