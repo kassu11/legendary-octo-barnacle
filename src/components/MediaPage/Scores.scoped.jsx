@@ -35,15 +35,15 @@ export function MediaPageScores() {
         <span>
           <Switch fallback="N/A">
             <Match when={jikanData.loading}>...</Match>
-            <Match when={jikanData()?.data.score > 0}>
-              {((jikanData().data.score || 0)).toFixed(2)}
+            <Match when={jikanData()?.data.data.score > 0}>
+              {((jikanData().data.data.score || 0)).toFixed(2)}
             </Match>
           </Switch>
         </span>
       </div>
       <p>
-        <Show when={jikanData()?.data?.scored_by} fallback="-">
-          {numberUtils.numberCommas(jikanData().data.scored_by)}
+        <Show when={jikanData()?.data?.data.scored_by} fallback="-">
+          {numberUtils.numberCommas(jikanData().data.data.scored_by)}
         </Show>
         {" "}Users
       </p>

@@ -40,7 +40,7 @@ const baseLimits = {
       return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
     }
   },
-  "https://api.animethemes.moe/": {
+  "https://api.animethemes.moe": {
     limit: 60,
     remaining: 60,
     resetTime: 0,
@@ -75,6 +75,35 @@ const baseLimits = {
       const tok2ReqIn2Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 4000) || now : now;
 
       return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
+    }
+  },
+  "https://api.jikan.moe/v4": {
+    limit: 60,
+    remaining: 60,
+    resetTime: 0,
+    requests: [],
+    timeToWait: self => {
+      const now = new Date().getTime();
+      // Anilist internal rate limit has been hit, resume only after reset time has passed
+      if (self.resetTime > now) return self.resetTime - now;
+
+      if (self.remaining === 0) {
+        const { end, start } = self.requests.at(-self.limit) ?? self.requests.at(-1) ?? {};
+        const time = (end || start || now) + 60_000;
+        return Math.max(time - now, 0);
+      }
+
+      // Only allow 1 request in one second
+      const only1ReqIn1Sec = self.requests.at(-1)?.start + 1000 || now;
+
+      // If 10 or less tokens remain limit requests to one per second
+      const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 1000) || now : now;
+      // If 5 or less tokens remain limit requests to one per two seconds
+      const tok5ReqIn2Sec = self.remaining <= 5 ? (self.requests.at(-1)?.start + 2000) || now : now;
+      // If 2 or less tokens remain limit requests to one per four seconds
+      const tok2ReqIn4Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 4000) || now : now;
+
+      return Math.max(now, only1ReqIn1Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn4Sec) - now;
     }
   }
 };

@@ -93,20 +93,11 @@ function malMediaSearch(type, variables, page) {
 
 const apiOLD = {
   animeThemes: {
-    themesByAniListId: fetchOnce(id => {
-      return Fetch.getJson(queries.animeThemesByAnilistId(id));
-    }),
     artisBySlug: fetchOnce(slug => {
       return Fetch.getJson(queries.animeThemesByArtisSlug(slug));
     }),
   },
   myAnimeList: {
-    animeById: fetchOnce(id => {
-      return Fetch.getJson(queries.myAnimeListAnimeById(id), res => res.data);
-    }),
-    mangaById: fetchOnce(id => {
-      return Fetch.getJson(queries.myAnimeListMangaById(id), res => res.data);
-    }),
     animeCharactersById: fetchOnce(id => {
       return Fetch.getJson(queries.myAnimeListAnimeCharactersById(id), res => res.data);
     }),

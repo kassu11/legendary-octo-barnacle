@@ -21,7 +21,7 @@ export function MediaPageApiSwitcher(props) {
               <Anilist />
             </A>
           </Show>
-          <a href={props.jikanData()?.data.url} class="active" target="_black">
+          <a href={props.jikanData()?.data.data.url} class="active" target="_black">
             <span class="visually-hidden">Go to MyAnimeList</span>
             <MyAnimeList />
             <ExternalSource />

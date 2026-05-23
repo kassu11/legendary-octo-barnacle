@@ -18,10 +18,6 @@ export const getRecommendationsByid = (token, id, page = 1) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistRecommendationsById, { id, page }, res => res.data.Media.recommendations);
 };
 
-export const getMediaByTypeAndMalId = (token, type, idMal) => {
-  return fetcherTemplates.anilistAuth(token, queries.anilistMediaById, { idMal, type: type.toUpperCase() }, res => res.data.Media);
-};
-
 export const getFrendScoresFromMedia = ({ token, id, ...variables}) => {
   if (!id) {
     return;

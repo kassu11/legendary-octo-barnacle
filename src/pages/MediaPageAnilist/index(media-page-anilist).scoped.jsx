@@ -28,13 +28,13 @@ import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
 import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
-import { fetchersOLD, fetcherSendersOLD, queries } from "../../collections/collections.js";
-import { fetcherSenderUtils, formatingUtils, navigationUtils } from "../../utils/utils.js";
+import { queries } from "../../collections/collections.js";
+import { formatingUtils, navigationUtils } from "../../utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { Trailer } from "../MediaPage/Trailer.jsx";
 import { isTypeFunction } from "../../utils/functionUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { createAnilistFetcher, createAnimeThemesFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { createTimer } from "../../utils/timeUtils.js";
 import { MediaPageApiSwitcher } from "../MediaPageJikan/MediaPageApiSwitcher.scoped.jsx";
@@ -83,25 +83,40 @@ export function MediaInfoContent(props) {
     });
   }
 
-  const idMal = createMemo(() => {
-    const data = anilistData()?.data.data.Media;
-    if (!data || data.idMal == null || data.type.toLowerCase() !== params.type) {
-      return;
-    }
-    return data.idMal;
-  });
-
   createRenderEffect(on(anilistData, apiResponse => {
     setIsFavourite(apiResponse?.data.data.Media?.isFavourite ?? false);
   }));
 
-  const jikanFetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.jikan.getMediaById, () => params.type, idMal);
-  const [_jikanData] = fetcherSendersOLD.sendWithNullUpdates(jikanFetcher);
+  const [_jikanData, setJikanData] = createSignal(undefined, { equals: false });
   const jikanData = createMemo(() => {
-    if (anilistData()?.data.data.Media.idMal && _jikanData()?.data?.mal_id === anilistData()?.data.data.Media.idMal) {
+    if (anilistData()?.data.data.Media.id == params.id && anilistData()?.data.data.Media.idMal === _jikanData()?.data.data.mal_id) {
       return _jikanData();
     }
     return undefined
+  });
+  let jikanFetcher, jikanController;
+  createEffect(() => {
+    if (anilistData()?.data.data.Media.type.toLowerCase() !== params.type) return;
+    if (anilistData()?.data.data.Media.id != params.id) return;
+    const id = anilistData()?.data.data.Media.idMal;
+    if (!id) return;
+
+    jikanController?.abort();
+    jikanController = new AbortController();
+
+    jikanFetcher = createAnimeThemesFetcher(queries.myAnimeListMediaById, { id, type: params.type }, jikanController.signal);
+
+    sendFetcher(jikanFetcher, {
+      name: "Jikan media page (Anilist)",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === jikanFetcher.cacheKey) jikanController = null;
+      },
+      onStart: startTimer,
+      onStop: stopTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === jikanFetcher.cacheKey) setJikanData(res);
+      }
+    });
   });
 
   const { openEditor } = useEditMediaEntries();

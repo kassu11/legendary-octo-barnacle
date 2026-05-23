@@ -158,9 +158,9 @@ async function retryDelay(fetcher, response, iteration) {
 
 
 const requestQueue = [
-  { url: "anilist", queue: [], timeout: null },
-  { url: "jikan", queue: [], timeout: null },
-  { url: "https://api.animethemes.moe/", queue: [], timeout: null },
+  { url: "https://graphql.anilist.co", queue: [], timeout: null },
+  { url: "https://api.jikan.moe/v4", queue: [], timeout: null },
+  { url: "https://api.animethemes.moe", queue: [], timeout: null },
 ]
 
 // const response = await fetch("/legendary-octo-barnacle/offline.json");
