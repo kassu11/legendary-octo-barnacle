@@ -31,15 +31,13 @@ import "./index(media-page-anilist).scoped.css";
 import { fetchersOLD, fetcherSendersOLD, queries } from "../../collections/collections.js";
 import { fetcherSenderUtils, formatingUtils, navigationUtils } from "../../utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
-import Anilist from "../../assets/Anilist.jsx";
-import ExternalSource from "../../assets/ExternalSource.jsx";
-import MyAnimeList from "../../assets/MyAnimeList.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { Trailer } from "../MediaPage/Trailer.jsx";
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { createTimer } from "../../utils/timeUtils.js";
+import { MediaPageApiSwitcher } from "../MediaPageJikan/MediaPageApiSwitcher.scoped.jsx";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -165,21 +163,7 @@ export function MediaInfoContent(props) {
           <aside class="media-page-left-aside">
             <Show when={anilistData()}>
               <img src={anilistData()?.data.data.Media?.coverImage.extraLarge} alt="Cover" class="media-page-cover" />
-              <div class="cp-media-api-switcher">
-                <Show when={anilistData()?.data.data.Media.id}>
-                  <a href={"https://anilist.co/" + params.type + "/" + (anilistData()?.data.data.Media.id ?? params.id)} target="_black" class="active">
-                    <span class="visually-hidden">Go to Anilist</span>
-                    <Anilist />
-                    <ExternalSource />
-                  </a>
-                </Show>
-                <Show when={anilistData()?.data.data.Media.idMal}>
-                  <A href={"/mal/" + params.type + "/" + anilistData()?.data.data.Media.idMal + "/" + params.name}>
-                    <span class="visually-hidden">Switch to MyAnimeList mode</span>
-                    <MyAnimeList />
-                  </A>
-                </Show>
-              </div>
+              <MediaPageApiSwitcher anilistData={anilistData} jikanData={jikanData} />
               <MediaPageScores />
               <Show when={accessToken()}>
                 <button onClick={() => {

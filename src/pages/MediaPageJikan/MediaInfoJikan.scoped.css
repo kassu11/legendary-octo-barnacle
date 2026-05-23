@@ -1,9 +1,10 @@
 .pg-media-info-jikan {
+  margin-top: 16px;
   width: min(100% - 1rem, 80rem);
   margin-inline: auto;
   display: grid;
   grid-template-columns: 15rem 1fr;
-  gap: 1rem;
+  gap: 16px;
 
   > * {
     display: grid;
@@ -11,7 +12,7 @@
     height: fit-content;
   }
 
-  > .left > div:not(.cp-media-api-switcher) {
+  > .left > div {
     background-color: var(--background-400);
   }
 
@@ -23,7 +24,7 @@
       border-radius: .25rem;
     }
 
-    a {
+    _a {
       color: inherit;
       text-decoration: none;
     }
@@ -43,33 +44,7 @@
   gap: 16px;
 }
 
-
-// TODO: Move this to its own component file
-.cp-media-api-switcher {
-  display: flex;
-  gap: .5rem;
-
-  a {
-    display: flex;
-    width: 100%;
-    justify-content: center;
-    background-color: var(--background-400);
-    border-radius: .25rem;
-    color: inherit;
-    padding: .5rem 1rem;
-    gap: 1rem;
-    text-decoration: none;
-
-    &:hover {
-      outline: 2px solid var(--text-300);
-    }
-  }
-
-  svg {
-    height: 1.5rem;
-  }
-
-  .svg-external-source {
-    color: var(--text-200);
-  }
+.time {
+  position: absolute;
+  transform: translateY(-50%);
 }

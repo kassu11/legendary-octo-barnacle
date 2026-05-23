@@ -1,3 +1,4 @@
+import "./MediaInfo.scoped.css";
 import { ErrorBoundary, Match, Show, Switch } from "solid-js";
 import { useMediaInfo } from "../../context/providers";
 import { A } from "@solidjs/router";
