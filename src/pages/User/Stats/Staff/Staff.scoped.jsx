@@ -1,34 +1,49 @@
 import { A, useParams } from "@solidjs/router";
-import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
-import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, localizations, queries } from "../../../../collections/collections.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 import "./Staff.scoped.css";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 
-export function StatsAnimeStaff() {
+export function StatsMediaStaff() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userAnimeStaff(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+
+    const { type } = params;
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStaff, { name: params.name }, userStatsController.signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaStaff, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].staff);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsStaff genres={userStats().data} />
-    </Show>
-  )
-}
-export function StatsMangaStaff() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userMangaStaff(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsStaff genres={userStats().data} />
-    </Show>
+    <>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <Show when={userStatsData()}>
+        <StatsStaff genres={userStatsData()} />
+      </Show>
+    </>
   )
 }
 

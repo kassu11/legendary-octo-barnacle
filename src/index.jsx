@@ -13,7 +13,7 @@ import { StatsMediaGenres } from "./pages/User/Stats/Genres/index(user-stats-gen
 import { StatsMediaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
-import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
+import { StatsMediaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
 import Artist from "./pages/Artist/Artist.jsx";
 import Notifications from "./pages/Notifications/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.jsx";
@@ -144,7 +144,7 @@ render(
                   <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsMediaTags} />
                   <Route path="/studios" component={StatsAnimeStudios} />
-                  <Route path="/staff" component={StatsAnimeStaff} />
+                  <Route path="/staff" component={StatsMediaStaff} />
                   <Route path="/voice-actors" component={StatsAnimeVoiceActors} />
                 </Route>
                 <Route path="/:type" matchFilters={{ type: "manga" }}>
@@ -152,7 +152,7 @@ render(
                   <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsMediaTags} />
-                  <Route path="/staff" component={StatsMangaStaff} />
+                  <Route path="/staff" component={StatsMediaStaff} />
                 </Route>
               </Route>
               <Route path="/socials" component={Socials} />
