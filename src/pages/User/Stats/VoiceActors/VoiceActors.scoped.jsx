@@ -4,19 +4,44 @@ import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/format
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
-import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
+import { fetchersOLD, fetcherSendersOLD, queries } from "../../../../collections/collections.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
 import "./VoiceActors.scoped.css";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userAnimeVoiceActors(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+
+    userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeVoiceActors, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user voice actor stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics.anime.voiceActors);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsVoiceActors genres={userStats().data} />
-    </Show>
+    <>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <Show when={userStatsData()}>
+        <StatsVoiceActors genres={userStatsData()} />
+      </Show>
+    </>
   )
 }
 
