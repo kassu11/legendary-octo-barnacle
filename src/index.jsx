@@ -138,21 +138,16 @@ render(
               <Route path="/favourites" component={IndexFavouriteScoped} />
               <Route path="/stats" component={Stats}>
                 <Route path="/" component={() => <Navigate href="anime" />} />
-                <Route path="/:type" matchFilters={{ type: "anime" }}>
+                <Route path="/:type" matchFilters={{ type: ["anime", "manga"] }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsMediaTags} />
-                  <Route path="/studios" component={StatsAnimeStudios} />
                   <Route path="/staff" component={StatsMediaStaff} />
-                  <Route path="/voice-actors" component={StatsAnimeVoiceActors} />
                 </Route>
-                <Route path="/:type" matchFilters={{ type: "manga" }}>
-                  <Route path="/" component={() => <Navigate href="overview" />} />
-                  <Route path="/overview" component={StatsMediaOverview} />
-                  <Route path="/genres" component={StatsMediaGenres} />
-                  <Route path="/tags" component={StatsMediaTags} />
-                  <Route path="/staff" component={StatsMediaStaff} />
+                <Route path="/:type" matchFilters={{ type: "anime" }}>
+                  <Route path="/studios" component={StatsAnimeStudios} />
+                  <Route path="/voice-actors" component={StatsAnimeVoiceActors} />
                 </Route>
               </Route>
               <Route path="/socials" component={Socials} />
