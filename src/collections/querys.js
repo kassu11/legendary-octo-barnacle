@@ -2011,7 +2011,7 @@ export const anilistCharacterById = format`query character(
   }
 }`
 
-export const trendingMedia = format`query {
+export const anilistBrowseMedia = format`query {
   trending: Page(page: 1, perPage: 6) {
     media(sort: TRENDING_DESC, isAdult: false) {
       ...media
@@ -2099,7 +2099,7 @@ fragment media on Media {
 }`
 
 
-export const trendingManga = format`query {
+export const anilistBrowseManga = format`query {
   trending: Page(page: 1, perPage: 6) {
     media(sort: TRENDING_DESC, type: MANGA, isAdult: false) {
       ...media
@@ -2176,7 +2176,7 @@ fragment media on Media {
   }
 }`;
 
-export const trendingAnime = format`query (
+export const anilistBrowseAnime = format`query (
   $season: MediaSeason
   $seasonYear: Int
   $nextSeason: MediaSeason

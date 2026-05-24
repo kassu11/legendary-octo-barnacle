@@ -1,7 +1,6 @@
 import { asserts, modes } from "../collections/collections.js";
 import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import * as queries from "../collections/querys";
-import { getDates } from "./dates";
 import { TokenBucket } from "./TokenBucket";
 const DEBUG = modes.debug;
 
@@ -93,15 +92,6 @@ function malMediaSearch(type, variables, page) {
 
 const apiOLD = {
   myAnimeList: {
-    animeCharactersById: fetchOnce(id => {
-      return Fetch.getJson(queries.myAnimeListAnimeCharactersById(id), res => res.data);
-    }),
-    mangaCharactersById: fetchOnce(id => {
-      return Fetch.getJson(queries.myAnimeListMangaCharactersById(id), res => res.data);
-    }),
-    animeStaffById: fetchOnce(id => {
-      return Fetch.getJson(queries.myAnimeListAnimeStaffById(id));
-    }),
     mediaSearch: fetchOnce(malMediaSearch),
     mediaSearchCache: onlyIfCache(malMediaSearch),
     genresAndThemes: fetchOnce(type => {
@@ -287,35 +277,6 @@ const apiOLD = {
     }),
     allMediaStaff: reloadCache((id, page = 1, token) => {
       return Fetch.authAnilist(token, queries.anilistStaff, { id, page }, res => res.data.Media);
-    }),
-    trendingMedia: reloadCache((token) => {
-      const dates = getDates();
-      return Fetch.authAnilist(token, queries.trendingMedia, {
-        "season": dates.season,
-        "seasonYear": dates.seasonYear,
-        "nextSeason": dates.nextSeason,
-        "nextYear": dates.nextYear,
-      });
-    }),
-    trendingAnime: reloadCache((token) => {
-      const dates = getDates();
-      return Fetch.authAnilist(token, queries.trendingAnime, {
-        "type": "ANIME",
-        "season": dates.season,
-        "seasonYear": dates.seasonYear,
-        "nextSeason": dates.nextSeason,
-        "nextYear": dates.nextYear,
-      });
-    }),
-    trendingManga: reloadCache((token) => {
-      const dates = getDates();
-      return Fetch.authAnilist(token, queries.trendingManga, {
-        "type": "MANGA",
-        "season": dates.season,
-        "seasonYear": dates.seasonYear,
-        "nextSeason": dates.nextSeason,
-        "nextYear": dates.nextYear,
-      });
     }),
     mediaListEntry: async (token, mediaId) => {
       asserts.assertTrueOLD(mediaId, "MediaId missing");

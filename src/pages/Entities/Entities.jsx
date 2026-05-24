@@ -12,37 +12,26 @@ import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 
 export function AnimeCharacters() {
-  const [idMal, setIdMal] = createSignal();
-  const [malCharacters] = apiOLD.myAnimeList.animeCharactersById(idMal);
-
   return (
-    <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
+    <Entities type="CHARACTER" />
   );
 }
 
 export function MangaCharacters() {
-  const [idMal, setIdMal] = createSignal();
-  const [malCharacters] = apiOLD.myAnimeList.mangaCharactersById(idMal);
-
   return (
-    <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
+    <Entities type="CHARACTER" />
   );
 }
 
 export function AnimeStaff() {
-  const [idMal, setIdMal] = createSignal();
-  const [malStaff] = apiOLD.myAnimeList.animeStaffById(idMal);
-
   return (
-    <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
+    <Entities type="STAFF" />
   );
 }
 
 export function MangaStaff() {
-  const [, setIdMal] = createSignal();
-
   return (
-    <Entities type="STAFF" setIdMal={setIdMal} />
+    <Entities type="STAFF" />
   );
 }
 
@@ -61,7 +50,6 @@ function Entities(props) {
             <StaffPage
               id={params.id}
               page={1}
-              setIdMal={props.setIdMal}
             />
           </ol>
         </Match>
@@ -282,16 +270,6 @@ function StaffPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
   const { accessToken } = useAuthentication();
   const [staff] = apiOLD.anilist.allMediaStaff(() => props.id, page, accessToken);
-
-  if (props.page === 1) {
-    createEffect(() => {
-      if (!staff()) {
-        return;
-      }
-
-      props.setIdMal(staff().data.idMal ?? undefined);
-    });
-  }
 
   return (
     <DoomScroll onIntersection={() => setPage(props.page)} fetchResponse={staff} loadingElement={<LoadingCard />} loading={props.loading}>{fetchCooldown => (
