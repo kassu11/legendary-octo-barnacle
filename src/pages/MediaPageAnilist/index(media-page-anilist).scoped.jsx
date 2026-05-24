@@ -1,31 +1,19 @@
-import {A, Navigate, useLocation, useNavigate, useParams, useSearchParams} from "@solidjs/router";
-import {AnilistRelationsPreview} from "./RelationsPreview.scoped.jsx";
+import { A, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { AnilistRelationsPreview } from "./RelationsPreview.scoped.jsx";
 import Characters from "../../components/media/Characters.jsx";
-import {
-    createEffect,
-    createMemo,
-    createRenderEffect,
-    createSignal,
-    ErrorBoundary,
-    For, Match,
-    on,
-    onCleanup,
-    onMount,
-    Show,
-    Switch
-} from "solid-js";
-import {Markdown} from "../../components/Markdown.jsx";
-import {StaffPreview} from "./StaffPreview.scoped.jsx";
+import { createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
+import { Markdown } from "../../components/Markdown.jsx";
+import { StaffPreview } from "./StaffPreview.scoped.jsx";
 import Friends from "../../components/media/Friends.jsx";
 import AnimeThemes from "../../components/MediaPage/AnimeThemes.jsx";
-import {Recommendations} from "./Recommendations.scoped.jsx";
-import {MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo} from "../../context/providers.js";
-import {AnilistMediaInfo} from "./MediaInfo.scoped.jsx";
-import {Tags} from "../../components/media/Tags.scoped.jsx";
-import {Genres} from "../../components/media/Genres.scoped.jsx";
-import {Rankings} from "../../components/media/Rankings.scoped.jsx";
-import {ExtraInfo} from "../../components/media/ExtraInfo.scoped.jsx";
-import {ExternalLinks} from "../../components/media/ExternalLinks.scoped.jsx";
+import { Recommendations } from "./Recommendations.scoped.jsx";
+import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../../context/providers.js";
+import { AnilistMediaInfo } from "./MediaInfo.scoped.jsx";
+import { Tags } from "../../components/media/Tags.scoped.jsx";
+import { Genres } from "../../components/media/Genres.scoped.jsx";
+import { Rankings } from "../../components/media/Rankings.scoped.jsx";
+import { ExtraInfo } from "../../components/media/ExtraInfo.scoped.jsx";
+import { ExternalLinks } from "../../components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
 import { queries } from "../../collections/collections.js";
@@ -111,8 +99,6 @@ export function MediaInfoContent(props) {
       onFetch: (_, { fetcher: f }) => {
         if (f.cacheKey === jikanFetcher.cacheKey) jikanController = null;
       },
-      onStart: startTimer,
-      onStop: stopTimer,
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === jikanFetcher.cacheKey) setJikanData(res);
       }
