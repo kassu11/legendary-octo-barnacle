@@ -10,7 +10,7 @@ import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/
 import { User } from "./pages/User/index(user).scoped.jsx";
 import { StatsMediaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
 import { StatsMediaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
-import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
+import { StatsMediaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
 import { StatsAnimeStaff, StatsMangaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
@@ -142,7 +142,7 @@ render(
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMediaGenres} />
-                  <Route path="/tags" component={StatsAnimeTags} />
+                  <Route path="/tags" component={StatsMediaTags} />
                   <Route path="/studios" component={StatsAnimeStudios} />
                   <Route path="/staff" component={StatsAnimeStaff} />
                   <Route path="/voice-actors" component={StatsAnimeVoiceActors} />
@@ -151,7 +151,7 @@ render(
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMediaGenres} />
-                  <Route path="/tags" component={StatsMangaTags} />
+                  <Route path="/tags" component={StatsMediaTags} />
                   <Route path="/staff" component={StatsMangaStaff} />
                 </Route>
               </Route>

@@ -1,34 +1,49 @@
 import { A, useParams } from "@solidjs/router";
-import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
-import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js";
+import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAuthentication, useUser } from "../../../../context/providers.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
-import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
-import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
+import { fetchersOLD, fetcherSendersOLD, localizations, queries } from "../../../../collections/collections.js";
+import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
 import "./Tags.scoped.css";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 
-export function StatsAnimeTags() {
+export function StatsMediaTags() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userAnimeTags(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+    const { type } = params;
+
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeTags, { name: params.name }, userStatsController.signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaTags, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user tag stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].tags);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsTags genres={userStats().data} />
-    </Show>
-  )
-}
-export function StatsMangaTags() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userMangaTags(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsTags genres={userStats().data} />
-    </Show>
+    <>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <Show when={userStatsData()}>
+        <StatsTags genres={userStatsData()} />
+      </Show>
+    </>
   )
 }
 
