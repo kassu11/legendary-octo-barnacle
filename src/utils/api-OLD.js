@@ -134,15 +134,6 @@ const apiOLD = {
       const request = Fetch.authAnilist(token, queries.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, res => res.data.SaveRecommendation);
       return await request.send();
     },
-    userByName: reloadCache((name, token) => {
-      asserts.assertTrueOLD(name, "Name is missing");
-      return Fetch.authAnilist(token, queries.getUserByName, { name }, res => res.data.User);
-    }),
-    toggleFollow: async (token, id) => {
-      asserts.assertTrueOLD(id, "id is missing");
-      const request = Fetch.authAnilist(token, queries.anilistToggleFollow, { id }, res => res.data.ToggleFollow);
-      return await request.send();
-    },
     characterIds: fetchOnce((ids, token) => {
       return Fetch.authAnilist(token, queries.anilistGetCharacterIds(ids), { ids }, res => Object.values(res.data).map(page => page.characters).flat());
     }),
