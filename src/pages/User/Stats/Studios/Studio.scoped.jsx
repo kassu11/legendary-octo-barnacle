@@ -1,23 +1,47 @@
 import { A, useParams } from "@solidjs/router";
-import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
-import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js";
+import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAuthentication } from "../../../../context/providers.js";
 import { fetcherSenderUtils } from "../../../../utils/utils.js";
-import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
-import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
+import { fetchersOLD, fetcherSendersOLD, queries } from "../../../../collections/collections.js";
+import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
 import "./Studio.scoped.css";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
 
 export function StatsAnimeStudios() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userAnimeStudios(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+
+    userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStudios, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user studio stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics.anime.studios);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsStudios genres={userStats().data} />
-    </Show>
+    <>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <Show when={userStatsData()}>
+        <StatsStudios genres={userStatsData()} />
+      </Show>
+    </>
   )
 }
 
