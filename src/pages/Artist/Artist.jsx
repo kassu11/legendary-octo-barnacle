@@ -1,17 +1,42 @@
 import { useParams } from "@solidjs/router";
-import apiOLD from "../../utils/api-OLD.js";
-import {  For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import { AnimeTheme } from "../../components/MediaPage/AnimeThemes.jsx";
 import style from "./Artist.module.scss";
+import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
+import { queries } from "../../collections/collections.js";
 
 function Artist() {
   const params = useParams();
-  const [artistData] = apiOLD.animeThemes.artisBySlug(() => params.name);
+
+  const [artistTime, startArtistTimer, stopArtistTimer] = createTimer();
+  const [artistData, setArtistData] = createSignal(undefined, { equals: false });
+  let artistFetcher, artistController;
+  createEffect(() => {
+    artistController?.abort();
+    artistController = new AbortController();
+
+    artistFetcher = createJsonGetFetcher(queries.animeThemesByArtisSlug, { slug: params.name }, artistController.signal);
+
+    sendFetcher(artistFetcher, {
+      name: "AnimeThemes artist",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === artistFetcher.cacheKey) artistController = null;
+      },
+      onStart: startArtistTimer,
+      onStop: stopArtistTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === artistFetcher.cacheKey) setArtistData(res);
+      }
+    });
+  });
+
   const video = <video src="" controls autoPlay />;
   document.title = "Artist - LOB";
 
   return (
     <>
+      <p>{formatMSToString(artistTime())}</p>
       <h1>Artist</h1>
       <Show when={artistData()}>
         <p>{artistData().data.artist.name}</p>

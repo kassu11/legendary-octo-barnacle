@@ -92,11 +92,6 @@ function malMediaSearch(type, variables, page) {
 
 
 const apiOLD = {
-  animeThemes: {
-    artisBySlug: fetchOnce(slug => {
-      return Fetch.getJson(queries.animeThemesByArtisSlug(slug));
-    }),
-  },
   myAnimeList: {
     animeCharactersById: fetchOnce(id => {
       return Fetch.getJson(queries.myAnimeListAnimeCharactersById(id), res => res.data);

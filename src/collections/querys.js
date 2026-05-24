@@ -352,7 +352,7 @@ export const anilistRateRecommendations = format`mutation (
 
 export const animeThemesByAnilistId = ({ id }) => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=AniList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
 export const animeThemesByMyAnimeListId = ({ id }) => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=MyAnimeList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
-export const animeThemesByArtisSlug = slug => `https://api.animethemes.moe/artist/${slug}?include=songs.animethemes.anime,songs.animethemes.animethemeentries.videos.audio,songs.animethemes.song.artists,resources,images`;
+export const animeThemesByArtisSlug = ({ slug }) => `https://api.animethemes.moe/artist/${slug}?include=songs.animethemes.anime,songs.animethemes.animethemeentries.videos.audio,songs.animethemes.song.artists,resources,images`;
 export const myAnimeListMediaById = ({ type, id }) => `https://api.jikan.moe/v4/${type}/${id}/full`;
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.jikan.moe/v4/${type}/${id}/characters`;
 export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/anime/${id}/characters`;
