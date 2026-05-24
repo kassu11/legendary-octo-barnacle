@@ -8,7 +8,7 @@ import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).scoped.jsx";
 import { User } from "./pages/User/index(user).scoped.jsx";
-import { StatsAnimeOverview, StatsMangaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
+import { StatsMediaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
 import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
@@ -140,7 +140,7 @@ render(
                 <Route path="/" component={() => <Navigate href="anime" />} />
                 <Route path="/:type" matchFilters={{ type: "anime" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
-                  <Route path="/overview" component={StatsAnimeOverview} />
+                  <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsAnimeGenres} />
                   <Route path="/tags" component={StatsAnimeTags} />
                   <Route path="/studios" component={StatsAnimeStudios} />
@@ -149,7 +149,7 @@ render(
                 </Route>
                 <Route path="/:type" matchFilters={{ type: "manga" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
-                  <Route path="/overview" component={StatsMangaOverview} />
+                  <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMangaGenres} />
                   <Route path="/tags" component={StatsMangaTags} />
                   <Route path="/staff" component={StatsMangaStaff} />

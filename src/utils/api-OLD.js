@@ -143,16 +143,6 @@ const apiOLD = {
       const request = Fetch.authAnilist(token, queries.anilistToggleFollow, { id }, res => res.data.ToggleFollow);
       return await request.send();
     },
-    userFollowing: reloadCache((id, page = 1, token) => {
-      asserts.assertTrueOLD(id, "id is missing");
-      return Fetch.authAnilist(token, queries.anilistGetUserFollowing, { id, page }, res => res.data.Page);
-    }),
-    userAnimeStats: reloadCache((name, token) => {
-      return Fetch.authAnilist(token, queries.anilistGetUserAnimeStats, { name }, res => res.data.User.statistics.anime);
-    }),
-    userMangaStats: reloadCache((name, token) => {
-      return Fetch.authAnilist(token, queries.anilistGetUserMangaStats, { name }, res => res.data.User.statistics.manga);
-    }),
     userAnimeGenres: reloadCache((name, token) => {
       return Fetch.authAnilist(token, queries.anilistGetUserAnimeGenres, { name }, res => res.data.User.statistics.anime.genres);
     }),

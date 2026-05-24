@@ -1,33 +1,46 @@
-import {useParams} from "@solidjs/router";
-import apiOLD from "../../../../utils/api-OLD.js";
-import {numberCommas} from "../../../../utils/formating.js";
-import {Match, Show, Switch} from "solid-js";
-import {useAuthentication, useUser} from "../../../../context/providers.js";
+import { useParams } from "@solidjs/router";
+import { numberCommas } from "../../../../utils/formating.js";
+import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
+import { useUser } from "../../../../context/providers.js";
 import "./index(user-stats-overview).scoped.css";
-import {StatsDistributionListsScoped} from "./StatsDistributionLists.scoped.jsx";
-import {StatsScoreDistributionBarsScoped} from "./StatsScoreDistributionBars.scoped.jsx";
-import {StatsEpisodeCountBarsScoped} from "./StatsEpisodeCountBars.scoped.jsx";
-import {StatsYearLineChartsScoped} from "./StatsYearLineCharts.scoped.jsx";
+import { StatsDistributionListsScoped } from "./StatsDistributionLists.scoped.jsx";
+import { StatsScoreDistributionBarsScoped } from "./StatsScoreDistributionBars.scoped.jsx";
+import { StatsEpisodeCountBarsScoped } from "./StatsEpisodeCountBars.scoped.jsx";
+import { StatsYearLineChartsScoped } from "./StatsYearLineCharts.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
+import { localizations, queries } from "../../../../collections/collections.js";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
 
-export function StatsAnimeOverview() {
+export function StatsMediaOverview() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userAnimeStats(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+
+    if (params.type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStats, { name: params.name }, userStatsController.signal);
+    if (params.type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaStats, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsOverview stats={userStats().data} />
-    </Show>
-  )
-}
-export function StatsMangaOverview() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userMangaStats(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsOverview stats={userStats().data} />
+    <Show when={userStatsData()}>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <StatsOverview stats={userStatsData().anime || userStatsData().manga} />
     </Show>
   )
 }
