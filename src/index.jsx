@@ -9,7 +9,7 @@ import { ResponsiveProvider } from "./context/ResponsiveContext";
 import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).scoped.jsx";
 import { User } from "./pages/User/index(user).scoped.jsx";
 import { StatsMediaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
-import { StatsAnimeGenres, StatsMangaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
+import { StatsMediaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
 import { StatsAnimeTags, StatsMangaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
@@ -141,7 +141,7 @@ render(
                 <Route path="/:type" matchFilters={{ type: "anime" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsMediaOverview} />
-                  <Route path="/genres" component={StatsAnimeGenres} />
+                  <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsAnimeTags} />
                   <Route path="/studios" component={StatsAnimeStudios} />
                   <Route path="/staff" component={StatsAnimeStaff} />
@@ -150,7 +150,7 @@ render(
                 <Route path="/:type" matchFilters={{ type: "manga" }}>
                   <Route path="/" component={() => <Navigate href="overview" />} />
                   <Route path="/overview" component={StatsMediaOverview} />
-                  <Route path="/genres" component={StatsMangaGenres} />
+                  <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsMangaTags} />
                   <Route path="/staff" component={StatsMangaStaff} />
                 </Route>

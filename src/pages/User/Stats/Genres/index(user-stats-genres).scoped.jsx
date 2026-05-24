@@ -1,32 +1,45 @@
-import {useParams} from "@solidjs/router";
-import apiOLD from "../../../../utils/api-OLD.js";
-import {createEffect, createSignal, on, Show} from "solid-js";
-import {createStore} from "solid-js/store";
-import {useAuthentication } from "../../../../context/providers.js";
-import {fetcherSenderUtils} from "../../../../utils/utils.js";
-import {fetchersOLD, fetcherSendersOLD} from "../../../../collections/collections.js";
-import {GenreItems} from "./GenreItems.scoped.jsx";
-import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
+import { useParams } from "@solidjs/router";
+import { createEffect, createSignal, on, Show } from "solid-js";
+import { createStore } from "solid-js/store";
+import { useAuthentication } from "../../../../context/providers.js";
+import { fetcherSenderUtils } from "../../../../utils/utils.js";
+import { fetchersOLD, fetcherSendersOLD, localizations, queries } from "../../../../collections/collections.js";
+import { GenreItems } from "./GenreItems.scoped.jsx";
+import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 
-export function StatsAnimeGenres() {
+export function StatsMediaGenres() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userAnimeGenres(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+    const { type } = params;
+
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeGenres, { name: params.name }, userStatsController.signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaGenres, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user genre stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].genres);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsGenres genres={userStats().data} />
-    </Show>
-  )
-}
-export function StatsMangaGenres() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = apiOLD.anilist.userMangaGenres(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsGenres genres={userStats().data} />
+    <Show when={userStatsData()}>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <StatsGenres genres={userStatsData()} />
     </Show>
   )
 }
