@@ -50,12 +50,6 @@ const baseLimits = {
       // Anilist internal rate limit has been hit, resume only after reset time has passed
       if (self.resetTime > now) return self.resetTime - now;
 
-      if (self.remaining === 0) {
-        const { end, start } = self.requests.at(-self.limit) ?? self.requests.at(-1) ?? {};
-        const time = (end || start || now) + 60_000;
-        return Math.max(time - now, 0);
-      }
-
       // Only allow 4 request back to back if the requests are from new session.
       // So the last request was over 90 seconds ago
       const _only4ReqIn1SecIfNewSession = (self.requests.at(-4)?.start + 90_000) || now;
@@ -67,14 +61,7 @@ const baseLimits = {
       // Only allow 6 request in five seconds
       const only6ReqIn5Sec = (self.requests.at(-6)?.start + 5000) || now;
 
-      // If 10 or less tokens remain limit requests to one per second
-      const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 1000) || now : now;
-      // If 5 or less tokens remain limit requests to one per two seconds
-      const tok5ReqIn2Sec = self.remaining <= 5 ? (self.requests.at(-1)?.start + 2000) || now : now;
-      // If 2 or less tokens remain limit requests to one per four seconds
-      const tok2ReqIn2Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 4000) || now : now;
-
-      return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
+      return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec) - now;
     }
   },
   "https://api.jikan.moe/v4": {
@@ -87,23 +74,10 @@ const baseLimits = {
       // Anilist internal rate limit has been hit, resume only after reset time has passed
       if (self.resetTime > now) return self.resetTime - now;
 
-      if (self.remaining === 0) {
-        const { end, start } = self.requests.at(-self.limit) ?? self.requests.at(-1) ?? {};
-        const time = (end || start || now) + 60_000;
-        return Math.max(time - now, 0);
-      }
-
       // Only allow 1 request in one second
       const only1ReqIn1Sec = self.requests.at(-1)?.start + 1500 || now;
 
-      // If 10 or less tokens remain limit requests to one per second
-      const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 1000) || now : now;
-      // If 5 or less tokens remain limit requests to one per two seconds
-      const tok5ReqIn2Sec = self.remaining <= 5 ? (self.requests.at(-1)?.start + 2000) || now : now;
-      // If 2 or less tokens remain limit requests to one per four seconds
-      const tok2ReqIn4Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 4000) || now : now;
-
-      return Math.max(now, only1ReqIn1Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn4Sec) - now;
+      return Math.max(now, only1ReqIn1Sec) - now;
     }
   }
 };
