@@ -123,17 +123,6 @@ const apiOLD = {
     }),
   },
   anilist: {
-    rateRecommendation: async (token, id, rating, mediaId, mediaRecommendationId) => {
-      asserts.assertTrueOLD(token, "Token is missing");
-      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
-      asserts.assertTrueOLD(id != null, "Id missing");
-      asserts.assertTrueOLD(rating != null, "Rating missing");
-      asserts.assertTrueOLD(mediaId != null, "MediaId missing");
-      asserts.assertTrueOLD(mediaRecommendationId != null, "MediaRecommendationId missing");
-
-      const request = Fetch.authAnilist(token, queries.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, res => res.data.SaveRecommendation);
-      return await request.send();
-    },
     characterIds: fetchOnce((ids, token) => {
       return Fetch.authAnilist(token, queries.anilistGetCharacterIds(ids), { ids }, res => Object.values(res.data).map(page => page.characters).flat());
     }),

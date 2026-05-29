@@ -1,12 +1,13 @@
 import { useParams } from "@solidjs/router";
 import { fetcherSenderUtils, scheduleUtils } from "../../utils/utils";
-import { asserts, fetchersOLD, fetcherSendersOLD } from "../../collections/collections";
+import { asserts, fetchersOLD, fetcherSendersOLD, queries } from "../../collections/collections";
 import "./Recommendations.scoped.css";
 import { batch, createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { useAuthentication } from "../../context/providers";
 import { DoomScroll } from "../../components/utils/DoomScroll";
-import apiOLD from "../../utils/api-OLD";
 import { AnilistMediaRecommendationCard } from "../../components/Cards/Cards.scoped";
+import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils";
+import { addApplicationNotification } from "../App/ApplicationNotifications.scoped";
 
 export function Recommendations(props) {
   const params = useParams();
@@ -107,10 +108,13 @@ function RecommendationCard(props) {
   let localRating = props.node.userRating;
   const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
-      const response = await apiOLD.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
-      asserts.assertTrueOLD(!response.fromCache, "Mutation should never be cached");
-      if (response.status === 200) {
-        props.mutateCache(response.data);
+      const fetcher = createAnilistFetcher(queries.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, AbortSignal.timeout(30_000));
+      const res = await fetcherToFetch(fetcher);
+      if (res.status === 200) {
+        const json = await res.json();
+        props.mutateCache(json.data.SaveRecommendation);
+      } else {
+        addApplicationNotification({ type: "error", message: "Rating recommendation failed", duration: 30_000 });
       }
     }
 
