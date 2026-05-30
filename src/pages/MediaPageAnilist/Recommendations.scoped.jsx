@@ -4,10 +4,10 @@ import { asserts, fetchersOLD, fetcherSendersOLD, queries } from "../../collecti
 import "./Recommendations.scoped.css";
 import { batch, createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { useAuthentication } from "../../context/providers";
-import { DoomScroll } from "../../components/utils/DoomScroll";
 import { AnilistMediaRecommendationCard } from "../../components/Cards/Cards.scoped";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils";
 import { addApplicationNotification } from "../App/ApplicationNotifications.scoped";
+import { Intersection } from "../../components/utils/Intersection.scoped";
 
 export function Recommendations(props) {
   const params = useParams();
@@ -61,22 +61,16 @@ function RecommendationsPage(props) {
   });
 
   return (
-    <DoomScroll
-      onIntersection={() => setId(props.id)} 
-      fetchResponse={recommendations} 
-      loadingElement={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />} 
-      loading={props.loading}
-    >{fetchCooldown => (
-        <>
+    <>
+      <Intersection onIntersection={() => setId(props.id)}>
+        <Show when={recommendations()?.data?.nodes} fallback={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />}>
           <RecommendationCards nodes={recommendations().data.nodes} mutateCache={mutateCache} mutateOldCardsCache={props.mutateOldCardsCache} oldCards={props.oldCards} />
-          <Show when={recommendations().data.pageInfo.hasNextPage}>
-            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-              <RecommendationsPage id={id()} page={props.page + 1} loading={recommendations.loading} />
-            </Show>
-          </Show>
-        </>
-      )}
-    </DoomScroll>
+        </Show>
+      </Intersection>
+      <Show when={!recommendations.loading && recommendations()?.data?.pageInfo.hasNextPage}>
+        <RecommendationsPage id={id()} page={props.page + 1} />
+      </Show>
+    </>
   );
 }
 

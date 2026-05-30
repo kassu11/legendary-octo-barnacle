@@ -1,8 +1,8 @@
 import { createEffect, createSignal, For, Show, untrack, on } from "solid-js";
-import { DoomScroll } from "../../../components/utils/DoomScroll.jsx";
 import apiOLD from "../../../utils/api-OLD.js";
 import { useAuthentication, useUser, useFavourites } from "../../../context/providers.js";
 import { FavouritePageItemScoped } from "./FavouritePageItem.scoped.jsx";
+import { Intersection } from "../../../components/utils/Intersection.scoped.jsx";
 
 export function FavouritesPageScoped(props) {
   const { user } = useUser();
@@ -26,22 +26,16 @@ export function FavouritesPageScoped(props) {
   }, { defer: true }));
 
   return (
-    <DoomScroll rootMargin="100px" onIntersection={() => setPage(props.page)} loading={props.loading} fetchResponse={favourites}>{fetchCooldown => (
-      <>
-        <For each={favourites()?.data[type].edges}>{edge => (
+    <>
+      <Intersection rootMargin="100px" onIntersection={() => setPage(props.page)}>
+        <For each={favourites()?.data?.[type].edges}>{edge => (
           <FavouritePageItemScoped edge={edge} />
         )}</For>
-        <Show when={favourites().data[type].pageInfo.hasNextPage}>
-          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-            <FavouritesPageScoped
-              page={props.page + 1}
-              loading={favourites.loading}
-            />
-          </Show>
-        </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!favourites.loading && favourites()?.data?.[type].pageInfo.hasNextPage}>
+        <FavouritesPageScoped page={props.page + 1} />
+      </Show>
+    </>
   );
 }
-
 

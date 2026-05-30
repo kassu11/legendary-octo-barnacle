@@ -6,7 +6,6 @@ import { capitalize, formatMediaFormat } from "../../utils/formating.js";
 import { createStore } from "solid-js/store";
 import { SearchBarContext, useAuthentication, useSearchBar } from "../../context/providers.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { RatingInputScoped } from "./inputs/RatingInput.scoped.jsx";
 import { SwitchInputScoped } from "./inputs/SwitchInput.scoped.jsx";
 import { GenresInputScoped } from "./inputs/GenresInput.scoped.jsx";
@@ -26,8 +25,7 @@ import { asserts, globalState, localizations, searchObjects, queries } from "../
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-
-
+import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
@@ -792,7 +790,7 @@ export function RedirectSearchHeaders() {
 }
 
 function AnilistMediaSearchContent(props) {
-  const {accessToken} = useAuthentication();
+  const { accessToken } = useAuthentication();
   const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
   const [cacheData] = apiOLD.anilist.searchMediaCache(accessToken, debouncedSearchVariables, props.page);
@@ -802,27 +800,20 @@ function AnilistMediaSearchContent(props) {
   createEffect(on(cacheData, data => data && setNewestData(data.data.media)));
   createEffect(on(mediaData, data => data && setNewestData(data.data.media)));
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={mediaData} loadingElement={newestData() && <AniCardRow data={newestData()} />} loading={props.loading}>{fetchCooldown => (
-      <>
-        <AniCardRow data={newestData()} />
-        <Show when={mediaData().data.pageInfo.hasNextPage}>
-          <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <AnilistMediaSearchContent 
-                    variables={vars()}
-                    page={props.page + 1}
-                    nestLevel={props.nestLevel + 1}
-                    loading={mediaData.loading}
-                  />
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={newestData()}>
+          <AniCardRow data={newestData()} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!mediaData.loading && mediaData()?.data?.pageInfo.hasNextPage}>
+        <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <AnilistMediaSearchContent variables={vars()} page={props.page + 1} nestLevel={props.nestLevel + 1} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
@@ -896,7 +887,7 @@ function MyAnimeListMediaSearchContent(props) {
     mediaController?.abort();
     mediaController = new AbortController();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { idMal_in: ids, type}, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { idMal_in: ids, type }, mediaController.signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
@@ -917,28 +908,20 @@ function MyAnimeListMediaSearchContent(props) {
   createEffect(on(cacheData, data => data && setNewestData(data.data.data)));
   createEffect(on(mediaData, data => data && setNewestData(data.data.data)));
   return (
-    <DoomScroll rootMargin="200px" onIntersection={() => setVariables(props.variables)} fetchResponse={mediaData} loadingElement={newestData() && <MalCardRow data={newestData()} />} loading={props.loading}>{fetchCooldown => (
-      <>
-        <MalCardRow data={newestData()} />
-        <Show when={mediaData().data.pagination.has_next_page}>
-          <Show when={mediaData().data.data} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <MyAnimeListMediaSearchContent
-                    variables={vars()}
-                    type={props.type}
-                    page={props.page + 1}
-                    nestLevel={props.nestLevel + 1}
-                    loading={mediaData.loading}
-                  />
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection rootMargin="200px" onIntersection={() => setVariables(props.variables)}>
+        <Show when={newestData()}>
+          <MalCardRow data={newestData()} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!mediaData.loading && mediaData()?.data?.pagination.has_next_page}>
+        <Show when={mediaData().data.data} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <MyAnimeListMediaSearchContent variables={vars()} type={props.type} page={props.page + 1} nestLevel={props.nestLevel + 1} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 

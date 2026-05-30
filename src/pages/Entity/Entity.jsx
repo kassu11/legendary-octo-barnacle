@@ -6,10 +6,10 @@ import "./Entity.scss";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { useAuthentication } from "../../context/providers.js";
 import { wrapToArray } from "../../utils/arrays.js";
 import { asserts } from "../../collections/collections.js";
+import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 
 export function Character() {
   const params = useParams();
@@ -277,29 +277,20 @@ function CharacterMediaPage(props) {
   }
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffCharacters} loading={props.loading}>{fetchCooldown => (
-      <>
-        <CharacterAndActorCards language={props.language} edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-        <Show when={staffCharacters().data.pageInfo.hasNextPage}>
-          <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <CharacterMediaPage
-                    variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} 
-                    nestLevel={props.nestLevel + 1} 
-                    showYears={props.showYears} 
-                    language={props.language} 
-                    lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                    loading={staffCharacters.loading} 
-                  /> 
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={staffCharacters()?.data}>
+          <CharacterAndActorCards language={props.language} edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!staffCharacters.loading && staffCharacters()?.data?.pageInfo.hasNextPage}>
+        <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <CharacterMediaPage variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} language={props.language} lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
@@ -316,28 +307,20 @@ function StaffCharacterPage(props) {
   }
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffCharacters} loading={props.loading}>{fetchCooldown => (
-      <>
-        <CharacterAndMediaCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
-        <Show when={staffCharacters().data.pageInfo.hasNextPage}>
-          <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <StaffCharacterPage
-                    variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} 
-                    nestLevel={props.nestLevel + 1} 
-                    showYears={props.showYears} 
-                    lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                    loading={staffCharacters.loading} 
-                  /> 
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={staffCharacters()?.data?.edges}>
+          <CharacterAndMediaCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!staffCharacters.loading && staffCharacters()?.data?.pageInfo.hasNextPage}>
+        <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <StaffCharacterPage variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
@@ -363,8 +346,8 @@ function StaffMediaRolePage(props) {
     const edges = structuredClone(media.data.edges);
     const removedEdges = [];
 
-    for(const edge of media.data.edges) {
-      if (edge.node.id !== props.lastMediaId) { break; } 
+    for (const edge of media.data.edges) {
+      if (edge.node.id !== props.lastMediaId) { break; }
       removedEdges.push(edges.shift());
     }
 
@@ -382,27 +365,20 @@ function StaffMediaRolePage(props) {
   }));
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffMedia} loading={props.loading}>{fetchCooldown => (
-      <>
-        <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-        <Show when={staffMedia().data.pageInfo.hasNextPage}>
-          <Show when={props.variables} keyed={props.nestLevel === 1}>
-            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-              <StaffMediaRolePage
-                variables={{ ...props.variables, staffPage: (props.variables?.staffPage || 1) + 1 }} 
-                nestLevel={props.nestLevel + 1} 
-                showYears={props.showYears}
-                mutate={mutate} 
-                type={props.type} 
-                lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                lastMediaId={staffMedia().data.edges.at(-1)?.node.id}
-                loading={staffMedia.loading} 
-              /> 
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={staffMedia()?.data?.edges}>
+          <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!staffMedia.loading && staffMedia()?.data?.pageInfo.hasNextPage}>
+        <Show when={staffMedia()?.data?.edges} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <StaffMediaRolePage variables={{ ...vars(), staffPage: (vars()?.staffPage || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} mutate={mutate} type={props.type} lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"} lastMediaId={staffMedia().data.edges.at(-1)?.node.id} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 

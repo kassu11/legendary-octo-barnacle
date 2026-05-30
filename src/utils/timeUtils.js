@@ -29,9 +29,8 @@ export function createTimer() {
 }
 
 export function formatMSToString(ms) {
-  if (ms >= 1000) {
-    return `${(ms / 1000).toFixed(1)} s`;
-  }
-
-  return `${Math.round(ms)} ms`;
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)} s`;
+  if (ms < 3_600_000) return `${Math.floor(ms / 60_000)} m ${Math.floor(ms / 1000)} s`;
+  return `${Math.floor(ms / 3_600_000)} h ${Math.floor(ms / 60_000)} m ${Math.floor(ms / 1000)} s`;
 }

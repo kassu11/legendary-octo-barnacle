@@ -3,13 +3,13 @@ import apiOLD from "../../utils/api-OLD.js";
 import { createEffect, createMemo, createRenderEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
-import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { useAuthentication } from "../../context/providers.js";
 import { asserts, fetchersOLD, fetcherSendersOLD, modes, signals } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
+import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 
 export function AnimeCharacters() {
   return (
@@ -272,22 +272,18 @@ function StaffPage(props) {
   const [staff] = apiOLD.anilist.allMediaStaff(() => props.id, page, accessToken);
 
   return (
-    <DoomScroll onIntersection={() => setPage(props.page)} fetchResponse={staff} loadingElement={<LoadingCard />} loading={props.loading}>{fetchCooldown => (
-      <>
-        <For each={staff().data.staff.edges}>{edge => (
-          <StaffCard edge={edge}></StaffCard>
-        )}</For>
-        <Show when={staff().data.staff.pageInfo.hasNextPage}>
-          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-            <StaffPage
-              id={props.id}
-              page={props.page + 1}
-              loading={staff.loading}
-             /> 
-          </Show>
+    <>
+      <Intersection onIntersection={() => setPage(props.page)}>
+        <Show when={staff()?.data?.staff.edges} fallback={<LoadingCard />}>
+          <For each={staff().data?.staff.edges}>{edge => (
+            <StaffCard edge={edge}></StaffCard>
+          )}</For>
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!staff.loading && staff()?.data?.staff.pageInfo.hasNextPage}>
+        <StaffPage id={props.id} page={props.page + 1} />
+      </Show>
+    </>
   );
 }
 

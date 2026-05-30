@@ -4,11 +4,11 @@ import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-
 import "./index(studio).scss";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
 import { useAuthentication } from "../../context/providers.js";
 import { asserts } from "../../collections/collections.js";
 import { AnilistMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
+import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 
 export function Studio() {
   const params = useParams();
@@ -117,30 +117,20 @@ function CharacterMediaPage(props) {
   const studioInfo2 = props.studioInfo || studioInfo;
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={studioInfo2} loading={props.loading}>{fetchCooldown => (
-      <>
-        <MediaCards edges={studioInfo2().data.media.edges} showYears={props.showYears} lastMediaId={props.lastMediaId} lastYearGroup={props.lastYearGroup}/>
-        <Show when={studioInfo2().data.media.pageInfo.hasNextPage}>
-          <Show when={studioInfo2().data.media.edges} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <CharacterMediaPage
-                    variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} 
-                    nestLevel={props.nestLevel + 1} 
-                    showYears={props.showYears} 
-                    language={props.language} 
-                    lastMediaId={studioInfo2().data.media.edges.at(-1)?.node.id}
-                    lastYearGroup={studioInfo2().data.media.edges.at(-1)?.node.startDate?.year || "TBA"}
-                    loading={studioInfo2.loading} 
-                  /> 
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={studioInfo2()?.data?.media.edges}>
+          <MediaCards edges={studioInfo2().data.media.edges} showYears={props.showYears} lastMediaId={props.lastMediaId} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!studioInfo2.loading && studioInfo2()?.data?.media.pageInfo.hasNextPage}>
+        <Show when={studioInfo2().data.media.edges} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <CharacterMediaPage variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} language={props.language} lastMediaId={studioInfo2().data.media.edges.at(-1)?.node.id} lastYearGroup={studioInfo2().data.media.edges.at(-1)?.node.startDate?.year || "TBA"} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
