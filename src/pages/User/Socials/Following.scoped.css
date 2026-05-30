@@ -1,0 +1,29 @@
+.page {
+  display: contents;
+
+  &.loading _a {
+    opacity: .5;
+  }
+
+  &:not(:last-of-type) .time {
+    display: none;
+  }
+
+  &:last-of-type .time {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 145px;
+  }
+
+  _a {
+    text-align: center;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    aspect-ratio: 1/1;
+    object-fit: cover;
+  }
+}

@@ -33,7 +33,7 @@ import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scope
 import {IndexFavouriteScoped} from "./pages/User/Favourites/index(favourite).scoped.jsx";
 import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
 import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index(media-page-anilist).scoped.jsx";
-import {Socials} from "./pages/User/Socials/Socials.jsx";
+import {Socials} from "./pages/User/Socials/Socials.scoped.jsx";
 import {BrowseMangaHomeScoped} from "./pages/Browse/BrowseMangaHome.scoped.jsx";
 import {BrowseAnimeHome} from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
 import {BrowseMediaHomeScoped} from "./pages/Browse/BrowseMediaHome.scoped.jsx";

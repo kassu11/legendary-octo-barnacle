@@ -123,10 +123,6 @@ const apiOLD = {
     }),
   },
   anilist: {
-    userFollowers: reloadCache((id, page = 1, token) => {
-      asserts.assertTrueOLD(id, "id is missing");
-      return Fetch.authAnilist(token, queries.anilistGetUserFollowers, { id, page }, res => res.data.Page);
-    }),
     activityByUserId: reloadCache((id, token) => {
       asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.profileActivity, { id });
