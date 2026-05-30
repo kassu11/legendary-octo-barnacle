@@ -123,10 +123,10 @@ export function GenresInputScoped(props) {
     return (
       <Switch>
         <Match when={props.engine === "ani"}>
-          <Show when={props.aniGenres()} fallback="Loading...">
+          <Show when={props.aniGenres} fallback="Loading...">
             <h3>Genres</h3>
             <ol>
-              <For each={props.aniGenres().data.genres}>{genre => (
+              <For each={props.aniGenres.genres}>{genre => (
                 <li classList={{exclude: genres.exclude[genre], hidden: !genre.toLowerCase().includes(filter())}} >
                   <label>
                     {genre}
@@ -141,7 +141,7 @@ export function GenresInputScoped(props) {
             </ol>
             <h3>Tags</h3>
             <ol>
-              <For each={props.aniGenres().data.tags}>{tag => (
+              <For each={props.aniGenres.tags}>{tag => (
                 <li classList={{exclude: genres.exclude[tag.name], hidden: !tag.name.toLowerCase().includes(filter())}}>
                   <label>
                     {tag.name}

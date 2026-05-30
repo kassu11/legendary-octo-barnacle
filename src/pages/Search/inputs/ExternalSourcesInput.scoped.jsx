@@ -99,7 +99,7 @@ export function ExternalSourceInput(props) {
 
     return (
       <ol>
-        <For each={props.sources()?.data || []} fallback={"Loading"}>{source => (
+        <For each={props.sources || []} fallback={"Loading"}>{source => (
           <li classList={{hidden: !source.site.toLowerCase().includes(filter())}}>
             <label>
               <div class="grid-wrapper">

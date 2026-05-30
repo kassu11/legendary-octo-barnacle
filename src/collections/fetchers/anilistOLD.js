@@ -7,14 +7,6 @@ export const getRecommendationsByid = (token, id, page = 1) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistRecommendationsById, { id, page }, res => res.data.Media.recommendations);
 };
 
-export const getFrendScoresFromMedia = ({ token, id, ...variables}) => {
-  if (!id) {
-    return;
-  }
-
-  return fetcherTemplates.anilistAuth(token, queries.anilistGetFriendMediaScore, { id, ...variables }, formatPage);
-};
-
 const notificationTypes = type => {
   switch (type) {
     case "airing": return [ "AIRING" ];

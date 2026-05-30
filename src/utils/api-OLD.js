@@ -188,12 +188,6 @@ const apiOLD = {
         type,
       }, (response) => response.data.Staff.staffMedia);
     }),
-    genresAndTags: fetchOnce(() => {
-      return Fetch.anilist(queries.anilistGenresAndTags, {}, res => res.data);
-    }),
-    externalSources: fetchOnce(type => {
-      return Fetch.anilist(queries.anilistExternalSources, { type: type || undefined }, res => res.data.ExternalLinkSourceCollection);
-    }),
     allMediaStaff: reloadCache((id, page = 1, token) => {
       return Fetch.authAnilist(token, queries.anilistStaff, { id, page }, res => res.data.Media);
     }),
@@ -229,9 +223,6 @@ const apiOLD = {
       }, { page });
       return Fetch.authAnilist(token, queries.searchMedia, variableObject, (response) => response.data.Page);
 
-    }),
-    friendsMediaScore: reloadCache((token, id, variables) => {
-      return Fetch.authAnilist(token, queries.anilistGetFriendMediaScore, {id, ...variables});
     }),
     mutateMedia: async (token, variables) => {
       asserts.assertTrueOLD(token, "Token is missing");

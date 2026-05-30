@@ -489,11 +489,57 @@ export function SearchBar(props) {
   const [debouncedSearchEngine, setDebouncedSearchEngine] = createSignal();
   const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
 
-  const [anilistGenresAndTags] = apiOLD.anilist.genresAndTags(() => searchParams.malSearch !== "true" || undefined);
-  const [externalSources] = apiOLD.anilist.externalSources(() => {
-    if (searchParams.malSearch !== "true" || params.type === "media") { return null }
-    else if (params.type === "anime" || params.type === "manga") { return params.type.toUpperCase(); }
-    else return undefined
+  const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
+  let anilistGenresAndTagsFetcher, anilistGenresAndTagsController;
+  createEffect(() => {
+    if (searchParams.malSearch === "true") return;
+
+    anilistGenresAndTagsController?.abort();
+    anilistGenresAndTagsController = new AbortController();
+
+    anilistGenresAndTagsFetcher = createAnilistFetcher(queries.anilistGenresAndTags, {}, anilistGenresAndTagsController.signal);
+
+    sendAnilistFetcher(anilistGenresAndTagsFetcher, {
+      name: "Anilist genres and tags",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistGenresAndTagsFetcher.cacheKey) anilistGenresAndTagsController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistGenresAndTagsFetcher.cacheKey) return;
+
+        setAnilistGenresAndTagsData(res.data.data);
+        setGenreAndTagTranslations({
+          genres: objectFromArrayEntries(res.data.data.genres),
+          tags: res.data.data.tags.reduce((acc, tag) => (acc[tag.name] = tag, acc), {}),
+        });
+      }
+    });
+  });
+
+  const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
+  let externalSourcesFetcher, externalSourcesController;
+  createEffect(() => {
+    externalSourcesController?.abort();
+    externalSourcesController = new AbortController();
+
+    const type = params.type.toUpperCase();
+    if (searchParams.malSearch === "true" || type === "MEDIA") return;
+
+    externalSourcesFetcher = createAnilistFetcher(queries.anilistExternalSources, { type }, externalSourcesController.signal);
+
+    sendAnilistFetcher(externalSourcesFetcher, {
+      name: "Anilist external sources",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === externalSourcesFetcher.cacheKey) externalSourcesController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== externalSourcesFetcher.cacheKey) return;
+
+        const data = res.data.data.ExternalLinkSourceCollection;
+        setExternalSourcesData(data);
+        setExternalSourceStore(data.reduce((acc, source) => (acc[source.id] = source.site, acc), {}));
+      }
+    });
   });
   const [malGenresAndThemes] = apiOLD.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
 
@@ -518,20 +564,6 @@ export function SearchBar(props) {
     if (!response) { return; }
     setGenreAndTagTranslations(response.data.translations);
   }));
-
-  createEffect(on(anilistGenresAndTags, response => {
-    if (!response) { return; }
-    setGenreAndTagTranslations({
-      genres: objectFromArrayEntries(response.data.genres),
-      tags: response.data.tags.reduce((acc, tag) => (acc[tag.name] = tag, acc), {}),
-    });
-  }));
-
-  createEffect(on(externalSources, response => {
-    if (!response) { return; }
-    setExternalSourceStore(response.data.reduce((acc, source) => (acc[source.id] = source.site, acc), {}));
-  }));
-
 
   createEffect(() => {
     const [type, engine, variables, preventFetch] = parseURL(genreAndTagTranslations);
@@ -595,7 +627,7 @@ export function SearchBar(props) {
           <label htmlFor="hasLicense"> Unlicensed</label>
         </div>
         <RatingInputScoped />
-        <GenresInputScoped aniGenres={anilistGenresAndTags} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
+        <GenresInputScoped aniGenres={anilistGenresAndTagsData()} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
         <YearInputScoped />
         <FormatInputScoped />
         <SortInputScoped />
@@ -603,7 +635,7 @@ export function SearchBar(props) {
         <CountryInputScoped />
         <SourceInputScoped />
         <SeasonInputScoped />
-        <ExternalSourceInput sources={externalSources} />
+        <ExternalSourceInput sources={externalSourcesData()} />
         <TwoHeadedRangeScoped
           min={0} 
           max={500} 
