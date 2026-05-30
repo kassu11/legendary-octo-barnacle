@@ -131,10 +131,6 @@ const apiOLD = {
       asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityById, { id }, res => res.data.Activity);
     }),
-    listOfActivityLikes: fetchOnce((id, token) => {
-      asserts.assertTrueOLD(id, "Id is missing");
-      return Fetch.authAnilist(token, queries.anilistGetActivityLikes, { id, type: "ACTIVITY" }, res => res.data.Page);
-    }),
     activityRepliesById: reloadCache((id, page, token) => {
       asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.anilistActivityRepliedById, { id, page }, res => res.data.Page);
@@ -210,9 +206,6 @@ const apiOLD = {
     }),
     externalSources: fetchOnce(type => {
       return Fetch.anilist(queries.anilistExternalSources, { type: type || undefined }, res => res.data.ExternalLinkSourceCollection);
-    }),
-    characters: reloadCache((id, page = 1, token) => {
-      return Fetch.authAnilist(token, queries.anilistCharacters, { id, page }, response => response.data.Media);
     }),
     allMediaStaff: reloadCache((id, page = 1, token) => {
       return Fetch.authAnilist(token, queries.anilistStaff, { id, page }, res => res.data.Media);

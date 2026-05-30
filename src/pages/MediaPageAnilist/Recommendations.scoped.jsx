@@ -101,12 +101,11 @@ function RecommendationCards(props)  {
 
 function RecommendationCard(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [userRating, setUserRating] = createSignal(props.node.userRating);
   const [rating, setRating] = createSignal(props.node.rating);
 
   let localRating = props.node.userRating;
-  const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
+  const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
       const fetcher = createAnilistFetcher(queries.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, AbortSignal.timeout(30_000));
       const res = await fetcherToFetch(fetcher);
@@ -125,11 +124,11 @@ function RecommendationCard(props) {
     e.preventDefault();
     setUserRating(rating => {
       if(rating === "RATE_UP") {
-        triggerLikeRating(accessToken(), props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
         setRating(v => v - 1);
         return "NO_RATING";
       } else {
-        triggerLikeRating(accessToken(), props.node.id, "RATE_UP", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "RATE_UP", params.id, props.node.mediaRecommendation.id);
         setRating(v => v + 1);
         return "RATE_UP";
       }
@@ -140,11 +139,11 @@ function RecommendationCard(props) {
     e.preventDefault();
     setUserRating(rating => {
       if(rating === "RATE_DOWN") {
-        triggerLikeRating(accessToken(), props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
         setRating(v => v + 1);
         return "NO_RATING";
       } else {
-        triggerLikeRating(accessToken(), props.node.id, "RATE_DOWN", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "RATE_DOWN", params.id, props.node.mediaRecommendation.id);
         setRating(v => v - 1);
         return "RATE_DOWN";
       }

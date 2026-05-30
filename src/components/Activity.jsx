@@ -1,20 +1,18 @@
-import { Switch, Show, Match, createSignal, mergeProps, For } from "solid-js";
+import { Switch, Show, Match, createSignal, mergeProps, For, createEffect } from "solid-js";
 import { OldMarkdownComponent } from "../components/Markdown.jsx";
 import "./Activity.scss";
-import apiOLD from "../utils/api-OLD.js";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { capitalize, mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
-import { useAuthentication } from "../context/providers.js";
 import { Tooltip } from "./Tooltips.jsx";
 import { Dynamic } from "solid-js/web"
-import { asserts } from "../collections/collections.js";
+import { asserts, queries } from "../collections/collections.js";
 import { CreatedAt } from "./CreatedAt.jsx";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
 
 export function ActivityCard(_props) {
   const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);
-  asserts.assertTrueOLD(typeof props.hideProfile === "boolean", "hideProfile needs to be boolean");
-  asserts.assertTrueOLD(typeof props.small === "boolean", "small needs to be boolean");
 
   return (
     <Switch>
@@ -79,48 +77,71 @@ export function ActivityCard(_props) {
   );
 }
 
+let activityLikesController;
 function Footer(props) {
   const [isLiked, setIsLiked] = createSignal(props.activity.isLiked);
   const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
-  const { accessToken } = useAuthentication();
-  const [showActivityLikeUserList, setShowActivityLikeUserList] = createSignal(undefined);
-  const [activityLikes] = apiOLD.anilist.listOfActivityLikes(props.activity.id, accessToken, showActivityLikeUserList);
+  const [showActivityLikeUserList, setShowActivityLikeUserList] = createSignal(false, { equals: false });
+
+  const [activityLikesData, setActivityLikesData] = createSignal(undefined, { equals: false });
+  let activityLikesFetcher;
+  createEffect(() => {
+    const { id } = props.activity;
+    if (!id || !showActivityLikeUserList()) return;
+
+    activityLikesController?.abort();
+    activityLikesController = new AbortController();
+
+    activityLikesFetcher = createAnilistFetcher(queries.anilistGetActivityLikes, { id, type: "ACTIVITY" }, activityLikesController.signal);
+
+    sendAnilistFetcher(activityLikesFetcher, {
+      name: "Anilist activity likes",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === activityLikesFetcher.cacheKey) activityLikesController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === activityLikesFetcher.cacheKey) setActivityLikesData(res.data.data.Page);
+      }
+    });
+  });
 
   let serverIsLiked = props.activity.isLiked;
-  const triggerLikeToggle = leadingAndTrailingDebounce(async (token, id, liked) => {
+  const triggerLikeToggle = leadingAndTrailingDebounce(async (id, liked) => {
     if (liked !== serverIsLiked) {
-      const data = await apiOLD.anilist.toggleActivityLike(token, { id });
-      asserts.assertTrueOLD(!data.fromCache, "Mutation should never be cached");
-
-      if (data.status === 200) {
-        props.activity.likeCount = data.data.data.ToggleLike.likeCount;
-        props.activity.isLiked = data.data.data.ToggleLike.isLiked;
+      const fetcher = createAnilistFetcher(queries.anilistMutateToggleLike, { id, type: "ACTIVITY" }, AbortSignal.timeout(30_000));
+      const res = await fetcherToFetch(fetcher);
+      if (res.status === 200) {
+        const json = await res.json();
+        props.activity.likeCount = json.data.ToggleLike.likeCount;
+        props.activity.isLiked = json.data.ToggleLike.isLiked;
         props.mutateCache(data => data);
         // This only triggers if cache had old like data in which case we want to update the visuals
-        if (serverIsLiked === data.data.data.ToggleLike.isLiked) {
-          setLikeCount(data.data.data.ToggleLike.likeCount);
-          setIsLiked(data.data.data.ToggleLike.isLiked);
+        if (serverIsLiked === json.data.ToggleLike.isLiked) {
+          setLikeCount(json.data.ToggleLike.likeCount);
+          setIsLiked(json.data.ToggleLike.isLiked);
         }
         serverIsLiked = liked;
+      } else {
+        addApplicationNotification({ type: "error", message: "Liking activity failed", duration: 30_000 });
       }
     }
   }, 500);
 
   return (
     <>
-      <button class="cp-activity-like" classList={{active: isLiked()}} onMouseMove={() => likeCount() && setShowActivityLikeUserList(true)} onClick={() => {
+      <button class="cp-activity-like" classList={{active: isLiked()}} onMouseEnter={() => likeCount() && setShowActivityLikeUserList(true)} onClick={() => {
         setIsLiked(liked => {
           asserts.assertTrueOLD(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
           setLikeCount(v => v + change);
-          triggerLikeToggle(accessToken(), props.activity.id, !liked);
+          triggerLikeToggle(props.activity.id, !liked);
           return !liked
         });
       }}>Like {likeCount()}
-        <Show when={showActivityLikeUserList() && activityLikes()?.data.likes.length}>
+        <Show when={showActivityLikeUserList() && activityLikesData()?.likes.length}>
           <Tooltip tipPosition="left">
             <ol>
-              <For each={activityLikes().data.likes}>{user => (
+              <For each={activityLikesData().likes}>{user => (
                 <li>
                   <img src={user.avatar.large} alt="Profile picture" />
                   {user.name}
