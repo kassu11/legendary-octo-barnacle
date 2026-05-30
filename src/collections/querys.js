@@ -975,8 +975,8 @@ fragment media on Media {
   }
 }`;
 
-export const anilistGetCharacterIds = ids => format`query ($ids: [Int]) {
-  ${[...Array(Math.ceil(ids.length / 50))].map((_, i) => {
+export const anilistGetCharacterIds = count => format`query ($ids: [Int]) {
+  ${[...Array(Math.ceil(count / 50))].map((_, i) => {
     return `page${i + 1}: Page(page: ${i + 1}) {
       characters(id_in: $ids) {
         ...characters

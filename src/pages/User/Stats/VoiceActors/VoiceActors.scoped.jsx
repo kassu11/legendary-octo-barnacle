@@ -1,11 +1,8 @@
 import { A, useParams } from "@solidjs/router";
-import apiOLD from "../../../../utils/api-OLD.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { useAuthentication } from "../../../../context/providers.js";
-import { fetchersOLD, fetcherSendersOLD, queries } from "../../../../collections/collections.js";
-import { fetcherSenderUtils } from "../../../../utils/utils.js";
+import { queries } from "../../../../collections/collections.js";
 import "./VoiceActors.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
@@ -47,17 +44,65 @@ export function StatsAnimeVoiceActors() {
 
 function StatsVoiceActors(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [characterIds, setCharacterIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
   const [pageType, setPageType] = createSignal("media");
-  const mediaVariable = () => pageType() === "media" ? ({ id_in: [...mediaIds()] }) : undefined;
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
-  const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 && pageType() === "characters" ? [...characterIds()] : undefined, accessToken);
   const [mediaStore, setMediaStore] = createStore({});
   const [characterStore, setCharacterStore] = createStore({});
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const pType = pageType();
+    const ids = [...mediaIds()];
+    if (pType != "media" || !ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            setMediaStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
+
+  let characterFetcher, characterController;
+  createEffect(() => {
+    const pType = pageType();
+    const ids = [...characterIds()];
+    if (pType != "characters" || !ids.length) return;
+
+    characterController?.abort();
+    characterController = new AbortController();
+
+    characterFetcher = createAnilistFetcher(queries.anilistGetCharacterIds(ids.length), { ids }, characterController.signal);
+
+    sendAnilistFetcher(characterFetcher, {
+      name: "Anilist character ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === characterFetcher.cacheKey) characterController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== characterFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.characters.forEach(c => {
+            setCharacterStore(c.id, c);
+          });
+        });
+      }
+    });
+  });
 
   createEffect(on(() => props.genres, genres => {
     setMediaIds(current => {
@@ -74,14 +119,6 @@ function StatsVoiceActors(props) {
       return current;
     });
     setCharacterIds(new Set(genres.map(genre => genre.characterIds.slice(0, 6)).flat()));
-  }));
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => setMediaStore(media.id, media));
-  }));
-
-  createEffect(on(characterById, characters => {
-    characters?.data.forEach(character => setCharacterStore(character.id, character));
   }));
 
   return (
@@ -169,13 +206,60 @@ function StatsVoiceActors(props) {
 
 function Cards(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [characterIds, setCharacterIds] = createSignal(new Set());
-  const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
-  const [characterById] = apiOLD.anilist.characterIds(() => characterIds().size > 0 ? [...characterIds()] : undefined, accessToken);
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    if (!ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            props.setMediaStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
+
+  let characterFetcher, characterController;
+  createEffect(() => {
+    const ids = [...characterIds()];
+    if (!ids.length) return;
+
+    characterController?.abort();
+    characterController = new AbortController();
+
+    characterFetcher = createAnilistFetcher(queries.anilistGetCharacterIds(ids.length), { ids }, characterController.signal);
+
+    sendAnilistFetcher(characterFetcher, {
+      name: "Anilist character ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === characterFetcher.cacheKey) characterController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== characterFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.characters.forEach(c => {
+            props.setCharacterStore(c.id, c);
+          });
+        });
+      }
+    });
+  });
+
   // eslint-disable-next-line no-unassigned-vars
   let gridReel;
 
@@ -192,14 +276,6 @@ function Cards(props) {
     fetchNewCards = true;
     gridReel.scrollLeft = 0;
   });
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => props.setMediaStore(media.id, media));
-  }));
-
-  createEffect(on(characterById, characters => {
-    characters?.data.forEach(character => props.setCharacterStore(character.id, character));
-  }));
 
   return (
     <div class="inline-container">

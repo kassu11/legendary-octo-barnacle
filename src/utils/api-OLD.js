@@ -123,9 +123,6 @@ const apiOLD = {
     }),
   },
   anilist: {
-    characterIds: fetchOnce((ids, token) => {
-      return Fetch.authAnilist(token, queries.anilistGetCharacterIds(ids), { ids }, res => Object.values(res.data).map(page => page.characters).flat());
-    }),
     userFollowers: reloadCache((id, page = 1, token) => {
       asserts.assertTrueOLD(id, "id is missing");
       return Fetch.authAnilist(token, queries.anilistGetUserFollowers, { id, page }, res => res.data.Page);
