@@ -127,14 +127,6 @@ const apiOLD = {
       asserts.assertTrueOLD(id, "Id is missing");
       return Fetch.authAnilist(token, queries.profileActivity, { id });
     }),
-    activityById: reloadCache((id, token) => {
-      asserts.assertTrueOLD(id, "Id is missing");
-      return Fetch.authAnilist(token, queries.anilistActivityById, { id }, res => res.data.Activity);
-    }),
-    activityRepliesById: reloadCache((id, page, token) => {
-      asserts.assertTrueOLD(id, "Id is missing");
-      return Fetch.authAnilist(token, queries.anilistActivityRepliedById, { id, page }, res => res.data.Page);
-    }),
     searchUsers: fetchOnce((search, page, token) => {
       asserts.assertTrueOLD(search, "Search is missing");
       return Fetch.authAnilist(token, queries.anilistUserSearch, { search, page, }, res => res.data.Page);
@@ -145,11 +137,6 @@ const apiOLD = {
         userName: name.toLowerCase(),
         type,
       }, res => res.data.MediaListCollection);
-    }),
-    favouritesByUserId: reloadCache((id, page, token) => {
-      asserts.assertTrueOLD(id, "Id is missing");
-      asserts.assertTrueOLD(page, "Page is missing");
-      return Fetch.authAnilist(token, queries.anilistUserFavouriteById, { id, page }, res => res.data.User.favourites);
     }),
     mutateFavourites: async (token, variables) => {
       const request = Fetch.authAnilist(token, queries.anilistUserMutateFavourites, variables);

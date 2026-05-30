@@ -106,7 +106,7 @@ export function FavouriteSectionScoped(props) {
           <Switch>
             <Match when={reorder()}>
               <button onClick={async () => {
-                const newIds = [...ol.childNodes].map(elem => +elem.dataset.id);
+                const newIds = [...ol.querySelectorAll(".favourite-item")].map(elem => +elem.dataset.id);
                 const newOrder = newIds.map((_, i) => i + 1);
 
                 let response;
@@ -141,15 +141,7 @@ export function FavouriteSectionScoped(props) {
           </Switch>
         </Show>
       </summary>
-      <ol
-        ref={el => ol = el}
-        classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}}
-        onMouseMove={dragMove}
-        onTouchMove={dragMove}
-        onTouchEnd={dragEnd}
-        onMouseDown={dragStart}
-        onTouchStart={dragStart}
-      >
+      <ol ref={el => ol = el} classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} onMouseMove={dragMove} onTouchMove={dragMove} onTouchEnd={dragEnd} onMouseDown={dragStart} onTouchStart={dragStart} >
         <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges}}>
           <Show when={user().id} keyed>
             <FavouritesPageScoped page={1} setVisible={setVisible} />

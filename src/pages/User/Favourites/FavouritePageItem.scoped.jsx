@@ -11,7 +11,7 @@ export function FavouritePageItemScoped(props) {
   const removeEdgeId = (id) => setAllEdges(edges => edges.filter(edge => edge.node.id !== id));
 
   return (
-    <li classList={{hidden: hidden()}} attr:data-id={props.edge.node.id}>
+    <li class="favourite-item" classList={{hidden: hidden()}} attr:data-id={props.edge.node.id}>
       <Switch>
         <Match when={type === "anime"}>
           <A href={mediaUrl(props.edge.node)}>
