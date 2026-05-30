@@ -2,9 +2,8 @@ import { A, useParams } from "@solidjs/router";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { useAuthentication, useUser } from "../../../../context/providers.js";
-import { fetcherSenderUtils } from "../../../../utils/utils.js";
-import { fetchersOLD, fetcherSendersOLD, localizations, queries } from "../../../../collections/collections.js";
+import { useUser } from "../../../../context/providers.js";
+import { localizations, queries } from "../../../../collections/collections.js";
 import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
 import "./Tags.scoped.css";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
@@ -50,12 +49,34 @@ export function StatsMediaTags() {
 function StatsTags(props) {
   const params = useParams();
   const { user } = useUser();
-  const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
-  const [mediaById, { mutate }] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    if (!ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            setStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
 
   createEffect(on(() => props.genres, genres => {
     setMediaIds(current => {
@@ -71,10 +92,6 @@ function StatsTags(props) {
 
       return current;
     });
-  }));
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => setStore(media.id, media));
   }));
 
   return (
@@ -127,7 +144,7 @@ function StatsTags(props) {
                 <p>User {params.type}</p>
                 <A href={"/user/" + user().name + "/" + params.type + "?tag=" + genre.tag.name}>Show all</A>
               </div>
-              <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+              <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>
           </li>
         )}</For>
@@ -138,18 +155,36 @@ function StatsTags(props) {
 
 function Cards(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, () => ({ id_in: [...mediaIds()] }));
-  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    if (!ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            props.setStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {
     fetchNewCards = true;
-  }));
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => props.setStore(media.id, media));
   }));
 
   return (

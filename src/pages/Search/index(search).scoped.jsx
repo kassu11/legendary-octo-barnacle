@@ -22,10 +22,10 @@ import { TwoHeadedRangeScoped } from "./inputs/TwoHeadedRange.scoped.jsx";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../../utils/virtualSearchParams.js";
 import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
-import { asserts, fetchersOLD, fetcherSendersOLD, globalState, localizations, searchObjects } from "../../collections/collections.js";
-import { fetcherSenderUtils } from "../../utils/utils.js";
+import { asserts, globalState, localizations, searchObjects, queries } from "../../collections/collections.js";
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 
 
 
@@ -870,7 +870,6 @@ function AnilistMediaSeasonContent(_props) {
 
 const malIds = new Set();
 function MyAnimeListMediaSearchContent(props) {
-  const { accessToken } = useAuthentication();
   const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
   const [cacheData] = apiOLD.myAnimeList.mediaSearchCache(props.type, debouncedSearchVariables, props.page);
@@ -889,19 +888,31 @@ function MyAnimeListMediaSearchContent(props) {
     return prev || [];
   });
 
-  const mediaVariables = () => ({ idMal_in: mediaIds(), type: props.type.toUpperCase() });
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariables);
-  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    const type = props.type.toUpperCase();
+    if (!ids.length || type === "MEDIA") return;
+    mediaController?.abort();
+    mediaController = new AbortController();
 
-  createEffect(on(mediaById, media => {
-    if (!media?.data?.length) {
-      return;
-    }
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { idMal_in: ids, type}, mediaController.signal);
 
-    const responseAsObject = Object.fromEntries(Object.values(media.data).map(series => ([series.idMal, series])))
-
-    globalState.storeMediaWithMalId(responseAsObject);
-  }));
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            globalState.storeMediaWithMalId(m.idMal, m);
+          });
+        });
+      }
+    });
+  });
 
   createEffect(on(cacheData, data => data && setNewestData(data.data.data)));
   createEffect(on(mediaData, data => data && setNewestData(data.data.data)));

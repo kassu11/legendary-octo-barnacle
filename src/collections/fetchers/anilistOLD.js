@@ -3,17 +3,6 @@ import { fetcherUtils } from "../../utils/utils.js";
 
 const formatPage = res => res.data.Page;
 
-export const getMediasWithIds = (token, variables) => {
-  asserts.assertTrueOLD(variables.id_in || variables.idMal_in, "Missing list for ids");
-  const count = variables.id_in?.length || variables.idMal_in?.length;
-  if (!count) {
-    return;
-  }
-
-
-  return fetcherTemplates.anilistAuth(token, queries.anilistGetMediasWithIds(count), variables, res => Object.values(res.data).map(page => page.media).flat());
-};
-
 export const getRecommendationsByid = (token, id, page = 1) => {
   return fetcherTemplates.anilistAuth(token, queries.anilistRecommendationsById, { id, page }, res => res.data.Media.recommendations);
 };

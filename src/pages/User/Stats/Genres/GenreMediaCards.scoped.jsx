@@ -1,26 +1,42 @@
 import {A, useParams} from "@solidjs/router";
-import {useAuthentication} from "../../../../context/providers.js";
 import {createEffect, createSignal, For, on, Show} from "solid-js";
 import {formatTitleToUrl} from "../../../../utils/formating.js";
-import { fetchersOLD, fetcherSendersOLD } from "../../../../collections/collections.js";
+import { queries } from "../../../../collections/collections.js";
 import "./GenreMediaCards.scoped.css";
-import { fetcherSenderUtils } from "../../../../utils/utils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 
 export function GenreMediaCardsScoped(props) {
   const params = useParams();
-  const {accessToken} = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
-  const mediaVariable = () => ({id_in: [...mediaIds()]});
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    if (!ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            props.setStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {
     fetchNewCards = true;
-  }));
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => props.setStore(media.id, media));
   }));
 
   return (
