@@ -10,12 +10,6 @@ const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expir
 // const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
 const fetchRateLimits = {
-  "animeThemes": new TokenBucket({
-    start: 90,
-    limit: 90,
-    interval: 60,
-    defaultDelay: 20,
-  }),
   "anilist": new TokenBucket({
     start: 5,
     limit: 5,
@@ -26,23 +20,6 @@ const fetchRateLimits = {
       limit: 90,
       interval: 60,
       fillAmount: 60,
-    })
-  }),
-  "jikan": new TokenBucket({
-    start: 1,
-    limit: 1,
-    interval: 1/3,
-    defaultDelay: 1,
-    pool: new TokenBucket({
-      start: 3,
-      limit: 3,
-      interval: 1.25,
-      pool: new TokenBucket({
-        start: 60,
-        limit: 60,
-        interval: 60,
-        fillAmount: 60,
-      })
     })
   }),
 }
@@ -154,10 +131,6 @@ class Fetch {
   #getFetchRateLimitBucket() {
     if (this.url.startsWith("https://graphql.anilist.co")) {
       return fetchRateLimits["anilist"];
-    } else if (this.url.startsWith("https://api.jikan.moe")) {
-      return fetchRateLimits["jikan"];
-    } else if (this.url.startsWith("https://api.animethemes.moe")) {
-      return fetchRateLimits["animeThemes"];
     } else {
       asserts.assertTrueOLD(false, `Fetch to url "${this.url}" does not have any rate limits`);
     }

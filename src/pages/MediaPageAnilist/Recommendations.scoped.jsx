@@ -1,13 +1,13 @@
 import { useParams } from "@solidjs/router";
-import { fetcherSenderUtils, scheduleUtils } from "../../utils/utils";
-import { asserts, fetchersOLD, fetcherSendersOLD, queries } from "../../collections/collections";
+import { scheduleUtils } from "../../utils/utils";
+import { asserts, queries } from "../../collections/collections";
 import "./Recommendations.scoped.css";
-import { batch, createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
-import { useAuthentication } from "../../context/providers";
+import { batch, createEffect, createSignal, For, Match, on, Show, Switch, untrack } from "solid-js";
 import { AnilistMediaRecommendationCard } from "../../components/Cards/Cards.scoped";
-import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { addApplicationNotification } from "../App/ApplicationNotifications.scoped";
 import { Intersection } from "../../components/utils/Intersection.scoped";
+import { setFetcherValueToStorage } from "../../utils/storageUtils";
 
 export function Recommendations(props) {
   const params = useParams();
@@ -50,24 +50,46 @@ export function Recommendations(props) {
 
 
 function RecommendationsPage(props) {
-  const { accessToken } = useAuthentication();
   const [id, setId] = createSignal(undefined)
-  const fetcher = fetcherSenderUtils.createFetcherOLD(fetchersOLD.anilist.getRecommendationsByid, accessToken, id, props.page);
-  const [recommendations, { mutateCache: mutateRecommendations }] = fetcherSendersOLD.sendWithNullUpdates(fetcher);
+  const [anilistRecommendationsLoading, setAnilistRecommendationsLoading] = createSignal(false);
+  const [anilistRecommendationsData, setAnilistRecommendationsData] = createSignal(undefined, { equals: false });
+  let anilistRecommendationsFetcher, anilistRecommendationsController;
+  createEffect(() => {
+    anilistRecommendationsController?.abort();
+    anilistRecommendationsController = new AbortController();
 
-  const mutateCache = (i, node) => mutateRecommendations(res => {
-    res.data.nodes[i] = node;
-    return res;
+    const i = id();
+    if (!i) return;
+
+    anilistRecommendationsFetcher = createAnilistFetcher(queries.anilistRecommendationsById, { id: i, page: props.page }, anilistRecommendationsController.signal);
+
+    sendAnilistFetcher(anilistRecommendationsFetcher, {
+      name: "Anilist recommendations",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistRecommendationsFetcher.cacheKey) anilistRecommendationsController = null;
+      },
+      onStart: () => setAnilistRecommendationsLoading(true),
+      onStop: () => setAnilistRecommendationsLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistRecommendationsFetcher.cacheKey) setAnilistRecommendationsData(res);
+      }
+    });
   });
+
+  const mutateCache = (i, node) => {
+    const res = untrack(anilistRecommendationsData);
+    res.data.data.Media.recommendations.nodes[i] = node;
+    setFetcherValueToStorage(res);
+  }
 
   return (
     <>
       <Intersection onIntersection={() => setId(props.id)}>
-        <Show when={recommendations()?.data?.nodes} fallback={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />}>
-          <RecommendationCards nodes={recommendations().data.nodes} mutateCache={mutateCache} mutateOldCardsCache={props.mutateOldCardsCache} oldCards={props.oldCards} />
+        <Show when={anilistRecommendationsData()?.data?.data.Media.recommendations.nodes} fallback={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />}>
+          <RecommendationCards nodes={anilistRecommendationsData().data.data.Media.recommendations.nodes} mutateCache={mutateCache} mutateOldCardsCache={props.mutateOldCardsCache} oldCards={props.oldCards} />
         </Show>
       </Intersection>
-      <Show when={!recommendations.loading && recommendations()?.data?.pageInfo.hasNextPage}>
+      <Show when={!anilistRecommendationsLoading() && anilistRecommendationsData()?.data?.data.Media.recommendations.pageInfo.hasNextPage}>
         <RecommendationsPage id={id()} page={props.page + 1} />
       </Show>
     </>

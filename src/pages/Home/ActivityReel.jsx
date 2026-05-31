@@ -7,25 +7,25 @@ import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../util
 import { isTypeFunction } from "../../utils/functionUtils.js";
 
 export function HomePageActivityReel(props) {
-  const [pagelessCacheData, setPagelessCacheData] = createSignal({
-    data: null, 
-    name:"Home Activity", 
-    expires: new Date().setHours(24 * 356),
-    modified: new Date(),
-  }, { equals: false });
+  const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
+  const [pagelessCacheData, setPagelessCacheData] = createSignal(undefined, { equals: false });
 
   createRenderEffect(async () => {
+    setPagelessCacheLoading(true);
     const pagelessFetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: "pageless" });
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
     if (data) setPagelessCacheData(data);
     else {
-      setPagelessCacheData(pageless => {
-        pageless.cacheKey = pagelessFetcher.cacheKey;
-        return pageless;
+      setPagelessCacheData({
+        data: null,
+        name: "Home Activity",
+        expires: new Date().setHours(24 * 356),
+        modified: new Date(),
+        cacheKey: pagelessFetcher.cacheKey
       });
     }
-
+    setPagelessCacheLoading(false);
   });
 
   const updateCache = (apiResponse, pagelessFetcher) => {
@@ -99,7 +99,7 @@ export function HomePageActivityReel(props) {
   const [isDebug, setIsDebug] = signals.debug();
 
   return (
-    <Show when={!pagelessCacheData.loading}>
+    <Show when={!pagelessCacheLoading()}>
       <Show when={modes.debug}>
         <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
       </Show>
