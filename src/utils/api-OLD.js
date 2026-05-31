@@ -6,7 +6,6 @@ const DEBUG = modes.debug;
 
 const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
 const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
-const onlyIfCache = cacheBuilder({ storeName: "results", type: "only-if-cached", expiresInSeconds: 60 * 60 * 24 * 365 });
 // const noCache = cacheBuilder({ type: "no-store" });
 // const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
@@ -48,80 +47,7 @@ const fetchRateLimits = {
   }),
 }
 
-function malMediaSearch(type, variables, page) {
-  let seasonQuery = null;
-  const query = variables.reduce((acc, v) => {
-    if (v.active) {
-      if (v.key === "season") {
-        seasonQuery = v.value;
-      } else {
-        acc.push(`${v.key}=${v.value}`) 
-      }
-    };
-    return acc;
-  }, []);
-  if (page > 1) {
-    query.push(`page=${page}`);
-  }
-
-  if (seasonQuery) {
-    return Fetch.getJson(queries.myAnimeListMediaSeasonSearch(seasonQuery, query.sort().join("&")), res => {
-      res.data.forEach(media => {
-        media.titles = media.titles.reduce((acc, title) => {
-          acc[title.type] = title.title;
-          return acc;
-        }, {});
-      })
-
-      return res;
-    });
-  }
-
-  return Fetch.getJson(queries.myAnimeListMediaSearch(type, query.sort().join("&")), res => {
-    res.data.forEach(media => {
-      media.titles = media.titles.reduce((acc, title) => {
-        acc[title.type] = title.title;
-        return acc;
-      }, {});
-    })
-
-    return res;
-  });
-}
-
-
 const apiOLD = {
-  myAnimeList: {
-    mediaSearch: fetchOnce(malMediaSearch),
-    mediaSearchCache: onlyIfCache(malMediaSearch),
-    genresAndThemes: fetchOnce(type => {
-      return Fetch.getJson(queries.myAnimeListMediaGenres(type), res => {
-        const idSet = new Set();
-        const headers = ["genres", "genres", "themes"];
-        const genres = { "genres": [], "themes": [] };
-        let headerIndex = 0;
-        res.data.reduce((lastGenre, genre) => {
-          if (idSet.has(genre.mal_id)) {
-            return lastGenre;
-          } 
-          if (genre.name < lastGenre) {
-            headerIndex = Math.min(headerIndex + 1, headers.length - 1);
-          }
-          genres[headers[headerIndex]].push(genre);
-          idSet.add(genre.mal_id);
-          return genre.name;
-        }, "");
-        genres.genres.sort();
-
-        return {
-          translations: {
-            [type]: Object.fromEntries(res.data.map(genre => ([genre.name, genre.mal_id]))),
-          },
-          ...genres
-        };
-      });
-    }),
-  },
   anilist: {
     activityByUserId: reloadCache((id, token) => {
       asserts.assertTrueOLD(id, "Id is missing");
@@ -188,42 +114,12 @@ const apiOLD = {
         type,
       }, (response) => response.data.Staff.staffMedia);
     }),
-    allMediaStaff: reloadCache((id, page = 1, token) => {
-      return Fetch.authAnilist(token, queries.anilistStaff, { id, page }, res => res.data.Media);
-    }),
     mediaListEntry: async (token, mediaId) => {
       asserts.assertTrueOLD(mediaId, "MediaId missing");
       asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
       const request = Fetch.authAnilist(token, queries.mediaListEntry, { mediaId });
       return await request.send();
     },
-    searchMedia: fetchOnce((token, variables, page, extraVariables = {}) => {
-      const variableObject = variables.reduce((acc, v) => {
-        if (v.active) { acc[v.key] = v.value; }
-        return acc;
-      }, { page });
-
-      Object.entries(extraVariables).forEach(([key, value]) => {
-        if (key === "format" || key === "season" || key === "seasonYear") {
-          variableObject[key] = value;
-        } else if (key === "episodeGreater") {
-          variableObject[key] = Math.max(value, variableObject[key] || 0);
-        } else {
-          variableObject[key] &&= [value, variableObject[key]].flat();
-          variableObject[key] ??= value;
-        }
-      });
-
-      return Fetch.authAnilist(token, queries.searchMedia, variableObject, (response) => response.data.Page);
-    }),
-    searchMediaCache: onlyIfCache((token, variables, page) => {
-      const variableObject = variables.reduce((acc, v) => {
-        if (v.active) { acc[v.key] = v.value; }
-        return acc;
-      }, { page });
-      return Fetch.authAnilist(token, queries.searchMedia, variableObject, (response) => response.data.Page);
-
-    }),
     mutateMedia: async (token, variables) => {
       asserts.assertTrueOLD(token, "Token is missing");
       asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");

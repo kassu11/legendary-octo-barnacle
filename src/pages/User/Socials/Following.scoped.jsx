@@ -4,7 +4,7 @@ import { useUser } from "../../../context/providers.js";
 import { asserts, queries } from "../../../collections/collections.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { authUserData } from "../../../core/globalState.js";
-import "./Followers.scoped.css";
+import "./Following.scoped.css";
 import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
 
 export function Following(props) {

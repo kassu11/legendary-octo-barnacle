@@ -8,7 +8,7 @@ export default [
     files: ["**/*.{js,jsx}"],
     rules: {
       "no-undef": "error",        // This catches missing imports/variables
-      "no-unused-vars": "warn",   // Helps clean up imports you don't need anymore
+      "no-unused-vars": ["error", {"args": "after-used"}],   // Helps clean up imports you don't need anymore
     },
     languageOptions: {
       globals: {

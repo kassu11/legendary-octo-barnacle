@@ -1,10 +1,9 @@
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
-import apiOLD from "../../utils/api-OLD.js";
-import { Show, For, Match, Switch, createSignal, createEffect, batch, on, mergeProps, createMemo } from "solid-js";
+import { Show, For, Match, Switch, createSignal, createEffect, batch, mergeProps } from "solid-js";
 import "./index(search).scoped.css";
 import { capitalize, formatMediaFormat } from "../../utils/formating.js";
 import { createStore } from "solid-js/store";
-import { SearchBarContext, useAuthentication, useSearchBar } from "../../context/providers.js";
+import { SearchBarContext, useSearchBar } from "../../context/providers.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { RatingInputScoped } from "./inputs/RatingInput.scoped.jsx";
 import { SwitchInputScoped } from "./inputs/SwitchInput.scoped.jsx";
@@ -24,7 +23,7 @@ import { moveSeasonObject } from "../../utils/dates.js";
 import { asserts, globalState, localizations, searchObjects, queries } from "../../collections/collections.js";
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 
 class SearchVariable {
@@ -541,7 +540,55 @@ export function SearchBar(props) {
       }
     });
   });
-  const [malGenresAndThemes] = apiOLD.myAnimeList.genresAndThemes(() => searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga") ? params.type : undefined);
+
+  const [jikanGenresAndThemesData, setJikanGenresAndThemesData] = createSignal(undefined, { equals: false });
+  let jikanGenresAndThemesFetcher, jikanGenresAndThemesController;
+  createEffect(() => {
+    jikanGenresAndThemesController?.abort();
+    jikanGenresAndThemesController = new AbortController();
+
+    const { type } = params;
+
+    if (searchParams.malSearch !== "true") return;
+    if (type !== "anime" && type !== "manga") return;
+
+    jikanGenresAndThemesFetcher = createJsonGetFetcher(queries.myAnimeListMediaGenres({ type }), jikanGenresAndThemesController.signal);
+
+    sendAnilistFetcher(jikanGenresAndThemesFetcher, {
+      name: "Jikan media genres",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === jikanGenresAndThemesFetcher.cacheKey) jikanGenresAndThemesController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== jikanGenresAndThemesFetcher.cacheKey) return;
+        const clone = structuredClone(res.data.data);
+
+        // Jikan does not give any types for genres, explicit genres and themes
+        // The list is sorted alphabelitcally, so that normal genres are first, then explicit genres and last are themes
+        const idSet = new Set();
+        const headers = ["genres", "genres", "themes"];
+        const entries = { "genres": [], "themes": [] };
+        let headerIndex = 0;
+        for (let i = 0; i < clone.length; i++) {
+          const genre = clone[i];
+          if (idSet.has(genre.mal_id)) continue;
+
+          // New group has been found
+          if (genre.name < clone[i - 1]?.name) {
+            headerIndex = Math.min(headerIndex + 1, headers.length - 1);
+          }
+
+          entries[headers[headerIndex]].push(genre);
+          idSet.add(genre.mal_id);
+        }
+
+        entries.genres.sort((a, b) => a.name.localeCompare(b.name));
+
+        setGenreAndTagTranslations(type, Object.fromEntries(clone.map(genre => ([genre.name, genre.mal_id]))));
+        setJikanGenresAndThemesData(entries);
+      }
+    });
+  });
 
   const triggerSetSearchParams = debounce(setSearchParams, 300);
   // const triggerSetSearchParamsFast = leadingAndTrailing(debounce, setSearchParams, 100);
@@ -560,13 +607,8 @@ export function SearchBar(props) {
     });
   }, 300);
 
-  createEffect(on(malGenresAndThemes, response => {
-    if (!response) { return; }
-    setGenreAndTagTranslations(response.data.translations);
-  }));
-
   createEffect(() => {
-    const [type, engine, variables, preventFetch] = parseURL(genreAndTagTranslations);
+    const [type, engine, variables, preventFetch] = parseURL();
     if (preventFetch) {
       return;
     }
@@ -627,7 +669,7 @@ export function SearchBar(props) {
           <label htmlFor="hasLicense"> Unlicensed</label>
         </div>
         <RatingInputScoped />
-        <GenresInputScoped aniGenres={anilistGenresAndTagsData()} malGenres={malGenresAndThemes} translation={genreAndTagTranslations} engine={searchEngine()} showAdult={true} />
+        <GenresInputScoped aniGenres={anilistGenresAndTagsData()} malGenres={jikanGenresAndThemesData()} engine={searchEngine()} showAdult={true} />
         <YearInputScoped />
         <FormatInputScoped />
         <SortInputScoped />
@@ -822,24 +864,47 @@ export function RedirectSearchHeaders() {
 }
 
 function AnilistMediaSearchContent(props) {
-  const { accessToken } = useAuthentication();
-  const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = apiOLD.anilist.searchMediaCache(accessToken, debouncedSearchVariables, props.page);
-  const [mediaData] = apiOLD.anilist.searchMedia(accessToken, props.nestLevel === 1 ? () => props.variables : variables, props.page);
-  const [newestData, setNewestData] = createSignal();
+  const [anilistSearchMediaLoading, setAnilistSearchMediaLoading] = createSignal(false);
+  const [anilistSearchMediaData, setAnilistSearchMediaData] = createSignal(undefined, { equals: false });
+  let anilistSearchMediaFetcher, anilistSearchMediaController;
+  createEffect(() => {
+    anilistSearchMediaController?.abort();
+    anilistSearchMediaController = new AbortController();
 
-  createEffect(on(cacheData, data => data && setNewestData(data.data.media)));
-  createEffect(on(mediaData, data => data && setNewestData(data.data.media)));
+    const { nestLevel, page } = props;
+    const vars = nestLevel === 1 ? props.variables : variables();
+    if (!vars || !page) return;
+
+    const variableObject = { page };
+    for (const entry of vars) {
+      if (entry.active) variableObject[entry.key] = entry.value;
+    }
+
+    anilistSearchMediaFetcher = createAnilistFetcher(queries.searchMedia, variableObject, anilistSearchMediaController.signal);
+
+    sendAnilistFetcher(anilistSearchMediaFetcher, {
+      name: "Anilist media search",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistSearchMediaFetcher.cacheKey) anilistSearchMediaController = null;
+      },
+      onStart: () => setAnilistSearchMediaLoading(true),
+      onStop: () => setAnilistSearchMediaLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistSearchMediaFetcher.cacheKey) setAnilistSearchMediaData(res.data.data.Page);
+      }
+    });
+  });
+
   return (
     <>
       <Intersection onIntersection={() => setVariables(props.variables)}>
-        <Show when={newestData()}>
-          <AniCardRow data={newestData()} />
+        <Show when={anilistSearchMediaData()}>
+          <AniCardRow data={anilistSearchMediaData().media} />
         </Show>
       </Intersection>
-      <Show when={!mediaData.loading && mediaData()?.data?.pageInfo.hasNextPage}>
-        <Show when={mediaData().data.media} keyed={props.nestLevel === 1}>
+      <Show when={!anilistSearchMediaLoading() && anilistSearchMediaData()?.pageInfo.hasNextPage}>
+        <Show when={anilistSearchMediaData().media} keyed={props.nestLevel === 1}>
           <Show when={props.variables}>{vars => (
             <AnilistMediaSearchContent variables={vars()} page={props.page + 1} nestLevel={props.nestLevel + 1} />
           )}</Show>
@@ -849,71 +914,151 @@ function AnilistMediaSearchContent(props) {
   );
 }
 
-function AnilistMediaSeasonContent(_props) {
-  const props = mergeProps({groupCards: true}, _props);
+function AnilistMediaSeasonContent(props) {
+  props = mergeProps({ groupCards: true }, props);
   asserts.assertTrueOLD(props.page, "page is missing");
   asserts.assertTrueOLD(props.extraVariables, "extraVariables is missing");
 
-  const {accessToken} = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [mediaData] = apiOLD.anilist.searchMedia(accessToken, () => props.variables, props.page, () => props.extraVariables);
+  const [anilistSearchMediaData, setAnilistSearchMediaData] = createSignal(undefined, { equals: false });
+  let anilistSearchMediaFetcher, anilistSearchMediaController;
+  createEffect(() => {
+    anilistSearchMediaController?.abort();
+    anilistSearchMediaController = new AbortController();
 
-  createEffect(on(mediaData, response => {
-    if (response?.data.pageInfo.hasNextPage) {
-      setVariables(props.variables);
+    const { page, variables, extraVariables} = props;
+    if (!variables || !page || !extraVariables) return;
+
+    const variableObject = { page };
+    for (const entry of variables) {
+      if (entry.active) variableObject[entry.key] = entry.value;
     }
-  }));
+
+    for (const [key, value] of Object.entries(extraVariables)) {
+      if (key === "format" || key === "season" || key === "seasonYear") {
+        variableObject[key] = value;
+      } else if (key === "episodeGreater") {
+        variableObject[key] = Math.max(value, variableObject[key] || 0);
+      } else {
+        variableObject[key] &&= [value, variableObject[key]].flat();
+        variableObject[key] ??= value;
+      }
+    }
+
+    anilistSearchMediaFetcher = createAnilistFetcher(queries.searchMedia, variableObject, anilistSearchMediaController.signal);
+
+    sendAnilistFetcher(anilistSearchMediaFetcher, {
+      name: "Anilist media search",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistSearchMediaFetcher.cacheKey) anilistSearchMediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistSearchMediaFetcher.cacheKey) return;
+        setAnilistSearchMediaData(res.data.data.Page);
+        if (res.data.data.Page.pageInfo.hasNextPage) {
+          setVariables(variables);
+        }
+      }
+    });
+  });
 
   return (
-    <Show when={mediaData()}>
-      <Show when={props.title && mediaData().data.media.length}>
+    <Show when={anilistSearchMediaData()}>
+      <Show when={props.title && anilistSearchMediaData().media.length}>
         <li class="grid-full-span">
           <h2>{props.title}</h2>
         </li>
       </Show>
       <Switch>
         <Match when={props.groupCards}>
-          <AniCardRowWithFormatHeader data={mediaData().data.media} lastFormat={props.previousFormat || "Unknown format"} />
+          <AniCardRowWithFormatHeader data={anilistSearchMediaData().media} lastFormat={props.previousFormat || "Unknown format"} />
         </Match>
         <Match when={props.groupCards === false}>
-          <AniCardRow data={mediaData().data.media} />
+          <AniCardRow data={anilistSearchMediaData().media} />
         </Match>
       </Switch>
-      <Show when={mediaData().data.pageInfo.hasNextPage}>
+      <Show when={anilistSearchMediaData().pageInfo.hasNextPage}>
         <AnilistMediaSeasonContent 
           variables={variables()} 
           extraVariables={props.extraVariables} 
           page={props.page + 1} 
-          previousFormat={mediaData().data.media.at(-1)?.format || "Unknown format"} 
+          previousFormat={anilistSearchMediaData().media.at(-1)?.format || "Unknown format"} 
         />
       </Show>
     </Show>
   );
 }
 
-const malIds = new Set();
+const malIds = new Set(); // These keep the track of mal ids of the whole application lifetime
+const sessionMalIds = new Set(); // Clear ids every time new page 1 query is fetched
 function MyAnimeListMediaSearchContent(props) {
-  const { debouncedSearchVariables } = useSearchBar();
   const [variables, setVariables] = createSignal(undefined);
-  const [cacheData] = apiOLD.myAnimeList.mediaSearchCache(props.type, debouncedSearchVariables, props.page);
-  const [mediaData] = apiOLD.myAnimeList.mediaSearch(props.type, props.nestLevel === 1 ? () => props.variables : variables, props.page);
-  const [newestData, setNewestData] = createSignal();
 
-  const mediaIds = createMemo(prev => {
-    const ids = new Set();
-    newestData()?.forEach(series => ids.add(series.mal_id));
-    const uniqueIds = [...ids.difference(malIds)];
-    if (uniqueIds.length) {
-      uniqueIds.forEach(val => malIds.add(val));
-      return uniqueIds;
+  const [mediaIds, setMediaIds] = createSignal([]);
+  const [jikanMediaSearchLoading, setJikanMediaSearchLoading] = createSignal(false);
+  const [jikanMediaSearchData, setJikanMediaSearchData] = createSignal(undefined, { equals: false });
+  let jikanMediaSearchFetcher, jikanMediaSearchController;
+  createEffect(() => {
+    jikanMediaSearchController?.abort();
+    jikanMediaSearchController = new AbortController();
+
+    const { type, page, nestLevel } = props;
+    const vars = nestLevel === 1 ? props.variables : variables();
+
+    if (!type || !page || !vars) return;
+
+    if (nestLevel === 1) sessionMalIds.clear();
+
+    let season = null;
+    const queryArray = [];
+
+    for (const v of vars) {
+      if (!v.active) continue;
+
+      if (v.key === "season") season = v.value;
+      else queryArray.push(`${v.key}=${v.value}`);
     }
 
-    return prev || [];
+    if (page > 1) queryArray.push(`page=${page}`);
+
+    const query = queryArray.sort().join("&");
+
+    if (season) jikanMediaSearchFetcher = createJsonGetFetcher(queries.myAnimeListMediaSeasonSearch, { season, query }, jikanMediaSearchController.signal);
+    else jikanMediaSearchFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, { type, query }, jikanMediaSearchController.signal);
+
+    sendAnilistFetcher(jikanMediaSearchFetcher, {
+      name: "Jikan media search",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === jikanMediaSearchFetcher.cacheKey) jikanMediaSearchController = null;
+      },
+      onStart: () => setJikanMediaSearchLoading(true),
+      onStop: () => setJikanMediaSearchLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== jikanMediaSearchFetcher.cacheKey) return;
+
+        const ids = new Set();
+        const clone = structuredClone(res.data);
+        clone.data = clone.data.filter(({ mal_id }) => !sessionMalIds.has(mal_id) && sessionMalIds.add(mal_id));
+        for (const { titles, mal_id } of clone.data) {
+          if (!malIds.has(mal_id)) {
+            ids.add(mal_id);
+            malIds.add(mal_id);
+          }
+
+          for (const entry of titles) {
+            titles[entry.type] = entry.title;
+          }
+        }
+
+        if (ids.size) setMediaIds([...ids])
+        setJikanMediaSearchData(clone);
+      }
+    });
   });
 
   let mediaFetcher, mediaController;
   createEffect(() => {
-    const ids = [...mediaIds()];
+    const ids = mediaIds();
     const type = props.type.toUpperCase();
     if (!ids.length || type === "MEDIA") return;
     mediaController?.abort();
@@ -937,17 +1082,15 @@ function MyAnimeListMediaSearchContent(props) {
     });
   });
 
-  createEffect(on(cacheData, data => data && setNewestData(data.data.data)));
-  createEffect(on(mediaData, data => data && setNewestData(data.data.data)));
   return (
     <>
       <Intersection rootMargin="200px" onIntersection={() => setVariables(props.variables)}>
-        <Show when={newestData()}>
-          <MalCardRow data={newestData()} />
+        <Show when={jikanMediaSearchData()?.data}>
+          <MalCardRow data={jikanMediaSearchData()?.data} />
         </Show>
       </Intersection>
-      <Show when={!mediaData.loading && mediaData()?.data?.pagination.has_next_page}>
-        <Show when={mediaData().data.data} keyed={props.nestLevel === 1}>
+      <Show when={!jikanMediaSearchLoading() && jikanMediaSearchData()?.pagination.has_next_page}>
+        <Show when={jikanMediaSearchData().data} keyed={props.nestLevel === 1}>
           <Show when={props.variables}>{vars => (
             <MyAnimeListMediaSearchContent variables={vars()} type={props.type} page={props.page + 1} nestLevel={props.nestLevel + 1} />
           )}</Show>

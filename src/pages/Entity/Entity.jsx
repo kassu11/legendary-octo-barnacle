@@ -1,6 +1,6 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import apiOLD from "../../utils/api-OLD.js";
-import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
+import { Switch, Match, Show, createSignal, createEffect, on, For, createMemo } from "solid-js";
 import { OldMarkdownComponent } from "../../components/Markdown.jsx";
 import "./Entity.scss";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
@@ -8,8 +8,9 @@ import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { useAuthentication } from "../../context/providers.js";
 import { wrapToArray } from "../../utils/arrays.js";
-import { asserts } from "../../collections/collections.js";
+import { asserts, queries } from "../../collections/collections.js";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 
 export function Character() {
   const params = useParams();
@@ -329,52 +330,79 @@ function StaffMediaRolePage(props) {
   asserts.assertTrueOLD(props.nestLevel, "nestLevel is missing");
 
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffMedia, { mutate }] = apiOLD.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
 
-  if (props.nestLevel === 1) {
-    createEffect(on(staffMedia, media => {
-      props.setVisible(media?.data.edges.length > 0);
-    }));
-  }
+  const lastId = createMemo(() => props.lastMediaId);
+  const [anilistStaffMediaLoading, setAnilistStaffMediaLoading] = createSignal(undefined, { equals: false });
+  const [anilistStaffMediaData, setAnilistStaffMediaData] = createSignal(undefined, { equals: false });
+  let anilistStaffMediaFetcher, anilistStaffMediaController;
+  createEffect(() => {
+    anilistStaffMediaController?.abort();
+    anilistStaffMediaController = new AbortController();
 
-  createEffect(on(staffMedia, media => {
-    if (!props.lastMediaId || !media?.data.edges.length) {
-      return;
-    }
-    const edges = structuredClone(media.data.edges);
-    const removedEdges = [];
+    const { id } = params;
+    const { type, nestLevel } = props;
+    const lastMediaId = lastId();
+    const vars = nestLevel === 1 ? props.variables : variables();
 
-    for (const edge of media.data.edges) {
-      if (edge.node.id !== props.lastMediaId) { break; }
-      removedEdges.push(edges.shift());
-    }
+    if (!vars || !type) return;
 
-    if (removedEdges.length === 0) {
-      return;
-    }
-    props.mutate(response => {
-      response.data.edges = [...response.data.edges, ...removedEdges];
-      return { ...response };
+    anilistStaffMediaFetcher = createAnilistFetcher(queries.anilistStaffById, {
+      ...vars,
+      "staffPage": vars.staffPage || 1,
+      "sort": vars.sort ? [vars.sort, "TITLE_ENGLISH"].flat() : "START_DATE_DESC",
+      "onList": vars.onList,
+      "withStaffRoles": true,
+      id,
+      type,
+    }, anilistStaffMediaController.signal);
+
+    sendAnilistFetcher(anilistStaffMediaFetcher, {
+      name: "Anilist staff media",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistStaffMediaFetcher.cacheKey) anilistStaffMediaController = null;
+      },
+      onStart: () => setAnilistStaffMediaLoading(true),
+      onStop: () => setAnilistStaffMediaLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistStaffMediaFetcher.cacheKey) return;
+        const media = structuredClone(res.data.data.Staff.staffMedia);
+
+        if (nestLevel === 1) {
+          props.setVisible(media.edges.length > 0);
+        }
+
+        // Merge same media entries
+        if (lastMediaId && media.edges.length) {
+          const { edges } = media;
+          const removedEdges = [];
+
+          while (edges.length && edges[0]?.node.id === lastMediaId) {
+            removedEdges.push(edges.shift());
+          }
+
+          if (removedEdges.length > 0) props.mutate(response => {
+            response.edges = [...response.edges, ...removedEdges];
+            return { ...response };
+          });
+        }
+
+        setAnilistStaffMediaData(media);
+      }
     });
-    mutate(response => {
-      response.data.edges = edges;
-      return { ...response };
-    });
-  }));
+  });
 
   return (
     <>
       <Intersection onIntersection={() => setVariables(props.variables)}>
-        <Show when={staffMedia()?.data?.edges}>
-          <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
+        <Show when={anilistStaffMediaData()?.edges} keyed>
+          <MediaCards edges={anilistStaffMediaData().edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
       </Intersection>
-      <Show when={!staffMedia.loading && staffMedia()?.data?.pageInfo.hasNextPage}>
-        <Show when={staffMedia()?.data?.edges} keyed={props.nestLevel === 1}>
+      <Show when={!anilistStaffMediaLoading() && anilistStaffMediaData()?.pageInfo.hasNextPage}>
+        <Show when={props.variables} keyed={props.nestLevel === 1}>
           <Show when={props.variables}>{vars => (
-            <StaffMediaRolePage variables={{ ...vars(), staffPage: (vars()?.staffPage || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} mutate={mutate} type={props.type} lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"} lastMediaId={staffMedia().data.edges.at(-1)?.node.id} />
+            <StaffMediaRolePage variables={{ ...vars(), staffPage: (vars()?.staffPage || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} mutate={setAnilistStaffMediaData} type={props.type} lastYearGroup={anilistStaffMediaData().edges.at(-1)?.node.startDate?.year || "TBA"} lastMediaId={anilistStaffMediaData().edges.at(-1)?.node.id} />
           )}</Show>
         </Show>
       </Show>

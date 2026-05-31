@@ -1,15 +1,15 @@
 import { A, useParams } from "@solidjs/router";
-import apiOLD from "../../utils/api-OLD.js";
 import { createEffect, createMemo, createRenderEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
 import { useAuthentication } from "../../context/providers.js";
-import { asserts, fetchersOLD, fetcherSendersOLD, modes, signals } from "../../collections/collections.js";
+import { asserts, fetchersOLD, fetcherSendersOLD, modes, signals, queries } from "../../collections/collections.js";
 import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 
 export function AnimeCharacters() {
   return (
@@ -268,19 +268,42 @@ function CharactersPage(props) {
 
 function StaffPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
-  const { accessToken } = useAuthentication();
-  const [staff] = apiOLD.anilist.allMediaStaff(() => props.id, page, accessToken);
+  const [anilistMediasStaffLoading, setAnilistMediasStaffLoading] = createSignal(undefined, { equals: false });
+  const [anilistMediasStaffData, setAnilistMediasStaffData] = createSignal(undefined, { equals: false });
+  let anilistMediasStaffFetcher, anilistMediasStaffController;
+  createEffect(() => {
+    anilistMediasStaffController?.abort();
+    anilistMediasStaffController = new AbortController();
+    const { id } = props;
+    const p = page();
+
+    if (!id || !p) return;
+
+    anilistMediasStaffFetcher = createAnilistFetcher(queries.anilistStaff, { id, page: p }, anilistMediasStaffController.signal);
+
+    sendAnilistFetcher(anilistMediasStaffFetcher, {
+      name: "Anilist medias staff",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistMediasStaffFetcher.cacheKey) anilistMediasStaffController = null;
+      },
+      onStart: () => setAnilistMediasStaffLoading(true),
+      onStop: () => setAnilistMediasStaffLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistMediasStaffFetcher.cacheKey) setAnilistMediasStaffData(res.data.data.Media);
+      }
+    });
+  });
 
   return (
     <>
       <Intersection onIntersection={() => setPage(props.page)}>
-        <Show when={staff()?.data?.staff.edges} fallback={<LoadingCard />}>
-          <For each={staff().data?.staff.edges}>{edge => (
+        <Show when={anilistMediasStaffData()?.staff.edges} fallback={<LoadingCard />}>
+          <For each={anilistMediasStaffData().staff.edges}>{edge => (
             <StaffCard edge={edge}></StaffCard>
           )}</For>
         </Show>
       </Intersection>
-      <Show when={!staff.loading && staff()?.data?.staff.pageInfo.hasNextPage}>
+      <Show when={!anilistMediasStaffLoading() && anilistMediasStaffData()?.staff.pageInfo.hasNextPage}>
         <StaffPage id={props.id} page={props.page + 1} />
       </Show>
     </>

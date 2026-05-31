@@ -359,9 +359,9 @@ export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/an
 export const myAnimeListMangaCharactersById = id => `https://api.jikan.moe/v4/manga/${id}/characters`;
 export const myAnimeListCharacterById = ({ id }) => `https://api.jikan.moe/v4/characters/${id}/full`;
 export const myAnimeListAnimeStaffById = ({ id }) => `https://api.jikan.moe/v4/anime/${id}/staff`;
-export const myAnimeListMediaSearch = (type, query) => `https://api.jikan.moe/v4/${type}?${query}`;
-export const myAnimeListMediaSeasonSearch = (season, query) => `https://api.jikan.moe/v4/seasons/${season}?${query}`;
-export const myAnimeListMediaGenres = (type) => `https://api.jikan.moe/v4/genres/${type}`;
+export const myAnimeListMediaSearch = ({ type, query }) => `https://api.jikan.moe/v4/${type}?${query}`;
+export const myAnimeListMediaSeasonSearch = ({ season, query }) => `https://api.jikan.moe/v4/seasons/${season}?${query}`;
+export const myAnimeListMediaGenres = ({ type }) => `https://api.jikan.moe/v4/genres/${type}`;
 
 export const anilistActivityRepliedById = format`query ($id: Int, $page: Int) {
   Page(page: $page, perPage: 25) {

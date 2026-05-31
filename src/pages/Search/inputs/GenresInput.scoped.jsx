@@ -157,10 +157,10 @@ export function GenresInputScoped(props) {
           </Show>
         </Match>
         <Match when={props.engine === "mal"}>
-          <Show when={props.malGenres()} fallback="Loading...">
+          <Show when={props.malGenres} fallback="Loading...">
             <h3>Genres</h3>
             <ol>
-              <For each={props.malGenres().data.genres}>{genre => (
+              <For each={props.malGenres.genres}>{genre => (
                 <li classList={{exclude: genres.exclude[genre.name], hidden: !genre.name.toLowerCase().includes(filter())}} >
                   <label>
                     {genre.name}
@@ -175,7 +175,7 @@ export function GenresInputScoped(props) {
             </ol>
             <h3>Themes</h3>
             <ol>
-              <For each={props.malGenres().data.themes}>{genre => (
+              <For each={props.malGenres.themes}>{genre => (
                 <li classList={{exclude: genres.exclude[genre.name], hidden: !genre.name.toLowerCase().includes(filter())}} >
                   <label>
                     {genre.name}
