@@ -8,5 +8,11 @@ export function getSessionStorageJson(key, defaultValue) {
 }
 
 export function setSessionStorageJson(key, value, defaultValue) {
-  sessionStorage[key] = safeStringifyJson(value, defaultValue);
+  try {
+    sessionStorage[key] = safeStringifyJson(value, defaultValue);
+  } catch {
+    // Probably hit session storage limit, so lets clean sessionStorage
+    sessionStorage.clear();
+    sessionStorage[key] = safeStringifyJson(value, defaultValue);
+  }
 }

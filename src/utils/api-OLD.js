@@ -68,52 +68,6 @@ const apiOLD = {
       const request = Fetch.authAnilist(token, queries.anilistUserMutateFavourites, variables);
       return await request.send();
     },
-    characterInfoById: reloadCache((id, token) => {
-      return Fetch.authAnilist(token, queries.anilistCharacterById, { id }, response => response.data.Character);
-    }),
-    characterMediaById: reloadCache((token, id, variables = {}) => { 
-      return Fetch.authAnilist(token, queries.anilistCharacterById, {
-        ...variables, 
-        "page": variables.page || 1,
-        "sort": variables.sort || "POPULARITY_DESC",
-        "onList": variables.onList,
-        "withRoles": variables.withRoles || true,
-        id,
-      }, response => response.data.Character.media);
-    }),
-    staffInfoById: reloadCache((id, token) => {
-      return Fetch.authAnilist(token, queries.anilistStaffById, { id }, (response) => response.data.Staff);
-    }),
-    studioInfoAndMediaById: reloadCache((id, variables = {}, token) => {
-      return Fetch.authAnilist(token, queries.anilistStudioById, { 
-        ...variables,
-        "page": variables.page || 1,
-        "sort": variables.sort || "START_DATE_DESC",
-        "onList": variables.onList,
-        id
-      }, (response) => response.data.Studio);
-    }),
-    staffCharactersById: reloadCache((token, id, variables = {}) => {
-      return Fetch.authAnilist(token, queries.anilistStaffById, { 
-        ...variables, 
-        "characterPage": variables.characterPage || 1,
-        "sort": variables.sort || "START_DATE_DESC",
-        "onList": variables.onList,
-        "withCharacterRoles": true,
-        id,
-      }, (response) => response.data.Staff.characterMedia);
-    }),
-    staffMediaById: reloadCache((token, id, type, variables) => {
-      return Fetch.authAnilist(token, queries.anilistStaffById, { 
-        ...variables, 
-        "staffPage": variables.staffPage || 1,
-        "sort": variables.sort || "START_DATE_DESC",
-        "onList": variables.onList,
-        "withStaffRoles": true,
-        id,
-        type,
-      }, (response) => response.data.Staff.staffMedia);
-    }),
     mediaListEntry: async (token, mediaId) => {
       asserts.assertTrueOLD(mediaId, "MediaId missing");
       asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");

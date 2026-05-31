@@ -1,15 +1,18 @@
-import {useNavigate, useParams, useSearchParams} from "@solidjs/router";
+import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import apiOLD from "../../../utils/api-OLD.js";
-import {createEffect, createMemo, createSignal, on, onCleanup} from "solid-js";
+import { createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import "./index(user-media-list).scoped.css";
-import {capitalize} from "../../../utils/formating.js";
+import { capitalize } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
-import {useAuthentication, UserMediaListContext, useUser} from "../../../context/providers.js";
-import {leadingAndTrailingDebounce} from "../../../utils/scheduled.js";
-import {asserts, fetchersOLD, fetcherSendersOLD, requests} from "../../../collections/collections.js";
-import {MediaListContainerScoped} from "./MediaListContainer.scoped.jsx";
-import {SearchControlsScoped} from "./SearchControls.scoped.jsx";
-import { fetcherSenderUtils } from "../../../utils/utils.js";
+import { useAuthentication, UserMediaListContext, useUser } from "../../../context/providers.js";
+import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
+import { asserts, queries } from "../../../collections/collections.js";
+import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
+import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
+import { isTypeFunction } from "../../../utils/functionUtils.js";
+import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 
 export const useListNavigation = () => {
   const navigate = useNavigate();
@@ -25,18 +28,45 @@ export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
   const { accessToken, authUserData } = useAuthentication();
-  const anilistFetcher = createMemo(() => fetchersOLD.anilist.mediaListByUserName({ token: accessToken(), name: user().name, type: params.type }));
-  const cacheType = fetcherSenderUtils.createDynamicCacheType({ default: () => requests.anilist.inFiveSeconds() > 2 })
-  const [mediaList, { mutateCache: mutateMediaListCache }] = fetcherSendersOLD.sendWithCacheTypeWithoutNullUpdates(cacheType, anilistFetcher);
+  const name = createMemo(() => user().name);
+  const [userMediaTime, startUserMediaTimer, stopUserMediaTimer] = createTimer();
+  const [userMediaData, setUserMediaData] = createSignal(undefined, { equals: false });
+  let userMediaFetcher, userMediaController;
+  createEffect(() => {
+    userMediaController?.abort();
+    userMediaController = new AbortController();
+
+    const userName = name();
+    const type = params.type.toUpperCase();
+
+    if (!userName || !type) return;
+
+    userMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, userMediaController.signal);
+
+    sendAnilistFetcher(userMediaFetcher, {
+      name: "Anilist user media page",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userMediaFetcher.cacheKey) userMediaController = null;
+      },
+      onStart: startUserMediaTimer,
+      onStop: stopUserMediaTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== userMediaFetcher.cacheKey) return;
+        setUserMediaData(res);
+        document.title = `${userName} ${capitalize(type)} - LOB`;
+      }
+    });
+  });
+
+  const mutateMediaListCache = (mutate, afterCallBack) => {
+    if (isTypeFunction(mutate)) mutate = mutate(untrack(userMediaData));
+    setFetcherValueToStorage(mutate);
+    afterCallBack();
+  }
+
   const [searchParams, _setSearchParams] = useSearchParams();
   const [listData, setListData] = createSignal({});
   let worker;
-  createEffect(on(user, (u) => {
-    if (u) {
-      document.title = `${u.name} ${params.type} - LOB`;
-    }
-  }))
-  document.title = "Authentication - LOB";
 
   const setSearchParams = (options) => {
     _setSearchParams(options, { replace: true });
@@ -73,18 +103,18 @@ export function UserMediaList() {
 
     mutateMediaListCache(res => {
       function pushEntryToList(name, isCustomList) {
-        const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
+        const listIndex = res.data.data.MediaListCollection.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
         if (listIndex === -1) {
-          res.data.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
+          res.data.data.MediaListCollection.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
         }
 
-        const list = res.data.lists.at(listIndex);
+        const list = res.data.data.MediaListCollection.lists.at(listIndex);
         list.entries.push(response.data);
-        listData().data.indecies[mediaId].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
+        listData().data.indecies[mediaId].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
       }
 
       listData().data.indecies[mediaId].forEach(([listIndex, entryIndex]) => {
-        res.data.lists[listIndex].entries.splice(entryIndex, 1);
+        res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
       });
       listData().data.indecies[mediaId] = [];
 
@@ -103,11 +133,11 @@ export function UserMediaList() {
   }, 250, 2);
 
   const updateListInfo = () => {
-    if (window.Worker && mediaList()?.data) {
+    if (window.Worker && userMediaData()) {
       worker = worker instanceof Worker ? worker : new UserMediaListWorker();
 
       const postObject = {
-        data: mediaList()?.data,
+        data: userMediaData()?.data.data.MediaListCollection,
         search: search(),
         format: format(),
         status: status(),
@@ -171,6 +201,7 @@ export function UserMediaList() {
           listData={listData}
           mutateMediaListCache={mutateMediaListCache}
           updateListInfo={updateListInfo}
+          timer={formatMSToString(userMediaTime())}
         />
       </div>
     </UserMediaListContext.Provider>

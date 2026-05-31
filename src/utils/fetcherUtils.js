@@ -110,7 +110,29 @@ async function fetcherToFetchRetry(fetcher) {
     await new Promise(res => setTimeout(res, delay));
   }
 
+  wrapResponseJson(response);
+
   return response;
+}
+
+function wrapResponseJson(response) {
+  if (!response?.json) return;
+  const originalJson = response.json.bind(response);
+  let jsonPromise;
+
+  response.json = async function(...args) {
+    try {
+      jsonPromise ??= originalJson(...args);
+      var response = await jsonPromise;
+    } catch (e) {
+      console.error(e);
+      return null;
+    } finally {
+      jsonPromise = null;
+    }
+
+    return response;
+  };
 }
 
 function fetchWrapper(fetcher) {

@@ -42,6 +42,7 @@ export function MediaListContainerScoped(props) {
 
   return (
     <div>
+      <p>{props.timer}</p>
       <Show when={props.listData()?.data} fallback={<CardsLoading />}>
         <For each={props.listData().data.lists}>{list => {
           storeCardsVisibility(list.name, {});
@@ -102,9 +103,9 @@ export function MediaListContainerScoped(props) {
                                       responseEntry = objectUtils.mergeObjects(entry, responseEntry);
                                       props.mutateMediaListCache(res => {
                                         function pushEntryToList(name, isCustomList) {
-                                          const listIndex = res.data.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
+                                          const listIndex = res.data.data.MediaListCollection.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
                                           if (listIndex === -1) {
-                                            res.data.lists.push({
+                                            res.data.data.MediaListCollection.lists.push({
                                               name,
                                               isCustomList: false,
                                               isCompletedList: false,
@@ -112,13 +113,13 @@ export function MediaListContainerScoped(props) {
                                             });
                                           }
 
-                                          const list = res.data.lists.at(listIndex);
+                                          const list = res.data.data.MediaListCollection.lists.at(listIndex);
                                           list.entries.push(responseEntry);
-                                          props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.lists.length - 1 : listIndex, list.entries.length - 1]);
+                                          props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
                                         }
 
                                         props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                          res.data.lists[listIndex].entries.splice(entryIndex, 1);
+                                          res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
                                         });
                                         props.listData().data.indecies[entry.media.id] = [];
 
@@ -138,7 +139,7 @@ export function MediaListContainerScoped(props) {
                                     deleteMedia: () => {
                                       props.mutateMediaListCache(res => {
                                         props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                          res.data.lists[listIndex].entries.splice(entryIndex, 1);
+                                          res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
                                         });
                                         return res;
                                       }, props.updateListInfo);
