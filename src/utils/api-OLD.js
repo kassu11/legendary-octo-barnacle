@@ -1,12 +1,6 @@
-import { asserts, modes } from "../collections/collections.js";
-import { batch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { asserts } from "../collections/collections.js";
 import * as queries from "../collections/querys";
 import { TokenBucket } from "./TokenBucket";
-const DEBUG = modes.debug;
-
-const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
-// const noCache = cacheBuilder({ type: "no-store" });
-// const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
 
 const fetchRateLimits = {
   "anilist": new TokenBucket({
@@ -25,13 +19,6 @@ const fetchRateLimits = {
 
 const apiOLD = {
   anilist: {
-    mediaListByUserNameFetchOnce: fetchOnce((name, type, token) => {
-      asserts.assertTrueOLD(name, "Name is missing");
-      return Fetch.authAnilist(token, queries.anilistUserMediaList, {
-        userName: name.toLowerCase(),
-        type,
-      }, res => res.data.MediaListCollection);
-    }),
     mutateFavourites: async (token, variables) => {
       const request = Fetch.authAnilist(token, queries.anilistUserMutateFavourites, variables);
       return await request.send();
@@ -242,8 +229,6 @@ class Fetch {
   }
 }
 
-const localFetchCacheStorage = new Map();
-const currentlyFetching = new Map();
 
 /**
  * @param {Object} settings - Cache settings.
@@ -257,182 +242,6 @@ const currentlyFetching = new Map();
  *     - `"only-if-cached"`: Serves data from cache only; returns null if no cache exists.
  *     - `"reload"`: Always fetches fresh data and updates the cache.
  */
-function cacheBuilder(settings) {
-  settings.storeName ??= "";
-  settings.fetchOnDebug ??= false;
-  settings.type ??= "default"; 
-  asserts.assertTrueOLD(settings.type === "no-store" || Number.isInteger(settings.expiresInSeconds), "Give explisite expiration time. 0 if the data never expires");
-  asserts.assertTrueOLD(settings.type === "no-store" || settings.expiresInSeconds > 0, "Expiration time should be more than 0");
-  asserts.assertTrueOLD(settings.type !== "no-store" || !settings.storeName, "StoreName is not used because cache type is no-store");
-
-  /**
-   * @param {(fetchOptions: any[]) => Fetch} fetchCallback
-   */
-  return function cache(fetchCallback) {
-    return (...fetchOptions) => {
-      const [data, setData] = createSignal(undefined);
-      const [error, setError] = createSignal(false);
-      const [loading, setLoading] = createSignal(false);
-      const [indexedDBClosed, setIndexedDBClosed] = createSignal(true);
-
-      let request = null;
-      const checkCacheBeforeFetch = settings.type == "default" || settings.type == "only-if-cached";
-      const fetchOnStart = (DEBUG == false || settings.fetchOnDebug || settings.type == "no-store" || !settings.storeName) && checkCacheBeforeFetch == false;
-
-      const mutateCache = (mutateData, callback) => {
-        if (typeof mutateData === "function") {
-          mutateData = mutateData(untrack(data));
-        }
-        // Create a deepcopy because onsuccess events are not instant so mutations could leak into cache.
-        mutateData = structuredClone(mutateData);
-
-        asserts.assertTrueOLD(untrack(data) !== null || settings.type !== "only-if-cached", "Can't mutate null data");
-        asserts.assertTrueOLD(typeof mutateData === "object", "Data should always be JSON object data");
-
-
-        if (settings.type !== "no-store") {
-          localFetchCacheStorage.set(request.cacheKey, mutateData);
-
-          if (settings.storeName) {
-            setIndexedDBClosed(false);
-            const cacheReq = IndexedDB.fetchCache();
-            cacheReq.onsuccess = evt => {
-              const db = evt.target.result;
-              const store = IndexedDB.store(db, settings.storeName, "readwrite", () => setIndexedDBClosed(true), () => setIndexedDBClosed(true));
-              const putReq = store.put(mutateData);
-              if (callback) {
-                putReq.onsuccess = callback;
-              }
-            }
-          }
-        }
-      }
-
-      const saveMutate = mutateData => {
-        if (mutateData.cacheKey === request.cacheKey) {
-          setData(mutateData);
-        }
-      }
-
-      const mutate = mutateData => {
-        if (typeof mutateData === "function") {
-          mutateData = mutateData(untrack(data));
-        }
-
-        setData(mutateData);
-      }
-
-      const refetch = async () => {
-        if (settings.type === "only-if-cached") {
-          setLoading(false);
-          return setData(null);
-        }
-
-        if (!currentlyFetching.has(request.cacheKey)) {
-          currentlyFetching.set(request.cacheKey, request.send());
-        }
-        const data = await currentlyFetching.get(request.cacheKey);
-        currentlyFetching.delete(request.cacheKey);
-
-        if (data === null) { // Data should be only null if signal aborted
-          return;
-        }
-
-        if (settings.expiresInSeconds) {
-          const time = new Date();
-          data.expires = time.setSeconds(time.getSeconds() + settings.expiresInSeconds);
-        }
-
-        batch(() => {
-          if (!data.error) {
-            mutateCache(data);
-            saveMutate(data);
-          } else {
-            setError(true);
-            console.assert(!DEBUG, "Fetch error, not saving data to cache");
-          }
-
-          setLoading(false);
-        });
-      }
-
-      createEffect(() => {
-        const options = fetchOptions.map(option => typeof option == "function" ? option() : option);
-        if (options.some(option => option === undefined)) {
-          return; // Don't fetch if you have undefined values
-        };
-
-        request?.abort();
-        request = fetchCallback(...options);
-        if (DEBUG) {
-          console.log("Fetching", settings.type, request.body || request.url);
-        }
-
-        batch(() => {
-          setLoading(true);
-          setError(false);
-        });
-
-        const localCacheData = localFetchCacheStorage.get(request.cacheKey);
-        if (localCacheData && localCacheData.expires > new Date()) {
-          saveMutate({ ...localCacheData, fromCache: true });
-          if (settings.type === "fetch-once") { 
-            setLoading(false);
-            return;
-          } else if(fetchOnStart === false) {
-            setLoading(false);
-          }
-        } else if (settings.type !== "no-store" && settings.storeName) {
-          const cacheReq = IndexedDB.fetchCache();
-          cacheReq.onerror = refetch;
-          cacheReq.onsuccess = evt => {
-            const db = evt.target.result;
-            const store = IndexedDB.store(db, settings.storeName, "readonly");
-            const getReg = store.get(request.cacheKey);
-            getReg.onerror = refetch;
-            getReg.onsuccess = evt => {
-              if (evt.target.result) {
-                asserts.assertTrueOLD(evt.target.result.expires, "Cache should have a expiration date");
-                asserts.assertTrueOLD(evt.target.result.data, "Cache should always have data");
-
-                if (evt.target.result.expires > new Date()) {
-                  if (fetchOnStart == false) {
-                    setLoading(false);
-                  }
-                  const cacheData = { ...evt.target.result, fromCache: true };
-                  if (settings.type !== "only-if-cached") {
-                    localFetchCacheStorage.set(cacheData.cacheKey, cacheData);
-                  }
-                  return saveMutate(cacheData);
-                }
-              } 
-
-              if (fetchOnStart == false) {
-                refetch();
-              }
-            };
-          }
-        } else if (fetchOnStart == false) {
-          refetch();
-        } 
-
-        if (fetchOnStart) {
-          refetch();
-        }
-      });
-
-      Object.defineProperties(data, {
-        error: { get: () => error() },
-        loading: { get: () => loading() },
-        indexedDBClosed: { get: () => indexedDBClosed() },
-      });
-
-      onCleanup(() => request?.abort());
-
-      return [data, { mutate, refetch, mutateCache }];
-    }
-  }
-}
 
 export class IndexedDB {
   static #createStore(db, name, key) {
