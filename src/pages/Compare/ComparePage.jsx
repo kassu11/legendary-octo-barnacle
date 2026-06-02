@@ -557,6 +557,10 @@ function UserRow(props) {
             </button>
           </label>
         </Match>
+        <Match when={!anilistUserMediaData() && !anilistUserMediaLoading()}>
+          <img src="https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png" alt="User profile not found." />
+          User not found
+        </Match>
       </Switch>
       <button onClick={remove}>Remove</button>
     </li>

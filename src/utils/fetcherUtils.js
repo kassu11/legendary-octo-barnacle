@@ -176,6 +176,8 @@ async function retryDelay(fetcher, response, iteration) {
       case 429: return { delay: 25_000, message: "Animethemes API rate limit hit" }; // Too Many Requests and missing Retry-After
     }
   }
+
+  return {};
 }
 
 
