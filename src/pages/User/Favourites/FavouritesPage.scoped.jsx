@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Show, untrack, on } from "solid-js";
+import { createEffect, createSignal, For, Show, untrack, on, createMemo } from "solid-js";
 import { useUser, useFavourites } from "../../../context/providers.js";
 import { FavouritePageItemScoped } from "./FavouritePageItem.scoped.jsx";
 import { Intersection } from "../../../components/utils/Intersection.scoped.jsx";
@@ -10,12 +10,13 @@ export function FavouritesPageScoped(props) {
   const { user } = useUser();
   const { type, allEdges } = useFavourites();
   const [page, setPage] = createSignal(undefined);
+  const userId = createMemo(() => user().id);
 
   const [loading, setLoading] = createSignal(false);
   const [favouritesData, setFavouritesData] = createSignal(undefined, { equals: false });
   let favouritesFetcher, favouritesController;
   createEffect(() => {
-    const id = user().id;
+    const id = userId()
     const p = props.page === 1 ? props.page : page();
     if (!id || !p) return;
 

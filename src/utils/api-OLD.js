@@ -4,7 +4,6 @@ import * as queries from "../collections/querys";
 import { TokenBucket } from "./TokenBucket";
 const DEBUG = modes.debug;
 
-const reloadCache = cacheBuilder({ storeName: "results", type:"reload", expiresInSeconds: 60 * 60 * 24 * 365 });
 const fetchOnce = cacheBuilder({ storeName: "results", type: "fetch-once", expiresInSeconds: 60 * 60 * 24 * 365 });
 // const noCache = cacheBuilder({ type: "no-store" });
 // const debugCache = cacheBuilder({ storeName: "debug", fetchOnDebug: true, type: "fetch-once", expiresInSeconds: 60 });
@@ -26,14 +25,6 @@ const fetchRateLimits = {
 
 const apiOLD = {
   anilist: {
-    activityByUserId: reloadCache((id, token) => {
-      asserts.assertTrueOLD(id, "Id is missing");
-      return Fetch.authAnilist(token, queries.profileActivity, { id });
-    }),
-    searchUsers: fetchOnce((search, page, token) => {
-      asserts.assertTrueOLD(search, "Search is missing");
-      return Fetch.authAnilist(token, queries.anilistUserSearch, { search, page, }, res => res.data.Page);
-    }),
     mediaListByUserNameFetchOnce: fetchOnce((name, type, token) => {
       asserts.assertTrueOLD(name, "Name is missing");
       return Fetch.authAnilist(token, queries.anilistUserMediaList, {

@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { queries } from "../../../collections/collections.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
@@ -8,6 +8,8 @@ import "./Followers.scoped.css";
 
 export function Followers(props) {
   const { user } = useUser();
+  const userId = createMemo(() => user()?.id);
+
   const [showNext, setShowNext] = createSignal(false);
 
   const [followersTime, startFollowersTimer, stopFollowersTimer] = createTimer();
@@ -15,7 +17,7 @@ export function Followers(props) {
   const [followersData, setFollowersData] = createSignal(undefined, { equals: false });
   let followersFetcher, followersController;
   createEffect(() => {
-    const { id } = user();
+    const id = userId();
     if (!id) return;
     followersController?.abort();
     followersController = new AbortController();

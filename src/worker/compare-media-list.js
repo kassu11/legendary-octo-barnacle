@@ -1,47 +1,25 @@
-import { IndexedDB } from "../utils/api-OLD.js";
+onmessage = ({ data: { includeKeys, excludeKeys, data, ...filtering } }) => {
+  const entries = {}
+  for (const entry of Object.values(data)) {
+    const { user } = entry;
+    const name = user.name.toLowerCase();
+    if (!includeKeys.some(n => n.toLowerCase() === name)) continue;
 
-onmessage = ({ data: { includeKeys, excludeKeys, type, ...filtering } }) => {
-  const cacheReq = IndexedDB.fetchCache();
-  cacheReq.onerror = error;
-  cacheReq.onsuccess = evt => {
-    const db = evt.target.result;
-    const store = IndexedDB.store(db, "results", "readonly");
+    includeCompareList(entry, entries, filtering);
+  }
 
-    const entries = {}
-    let count = 0;
-    function listFilteringComplate() {
-      if (includeKeys.length + excludeKeys.length === ++count) {
-        formatCompareList(entries, Math.min(+filtering.reviewsNeeded || includeKeys.length, includeKeys.length), filtering);
-      }
-    }
+  for (const entry of Object.values(data)) {
+    const { user } = entry;
+    const name = user.name.toLowerCase();
+    if (!excludeKeys.some(n => n.toLowerCase() === name)) continue;
 
-    for (const includeKey of includeKeys) {
-      const getReg = store.get(includeKey);
-      getReg.onerror = error;
-      getReg.onsuccess = evt => {
-        if (evt.target.result) {
-          includeCompareList(evt.target.result, entries, type, filtering, listFilteringComplate);
-        } else {
-          error();
-        };
-      };
-    }
+    excludeCompareList(entry, entries);
+  }
 
-    for (const excludeKey of excludeKeys) {
-      const getReg = store.get(excludeKey);
-      getReg.onerror = error;
-      getReg.onsuccess = evt => {
-        if (evt.target.result) {
-          excludeCompareList(evt.target.result, entries, listFilteringComplate);
-        } else {
-          error();
-        };
-      };
-    }
-  };
+  formatCompareList(entries, Math.min(+filtering.reviewsNeeded || includeKeys.length, includeKeys.length), filtering);
 }
 
-function includeCompareList(listData, entries, type, filterObject, filteringComplate) {
+function includeCompareList(listData, entries, filterObject) {
   if (filterObject.search) {
     filterObject.search = filterObject.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&");
     if (filterObject.search.trim() === "") {
@@ -53,31 +31,27 @@ function includeCompareList(listData, entries, type, filterObject, filteringComp
     }
   }
 
-  listData.data.lists.forEach((list) => {
+  listData.lists.forEach((list) => {
     list.entries.forEach((entry) => {
       if (filter(entry, filterObject)) {
         const id = entry.media.id;
         entries[id] ??= entry.media;
         entries[id].mediaEntries ??= {}
         delete entry.media;
-        entry.name = listData.data.user.name;
-        entries[id].mediaEntries[listData.data.user.name] ??= entry;
+        entry.name = listData.user.name;
+        entries[id].mediaEntries[listData.user.name] ??= entry;
       }
     });
   });
-
-  filteringComplate();
 }
 
-function excludeCompareList(listData, entries, filteringComplate) {
-  listData.data.lists.forEach((list) => {
+function excludeCompareList(listData, entries) {
+  listData.lists.forEach((list) => {
     list.entries.forEach((entry) => {
       entries[entry.media.id] ??= entry.media;
       entries[entry.media.id].exclude = true;
     });
   });
-
-  filteringComplate();
 }
 
 function formatCompareList(entries, minUserCount, filterObject) {
@@ -114,18 +88,7 @@ function formatCompareList(entries, minUserCount, filterObject) {
   const sortFunction = generateSortFunction(filterObject.sort, filterObject.reverse ? -1 : 1);
   entries.sort(sortFunction);
 
-  const cacheReq = IndexedDB.user();
-  cacheReq.onerror = error;
-  cacheReq.onsuccess = evt => {
-    const db = evt.target.result;
-    const store = IndexedDB.store(db, "data", "readwrite", error);
-    store.onerror = error;
-    const putReq = store.put(entries, "compare_list");
-    putReq.onerror = error;
-    putReq.onsuccess = () => {
-      postMessage("success");
-    }
-  }
+  postMessage(entries);
 }
 
 function generateSortFunction(sort, direction = 1) {
@@ -212,9 +175,4 @@ function filter(entry, filterObject) {
   }
 
   return true;
-}
-
-function error(err) {
-  console.trace(err);
-  postMessage("error");
 }
