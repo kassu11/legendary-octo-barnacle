@@ -1,0 +1,108 @@
+query ($userId: Int, $userName: String, $type: MediaType) {
+  MediaListCollection(userId: $userId, userName: $userName, type: $type) {
+    lists {
+      name
+      isCustomList
+      isCompletedList: isSplitCompletedList
+      entries {
+        ...mediaListEntry
+      }
+    }
+    user {
+      id
+      name
+      avatar {
+        large
+      }
+      mediaListOptions {
+        scoreFormat
+        rowOrder
+        animeList {
+          sectionOrder
+          customLists
+          splitCompletedSectionByFormat
+        }
+        mangaList {
+          sectionOrder
+          customLists
+          splitCompletedSectionByFormat
+        }
+      }
+    }
+  }
+}
+
+fragment mediaListEntry on MediaList {
+  status
+  score
+  progress
+  progressVolumes
+  repeat
+  priority
+  private
+  hiddenFromStatusLists
+  customLists
+  advancedScores
+  notes
+  updatedAt
+  startedAt {
+    year
+    month
+    day
+  }
+  completedAt {
+    year
+    month
+    day
+  }
+  media {
+    id
+    idMal
+    synonyms
+    title {
+      userPreferred
+      romaji
+      english
+      native
+    }
+    coverImage {
+      extraLarge
+      large
+      color
+    }
+    type
+    season
+    seasonYear
+    format
+    status(version: 2)
+    episodes
+    volumes
+    chapters
+    averageScore
+    popularity
+    isAdult
+    countryOfOrigin
+    genres
+    bannerImage
+    tags {
+      name
+      rank
+      isMediaSpoiler
+      isGeneralSpoiler
+    }
+    studios(isMain: true) {
+      edges {
+        isMain
+        node {
+          id
+          name
+        }
+      }
+    }
+    startDate {
+      year
+      month
+      day
+    }
+  }
+}

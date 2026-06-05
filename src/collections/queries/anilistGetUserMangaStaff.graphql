@@ -1,0 +1,26 @@
+query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      manga {
+        staff {
+          staff {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+          }
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}

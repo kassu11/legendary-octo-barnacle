@@ -1,0 +1,40 @@
+query ($userId: Int, $statusIn: [MediaListStatus]) {
+  anime: MediaListCollection(userId: $userId type: ANIME status_in: $statusIn sort: UPDATED_TIME_DESC) {
+    ...mediaListCollection
+  }
+  manga: MediaListCollection(userId: $userId type: MANGA status_in: $statusIn sort: UPDATED_TIME_DESC) {
+    ...mediaListCollection
+  }
+}
+
+fragment mediaListCollection on MediaListCollection {
+  lists {
+    name
+    entries {
+      id
+      status
+      progress
+      progressVolumes
+      updatedAt
+      media {
+        id
+        type
+        status(version: 2)
+        format
+        episodes
+        chapters
+        title {
+          userPreferred
+        }
+        coverImage {
+          large
+        }
+        nextAiringEpisode {
+          airingAt
+          timeUntilAiring
+          episode
+        }
+      }
+    }
+  }
+}

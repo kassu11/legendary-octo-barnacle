@@ -1,0 +1,42 @@
+mutation (
+  $ANIME: Int
+  $MANGA: Int
+  $CHARACTER: Int
+  $STAFF: Int
+  $STUDIO: Int
+) {
+  ToggleFavourite(
+    animeId: $ANIME
+    mangaId: $MANGA
+    characterId: $CHARACTER
+    staffId: $STAFF
+    studioId: $STUDIO
+  ) {
+    anime {
+      pageInfo {
+        total
+      }
+    }
+    manga {
+      pageInfo {
+        total
+      }
+    }
+    characters {
+      pageInfo {
+        total
+      }
+    }
+    staff {
+      pageInfo {
+        total
+      }
+    }
+    studios {
+      pageInfo {
+        total
+      }
+    }
+  }
+}
+

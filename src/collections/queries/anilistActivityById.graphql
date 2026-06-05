@@ -1,0 +1,88 @@
+query ($id: Int) {
+  Activity(id: $id) {
+    ... on ListActivity {
+      id
+      type
+      replyCount
+      status
+      progress
+      isLocked
+      isSubscribed
+      isLiked
+      likeCount
+      createdAt
+      user {
+        id
+        name
+        donatorTier
+        donatorBadge
+        avatar {
+          large
+        }
+      }
+      media {
+        id
+        type
+        status(version: 2)
+        isAdult
+        title {
+          userPreferred
+        }
+        bannerImage
+        coverImage {
+          large
+        }
+      }
+    }
+    ... on TextActivity {
+      id
+      type
+      text
+      replyCount
+      isLocked
+      isSubscribed
+      isLiked
+      likeCount
+      createdAt
+      user {
+        id
+        name
+        donatorTier
+        donatorBadge
+        moderatorRoles
+        avatar {
+          large
+        }
+      }
+    }
+    ... on MessageActivity {
+      id
+      type
+      message
+      replyCount
+      isLocked
+      isPrivate
+      isSubscribed
+      isLiked
+      likeCount
+      createdAt
+      user: recipient {
+        id
+        name
+        avatar {
+          large
+        }
+      }
+      messenger {
+        id
+        name
+        donatorTier
+        donatorBadge
+        moderatorRoles
+        avatar {
+          large
+        }
+      }
+    }
+  }
+}

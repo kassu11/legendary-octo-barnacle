@@ -62,14 +62,14 @@ function NotificationsReel(props) {
         name: "Anilist notifications pageless",
         expires: new Date().setHours(24 * 356),
         modified: new Date(),
-        cacheKey: pagelessFetcher.cachKey
+        cacheKey: pagelessFetcher.cacheKey
       });
     }
     setPagelessCacheLoading(false);
   });
 
   const mutateCache = mutate => {
-    if (isTypeFunction(mutate)) mutate = mutate(pagelessCacheData());
+    if (isTypeFunction(mutate)) mutate = mutate(untrack(pagelessCacheData));
     setFetcherValueToStorage(mutate);
   };
 

@@ -1,0 +1,28 @@
+mutation (
+  $mediaId: Int
+  $mediaRecommendationId: Int
+  $rating: RecommendationRating
+) {
+  SaveRecommendation(
+    mediaId: $mediaId
+    mediaRecommendationId: $mediaRecommendationId
+    rating: $rating
+  ) {
+    id
+    rating
+    userRating
+    mediaRecommendation {
+      id
+      title {
+        userPreferred
+      }
+      format
+      type
+      status(version: 2)
+      bannerImage
+      coverImage {
+        large
+      }
+    }
+  }
+}

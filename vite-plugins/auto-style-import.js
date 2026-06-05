@@ -1,3 +1,6 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 export default function autoStyleImport() {
   return {
     name: 'auto-import-scoped-css',

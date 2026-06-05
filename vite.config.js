@@ -4,6 +4,7 @@ import scopedStyling from "./vite-plugins/solidjs-scoped-styling";
 import autoImportScopedStyles from "./vite-plugins/auto-import-scoped-styles";
 import checker from 'vite-plugin-checker';
 import AutoImport from "unplugin-auto-import/vite"
+import grapqlMinimizer from "./vite-plugins/graphql-minimize";
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
@@ -14,6 +15,7 @@ export default defineConfig({
   plugins: [
     scopedStyling(),
     autoImportScopedStyles(),
+    grapqlMinimizer(),
     solid(),
     checker({
       eslint: {
