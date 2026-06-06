@@ -1,5 +1,5 @@
 import {A} from "@solidjs/router";
-import {asserts, globalState, queries} from "../../collections/collections.js";
+import {asserts, queries} from "../../collections/collections.js";
 import {urlUtils} from "../../utils/utils.js";
 import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
@@ -15,6 +15,7 @@ import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
+import { mediaWithMalId } from "../../core/globalState.js";
 
 function AnilistMediaCardListBody(props) {
   asserts.assertTrueOLD(props.media, "Missing media");
@@ -86,8 +87,8 @@ export function JikanMediaCard(props) {
 
   return (
     <JikanMediaCardListBody {...props}>
-      <Show when={globalState.mediaWithMalId[props.media.mal_id]}>
-        <QuickActionItemList media={globalState.mediaWithMalId[props.media.mal_id]} />
+      <Show when={mediaWithMalId[props.media.mal_id]}>
+        <QuickActionItemList media={mediaWithMalId[props.media.mal_id]} />
       </Show>
     </JikanMediaCardListBody>
   );

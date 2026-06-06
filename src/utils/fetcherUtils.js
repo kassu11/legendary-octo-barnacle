@@ -60,8 +60,8 @@ function baseEncoding(url, params) {
 
 function removeTokenFromEncode(url, params) {
   let paramsAsString = safeStringifyJson(params, "missing");
-  const token = params.headers.Authorization;
-  const userId = allActiveTokens[token];
+  const token = params.headers?.Authorization?.substring(7);
+  const userId = allActiveTokens()[token];
   if (token && userId) paramsAsString = paramsAsString.replace(token, userId);
   return hashKeyFNV32(url) + hashKeyFNV32(paramsAsString) + hashKeyFNV32(url + paramsAsString);
 }

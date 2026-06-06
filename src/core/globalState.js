@@ -1,13 +1,16 @@
 import { batch, createMemo, createRoot, createSignal, untrack } from "solid-js";
 import { createLocalStorageJsonSignal } from "../utils/localStorageUtils";
 import { deleteIndexDBValue, setIndexedDBValue } from "../utils/indexedDButils";
-import { createOneTimeSessionStorageSignal } from "../utils/sessionStorageUtils";
+import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal } from "../utils/sessionStorageUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "../utils/fetcherUtils";
 import { queries } from "../collections/collections";
 import { setFetcherValueToStorage } from "../utils/storageUtils";
+import { createStore } from "solid-js/store";
+
+export const [mediaWithMalId, storeMediaWithMalId] = createStore({});
 
 export const [authUserData, setAuthUserData] = createLocalStorageJsonSignal("LOB-authed-used-data");
-export const allActiveTokens = {};
+export const [allActiveTokens, setAllActiveTokens] = createOneTimeSessionStorageJsonSignal("LOB-tokens", {});
 export const [token2, setToken2] = createOneTimeSessionStorageSignal("LOB-token");
 
 export const authedUserId = createRoot(() => createMemo(() => authUserData()?.data.id));
@@ -31,8 +34,11 @@ export const setAccessToken = async (token, expires) => {
 
       // Because we store what token the user uses, the fetcher can now swap the token to user id
       // This makes it possible to keep your cache, even when tokens update
-      allActiveTokens[`anilist-${id}`] = token;
-      allActiveTokens[token] = `anilist-${id}`;
+      setAllActiveTokens(tokens => {
+        tokens[`anilist-${id}`] = token;
+        tokens[token] = `anilist-${id}`;
+        return tokens;
+      });
 
       // Because new token is now linked, if we generate the same fetcher, the token should be swapped with id
       // Store the user data to this tokenless cacheKey

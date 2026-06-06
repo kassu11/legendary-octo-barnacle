@@ -20,11 +20,12 @@ import { TwoHeadedRangeScoped } from "./inputs/TwoHeadedRange.scoped.jsx";
 import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from "../../utils/virtualSearchParams.js";
 import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
-import { asserts, globalState, localizations, searchObjects, queries } from "../../collections/collections.js";
+import { asserts, localizations, searchObjects, queries } from "../../collections/collections.js";
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
+import { storeMediaWithMalId } from "../../core/globalState";
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
@@ -1075,7 +1076,7 @@ function MyAnimeListMediaSearchContent(props) {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {
           page.media.forEach(m => {
-            globalState.storeMediaWithMalId(m.idMal, m);
+            storeMediaWithMalId(m.idMal, m);
           });
         });
       }

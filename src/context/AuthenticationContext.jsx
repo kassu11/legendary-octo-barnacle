@@ -1,6 +1,6 @@
 import { Show, untrack } from "solid-js";
 import { AuthenticationContext } from "./providers";
-import { authUserData, logoutUser, authedUserId, token2, allActiveTokens, setToken2 } from "../core/globalState.js";
+import { authUserData, logoutUser, authedUserId, token2, allActiveTokens, setToken2, setAllActiveTokens } from "../core/globalState.js";
 import { getAllIndexedDBValues } from "../utils/indexedDButils.js";
 
 export function AuthenticationProvider(props) {
@@ -18,16 +18,20 @@ export function AuthenticationProvider(props) {
 async function loadTokens() {
   const id = +untrack(authedUserId);
   const tokens = await getAllIndexedDBValues("tokens");
-  for (const key in allActiveTokens) {
-    delete allActiveTokens[key];
-  }
+  setAllActiveTokens(active => {
+    for (const key in active) {
+      delete active[key];
+    }
 
-  for (const key in tokens) {
-    allActiveTokens[key] = tokens[key].data;
-    allActiveTokens[tokens[key].data] = key;
-  }
+    for (const key in tokens) {
+      active[key] = tokens[key].data;
+      active[tokens[key].data] = key;
+    }
 
-  const token = allActiveTokens[`anilist-${id}`];
+    return active;
+  })
+
+  const token = allActiveTokens()[`anilist-${id}`];
   if (!token && id) logoutUser();
   else setToken2(token || null);
 }
