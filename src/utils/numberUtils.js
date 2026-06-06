@@ -1,3 +1,5 @@
+import { asserts } from "../collections/collections";
+
 export const numberCommas = num => {
   if (num == undefined) return;
   return Intl.NumberFormat("ja-JP").format(num)
@@ -12,7 +14,7 @@ export const parse = (string, fallback) => {
 
 export const compactNumber = num => {
   if (num == undefined) return;
-  asserts.assertTrue(typeof num === "number", "Number is not typeof number");
+  asserts.assertTrueOLD(typeof num === "number", "Number is not typeof number");
 
   return Intl.NumberFormat('en-US', {
     notation: "compact",

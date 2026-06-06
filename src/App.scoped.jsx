@@ -1,19 +1,16 @@
-import { A } from "@solidjs/router";
 import "./App.scoped.css"
-import { useAuthentication } from "./context/providers.js";
 import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
 import { createEffect } from "solid-js";
-import { urlUtils } from "./utils/utils.js";
 import { Show } from "solid-js";
 import { localizations } from "./collections/collections";
+import { MainNavigation } from "./pages/App/MainNavigation.scoped.jsx";
+import { MainLoadingBar } from "./pages/App/MainLoadingBar.scoped";
+import { ApplicationNotifications } from "./pages/App/ApplicationNotifications.scoped";
 
-const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(_ => true).catch(_ => false);
+const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
+
 
 function App(props) {
-  const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${urlUtils.anilistClientId()}&response_type=token`;
-
-  const { accessToken, authUserData, logoutUser } = useAuthentication();
-
   let controller = new AbortController();
 
   createEffect(() => {
@@ -40,28 +37,9 @@ function App(props) {
 
   return (
     <>
-      <nav class="main-navigation">
-        <ul>
-          <li><A href="/">Home</A></li>
-          <li><A href="/browse/anime">Anime</A></li>
-          <li><A href="/browse/manga">Manga</A></li>
-          <li><A href="/browse/media">Search</A></li>
-          <Show when={accessToken()} fallback={<li><a href={loginUrl}>Login with AniList</a></li>}>
-            <li>
-              <button onClick={() => logoutUser()}>Logout</button>
-            </li>
-            <Show when={authUserData()}>
-              <li><A href="/notifications">Notifications ({authUserData().data.unreadNotificationCount})</A></li>
-              <li class="profile">
-                <A href={"/user/" + authUserData().data.name}>
-                  {authUserData().data.name}
-                  <img src={authUserData().data.avatar.large} alt="Profile avatar" />
-                </A>
-              </li>
-            </Show>
-          </Show>
-        </ul>
-      </nav>
+      <MainLoadingBar />
+      <MainNavigation />
+      <ApplicationNotifications />
       <Show when={localStorage.getItem(localizations.LOB_DEV_BRANCH)}>{branch => (
         <div class="dev-branch">
           <p>Preview: {branch}</p>

@@ -1,17 +1,44 @@
-import {A} from "@solidjs/router";
-import {For, Match, Show, Switch} from "solid-js";
-import api from "../../../utils/api.js";
-import {useAuthentication, useUser} from "../../../context/providers.js";
-import {formatTitleToUrl, mediaUrl, numberCommas} from "../../../utils/formating.js";
-import {ActivityCard} from "../../../components/Activity.jsx";
+import { A } from "@solidjs/router";
+import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { useUser } from "../../../context/providers.js";
+import { formatTitleToUrl, mediaUrl, numberCommas } from "../../../utils/formating.js";
+import { ActivityCard } from "../../../components/Activity.jsx";
 import "./Overview.scss";
-import {asserts} from "../../../collections/collections.js";
-import {ActivityHistoryScoped} from "./ActivityHistory.scoped.jsx";
+import { asserts, queries } from "../../../collections/collections.js";
+import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
+import { isTypeFunction } from "../../../utils/functionUtils.js";
+import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 
 export function Overview() {
   const { user } = useUser();
-  const { accessToken } = useAuthentication();
-  const [activity, { mutateCache: mutateActivityCache }] = api.anilist.activityByUserId(() => user().id || undefined, accessToken);
+  const userId = createMemo(() => user().id);
+
+  const [anilistActivityData, setAnilistActivityData] = createSignal(undefined, { equals: false });
+  let anilistActivityFetcher, anilistActivityController;
+  createEffect(() => {
+    anilistActivityController?.abort();
+    anilistActivityController = new AbortController();
+    const id = userId();
+    if (!id) return;
+
+    anilistActivityFetcher = createAnilistFetcher(queries.profileActivity, { id }, anilistActivityController.signal);
+
+    sendAnilistFetcher(anilistActivityFetcher, {
+      name: "Anilist activities",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistActivityFetcher.cacheKey) anilistActivityController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistActivityFetcher.cacheKey) setAnilistActivityData(res);
+      }
+    });
+  });
+
+  const mutateActivityCache = mutate => {
+    if (isTypeFunction(mutate)) mutate = mutate(untrack(anilistActivityData));
+    setFetcherValueToStorage(mutate);
+  };
 
   return (
     <div class="user-profile-overview-body">
@@ -147,7 +174,7 @@ export function Overview() {
           <GenrePreview title="Manga genre overview" type="manga" genres={user().statistics.manga.genrePreview} total={user().statistics.manga.count}/>
         </div>
         <div class="user-profile-activity">
-          <For each={activity()?.data.data.Page.activities}>{activity => (
+          <For each={anilistActivityData()?.data.data.Page.activities}>{activity => (
             <ActivityCard activity={activity} mutateCache={mutateActivityCache} hideProfile={true} small={true}/>
           )}</For>
         </div>
@@ -157,8 +184,8 @@ export function Overview() {
 }
 
 function GenrePreview(props) {
-  asserts.assertTrue(props.genres, "Genres missing");
-  asserts.assertTrue(props.title, "Title missing");
+  asserts.assertTrueOLD(props.genres, "Genres missing");
+  asserts.assertTrueOLD(props.title, "Title missing");
 
   const { user } = useUser();
 

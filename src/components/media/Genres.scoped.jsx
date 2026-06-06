@@ -1,4 +1,6 @@
+import { ErrorBoundary, For, Show } from "solid-js";
 import "./Genres.scoped.css";
+import { A } from "@solidjs/router";
 
 export const Genres = (props) => {
   return (

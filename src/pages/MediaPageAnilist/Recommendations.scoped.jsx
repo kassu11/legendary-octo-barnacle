@@ -1,7 +1,13 @@
 import { useParams } from "@solidjs/router";
 import { scheduleUtils } from "../../utils/utils";
-import { fetchers } from "../../collections/collections";
+import { asserts, queries } from "../../collections/collections";
 import "./Recommendations.scoped.css";
+import { batch, createEffect, createSignal, For, Match, on, Show, Switch, untrack } from "solid-js";
+import { AnilistMediaRecommendationCard } from "../../components/Cards/Cards.scoped";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../utils/fetcherUtils";
+import { addApplicationNotification } from "../App/ApplicationNotifications.scoped";
+import { Intersection } from "../../components/utils/Intersection.scoped";
+import { setFetcherValueToStorage } from "../../utils/storageUtils";
 
 export function Recommendations(props) {
   const params = useParams();
@@ -44,38 +50,54 @@ export function Recommendations(props) {
 
 
 function RecommendationsPage(props) {
-  const { accessToken } = useAuthentication();
   const [id, setId] = createSignal(undefined)
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getRecommendationsByid, accessToken, id, props.page);
-  const [recommendations, { mutateCache: mutateRecommendations }] = fetcherSenders.sendWithNullUpdates(fetcher);
+  const [anilistRecommendationsLoading, setAnilistRecommendationsLoading] = createSignal(false);
+  const [anilistRecommendationsData, setAnilistRecommendationsData] = createSignal(undefined, { equals: false });
+  let anilistRecommendationsFetcher, anilistRecommendationsController;
+  createEffect(() => {
+    anilistRecommendationsController?.abort();
+    anilistRecommendationsController = new AbortController();
 
-  const mutateCache = (i, node) => mutateRecommendations(res => {
-    res.data.nodes[i] = node;
-    return res;
+    const i = id();
+    if (!i) return;
+
+    anilistRecommendationsFetcher = createAnilistFetcher(queries.anilistRecommendationsById, { id: i, page: props.page }, anilistRecommendationsController.signal);
+
+    sendAnilistFetcher(anilistRecommendationsFetcher, {
+      name: "Anilist recommendations",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistRecommendationsFetcher.cacheKey) anilistRecommendationsController = null;
+      },
+      onStart: () => setAnilistRecommendationsLoading(true),
+      onStop: () => setAnilistRecommendationsLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistRecommendationsFetcher.cacheKey) setAnilistRecommendationsData(res);
+      }
+    });
   });
 
+  const mutateCache = (i, node) => {
+    const res = untrack(anilistRecommendationsData);
+    res.data.data.Media.recommendations.nodes[i] = node;
+    setFetcherValueToStorage(res);
+  }
+
   return (
-    <DoomScroll 
-      onIntersection={() => setId(props.id)} 
-      fetchResponse={recommendations} 
-      loadingElement={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />} 
-      loading={props.loading}
-    >{fetchCooldown => (
-        <>
-          <RecommendationCards nodes={recommendations().data.nodes} mutateCache={mutateCache} mutateOldCardsCache={props.mutateOldCardsCache} oldCards={props.oldCards} />
-          <Show when={recommendations().data.pageInfo.hasNextPage}>
-            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-              <RecommendationsPage id={id()} page={props.page + 1} loading={recommendations.loading} />
-            </Show>
-          </Show>
-        </>
-      )}
-    </DoomScroll>
+    <>
+      <Intersection onIntersection={() => setId(props.id)}>
+        <Show when={anilistRecommendationsData()?.data?.data.Media.recommendations.nodes} fallback={<RecommendationCards nodes={props.oldCards || []} mutateCache={props.mutateCache} />}>
+          <RecommendationCards nodes={anilistRecommendationsData().data.data.Media.recommendations.nodes} mutateCache={mutateCache} mutateOldCardsCache={props.mutateOldCardsCache} oldCards={props.oldCards} />
+        </Show>
+      </Intersection>
+      <Show when={!anilistRecommendationsLoading() && anilistRecommendationsData()?.data?.data.Media.recommendations.pageInfo.hasNextPage}>
+        <RecommendationsPage id={id()} page={props.page + 1} />
+      </Show>
+    </>
   );
 }
 
 function RecommendationCards(props)  {
-  asserts.assertTrue(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
+  asserts.assertTrueOLD(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
 
   return (
     <For each={props.nodes}>{(node, i) => (
@@ -95,17 +117,19 @@ function RecommendationCards(props)  {
 
 function RecommendationCard(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [userRating, setUserRating] = createSignal(props.node.userRating);
   const [rating, setRating] = createSignal(props.node.rating);
 
   let localRating = props.node.userRating;
-  const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (token, id, rating, mediaId, mediaRecommendationId) => {
+  const triggerLikeRating = scheduleUtils.leadingAndTrailingDebounce(async (id, rating, mediaId, mediaRecommendationId) => {
     if (rating !== localRating) {
-      const response = await api.anilist.rateRecommendation(token, id, rating, mediaId, mediaRecommendationId);
-      asserts.assertTrue(!response.fromCache, "Mutation should never be cached");
-      if (response.status === 200) {
-        props.mutateCache(response.data);
+      const fetcher = createAnilistFetcher(queries.anilistRateRecommendations, { id, rating, mediaId, mediaRecommendationId }, AbortSignal.timeout(30_000));
+      const res = await fetcherToFetch(fetcher);
+      if (res.status === 200) {
+        const json = await res.json();
+        props.mutateCache(json.data.SaveRecommendation);
+      } else {
+        addApplicationNotification({ type: "error", message: "Rating recommendation failed", duration: 30_000 });
       }
     }
 
@@ -116,11 +140,11 @@ function RecommendationCard(props) {
     e.preventDefault();
     setUserRating(rating => {
       if(rating === "RATE_UP") {
-        triggerLikeRating(accessToken(), props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
         setRating(v => v - 1);
         return "NO_RATING";
       } else {
-        triggerLikeRating(accessToken(), props.node.id, "RATE_UP", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "RATE_UP", params.id, props.node.mediaRecommendation.id);
         setRating(v => v + 1);
         return "RATE_UP";
       }
@@ -131,11 +155,11 @@ function RecommendationCard(props) {
     e.preventDefault();
     setUserRating(rating => {
       if(rating === "RATE_DOWN") {
-        triggerLikeRating(accessToken(), props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "NO_RATING", params.id, props.node.mediaRecommendation.id);
         setRating(v => v + 1);
         return "NO_RATING";
       } else {
-        triggerLikeRating(accessToken(), props.node.id, "RATE_DOWN", params.id, props.node.mediaRecommendation.id);
+        triggerLikeRating(props.node.id, "RATE_DOWN", params.id, props.node.mediaRecommendation.id);
         setRating(v => v - 1);
         return "RATE_DOWN";
       }

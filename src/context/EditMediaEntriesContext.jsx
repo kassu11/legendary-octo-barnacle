@@ -1,13 +1,15 @@
-import { batch, createContext, createSignal, Match, useContext } from "solid-js";
-import api from "../utils/api";
+import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
-import { EditMediaEntriesContext, useAuthentication } from "./providers.js";
-import { asserts } from "../collections/collections.js";
+import { EditMediaEntriesContext } from "./providers.js";
+import { asserts, queries } from "../collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
+import { authUserData } from "../core/globalState";
 
 function formState(auth, initialData) {
-  asserts.assertTrue(!initialData || auth, "Should not be able to edit if not authenticated");
+  asserts.assertTrueOLD(!initialData || auth, "Should not be able to edit if not authenticated");
   const [score, setScore] = createSignal();
   const [advancedScores, setAdvancedScores] = createSignal();
   const [advancedScoresEnabled, setAdvancedScoresEnabled] = createSignal();
@@ -106,11 +108,10 @@ function formState(auth, initialData) {
 export function EditMediaEntriesProvider(props) {
   const [mediaListEntry, setMediaListEntry] = createSignal(undefined);
   const [mutates, setMutates] = createSignal(undefined);
-  const { accessToken, authUserData } = useAuthentication()
   const [state, setState] = formState();
 
-  let editor;
-  let warning;
+  // eslint-disable-next-line no-unassigned-vars
+  let editor, warning;
 
   const handleSubmit = async e => {
     const formData = new FormData(e.currentTarget);
@@ -151,7 +152,7 @@ export function EditMediaEntriesProvider(props) {
       }
     }
 
-    asserts.assertTrue(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
+    asserts.assertTrueOLD(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
 
     if (!(form.status == "none" || mediaListEntry().mediaListEntry?.status == form.status)) {
       changes.status = form.status;
@@ -198,12 +199,17 @@ export function EditMediaEntriesProvider(props) {
       // Send changes to anilist
       if (Object.keys(changes).length > 0) {
         changes.mediaId = mediaListEntry().id;
-        for(const [key, value] of Object.entries(changes)) {
-          asserts.assertTrue(Number.isNaN(value) === false, `Key "${key}" is NaN`);
+        for (const [key, value] of Object.entries(changes)) {
+          asserts.assertTrueOLD(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
-        const response = await api.anilist.mutateMedia(accessToken(), changes);
-        if (response.status === 200) {
-          mutates()?.mutateMedia?.(response.data);
+
+        const fetcher = createAnilistFetcher(queries.anilistMutateMedia, changes, AbortSignal.timeout(30_000));
+        const res = await fetcherToFetch(fetcher);
+        if (res.status === 200) {
+          const json = await res.json();
+          mutates()?.mutateMedia?.(json.data.SaveMediaListEntry);
+        } else {
+          addApplicationNotification({ type: "error", message: "Failed to save media updates", duration: 30_000 });
         }
       }
     } 
@@ -219,7 +225,7 @@ export function EditMediaEntriesProvider(props) {
    * @param {undefined|Function} mutate.deteleMedia
    */
   async function openEditor(defaultData, mutate) {
-    asserts.assertTrue("id" in defaultData, "Missing editor id");
+    asserts.assertTrueOLD("id" in defaultData, "Missing editor id");
 
     batch(() => {
       setMediaListEntry(defaultData);
@@ -229,11 +235,17 @@ export function EditMediaEntriesProvider(props) {
 
     editor.showModal();
 
-    const data = await api.anilist.mediaListEntry(accessToken(), defaultData.id);
-    batch(() => {
-      setMediaListEntry(data.data.data.Media);
-      setState(authUserData(), data.data.data.Media);
-    });
+    const fetcher = createAnilistFetcher(queries.mediaListEntry, { mediaId: defaultData.id }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher);
+    if (res.status === 200) {
+      const json = await res.json();
+      batch(() => {
+        setMediaListEntry(json.data.Media);
+        setState(authUserData(), json.data.Media);
+      });
+    } else {
+      addApplicationNotification({ type: "error", message: "Failed to load media data", duration: 30_000 });
+    }
   }
 
   return (
@@ -406,7 +418,7 @@ export function EditMediaEntriesProvider(props) {
                               total += v || 0;
                             });
 
-                            asserts.assertTrue(scoresCounted !== 0 || total === 0, "Total is 0");
+                            asserts.assertTrueOLD(scoresCounted !== 0 || total === 0, "Total is 0");
 
                             if (Number.isNaN(total) === false && typeof total === "number" && scoresCounted > 0) {
                               state.setScore(() => {
@@ -422,7 +434,7 @@ export function EditMediaEntriesProvider(props) {
                                   case "POINT_3": 
                                     return Math.max(0, Math.min(Math.round(total / scoresCounted), 3));
                                   default:
-                                    asserts.assertTrue(false, `Format "${state.format()}" not found`);
+                                    asserts.assertTrueOLD(false, `Format "${state.format()}" not found`);
                                 }
                               });
                             }
@@ -473,8 +485,13 @@ export function EditMediaEntriesProvider(props) {
             <form method="dialog">
               <button onClick={async () => {
                 editor.close();
-                const response = await api.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
-                mutates()?.deleteMedia?.();
+                const fetcher = createAnilistFetcher(queries.anilistDeleteMediaListEntry, { id: mediaListEntry().mediaListEntry.id }, AbortSignal.timeout(30_000));
+                const res = await fetcherToFetch(fetcher);
+                if (res.status === 200) {
+                  mutates()?.deleteMedia?.();
+                } else {
+                  addApplicationNotification({ type: "error", message: "Failed to delete media", duration: 30_000 });
+                }
               }}>Yes</button>
               <button>No</button>
             </form>

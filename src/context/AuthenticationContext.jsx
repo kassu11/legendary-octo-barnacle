@@ -1,68 +1,37 @@
-import api, { IndexedDB } from "../utils/api";
-import { createMemo, createResource, Show } from "solid-js";
+import { Show, untrack } from "solid-js";
 import { AuthenticationContext } from "./providers";
+import { authUserData, logoutUser, authedUserId, token2, allActiveTokens, setToken2, setAllActiveTokens } from "../core/globalState.js";
+import { getAllIndexedDBValues } from "../utils/indexedDButils.js";
 
 export function AuthenticationProvider(props) {
-  const [accessToken, { mutate: setToken }] = createResource(async () => {
-    return new Promise((resolve) => {
-      const error = () => resolve(null);
-      const dbReq = IndexedDB.user(error);
-      dbReq.onsuccess = (evt) => {
-        const db = evt.target.result;
-        const store = IndexedDB.store(db, "data", "readonly", error);
-        const getTokenReq = store.get("access_token");
-
-        getTokenReq.onsuccess = (evt) => resolve(evt.target.result || null);
-        getTokenReq.onerror = error;
-      };
-    });
-  });
-  const [authUserData, { mutate: setAuthUserData }] = api.anilist.getAuthUserData(() => accessToken() ?? undefined);
-
-  const dbReq = IndexedDB.user();
-  dbReq.onsuccess = evt => {
-    const db = evt.target.result;
-    const store = IndexedDB.store(db, "data", "readonly");
-    const getProfileReq = store.get("auth_profile_info");
-
-    getProfileReq.onsuccess = evt => {
-      if(evt.target.result == null) return;
-      setAuthUserData(evt.target.result);
-    };
-  }
-
-  const setAccessToken = token => {
-    const dbReq = IndexedDB.user();
-    dbReq.onsuccess = evt => {
-      const db = evt.target.result;
-      const store = IndexedDB.store(db, "data", "readwrite");
-      const getReg = store.put(token, "access_token");
-      getReg.onsuccess = () => setToken(token);
-    };
-  };
-
-  const logoutUser = () => {
-    const dbReq = IndexedDB.user();
-    dbReq.onsuccess = evt => {
-      const db = evt.target.result;
-      const store = IndexedDB.store(db, "data", "readwrite");
-      store.delete("access_token");
-      store.delete("auth_profile_info");
-      setToken(null);
-      setAuthUserData(null);
-    };
-  };
-
-  // This should only be used when feature is soft released
-  const isDeveloper = createMemo(() => {
-    return authUserData()?.data?.id === 5137809;
-  });
+  loadTokens();
 
   return (
-    <AuthenticationContext.Provider value={{ accessToken, setAccessToken, authUserData, logoutUser, isDeveloper }}>
-      <Show when={!accessToken.loading}>
+    <AuthenticationContext.Provider value={{ accessToken: token2, authUserData, logoutUser }}>
+      <Show when={token2() !== undefined}>
         {props.children}
       </Show>
     </AuthenticationContext.Provider>
   )
+}
+
+async function loadTokens() {
+  const id = +untrack(authedUserId);
+  const tokens = await getAllIndexedDBValues("tokens");
+  setAllActiveTokens(active => {
+    for (const key in active) {
+      delete active[key];
+    }
+
+    for (const key in tokens) {
+      active[key] = tokens[key].data;
+      active[tokens[key].data] = key;
+    }
+
+    return active;
+  })
+
+  const token = allActiveTokens()[`anilist-${id}`];
+  if (!token && id) logoutUser();
+  else setToken2(token || null);
 }

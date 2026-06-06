@@ -1,5 +1,5 @@
 import {A} from "@solidjs/router";
-import {asserts, globalState} from "../../collections/collections.js";
+import {asserts, queries} from "../../collections/collections.js";
 import {urlUtils} from "../../utils/utils.js";
 import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
@@ -8,14 +8,17 @@ import Complete from "../../assets/Complete.jsx";
 import Rewatched from "../../assets/Rewatched.jsx";
 import {useAuthentication, useEditMediaEntries} from "../../context/providers.js";
 import Star from "../../assets/Star.jsx";
-import api from "../../utils/api.js";
 import {QuickActionListButton} from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
+import { Match, Show, Switch } from "solid-js";
+import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
+import { mediaWithMalId } from "../../core/globalState.js";
 
 function AnilistMediaCardListBody(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <li class="cp-media-card inline-container">
@@ -41,7 +44,7 @@ function AnilistMediaCardListBody(props) {
 }
 
 function JikanMediaCardListBody(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <li class="cp-media-card inline-container">
@@ -69,7 +72,7 @@ function JikanMediaCardListBody(props) {
 }
 
 export function AnilistMediaCard(props) {
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
     <AnilistMediaCardListBody {...props}>
@@ -79,13 +82,13 @@ export function AnilistMediaCard(props) {
 }
 
 export function JikanMediaCard(props) {
-  asserts.assertTrue(props.media, "Missing media");
-  asserts.isTypeString(props.type);
+  asserts.assertTrueOLD(props.media, "Missing media");
+  asserts.isTypeStringOLD(props.type);
 
   return (
     <JikanMediaCardListBody {...props}>
-      <Show when={globalState.mediaWithMalId[props.media.mal_id]}>
-        <QuickActionItemList media={globalState.mediaWithMalId[props.media.mal_id]} />
+      <Show when={mediaWithMalId[props.media.mal_id]}>
+        <QuickActionItemList media={mediaWithMalId[props.media.mal_id]} />
       </Show>
     </JikanMediaCardListBody>
   );
@@ -95,7 +98,21 @@ function QuickActionItemList(props) {
   const { openEditor } = useEditMediaEntries();
   const { accessToken } = useAuthentication();
 
-  asserts.assertTrue(props.media, "Missing media");
+  asserts.assertTrueOLD(props.media, "Missing media");
+
+  const handleClick = status => async e => {
+    e.preventDefault();
+
+    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: props.media.id, status }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher);
+    if (res.status === 200) {
+      const json = await res.json();
+      console.log("JSON", json)
+      // props.activity.likeCount = json.data.ToggleLike.likeCount;
+    } else {
+      addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });
+    }
+  };
 
   return (
     <Show when={accessToken()}>
@@ -106,28 +123,16 @@ function QuickActionItemList(props) {
         }}>
           <Edit />
         </QuickActionListButton>
-        <QuickActionListButton label="Set to planning" onClick={e => {
-          e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "PLANNING" });
-        }}>
+        <QuickActionListButton label="Set to planning" onClick={handleClick("PLANNING")}>
           <Planning />
         </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={e => {
-          e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "CURRENT" });
-        }}>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={handleClick("CURRENT")}>
           <Watching />
         </QuickActionListButton>
-        <QuickActionListButton label="Set to completed" onClick={e => {
-          e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "COMPLETED" });
-        }}>
+        <QuickActionListButton label="Set to completed" onClick={handleClick("COMPLETED")}>
           <Complete />
         </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={e => {
-          e.preventDefault();
-          api.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "REPEAT" });
-        }}>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEAT")}>
           <Rewatched />
         </QuickActionListButton>
       </ul>
@@ -136,10 +141,10 @@ function QuickActionItemList(props) {
 }
 
 export function AnilistMediaRecommendationCard(props) {
-  asserts.assertTrue(props.node, "Missing node");
-  asserts.isTypeFunction(props.handleRateUp, "handleRateUp");
-  asserts.isTypeFunction(props.handleRateDown, "handleRateDown");
-  asserts.isTypeString(props.userRating, "userRating");
+  asserts.assertTrueOLD(props.node, "Missing node");
+  asserts.assertTypeFunctionOLD(props.handleRateUp, "handleRateUp");
+  asserts.assertTypeFunctionOLD(props.handleRateDown, "handleRateDown");
+  asserts.isTypeStringOLD(props.userRating, "userRating");
   asserts.isTypeInteger(props.rating, "rating");
 
   return (
@@ -165,8 +170,8 @@ export function AnilistMediaRecommendationCard(props) {
 }
 
 export function MalCharacterCard(props) {
-  asserts.assertTrue(props.character, "character");
-  asserts.isTypeString(props.role, "role");
+  asserts.assertTrueOLD(props.character, "character");
+  asserts.isTypeStringOLD(props.role, "role");
 
   return (
     <li class="cp-character-card">
@@ -192,8 +197,8 @@ export function MalCharacterCard(props) {
 }
 
 export function MalStaffCard(props) {
-  asserts.assertTrue(props.staff, "staff");
-  asserts.assertTrue(props.positions, "positions");
+  asserts.assertTrueOLD(props.staff, "staff");
+  asserts.assertTrueOLD(props.positions, "positions");
 
   return (
     <li class="cp-character-card">
@@ -209,7 +214,7 @@ export function MalStaffCard(props) {
 }
 
 function CharacterSection(props) {
-  asserts.isTypeString(props.alt);
+  asserts.isTypeStringOLD(props.alt);
 
   return (
     <A className="clean-link flex" class={props.class} href={props.href}>

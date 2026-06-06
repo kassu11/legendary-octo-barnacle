@@ -2,9 +2,10 @@ import {A} from "@solidjs/router";
 import {For} from "solid-js";
 import {AnilistMediaCard} from "../../components/Cards/Cards.scoped.jsx";
 import "./HorizontalCardRow.scoped.css";
+import { asserts } from "../../collections/collections.js";
 
 export function HorizontalCardRowScoped(props) {
-  asserts.assertTrue("href" in props, "Link is missing");
+  asserts.assertTrueOLD("href" in props, "Link is missing");
 
   return (
     <section>

@@ -3,7 +3,7 @@ import "./EmojiByScore.scoped.css";
 import { asserts } from "../collections/collections.js";
 
 export default function EmojiByScoreScoped(props) {
-  asserts.assertTrue("score" in props, "Score is missing");
+  asserts.assertTrueOLD("score" in props, "Score is missing");
   return (
     <Switch>
       <Match when={props.score >= 75}>

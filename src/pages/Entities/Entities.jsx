@@ -1,48 +1,38 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../utils/api.js";
-import { createEffect, createMemo, createRenderEffect, createSignal, Match, on, onCleanup, onMount, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
-import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
-import { useAuthentication } from "../../context/providers.js";
-import { asserts, fetchers, fetcherSenders, modes, signals } from "../../collections/collections.js";
-import { arrayUtils, fetcherSenderUtils } from "../../utils/utils.js";
+import { asserts, modes, signals, queries } from "../../collections/collections.js";
+import { arrayUtils } from "../../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
+import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
+import { isTypeFunction } from "../../utils/functionUtils";
 
 export function AnimeCharacters() {
-  const [idMal, setIdMal] = createSignal();
-  const [malCharacters] = api.myAnimeList.animeCharactersById(idMal);
-
   return (
-    <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
+    <Entities type="CHARACTER" />
   );
 }
 
 export function MangaCharacters() {
-  const [idMal, setIdMal] = createSignal();
-  const [malCharacters] = api.myAnimeList.mangaCharactersById(idMal);
-
   return (
-    <Entities type="CHARACTER" setIdMal={setIdMal} malData={malCharacters} />
+    <Entities type="CHARACTER" />
   );
 }
 
 export function AnimeStaff() {
-  const [idMal, setIdMal] = createSignal();
-  const [malStaff] = api.myAnimeList.animeStaffById(idMal);
-
   return (
-    <Entities type="STAFF" setIdMal={setIdMal} malData={malStaff} />
+    <Entities type="STAFF" />
   );
 }
 
 export function MangaStaff() {
-  const [idMal, setIdMal] = createSignal();
-
   return (
-    <Entities type="STAFF" setIdMal={setIdMal} />
+    <Entities type="STAFF" />
   );
 }
 
@@ -61,7 +51,6 @@ function Entities(props) {
             <StaffPage
               id={params.id}
               page={1}
-              setIdMal={props.setIdMal}
             />
           </ol>
         </Match>
@@ -80,83 +69,142 @@ function updateCacheMap(start, end, cacheMap, entries) {
 
 function CharactersReel(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const pagelessFetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPageless, accessToken, () => params.id);
-  const [pagelessCacheData, { mutateBoth }] = fetcherSenders.sendWithNullUpdates(pagelessFetcher);
+  const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
+  const [pagelessCacheData, setPagelessCacheData] = createSignal(undefined, { equals: false });
 
-  const updateCache = (apiResponse, voiceActorRoles) => {
-    if (!apiResponse?.data?.characters.edges?.length) {
-      return;
+  createRenderEffect(async () => {
+    setPagelessCacheLoading(true);
+    const pagelessFetcher = createAnilistFetcher(queries.anilistCharacters, { id: params.id, page: "pageless"});
+    const data = await getFetcherValueFromStorage(pagelessFetcher);
+
+    if (data) setPagelessCacheData(data);
+    else {
+      setPagelessCacheData({
+        data: null,
+        name: "Anilist characters pageless",
+        expires: new Date().setHours(24 * 356),
+        modified: new Date(),
+        cacheKey: pagelessFetcher.cacheKey
+      });
     }
+    setPagelessCacheLoading(false);
+  });
 
-    mutateBoth(api => {
-      if (!api?.data?.items?.length) {
-        api.data = {
-          items: apiResponse.data.characters.edges,
-          indices: updateCacheMap(0, apiResponse.data.characters.edges.length - 1, {}, apiResponse.data.characters.edges),
-          roles: voiceActorRoles,
-        };
-        return api;
-      }
+  const mutateCache = mutate => {
+    if (isTypeFunction(mutate)) mutate = mutate(untrack(pagelessCacheData));
+    setFetcherValueToStorage(mutate);
+  };
 
-      for (let i = 0; i < apiResponse.data.characters.edges.length; i++) {
-        const character = apiResponse.data.characters.edges[i];
-        const newIndex = i + (apiResponse.data.characters.pageInfo.currentPage - 1) * apiResponse.data.characters.pageInfo.perPage;
-        const cacheIndex = api.data.indices[character.id];
-        if (character.id in api.data.indices) {
-          if (cacheIndex < newIndex) {
-            for (let j = cacheIndex; j < newIndex; j++) {
-              api.data.items[j] = api.data.items[j + 1];
-            }
-          } else if (cacheIndex > newIndex) {
-            for (let j = newIndex; j > cacheIndex; j--) {
-              api.data.items[j] = api.data.items[j - 1];
-            }
-          }
+  const updateCache = (onePageRes, voiceActorRoles, pagelessFetcher) => {
+    if (!onePageRes.data.data.Media.characters.edges?.length) return;;
+    if (pagelessFetcher.cacheKey !== pagelessCacheData().cacheKey) return;
 
-          api.data.items[newIndex] = character;
-          updateCacheMap(Math.min(newIndex, cacheIndex), Math.max(newIndex, cacheIndex), api.data.indices, api.data.items);
-        } else {
-          // New id added
-          api.data.items.splice(newIndex, 0, character);
-          updateCacheMap(newIndex, api.data.items.length - 1, api.data.indices, api.data.items);
+    setPagelessCacheData(pagelessRes => {
+      try {
+        if (!pagelessRes?.data?.items?.length) {
+          pagelessRes.data = {
+            items: onePageRes.data.data.Media.characters.edges,
+            indices: updateCacheMap(0, onePageRes.data.data.Media.characters.edges.length - 1, {}, onePageRes.data.data.Media.characters.edges),
+            roles: voiceActorRoles,
+          };
+          return pagelessRes;
         }
-      }
 
-      api.data.roles = voiceActorRoles;
-      return api;
+        for (let i = 0; i < onePageRes.data.data.Media.characters.edges.length; i++) {
+          const character = onePageRes.data.data.Media.characters.edges[i];
+          const newIndex = i + (onePageRes.data.data.Media.characters.pageInfo.currentPage - 1) * onePageRes.data.data.Media.characters.pageInfo.perPage;
+          const cacheIndex = pagelessRes.data.indices[character.id];
+          if (character.id in pagelessRes.data.indices) {
+            if (cacheIndex < newIndex) {
+              for (let j = cacheIndex; j < newIndex; j++) {
+                pagelessRes.data.items[j] = pagelessRes.data.items[j + 1];
+              }
+            } else if (cacheIndex > newIndex) {
+              for (let j = newIndex; j > cacheIndex; j--) {
+                pagelessRes.data.items[j] = pagelessRes.data.items[j - 1];
+              }
+            }
+
+            pagelessRes.data.items[newIndex] = character;
+            updateCacheMap(Math.min(newIndex, cacheIndex), Math.max(newIndex, cacheIndex), pagelessRes.data.indices, pagelessRes.data.items);
+          } else {
+            // New id added
+            pagelessRes.data.items.splice(newIndex, 0, character);
+            updateCacheMap(newIndex, pagelessRes.data.items.length - 1, pagelessRes.data.indices, pagelessRes.data.items);
+          }
+        }
+
+        pagelessRes.data.roles = voiceActorRoles;
+        return pagelessRes;
+      } finally {
+        mutateCache(pagelessRes);
+      }
     });
   }
 
   const [isDebug, setIsDebug] = signals.debug();
 
   return (
-    <Show when={!pagelessCacheData.loading}>
+    <Show when={!pagelessCacheLoading()}>
       <Show when={modes.debug}>
         <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
       </Show>
-      <CharactersPage cache={pagelessCacheData()?.data?.items || []} roles={pagelessCacheData()?.data?.roles || []} updateCache={updateCache} isDebug={isDebug} {...props} />
+      <CharactersPage cache={pagelessCacheData()?.data?.items || []} roles={pagelessCacheData()?.data?.roles || []} updateCache={updateCache} isDebug={isDebug()} {...props} />
     </Show>
   );
 }
 
 function CharactersPage(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.charactersPage, accessToken, () => params.id, page);
-  const [charactersData] = fetcherSenders.sendWithDisabledSignal(props.isDebug, fetcher);
+  const [anilistCharactersLoading, setAnilistCharactersLoading] = createSignal(false);
+  const [anilistCharactersData, setAnilistCharactersData] = createSignal(undefined, { equals: false });
+  let anilistCharactersFetcher, anilistCharactersController;
+  createEffect(() => {
+    anilistCharactersController?.abort();
+    anilistCharactersController = new AbortController();
 
-  const hasNextPage = createMemo(prev => prev && !(charactersData()?.data?.characters.pageInfo.hasNextPage === false), true);
+    const { id } = params;
+    const p = page();
+    if (!id || !p) return;
+
+    const pagelessFetcher = createAnilistFetcher(queries.anilistCharacters, { id, page: "pageless"});
+    anilistCharactersFetcher = createAnilistFetcher(queries.anilistCharacters, { id, page: p }, anilistCharactersController.signal);
+
+    sendAnilistFetcher(anilistCharactersFetcher, {
+      name: "Anilist characters",
+      cache: null,
+      debug: props.isDebug,
+      active: (_, settings) => !settings.debug,
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistCharactersFetcher.cacheKey) anilistCharactersController = null;
+      },
+      onStart: () => setAnilistCharactersLoading(true),
+      onStop: () => setAnilistCharactersLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistCharactersFetcher.cacheKey) return;
+        setAnilistCharactersData(res.data.data.Media);
+
+        if (!res.data.data.Media.characters.edges.length) return;
+        asserts.assertThruthy(hardcodedPageCount === res.data.data.Media.characters.pageInfo.perPage, "Page count is wrong");
+        freshPages.add(res.data.data.Media.characters.pageInfo.currentPage);
+
+        props.updateCache(res, voiceActorRoles(), pagelessFetcher);
+        updatePage();
+      }
+    });
+  });
+
+  const hasNextPage = createMemo(prev => prev && !(anilistCharactersData()?.characters.pageInfo.hasNextPage === false), true);
   const [voiceActorRole, setVoiceActorRole] = createSignal({ language: "Japanese", dubGroup: null });
-  const countryOfOrigin = createMemo(() => charactersData()?.data?.countryOfOrigin || "JP");
+  const countryOfOrigin = createMemo(() => anilistCharactersData()?.countryOfOrigin || "JP");
   const voiceActorRoles = createMemo(() => {
-    if (charactersData()?.data?.characters?.pageInfo.currentPage !== 1) {
+    if (anilistCharactersData()?.characters?.pageInfo.currentPage !== 1) {
       return props.roles;
     }
 
     const newLanguages = new Map();
-    for (const edge of charactersData().data.characters.edges) {
+    for (const edge of anilistCharactersData().characters.edges) {
       for (const actorRole of edge.voiceActorRoles) {
         const key = actorRole.voiceActor.language + actorRole.dubGroup;
         if (newLanguages.has(key) === false) {
@@ -182,7 +230,7 @@ function CharactersPage(props) {
 
 
   const freshPages = new Set();
-  const triggerPage = leadingAndTrailing(debounce, num => !charactersData.loading && setPage(num), 1000);
+  const triggerPage = leadingAndTrailing(debounce, num => !anilistCharactersLoading() && setPage(num), 1000);
 
   function updatePage() {
     const nextPage = getPageNumberByScrollPosition();
@@ -212,24 +260,12 @@ function CharactersPage(props) {
     }
   }
 
-  createEffect(on(charactersData, apiResponse => {
-    if (!apiResponse?.data?.characters.edges.length) {
-      return;
-    }
-
-    asserts.assertTrue(hardcodedPageCount === apiResponse.data.characters.pageInfo.perPage, "Page count is wrong");
-
-    freshPages.add(apiResponse.data.characters.pageInfo.currentPage);
-
-    props.updateCache(apiResponse, voiceActorRoles());
-    updatePage();
-  }));
 
   const visiblePages = new Set();
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const page = parseInt(entry.target.dataset.page);
-      asserts.assertTrue(Number.isInteger(page));
+      asserts.assertTrueOLD(Number.isInteger(page));
 
       if (entry.isIntersecting) {
         visiblePages.add(page);
@@ -269,7 +305,7 @@ function CharactersPage(props) {
             )}</Show>
         )}</For>
       </ol>
-      <Show when={charactersData.loading &&  page() > Math.ceil(props.cache.length / hardcodedPageCount) && props.cache.length}>
+      <Show when={anilistCharactersLoading() &&  page() > Math.ceil(props.cache.length / hardcodedPageCount) && props.cache.length}>
         <LoaderCircle class="new">
           <Tooltip tipPosition="bottom">Loading characters</Tooltip>
         </LoaderCircle>
@@ -280,40 +316,50 @@ function CharactersPage(props) {
 
 function StaffPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
-  const { accessToken } = useAuthentication();
-  const [staff] = api.anilist.allMediaStaff(() => props.id, page, accessToken);
+  const [anilistMediasStaffLoading, setAnilistMediasStaffLoading] = createSignal(undefined, { equals: false });
+  const [anilistMediasStaffData, setAnilistMediasStaffData] = createSignal(undefined, { equals: false });
+  let anilistMediasStaffFetcher, anilistMediasStaffController;
+  createEffect(() => {
+    anilistMediasStaffController?.abort();
+    anilistMediasStaffController = new AbortController();
+    const { id } = props;
+    const p = page();
 
-  if (props.page === 1) {
-    createEffect(() => {
-      if (!staff()) {
-        return;
+    if (!id || !p) return;
+
+    anilistMediasStaffFetcher = createAnilistFetcher(queries.anilistStaff, { id, page: p }, anilistMediasStaffController.signal);
+
+    sendAnilistFetcher(anilistMediasStaffFetcher, {
+      name: "Anilist medias staff",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistMediasStaffFetcher.cacheKey) anilistMediasStaffController = null;
+      },
+      onStart: () => setAnilistMediasStaffLoading(true),
+      onStop: () => setAnilistMediasStaffLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistMediasStaffFetcher.cacheKey) setAnilistMediasStaffData(res.data.data.Media);
       }
-
-      props.setIdMal(staff().data.idMal ?? undefined);
     });
-  }
+  });
 
   return (
-    <DoomScroll onIntersection={() => setPage(props.page)} fetchResponse={staff} loadingElement={<LoadingCard />} loading={props.loading}>{fetchCooldown => (
-      <>
-        <For each={staff().data.staff.edges}>{edge => (
-          <StaffCard edge={edge}></StaffCard>
-        )}</For>
-        <Show when={staff().data.staff.pageInfo.hasNextPage}>
-          <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-            <StaffPage
-              id={props.id}
-              page={props.page + 1}
-              loading={staff.loading}
-             /> 
-          </Show>
+    <>
+      <Intersection onIntersection={() => setPage(props.page)}>
+        <Show when={anilistMediasStaffData()?.staff.edges} fallback={<LoadingCard />}>
+          <For each={anilistMediasStaffData().staff.edges}>{edge => (
+            <StaffCard edge={edge}></StaffCard>
+          )}</For>
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!anilistMediasStaffLoading() && anilistMediasStaffData()?.staff.pageInfo.hasNextPage}>
+        <StaffPage id={props.id} page={props.page + 1} />
+      </Show>
+    </>
   );
 }
 
 function CharacterCard(props) {
+  // eslint-disable-next-line no-unassigned-vars
   let ref;
   onMount(() => props.intersectionObserver.observe(ref))
 

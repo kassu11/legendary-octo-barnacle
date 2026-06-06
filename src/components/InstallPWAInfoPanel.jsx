@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import "./InstallPWAInfoPanel.scss";
 import { useResponsive } from "../context/providers";
 

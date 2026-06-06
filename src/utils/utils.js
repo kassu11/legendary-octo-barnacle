@@ -3,7 +3,6 @@ export * as navigationUtils from "./navigationUtils.js";
 export * as objectUtils from "./objectUtils.js";
 export * as functionUtils from "./functionUtils.js";
 export * as fetcherSenderUtils from "./fetcherSenderUtils.js";
-export * as fetcherUtils from "./Fetcher/fetcherUtils.js";
 export * as scheduleUtils from "./scheduled.js";
 export * as dateUtils from "./dateUtils.js";
 export * as numberUtils from "./numberUtils.js";

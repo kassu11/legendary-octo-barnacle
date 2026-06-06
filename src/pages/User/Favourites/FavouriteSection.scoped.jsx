@@ -1,18 +1,19 @@
 import { Show, Switch, Match, createSignal } from "solid-js";
-import api from "../../../utils/api.js";
 import { useAuthentication, useUser } from "../../../context/providers.js";
 import { FavouritesContext } from "../../../context/providers.js";
 import { FavouritesPageScoped } from "./FavouritesPage.scoped.jsx";
-import { asserts } from "../../../collections/collections.js";
+import { asserts, queries } from "../../../collections/collections.js";
 import "./FavouriteSection.scoped.css"
+import { createAnilistFetcher, fetcherToFetch } from "../../../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
 
 export function FavouriteSectionScoped(props) {
-  asserts.assertTrue(props.title, "title missing");
-  asserts.assertTrue(props.type, "type missing");
+  asserts.assertTrueOLD(props.title, "title missing");
+  asserts.assertTrueOLD(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
   const [reorder, setReorder] = createSignal(false);
   const [allEdges, setAllEdges] = createSignal([]);
-  const { accessToken, authUserData } = useAuthentication();
+  const { authUserData } = useAuthentication();
   const { user } = useUser();
 
   let ol, dragging, offsetX,offsetY;
@@ -106,23 +107,19 @@ export function FavouriteSectionScoped(props) {
           <Switch>
             <Match when={reorder()}>
               <button onClick={async () => {
-                const newIds = [...ol.childNodes].map(elem => +elem.dataset.id);
+                const newIds = [...ol.querySelectorAll(".favourite-item")].map(elem => +elem.dataset.id);
                 const newOrder = newIds.map((_, i) => i + 1);
 
-                let response;
-                if (props.type === "anime") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {animeIds: newIds, animeOrder: newOrder});
-                } else if (props.type === "manga") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {mangaIds: newIds, mangaOrder: newOrder});
-                } else if (props.type === "studios") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {studioIds: newIds, studioOrder: newOrder});
-                } else if (props.type === "staff") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {staffIds: newIds, staffOrder: newOrder});
-                } else if (props.type === "characters") {
-                  response = await api.anilist.mutateFavourites(accessToken(), {characterIds: newIds, characterOrder: newOrder});
-                }
+                let fetcher;
+                if (props.type === "anime") fetcher = createAnilistFetcher(queries.anilistUserMutateFavourites, { animeIds: newIds, animeOrder: newOrder }, AbortSignal.timeout(30_000));
+                else if (props.type === "manga") fetcher = createAnilistFetcher(queries.anilistUserMutateFavourites, { mangaIds: newIds, mangaOrder: newOrder }, AbortSignal.timeout(30_000));
+                else if (props.type === "studios") fetcher = createAnilistFetcher(queries.anilistUserMutateFavourites, { studioIds: newIds, studioOrder: newOrder }, AbortSignal.timeout(30_000));
+                else if (props.type === "staff") fetcher = createAnilistFetcher(queries.anilistUserMutateFavourites, { staffIds: newIds, staffOrder: newOrder }, AbortSignal.timeout(30_000));
+                else if (props.type === "characters") fetcher = createAnilistFetcher(queries.anilistUserMutateFavourites, { characterIds: newIds, characterOrder: newOrder }, AbortSignal.timeout(30_000));
+                else return;
 
-                if (response.status === 200) {
+                const res = await fetcherToFetch(fetcher);
+                if (res.status === 200) {
                   setAllEdges(edges => {
                     const indexFromId = Object.fromEntries(edges.map((edge, i) => [edge.node.id, i]));
                     return edges.map((_, i) => (edges[indexFromId[newIds[i]]]));
@@ -130,7 +127,7 @@ export function FavouriteSectionScoped(props) {
                   setReorder(false);
                 } else {
                   resetOrder();
-                  console.error("mutation failed");
+                  addApplicationNotification({ type: "error", message: "Saving favourites has failed", duration: 30_000 });
                 }
               }}>Save</button>
               <button onClick={resetOrder}>Cancel</button>
@@ -141,15 +138,7 @@ export function FavouriteSectionScoped(props) {
           </Switch>
         </Show>
       </summary>
-      <ol
-        ref={el => ol = el}
-        classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}}
-        onMouseMove={dragMove}
-        onTouchMove={dragMove}
-        onTouchEnd={dragEnd}
-        onMouseDown={dragStart}
-        onTouchStart={dragStart}
-      >
+      <ol ref={el => ol = el} classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} onMouseMove={dragMove} onTouchMove={dragMove} onTouchEnd={dragEnd} onMouseDown={dragStart} onTouchStart={dragStart} >
         <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges}}>
           <Show when={user().id} keyed>
             <FavouritesPageScoped page={1} setVisible={setVisible} />

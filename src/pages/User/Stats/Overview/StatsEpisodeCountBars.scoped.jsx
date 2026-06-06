@@ -1,12 +1,10 @@
-import {useParams} from "@solidjs/router";
-import {createEffect, createSignal, For, Match, Show, Switch} from "solid-js";
+import {createEffect, createSignal, For, Show} from "solid-js";
 import {DraggableScrollContainerScoped2} from "./DraggableScrollContainer.scoped.jsx";
 import {numberCommas} from "../../../../utils/formating.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 import "./StatsEpisodeCountBars.scoped.css";
 
 export function StatsEpisodeCountBarsScoped(props) {
-  const params = useParams();
   const [state, setState] = createSignal("count");
   const [max, setMax] = createSignal(0);
 

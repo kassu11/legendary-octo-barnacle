@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on } from "solid-js";
+import { createEffect, createSignal, For, on, Show } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../../utils/arrays.js";
@@ -11,6 +11,7 @@ export function ExternalSourceInput(props) {
   const { isTouch } = useResponsive()
   let open = false;
   let oldExternalSources;
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
@@ -98,7 +99,7 @@ export function ExternalSourceInput(props) {
 
     return (
       <ol>
-        <For each={props.sources()?.data || []} fallback={"Loading"}>{source => (
+        <For each={props.sources || []} fallback={"Loading"}>{source => (
           <li classList={{hidden: !source.site.toLowerCase().includes(filter())}}>
             <label>
               <div class="grid-wrapper">

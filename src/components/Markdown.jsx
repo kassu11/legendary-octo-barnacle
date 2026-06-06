@@ -1,7 +1,7 @@
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
 import style from "./Markdown.module.scss";
-import { createMemo, createRenderEffect, createSignal } from "solid-js";
+import { createMemo, For } from "solid-js";
 
 const spoilerExtension = {
   name: "spoiler",

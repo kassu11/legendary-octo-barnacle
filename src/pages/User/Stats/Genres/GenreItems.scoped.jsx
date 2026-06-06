@@ -30,9 +30,7 @@ export function GenreItems(props) {
               <p>User {params.type}</p>
               <A href={"/user/" + user().name + "/" + params.type + "?genre=" + genre.genre}>Show all</A>
             </div>
-            <GenreMediaCardsScoped store={props.store} setStore={props.setStore} mediaIds={genre.mediaIds}
-                                   allMediaIds={props.mediaIds()}
-                                   mutate={props.mutate}/>
+            <GenreMediaCardsScoped store={props.store} setStore={props.setStore} mediaIds={genre.mediaIds} allMediaIds={props.mediaIds()} />
           </div>
         </li>
       )}</For>

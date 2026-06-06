@@ -50,7 +50,8 @@ export const localStorageBoolean = (key, initialValue) => {
 const parseJson = (str) => {
   try {
     return JSON.parse(str);
-  } catch (e) {
+  } catch {
+    return null;
   }
 }
 
@@ -75,7 +76,7 @@ export const localStorageJSON = (key, initialValue) => {
 export const debug = (booleanToGiveWhenInDubugMode = true) => createSignal(modes.debug === booleanToGiveWhenInDubugMode);
 
 export const createSignalWithSignal = signal => {
-  asserts.isTypeFunction(signal);
+  asserts.assertTypeFunctionOLD(signal);
 
   const [value, setValue] = createSignal();
   createRenderEffect(() => {

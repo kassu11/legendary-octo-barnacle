@@ -1,0 +1,9 @@
+.intersection {
+  &:not(:empty), &.resolved {
+    display: contents;
+  }
+
+  &:not(.resolved):empty::before {
+    content: "Intersection"
+  }
+}

@@ -1,23 +1,26 @@
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import api from "../utils/api";
 import "./FavouriteToggle.scss";
 import { compactNumber } from "../utils/formating.js";
-import { useAuthentication } from "../context/providers.js";
-import { asserts } from "../collections/collections.js";
-import { untrack } from "solid-js";
+import { asserts, queries } from "../collections/collections.js";
+import { Match, Show, Switch, untrack } from "solid-js";
 import Heart from "../assets/Heart.jsx";
 import Anilist from "../assets/Anilist.jsx";
 import MyAnimeList from "../assets/MyAnimeList.jsx";
+import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
 
 export function FavouriteToggle(props) {
-  const { accessToken } = useAuthentication();
-
   let localChecked = null;
-  const triggerLikeToggle = leadingAndTrailingDebounce(async (token, variables, checked) => {
+  const triggerLikeToggle = leadingAndTrailingDebounce(async (variables, checked) => {
     if (checked !== localChecked) {
-      const data = await api.anilist.toggleFavourite(token, variables);
-      asserts.assertFalse(data.fromCache, "Mutation should never be cached");
-      props.mutateCache(checked, variables);
+      const fetcher = createAnilistFetcher(queries.anilistMutateToggleFavourite, variables, AbortSignal.timeout(30_000));
+      const res = await fetcherToFetch(fetcher);
+      if (res.status === 200) {
+        props.mutateCache(checked, variables);
+      } else {
+        if (checked) addApplicationNotification({ type: "error", message: "Adding to favourites has failed", duration: 30_000 });
+        else addApplicationNotification({ type: "error", message: "Removing from favourites has failed", duration: 30_000 });
+      }
     }
     localChecked = checked
   }, 500);
@@ -31,10 +34,10 @@ export function FavouriteToggle(props) {
           return;
         }
         const type = props.idType;
-        asserts.assertTrue(type === "MANGA" || type === "ANIME" || type === "STAFF" || type === "CHARACTER" || type === "STUDIO" , "Missing idType");
+        asserts.assertTrueOLD(type === "MANGA" || type === "ANIME" || type === "STAFF" || type === "CHARACTER" || type === "STUDIO" , "Missing idType");
 
         props.onChange(e.target.checked);
-        triggerLikeToggle(accessToken(), {[props.idType]: props.variableId}, e.target.checked);
+        triggerLikeToggle({[props.idType]: props.variableId}, e.target.checked);
       }}/>
       <Heart />
       <Scores />

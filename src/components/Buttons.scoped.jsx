@@ -13,8 +13,8 @@ export function QuickActionListButton(props) {
 }
 
 export function QuickActionButton(props) {
-  asserts.isTypeString(props.label, "label");
-  asserts.isTypeFunction(props.onClick, "onClick");
+  asserts.isTypeStringOLD(props.label, "label");
+  asserts.assertTypeFunctionOLD(props.onClick, "onClick");
 
   return (
     <button class="cp-media-action-item" classList={{ big: props.big }} data-tooltip-trigger onClick={props.onClick}>

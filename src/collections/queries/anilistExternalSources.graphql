@@ -1,0 +1,11 @@
+query ($type: ExternalLinkMediaType) {
+  ExternalLinkSourceCollection(mediaType: $type, type: STREAMING) {
+    id
+    url
+    site
+    type
+    language
+    color
+    icon
+  }
+}

@@ -1,0 +1,53 @@
+.loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(to left, var(--crimson-400), var(--red-400));
+  z-index: 101;
+
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.loading-bar {
+  &:not(.done) {
+    animation:
+      loading-bar-pulse 1s 3s linear infinite both,
+      loading-progress 40s linear forwards .2s;
+    }
+
+    &.done {
+      animation:
+        loading-bar-pulse 1s 3s linear infinite both,
+        loading-progress 40s linear forwards .2s,
+        loading-progress-done .25s linear forwards,
+        loading-done-fade .2s .5s linear forwards;
+  }
+}
+
+@keyframes loading-progress {
+  0%   { transform: scaleX(0  ); }
+  0.2% { transform: scaleX(0.1); }
+  1%   { transform: scaleX(.2 ); }
+  3%   { transform: scaleX(.4 ); }
+  4%   { transform: scaleX(.6 ); }
+  6%   { transform: scaleX(.7 ); }
+  10%  { transform: scaleX(.8 ); }
+  13%  { transform: scaleX(.95); }
+  100% { transform: scaleX(.98); }
+}
+
+@keyframes loading-progress-done {
+  to { transform: scaleX(1); }
+}
+
+@keyframes loading-done-fade {
+  to { opacity: 0; }
+}
+
+@keyframes loading-bar-pulse {
+  0%, 100% { filter: brightness(1.8); }
+  50% { filter: brightness(1); }
+}

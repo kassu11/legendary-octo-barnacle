@@ -1,0 +1,28 @@
+.cp-media-api-switcher {
+  display: flex;
+  gap: .5rem;
+
+  _a {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    background-color: var(--background-400);
+    border-radius: .25rem;
+    color: inherit;
+    padding: .5rem 1rem;
+    gap: 1rem;
+    text-decoration: none;
+
+    &:hover {
+      outline: 2px solid var(--text-300);
+    }
+  }
+
+  _svg {
+    height: 1.5rem;
+  }
+
+  _.svg-external-source {
+    color: var(--text-200);
+  }
+}

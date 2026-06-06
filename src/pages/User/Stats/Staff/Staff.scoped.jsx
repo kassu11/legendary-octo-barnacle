@@ -1,46 +1,80 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../../../utils/api.js";
 import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
 import {createEffect, createSignal, For, Match, on, Show, Switch} from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
-import { useAuthentication } from "../../../../context/providers.js";
-import { fetcherSenderUtils } from "../../../../utils/utils.js";
-import { fetchers, fetcherSenders } from "../../../../collections/collections.js";
+import { createStore } from "solid-js/store";
+import { localizations, queries } from "../../../../collections/collections.js";
 import {SortHeaderButtons} from "../SortHeaderButtons.scoped.jsx";
 import "./Staff.scoped.css";
+import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 
-export function StatsAnimeStaff() {
+export function StatsMediaStaff() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userAnimeStaff(() => params.name, accessToken);
+
+  const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
+  const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
+  let userStatsFetcher, userStatsController;
+  createEffect(() => {
+    userStatsController?.abort();
+    userStatsController = new AbortController();
+
+    const { type } = params;
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStaff, { name: params.name }, userStatsController.signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaStaff, { name: params.name }, userStatsController.signal);
+
+    sendAnilistFetcher(userStatsFetcher, {
+      name: "Anilist user stats",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
+      },
+      onStart: startUserStatsTimer,
+      onStop: stopUserStatsTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].staff);
+      }
+    });
+  });
 
   return (
-    <Show when={userStats()}>
-      <StatsStaff genres={userStats().data} />
-    </Show>
-  )
-}
-export function StatsMangaStaff() {
-  const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userStats] = api.anilist.userMangaStaff(() => params.name, accessToken);
-
-  return (
-    <Show when={userStats()}>
-      <StatsStaff genres={userStats().data} />
-    </Show>
+    <>
+      <p>{formatMSToString(userStatsTime())}</p>
+      <Show when={userStatsData()}>
+        <StatsStaff genres={userStatsData()} />
+      </Show>
+    </>
   )
 }
 
 function StatsStaff(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
-  const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById, { mutate }] = fetcherSenders.sendWithNullUpdates(fetcher);
   const [store, setStore] = createStore({});
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    if (!ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            setStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
 
   createEffect(on(() => props.genres, genres => {
     setMediaIds(current => {
@@ -56,10 +90,6 @@ function StatsStaff(props) {
 
       return current;
     });
-  }));
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => setStore(media.id, media));
   }));
 
   return (
@@ -109,7 +139,7 @@ function StatsStaff(props) {
                   </li>
                 </ol>
                 <div class="wrapper">
-                  <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} mutate={mutate}/>
+                  <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
                 </div>
               </div>
             </div>
@@ -122,19 +152,36 @@ function StatsStaff(props) {
 
 function Cards(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [mediaIds, setMediaIds] = createSignal(new Set());
-  const mediaVariable = () => ({ id_in: [...mediaIds()] });
-  const fetcher = fetcherSenderUtils.createFetcher(fetchers.anilist.getMediasWithIds, accessToken, mediaVariable);
-  const [mediaById] = fetcherSenders.sendWithNullUpdates(fetcher);
+
+  let mediaFetcher, mediaController;
+  createEffect(() => {
+    const ids = [...mediaIds()];
+    if (!ids.length) return;
+    mediaController?.abort();
+    mediaController = new AbortController();
+
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+
+    sendAnilistFetcher(mediaFetcher, {
+      name: "Anilist media ids",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== mediaFetcher.cacheKey) return;
+        Object.values(res.data.data).forEach(page => {
+          page.media.forEach(m => {
+            props.setStore(m.id, m);
+          });
+        });
+      }
+    });
+  });
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {
     fetchNewCards = true;
-  }));
-
-  createEffect(on(mediaById, medias => {
-    medias?.data.forEach(media => props.setStore(media.id, media));
   }));
 
   return (

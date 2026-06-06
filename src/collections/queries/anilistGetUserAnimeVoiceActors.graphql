@@ -1,0 +1,27 @@
+query ($name: String) {
+  User(name: $name) {
+    id
+    name
+    statistics {
+      anime {
+        voiceActors {
+          voiceActor {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+          }
+          characterIds
+          count
+          meanScore
+          minutesWatched
+          chaptersRead
+          mediaIds
+        }
+      }
+    }
+  }
+}

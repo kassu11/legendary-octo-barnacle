@@ -61,7 +61,7 @@ export function wrapToSet(value) {
 }
 
 export function removeDuplicateIgnoreCaseSensitivity(array) {
-  asserts.assertTrue(isArray(array), "Not array");
+  asserts.assertTrueOLD(isArray(array), "Not array");
   const map = new Map();
   array.forEach(value => map.set(value.toLowerCase(), value));
   return Array.from(map.values());
@@ -134,7 +134,7 @@ export function binarySearchFindAlwaysIndex(arr, callback, left = 0, right = arr
 }
 
 export const findOrFirst = (array, findCallback, defaultReturn) => {
-  asserts.isTypeFunction(findCallback);
+  asserts.assertTypeFunctionOLD(findCallback);
 
   if (!isArray(array) || array.length === 0) {
     return defaultReturn;

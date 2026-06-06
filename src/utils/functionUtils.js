@@ -1,2 +1,2 @@
-const isFunction = value => typeof value === "function";
-export const unwrapFunction = value => isFunction(value) ? value() : value;
+export const isTypeFunction = value => typeof value === "function";
+export const unwrapFunction = value => isTypeFunction(value) ? value() : value;

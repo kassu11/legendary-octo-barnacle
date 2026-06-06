@@ -10,7 +10,7 @@ export const jikanCharacterUrl= character => {
 }
 
 export const anilistMediaUrl = media => {
-  asserts.isTypeString(media.type, "Media type");
+  asserts.isTypeStringOLD(media.type, "Media type");
   asserts.isTypeInteger(media.id, "Media id");
 
   const base = "/ani/" + media.type.toLowerCase() + "/" + media.id;

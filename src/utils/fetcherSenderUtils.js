@@ -3,7 +3,7 @@ import { functionUtils } from "./utils.js";
 import { asserts, localizations } from "../collections/collections.js";
 
 const createFetcherWithArguments = (fetcherCreator, args) => {
-  asserts.isTypeFunction(fetcherCreator);
+  asserts.assertTypeFunctionOLD(fetcherCreator);
 
   const unwrapperArgs = [];
   for (const arg of args) {
@@ -21,7 +21,7 @@ const createFetcherWithArguments = (fetcherCreator, args) => {
 /**
  * @param {(any) => Fetcher} fetcherCreator
  */
-export const createFetcher = (fetcherCreator, ...args) => {
+export const createFetcherOLD = (fetcherCreator, ...args) => {
   return createMemo(() => createFetcherWithArguments(fetcherCreator, args));
 }
 

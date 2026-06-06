@@ -1,14 +1,15 @@
-import { createEffect, createSignal, on } from "solid-js";
+import { createEffect, on, Show } from "solid-js";
 import "./RatingInput.scoped.css";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { useResponsive } from "../../../context/providers.js";
 
-export function RatingInputScoped(props) {
+export function RatingInputScoped() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
   let oldRatings;
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {

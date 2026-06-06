@@ -2,7 +2,9 @@ import { defineConfig } from "vite"
 import solid from "vite-plugin-solid"
 import scopedStyling from "./vite-plugins/solidjs-scoped-styling";
 import autoImportScopedStyles from "./vite-plugins/auto-import-scoped-styles";
+import checker from 'vite-plugin-checker';
 import AutoImport from "unplugin-auto-import/vite"
+import grapqlMinimizer from "./vite-plugins/graphql-minimize";
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
@@ -13,7 +15,13 @@ export default defineConfig({
   plugins: [
     scopedStyling(),
     autoImportScopedStyles(),
+    grapqlMinimizer(),
     solid(),
+    checker({
+      eslint: {
+        lintCommand: 'eslint "./src/**/*.{js,jsx}"', // Fail on Lint errors
+      },
+    }),
     AutoImport({
       include: [
         /\.jsx$/,
@@ -41,7 +49,7 @@ export default defineConfig({
         "./src/libs",
         "./src/collections/collections.js",
         "./src/utils/utils.js",
-        "./src/utils/api.js",
+        "./src/utils/api-OLD.js",
       ],
     })
   ],

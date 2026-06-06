@@ -1,0 +1,22 @@
+query (
+  $page: Int = 1
+  $search: String
+  $sort: [UserSort] = SEARCH_MATCH
+) {
+  Page(page: $page, perPage: 20) {
+    pageInfo {
+      total
+      perPage
+      currentPage
+      lastPage
+      hasNextPage
+    }
+    users(search: $search, sort: $sort) {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+  }
+}

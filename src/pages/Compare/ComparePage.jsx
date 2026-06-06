@@ -1,10 +1,9 @@
-import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
+import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { batch, createMemo, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays.js";
-import { CompareMediaListContext, useAuthentication, useCompareMediaList } from "../../context/providers.js";
-import api, { IndexedDB } from "../../utils/api.js";
+import { CompareMediaListContext, useCompareMediaList } from "../../context/providers.js";
 import { LoaderCircle } from "../../components/LoaderCircle.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
@@ -13,16 +12,20 @@ import "./ComparePage.scss";
 import Score from "../../components/media/Score.jsx";
 import Star from "../../assets/Star.jsx";
 import { debounce } from "@solid-primitives/scheduled";
-import { asserts, searchObjects, signals } from "../../collections/collections.js";
+import { asserts, queries, searchObjects, signals } from "../../collections/collections.js";
 import { arrayUtils, numberUtils } from "../../utils/utils.js";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 
 const initialMediaCompareList = () => {
   const count = numberUtils.parse(sessionStorage.getItem(window.location.href), 0);
   return Array(count).fill({ id: -1, coverImage: {} });
 }
 
+const [allAnilistUserMediaData, setAllAnilistUserMediaData] = createSignal({}, { equals: false });
 export default function ComparePage() {
+  setAllAnilistUserMediaData({});
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const params = useParams();
@@ -33,18 +36,36 @@ export default function ComparePage() {
     sessionStorage.setItem(window.location.href, list.length);
     _setCompareMediaList(list);
   }
-  const [includeKeys, setIncludeKeys] = createSignal([]);
-  const [excludeKeys, setExcludeKeys] = createSignal([]);
   const [loading, setLoading] = createSignal(true);
 
-  createEffect(on(() => searchParams.user, user => {
-    const names = wrapToSet(user);
-    storeNames(reconcile([...names], []));
+  const includedUsers = createMemo(() => wrapToArray(searchParams.user));
+
+  createEffect(() => {
+    const { user, disabled, exclude } = searchParams;
+    const names = wrapToSet(disabled).union(wrapToSet(exclude)).union(wrapToSet(user));
+    storeNames(reconcile([...names].sort(), []));
+  });
+
+  createEffect(on(() => searchParams.user, users => {
+    const names = wrapToSet(users);
+    if (names > 1 && users.length !== names.size) setSearchParams({ "user": [...names] });
+  }));
+
+  createEffect(on(() => searchParams.exclude, names => {
+    names = arrayUtils.wrapToSet(names);
+    const users = [...arrayUtils.wrapToSet(searchParams.user)].filter(name => !names.has(name));
+    setSearchParams({ "user": users });
+  }));
+
+  createEffect(on(() => searchParams.disabled, names => {
+    names = arrayUtils.wrapToSet(names);
+    const users = [...arrayUtils.wrapToSet(searchParams.user)].filter(name => !names.has(name));
+    setSearchParams({ "user": users });
   }));
 
   const search = () => searchParams.search || "";
   const format = () => searchParams.format || "";
-  const reviewsNeeded = () => searchParams.reviewsNeeded || includeKeys().length;
+  const reviewsNeeded = () => searchParams.reviewsNeeded || wrapToSet(searchParams.user).size;
   const status = () => searchParams.status || "";
   const genre = () => searchParams.genre || "";
   const countryOfOrigin = () => searchParams.countryOfOrigin || "";
@@ -72,8 +93,9 @@ export default function ComparePage() {
     worker = worker instanceof Worker ? worker : new CompareMediaListWorker();
 
     const postObject = {
-      includeKeys: includeKeys(),
-      excludeKeys: excludeKeys(),
+      includeKeys: wrapToArray(searchParams.user),
+      excludeKeys: wrapToArray(searchParams.exclude),
+      data: allAnilistUserMediaData(),
       search: search(),
       format: format(),
       status: status(),
@@ -97,30 +119,18 @@ export default function ComparePage() {
     setLoading(true);
 
     worker.onmessage = message => {
-      if (message.data === "success") {
-        const cacheReq = IndexedDB.user();
-        cacheReq.onsuccess = evt => {
-          const db = evt.target.result;
-          const store = IndexedDB.store(db, "data", "readonly");
-          const getReq = store.get("compare_list");
-          getReq.onerror = () => setLoading(false);
-          getReq.onsuccess = (evt) => {
-            setLoading(false);
-            setCompareMediaList(evt.target.result || []);
-          }
-        }
-      } else {
-        setLoading(false);
-        console.error("Error");
-      }
+      setLoading(false);
+      setCompareMediaList(message.data || []);
     }
   }
 
   createEffect(updateCompareScores);
   document.title = `Compare ${params.type} - LOB`;
 
+  const navigate = useNavigate();
+
   return (
-    <CompareMediaListContext.Provider value={{ compareMediaList, includeKeys, setIncludeKeys, setExcludeKeys, users, storeUsers, loading }}>
+    <CompareMediaListContext.Provider value={{ compareMediaList, users, storeUsers, loading }}>
       <div class="pg-compare">
         <UserSearch />
         <div>
@@ -284,17 +294,17 @@ export default function ComparePage() {
             <input 
               type="number" 
               inputMode="numeric" 
-              onBlur={e => setSearchParams({ reviewsNeeded: Number(e.target.value) >= includeKeys().length ? undefined : +e.target.value || "" })} 
+              onBlur={e => setSearchParams({ reviewsNeeded: Number(e.target.value) >= searchParams.user ? undefined : +e.target.value || "" })} 
               onBeforeInput={e => {
                 if (e.data?.toLowerCase().includes("e")) {
                   e.preventDefault();
                 }
               }}
               min="1" 
-              max={includeKeys().length} 
-              placeholder={includeKeys().length + " (All)"}
+              max={includedUsers().length} 
+              placeholder={includedUsers().length + " (All)"}
               value={reviewsNeeded()} 
-              onInput={e => setSearchParams({ reviewsNeeded: e.target.value == includeKeys().length ? undefined : e.target.value })} 
+              onInput={e => setSearchParams({ reviewsNeeded: e.target.value == searchParams.user ? undefined : e.target.value })} 
               name="reviewsNeeded" 
               id="reviewsNeeded"  
             />
@@ -338,10 +348,34 @@ function UserSearch() {
   const [search, setSearch] = createSignal("");
   const [index, setIndex] = createSignal(0);
   const [searchVar, setSearchVar] = createSignal(undefined);
-  const { accessToken } = useAuthentication();
-  const [searchedUsers, { mutate: mutateSearchUsers }] = api.anilist.searchUsers(searchVar, 1, accessToken);
   const triggerSetSearchVar = debounce(setSearchVar, 300);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [anilistUserSearchTime, startAnilistUserSearchTimer, stopAnilistUserSearchTimer] = createTimer();
+  const [anilistUserSearchData, setAnilistUserSearchData] = createSignal(undefined, { equals: false });
+  let anilistUserSearchFetcher, anilistUserSearchController;
+  createEffect(() => {
+    anilistUserSearchController?.abort();
+    anilistUserSearchController = new AbortController();
+    const search = searchVar();
+    if (!search) return;
+
+    anilistUserSearchFetcher = createAnilistFetcher(queries.anilistUserSearch, { search, page: 1 }, anilistUserSearchController.signal);
+
+    sendAnilistFetcher(anilistUserSearchFetcher, {
+      name: "Anilist user search",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistUserSearchFetcher.cacheKey) anilistUserSearchController = null;
+      },
+      onStart: startAnilistUserSearchTimer,
+      onStop: stopAnilistUserSearchTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistUserSearchFetcher.cacheKey) setAnilistUserSearchData(res.data.data.Page);
+      }
+    });
+  });
+
+  // eslint-disable-next-line no-unassigned-vars
   let form;
 
   createEffect(on(index, i => {
@@ -370,121 +404,142 @@ function UserSearch() {
     }
     batch(() => {
       triggerSetSearchVar(undefined);
-      mutateSearchUsers(undefined);
+      setAnilistUserSearchData(undefined);
       setIndex(0);
       setSearch("");
     });
   }
 
-  return (
-    <form class="pg-compare-user-search" ref={form} onKeyDown={e => {
-      const userCount = searchedUsers()?.data?.users?.length || 0;
-      if (!userCount) {
-        return;
-      }
+  const handleKeyDown = e => {
+    const userCount = anilistUserSearchData()?.users?.length || 0;
+    if (!userCount) return;
 
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setIndex(i => (i + 1) % userCount);
-      } else if (e.key === "ArrowUp"){
-        e.preventDefault();
-        setIndex(i => (userCount + i - 1) % userCount);
-      }
-    }} onSubmit={e => {
-        e.preventDefault();
-        addUserToSearch(searchedUsers()?.data.users?.[index()]?.name || search());
-      }}>
-      <input type="search" name="user" id="user" value={search()} placeholder="Search users" onInput={e => {
-        batch(() => {
-          setSearch(e.target.value);
-          setIndex(0);
-          triggerSetSearchVar(e.target.value.trim() || undefined);
-          mutateSearchUsers(undefined);
-        });
-      }} />
-      <Show when={search()}>
-        <ol>
-          <For each={searchedUsers()?.data.users}>{(user, i) => (
-            <li 
-              classList={{selected: index() === i()}} 
-              onClick={() => addUserToSearch(user.name) } 
-              onMouseEnter={() => setIndex(i())}
-            >
-              <img src={user.avatar.large} alt="Profile picture" />
-              {user.name}
-            </li>
-          )}</For>
-        </ol>
-      </Show>
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setIndex(i => (i + 1) % userCount);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setIndex(i => (userCount + i - 1) % userCount);
+    }
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    addUserToSearch(anilistUserSearchData()?.users?.[index()]?.name || search());
+  };
+
+  const handleInput = e => {
+    batch(() => {
+      setSearch(e.target.value);
+      setIndex(0);
+      triggerSetSearchVar(e.target.value.trim() || undefined);
+      setAnilistUserSearchData(undefined);
+    });
+  };
+
+  return (
+    <form class="pg-compare-user-search" ref={form} onKeyDown={handleKeyDown} onSubmit={handleSubmit}>
+      <input type="search" name="user" id="user" value={search()} placeholder="Search users" onInput={handleInput} />
+      <Switch>
+        <Match when={search() && anilistUserSearchData()?.users.length}>
+          <ol>
+            <For each={anilistUserSearchData()?.users}>{(user, i) => (
+              <li classList={{ selected: index() === i() }} onClick={() => addUserToSearch(user.name)} onMouseEnter={() => setIndex(i())}>
+                <img src={user.avatar.large} alt="Profile picture" />
+                {user.name}
+              </li>
+            )}</For>
+          </ol>
+        </Match>
+        <Match when={search() && anilistUserSearchTime()}>
+          <ol>
+            <li>{formatMSToString(anilistUserSearchTime())}</li>
+          </ol>
+        </Match>
+      </Switch>
     </form>
   );
 }
 
 function UserRow(props) {
-  asserts.assertTrue(props.name, "Name is missing");
+  asserts.assertTrueOLD(props.name, "Name is missing");
   const params = useParams();
-  const { setIncludeKeys, setExcludeKeys, storeUsers } = useCompareMediaList();
+  const { storeUsers } = useCompareMediaList();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { accessToken } = useAuthentication();
   const [enabled, setEnabled] = signals.createSignalWithSignal(() => !arrayUtils.includes(searchParams.disabled, props.name));
   const [exclude, setExclude] = signals.createSignalWithSignal(() => arrayUtils.includes(searchParams.exclude, props.name));;
-  const [mediaList, { mutateCache: mutateMediaListCache }] = api.anilist.mediaListByUserNameFetchOnce(() => props.name, () => params.type.toUpperCase(), accessToken);
 
-  function setKeys(keys, excludedValue) {
-    if (enabled() && exclude() === excludedValue) {
-      return [...new Set([...keys, mediaList().cacheKey])];
-    } else {
-      return keys.filter(val => val !== mediaList().cacheKey);
-    }
-  }
+  const name = createMemo(() => props.name.toLowerCase());
+
+  const [anilistUserMediaLoading, setAnilistUserMediaLoading] = createSignal(false);
+  const [anilistUserMediaData, setAnilistUserMediaData] = createSignal(undefined, { equals: false });
+  let anilistUserMediaFetcher, anilistUserMediaController;
+  createEffect(() => {
+    anilistUserMediaController?.abort();
+    anilistUserMediaController = new AbortController();
+    const type = params.type.toUpperCase();
+    const userName = name();
+
+    if (!type || !userName);
+
+    anilistUserMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, anilistUserMediaController.signal);
+
+    sendAnilistFetcher(anilistUserMediaFetcher, {
+      name: "Anilist user media list",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistUserMediaFetcher.cacheKey) anilistUserMediaController = null;
+      },
+      onStart: () => setAnilistUserMediaLoading(true),
+      onStop: () => setAnilistUserMediaLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistUserMediaFetcher.cacheKey) return;
+        const userData = res.data.data.MediaListCollection.user;
+        setAnilistUserMediaData(userData);
+        storeUsers(userData.name, userData);
+        setAllAnilistUserMediaData(data => {
+          data[userData.id] = res.data.data.MediaListCollection;
+          return data;
+        });
+      }
+    });
+  });
 
   function remove() {
-    setIncludeKeys(keys => keys.filter(key => key !== mediaList()?.cacheKey));
-    setExcludeKeys(keys => keys.filter(key => key !== mediaList()?.cacheKey));
-
     setSearchParams({ user: wrapToArray(searchParams.user).filter(name => name !== props.name) });
   }
 
-  createEffect(() => {
-    if (mediaList()) {
-      storeUsers(mediaList().data.user.name, mediaList().data.user);
-
-      if (mediaList.indexedDBClosed) {
-        setIncludeKeys(keys => setKeys(keys, false));
-        setExcludeKeys(keys => setKeys(keys, true));
-      }
-    }
-  });
-
   const handleEnabledChange = e => {
     setEnabled(!e.target.checked);
-    setSearchParams({ disabled: arrayUtils.toggle(searchParams.disabled, props.name, !e.target.checked) });
+    setSearchParams({
+      disabled: arrayUtils.toggle(searchParams.disabled, props.name, !e.target.checked),
+      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked) 
+    });
   }
 
   const handleExcludeChange = e => {
     setExclude(!e.target.checked);
-    setSearchParams({ exclude: arrayUtils.toggle(searchParams.exclude, props.name, !e.target.checked) });
+    setSearchParams({
+      exclude: arrayUtils.toggle(searchParams.exclude, props.name, !e.target.checked),
+      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked) 
+    });
   }
 
   return (
-    <li classList={{disabled: !enabled(), exclude: exclude()}}>
+    <li classList={{ disabled: !enabled(), exclude: exclude() }}>
       <Switch>
-        <Match when={mediaList.error}>
-          <p class="error">No user found with name: "{props.name}"</p>
-        </Match>
-        <Match when={mediaList() || mediaList.loading}>
-          <Show when={mediaList()} fallback={
+        <Match when={anilistUserMediaData() || anilistUserMediaLoading()}>
+          <Show when={anilistUserMediaData()} fallback={
             <LoaderCircle>
               <Tooltip tipPosition="right">
                 <p>Loading user data</p>
               </Tooltip>
             </LoaderCircle>
           }>
-            <img src={mediaList().data.user.avatar.large} alt={mediaList().data.user.name + " profile picture"} />
+            <img src={anilistUserMediaData().avatar.large} alt={anilistUserMediaData().name + " profile picture"} />
           </Show>
           <p>
-            <Show when={mediaList()} fallback={props.name}>
-              {mediaList().data.user.name}
+            <Show when={anilistUserMediaData()} fallback={props.name}>
+              {anilistUserMediaData().name}
             </Show>
           </p>
           <label>
@@ -497,21 +552,34 @@ function UserRow(props) {
           <label>
             <input type="checkbox" name="enable" checked={exclude()} onChange={handleExcludeChange} /> Filter out <button>?
               <Tooltip tipPosition="bottom">
-                Filters out all {params.type} from user {mediaList()?.data?.user?.name || props.name}
+                Filters out all {params.type} from user {anilistUserMediaData()?.name || props.name}
               </Tooltip>
             </button>
           </label>
         </Match>
+        <Match when={!anilistUserMediaData() && !anilistUserMediaLoading()}>
+          <img src="https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png" alt="User profile not found." />
+          User not found
+        </Match>
       </Switch>
-      <button onClick={() => remove(mediaList()?.cacheKey)}>Remove</button>
+      <button onClick={remove}>Remove</button>
     </li>
   );
 }
 
 function CompareMediaListContent() {
-  const { compareMediaList, loading, includeKeys } = useCompareMediaList();
+  const { compareMediaList, loading } = useCompareMediaList();
   const [searchParams] = useSearchParams();
   const params = useParams();
+
+  const allDisabled = createMemo(() => {
+    const users = arrayUtils.wrapToArray(searchParams.user);
+    const disabled = arrayUtils.wrapToArray(searchParams.disabled);
+    const exclude = arrayUtils.wrapToArray(searchParams.exclude);
+    const activeUsers = users.filter(name => !disabled.includes(name) && !exclude.includes(name));
+
+    return !activeUsers.length;
+  });
 
   return (
     <>
@@ -526,7 +594,7 @@ function CompareMediaListContent() {
         <Switch fallback="No content">
           <Match when={loading()}>Loading content</Match>
           <Match when={!searchParams.user}>No users selected</Match>
-          <Match when={includeKeys().length === 0}>All users are disabled</Match>
+          <Match when={allDisabled()}>All users are disabled</Match>
         </Switch>
       </Show>
     </>
@@ -538,7 +606,7 @@ function ContentPage() {
   const { compareMediaList, users } = useCompareMediaList();
   const params = useParams();
   const observerList = [];
-
+  // eslint-disable-next-line
   function observe(target) {
     observerList.push(target);
   }

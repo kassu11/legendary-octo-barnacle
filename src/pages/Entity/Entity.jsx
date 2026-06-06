@@ -1,49 +1,93 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import api from "../../utils/api.js";
-import { Switch, Match, Show, createSignal, createEffect, on, For } from "solid-js";
+import { Switch, Match, Show, createSignal, createEffect, For, createMemo, untrack } from "solid-js";
 import { OldMarkdownComponent } from "../../components/Markdown.jsx";
 import "./Entity.scss";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { DoomScroll } from "../../components/utils/DoomScroll.jsx";
-import { useAuthentication } from "../../context/providers.js";
 import { wrapToArray } from "../../utils/arrays.js";
-import { asserts } from "../../collections/collections.js";
+import { asserts, queries } from "../../collections/collections.js";
+import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { isTypeFunction } from "../../utils/functionUtils.js";
+import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 
 export function Character() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [characterInfo, { mutateCache: mutateCharacterInfoCache }] = api.anilist.characterInfoById(() => params.id, accessToken);
-  document.title = "Character - LOB";
+  const [anilistCharacterInfoTime, startAnilistCharacterInfoTimer, stopAnilistCharacterInfoTimer] = createTimer();
+  const [anilistCharacterInfoData, setAnilistCharacterInfoData] = createSignal(undefined, { equals: false });
+  let anilistCharacterInfoFetcher, anilistCharacterInfoController;
+  createEffect(() => {
+    anilistCharacterInfoController?.abort();
+    anilistCharacterInfoController = new AbortController();
+
+    anilistCharacterInfoFetcher = createAnilistFetcher(queries.anilistCharacterById, { id: params.id }, anilistCharacterInfoController.signal);
+
+    sendAnilistFetcher(anilistCharacterInfoFetcher, {
+      name: "Anilist character info",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistCharacterInfoFetcher.cacheKey) anilistCharacterInfoController = null;
+      },
+      onStart: startAnilistCharacterInfoTimer,
+      onStop: stopAnilistCharacterInfoTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistCharacterInfoFetcher.cacheKey) setAnilistCharacterInfoData(res);
+      }
+    });
+  });
+
+  const mutateCache = mutate => {
+    if(isTypeFunction(mutate)) mutate = mutate(untrack(anilistCharacterInfoData));
+    setFetcherValueToStorage(mutate);
+  }
 
   return (
-    <Body type="CHARACTER" entityInfo={characterInfo} mutateEntityInfoCache={mutateCharacterInfoCache} />
+    <Body type="CHARACTER" entityInfo={anilistCharacterInfoData()?.data.data.Character} mutateEntityInfoCache={mutateCache} time={formatMSToString(anilistCharacterInfoTime())} />
   );
 }
 
 export function Staff() {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [staffInfo, { mutateCache: mutateStaffInfoCache }] = api.anilist.staffInfoById(() => params.id, accessToken);
-  document.title = "Staff - LOB";
+  const [anilistStaffInfoTime, startAnilistStaffInfoTimer, stopAnilistStaffInfoTimer] = createTimer();
+  const [anilistStaffInfoData, setAnilistStaffInfoData] = createSignal(undefined, { equals: false });
+  let anilistStaffInfoFetcher, anilistStaffInfoController;
+  createEffect(() => {
+    anilistStaffInfoController?.abort();
+    anilistStaffInfoController = new AbortController();
+
+    anilistStaffInfoFetcher = createAnilistFetcher(queries.anilistStaffById, { id: params.id }, anilistStaffInfoController.signal);
+
+    sendAnilistFetcher(anilistStaffInfoFetcher, {
+      name: "Anilist staff info",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistStaffInfoFetcher.cacheKey) anilistStaffInfoController = null;
+      },
+      onStart: startAnilistStaffInfoTimer,
+      onStop: stopAnilistStaffInfoTimer,
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistStaffInfoFetcher.cacheKey) setAnilistStaffInfoData(res);
+      }
+    });
+  });
+
+  const mutateCache = mutate => {
+    if(isTypeFunction(mutate)) mutate = mutate(untrack(anilistStaffInfoData));
+    setFetcherValueToStorage(mutate);
+  }
 
   return (
-    <Body type="STAFF" entityInfo={staffInfo} mutateEntityInfoCache={mutateStaffInfoCache} />
+    <Body type="STAFF" entityInfo={anilistStaffInfoData()?.data.data.Staff} mutateEntityInfoCache={mutateCache} time={formatMSToString(anilistStaffInfoTime())} /> 
   );
 }
 
 function Body(props) {
-  const params = useParams();
   const [searchParams, _setSearchParams] = useSearchParams();
   const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
   const [variables, setVariables] = createSignal();
 
   const [favourite, setFavourite] = createSignal(false);
-  createEffect(on(props.entityInfo, info => {
-    setFavourite(info?.data.isFavourite);
-  }));
-
+  createEffect(() => setFavourite(props.entityInfo?.isFavourite ?? false));
 
   createEffect(() => {
     setVariables({
@@ -52,59 +96,68 @@ function Body(props) {
     });
   });
 
+  createEffect(() => {
+    const name = props.entityInfo?.name.userPreferred;
+    if (!name) return;
+    document.title = `${capitalize(props.type)} - ${name} - LOB`
+  });
+
   return (
     <div class="entity-page">
-      <Show when={props.entityInfo()}>
+      <Show when={props.entityInfo}>
         <div className="entity-page-header">
-          <img src={props.entityInfo().data.image.large} class="cover" alt={capitalize(props.type) + " profile"} />
+          <img src={props.entityInfo.image.large} class="cover" alt={capitalize(props.type) + " profile"} />
           <div className="row">
-            <h1>{props.entityInfo().data.name.userPreferred}</h1>
-            <p class="entity-page-alternative-names">{[...wrapToArray(props.entityInfo().data.name.native), ...wrapToArray(props.entityInfo().data.name.alternative)].join(", ")}</p>
+            <div>
+              <p>{props.time}</p>
+              <h1>{props.entityInfo.name.userPreferred}</h1>
+            </div>
+            <p class="entity-page-alternative-names">{[...wrapToArray(props.entityInfo.name.native), ...wrapToArray(props.entityInfo.name.alternative)].join(", ")}</p>
             <FavouriteToggle 
               checked={favourite()} 
               idType={props.type} 
-              variableId={props.entityInfo().data.id} 
-              anilistValue={props.entityInfo().data.favourites} 
+              variableId={props.entityInfo.id} 
+              anilistValue={props.entityInfo.favourites} 
               onChange={setFavourite} 
               mutateCache={(isFavourite) => {
-                props.entityInfo().data.isFavourite = isFavourite;
+                props.entityInfo.isFavourite = isFavourite;
                 props.mutateEntityInfoCache(data => data);
               }} 
             />
           </div>
           <ul class="description">
-            <Show when={formatAnilistDate(props.entityInfo().data.dateOfBirth)}>
-              <li><strong>Birth:</strong> {formatAnilistDate(props.entityInfo().data.dateOfBirth)}</li>
+            <Show when={formatAnilistDate(props.entityInfo.dateOfBirth)}>
+              <li><strong>Birth:</strong> {formatAnilistDate(props.entityInfo.dateOfBirth)}</li>
             </Show>
-            <Show when={props.entityInfo().data.age}>
-              <li><strong>Age:</strong> {props.entityInfo().data.age}</li>
+            <Show when={props.entityInfo.age}>
+              <li><strong>Age:</strong> {props.entityInfo.age}</li>
             </Show>
-            <Show when={props.entityInfo().data.gender}>
-              <li><strong>Gender:</strong> {props.entityInfo().data.gender}</li>
+            <Show when={props.entityInfo.gender}>
+              <li><strong>Gender:</strong> {props.entityInfo.gender}</li>
             </Show>
-            <Show when={props.entityInfo().data.yearsActive?.length}>
+            <Show when={props.entityInfo.yearsActive?.length}>
               <li>
                 <strong>Active years: </strong> 
-                {props.entityInfo().data.yearsActive.join("-")}
+                {props.entityInfo.yearsActive.join("-")}
                 <Switch>
-                  <Match when={props.entityInfo().data.dateOfDeath?.year && props.entityInfo().data.yearsActive.at(-1) !== props.entityInfo().data.dateOfDeath?.year}>
-                    -{props.entityInfo().data.dateOfDeath.year}
+                  <Match when={props.entityInfo.dateOfDeath?.year && props.entityInfo.yearsActive.at(-1) !== props.entityInfo.dateOfDeath?.year}>
+                    -{props.entityInfo.dateOfDeath.year}
                   </Match>
-                  <Match when={props.entityInfo().data.dateOfDeath?.year == null}>
+                  <Match when={props.entityInfo.dateOfDeath?.year == null}>
                     -Present
                   </Match>
                 </Switch>
               </li>
             </Show>
-            <Show when={props.entityInfo().data.homeTown}>
-              <li><strong>Home town:</strong> {props.entityInfo().data.homeTown}</li>
+            <Show when={props.entityInfo.homeTown}>
+              <li><strong>Home town:</strong> {props.entityInfo.homeTown}</li>
             </Show>
-            <Show when={props.entityInfo().data.bloodType}>
-              <li><strong>Blood type:</strong> {props.entityInfo().data.bloodType}</li>
+            <Show when={props.entityInfo.bloodType}>
+              <li><strong>Blood type:</strong> {props.entityInfo.bloodType}</li>
             </Show>
-            <Show when={props.entityInfo().data.description}>
+            <Show when={props.entityInfo.description}>
               <li>
-                <OldMarkdownComponent>{props.entityInfo().data.description}</OldMarkdownComponent>
+                <OldMarkdownComponent>{props.entityInfo.description}</OldMarkdownComponent>
               </li>
             </Show>
           </ul>
@@ -191,9 +244,9 @@ function Body(props) {
 } 
 
 function SubSection(props) {
-  asserts.assertTrue(props.title, "title missing");
-  asserts.assertTrue(props.title, "title missing");
-  asserts.assertTrue(props.type, "type missing");
+  asserts.assertThruthy(props.title, "title missing");
+  asserts.assertThruthy(props.title, "title missing");
+  asserts.assertThruthy(props.type, "type missing");
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
   const [visible, setVisible] = createSignal(false);
@@ -258,152 +311,214 @@ function SubSection(props) {
 
 function CharacterMediaPage(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffCharacters] = api.anilist.characterMediaById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
+  const [anilistCharacterInfoLoading, setAnilistCharacterInfoLoading] = createSignal(false);
+  const [anilistCharacterInfoData, setAnilistCharacterInfoData] = createSignal(undefined, { equals: false });
+  let anilistCharacterInfoFetcher, anilistCharacterInfoController;
+  createEffect(() => {
+    anilistCharacterInfoController?.abort();
+    anilistCharacterInfoController = new AbortController();
 
-  if (props.nestLevel === 1) {
-    createEffect(on(staffCharacters, characters => {
-      props.setVisible(characters?.data.edges.length > 0);
+    const { nestLevel } = props;
+    const vars = nestLevel === 1 ? props.variables : variables();
 
-      const newLanguages = new Set();
-      for(const edge of characters?.data.edges || []) {
-        for(const actorRole of edge.voiceActorRoles) {
-          newLanguages.add(actorRole.voiceActor.language);
+    if (!vars) return;
+
+    anilistCharacterInfoFetcher = createAnilistFetcher(queries.anilistCharacterById, {
+      ...vars, 
+      "page": vars.page || 1,
+      "sort": vars.sort || "POPULARITY_DESC",
+      "onList": vars.onList,
+      "withRoles": vars.withRoles || true,
+      id: params.id,
+    }, anilistCharacterInfoController.signal);
+
+    sendAnilistFetcher(anilistCharacterInfoFetcher, {
+      name: "Anilist character info",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistCharacterInfoFetcher.cacheKey) anilistCharacterInfoController = null;
+      },
+      onStart: () => setAnilistCharacterInfoLoading(true),
+      onStop: () => setAnilistCharacterInfoLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistCharacterInfoFetcher.cacheKey) return;
+        const { media } = res.data.data.Character;
+        setAnilistCharacterInfoData(media);
+
+        if (nestLevel !== 1) return;
+        props.setVisible(media.edges.length > 0);
+
+        const newLanguages = new Set();
+        for (const { voiceActorRoles } of media.edges) {
+          for (const { voiceActor } of voiceActorRoles) {
+            newLanguages.add(voiceActor.language);
+          }
         }
-      }
 
-      props.setLanguages([...newLanguages]);
-    }));
-  }
+        props.setLanguages([...newLanguages]);
+      }
+    });
+  });
+
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffCharacters} loading={props.loading}>{fetchCooldown => (
-      <>
-        <CharacterAndActorCards language={props.language} edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-        <Show when={staffCharacters().data.pageInfo.hasNextPage}>
-          <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <CharacterMediaPage
-                    variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} 
-                    nestLevel={props.nestLevel + 1} 
-                    showYears={props.showYears} 
-                    language={props.language} 
-                    lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                    loading={staffCharacters.loading} 
-                  /> 
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={anilistCharacterInfoData()}>
+          <CharacterAndActorCards language={props.language} edges={anilistCharacterInfoData().edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!anilistCharacterInfoLoading() && anilistCharacterInfoData()?.pageInfo.hasNextPage}>
+        <Show when={anilistCharacterInfoData().edges} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <CharacterMediaPage variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} language={props.language} lastYearGroup={anilistCharacterInfoData().edges.at(-1)?.node.startDate?.year || "TBA"} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
 function StaffCharacterPage(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffCharacters] = api.anilist.staffCharactersById(accessToken, () => params.id, props.nestLevel === 1 ? () => props.variables : variables);
+  const [anilistStaffCharacterLoading, setAnilistStaffCharacterLoading] = createSignal(false);
+  const [anilistStaffCharacterData, setAnilistStaffCharacterData] = createSignal(undefined, { equals: false });
+  let anilistStaffCharacterFetcher, anilistStaffCharacterController;
+  createEffect(() => {
+    anilistStaffCharacterController?.abort();
+    anilistStaffCharacterController = new AbortController();
 
-  if (props.nestLevel === 1) {
-    createEffect(on(staffCharacters, characters => {
-      props.setVisible(characters?.data.edges.length > 0);
-    }));
-  }
+    const { nestLevel } = props;
+    const vars = nestLevel === 1 ? props.variables : variables();
+    if (!vars) return;
+
+    anilistStaffCharacterFetcher = createAnilistFetcher(queries.anilistStaffById, { 
+        ...vars, 
+        "characterPage": vars.characterPage || 1,
+        "sort": vars.sort || "START_DATE_DESC",
+        "onList": vars.onList,
+        "withCharacterRoles": true,
+        id: params.id,
+      }, anilistStaffCharacterController.signal);
+
+    sendAnilistFetcher(anilistStaffCharacterFetcher, {
+      name: "Anilist staff media",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistStaffCharacterFetcher.cacheKey) anilistStaffCharacterController = null;
+      },
+      onStart: () => setAnilistStaffCharacterLoading(true),
+      onStop: () => setAnilistStaffCharacterLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistStaffCharacterFetcher.cacheKey) return;
+
+        const media = res.data.data.Staff.characterMedia;
+        setAnilistStaffCharacterData(media);
+        if (nestLevel === 1) props.setVisible(media.edges.length > 0);
+      }
+    });
+  });
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffCharacters} loading={props.loading}>{fetchCooldown => (
-      <>
-        <CharacterAndMediaCards edges={staffCharacters().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
-        <Show when={staffCharacters().data.pageInfo.hasNextPage}>
-          <Show when={staffCharacters().data.edges} keyed={props.nestLevel === 1}>
-            <Show when={props.variables}>
-              {vars => (
-                <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-                  <StaffCharacterPage
-                    variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} 
-                    nestLevel={props.nestLevel + 1} 
-                    showYears={props.showYears} 
-                    lastYearGroup={staffCharacters().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                    loading={staffCharacters.loading} 
-                  /> 
-                </Show>
-              )}
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={anilistStaffCharacterData()?.edges}>
+          <CharacterAndMediaCards edges={anilistStaffCharacterData().edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!anilistStaffCharacterLoading() && anilistStaffCharacterData()?.pageInfo.hasNextPage}>
+        <Show when={anilistStaffCharacterData().edges} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <StaffCharacterPage variables={{ ...vars(), characterPage: (vars()?.characterPage || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} lastYearGroup={anilistStaffCharacterData().edges.at(-1)?.node.startDate?.year || "TBA"} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
 function StaffMediaRolePage(props) {
-  asserts.assertTrue(props.type, "Type is missing");
-  asserts.assertTrue(props.nestLevel, "nestLevel is missing");
+  asserts.assertThruthy(props.type, "Type is missing");
+  asserts.assertThruthy(props.nestLevel, "nestLevel is missing");
 
   const params = useParams();
-  const { accessToken } = useAuthentication();
   const [variables, setVariables] = createSignal(undefined);
-  const [staffMedia, { mutate }] = api.anilist.staffMediaById(accessToken, () => params.id, props.type, props.nestLevel === 1 ? () => props.variables : variables);
 
-  if (props.nestLevel === 1) {
-    createEffect(on(staffMedia, media => {
-      props.setVisible(media?.data.edges.length > 0);
-    }));
-  }
+  const lastId = createMemo(() => props.lastMediaId);
+  const [anilistStaffMediaLoading, setAnilistStaffMediaLoading] = createSignal(undefined, { equals: false });
+  const [anilistStaffMediaData, setAnilistStaffMediaData] = createSignal(undefined, { equals: false });
+  let anilistStaffMediaFetcher, anilistStaffMediaController;
+  createEffect(() => {
+    anilistStaffMediaController?.abort();
+    anilistStaffMediaController = new AbortController();
 
-  createEffect(on(staffMedia, media => {
-    if (!props.lastMediaId || !media?.data.edges.length) {
-      return;
-    }
-    const edges = structuredClone(media.data.edges);
-    const removedEdges = [];
+    const { id } = params;
+    const { type, nestLevel } = props;
+    const lastMediaId = lastId();
+    const vars = nestLevel === 1 ? props.variables : variables();
 
-    for(const edge of media.data.edges) {
-      if (edge.node.id !== props.lastMediaId) { break; } 
-      removedEdges.push(edges.shift());
-    }
+    if (!vars || !type) return;
 
-    if (removedEdges.length === 0) {
-      return;
-    }
-    props.mutate(response => {
-      response.data.edges = [...response.data.edges, ...removedEdges];
-      return { ...response };
+    anilistStaffMediaFetcher = createAnilistFetcher(queries.anilistStaffById, {
+      ...vars,
+      "staffPage": vars.staffPage || 1,
+      "sort": vars.sort ? [vars.sort, "TITLE_ENGLISH"].flat() : "START_DATE_DESC",
+      "onList": vars.onList,
+      "withStaffRoles": true,
+      id,
+      type,
+    }, anilistStaffMediaController.signal);
+
+    sendAnilistFetcher(anilistStaffMediaFetcher, {
+      name: "Anilist staff media",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === anilistStaffMediaFetcher.cacheKey) anilistStaffMediaController = null;
+      },
+      onStart: () => setAnilistStaffMediaLoading(true),
+      onStop: () => setAnilistStaffMediaLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistStaffMediaFetcher.cacheKey) return;
+        const media = structuredClone(res.data.data.Staff.staffMedia);
+
+        if (nestLevel === 1) {
+          props.setVisible(media.edges.length > 0);
+        }
+
+        // Merge same media entries
+        if (lastMediaId && media.edges.length) {
+          const { edges } = media;
+          const removedEdges = [];
+
+          while (edges.length && edges[0]?.node.id === lastMediaId) {
+            removedEdges.push(edges.shift());
+          }
+
+          if (removedEdges.length > 0) props.mutate(response => {
+            response.edges = [...response.edges, ...removedEdges];
+            return { ...response };
+          });
+        }
+
+        setAnilistStaffMediaData(media);
+      }
     });
-    mutate(response => {
-      response.data.edges = edges;
-      return { ...response };
-    });
-  }));
+  });
 
   return (
-    <DoomScroll onIntersection={() => setVariables(props.variables)} fetchResponse={staffMedia} loading={props.loading}>{fetchCooldown => (
-      <>
-        <MediaCards edges={staffMedia().data.edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup}/>
-        <Show when={staffMedia().data.pageInfo.hasNextPage}>
-          <Show when={props.variables} keyed={props.nestLevel === 1}>
-            <Show when={fetchCooldown === false} fallback="Fetch cooldown">
-              <StaffMediaRolePage
-                variables={{ ...props.variables, staffPage: (props.variables?.staffPage || 1) + 1 }} 
-                nestLevel={props.nestLevel + 1} 
-                showYears={props.showYears}
-                mutate={mutate} 
-                type={props.type} 
-                lastYearGroup={staffMedia().data.edges.at(-1)?.node.startDate?.year || "TBA"}
-                lastMediaId={staffMedia().data.edges.at(-1)?.node.id}
-                loading={staffMedia.loading} 
-              /> 
-            </Show>
-          </Show>
+    <>
+      <Intersection onIntersection={() => setVariables(props.variables)}>
+        <Show when={anilistStaffMediaData()?.edges} keyed>
+          <MediaCards edges={anilistStaffMediaData().edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </>
-    )}</DoomScroll>
+      </Intersection>
+      <Show when={!anilistStaffMediaLoading() && anilistStaffMediaData()?.pageInfo.hasNextPage}>
+        <Show when={props.variables} keyed={props.nestLevel === 1}>
+          <Show when={props.variables}>{vars => (
+            <StaffMediaRolePage variables={{ ...vars(), staffPage: (vars()?.staffPage || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} mutate={setAnilistStaffMediaData} type={props.type} lastYearGroup={anilistStaffMediaData().edges.at(-1)?.node.startDate?.year || "TBA"} lastMediaId={anilistStaffMediaData().edges.at(-1)?.node.id} />
+          )}</Show>
+        </Show>
+      </Show>
+    </>
   );
 }
 
@@ -431,8 +546,8 @@ function YearHeader(props) {
 }
 
 function CharacterAndActorCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
-  asserts.assertTrue(props.language, "language signal is missing");
+  asserts.assertThruthy(props.showYears, "showYears signal is missing");
+  asserts.assertThruthy(props.language, "language signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
@@ -480,7 +595,7 @@ function CharacterAndActorCards(props) {
 }
 
 function MediaCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
+  asserts.assertThruthy(props.showYears, "showYears signal is missing");
   const combine = (acc, edge) => {
     const last = acc.at(-1);
     if (last?.node.id !== edge.node.id) {
@@ -520,7 +635,7 @@ function MediaCards(props) {
 }
 
 function CharacterAndMediaCards(props) {
-  asserts.assertTrue(props.showYears, "showYears signal is missing");
+  asserts.assertThruthy(props.showYears, "showYears signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (

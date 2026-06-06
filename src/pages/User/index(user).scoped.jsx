@@ -1,34 +1,62 @@
 import { A, useParams } from "@solidjs/router";
-import api from "../../utils/api.js";
-import { createEffect, createSignal, Match, on, Show } from "solid-js";
+import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { formatTimeToDate } from "../../utils/formating.js";
-import { useAuthentication, UserContext, useUser } from "../../context/providers.js";
+import { UserContext, useUser } from "../../context/providers.js";
 import "./index(user).scoped.css";
+import { queries } from "../../collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
+import { authUserData } from "../../core/globalState.js";
 
 export function User(props) {
   const params = useParams();
-  const { accessToken } = useAuthentication();
-  const [userData, {mutateCache: mutateUserCache}] = api.anilist.userByName(() => params.name, accessToken);
+
+  const [userTime, startUserTimer, stopUserTimer] = createTimer();
+  const [loading, setLoading] = createSignal(false);
+  const [userData, setUserData] = createSignal(undefined, { equals: false });
+  let userFetcher, userController;
+  createEffect(() => {
+    userController?.abort();
+    userController = new AbortController();
+
+    userFetcher = createAnilistFetcher(queries.getUserByName, { name: params.name }, userController.signal);
+
+    sendAnilistFetcher(userFetcher, {
+      name: "Anilist user info",
+      onFetch: (_, { fetcher: f }) => {
+        if (f.cacheKey === userFetcher.cacheKey) userController = null;
+      },
+      onStart: time => {
+        startUserTimer(time);
+        setLoading(true);
+      },
+      onStop: time => {
+        stopUserTimer(time);
+        setLoading(false);
+      },
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === userFetcher.cacheKey) {
+          setUserData(res);
+          document.title = `${res.data.data.User.name} profile - LOB`;
+        }
+      }
+    });
+  });
 
   const following = (status) => {
-    mutateUserCache(response => {
-      response.data.isFollowing = status;
-      userData().data.isFollowing = status;
-      return response;
+    setUserData(res => {
+      res.data.data.User.isFollowing = status;
+      setFetcherValueToStorage(res);
+      return res;
     });
   }
 
-  createEffect(on(userData, user => {
-    if (user) {
-      document.title = `${user.data.name} profile - LOB`;
-    }
-  }))
-
   return (
-    <UserContext.Provider value={{ user: () => userData().data, following }}>
+    <UserContext.Provider value={{ user: () => userData().data.data.User, following }}>
       <Switch>
-        <Match when={userData()?.data && (!userData.loading || userData().data.name === params.name)}>
-          <Content>
+        <Match when={userData() && (!loading() || userData().data.data.User.name === params.name)}>
+          <Content time={userTime}>
             {props.children}
           </Content>
         </Match>
@@ -42,7 +70,6 @@ export function User(props) {
 
 function Content(props) {
   const { user, following } = useUser();
-  const { authUserData, accessToken } = useAuthentication();
   const [isFollowing, setIsFollowing] = createSignal(user().isFollowing);
 
   createEffect(() => {
@@ -56,16 +83,19 @@ function Content(props) {
           <img src={user().bannerImage} class="banner" alt="Banner" />
         </Show>
         <div class="user-profile-container">
-          <img src={user().avatar.large} class="profile" alt="Profile" />
+          <div>
+            <p>{formatMSToString(props.time())}</p>
+            <img src={user().avatar.large} class="profile" alt="Profile" />
+          </div>
           <div class="content">
             <Show when={user().id !== authUserData()?.data.id}>
               <button onClick={async () => {
-                setIsFollowing(val => {
-                  return !val;
-                });
-                const response = await api.anilist.toggleFollow(accessToken(), user().id);
-                if (response.status === 200) {
-                  following(response.data.isFollowing);
+                setIsFollowing(val => !val);
+                const fetcher = createAnilistFetcher(queries.anilistToggleFollow, { id: user().id }, AbortSignal.timeout(30_000));
+                const res = await fetcherToFetch(fetcher);
+                if (res.status === 200) {
+                  const json = await res.json();
+                  following(json.data.ToggleFollow.isFollowing);
                 } else {
                   setIsFollowing(user().isFollowing);
                 }

@@ -5,12 +5,14 @@ import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../../utils/arrays.js";
 import { useVirtualSearchParams } from "../../../utils/virtualSearchParams.js";
 import { useResponsive } from "../../../context/providers.js";
+import { searchObjects } from "../../../collections/collections";
 
 export function SeasonInputScoped() {
   const [virtualSearchParams, setVirtualSearchParams] = useVirtualSearchParams();
   const { isTouch } = useResponsive()
   let open = false;
   let oldSeasons;
+  // eslint-disable-next-line no-unassigned-vars
   let dialog, scrollWrapper, controller, button, form;
 
   function close() {
