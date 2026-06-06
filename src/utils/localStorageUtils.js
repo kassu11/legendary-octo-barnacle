@@ -30,3 +30,16 @@ export const createLocalStorageJsonSignal = (key, initialValue) => {
 
   return [value, setValue];
 }
+
+export const createLocalStorageSignal = (key, initialValue) => {
+  const [value, _setValue] = createSignal(localStorage.getItem(key) ?? initialValue);
+  const setValue = mutate => {
+    _setValue(v => {
+      if (isTypeFunction(mutate)) mutate = mutate(v);
+      if (!mutate) localStorage.removeItem(key);
+      return mutate;
+    });
+  }
+
+  return [value, setValue];
+}

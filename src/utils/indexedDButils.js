@@ -13,7 +13,7 @@ const createDbStore = (db, storeName, key) => {
 // }
 
 export const openIndexDBStore = (storeName, mode) => {
-  const request = indexedDB.open("legendary-octo-barnacle-cache2", 1);
+  const request = indexedDB.open("legendary-octo-barnacle", 2);
 
   request.onupgradeneeded = (evt) => {
     const db = evt.target.result;
@@ -22,6 +22,12 @@ export const openIndexDBStore = (storeName, mode) => {
         const objectStore = createDbStore(db, "fetches", { keyPath: "cacheKey" });
         objectStore.createIndex("Cache key", "cacheKey", { unique: true });
         objectStore.createIndex("Name", "name", { unique: false });
+        objectStore.createIndex("Data", "data", { unique: false });
+        objectStore.createIndex("Expiration", "expires", { unique: false });
+        objectStore.createIndex("Last modified", "modified", { unique: false });
+      } // fallthrough
+      case 1: {
+        const objectStore = createDbStore(db, "tokens");
         objectStore.createIndex("Data", "data", { unique: false });
         objectStore.createIndex("Expiration", "expires", { unique: false });
         objectStore.createIndex("Last modified", "modified", { unique: false });
@@ -48,6 +54,8 @@ export const openIndexDBStore = (storeName, mode) => {
 export const setIndexedDBValue = async (storeName, value, key) => {
   const { promise, resolve, reject } = Promise.withResolvers();
   const store = await openIndexDBStore(storeName, "readwrite");
+  if (value?.expires instanceof Date) value.expires = value.expires.getTime();
+  if (value?.modified instanceof Date) value.modified = value.modified.getTime();
   const putReq = store.put(value, key);
   putReq.onerror = reject;
   putReq.onsuccess = resolve;
@@ -58,6 +66,28 @@ export const setIndexedDBValue = async (storeName, value, key) => {
 export const getIndexedDBValue = async (storeName, key) => {
   const store = await openIndexDBStore(storeName, "readonly");
   return await storeGet(store, key);
+};
+
+export const getAllIndexedDBValues = async (storeName) => {
+  const store = await openIndexDBStore(storeName, "readonly");
+  const index = store.index("Expiration");
+
+  const range = IDBKeyRange.lowerBound(curTime, true);
+  const request = index.openCursor(range);
+  const results = {};
+  const { promise, resolve, reject } = Promise.withResolvers();
+  request.onsuccess = (event) => {
+    const cursor = event.target.result;
+    if (cursor) {
+      results[cursor.primaryKey] = cursor.value;
+      cursor.continue();   // move to next
+    } else {
+      resolve(results);
+    }
+  };
+
+  request.onerror = reject;
+  return promise;
 };
 
 export const deleteIndexDBValue = async (storeName, key) => {
@@ -91,12 +121,12 @@ const storeGet = (store, key) => {
   });
 };
 
-const curTime = new Date();
+const curTime = new Date().getTime();
 async function deleteExpired(storeName) {
   const store = await openIndexDBStore(storeName, "readwrite");
   const index = store.index("Expiration");
 
-  const range = IDBKeyRange.lowerBound(curTime, true);
+  const range = IDBKeyRange.bound(0, curTime);
   const request = index.openCursor(range);
 
   request.onsuccess = (event) => {
@@ -112,4 +142,5 @@ async function deleteExpired(storeName) {
 // Expired values are also filtered out whithin the getter
 setTimeout(() => {
   deleteExpired("fetches");
+  deleteExpired("tokens");
 }, 5_000);

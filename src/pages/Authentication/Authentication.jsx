@@ -1,18 +1,18 @@
 import { Navigate, useLocation } from "@solidjs/router";
-import { useAuthentication } from "../../context/providers.js";
+import { setAccessToken } from "../../core/globalState.js";
 
 function Authentication() {
   const location = useLocation();
   const hash = location.hash.substring(1);
   const search = new URLSearchParams(hash);
   const token = search.get("access_token");
-
-  document.title = "Authentication - LOB";
+  const expires = +search.get("expires_in") || 356 * 24 * 60 * 60;
 
   if (token?.length > 50) {
-    const { setAccessToken } = useAuthentication();
-    setAccessToken(token);
+    setAccessToken(token, expires);
   }
+
+  document.title = "Authentication - LOB";
 
   return <Navigate href="/" />
 }

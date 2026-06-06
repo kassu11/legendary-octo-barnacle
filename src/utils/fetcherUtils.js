@@ -1,7 +1,7 @@
 import { assertTypeArray, assertTypeString } from "../collections/asserts";
 import { localizations, modes } from "../collections/collections";
 import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "../core/fetchRateLimits";
-import { logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
+import { allActiveTokens, logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped";
 import { isTypeFunction } from "./functionUtils";
 import { hashKeyFNV32 } from "./hashUtils";
@@ -50,11 +50,19 @@ export function createAnilistFetcher(query, variables, signal) {
       query: query,
       variables
     },
-  });
+  }, removeTokenFromEncode);
 }
 
 function baseEncoding(url, params) {
   const paramsAsString = safeStringifyJson(params, "missing");
+  return hashKeyFNV32(url) + hashKeyFNV32(paramsAsString) + hashKeyFNV32(url + paramsAsString);
+}
+
+function removeTokenFromEncode(url, params) {
+  let paramsAsString = safeStringifyJson(params, "missing");
+  const token = params.headers.Authorization;
+  const userId = allActiveTokens[token];
+  if (token && userId) paramsAsString = paramsAsString.replace(token, userId);
   return hashKeyFNV32(url) + hashKeyFNV32(paramsAsString) + hashKeyFNV32(url + paramsAsString);
 }
 
