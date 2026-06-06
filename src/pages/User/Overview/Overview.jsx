@@ -30,7 +30,6 @@ export function Overview() {
         if (f.cacheKey === anilistActivityFetcher.cacheKey) anilistActivityController = null;
       },
       setValue: (res, { fetcher: f }) => {
-        console.log("Lol", res);
         if (f.cacheKey === anilistActivityFetcher.cacheKey) setAnilistActivityData(res);
       }
     });

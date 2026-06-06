@@ -1,5 +1,5 @@
 import {A} from "@solidjs/router";
-import {asserts, globalState} from "../../collections/collections.js";
+import {asserts, globalState, queries} from "../../collections/collections.js";
 import {urlUtils} from "../../utils/utils.js";
 import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
@@ -8,12 +8,13 @@ import Complete from "../../assets/Complete.jsx";
 import Rewatched from "../../assets/Rewatched.jsx";
 import {useAuthentication, useEditMediaEntries} from "../../context/providers.js";
 import Star from "../../assets/Star.jsx";
-import apiOLD from "../../utils/api-OLD.js";
 import {QuickActionListButton} from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
+import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
 
 function AnilistMediaCardListBody(props) {
   asserts.assertTrueOLD(props.media, "Missing media");
@@ -98,6 +99,19 @@ function QuickActionItemList(props) {
 
   asserts.assertTrueOLD(props.media, "Missing media");
 
+  const handleClick = status => async e => {
+    e.preventDefault();
+
+    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: props.media.id, status }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher);
+    if (res.status === 200) {
+      const json = await res.json();
+      console.log("JSON", json)
+    } else {
+      addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });
+    }
+  };
+
   return (
     <Show when={accessToken()}>
       <ul class="cp-media-card-quick-action-items">
@@ -107,28 +121,16 @@ function QuickActionItemList(props) {
         }}>
           <Edit />
         </QuickActionListButton>
-        <QuickActionListButton label="Set to planning" onClick={e => {
-          e.preventDefault();
-          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "PLANNING" });
-        }}>
+        <QuickActionListButton label="Set to planning" onClick={handleClick("PLANNING")}>
           <Planning />
         </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={e => {
-          e.preventDefault();
-          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "CURRENT" });
-        }}>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={handleClick("CURRENT")}>
           <Watching />
         </QuickActionListButton>
-        <QuickActionListButton label="Set to completed" onClick={e => {
-          e.preventDefault();
-          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "COMPLETED" });
-        }}>
+        <QuickActionListButton label="Set to completed" onClick={handleClick("COMPLETED")}>
           <Complete />
         </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={e => {
-          e.preventDefault();
-          apiOLD.anilist.mutateMedia(accessToken(), { mediaId: props.media.id, status: "REPEAT" });
-        }}>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEAT")}>
           <Rewatched />
         </QuickActionListButton>
       </ul>

@@ -4,7 +4,9 @@ import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
 import { EditMediaEntriesContext, useAuthentication } from "./providers.js";
-import { asserts } from "../collections/collections.js";
+import { asserts, queries } from "../collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
+import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
 
 function formState(auth, initialData) {
   asserts.assertTrueOLD(!initialData || auth, "Should not be able to edit if not authenticated");
@@ -229,11 +231,17 @@ export function EditMediaEntriesProvider(props) {
 
     editor.showModal();
 
-    const data = await apiOLD.anilist.mediaListEntry(accessToken(), defaultData.id);
-    batch(() => {
-      setMediaListEntry(data.data.data.Media);
-      setState(authUserData(), data.data.data.Media);
-    });
+    const fetcher = createAnilistFetcher(queries.mediaListEntry, { mediaId: defaultData.id }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher);
+    if (res.status === 200) {
+      const json = await res.json();
+      batch(() => {
+        setMediaListEntry(json.data.Media);
+        setState(authUserData(), json.data.Media);
+      });
+    } else {
+      addApplicationNotification({ type: "error", message: "Failed to load media data", duration: 30_000 });
+    }
   }
 
   return (

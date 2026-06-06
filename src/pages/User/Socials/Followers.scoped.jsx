@@ -38,7 +38,6 @@ export function Followers(props) {
         setLoading(false);
       },
       setValue: (res, { fetcher: f }) => {
-        console.log("res", res);
         if (f.cacheKey === followersFetcher.cacheKey) setFollowersData(res.data.data.Page);
       }
     });

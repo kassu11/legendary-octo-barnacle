@@ -19,16 +19,6 @@ const fetchRateLimits = {
 
 const apiOLD = {
   anilist: {
-    mutateFavourites: async (token, variables) => {
-      const request = Fetch.authAnilist(token, queries.anilistUserMutateFavourites, variables);
-      return await request.send();
-    },
-    mediaListEntry: async (token, mediaId) => {
-      asserts.assertTrueOLD(mediaId, "MediaId missing");
-      asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
-      const request = Fetch.authAnilist(token, queries.mediaListEntry, { mediaId });
-      return await request.send();
-    },
     mutateMedia: async (token, variables) => {
       asserts.assertTrueOLD(token, "Token is missing");
       asserts.assertTrueOLD(typeof token !== "function", "This specific api doesnt support signals");
