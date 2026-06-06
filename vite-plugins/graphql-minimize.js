@@ -13,7 +13,7 @@ export default function grapqlMinimizer() {
         let string = "";
         for (const c of formatted) {
           // Scope starts
-          if (c === "(" || c === "{" || c === "[") {
+          if (c === "(" || c === "{") {
             // Scope can be sorted because its inside { or (
             if (Array.isArray(lines.at(-1))) lines.at(-1).push(string + c);
             else lines.push(string + c);
@@ -22,13 +22,17 @@ export default function grapqlMinimizer() {
             mode = c;
           }
           // Separator was hit, break line, NOTE: we don't break [, because we don't want to sort that scope
-          else if ((mode === "(" || mode === "{") && (c === "," || c === " ") && string !== "...on") {
+          else if (
+            (mode === "(" && (c === "," || c === " " || (c === "$" && !string.endsWith(":")))) ||
+            (mode === "{" && (c === "," || c === " ") && string !== "...on")) {
             if (Array.isArray(lines.at(-1))) lines.at(-1).push(string);
             else lines.push(string);
-            string = "";
+            // Inside "(" scope variables can be written as $page:Int$id:5 -> this handle that
+            if (c === "$") string = "$";
+            else string = "";
           }
           // Scope closed
-          else if ((mode === "(" && c === ")") || (mode === "{" && c === "}") || (mode === "[" && c === "]")) {
+          else if ((mode === "(" && c === ")") || (mode === "{" && c === "}")) {
             let separator = c === "}" ? " " : ",";
             lines.at(-1).push(string);
             if (Array.isArray(lines.at(-2))) {
@@ -44,11 +48,14 @@ export default function grapqlMinimizer() {
           }
           // Add character to string
           else {
+            // Update mode, so we don't split "," characters inside this scope
+            if (c === "[") mode = c;
+            else if (c === "]") mode = parentScopeMode(lines);
             string += c;
           }
         }
 
-        return `export default ${JSON.stringify(lines.join(""))};`;
+        return `export default ${JSON.stringify(lines.sort().join("")).replaceAll(",$", "$")};`;
       }
     }
   }
