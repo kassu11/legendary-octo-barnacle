@@ -1,18 +1,19 @@
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
-import apiOLD from "../../../utils/api-OLD.js";
 import { createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import "./index(user-media-list).scoped.css";
 import { capitalize } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
-import { useAuthentication, UserMediaListContext, useUser } from "../../../context/providers.js";
+import { UserMediaListContext, useUser } from "../../../context/providers.js";
 import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
 import { asserts, queries } from "../../../collections/collections.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
 import { isTypeFunction } from "../../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
+import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
+import { authUserData } from "../../../core/globalState";
 
 export const useListNavigation = () => {
   const navigate = useNavigate();
@@ -27,7 +28,6 @@ export const useListNavigation = () => {
 export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
-  const { accessToken, authUserData } = useAuthentication();
   const name = createMemo(() => user().name);
   const [userMediaTime, startUserMediaTimer, stopUserMediaTimer] = createTimer();
   const [userMediaData, setUserMediaData] = createSignal(undefined, { equals: false });
@@ -95,11 +95,14 @@ export function UserMediaList() {
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
     asserts.assertTrueOLD(progressKey, "Progress key is undefined");
-
-    const response = await apiOLD.anilist.mutateMedia(accessToken(), { mediaId, [progressKey]: newProgress });
-    if (response.status !== 200) {
+    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId, [progressKey]: newProgress }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher);
+    if (res.status !== 200) {
+      addApplicationNotification({ type: "error", message: "Failed to save media changes", duration: 30_000 });
       return;
     }
+
+    const json = await res.json();
 
     mutateMediaListCache(res => {
       function pushEntryToList(name, isCustomList) {
@@ -109,7 +112,7 @@ export function UserMediaList() {
         }
 
         const list = res.data.data.MediaListCollection.lists.at(listIndex);
-        list.entries.push(response.data);
+        list.entries.push(json.data.SaveMediaListEntry);
         listData().data.indecies[mediaId].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
       }
 
@@ -118,12 +121,12 @@ export function UserMediaList() {
       });
       listData().data.indecies[mediaId] = [];
 
-      if (!response.data.hiddenFromStatusLists) {
-        const name = converStatusToListName(response.data.status, params.type);
+      if (!json.data.SaveMediaListEntry.hiddenFromStatusLists) {
+        const name = converStatusToListName(json.data.SaveMediaListEntry.status, params.type);
         pushEntryToList(name, false);
       }
 
-      for (const [listName, enabled] of Object.entries(response.data.customLists ?? {})) {
+      for (const [listName, enabled] of Object.entries(json.data.SaveMediaListEntry.customLists ?? {})) {
         if (enabled) {
           pushEntryToList(listName, true);
         }

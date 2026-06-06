@@ -1,12 +1,12 @@
 import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
-import apiOLD from "../utils/api-OLD.js";
 import ScoreInput from "../components/media/ScoreInput";
 import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
 import "./EditMediaEntriesContext.scss";
-import { EditMediaEntriesContext, useAuthentication } from "./providers.js";
+import { EditMediaEntriesContext } from "./providers.js";
 import { asserts, queries } from "../collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
+import { authUserData } from "../core/globalState";
 
 function formState(auth, initialData) {
   asserts.assertTrueOLD(!initialData || auth, "Should not be able to edit if not authenticated");
@@ -108,7 +108,6 @@ function formState(auth, initialData) {
 export function EditMediaEntriesProvider(props) {
   const [mediaListEntry, setMediaListEntry] = createSignal(undefined);
   const [mutates, setMutates] = createSignal(undefined);
-  const { accessToken, authUserData } = useAuthentication()
   const [state, setState] = formState();
 
   // eslint-disable-next-line no-unassigned-vars
@@ -200,12 +199,17 @@ export function EditMediaEntriesProvider(props) {
       // Send changes to anilist
       if (Object.keys(changes).length > 0) {
         changes.mediaId = mediaListEntry().id;
-        for(const [key, value] of Object.entries(changes)) {
+        for (const [key, value] of Object.entries(changes)) {
           asserts.assertTrueOLD(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
-        const response = await apiOLD.anilist.mutateMedia(accessToken(), changes);
-        if (response.status === 200) {
-          mutates()?.mutateMedia?.(response.data);
+
+        const fetcher = createAnilistFetcher(queries.anilistMutateMedia, changes, AbortSignal.timeout(30_000));
+        const res = await fetcherToFetch(fetcher);
+        if (res.status === 200) {
+          const json = await res.json();
+          mutates()?.mutateMedia?.(json.data.SaveMediaListEntry);
+        } else {
+          addApplicationNotification({ type: "error", message: "Failed to save media updates", duration: 30_000 });
         }
       }
     } 
@@ -481,8 +485,13 @@ export function EditMediaEntriesProvider(props) {
             <form method="dialog">
               <button onClick={async () => {
                 editor.close();
-                // const response = await apiOLD.anilist.deleteMediaListEntry(accessToken(), mediaListEntry().mediaListEntry.id);
-                mutates()?.deleteMedia?.();
+                const fetcher = createAnilistFetcher(queries.anilistDeleteMediaListEntry, { id: mediaListEntry().mediaListEntry.id }, AbortSignal.timeout(30_000));
+                const res = await fetcherToFetch(fetcher);
+                if (res.status === 200) {
+                  mutates()?.deleteMedia?.();
+                } else {
+                  addApplicationNotification({ type: "error", message: "Failed to delete media", duration: 30_000 });
+                }
               }}>Yes</button>
               <button>No</button>
             </form>

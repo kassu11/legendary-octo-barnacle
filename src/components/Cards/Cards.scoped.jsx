@@ -107,6 +107,7 @@ function QuickActionItemList(props) {
     if (res.status === 200) {
       const json = await res.json();
       console.log("JSON", json)
+      // props.activity.likeCount = json.data.ToggleLike.likeCount;
     } else {
       addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });
     }
