@@ -1,5 +1,6 @@
 [
   "main"
   , "dev"
+  , "feature-improve-fetch-rate-limits"
   , "v26.23.0"
 ]
