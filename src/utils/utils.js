@@ -10,5 +10,3 @@ export * as stringUtils from "./stringUtils.js";
 export * as statusUtils from "./statusUtils.js";
 export * as urlUtils from "./urlUtils.js";
 export * as formatingUtils from "./formatingUtils.js";
-
-export * as requestUtils from "./requestUtils.js";

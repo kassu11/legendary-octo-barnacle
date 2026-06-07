@@ -31,11 +31,11 @@ const baseLimits = {
       const only6ReqIn5Sec = (self.requests.at(-6)?.start + 5000) || now;
 
       // If 10 or less tokens remain limit requests to one per second
-      const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 1000) || now : now;
+      const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 2000) || now : now;
       // If 5 or less tokens remain limit requests to one per two seconds
-      const tok5ReqIn2Sec = self.remaining <= 5 ? (self.requests.at(-1)?.start + 2000) || now : now;
+      const tok5ReqIn2Sec = self.remaining <= 5 ? (self.requests.at(-1)?.start + 3000) || now : now;
       // If 2 or less tokens remain limit requests to one per four seconds
-      const tok2ReqIn2Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 4000) || now : now;
+      const tok2ReqIn2Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 6000) || now : now;
 
       return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
     }
@@ -89,23 +89,23 @@ export function addFetcherToRateLimit(fetcher) {
   const now = new Date().getTime();
   rateLimit.requests.push({ start: now });
   // Remove requests if they are over 2 min old
-  rateLimit.requests = rateLimit.requests.filter(row => now - row.start < 120_000);
+  rateLimit.requests = rateLimit.requests.filter(row => now - row.start < 300_000);
 
   storeRateLimits();
 }
 
-export function setFetchResponseToRateLimit(fetcher, response) {
+export function setFetchResponseToRateLimit(fetcher, response, delay) {
   const rateLimit = getRateLimitRow(fetcher);
   if (!rateLimit) return;
 
   const now = new Date().getTime();
 
   // const status = response?.status || "cors";
-  const retry = parseInt(response?.headers?.get("Retry-After"));
+  const retry = (parseInt(response?.headers?.get("Retry-After")) * 1000) || delay || 0;
   const limit = parseInt(response?.headers?.get("X-Ratelimit-Limit"));
   const remain = parseInt(response?.headers?.get("X-Ratelimit-Remaining"));
 
-  rateLimit.resetTime = retry ? retry * 1000 + now : 0;
+  rateLimit.resetTime = retry + now;
   rateLimit.limit = limit ? limit : rateLimit.limit || 15;
   rateLimit.remaining = remain ? remain : Math.max(rateLimit.remaining - 1, 0);
 
