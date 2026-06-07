@@ -11,8 +11,8 @@ import { CreatedAt } from "./CreatedAt.jsx";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
 
-export function ActivityCard(_props) {
-  const props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, _props);
+export function ActivityCard(props) {
+  props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, props);
 
   return (
     <Switch>
@@ -42,21 +42,13 @@ export function ActivityCard(_props) {
             <Switch>
               <Match when={props.hideProfile === true}>
                 <p>
-                  {capitalize(props.activity.status)}{" "}
-                  <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
-                    {props.activity.progress} of 
-                  </Show>
-                  <A href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
+                  <MediaListTextContent {...props} />
                 </p>
               </Match>
               <Match when={props.hideProfile === false}>
                 <A href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
                 <p>
-                  {capitalize(props.activity.status)}{" "}
-                  <Show when={props.activity.status !== "rewatched" && props.activity.status !== "reread" && props.activity.progress}>
-                    {props.activity.progress} of 
-                  </Show>
-                  <A href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
+                  <MediaListTextContent {...props} />
                   <A href={"/user/" + props.activity.user.name}>
                     <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
                   </A>
@@ -75,6 +67,18 @@ export function ActivityCard(_props) {
       </Match>
     </Switch>
   );
+}
+
+function MediaListTextContent(props) {
+  return (
+    <>
+      {capitalize(props.activity.status)}{" "}
+      <Show when={(props.activity.status.includes("episode") || props.activity.status.includes("chapter")) && props.activity.progress}>
+        {props.activity.progress} of{" "}
+      </Show>
+      <A href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
+    </>
+  )
 }
 
 let activityLikesController;
