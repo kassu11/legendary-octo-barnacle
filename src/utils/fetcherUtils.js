@@ -300,6 +300,7 @@ export async function sendFetcher(fetcher, settings = {}) {
     queueTarget.timeout = setTimeout(loop, 10);
   }
 
+  let couldHaveFetchedStreak = 0;
   if (settings.queue === false) {
     event();
     return;
@@ -311,15 +312,18 @@ export async function sendFetcher(fetcher, settings = {}) {
   function loop() {
     if (!queueTarget.queue.length) return;
     const { event, fetcher } = queueTarget.queue.at(-1);
-    const inActiveTabPenalty = document.hidden ? 1_000 : 0;
 
     const ms = getRateLimitFromFetcher(fetcher);
-    if (ms === 0) {
+    if (ms === 0) couldHaveFetchedStreak++;
+    else couldHaveFetchedStreak = 0;
+
+    if (ms === 0 && (!document.hidden || couldHaveFetchedStreak > 10)) {
       queueTarget.queue.pop();
       event();
     } else {
       clearTimeout(queueTarget.timeout);
-      queueTarget.timeout = setTimeout(loop, inActiveTabPenalty + ms);
+      const inactiveTabPenalty = document.hidden ? 1000 + Math.random() * 500 : 0;
+      queueTarget.timeout = setTimeout(loop, Math.min(ms, 200) + inactiveTabPenalty);
     }
   }
 }
