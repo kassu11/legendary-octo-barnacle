@@ -14,7 +14,7 @@
     }
 
     .cp-current-card-info {
-      background-color: var(--shadow-400);
+      background-color: var(--shadow-400-old);
       padding-block: .75em 1rem;
       position: absolute;
       width: 100%;
@@ -33,7 +33,7 @@
     }
 
     .cp-current-card-hover-info {
-      background-color: var(--shadow-400);
+      background-color: var(--shadow-400-old);
       padding-block: .75em;
       position: absolute;
       width: 100%;
@@ -54,7 +54,7 @@
       }
 
       &:hover {
-        background-color: var(--shadow-300);
+        background-color: var(--shadow-300-old);
       }
 
       .plus {
@@ -74,7 +74,7 @@
       width: min(15rem, calc(100vw - 150%));
       z-index: 1;
       pointer-events: none;
-      background-color: var(--bg-light);
+      background-color: var(--bg-light-old);
       padding: 4px 8px;
 
       &.right {
@@ -93,7 +93,7 @@
         transform: translateX(-50%);
         border-radius: 4px;
         top: calc(100% + var(--gap) / 2);
-        outline: 2px solid var(--bg);
+        outline: 2px solid var(--bg-old);
       }
 
       .progress-status {

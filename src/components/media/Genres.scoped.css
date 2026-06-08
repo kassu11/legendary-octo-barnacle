@@ -1,5 +1,5 @@
 .wrapper {
-  background-color: var(--background-400);
+  background-color: var(--background-400-old);
 
   .genres {
     list-style: none;
@@ -10,7 +10,7 @@
     padding: .25rem;
 
     .genre {
-      background-color: var(--background-500);
+      background-color: var(--background-500-old);
       flex-grow: 1;
       text-align: center;
       padding: .1rem .25rem;

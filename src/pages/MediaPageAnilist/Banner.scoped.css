@@ -1,6 +1,6 @@
 @layer layout {
   .pg-media-banner {
-    background-color: var(--background-200);
+    background-color: var(--background-200-old);
 
     &.loading {
       opacity: .6;

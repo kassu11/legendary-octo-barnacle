@@ -3,7 +3,7 @@
     max-width: 85rem;
     padding: 2rem 1rem;
     margin-inline: auto;
-    background-color: var(--background-400);
+    background-color: var(--background-400-old);
 
     @container (width < calc(6 * 7em + 5 * 8px)) {
       .search-page-content {

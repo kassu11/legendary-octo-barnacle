@@ -6,7 +6,7 @@
     display: grid;
     justify-items: left;
     gap: 8px;
-    background-color: var(--background-350);
+    background-color: var(--background-350-old);
     border-radius: 4px;
     left: 0px;
     bottom: 0px;
@@ -17,6 +17,6 @@
 
   footer {
     min-height: 20rem;
-    background-color: var(--background-350);
+    background-color: var(--background-350-old);
   }
 }

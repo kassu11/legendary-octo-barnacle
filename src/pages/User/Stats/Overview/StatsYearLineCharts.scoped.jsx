@@ -59,8 +59,8 @@ export function StatsYearLineChartsScoped(props) {
         </div>
         <DraggableScrollContainerScoped>
           <svg width={getX(props.data.length - 1) + inlinePadding} height={getY(0) + bottomPadding}>
-            <path d={pathFill()} stroke="none" stroke-width="0" fill="var(--background-350)"/>
-            <rect x="0" y={getY(0)} width="100%" height="60" fill="var(--background-300)" stroke="none"
+            <path d={pathFill()} stroke="none" stroke-width="0" fill="var(--background-350-old)"/>
+            <rect x="0" y={getY(0)} width="100%" height="60" fill="var(--background-300-old)" stroke="none"
                   pointer-events="all"/>
             <path d={path()} stroke="black" stroke-width="5" fill="transparent"/>
             <For each={props.data}>{(year, i) => (

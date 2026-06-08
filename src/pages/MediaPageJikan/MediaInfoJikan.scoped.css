@@ -13,13 +13,13 @@
   }
 
   > .left > div {
-    background-color: var(--background-400);
+    background-color: var(--background-400-old);
   }
 
 
   .relations {
     li {
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
       padding: .5rem 1rem;
       border-radius: .25rem;
     }
@@ -34,7 +34,7 @@
     }
 
     .type {
-      color: var(--text-300);
+      color: var(--text-300-old);
     }
   }
 }

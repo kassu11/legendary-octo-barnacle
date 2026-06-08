@@ -6,7 +6,7 @@
 }
 
 .character {
-  background-color: var(--background-400);
+  background-color: var(--background-400-old);
   display: flex;
   gap: .5rem;
   text-decoration: none;
@@ -42,4 +42,3 @@
   grid-template-columns: 1fr 3.5rem;
   text-align: right;
 }
-

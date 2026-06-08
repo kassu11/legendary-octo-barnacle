@@ -1,11 +1,11 @@
 @layer layout {
   li _a {
-    background-color: var(--background-400);
+    background-color: var(--background-400-old);
     display: grid;
     grid-template-columns: 5.5rem 1fr;
     gap: .5rem;
     text-decoration: none;
-    color: var(--text-400);
+    color: var(--text-400-old);
 
     img {
       width: 100%;
@@ -21,7 +21,7 @@
     }
 
     .type {
-      color: var(--text-500);
+      color: var(--text-500-old);
       font-weight: 700;
     }
 

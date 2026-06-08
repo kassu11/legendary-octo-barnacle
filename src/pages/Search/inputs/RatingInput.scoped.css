@@ -64,7 +64,7 @@
 
     .multi-input-header {
       padding: .25rem .5rem;
-      background-color: var(--background-300);
+      background-color: var(--background-300-old);
     }
 
     input[type="search"] {
@@ -131,7 +131,7 @@
     justify-content: end;
     gap: .25rem 1rem;
     padding: .5rem 1rem;
-    background-color: var(--background-300);
+    background-color: var(--background-300-old);
     flex-wrap: wrap;
   }
 }

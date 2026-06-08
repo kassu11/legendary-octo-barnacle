@@ -1,6 +1,6 @@
 @layer layout {
   .grid-column-auto-fill.current {
-    background-color: var(--background-400);
+    background-color: var(--background-400-old);
     --grid-column-width: 5rem;
     --gap: 1.5rem;
     padding: 1rem;

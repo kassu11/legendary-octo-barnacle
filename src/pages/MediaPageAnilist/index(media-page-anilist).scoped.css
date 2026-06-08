@@ -21,7 +21,7 @@
 
     .grid-reel-auto-fill {
       /* Setting background color to the same as background because otherwise the scroll snapping will break ¯\_(ツ)_/¯ */
-      background-color: var(--background-200);
+      background-color: var(--background-200-old);
     }
 
     li {
@@ -47,7 +47,7 @@
 
     p {
       margin-top: auto;
-      background-color: var(--shadow-400);
+      background-color: var(--shadow-400-old);
       padding: .5rem;
       width: 100%;
     }
@@ -70,7 +70,7 @@
     }
 
     > div {
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
     }
   }
 
@@ -114,7 +114,7 @@
       top: calc(50% + .1em);
       transform: translateY(-50%) translateX(calc(var(--gap, 1rem) / -2 + -50%));
       border-radius: 100%;
-      background-color: var(--text-200);
+      background-color: var(--text-200-old);
     }
   }
 
@@ -150,7 +150,7 @@
 
     .media-page-cover {
       grid-column: 1;
-      order: 0; 
+      order: 0;
     }
 
     _.pg-ani-media-info {
@@ -167,7 +167,7 @@
     }
 
     .media-page-description {
-      order: 0; 
+      order: 0;
     }
   }
 }

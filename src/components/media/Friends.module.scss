@@ -14,7 +14,7 @@
 
 .friend {
   display: grid;
-  background-color: var(--background-400);
+  background-color: var(--background-400-old);
   border-radius: .25rem;
   grid-template-columns: subgrid;
   grid-column: 1/-1;

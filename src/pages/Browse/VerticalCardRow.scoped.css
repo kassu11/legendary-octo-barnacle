@@ -15,7 +15,7 @@
       container-name: vertical-search-cards;
 
       .vertical-search-card {
-        background-color: var(--background-300);
+        background-color: var(--background-300-old);
         display: grid;
         grid-template-columns: subgrid;
         grid-column: 1 / -1;
@@ -31,7 +31,7 @@
           display: grid;
           grid-template-columns: subgrid;
           grid-column: 2 / -1;
-          background-color: var(--background-350);
+          background-color: var(--background-350-old);
           padding: .5rem;
 
           .vertical-search-card-content {
@@ -121,7 +121,7 @@
         grid-template-columns: auto auto;
         font-size: 1.25rem;
         pointer-events: none;
-        color: var(--shadow-300)
+        color: var(--shadow-300-old)
       }
 
       .vertical-search-card-body {

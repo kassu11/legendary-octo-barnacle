@@ -4,7 +4,7 @@
     gap: 2rem;
 
     .item {
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
 
       .header {
         display: grid;
@@ -18,7 +18,7 @@
       }
 
       .wrapper {
-        background-color: var(--background-350);
+        background-color: var(--background-350-old);
 
         .flex-space-between {
           padding-inline: 1rem;

@@ -1,6 +1,6 @@
 .entities-page {
   display: grid;
-  background-color: var(--background-400);
+  background-color: var(--background-400-old);
   gap: 1rem;
 
   .cp-loader-circle {
@@ -10,7 +10,7 @@
 }
 
 .entities-page-entity {
-  background-color: var(--background-350);
+  background-color: var(--background-350-old);
   display: flex;
   gap: .5rem;
   text-decoration: none;
@@ -64,4 +64,3 @@
     color: wheat;
   }
 }
-

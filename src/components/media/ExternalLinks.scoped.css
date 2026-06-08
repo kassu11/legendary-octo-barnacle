@@ -1,5 +1,5 @@
 .external {
-  background-color: var(--background-400);
+  background-color: var(--background-400-old);
 
   .cp-external-link {
     display: flex;
@@ -20,4 +20,3 @@
     }
   }
 }
-

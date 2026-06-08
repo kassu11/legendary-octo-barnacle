@@ -1,9 +1,9 @@
 .spoiler {
   display: inline-block;
-  background-color: var(--background-400);
+  background-color: var(--background-400-old);
 
   &:not([open]) {
-    background-color: var(--background-500);
+    background-color: var(--background-500-old);
     * {
       color: transparent;
     }

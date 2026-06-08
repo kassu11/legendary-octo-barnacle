@@ -1,7 +1,7 @@
 @layer components {
   tool-tip2 {
     display: block;
-    background-color: var(--bg-dark);
+    background-color: var(--bg-dark-old);
     width: max-content;
     padding: 4px 8px;
     border-radius: 4px;

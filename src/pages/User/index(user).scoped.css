@@ -16,7 +16,7 @@
       object-fit: cover;
       left: 0px;
       z-index: -1;
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
       filter: brightness(.75);
     }
 
@@ -52,7 +52,7 @@
   }
 
   .profile-navigation ul {
-    background-color: var(--background-500);
+    background-color: var(--background-500-old);
     display: flex;
     flex-wrap: wrap;
     list-style: none;

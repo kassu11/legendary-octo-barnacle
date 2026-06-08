@@ -57,14 +57,14 @@
     z-index: 1;
 
     .entity-page-details[open] & {
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
       &::before {
         content: "[open]";
       }
     }
 
     .entity-page-details & {
-      background-color: var(--background-300);
+      background-color: var(--background-300-old);
       &::before {
         content: "[closed]";
       }

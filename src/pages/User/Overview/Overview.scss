@@ -12,7 +12,7 @@
     gap: 2rem;
 
     > div {
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
     }
   }
   .user-activity-container {
@@ -42,7 +42,7 @@
       gap: 1rem;
       justify-content: space-around;
       flex: 1;
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
       padding: .5rem;
       flex-wrap: wrap;
       flex-basis: min(20rem, 100%);
@@ -75,7 +75,7 @@
     }
 
     .item {
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
       padding-inline: .5rem;
 
       span {
