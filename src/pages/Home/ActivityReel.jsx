@@ -1,5 +1,5 @@
-import {createRenderEffect, createSignal, Show} from "solid-js";
-import {HomePageActivityReelContent} from "./ActivityPage.scoped.jsx";
+import { createRenderEffect, createSignal, Show } from "solid-js";
+import { HomePageActivityReelContent } from "./ActivityPage.scoped.jsx";
 import { modes, signals, queries } from "../../collections/collections.js";
 import { arrayUtils } from "../../utils/utils.js";
 import { createAnilistFetcher } from "../../utils/fetcherUtils.js";

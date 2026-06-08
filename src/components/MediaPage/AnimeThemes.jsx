@@ -3,7 +3,7 @@ import style from "./AnimeThemes.module.scss";
 import { queries } from "../../collections/collections.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
-import {createEffect, createSignal, ErrorBoundary, For, Match, Show, Switch} from "solid-js";
+import { createEffect, createSignal, ErrorBoundary, For, Match, Show, Switch } from "solid-js";
 import { useMediaInfo } from "../../context/providers.js";
 import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils";
 
@@ -30,7 +30,7 @@ function AnimeThemes() {
     let query;
     if (api === localizations.ani) query = queries.animeThemesByAnilistId;
     else if (api === localizations.mal) query = queries.animeThemesByMyAnimeListId;
-    
+
     let curId = ++sessionId;
     const fetcher = createJsonGetFetcher(query, { id: params.id });
     sendFetcher(fetcher, {

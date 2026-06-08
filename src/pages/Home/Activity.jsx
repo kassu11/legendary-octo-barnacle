@@ -1,5 +1,5 @@
-import {batch, createEffect, Show} from "solid-js";
-import {HomePageActivityReel} from "./ActivityReel.jsx";
+import { batch, createEffect, Show } from "solid-js";
+import { HomePageActivityReel } from "./ActivityReel.jsx";
 import { signals } from "../../collections/collections.js";
 
 export function Activity() {

@@ -1,6 +1,6 @@
-import {createEffect, createSignal, Show} from "solid-js";
-import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
-import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
+import { createEffect, createSignal, Show } from "solid-js";
+import { HorizontalCardRowScoped } from "./HorizontalCardRow.scoped.jsx";
+import { VerticalCardRowScoped } from "./VerticalCardRow.scoped.jsx";
 import "./BrowseMangaHome.scoped.css";
 import { queries } from "../../collections/collections.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
@@ -16,7 +16,7 @@ export function BrowseMangaHomeScoped() {
     browseController = new AbortController();
 
     const dates = getDates();
-    browseFetcher = createAnilistFetcher(queries.anilistBrowseManga, { 
+    browseFetcher = createAnilistFetcher(queries.anilistBrowseManga, {
       "type": "ANIME",
       "season": dates.season,
       "seasonYear": dates.seasonYear,

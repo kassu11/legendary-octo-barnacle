@@ -1,6 +1,6 @@
-import {A, useParams} from "@solidjs/router";
-import {createEffect, createSignal, For, on, Show} from "solid-js";
-import {formatTitleToUrl} from "../../../../utils/formating.js";
+import { A, useParams } from "@solidjs/router";
+import { createEffect, createSignal, For, on, Show } from "solid-js";
+import { formatTitleToUrl } from "../../../../utils/formating.js";
 import { queries } from "../../../../collections/collections.js";
 import "./GenreMediaCards.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";

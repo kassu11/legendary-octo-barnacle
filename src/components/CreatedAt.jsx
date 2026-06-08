@@ -1,4 +1,4 @@
-import {createSignal, onCleanup, Match, Switch} from "solid-js";
+import { createSignal, onCleanup, Match, Switch } from "solid-js";
 import { plural } from "../utils/formating.js";
 
 export function CreatedAt(props) {
@@ -29,4 +29,3 @@ export function CreatedAt(props) {
     </time>
   );
 }
-

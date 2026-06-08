@@ -1,6 +1,6 @@
-import {createMemo, For, Show} from "solid-js";
-import {Tooltip} from "../../../components/Tooltips.jsx";
-import {formatTimeToDate} from "../../../utils/formating.js";
+import { createMemo, For, Show } from "solid-js";
+import { Tooltip } from "../../../components/Tooltips.jsx";
+import { formatTimeToDate } from "../../../utils/formating.js";
 import "./ActivityHistory.scoped.css";
 import { arrayUtils, numberUtils } from "../../../utils/utils.js";
 import { timeCollection } from "../../../collections/collections.js";

@@ -22,7 +22,7 @@ import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
 import { asserts, localizations, searchObjects, queries } from "../../collections/collections.js";
 import { AnilistMediaCard, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
-import {MediaCardContainerScoped} from "../../components/Cards/MediaCardContainer.scoped.jsx";
+import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContainer.scoped.jsx";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { storeMediaWithMalId } from "../../core/globalState";
@@ -121,8 +121,8 @@ function parseURL() {
   asserts.assertFalseOLD(disabledBySeasonSearch && engine === localizations.ani, "Season disabling should only have on MAL search");
 
   if (searchParams.q) {
-    variables.push(new SearchVariable({ 
-      url: "q=" + searchParams.q, 
+    variables.push(new SearchVariable({
+      url: "q=" + searchParams.q,
       key: engine === "ani" ? "search" : "q",
       value: searchParams.q,
       name: "Search: " + searchParams.q,
@@ -212,13 +212,13 @@ function parseURL() {
   function parseGenres([urlKey, validGenres = [], validTags = []], genre) {
     let disabled = false;
     if (engine === "ani") {
-      if (genreAndTagTranslations.genres === null) { preventFetch = true } 
-      else if (genreAndTagTranslations.tags[genre]) { validTags.push(genre) } 
-      else if (genreAndTagTranslations.genres[genre]) { validGenres.push(genre) } 
+      if (genreAndTagTranslations.genres === null) { preventFetch = true }
+      else if (genreAndTagTranslations.tags[genre]) { validTags.push(genre) }
+      else if (genreAndTagTranslations.genres[genre]) { validGenres.push(genre) }
       else { disabled = true }
     }
     else if (engine === "mal") {
-      if (genreAndTagTranslations[type] === null) { preventFetch = true } 
+      if (genreAndTagTranslations[type] === null) { preventFetch = true }
       else if (Number.isInteger(genreAndTagTranslations[type][genre])) { validGenres.push(genreAndTagTranslations[type][genre]) }
       else { disabled = true }
     }
@@ -291,13 +291,13 @@ function parseURL() {
       let orderWithoutAlternativeKey = order;
       if (order === searchObjects.sortOrders.ani.anime.duration.alternative_key) {
         orderWithoutAlternativeKey = "duration";
-        variables.push(new SearchVariable({ 
-          name: "Duration greater than 0", 
-          url: `order=${order}`, 
-          active: engine === "ani", visuallyDisabled: engine !== "ani", 
-          addUrl: `order=${orderWithoutAlternativeKey}`, 
-          key: "durationGreater", 
-          value: 0 
+        variables.push(new SearchVariable({
+          name: "Duration greater than 0",
+          url: `order=${order}`,
+          active: engine === "ani", visuallyDisabled: engine !== "ani",
+          addUrl: `order=${orderWithoutAlternativeKey}`,
+          key: "durationGreater",
+          value: 0
         }));
       }
       else if (order === searchObjects.sortOrders.mal.anime.episodes.alternative_key) {
@@ -318,14 +318,14 @@ function parseURL() {
       else if (order === searchObjects.sortOrders.mal.manga.volumes.alternative_key) {
         orderWithoutAlternativeKey = "volumes";
         if (engine === "ani") {
-          variables.push(new SearchVariable({ 
-            name: "Volumes greater than 0", 
-            url: `order=${order}`, 
-            addUrl: `order=${orderWithoutAlternativeKey}`, 
+          variables.push(new SearchVariable({
+            name: "Volumes greater than 0",
+            url: `order=${order}`,
+            addUrl: `order=${orderWithoutAlternativeKey}`,
             active: type === "manga" && !disabledBySeasonSearch,
             visuallyDisabled: type !== "manga" || disabledBySeasonSearch,
-            key: "volumeGreater", 
-            value: 0 
+            key: "volumeGreater",
+            value: 0
           }));
         }
         else if (engine === "mal") {
@@ -680,12 +680,12 @@ export function SearchBar(props) {
         <SeasonInputScoped />
         <ExternalSourceInput sources={externalSourcesData()} />
         <TwoHeadedRangeScoped
-          min={0} 
-          max={500} 
-          separation={1} 
-          minValue={+searchParams.episodeGreater || 0} 
-          maxValue={+searchParams.episodeLesser || 500} 
-          onChange={([min, max]) => setSearchParams({ episodeLesser: max, episodeGreater: min })} 
+          min={0}
+          max={500}
+          separation={1}
+          minValue={+searchParams.episodeGreater || 0}
+          maxValue={+searchParams.episodeLesser || 500}
+          onChange={([min, max]) => setSearchParams({ episodeLesser: max, episodeGreater: min })}
         />
         <Show when={params.type === "anime"}>
           <div>
@@ -799,7 +799,7 @@ export function SearchContent(props) {
             <li>
               <button onClick={() => {
                 if (searchParams.malSearch === "true") {
-                  navigate("/search/" + params.type + "?malSearch=true"); 
+                  navigate("/search/" + params.type + "?malSearch=true");
                 } else {
                   navigate("/search/" + params.type);
                 }
@@ -820,17 +820,17 @@ export function SearchContent(props) {
                   <Show when={debouncedSearchVariables().find(v => v.key === "seasonYear")?.value}>{seasonYear => (
                     <Show when={debouncedSearchVariables().find(v => v.key === "season")?.value}>{season => (
                       <Show when={debouncedSearchVariables().filter(v => v.key === "format").length === 0 || debouncedSearchVariables().some(v => v.key === "format" && v.value?.includes("TV"))}>
-                        <AnilistMediaSeasonContent 
-                          page={1} 
-                          variables={debouncedSearchVariables()} 
-                          title="Leftovers" 
-                          groupCards={false} 
-                          extraVariables={{ 
+                        <AnilistMediaSeasonContent
+                          page={1}
+                          variables={debouncedSearchVariables()}
+                          title="Leftovers"
+                          groupCards={false}
+                          extraVariables={{
                             seasonYear: moveSeasonObject(season(), +seasonYear(), - 1).year,
                             season: moveSeasonObject(season(), +seasonYear(), - 1).season,
                             episodeGreater: 16,
                             format: "TV"
-                          }} 
+                          }}
                         />
                       </Show>
                     )}</Show>
@@ -979,11 +979,11 @@ function AnilistMediaSeasonContent(props) {
         </Match>
       </Switch>
       <Show when={anilistSearchMediaData().pageInfo.hasNextPage}>
-        <AnilistMediaSeasonContent 
-          variables={variables()} 
-          extraVariables={props.extraVariables} 
-          page={props.page + 1} 
-          previousFormat={anilistSearchMediaData().media.at(-1)?.format || "Unknown format"} 
+        <AnilistMediaSeasonContent
+          variables={variables()}
+          extraVariables={props.extraVariables}
+          page={props.page + 1}
+          previousFormat={anilistSearchMediaData().media.at(-1)?.format || "Unknown format"}
         />
       </Show>
     </Show>

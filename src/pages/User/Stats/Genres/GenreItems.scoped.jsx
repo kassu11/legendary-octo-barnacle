@@ -1,8 +1,8 @@
-import {A, useParams} from "@solidjs/router";
-import {useUser} from "../../../../context/providers.js";
-import {For} from "solid-js";
-import {GenresCardStats} from "./GenresCardStats.scoped.jsx";
-import {GenreMediaCardsScoped} from "./GenreMediaCards.scoped.jsx";
+import { A, useParams } from "@solidjs/router";
+import { useUser } from "../../../../context/providers.js";
+import { For } from "solid-js";
+import { GenresCardStats } from "./GenresCardStats.scoped.jsx";
+import { GenreMediaCardsScoped } from "./GenreMediaCards.scoped.jsx";
 import "./GenreItems.scoped.css";
 
 export function GenreItems(props) {

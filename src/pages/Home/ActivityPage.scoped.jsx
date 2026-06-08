@@ -1,9 +1,9 @@
-import {createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch} from "solid-js";
-import {debounce, leadingAndTrailing} from "@solid-primitives/scheduled";
-import {untrack} from "solid-js/web";
-import {LoaderCircle} from "../../components/LoaderCircle.jsx";
-import {Tooltip} from "../../components/Tooltips.jsx";
-import {ActivityCard} from "../../components/Activity.jsx";
+import { createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
+import { untrack } from "solid-js/web";
+import { LoaderCircle } from "../../components/LoaderCircle.jsx";
+import { Tooltip } from "../../components/Tooltips.jsx";
+import { ActivityCard } from "../../components/Activity.jsx";
 import { asserts, queries } from "../../collections/collections.js";
 import "./ActivityPage.scoped.css";
 import { arrayUtils, scheduleUtils } from "../../utils/utils.js";

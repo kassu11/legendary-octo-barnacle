@@ -1,6 +1,6 @@
-import {useParams} from "@solidjs/router";
-import {Match, Show, Switch} from "solid-js";
-import {numberCommas, plural} from "../../../../utils/formating.js";
+import { useParams } from "@solidjs/router";
+import { Match, Show, Switch } from "solid-js";
+import { numberCommas, plural } from "../../../../utils/formating.js";
 import "./DistributionFooter.scoped.css";
 
 export function DistributionFooterScoped(props) {

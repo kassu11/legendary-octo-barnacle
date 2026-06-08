@@ -1,6 +1,6 @@
-import {createEffect, createSignal, Show} from "solid-js";
-import {HorizontalCardRowScoped} from "./HorizontalCardRow.scoped.jsx";
-import {VerticalCardRowScoped} from "./VerticalCardRow.scoped.jsx";
+import { createEffect, createSignal, Show } from "solid-js";
+import { HorizontalCardRowScoped } from "./HorizontalCardRow.scoped.jsx";
+import { VerticalCardRowScoped } from "./VerticalCardRow.scoped.jsx";
 import "./BrowseMediaHome.scoped.css";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { getDates } from "../../utils/dates.js";
@@ -16,7 +16,7 @@ export function BrowseMediaHomeScoped() {
     browseController = new AbortController();
 
     const dates = getDates();
-    browseFetcher = createAnilistFetcher(queries.anilistBrowseMedia, { 
+    browseFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {
       "type": "ANIME",
       "season": dates.season,
       "seasonYear": dates.seasonYear,

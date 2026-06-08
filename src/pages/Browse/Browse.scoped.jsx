@@ -1,5 +1,5 @@
-import {Navigate, useLocation, useParams} from "@solidjs/router";
-import {Show} from "solid-js";
+import { Navigate, useLocation, useParams } from "@solidjs/router";
+import { Show } from "solid-js";
 
 export function BrowseRedirect(props) {
   const params = useParams();

@@ -1,5 +1,5 @@
-import {useParams} from "@solidjs/router";
-import {Match, Switch} from "solid-js";
+import { useParams } from "@solidjs/router";
+import { Match, Switch } from "solid-js";
 
 export function SortHeaderButtons(props) {
   const params = useParams();

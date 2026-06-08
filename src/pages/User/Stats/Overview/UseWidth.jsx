@@ -1,4 +1,4 @@
-import {createEffect, createSignal, on, onCleanup} from "solid-js";
+import { createEffect, createSignal, on, onCleanup } from "solid-js";
 
 export function useWidth(elem) {
   const [width, setWidth] = createSignal(elem()?.getBoundingClientRect().width || 0);

@@ -9,6 +9,8 @@ import grapqlMinimizer from "./vite-plugins/graphql-minimize";
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
 
+
+// eslint-disable-next-line no-undef
 const branch = process.env.SAFE_BRANCH_NAME || "main";
 
 export default defineConfig({

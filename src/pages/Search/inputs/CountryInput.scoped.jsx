@@ -1,4 +1,4 @@
-import {createEffect, For, on, Show} from "solid-js";
+import { createEffect, For, on, Show } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import { objectFromArrayEntries } from "../../../utils/arrays.js";

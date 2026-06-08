@@ -1,6 +1,6 @@
-import {A} from "@solidjs/router";
-import {For} from "solid-js";
-import {AnilistMediaCard} from "../../components/Cards/Cards.scoped.jsx";
+import { A } from "@solidjs/router";
+import { For } from "solid-js";
+import { AnilistMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import "./HorizontalCardRow.scoped.css";
 import { asserts } from "../../collections/collections.js";
 

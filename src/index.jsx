@@ -2,7 +2,7 @@ import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
 import App from "./App.scoped.jsx"
-import {Home} from "./pages/Home/index(home).scoped.jsx"
+import { Home } from "./pages/Home/index(home).scoped.jsx"
 import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
@@ -19,7 +19,7 @@ import Notifications from "./pages/Notifications/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
-import {ActivityPage} from "./pages/Activity/index(activity).scoped.jsx";
+import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
 import { BrowseRedirect } from "./pages/Browse/Browse.scoped.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/Compare/ComparePage.jsx";
@@ -28,15 +28,15 @@ import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
 import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikan.scoped.jsx";
-import {Overview} from "./pages/User/Overview/Overview.jsx";
-import {UserMediaList} from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
-import {IndexFavouriteScoped} from "./pages/User/Favourites/index(favourite).scoped.jsx";
-import {Stats} from "./pages/User/Stats/index(user-stats).scoped.jsx";
-import {MediaInfoContent, MediaInfoHome, MediaPageRedirect} from "./pages/MediaPageAnilist/index(media-page-anilist).scoped.jsx";
-import {Socials} from "./pages/User/Socials/Socials.scoped.jsx";
-import {BrowseMangaHomeScoped} from "./pages/Browse/BrowseMangaHome.scoped.jsx";
-import {BrowseAnimeHome} from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
-import {BrowseMediaHomeScoped} from "./pages/Browse/BrowseMediaHome.scoped.jsx";
+import { Overview } from "./pages/User/Overview/Overview.jsx";
+import { UserMediaList } from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
+import { IndexFavouriteScoped } from "./pages/User/Favourites/index(favourite).scoped.jsx";
+import { Stats } from "./pages/User/Stats/index(user-stats).scoped.jsx";
+import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaPageAnilist/index(media-page-anilist).scoped.jsx";
+import { Socials } from "./pages/User/Socials/Socials.scoped.jsx";
+import { BrowseMangaHomeScoped } from "./pages/Browse/BrowseMangaHome.scoped.jsx";
+import { BrowseAnimeHome } from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
+import { BrowseMediaHomeScoped } from "./pages/Browse/BrowseMediaHome.scoped.jsx";
 import { SettingsPage } from "./pages/Settings/index(settings).scoped";
 
 const root = document.getElementById("root")

@@ -1,7 +1,7 @@
-import {useParams} from "@solidjs/router";
-import {createEffect, createSignal, For, Match, Show, Switch} from "solid-js";
-import {DraggableScrollContainerScoped2} from "./DraggableScrollContainer.scoped.jsx";
-import {numberCommas} from "../../../../utils/formating.js";
+import { useParams } from "@solidjs/router";
+import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
+import { DraggableScrollContainerScoped2 } from "./DraggableScrollContainer.scoped.jsx";
+import { numberCommas } from "../../../../utils/formating.js";
 import "./StatsScoreDistributionBars.scoped.css";
 
 export function StatsScoreDistributionBarsScoped(props) {

@@ -1,6 +1,6 @@
-import {A} from "@solidjs/router";
-import {For, Match, Show, Switch} from "solid-js";
-import {capitalize, formatMediaFormat, mediaUrl, numberCommas} from "../../utils/formating.js";
+import { A } from "@solidjs/router";
+import { For, Match, Show, Switch } from "solid-js";
+import { capitalize, formatMediaFormat, mediaUrl, numberCommas } from "../../utils/formating.js";
 import EmojiByScoreScoped from "../../components/EmojiByScore.scoped.jsx";
 import "./VerticalCardRow.scoped.css";
 import { asserts } from "../../collections/collections.js";
