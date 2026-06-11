@@ -71,7 +71,10 @@ function formatCompareList(entries, minUserCount, filterObject) {
       }
       repeatTotal += v.repeat;
       entry.updatedAt = Math.max(entry.updatedAt ?? v.updatedAt, v.updatedAt);
-      entry.completedAt = Math.max(entry.completedAt ?? v.completedAt, v.completedAt);
+      entry.completedAt ??= v.completedAt?.year && {...v.completedAt};
+      if (entry.completedAt?.year < v.completedAt?.year) entry.completedAt = { ...v.completedAt };
+      else if (entry.completedAt?.year == v.completedAt?.year && entry.completedAt?.month < v.completedAt?.month) entry.completedAt = { ...v.completedAt };
+      else if (entry.completedAt?.year == v.completedAt?.year && entry.completedAt?.month == v.completedAt?.month && entry.completedAt?.day == v.completedAt?.day) entry.completedAt = { ...v.completedAt };
     });
 
     entry.score = scoreTotal / scoreCount;
