@@ -6,6 +6,7 @@ import { localizations } from "./collections/collections";
 import { MainNavigation } from "./pages/App/MainNavigation.scoped.jsx";
 import { MainLoadingBar } from "./pages/App/MainLoadingBar.scoped";
 import { ApplicationNotifications } from "./pages/App/ApplicationNotifications.scoped";
+import { ParseSearchParams } from "./pages/App/ParseSearchParams";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
@@ -40,6 +41,7 @@ function App(props) {
       <MainLoadingBar />
       <MainNavigation />
       <ApplicationNotifications />
+      <ParseSearchParams />
       <Show when={localStorage.getItem(localizations.LOB_DEV_BRANCH)}>{branch => (
         <div class="dev-branch">
           <p>Preview: {branch}</p>

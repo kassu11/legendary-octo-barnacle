@@ -6,7 +6,7 @@ import Planning from "../../assets/Planning.jsx";
 import Watching from "../../assets/Watching.jsx";
 import Complete from "../../assets/Complete.jsx";
 import Rewatched from "../../assets/Rewatched.jsx";
-import { useAuthentication, useEditMediaEntries } from "../../context/providers.js";
+import { useEditMediaEntries } from "../../context/providers.js";
 import Star from "../../assets/Star.jsx";
 import { QuickActionListButton } from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
@@ -15,13 +15,13 @@ import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
-import { mediaWithMalId } from "../../core/globalState.js";
+import { mediaWithMalId, token2 } from "../../core/globalState.js";
 
 function AnilistMediaCardListBody(props) {
   asserts.assertTrueOLD(props.media, "Missing media");
 
   return (
-    <li class="cp-media-card inline-container">
+    <li class="cp-media-card inline-container" classList={{ loading: props.loading }} style={{ "--card-cover-url": `url("${props.media.coverImage.large}")`, "--media-color": props.media.coverImage.color }}>
       <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
         <div class="wrapper">
           <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />
@@ -72,12 +72,24 @@ function JikanMediaCardListBody(props) {
 }
 
 export function AnilistMediaCard(props) {
-  asserts.assertTrueOLD(props.media, "Missing media");
-
   return (
-    <AnilistMediaCardListBody {...props}>
-      <QuickActionItemList {...props} />
-    </AnilistMediaCardListBody>
+    <Switch>
+      <Match when={props.media}>
+        <AnilistMediaCardListBody {...props}>
+          <QuickActionItemList {...props} />
+        </AnilistMediaCardListBody>
+      </Match>
+      <Match when={props.loading}>
+        <LoadingMediaCard />
+      </Match>
+    </Switch>
+  );
+}
+
+function LoadingMediaCard() {
+  return (
+    <li class="loading-media-card">
+    </li>
   );
 }
 
@@ -96,7 +108,6 @@ export function JikanMediaCard(props) {
 
 function QuickActionItemList(props) {
   const { openEditor } = useEditMediaEntries();
-  const { accessToken } = useAuthentication();
 
   asserts.assertTrueOLD(props.media, "Missing media");
 
@@ -115,7 +126,7 @@ function QuickActionItemList(props) {
   };
 
   return (
-    <Show when={accessToken()}>
+    <Show when={token2()}>
       <ul class="cp-media-card-quick-action-items">
         <QuickActionListButton label="Edit media" onClick={e => {
           e.preventDefault();
@@ -132,7 +143,7 @@ function QuickActionItemList(props) {
         <QuickActionListButton label="Set to completed" onClick={handleClick("COMPLETED")}>
           <Complete />
         </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEAT")}>
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEATING")}>
           <Rewatched />
         </QuickActionListButton>
       </ul>

@@ -1,4 +1,5 @@
 import { createSignal, onCleanup } from "solid-js";
+import { plural } from "./formating";
 
 export function createTimer() {
   const [val, setVal] = createSignal(0);
@@ -33,4 +34,13 @@ export function formatMSToString(ms) {
   if (ms < 60_000) return `${(ms / 1000).toFixed(1)} s`;
   if (ms < 3_600_000) return `${Math.floor(ms / 60_000)} m ${Math.floor(ms / 1000)} s`;
   return `${Math.floor(ms / 3_600_000)} h ${Math.floor(ms / 60_000)} m ${Math.floor(ms / 1000)} s`;
+}
+
+export function formatSecondsToLongString(s) {
+  let h = Math.floor(s / 60);
+  let m = s % 60;
+
+  if (h && m) return `${h} hour${plural(h)}, ${m} min${plural(m)}`;
+  if (h) return `${h} hour${plural(h)}`;
+  return `${m} min${plural(m)}`;
 }

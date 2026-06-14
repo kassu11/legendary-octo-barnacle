@@ -61,6 +61,33 @@
       }
     }
   }
+
+
+
+
+  /* New select stuff */
+  .item {
+    cursor: pointer;
+
+    &.inc {
+      background: green;
+    }
+    &.exc {
+      background: red;
+    }
+    &.active {
+      &.inc {
+        background: lime;
+      }
+      &.exc {
+        background: pink;
+      }
+      background: grey;
+    }
+    &.hidden {
+      display: none;
+    }
+  }
 }
 
 @layer resize {

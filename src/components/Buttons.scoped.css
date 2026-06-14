@@ -1,4 +1,9 @@
 @layer components {
+  .wrapper {
+    anchor-scope: --action-items;
+    display: contents;
+  }
+
   .cp-media-action-item {
     position: relative;
     height: 32px;
@@ -7,6 +12,10 @@
     border-radius: 50%;
     border: none;
     cursor: pointer;
+    background-color: color-mix(var(--bg-dark), transparent 10%);
+    color: var(--text-muted);
+    transition: .1s filter, .1s scale;
+    anchor-name: --action-items;
 
     &.big {
       width: 48px;
@@ -16,7 +25,8 @@
     }
 
     &:hover {
-      background-color: grey;
+      filter: brightness(1.5);
+      scale: 1.07;
     }
 
     _svg {
@@ -24,5 +34,25 @@
       height: 100%;
     }
   }
-}
 
+  .tool-tip {
+    position: fixed;
+    width: max-content;
+    position-anchor: --action-items;
+    position-area: left center;
+    position-try-fallbacks: right center;
+    background-color: var(--bg);
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    z-index: 1;
+    opacity: 0;
+    transition: .1s opacity, .4s margin;
+    pointer-events: none;
+
+    .wrapper:has(_:hover, _:focus-visible) & {
+      opacity: 1;
+      margin: 4px;
+    }
+  }
+}

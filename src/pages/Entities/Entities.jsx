@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import { createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Entities.scss";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
 import { asserts, modes, signals, queries } from "../../collections/collections.js";
@@ -77,17 +77,19 @@ function CharactersReel(props) {
     const pagelessFetcher = createAnilistFetcher(queries.anilistCharacters, { id: params.id, page: "pageless"});
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
-    if (data) setPagelessCacheData(data);
-    else {
-      setPagelessCacheData({
-        data: null,
-        name: "Anilist characters pageless",
-        expires: new Date().setHours(24 * 356),
-        modified: new Date(),
-        cacheKey: pagelessFetcher.cacheKey
-      });
-    }
-    setPagelessCacheLoading(false);
+    batch(() => {
+      if (data) setPagelessCacheData(data);
+      else {
+        setPagelessCacheData({
+          data: null,
+          name: "Anilist characters pageless",
+          expires: new Date().setHours(24 * 356),
+          modified: new Date(),
+          cacheKey: pagelessFetcher.cacheKey
+        });
+      }
+      setPagelessCacheLoading(false);
+    });
   });
 
   const mutateCache = mutate => {

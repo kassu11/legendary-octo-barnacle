@@ -5,7 +5,7 @@ import { useSearchParams } from "@solidjs/router";
 import { wrapToSet } from "../../utils/arrays";
 import { useResponsive } from "../../context/providers";
 
-export function SettingsPage() {
+export function SelectElement() {
   const [hovered, setHovered] = createSignal();
   const [searchStore, setSearchStore] = createStore({});
   const [searchParams, setSearchParams] = useSearchParams();
@@ -76,14 +76,11 @@ export function SettingsPage() {
         }}>{entry.value}</div>
       </>
     )}</Select>
-    <button>Click me 2</button>
     </>
   );
 }
 
-function Select(props) {
-  // props.onClick
-  // props.onChange => (target)
+export function Select(props) {
   const [search, setSearch] = createSignal("");
   const { isTouch } = useResponsive()
   let dialog, input, controller;
@@ -102,7 +99,6 @@ function Select(props) {
   }
 
   const handleClick = e => {
-    console.log(e.target);
     // Dialog is only clicked in mobile, when user clicks outside the select area
     if (e.target === dialog) handleClose();
   }
@@ -182,7 +178,7 @@ function Select(props) {
   }
 
   return (
-    <>
+    <div class="select">
       <button onClick={handleButtonClick}>Click me</button>
       <dialog ref={elem => dialog = elem} classList={{ mobile: isTouch() }}>
         <div class="wrapper">
@@ -200,6 +196,6 @@ function Select(props) {
           </Show>
         </div>
       </dialog>
-    </>
+    </div>
   )
 }

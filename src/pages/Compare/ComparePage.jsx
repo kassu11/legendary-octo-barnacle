@@ -676,7 +676,7 @@ function ContentPage() {
               </Show>
             </div>
             <div class="pg-compare-card-content">
-              <p class="title">{media.title.userPreferred}</p>
+              <p class="title line-clamp">{media.title.userPreferred}</p>
               <ol class="pg-compare-media-users">
                 <For each={media.mediaEntries}>{user => (
                   <li>

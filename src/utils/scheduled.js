@@ -45,7 +45,7 @@ export const debouncer = (callback) => {
 
   const trigger = (ms, ...args) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => callback(...args), ms);
+    timeout = setTimeout(callback, ms, ...args);
   }
 
   onCleanup(() => clearTimeout(timeout));

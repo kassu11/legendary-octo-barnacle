@@ -2,7 +2,7 @@ import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Show, For, Match, Switch, createSignal, createEffect, batch, mergeProps } from "solid-js";
 import "./index(search).scoped.css";
 import { capitalize, formatMediaFormat } from "../../utils/formating.js";
-import { createStore } from "solid-js/store";
+import { createStore, produce, reconcile } from "solid-js/store";
 import { SearchBarContext, useSearchBar } from "../../context/providers.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { RatingInputScoped } from "./inputs/RatingInput.scoped.jsx";
@@ -26,6 +26,8 @@ import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContai
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { storeMediaWithMalId } from "../../core/globalState";
+import { Select } from "../Settings/SelectElement.scoped";
+import { searchParamsObject } from "../App/ParseSearchParams";
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
@@ -490,6 +492,7 @@ export function SearchBar(props) {
   const [debouncedSearchVariables, setDebouncedSearchVariables] = createSignal();
 
   const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
+  const [anilistGenresAndTagsData2, setAnilistGenresAndTagsData2] = createStore([]);
   let anilistGenresAndTagsFetcher, anilistGenresAndTagsController;
   createEffect(() => {
     if (searchParams.malSearch === "true") return;
@@ -506,6 +509,28 @@ export function SearchBar(props) {
       },
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== anilistGenresAndTagsFetcher.cacheKey) return;
+
+        console.log("anilist genres", res);
+
+        const genres = res.data.data.genres.map(name => ({ name }));
+        genres[0].category = "Genres";
+        const tags = {};
+        res.data.data.tags.forEach(({ category, ...rest }) => {
+          const group = tags[category] ?? (tags[category] = { name: category, items: [] });
+          group.items.push(rest);
+        });
+
+        const genresAndTags = [
+          ...genres,
+          ...Object.values(tags).sort((a, b) => a.name.localeCompare(b.name)).map(({ name, items }) => {
+            items[0].category = name;
+            return items;
+          }).flat()
+        ];
+
+        console.log(genresAndTags);
+
+        setAnilistGenresAndTagsData2(reconcile(genresAndTags));
 
         setAnilistGenresAndTagsData(res.data.data);
         setGenreAndTagTranslations({
@@ -561,6 +586,7 @@ export function SearchBar(props) {
         if (f.cacheKey === jikanGenresAndThemesFetcher.cacheKey) jikanGenresAndThemesController = null;
       },
       setValue: (res, { fetcher: f }) => {
+        console.log("anilist genres", res);
         if (f.cacheKey !== jikanGenresAndThemesFetcher.cacheKey) return;
         const clone = structuredClone(res.data.data);
 
@@ -627,6 +653,18 @@ export function SearchBar(props) {
     });
   });
 
+  const handleGenreSearch = search => {
+    const pattern = new RegExp(RegExp.escape(search), "i");
+    setAnilistGenresAndTagsData2(produce(data => {
+      const indecies = [];
+      data.forEach((entry, i) => {
+        if (!(entry.hidden = !pattern.test(entry.name))) indecies.push(i);
+      });
+
+      data.indecies = indecies;
+    }));
+  };
+
   return (
     <div class="search-page">
       <div class="header-row">
@@ -671,6 +709,17 @@ export function SearchBar(props) {
         </div>
         <RatingInputScoped />
         <GenresInputScoped aniGenres={anilistGenresAndTagsData()} malGenres={jikanGenresAndThemesData()} engine={searchEngine()} showAdult={true} />
+        <Select each={anilistGenresAndTagsData2} onOpen={() => null} onCancel={() => null} onHover={() => null} onSubmit={() => null} onSelect={() => null} onSearch={handleGenreSearch}>{(entry, i) => (
+          <>
+            <Show when={entry.category}>
+              <h2>{entry.category}</h2>
+            </Show>
+            <div class="item" classList={{ inc: searchParamsObject.genres[entry.value] === "inc", exc: searchParamsObject.genres[entry.value] === "exc", hidden: entry.hidden, active: i() === false }} onClick={e => {
+              e.preventDefault();
+              // handleSelect(i());
+            }}>{entry.name}</div>
+          </>
+        )}</Select>
         <YearInputScoped />
         <FormatInputScoped />
         <SortInputScoped />

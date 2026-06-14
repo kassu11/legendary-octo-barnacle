@@ -1,4 +1,4 @@
-import { createRenderEffect, createSignal, Show } from "solid-js";
+import { batch, createRenderEffect, createSignal, Show } from "solid-js";
 import { HomePageActivityReelContent } from "./ActivityPage.scoped.jsx";
 import { modes, signals, queries } from "../../collections/collections.js";
 import { arrayUtils } from "../../utils/utils.js";
@@ -15,17 +15,19 @@ export function HomePageActivityReel(props) {
     const pagelessFetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: "pageless" });
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
-    if (data) setPagelessCacheData(data);
-    else {
-      setPagelessCacheData({
-        data: null,
-        name: "Home Activity",
-        expires: new Date().setHours(24 * 356),
-        modified: new Date(),
-        cacheKey: pagelessFetcher.cacheKey
-      });
-    }
-    setPagelessCacheLoading(false);
+    batch(() => {
+      if (data) setPagelessCacheData(data);
+      else {
+        setPagelessCacheData({
+          data: null,
+          name: "Home Activity",
+          expires: new Date().setHours(24 * 356),
+          modified: new Date(),
+          cacheKey: pagelessFetcher.cacheKey
+        });
+      }
+      setPagelessCacheLoading(false);
+    });
   });
 
   const updateCache = (apiResponse, pagelessFetcher) => {

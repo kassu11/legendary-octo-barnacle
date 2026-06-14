@@ -1,11 +1,14 @@
 import { batch, createMemo, createRoot, createSignal, untrack } from "solid-js";
 import { createLocalStorageJsonSignal } from "../utils/localStorageUtils";
 import { deleteIndexDBValue, setIndexedDBValue } from "../utils/indexedDButils";
-import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal } from "../utils/sessionStorageUtils";
+import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal, getOrInsertSessionStorageInt } from "../utils/sessionStorageUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "../utils/fetcherUtils";
 import { queries } from "../collections/collections";
 import { setFetcherValueToStorage } from "../utils/storageUtils";
 import { createStore } from "solid-js/store";
+
+export const tabTime = new Date().getTime();
+export const sessionTime = getOrInsertSessionStorageInt(new Date().getTime());
 
 export const [mediaWithMalId, storeMediaWithMalId] = createStore({});
 
@@ -24,7 +27,7 @@ export const logoutUser = () => {
   });
 };
 
-export const setAccessToken = async (token, expires) => {
+export const storeAccessToken = async (token, expires) => {
   setToken2(token || null);
   const fetcher = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
   sendAnilistFetcher(fetcher, {

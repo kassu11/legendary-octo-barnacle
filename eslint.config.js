@@ -6,6 +6,7 @@ export default [
   js.configs.recommended,
   {
     files: ["**/*.{js,jsx}"],
+    ignores: ["!**/node_modules/"],
     rules: {
       "no-undef": "error",        // This catches missing imports/variables
       "no-unused-vars": ["error", {"args": "after-used"}],   // Helps clean up imports you don't need anymore

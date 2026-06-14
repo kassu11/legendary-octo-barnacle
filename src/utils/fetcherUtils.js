@@ -205,14 +205,14 @@ const baseSettings = {
   active: (res, settings) => {
     if (!res) return true;
     else if (settings.debug) return false;
-    return !cache.has(res.cacheKey);
+    return !allFetchedCacheKeys.has(res.cacheKey);
   },
   debug: modes.debug,
   loadingBar: true,
   cache: {
     get: res => getFetcherValueFromStorage(res, null),
     set: async res => {
-      cache.add(res.cacheKey);
+      allFetchedCacheKeys.add(res.cacheKey);
       setFetcherValueToStorage(res);
     }
   },
@@ -248,27 +248,35 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   settings = mergeObjects({ ...baseSettings, cache: { ...baseSettings.cache } }, settings);
 
+  if (settings.delay) await new Promise(res => setTimeout(res, settings.delay));
+
   const start = performance.now();
   settings.onStart?.(performance.now() - start);
 
   var res = settings.file ? await (await fetch("/legendary-octo-barnacle/" + settings.file)).json() : await settings.cache?.get?.(fetcher, settings);
   const active = settings.active?.(res, settings);
 
-  if (res) settings.setValue(res, { fetcher });
+  if (res) settings.setValue(res, { fetcher, settings });
 
   if (!active) {
     settings.onStop?.(performance.now() - start);
     return;
   }
 
+  const [url, { signal }] = fetcher;
+  // This was added because of media search.
+  // We have added delay and constantly abort the fetch before starting
+  // This will cause the loading bar to start and stop all the time
+  // We want to disable the loading bar if no fetch is ever going to happen anyway
+  if (signal?.aborted === true) settings.loadingBar = false;
   if (settings.loadingBar) setMainLoadingCount(v => v + 1);
 
-  const [url, { signal }] = fetcher;
+
   const queueTarget = requestQueue.find(que => url.includes(que.url));
 
   async function event() {
     settings.onFetch?.(performance.now() - start, { fetcher });
-    if (signal?.aborded !== true) {
+    if (signal?.aborted !== true) {
       try {
         const response = await fetcherToFetch(fetcher);
 
@@ -286,7 +294,7 @@ export async function sendFetcher(fetcher, settings = {}) {
 
         if (settings.name) res.name = settings.name;
 
-        settings.setValue({ ...res, cache: false }, { fetcher });
+        settings.setValue({ ...res, cache: false }, { fetcher, settings });
         if (data) settings.cache?.set?.(res, { fetcher });
       } catch (err) {
         settings.onError?.(err);
@@ -328,7 +336,7 @@ export async function sendFetcher(fetcher, settings = {}) {
   }
 }
 
-const cache = new Set();
+const allFetchedCacheKeys = new Set();
 const anilistBaseFetcherSettings = {
   name: "AniList fetch",
   onError: async res => {

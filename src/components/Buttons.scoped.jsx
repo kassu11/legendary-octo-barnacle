@@ -1,6 +1,4 @@
 import { asserts } from "../collections/collections";
-
-import { Tooltip2Scoped } from "./Tooltip2.scoped.jsx";
 import "./Buttons.scoped.css";
 
 export function QuickActionListButton(props) {
@@ -17,11 +15,11 @@ export function QuickActionButton(props) {
   asserts.assertTypeFunctionOLD(props.onClick, "onClick");
 
   return (
-    <button class="cp-media-action-item" classList={{ big: props.big }} data-tooltip-trigger onClick={props.onClick}>
-      {props.children}
-      <Tooltip2Scoped positions="left right">
-        {props.label}
-      </Tooltip2Scoped>
-    </button>
+    <div class="wrapper">
+      <button class="cp-media-action-item" classList={{ big: props.big }} onClick={props.onClick}>
+        {props.children}
+      </button>
+      <div class="tool-tip">{props.label}</div>
+    </div>
   );
 }

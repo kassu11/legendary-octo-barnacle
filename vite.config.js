@@ -5,6 +5,7 @@ import autoImportScopedStyles from "./vite-plugins/auto-import-scoped-styles";
 import checker from 'vite-plugin-checker';
 import AutoImport from "unplugin-auto-import/vite"
 import grapqlMinimizer from "./vite-plugins/graphql-minimize";
+import openInEditor from "./vite-plugins/open-in-editor";
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
@@ -18,6 +19,7 @@ export default defineConfig({
     scopedStyling(),
     autoImportScopedStyles(),
     grapqlMinimizer(),
+    openInEditor(),
     solid(),
     checker({
       eslint: {
@@ -39,7 +41,7 @@ export default defineConfig({
       ],
       dirsScanOptions: {
         fileFilter: file => {
-          return file.endsWith(".js") || file.endsWith(".jsx") || file.endsWith(".ts") || file.endsWith(".tsx");;
+          return file.endsWith(".js") || file.endsWith(".jsx") || file.endsWith(".ts") || file.endsWith(".tsx");
         }
       },
       dirs: [

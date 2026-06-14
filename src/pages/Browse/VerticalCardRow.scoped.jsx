@@ -4,6 +4,8 @@ import { capitalize, formatMediaFormat, mediaUrl, numberCommas } from "../../uti
 import EmojiByScoreScoped from "../../components/EmojiByScore.scoped.jsx";
 import "./VerticalCardRow.scoped.css";
 import { asserts } from "../../collections/collections.js";
+import { formatSecondsToLongString } from "../../utils/timeUtils.js";
+import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 
 export function VerticalCardRowScoped(props) {
   asserts.assertTrueOLD("href" in props, "Link is missing");
@@ -11,10 +13,7 @@ export function VerticalCardRowScoped(props) {
 
   return (
     <section>
-      <A href={props.href} class="header">
-        <h2>{props.title}</h2>
-        View all
-      </A>
+      <BrowsePageHeaderLinks {...props} />
       <ol class="vertical-search-card-row">
         <For each={props.data}>
           {(card, i) => (
@@ -24,13 +23,11 @@ export function VerticalCardRowScoped(props) {
                 <span>{i() + 1}</span>
               </p>
               <div class="vertical-search-card-body">
-                <A
-                  class="cover-container"
-                  href={mediaUrl(card)}>
+                <A class="cover-container" tabindex="-1" href={mediaUrl(card)}>
                   <img src={card.coverImage.large} class="cover" alt="Cover."/>
                 </A>
                 <div class="vertical-search-card-content clamp">
-                  <A class="line-clamp" href={mediaUrl(card)}>
+                  <A href={mediaUrl(card)} class="title">
                     {card.title.userPreferred}
                   </A>
                   <ol class="vertical-search-card-genre-list">
@@ -50,27 +47,50 @@ export function VerticalCardRowScoped(props) {
                     </div>
                   </div>
                   <div class="clamp">
-                    <p>{formatMediaFormat(card.format)}</p>
+                    <p>{formatMediaFormat(card.format) || "TBA"}</p>
                     <p>
                       <Switch>
                         <Match when={card.type === "ANIME"}>
-                          <Show when={card.episodes} fallback="Ongoing">
-                            {numberCommas(card.episodes)} Episode
-                            <Show when={card.episodes > 1}>s</Show>
-                          </Show>
+                          <Switch>
+                            <Match when={card.format === "MOVIE"}>{formatSecondsToLongString(card.duration)}</Match>
+                            <Match when={card.episodes}>
+                              {numberCommas(card.episodes)} Episode
+                              <Show when={card.episodes > 1}>s</Show>
+                            </Match>
+                          </Switch>
                         </Match>
-                        <Match when={card.type === "MANGA"}>
-                          <Show when={card.chapters} fallback="Ongoing">
-                            {numberCommas(card.chapters)} Chapter
-                            <Show when={card.chapters > 1}>s</Show>
-                          </Show>
+                        <Match when={card.type === "MANGA" && card.format === "NOVEL" && card.volumes}>
+                          {numberCommas(card.volumes)} Volume
+                          <Show when={card.volumes > 1}>s</Show>
+                        </Match>
+                        <Match when={card.type === "MANGA" && card.chapters}>
+                          {numberCommas(card.chapters)} Chapter
+                          <Show when={card.chapters > 1}>s</Show>
                         </Match>
                       </Switch>
                     </p>
                   </div>
                   <div class="clamp">
-                    <p>{capitalize(card.season)} {card.seasonYear}</p>
-                    <p>{capitalize(card.status)}</p>
+                    {console.log(card)}
+                    <Switch>
+                      {/* TODO: Check how anilist handles airing episodes*/}
+                      {/* TODO Add edit media button for row cards*/}
+                      {/* <Match when={card.status === "AIRING"}>*/}
+                        {/* <p>{capitalize(card.status)}</p>*/}
+                        {/* <p></p>*/}
+                      {/* </Match>*/}
+                      <Match when={true}>
+                        <Switch>
+                          <Match when={(card.episodes > 32 || card.type === "MANGA") && card.endDate?.year - card.startDate?.year > 0}>
+                            <p>{card.startDate.year} - {card.endDate.year}</p>
+                          </Match>
+                          <Match when={card.season}>
+                            <p>{capitalize(card.season)} {card.seasonYear}</p>
+                          </Match>
+                        </Switch>
+                        <p>{capitalize(card.status)}</p>
+                      </Match>
+                    </Switch>
                   </div>
                 </div>
               </div>

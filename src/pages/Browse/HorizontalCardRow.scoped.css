@@ -1,20 +1,17 @@
 @layer layout {
-  section {
-    display: grid;
-    gap: .25rem;
+  .grid-reel-auto-fill {
+    padding-block: 16px;
+    --spill-ratio: 1;
+    --padding: 64px;
+    --spill-ration-correction-padding: 0px;
+    --gap: 48px;
+    --line-clamp: 2;
+    overflow-y: clip;
+    scrollbar-width: none;
 
-    > _.header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-
-    .grid-reel-auto-fill {
-      margin-inline: -16px;
-      --spill-ratio: 1;
+    @media (width < 40em) {
       --padding: 16px;
-      --spill-ration-correction-padding: 0px;
-      --gap: 16px;
+      --gap: 8px;
     }
   }
 }

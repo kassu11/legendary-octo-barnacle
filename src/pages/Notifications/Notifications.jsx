@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createEffect, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Notifications.scss";
 import { mediaUrl } from "../../utils/formating.js";
 import { CreatedAt } from "../../components/CreatedAt.jsx";
@@ -55,17 +55,19 @@ function NotificationsReel(props) {
     const pagelessFetcher = createAnilistFetcher(queries.anilistUserNotifications, { types, page: "pageless" });
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
-    if (data) setPagelessCacheData(data);
-    else {
-      setPagelessCacheData({
-        data: null,
-        name: "Anilist notifications pageless",
-        expires: new Date().setHours(24 * 356),
-        modified: new Date(),
-        cacheKey: pagelessFetcher.cacheKey
-      });
-    }
-    setPagelessCacheLoading(false);
+    batch(() => {
+      if (data) setPagelessCacheData(data);
+      else {
+        setPagelessCacheData({
+          data: null,
+          name: "Anilist notifications pageless",
+          expires: new Date().setHours(24 * 356),
+          modified: new Date(),
+          cacheKey: pagelessFetcher.cacheKey
+        });
+      }
+      setPagelessCacheLoading(false);
+    })
   });
 
   const mutateCache = mutate => {
