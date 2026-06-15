@@ -481,7 +481,7 @@ const [externalSourceStore, setExternalSourceStore] = createStore({});
 export function SearchBar(props) {
   const changeType = useVirtualType();
   const params = useParams();
-  const searchParamsObject = useParsedSearchParams();
+  const parsedSearchParams = useParsedSearchParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchType, setSearchType] = createSignal();
@@ -714,7 +714,7 @@ export function SearchBar(props) {
             <Show when={entry.category}>
               <h2>{entry.category}</h2>
             </Show>
-            <div class="item" classList={{ inc: searchParamsObject().genres[entry.value] === "inc", exc: searchParamsObject().genres[entry.value] === "exc", hidden: entry.hidden, active: i() === false }} onClick={e => {
+            <div class="item" classList={{ inc: parsedSearchParams().genres[entry.value] === "inc", exc: parsedSearchParams().genres[entry.value] === "exc", hidden: entry.hidden, active: i() === false }} onClick={e => {
               e.preventDefault();
               // handleSelect(i());
             }}>{entry.name}</div>

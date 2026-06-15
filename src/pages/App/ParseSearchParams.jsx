@@ -6,6 +6,7 @@ import { wrapToSet } from "../../utils/arrays";
 import { ParsedSearchParamsContext } from "../../context/providers";
 
 const [searchStore, setSearchStore] = createStore({});
+
 export function ParseSearchParams(props) {
   const [searchParams] = useSearchParams();
 

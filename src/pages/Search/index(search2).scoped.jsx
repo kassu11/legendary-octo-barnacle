@@ -9,20 +9,20 @@ import { VerticalCardRowScoped } from "../Browse/VerticalCardRow.scoped";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
-import { assertThruthy } from "../../collections/asserts";
 import { AnilistMediaCard } from "../../components/Cards/Cards.scoped";
 import { tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
 import { scheduleUtils } from "../../utils/utils";
+import { assertThruthy } from "../../collections/asserts";
 
 function createAnilistMediaQueryVariables() {
-  const searchParamsObject = useParsedSearchParams();
+  const parsedSearchParams = useParsedSearchParams();
   const params = useParams();
   const { type, mode } = params;
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false} = searchParamsObject();
+  const { q, isAdult = false} = parsedSearchParams();
 
   return {
     search: q?.toLowerCase().trim() || undefined,
@@ -80,18 +80,31 @@ export function SearchPage() {
     const key = untrack(pagelessCacheKey);
     if (key !== cacheKey) return
 
-    setPagelessCacheData(produce(pageless => {
-      pageless.data ??= [];
-      const start = (currentPage - 1) * perPage;
+    const start = (currentPage - 1) * perPage;
+    assertThruthy(start <= pagelessCacheData.data.length);
 
-      assertThruthy(start <= pageless.data.length);
-      pageless.data.splice(start, perPage, ...media);
+    media.forEach((m, i) => {
+      if (m.id === pagelessCacheData.data[start + i]?.id) setPagelessCacheData("data", start + i, m); // fine grained update
+      else setPagelessCacheData("data", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
+    });
 
-      if (!hasNextPage) pageless.data.splice(start + media.length); // Delete old and null elements
-      else if (pageless.data.at(-1) !== null) pageless.data.push(...Array(4).fill(null)); // Insert loading elements
+    if (!hasNextPage) setPagelessCacheData("data", produce(data => data.splice(start + media.length))); // Delete old and null elements
+    else if (pagelessCacheData.data.at(-1) !== null) setPagelessCacheData("data", produce(data => data.push(...Array(4).fill(null)))); // Insert loading elements
 
-      setFetcherValueToStorage(unwrap(pageless));
-    }));
+    setFetcherValueToStorage(unwrap(pagelessCacheData));
+
+    // This would be ideal, but splice does not do fine grained updating
+    // setPagelessCacheData(produce(pageless => {
+    //   const start = (currentPage - 1) * perPage;
+    //
+    //   assertThruthy(start <= pageless.data.length);
+    //   pageless.data.splice(start, perPage, ...media);
+    //
+    //   if (!hasNextPage) pageless.data.splice(start + media.length); // Delete old and null elements
+    //   else if (pageless.data.at(-1) !== null) pageless.data.push(...Array(4).fill(null)); // Insert loading elements
+    //
+    //   setFetcherValueToStorage(unwrap(pageless));
+    // }));
   };
 
   const [anilistSearchTime, startAnilistSearchTimer, stopAnilistSearchTimer] = createTimer();
@@ -170,6 +183,7 @@ export function SearchPage() {
             media.tabTime = settings.debug ? tabTime : res.modified;
             // media.tabTime = res.modified;
           }
+
           mutatePageless(res.data.data.Page.media, res.data.data.Page.pageInfo, currentPagelessFetcher.cacheKey);
         }
       }
@@ -295,7 +309,7 @@ function BrowsePage(props) {
 }
 
 function SearchBar() {
-  const searchParamsObject = useParsedSearchParams();
+  const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
 
   let replace = false, timeout;
@@ -308,7 +322,7 @@ function SearchBar() {
 
   return (
     <div>
-      <input autofocus type="search" onInput={handleInput} value={searchParamsObject().q}/>
+      <input autofocus type="search" onInput={handleInput} value={parsedSearchParams().q}/>
     </div>
   );
 }
