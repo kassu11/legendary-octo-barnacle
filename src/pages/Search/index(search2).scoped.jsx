@@ -171,8 +171,8 @@ export function SearchPage() {
         <Match when={params.mode === "search"}>
           <div class="search-page">
             <ol class="cards">
-              <For each={!pagelessCacheLoading() && (pagelessCacheData?.data || Array(20).fill(0))}>{media => (
-                <AnilistMediaCard media={media} loading={anilistSearchLoading()} />
+              <For each={!pagelessCacheLoading() && (pagelessCacheData?.data || Array(20).fill(null))}>{media => (
+                <AnilistMediaCard media={media} skeleton={!media} loading={anilistSearchLoading()} />
               )}</For>
             </ol>
           </div>

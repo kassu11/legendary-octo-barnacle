@@ -43,8 +43,8 @@ export function HorizontalCardRowScoped(props) {
     <section>
       <BrowsePageHeaderLinks {...props} />
       <ol ref={handleRef} class="grid-reel-auto-fill">
-        <For each={props.data || [0, 0, 0, 0, 0, 0]}>{media => (
-          <AnilistMediaCard media={media} loading={props.loading} />
+        <For each={props.data || Array(6).fill(null)}>{media => (
+          <AnilistMediaCard media={media} skeleton={!media} loading={props.loading} />
         )}</For>
       </ol>
     </section>

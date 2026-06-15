@@ -18,27 +18,27 @@ import { addApplicationNotification } from "../../pages/App/ApplicationNotificat
 import { mediaWithMalId, token2 } from "../../core/globalState.js";
 
 function AnilistMediaCardListBody(props) {
-  asserts.assertTrueOLD(props.media, "Missing media");
-
   return (
-    <li class="cp-media-card inline-container" classList={{ loading: props.loading }} style={{ "--card-cover-url": `url("${props.media.coverImage.large}")`, "--media-color": props.media.coverImage.color }}>
-      <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
-        <div class="wrapper">
-          <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />
-          <Show when={props.media.averageScore}>
-            <div class="score">
-              <Star /> {(props.media.averageScore / 10)}
-            </div>
-          </Show>
-          {props.children}
-        </div>
-        <p class="line-clamp">
-          <Show when={props.media.mediaListEntry?.status}>
-            <div class="list-status" attr:data-status={props.media.mediaListEntry.status}></div>
-          </Show>
-          {props.media.title.userPreferred}
-        </p>
-      </A>
+    <li class="cp-media-card inline-container" classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage.large}")`, "--media-color": props.media?.coverImage.color }}>
+      <Show when={!props.skeleton}>
+        <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
+          <div class="wrapper">
+            <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />
+            <Show when={props.media.averageScore}>
+              <div class="score">
+                <Star /> {(props.media.averageScore / 10)}
+              </div>
+            </Show>
+            {props.children}
+          </div>
+          <p class="line-clamp">
+            <Show when={props.media.mediaListEntry?.status}>
+              <div class="list-status" attr:data-status={props.media.mediaListEntry.status}></div>
+            </Show>
+            {props.media.title.userPreferred}
+          </p>
+        </A>
+      </Show>
     </li>
   )
 }
@@ -73,23 +73,9 @@ function JikanMediaCardListBody(props) {
 
 export function AnilistMediaCard(props) {
   return (
-    <Switch>
-      <Match when={props.media}>
-        <AnilistMediaCardListBody {...props}>
-          <QuickActionItemList {...props} />
-        </AnilistMediaCardListBody>
-      </Match>
-      <Match when={props.loading}>
-        <LoadingMediaCard />
-      </Match>
-    </Switch>
-  );
-}
-
-function LoadingMediaCard() {
-  return (
-    <li class="loading-media-card">
-    </li>
+    <AnilistMediaCardListBody {...props}>
+      <QuickActionItemList {...props} />
+    </AnilistMediaCardListBody>
   );
 }
 

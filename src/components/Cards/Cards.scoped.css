@@ -1,72 +1,79 @@
 @layer layout {
-  .loading-media-card {
-    filter: grayscale(.8);
-    opacity: .8;
-    aspect-ratio: 5.5/8;
-    margin-bottom: calc(1lh + 4px);
-    transition: .3s scale linear, .18s opacity linear;
-
-    @starting-style {
-      scale: .92;
-      opacity: 0;
-    }
-    &::after,
-    &::before {
-      content: "";
-      position: absolute;
-      z-index: 1;
-      --offset: 0px;
-      background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
-      background-size: 900px;
-      animation: move-gradient 2s infinite;
-      pointer-events: none;
-      border-radius: 8px;
-    }
-    &::before {
-      inset: 0;
-    }
-    &::after {
-      height: 1lh;
-      width: 100%;
-      top: calc(100% + 8px);
-      --offset: 32px;
-    }
-  }
-
   .cp-media-card {
-    transition: .3s scale linear, .18s opacity linear;
-    @starting-style {
-      scale: .92;
-      opacity: 0;
-    }
-
-    &.loading {
+    position: relative;
+    margin-bottom: 4.5rem;
+    transition: .3s scale, .18s opacity, .3s filter;
+    &:where(.loading):not(.skeleton) {
       filter: grayscale(.8);
       opacity: .8;
 
-      p {
+      .line-clamp {
         color: var(--text-muted);
       }
+    }
+
+    &.skeleton {
+      aspect-ratio: 5.5/8;
+
+      &::after,
+      &::before {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        --offset: 0px;
+        background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
+        background-size: 900px;
+        animation: move-gradient 2s infinite;
+        pointer-events: none;
+      }
+      &::before {
+        inset: 0;
+        border-radius: 8px;
+      }
+      &::after {
+        height: 1.25lh;
+        width: 100%;
+        top: 100%;
+        margin-top: 8px;
+        border-radius: 4px;
+        --offset: -113px;
+      }
+    }
+
+    @starting-style {
+      scale: .92;
+      opacity: 0;
     }
 
     .wrapper {
       aspect-ratio: 5.5/8;
       position: relative;
-      margin-bottom: 8px;
       border-radius: 8px;
       box-shadow: 0 3px 8px #0000009e;
       background: var(--bg);
+      transition: .18s opacity;
 
-      .loading &::before {
+      @starting-style {
+        opacity: 0;
+      }
+
+      :where(.loading, .loading-end) &::before {
         content: "";
         position: absolute;
+        border-radius: inherit;
         inset: 0;
         z-index: 1;
         background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
         background-size: 900px;
         animation: move-gradient 2s infinite;
-        opacity: .8;
         pointer-events: none;
+        transition: .18s opacity;
+      }
+      .loading &::before {
+        opacity: .8;
+      }
+      .loading-end &::before {
+        opacity: 0;
       }
 
       &::after {
@@ -96,6 +103,7 @@
         filter: blur(5px);
         transition-behavior: allow-discrete;
       }
+      /* Disable border blur hover efect when card is loading */
       .loading &::after {
         content: unset;
       }
@@ -179,12 +187,18 @@
     .line-clamp {
       color: var(--text-muted);
       font-weight: 500;
-      transition: .2s transform, .2s color, .2s text-shadow;
+      transition: .2s transform, .2s color, .2s text-shadow, .18s opacity;
+      position: absolute;
+      margin-top: 8px;
 
       .cp-media-card:has(_:hover, _:focus-visible) & {
         transform: translateY(5px);
         color: color-mix(var(--media-color, var(--text)), var(--text) 70%);
         text-shadow: 0 0 2px black;
+      }
+
+      @starting-style {
+        opacity: 0;
       }
     }
 
