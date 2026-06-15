@@ -18,10 +18,32 @@
 
     .cards {
       display: grid;
+      padding-inline: 32px;
       grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
       gap: 32px 48px;
       margin-bottom: 64px;
       list-style: none;
+
+      @media (width < 61em) {
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+        gap: 32px 32px;
+        padding-inline: 16px;
+      }
+
+      @media (width < 40em) {
+        grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+        gap: 8px 8px;
+        padding-inline: 8px;
+      }
+    }
+
+    &.prevent-animation _* {
+      transition: unset !important; 
+    }
+
+    .skeleton-card {
+      aspect-ratio: 5.5/8;
+      margin-bottom: 4.5rem;
     }
   }
 

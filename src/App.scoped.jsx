@@ -37,11 +37,10 @@ function App(props) {
   });
 
   return (
-    <>
+    <ParseSearchParams>
       <MainLoadingBar />
       <MainNavigation />
       <ApplicationNotifications />
-      <ParseSearchParams />
       <Show when={localStorage.getItem(localizations.LOB_DEV_BRANCH)}>{branch => (
         <div class="dev-branch">
           <p>Preview: {branch}</p>
@@ -56,7 +55,7 @@ function App(props) {
         {props.children}
       </main>
       <footer class="main-footer"></footer>
-    </>
+    </ParseSearchParams>
   )
 }
 

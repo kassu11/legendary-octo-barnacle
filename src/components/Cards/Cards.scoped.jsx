@@ -19,7 +19,7 @@ import { mediaWithMalId, token2 } from "../../core/globalState.js";
 
 function AnilistMediaCardListBody(props) {
   return (
-    <li class="cp-media-card inline-container" classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage.large}")`, "--media-color": props.media?.coverImage.color }}>
+    <li class="cp-media-card inline-container" data-index={props["data-index"]} classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage.large}")`, "--media-color": props.media?.coverImage.color }} ref={props.ref}>
       <Show when={!props.skeleton}>
         <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
           <div class="wrapper">

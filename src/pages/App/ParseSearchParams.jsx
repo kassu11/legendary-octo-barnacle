@@ -1,15 +1,15 @@
 import { useSearchParams } from "@solidjs/router";
-import { createRenderEffect } from "solid-js";
+import { createMemo } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { createStore, reconcile } from "solid-js/store";
 import { wrapToSet } from "../../utils/arrays";
+import { ParsedSearchParamsContext } from "../../context/providers";
 
 const [searchStore, setSearchStore] = createStore({});
-export { searchStore as searchParamsObject };
-export function ParseSearchParams() {
+export function ParseSearchParams(props) {
   const [searchParams] = useSearchParams();
 
-  createRenderEffect(() => {
+  const searchObject = createMemo(() => {
     const include = wrapToSet(searchParams.genre);
     const exclude = wrapToSet(searchParams.excludeGenre);
 
@@ -17,10 +17,21 @@ export function ParseSearchParams() {
     include.forEach(v => newObject[v] = "inc");
     exclude.forEach(v => newObject[v] = "exc");
 
-    setSearchStore(reconcile({
+    return {
       genres: newObject,
       q: decodeURIComponent(searchParams.q || ""),
       isAdult: false,
-    }));
+    }
   });
+
+  const parsedSearchParams = createMemo(() => {
+    setSearchStore(reconcile(searchObject()));
+    return searchStore;
+  });
+
+  return (
+    <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
+      {props.children}
+    </ParsedSearchParamsContext.Provider>
+  )
 }

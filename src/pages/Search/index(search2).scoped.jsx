@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
 import { createTimer, formatMSToString } from "../../utils/timeUtils";
@@ -8,19 +8,21 @@ import { HorizontalCardRowScoped } from "../Browse/HorizontalCardRow.scoped";
 import { VerticalCardRowScoped } from "../Browse/VerticalCardRow.scoped";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
-import { searchParamsObject } from "../App/ParseSearchParams";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
 import { assertThruthy } from "../../collections/asserts";
 import { AnilistMediaCard } from "../../components/Cards/Cards.scoped";
 import { tabTime } from "../../core/globalState";
+import { useParsedSearchParams } from "../../context/providers";
+import { scheduleUtils } from "../../utils/utils";
 
 function createAnilistMediaQueryVariables() {
+  const searchParamsObject = useParsedSearchParams();
   const params = useParams();
   const { type, mode } = params;
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false} = searchParamsObject;
+  const { q, isAdult = false} = searchParamsObject();
 
   return {
     search: q?.toLowerCase().trim() || undefined,
@@ -31,13 +33,16 @@ function createAnilistMediaQueryVariables() {
 
 const SEARCH_DEBOUNCE = 400;
 const cachedResults = new Set();
+const searchPageSizes = {} // keep that of how many elements url had, so when user navigates back in history, we can create the right amount of skeleton cards
 
 export function SearchPage() {
   const params = useParams();
   const location = useLocation();
 
   const anilistVariables = createMemo(createAnilistMediaQueryVariables);
+  const [page, setPage] = createSignal(1);
   const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
+  const [previousHistoryDummyData, setPreviousHistoryDummyData] = createSignal();
   const [pagelessCacheData, setPagelessCacheData] = createStore({});
   const pagelessCacheKey = createMemo(() => pagelessCacheData?.cacheKey);
 
@@ -47,19 +52,21 @@ export function SearchPage() {
     if (!variables) return;
 
     setPagelessCacheLoading(true);
+    setPage(1);
 
     pagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless"});
+    if (untrack(previousHistoryDummyData) === undefined) setPreviousHistoryDummyData(Array(searchPageSizes[pagelessFetcher.cacheKey] || 20).fill(null));
     let curKey = pagelessFetcher.cacheKey;
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
     if (curKey !== pagelessFetcher.cacheKey) return;
 
-    // TODO: Make a function to check went we can use long time cache
+    // TODO: Make a function to check when we can use long time cache
     // For example when results are smaller than page size or when searching using years etc.
     if (data) setPagelessCacheData(reconcile(data));
     else {
       setPagelessCacheData(reconcile({
-        data: null,
+        data: Array(20).fill(null),
         name: "Anilist media pageless",
         // Keep cache for a week and on rare cases we will keep the cache for longer
         expires: new Date().setHours(24 * 7),
@@ -69,7 +76,7 @@ export function SearchPage() {
     }
   });
 
-  const mutatePageless = (media, { currentPage, perPage }, cacheKey) => {
+  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, cacheKey) => {
     const key = untrack(pagelessCacheKey);
     if (key !== cacheKey) return
 
@@ -79,6 +86,10 @@ export function SearchPage() {
 
       assertThruthy(start <= pageless.data.length);
       pageless.data.splice(start, perPage, ...media);
+
+      if (!hasNextPage) pageless.data.splice(start + media.length); // Delete old and null elements
+      else if (pageless.data.at(-1) !== null) pageless.data.push(...Array(4).fill(null)); // Insert loading elements
+
       setFetcherValueToStorage(unwrap(pageless));
     }));
   };
@@ -103,6 +114,7 @@ export function SearchPage() {
 
     else if (mode === "search") {
       const variables = anilistVariables();
+      const p = page();
       if (!variables) return;
 
       const key = pagelessCacheKey();
@@ -110,7 +122,7 @@ export function SearchPage() {
       if (currentPagelessFetcher.cacheKey !== key) return; // Pageless fetcher might load slower, so cancel fetcher if pagelessCacheKey is missing/different
 
       if (anilistSearchFetcher) debounce = SEARCH_DEBOUNCE; // Don't debounce on first page load
-      anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, variables, anilistSearchController.signal);
+      anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: p }, anilistSearchController.signal);
       if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
     }
 
@@ -134,6 +146,7 @@ export function SearchPage() {
       },
       onStop: time => {
         batch(() => {
+          setPreviousHistoryDummyData(null); // This value is used only ones the page load, then its cleared
           setAnilistSearchLoading(false);
           stopAnilistSearchTimer(time);
         });
@@ -150,11 +163,59 @@ export function SearchPage() {
           // For example when results are smaller than page size or when searching using years etc.
           // Now we will only allow fetches one time per tab
           if (res.modified < tabTime && !settings.debug) return;
+          if (cachedResults.has(res.cacheKey)) return;
           cachedResults.add(res.cacheKey);
+          for (const media of res.data.data.Page.media) {
+            // we don't want the debug enviroment to always fetchs, so we pretend like the data is always fresh
+            media.tabTime = settings.debug ? tabTime : res.modified;
+            // media.tabTime = res.modified;
+          }
           mutatePageless(res.data.data.Page.media, res.data.data.Page.pageInfo, currentPagelessFetcher.cacheKey);
         }
       }
     });
+  });
+
+  const [visibleCardIndices, setVisibleCardIndices] = createStore([]);
+  const intersectionObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      setVisibleCardIndices(entry.target.dataset.index, entry.isIntersecting);
+    }
+  }, { rootMargin: "800px" });
+
+  let deltaScrollDistance = 0, prevScrollTop;
+  const updatePage = scheduleUtils.debouncer(() => {
+    const elems = document.querySelectorAll(".cp-media-card:is(.loading,.skeleton)");
+    if (!elems.length) return;
+    const index = +elems[elems.length - 1].dataset.index;
+    const p = Math.floor(index / 50) + 1;
+    setPage(p);
+    setTimeout(handleScroll, 300);
+  });
+  const handleScroll = () => {
+
+    // Disable card opacity and scale animations if scrolling fast, to make the interface keep up
+    const currentPos = document.body.parentElement.scrollTop;
+    if (prevScrollTop) {
+      var delta = Math.abs(prevScrollTop - currentPos);
+      deltaScrollDistance += delta;
+      setTimeout(() => {
+        deltaScrollDistance -= delta;
+        document.querySelector(".search-page")?.classList.toggle("prevent-animation", deltaScrollDistance > 1000);
+      }, 1000);
+    }
+    prevScrollTop = currentPos;
+
+    // If user is scrolling too fast start to debounce setPage
+    updatePage(deltaScrollDistance > 500 ? 300 : 0);
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+
+  onCleanup(() => {
+    window.removeEventListener("scroll", handleScroll, { passive: true });
+    intersectionObserver.disconnect();
+    searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data.length;
   });
 
   return (
@@ -163,17 +224,31 @@ export function SearchPage() {
       <Switch>
         {/* Data is type browse, so display all the fields */}
         <Match when={params.mode === "browse"}>
-          <Show when={location.search}>
-            <Navigate href={"/search/" + params.type + location.search} />
+          <Show when={location.search || params.header}>
+            <Navigate href={"/search/" + params.type + (params.header ? ("/" + params.header) : "") +  location.search} />
           </Show>
           <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} time={formatMSToString(anilistSearchTime())} />
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
             <ol class="cards">
-              <For each={!pagelessCacheLoading() && (pagelessCacheData?.data || Array(20).fill(null))}>{media => (
-                <AnilistMediaCard media={media} skeleton={!media} loading={anilistSearchLoading()} />
-              )}</For>
+              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data) || previousHistoryDummyData()}>{(media, i) => {
+                let ref;
+
+                const handleRef = elem => {
+                  if (ref) intersectionObserver.unobserve(ref);
+                  ref = elem;
+                  intersectionObserver.observe(elem);
+                };
+
+                onCleanup(() => intersectionObserver.unobserve(ref));
+
+                return (
+                  <Show when={visibleCardIndices[i()]} fallback={<li class="skeleton-card" data-index={i()} ref={handleRef} /> }>
+                    <AnilistMediaCard data-index={i()} ref={handleRef} media={media} skeleton={!media} loading={media?.tabTime < tabTime} />
+                  </Show>
+                )
+              }}</For>
             </ol>
           </div>
         </Match>
@@ -220,6 +295,7 @@ function BrowsePage(props) {
 }
 
 function SearchBar() {
+  const searchParamsObject = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
 
   let replace = false, timeout;
@@ -232,7 +308,7 @@ function SearchBar() {
 
   return (
     <div>
-      <input autofocus type="search" onInput={handleInput} value={searchParamsObject.q}/>
+      <input autofocus type="search" onInput={handleInput} value={searchParamsObject().q}/>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Show, For, Match, Switch, createSignal, createEffect, batch, mergeProps
 import "./index(search).scoped.css";
 import { capitalize, formatMediaFormat } from "../../utils/formating.js";
 import { createStore, produce, reconcile } from "solid-js/store";
-import { SearchBarContext, useSearchBar } from "../../context/providers.js";
+import { SearchBarContext, useParsedSearchParams, useSearchBar } from "../../context/providers.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { RatingInputScoped } from "./inputs/RatingInput.scoped.jsx";
 import { SwitchInputScoped } from "./inputs/SwitchInput.scoped.jsx";
@@ -27,7 +27,6 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { storeMediaWithMalId } from "../../core/globalState";
 import { Select } from "../Settings/SelectElement.scoped";
-import { searchParamsObject } from "../App/ParseSearchParams";
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
@@ -482,6 +481,7 @@ const [externalSourceStore, setExternalSourceStore] = createStore({});
 export function SearchBar(props) {
   const changeType = useVirtualType();
   const params = useParams();
+  const searchParamsObject = useParsedSearchParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchType, setSearchType] = createSignal();
@@ -714,7 +714,7 @@ export function SearchBar(props) {
             <Show when={entry.category}>
               <h2>{entry.category}</h2>
             </Show>
-            <div class="item" classList={{ inc: searchParamsObject.genres[entry.value] === "inc", exc: searchParamsObject.genres[entry.value] === "exc", hidden: entry.hidden, active: i() === false }} onClick={e => {
+            <div class="item" classList={{ inc: searchParamsObject().genres[entry.value] === "inc", exc: searchParamsObject().genres[entry.value] === "exc", hidden: entry.hidden, active: i() === false }} onClick={e => {
               e.preventDefault();
               // handleSelect(i());
             }}>{entry.name}</div>
