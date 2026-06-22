@@ -158,12 +158,20 @@ export function EditMediaEntriesProvider(props) {
       changes.status = form.status;
     }
     if ((form.startedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.startedAt)) {
-      const [year, month, day] = form.startedAt.split("-");
-      changes.startedAt = { year, month, day };
+      if (!form.startedAt) {
+        changes.startedAt = null;
+      } else {
+        const [year, month, day] = form.startedAt.split("-");
+        changes.startedAt = { year, month, day };
+      }
     }
     if ((form.completedAt || "") != formatDateToInput(mediaListEntry().mediaListEntry?.completedAt)) {
-      const [year, month, day] = form.completedAt.split("-");
-      changes.completedAt = { year, month, day };
+      if (!form.completedAt) {
+        changes.completedAt = null;
+      } else {
+        const [year, month, day] = form.completedAt.split("-");
+        changes.completedAt = { year, month, day };
+      }
     }
     if (form.notes != mediaListEntry().mediaListEntry?.notes) {
       changes.notes = form.notes;
