@@ -87,9 +87,8 @@ export function MediaListContainerScoped(props) {
                                 {entry.media.title.userPreferred}
                               </p>
                               <div class="scores">
-                                <MediaCardEpisodes entry={entry}/>
-                                <Score score={entry.score}
-                                       format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"}/>
+                                <MediaCardEpisodes entry={entry} />
+                                <Score score={entry.score} format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
                               </div>
                             </div>
                             <Show when={isOwnProfile()}>

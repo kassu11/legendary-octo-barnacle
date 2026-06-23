@@ -5,6 +5,9 @@ export function MediaCardEpisodes(props) {
   return (
     <p>
       <Switch>
+        <Match when={props.entry.media.type === "ANIME" && props.entry.media.format === "MOVIE"}>
+          <MediaCardProgressInfo {...props} label="Movie" progressKey="progress" maxProgressKey="episodes" />
+        </Match>
         <Match when={props.entry.media.type === "ANIME"}>
           <MediaCardProgressInfo {...props} label="Ep" progressKey="progress" maxProgressKey="episodes" />
         </Match>

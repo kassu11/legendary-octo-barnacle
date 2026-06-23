@@ -10,7 +10,8 @@ export function MediaCardProgressInfo(props) {
 
   return (
     <>
-      {props.label} {count()}
+      {props.label}
+      <Show when={props.label !== "Movie" || count() !== 1}> {count()}</Show>
       <Show when={count() < props.entry.media[props.maxProgressKey]}>
         /{props.entry.media[props.maxProgressKey]}
       </Show>
