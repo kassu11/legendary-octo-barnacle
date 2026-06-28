@@ -5,6 +5,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays";
 import { ParsedSearchParamsContext } from "../../context/providers";
 import { translateInternalSearchParams } from "../../core/apiTranslations";
+import { getDates } from "../../utils/dates";
 
 const [searchStore, setSearchStore] = createStore({});
 
@@ -29,6 +30,21 @@ export function ParseSearchParams(props) {
     else if (header === "top") Object.assign(obj, { sort: ["score_desc"] });
     else if (header === "finished-manga") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", format: "manga" });
     else if (header === "finished-novel") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", format: "light_novel" });
+    else if (header === "this-season") {
+      const dates = getDates();
+      Object.assign(obj, { sort: ["format", "popularity_desc", "score_desc"], year: dates.seasonYear, season: dates.season, });
+    }
+    else if (header === "next-season") {
+      const dates = getDates();
+      Object.assign(obj, { sort: ["format", "popularity_desc", "score_desc"], year: dates.nextYear, season: dates.nextSeason, });
+    }
+    else if (header === "tba") {
+      Object.assign(obj, { sort: ["popularity_desc", "score_desc"], season: null, status: "not_yet_released" });
+    }
+    else if (/winter|spring|summer|fall|/.test(header)) {
+      const dates = getDates();
+      Object.assign(obj, { sort: ["format", "popularity_desc", "score_desc"], year: dates.nextYear, season: dates.nextSeason, });
+    }
 
     const include = wrapToSet(searchParams.genre);
     const exclude = wrapToSet(searchParams.excludeGenre);

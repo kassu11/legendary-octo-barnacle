@@ -9,9 +9,23 @@
     overflow-y: clip;
     scrollbar-width: none;
 
+    &.scrollable {
+      &, _a {
+        cursor: grab;
+
+        &:active {
+          cursor: grabbing;
+        }
+      }
+    }
+
     @media (width < 40em) {
       --padding: 16px;
       --gap: 8px;
+    }
+
+    li::view-transition-group(*) {
+      animation-duration: 0.5s;
     }
   }
 }

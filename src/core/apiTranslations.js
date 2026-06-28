@@ -21,14 +21,41 @@ export const translateInternalSearchParams = {
     score_plus: {
       ani: { sort: ["SCORE"], averageScoreGreater: 0 },
     },
+    format: {
+      ani: { sort: ["FORMAT"] },
+    },
+    title_romaji_desc: {
+      ani: { sort: ["TITLE_ROMAJI_DESC"] },
+    },
   },
   status: {
     complete: {
       ani: { status: "FINISHED" },
     },
+    not_yet_released: {
+      ani: { status: "NOT_YET_RELEASED" },
+    },
+  },
+  season: {
+    WINTER: {
+      ani: { season: "WINTER" },
+    },
+    SPRINT: {
+      ani: { season: "SPRINT" },
+    },
+    SUMMER: {
+      ani: { season: "SUMMER" },
+    },
+    FALL: {
+      ani: { season: "FALL" },
+    },
+    [null]: {
+      ani: { season: null },
+    }
   },
   endDateGreater: {
     _default: (api, value) => {
+      if (value === undefined) return;
       if (api === "ani") return { endDateGreater: value };
     },
   },

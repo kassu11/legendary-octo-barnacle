@@ -26,7 +26,7 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false, ...rest } = parsedSearchParams();
+  const { q, isAdult = false, year, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
@@ -39,6 +39,11 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "sort", obj, rest);
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
+  mergeVariables(api, "season", obj, rest);
+
+  if (obj.season && year) {
+    obj.seasonYear = year;
+  }
 
 
   return obj;

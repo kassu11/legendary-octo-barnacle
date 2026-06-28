@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, onCleanup, onMount } from "solid-js";
 import { AnilistMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import "./HorizontalCardRow.scoped.css";
 import { asserts } from "../../collections/collections.js";
@@ -7,18 +7,35 @@ import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 export function HorizontalCardRowScoped(props) {
   asserts.assertTrueOLD("href" in props, "Link is missing");
 
-  let startX, startScrollX, reel, preventClick = false;
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  let startX, momentumX = 0, startScrollX, reel, preventClick = false;
   const handleMouseDown = e => {
+    if (e.buttons !== 1) return;
+
+    const prev = document.querySelector("ol.dragging");
+    prev?.classList.remove("dragging");
+    reel.classList.add("dragging");
+
+    prev?.querySelectorAll(":scope > li").forEach(elem => elem.style.viewTransitionName = null);
+    reel.querySelectorAll(":scope > li").forEach((elem, i) => elem.style.viewTransitionName = `dragging-${i}`);
+
+    reel.style.scrollSnapType = "unset";
+
     e.preventDefault();
     startX = e.x;
+    momentumX = 0;
+    preventClick = false;
     startScrollX = reel.scrollLeft;
   }
 
   const handleRef = elem => {
     reel = elem;
-    elem.addEventListener("click", handleClick);
-    elem.addEventListener("mousemove", handleMouseMove);
-    elem.addEventListener("mousedown", handleMouseDown);
+    elem.addEventListener("click", handleClick, { signal });
+    elem.addEventListener("mousemove", handleMouseMove, { signal });
+    elem.addEventListener("mousedown", handleMouseDown, { signal });
+    window.addEventListener("resize", handleResize, { passive: true, signal });
   };
 
   const handleClick = e => {
@@ -26,18 +43,27 @@ export function HorizontalCardRowScoped(props) {
       e.preventDefault();
       e.stopPropagation(); // Make sure that child clicks are cancelled
     }
-    preventClick = false;
-    reel.style.scrollSnapType = null;
+
+    document.startViewTransition(() => {
+      reel.style.scrollSnapType = null
+      reel.scrollBy(momentumX, 0);
+    });
   }
 
   const handleMouseMove = e => {
     if (startX == null || e.buttons !== 1) return;
     if (Math.abs(startX - e.x) > 20) preventClick = true;
+    momentumX -= e.movementX;
+    setTimeout(() => momentumX += e.movementX, 50);
 
     e.preventDefault();
     reel.scrollTo(startScrollX + (startX - e.x), 0);
-    reel.style.scrollSnapType = "unset";
   }
+
+  const handleResize = () => reel?.classList.toggle("scrollable", reel.clientWidth < reel.scrollWidth);
+
+  onCleanup(() => controller.abort());
+  onMount(handleResize);
 
   return (
     <section>
