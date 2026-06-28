@@ -97,7 +97,7 @@ export function SeasonInputScoped() {
 
     return (
       <ol>
-        <For each={Object.entries(searchObjects.searchSeasons[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
+        <For each={Object.entries(searchObjects.searchSeasonsOLD[engine()]?.[params.type] || {})} fallback={"Something went wrong"}>{([key, season]) => (
           <Show when={key !== "tba"}>
             <li>
               <label>

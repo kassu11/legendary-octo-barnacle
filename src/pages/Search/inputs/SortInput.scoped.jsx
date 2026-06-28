@@ -95,7 +95,7 @@ export function SortInputScoped() {
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
-    const sortEntries = () => Object.entries(searchObjects.sortOrders[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const sortEntries = () => Object.entries(searchObjects.sortOrdersOLD[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

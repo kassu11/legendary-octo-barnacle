@@ -47,17 +47,17 @@ const animeSearch = {
       return true;
     }
 
-    return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top-100"].includes(string);
+    return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top"].includes(string);
   }
 }
 const mangaSearch = {
   type: "manga",
-  header: ["finished", "finished-manga", "tba", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top-100"],
+  header: ["finished", "finished-manga", "tba", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top"],
 }
 
 const bothSearch = {
   type: "media",
-  header: ["finished", "trending", "popular", "top-100", "tba"],
+  header: ["finished", "trending", "popular", "top", "tba"],
 }
 
 render(
@@ -93,7 +93,7 @@ render(
             {/*     </Route> */}
             {/*   </Route> */}
             {/* </Route> */}
-            <Route path="/:mode/:type" matchFilters={{ mode: ["browse", "search"], type: ["anime", "manga", "media"] }} component={SearchPage}>
+            <Route path="/:api/:mode/:type" matchFilters={{ api: ["ani", "mal"], mode: ["browse", "search"], type: ["anime", "manga", "media"] }} component={SearchPage}>
               <Route path="/:header?" matchFilters={animeSearch} />
               <Route path="/:header?" matchFilters={mangaSearch} />
               <Route path="/:header?" matchFilters={bothSearch} />

@@ -698,7 +698,7 @@ function ContentPage() {
                 )}</For>
               </ol>
               <ul class="flex-bullet-separator">
-                <Show when={Object.entries(searchObjects.searchFormats.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
+                <Show when={Object.entries(searchObjects.searchFormatsOLD.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
                   <li>
                     <Switch>
                       <Match when={media.countryOfOrigin !== "JP"}> 

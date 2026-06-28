@@ -23,7 +23,7 @@ function AnilistMediaCardListBody(props) {
       <Show when={!props.skeleton}>
         <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
           <div class="wrapper">
-            <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />
+            <img class="absolute-inset" src={props.media.coverImage.extraLarge || props.media.coverImage.large} alt="Cover." />
             <Show when={props.media.averageScore}>
               <div class="score">
                 <Star /> {(props.media.averageScore / 10)}

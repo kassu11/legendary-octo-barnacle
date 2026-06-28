@@ -97,7 +97,7 @@ export function SourceInputScoped() {
       setStore(reconcile(objectFromArrayEntries(searchParams.source, {})));
     });
 
-    const sourceEntries = () => Object.entries(searchObjects.searchSources).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const sourceEntries = () => Object.entries(searchObjects.searchSourcesOLD).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

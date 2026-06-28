@@ -90,7 +90,7 @@ export function CountryInputScoped() {
       setStore(reconcile(objectFromArrayEntries(searchParams.country, {})));
     });
 
-    const countryEntries = () => Object.entries(searchObjects.searchCountries).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const countryEntries = () => Object.entries(searchObjects.searchCountriesOLD).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

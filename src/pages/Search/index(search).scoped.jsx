@@ -90,7 +90,7 @@ function parseURL() {
 
   const [season] = wrapToArray(virtualSearchParams("season"));
   if (season && engine === localizations.ani) {
-    const { api, flavorText } = searchObjects.searchSeasons[engine]?.[type]?.[season] || { flavorText: searchObjects.searchStatuses.flavorTexts[season] || season }
+    const { api, flavorText } = searchObjects.searchSeasonsOLD[engine]?.[type]?.[season] || { flavorText: searchObjects.searchStatusesOLD.flavorTexts[season] || season }
     variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: api, active: api !== undefined, visuallyDisabled: api === undefined}));
   }
 
@@ -99,7 +99,7 @@ function parseURL() {
   let hasStartDateSet = false;
   let disabledBySeasonSearch = false;
   if (season && year && engine === localizations.mal) {
-    const { api, flavorText } = searchObjects.searchSeasons[engine]?.[type]?.[season] || { flavorText: searchObjects.searchStatuses.flavorTexts[season] || season }
+    const { api, flavorText } = searchObjects.searchSeasonsOLD[engine]?.[type]?.[season] || { flavorText: searchObjects.searchStatusesOLD.flavorTexts[season] || season }
     variables.push(new SearchVariable({ name: flavorText, url: `season=${season}`, key: "season", value: year + "/" + api, active: api !== undefined, visuallyDisabled: api === undefined}));
     variables.push(new SearchVariable({ name: year, url: `year=${year}`, active: false }));
     disabledBySeasonSearch = true;
@@ -259,8 +259,8 @@ function parseURL() {
   {
     const validFormats = [];
     wrapToSet(virtualSearchParams("format")).forEach(format => {
-      const {api, flavorText} = searchObjects.searchFormats[engine][type]?.[format] || {};
-      const flavorTextFallback = flavorText || searchObjects.searchFormats.flavorTexts[format] || format;
+      const {api, flavorText} = searchObjects.searchFormatsOLD[engine][type]?.[format] || {};
+      const flavorTextFallback = flavorText || searchObjects.searchFormatsOLD.flavorTexts[format] || format;
       if (engine === "ani" && api) {
         validFormats.push(api);
       }
@@ -290,7 +290,7 @@ function parseURL() {
     const orderSet = wrapToSet(virtualSearchParams("order"));
     orderSet.forEach(order => {
       let orderWithoutAlternativeKey = order;
-      if (order === searchObjects.sortOrders.ani.anime.duration.alternative_key) {
+      if (order === searchObjects.sortOrdersOLD.ani.anime.duration.alternative_key) {
         orderWithoutAlternativeKey = "duration";
         variables.push(new SearchVariable({
           name: "Duration greater than 0",
@@ -301,7 +301,7 @@ function parseURL() {
           value: 0
         }));
       }
-      else if (order === searchObjects.sortOrders.mal.anime.episodes.alternative_key) {
+      else if (order === searchObjects.sortOrdersOLD.mal.anime.episodes.alternative_key) {
         orderWithoutAlternativeKey = "episodes";
         if (engine === "ani") {
           if (type === "anime") {
@@ -316,7 +316,7 @@ function parseURL() {
           variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete", active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
-      else if (order === searchObjects.sortOrders.mal.manga.volumes.alternative_key) {
+      else if (order === searchObjects.sortOrdersOLD.mal.manga.volumes.alternative_key) {
         orderWithoutAlternativeKey = "volumes";
         if (engine === "ani") {
           variables.push(new SearchVariable({
@@ -333,7 +333,7 @@ function parseURL() {
           variables.push(new SearchVariable({ name: "Status complete", url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}`, key: "status", value: "complete", active: !disabledBySeasonSearch, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
-      else if (order === searchObjects.sortOrders.mal.anime.end_date.alternative_key) {
+      else if (order === searchObjects.sortOrdersOLD.mal.anime.end_date.alternative_key) {
         orderWithoutAlternativeKey = "end_date";
         const base = { name: "Only valid dates", active: !hasEndDateSet && !disabledBySeasonSearch, hidden: hasEndDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
@@ -343,7 +343,7 @@ function parseURL() {
           variables.push(new SearchVariable({ ...base, key: "end_date", value: `${new Date().getFullYear() + 100}-01-01`, visuallyDisabled: disabledBySeasonSearch }));
         }
       }
-      else if (order === searchObjects.sortOrders.mal.anime.start_date.alternative_key) {
+      else if (order === searchObjects.sortOrdersOLD.mal.anime.start_date.alternative_key) {
         orderWithoutAlternativeKey = "start_date";
         const base = { name: "Only valid dates", active: !hasStartDateSet && !disabledBySeasonSearch, hidden: hasStartDateSet, url: `order=${order}`, addUrl: `order=${orderWithoutAlternativeKey}` };
         if (engine === "ani") {
@@ -355,8 +355,8 @@ function parseURL() {
       }
 
 
-      const {api, flavorText, reverse} = searchObjects.sortOrders[engine][type]?.[orderWithoutAlternativeKey] || {};
-      const flavorTextFallback = flavorText || searchObjects.sortOrders[engine === "ani" ? "mal" : "ani"][type]?.[orderWithoutAlternativeKey]?.flavorText || searchObjects.sortOrders.flavorTexts[orderWithoutAlternativeKey] || order;
+      const {api, flavorText, reverse} = searchObjects.sortOrdersOLD[engine][type]?.[orderWithoutAlternativeKey] || {};
+      const flavorTextFallback = flavorText || searchObjects.sortOrdersOLD[engine === "ani" ? "mal" : "ani"][type]?.[orderWithoutAlternativeKey]?.flavorText || searchObjects.sortOrdersOLD.flavorTexts[orderWithoutAlternativeKey] || order;
       if (engine === "ani" && api) {
         if (searchParams.sort === "ASC") {
           validAniOrders.push(api);
@@ -404,21 +404,21 @@ function parseURL() {
 
   if (virtualSearchParams("status")) {
     const [status] = wrapToArray(virtualSearchParams("status"));
-    const { api, flavorText } = searchObjects.searchStatuses[engine][type]?.[status] || {
-      flavorText: searchObjects.searchStatuses[notEngine][type]?.[status]?.flavorText || searchObjects.searchStatuses.flavorTexts[status] || status
+    const { api, flavorText } = searchObjects.searchStatusesOLD[engine][type]?.[status] || {
+      flavorText: searchObjects.searchStatusesOLD[notEngine][type]?.[status]?.flavorText || searchObjects.searchStatusesOLD.flavorTexts[status] || status
     };
     variables.push(new SearchVariable({ name: flavorText, active: !!api, visuallyDisabled: !api, key: "status", value: api, url: `status=${status}` }));
   }
 
   if (virtualSearchParams("country")) {
     const [country] = wrapToArray(virtualSearchParams("country"));
-    const { flavorText } = searchObjects.searchCountries[country] || { flavorText: country };
+    const { flavorText } = searchObjects.searchCountriesOLD[country] || { flavorText: country };
     variables.push(new SearchVariable({ name: flavorText, active: engine === "ani", visuallyDisabled: engine !== "ani", key: "countryOfOrigin", value: country, url: `country=${country}` }));
   }
 
   if (searchParams.source) {
     const [source] = wrapToArray(searchParams.source);
-    const { api, flavorText } = searchObjects.searchSources[source] || { flavorText: source };
+    const { api, flavorText } = searchObjects.searchSourcesOLD[source] || { flavorText: source };
     variables.push(new SearchVariable({ name: flavorText, active: engine === "ani", visuallyDisabled: engine !== "ani", key: "source", value: api, url: `source=${source}` }));
   }
 

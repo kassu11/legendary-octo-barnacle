@@ -71,7 +71,6 @@ export function VerticalCardRowScoped(props) {
                     </p>
                   </div>
                   <div class="clamp">
-                    {console.log(card)}
                     <Switch>
                       {/* TODO: Check how anilist handles airing episodes*/}
                       {/* TODO Add edit media button for row cards*/}

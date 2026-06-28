@@ -1,4 +1,4 @@
-export const sortOrders = {
+export const sortOrdersOLD = {
   mal: {
     anime: {
       end_date: { api: "end_date", flavorText: "End date", alternative_key: "end_date_filtered" },
@@ -74,10 +74,10 @@ export const sortOrders = {
     }
   }
 };
-sortOrders.flavorTexts = extractFlavorTexts(sortOrders);
+sortOrdersOLD.flavorTexts = extractFlavorTexts(sortOrdersOLD);
 
 
-export const searchFormats = {
+export const searchFormatsOLD = {
   mal: {
     anime: {
       cm: { api: "cm", flavorText: "CM" },
@@ -129,10 +129,10 @@ export const searchFormats = {
     }
   },
 }
-searchFormats.flavorTexts = extractFlavorTexts(searchFormats);
+searchFormatsOLD.flavorTexts = extractFlavorTexts(searchFormatsOLD);
 
 
-export const searchSeasons = {
+export const searchSeasonsOLD = {
   ani: {
     anime: {
       winter: { api: "WINTER", flavorText: "Winter" },
@@ -151,11 +151,11 @@ export const searchSeasons = {
     },
   }
 }
-searchSeasons.flavorTexts = extractFlavorTexts(searchSeasons);
+searchSeasonsOLD.flavorTexts = extractFlavorTexts(searchSeasonsOLD);
 
 
 
-export const searchStatuses = {
+export const searchStatusesOLD = {
   mal: {
     anime: {
       releasing: { api: "airing", flavorText: "Airing" },
@@ -193,16 +193,16 @@ export const searchStatuses = {
     }
   },
 }
-searchStatuses.flavorTexts = extractFlavorTexts(searchStatuses);
+searchStatusesOLD.flavorTexts = extractFlavorTexts(searchStatusesOLD);
 
-export const searchCountries = {
+export const searchCountriesOLD = {
   CN: { flavorText: "China" },
   JP: { flavorText: "Japan" },
   KR: { flavorText: "South Korea" },
   TW: { flavorText: "Taiwan" },
 }
 
-export const searchSources = {
+export const searchSourcesOLD = {
   anime: { api: "ANIME", flavorText: "Anime"},
   comic: { api: "COMIC", flavorText: "Comic"},
   doujinshi: { api: "DOUJINSHI", flavorText: "Doujinshi"},

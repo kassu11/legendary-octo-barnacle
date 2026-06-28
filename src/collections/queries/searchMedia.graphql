@@ -1,5 +1,5 @@
 query (
-  $page: Int = 1
+  $page: Int
   $id: Int
   $type: MediaType
   $isAdult: Boolean
@@ -33,6 +33,7 @@ query (
   $excludedTags: [String]
   $minimumTagRank: Int
   $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
+  $averageScoreGreater: Int
 ) {
   Page(page: $page) {
     pageInfo {
@@ -76,6 +77,7 @@ query (
       minimumTagRank: $minimumTagRank
       sort: $sort
       isAdult: $isAdult
+      averageScore_greater: $averageScoreGreater
     ) {
       id
       title {

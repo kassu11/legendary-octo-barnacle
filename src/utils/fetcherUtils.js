@@ -297,7 +297,7 @@ export async function sendFetcher(fetcher, settings = {}) {
         settings.setValue({ ...res, cache: false }, { fetcher, settings });
         if (data) settings.cache?.set?.(res, { fetcher });
       } catch (err) {
-        settings.onError?.(err);
+        settings.onError?.(err, { fetcher });
       }
     }
 

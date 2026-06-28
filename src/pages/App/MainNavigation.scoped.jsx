@@ -30,9 +30,9 @@ export function MainNavigation() {
     <nav class="main-navigation">
       <ul>
         <li><A href="/">Home</A></li>
-        <li><A href="/browse/anime">Anime</A></li>
-        <li><A href="/browse/manga">Manga</A></li>
-        <li><A href="/browse/media">Search</A></li>
+        <li><A href="/ani/browse/anime">Anime</A></li>
+        <li><A href="/ani/browse/manga">Manga</A></li>
+        <li><A href="/ani/browse/media">Search</A></li>
         <Switch>
           <Match when={token2()}>
             <li>

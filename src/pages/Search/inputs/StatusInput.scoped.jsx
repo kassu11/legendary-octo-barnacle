@@ -92,7 +92,7 @@ export function StatusInputScoped() {
     });
 
     const engine = () => (searchParams.malSearch === "true" && (params.type === "anime" || params.type === "manga")) ? "mal" : "ani";
-    const statusEntries = () => Object.entries(searchObjects.searchStatuses[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
+    const statusEntries = () => Object.entries(searchObjects.searchStatusesOLD[engine()][params.type] || {}).sort(([, a], [, b]) => a.flavorText.localeCompare(b))
 
     return (
       <ol>

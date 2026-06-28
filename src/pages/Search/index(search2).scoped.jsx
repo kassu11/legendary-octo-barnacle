@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
 import { createTimer, formatMSToString } from "../../utils/timeUtils";
@@ -14,21 +14,50 @@ import { tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
 import { scheduleUtils } from "../../utils/utils";
 import { assertThruthy } from "../../collections/asserts";
+import { translateInternalSearchParams } from "../../core/apiTranslations";
+import { concatMergeObjects } from "../../utils/objectUtils";
+import { isTypeArray } from "../../utils/arrays";
+import { capitalize } from "../../utils/formating";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
   const params = useParams();
-  const { type, mode } = params;
+  const { api, type, mode } = params;
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false} = parsedSearchParams();
+  const { q, isAdult = false, ...rest } = parsedSearchParams();
 
-  return {
+  const obj = {
+    sort: [],
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
     isAdult
   };
+
+  console.log(rest);
+  mergeVariables(api, "sort", obj, rest);
+  mergeVariables(api, "endDateGreater", obj, rest);
+  mergeVariables(api, "status", obj, rest);
+
+
+  return obj;
+}
+
+function mergeVariables(api, key, to, from) {
+  if (isTypeArray(from[key])) {
+    from[key].forEach(value => mergeValue(api, key, to, value));
+  } else {
+    mergeValue(api, key, to, from[key]);
+  }
+}
+
+function mergeValue(api, key, to, value) {
+  let val;
+  if (!(value in translateInternalSearchParams[key])) val = translateInternalSearchParams[key]._default?.(api, value);
+  else val = translateInternalSearchParams[key][value]?.[api];
+
+  concatMergeObjects(to, val);
 }
 
 const SEARCH_DEBOUNCE = 400;
@@ -38,9 +67,11 @@ const searchPageSizes = {} // keep that of how many elements url had, so when us
 export function SearchPage() {
   const params = useParams();
   const location = useLocation();
+  const parsedSearchParams = useParsedSearchParams();
 
   const anilistVariables = createMemo(createAnilistMediaQueryVariables);
   const [page, setPage] = createSignal(1);
+  const [error, setError] = createSignal();
   const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
   const [previousHistoryDummyData, setPreviousHistoryDummyData] = createSignal();
   const [pagelessCacheData, setPagelessCacheData] = createStore({});
@@ -111,6 +142,7 @@ export function SearchPage() {
   const [anilistSearchLoading, setAnilistSearchLoading] = createSignal(false);
   const [anilistBrowseData, setAnilistBrowseData] = createStore({});
   let anilistSearchFetcher, anilistSearchController;
+  let previousMode = null;
   createEffect(() => {
     anilistSearchController?.abort();
     anilistSearchController = new AbortController();
@@ -134,10 +166,14 @@ export function SearchPage() {
       var currentPagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless"});
       if (currentPagelessFetcher.cacheKey !== key) return; // Pageless fetcher might load slower, so cancel fetcher if pagelessCacheKey is missing/different
 
-      if (anilistSearchFetcher) debounce = SEARCH_DEBOUNCE; // Don't debounce on first page load
       anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: p }, anilistSearchController.signal);
+      console.log("vars", variables);
+      if (previousMode === "search" && mode === "search") debounce = SEARCH_DEBOUNCE; // Don't debounce on first page load or when switching between browse and search headers
       if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
     }
+
+    setError(null);
+    previousMode = mode;
 
     const expires = mode === "search" ? new Date().setHours(24 * 7) : undefined; // 1 week
 
@@ -163,6 +199,14 @@ export function SearchPage() {
           setAnilistSearchLoading(false);
           stopAnilistSearchTimer(time);
         });
+      },
+      onError: async (response, { fetcher: f }) => {
+        if (f.cacheKey !== anilistSearchFetcher.cacheKey || response?.status !== 400) return;
+        try {
+          var json = await response.json();
+        } finally {
+          setError(json || response); // Returns anilists own error list
+        }
       },
       setValue: (res, { fetcher: f, settings }) => {
         // TODO: There is a slight bug, where tabTime can be fooled, by using another tab
@@ -229,22 +273,43 @@ export function SearchPage() {
   onCleanup(() => {
     window.removeEventListener("scroll", handleScroll, { passive: true });
     intersectionObserver.disconnect();
-    searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data.length;
+    searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data?.length || 0;
   });
 
   return (
-    <>
+    <ErrorBoundary fallback="Search page has crashed">
       <SearchBar />
       <Switch>
+        <Match when={error()?.errors}>
+          <h2>Bad request error: </h2>
+          <For each={error().errors}>{({ message }) => (
+            <p>{message}</p>
+          )}</For>
+        </Match>
+        <Match when={error()}>
+          <h2>Internal error</h2>
+          <p>{error()}</p>
+        </Match>
         {/* Data is type browse, so display all the fields */}
         <Match when={params.mode === "browse"}>
           <Show when={location.search || params.header}>
-            <Navigate href={"/search/" + params.type + (params.header ? ("/" + params.header) : "") +  location.search} />
+            <Navigate href={"/" + params.api + "/search/" + params.type + (params.header ? ("/" + params.header) : "") +  location.search} />
           </Show>
           <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} time={formatMSToString(anilistSearchTime())} />
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
+            <Switch>
+              <Match when={params.header === "top" && parsedSearchParams().sort?.[0] === "score_desc"}>
+                <h1>Top {capitalize(params.type)}</h1>
+              </Match>
+              <Match when={params.header === "top" && parsedSearchParams().sort?.[0] === "score_plus"}>
+                <h1>Worst {capitalize(params.type)}</h1>
+              </Match>
+              <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
+                <h1>Trending {capitalize(params.type)}</h1>
+              </Match>
+            </Switch>
             <ol class="cards">
               <For each={(!pagelessCacheLoading() && pagelessCacheData?.data) || previousHistoryDummyData()}>{(media, i) => {
                 let ref;
@@ -267,7 +332,7 @@ export function SearchPage() {
           </div>
         </Match>
       </Switch>
-    </>
+    </ErrorBoundary>
   );
 }
 
@@ -279,29 +344,29 @@ function BrowsePage(props) {
       <p class="time">{props.time}</p>
       <Switch>
         <Match when={params.type === "anime"}>
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.trending?.media} loading={props.loading} href="/search/anime/trending" title="Trending now" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.season?.media} loading={props.loading} href="/search/anime/this-season?order=popularity" title="Popular this season" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.nextSeason?.media} loading={props.loading} href="/search/anime/next-season?order=popularity" title="Upcoming next season" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.finished?.media} loading={props.loading} href="/search/anime/finished" title="Recently finished" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.popular?.media} loading={props.loading} href="/search/anime/popular" title="All time popular" />
-          <VerticalCardRowScoped data={props.cards?.season && props.cards?.top?.media} type="anime" href="/search/anime/top-100" title="Top 100 anime" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.trending?.media} loading={props.loading} href="/ani/search/anime/trending" title="Trending now" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.season?.media} loading={props.loading} href="/ani/search/anime/this-season?order=popularity" title="Popular this season" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.nextSeason?.media} loading={props.loading} href="/ani/search/anime/next-season?order=popularity" title="Upcoming next season" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.finished?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently finished" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.popular?.media} loading={props.loading} href="/ani/search/anime/popular" title="All time popular" />
+          <VerticalCardRowScoped data={props.cards?.season && props.cards?.top?.media} type="anime" href="/ani/search/anime/top" title="Top 100 anime" />
         </Match>
         <Match when={params.type === "manga"}>
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.trending?.media} loading={props.loading} href="/search/manga/trending" title="Trending now" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.novel?.media} loading={props.loading} href="/search/manga/novel" title="Popular light novels" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.manhwa?.media} loading={props.loading} href="/search/manga/manhwa" title="Popular Manhwas" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedManga?.media} loading={props.loading} href="/search/manga/finished-manga" title="Recently finished mangas" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedNovel?.media} loading={props.loading} href="/search/manga/finished-novel" title="Recently finished light novels" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.popular?.media} loading={props.loading} href="/search/manga/popular" title="All time popular" />
-          <VerticalCardRowScoped data={props.cards?.novel && props.cards?.top?.media} type="manga" href="/search/manga/top-100" title="Top 100 manga" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.trending?.media} loading={props.loading} href="/ani/search/manga/trending" title="Trending now" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.novel?.media} loading={props.loading} href="/ani/search/manga/novel" title="Popular light novels" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.manhwa?.media} loading={props.loading} href="/ani/search/manga/manhwa" title="Popular Manhwas" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished-manga" title="Recently finished mangas" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedNovel?.media} loading={props.loading} href="/ani/search/manga/finished-novel" title="Recently finished light novels" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.popular?.media} loading={props.loading} href="/ani/search/manga/popular" title="All time popular" />
+          <VerticalCardRowScoped data={props.cards?.novel && props.cards?.top?.media} type="manga" href="/ani/search/manga/top" title="Top 100 manga" />
         </Match>
         <Match when={params.type === "media"}>
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.trending?.media} loading={props.loading} href="/search/media/trending" title="Trending anime and manga" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newAnime?.media} loading={props.loading} href="/search/anime/new" title="Newly added anime" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newManga?.media} loading={props.loading} href="/search/manga/new" title="Newly added manga" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedAnime?.media} loading={props.loading} href="/search/anime/finished" title="Recently finished anime" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedManga?.media} loading={props.loading} href="/search/manga/finished" title="Recently finished manga" />
-          <VerticalCardRowScoped data={props.cards?.newAnime && props.cards?.top?.media} type="media" href="/search/media/top-100" title="Top 100 anime and manga" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.trending?.media} loading={props.loading} href="/ani/search/media/trending" title="Trending anime and manga" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newAnime?.media} loading={props.loading} href="/ani/search/anime/new" title="Newly added anime" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newManga?.media} loading={props.loading} href="/ani/search/manga/new" title="Newly added manga" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedAnime?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently finished anime" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished" title="Recently finished manga" />
+          <VerticalCardRowScoped data={props.cards?.newAnime && props.cards?.top?.media} type="media" href="/ani/search/media/top" title="Top 100 anime and manga" />
         </Match>
       </Switch>
     </div>

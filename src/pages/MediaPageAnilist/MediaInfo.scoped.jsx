@@ -43,7 +43,7 @@ export function AnilistMediaInfo(props) {
                 </Match>
               </Switch>
             </li>
-            <Show when={Object.entries(searchObjects.searchFormats.ani.media).find(([, val]) => val.api === anilistData()?.data.data.Media.format)?.[0]}>{formatApiValue => (
+            <Show when={Object.entries(searchObjects.searchFormatsOLD.ani.media).find(([, val]) => val.api === anilistData()?.data.data.Media.format)?.[0]}>{formatApiValue => (
               <li>
                 <Switch>
                   <Match when={anilistData()?.data.data.Media.countryOfOrigin !== "JP"}> 
@@ -64,7 +64,7 @@ export function AnilistMediaInfo(props) {
           <ul>
             <Show when={anilistData()?.data.data.Media.source}>
               <li>Source: 
-                <A href={"/search/" + anilistData()?.data.data.Media.type.toLowerCase() + "?source=" + Object.entries(searchObjects.searchSources).find(([, val]) => val.api === anilistData()?.data.data.Media.source)[0]}>
+                <A href={"/search/" + anilistData()?.data.data.Media.type.toLowerCase() + "?source=" + Object.entries(searchObjects.searchSourcesOLD).find(([, val]) => val.api === anilistData()?.data.data.Media.source)[0]}>
                   {formatingUtils.formatMediaSource(anilistData()?.data.data.Media.source)}
                 </A>
               </li>

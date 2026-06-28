@@ -1,0 +1,35 @@
+export const translateInternalSearchParams = {
+  sort: {
+    trending_desc: {
+      ani: { sort: "TRENDING_DESC" },
+    },
+    end_date_desc: {
+      ani: { sort: "END_DATE_DESC" },
+    },
+    popularity_plus_desc: {
+      ani: { sort: ["POPULARITY_DESC", "SCORE_DESC"] },
+    },
+    popularity_desc: {
+      ani: { sort: ["POPULARITY_DESC"] },
+    },
+    score_desc: {
+      ani: { sort: ["SCORE_DESC"] },
+    },
+    score: {
+      ani: { sort: ["SCORE"] },
+    },
+    score_plus: {
+      ani: { sort: ["SCORE"], averageScoreGreater: 0 },
+    },
+  },
+  status: {
+    complete: {
+      ani: { status: "FINISHED" },
+    },
+  },
+  endDateGreater: {
+    _default: (api, value) => {
+      if (api === "ani") return { endDateGreater: value };
+    },
+  },
+};

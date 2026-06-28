@@ -97,7 +97,7 @@ export function FormatInputScoped() {
 
     return (
       <ol>
-        <For each={Object.entries(searchObjects.searchFormats[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, format]) => (
+        <For each={Object.entries(searchObjects.searchFormatsOLD[engine()][params.type] || {})} fallback={"Something went wrong"}>{([key, format]) => (
           <li>
             <label>
               {format.flavorText}

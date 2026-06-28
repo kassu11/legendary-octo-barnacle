@@ -1,17 +1,17 @@
 import { asserts } from "../collections/collections";
 
-const isArray = value => Array.isArray(value);
+export const isTypeArray = value => Array.isArray(value);
 
 export function objectFromArrayEntries(arr, defaultRetun) {
   if (!arr) {
     return defaultRetun || null;
-  } else if (isArray(arr)) {
+  } else if (isTypeArray(arr)) {
     return Object.fromEntries(arr.map(v => ([v, true])));
   } return {[arr]: true};
 }
 
 export function wrapToArray(value) {
-  if (isArray(value)) {
+  if (isTypeArray(value)) {
     return value;
   } else if (value) {
     return [value];
@@ -61,7 +61,7 @@ export function wrapToSet(value) {
 }
 
 export function removeDuplicateIgnoreCaseSensitivity(array) {
-  asserts.assertTrueOLD(isArray(array), "Not array");
+  asserts.assertTrueOLD(isTypeArray(array), "Not array");
   const map = new Map();
   array.forEach(value => map.set(value.toLowerCase(), value));
   return Array.from(map.values());
@@ -74,7 +74,7 @@ export function compare(a, b) {
   if (typeof a !== typeof b) {
     return false;
   } 
-  if (isArray(a)) {
+  if (isTypeArray(a)) {
     return a.length === b.length && a.every((v, i) => compare(v, b[i]))
   }
 
@@ -82,7 +82,7 @@ export function compare(a, b) {
 }
 
 export function first(value) {
-  return isArray(value) ? value[0] : value;
+  return isTypeArray(value) ? value[0] : value;
 }
 
 export function binarySearchFindIndex(arr, callback, left = 0, right = arr.length - 1) {
@@ -136,7 +136,7 @@ export function binarySearchFindAlwaysIndex(arr, callback, left = 0, right = arr
 export const findOrFirst = (array, findCallback, defaultReturn) => {
   asserts.assertTypeFunctionOLD(findCallback);
 
-  if (!isArray(array) || array.length === 0) {
+  if (!isTypeArray(array) || array.length === 0) {
     return defaultReturn;
   }
 
@@ -144,7 +144,7 @@ export const findOrFirst = (array, findCallback, defaultReturn) => {
 }
 
 export const at = (array, index, defaultReturn) => {
-  if (!isArray(array) || array.length === 0) {
+  if (!isTypeArray(array) || array.length === 0) {
     return defaultReturn;
   }
 
@@ -204,7 +204,7 @@ export function binarySearchIndexOf(arr, el, left = 0, right = arr.length - 1) {
 }
 
 export function atPercent(array, percent) {
-  if (!isArray(array)) {
+  if (!isTypeArray(array)) {
     return undefined;
   }
 
