@@ -425,19 +425,18 @@
     color: var(--text);
     cursor: pointer;
     background-image: linear-gradient(45deg, oklab(0.58 0.18 -0.26), oklab(0.7 0.26 0.02));
-    background-position: 0 calc(100% - 2px);
-    background-repeat: repeat-x;
-    background-size: 100% 2px;
-    padding: 2px;
-    margin: -2px;
-    transition: .1s background, .1s text-shadow;
+    background-position: 3px calc(100% - 4px);
+    background-repeat: no-repeat;
+    background-size: calc(100% - 6px) 2px;
+    padding: 5px;
+    margin: -5px;
+    transition: .1s background, .25s text-shadow, .25s filter;
 
     &:hover, &:focus-visible {
-      padding: 5px;
-      margin: -5px;
       background-position: 0 100%;
-      background-size: calc(100% + 10px) calc(100% + 10px);
+      background-size: 100% 100%;
       text-shadow: 0 0 5px black;
+      filter: contrast(1.5);
     }
   }
 }

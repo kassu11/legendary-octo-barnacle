@@ -210,3 +210,7 @@ export function atPercent(array, percent) {
 
   return array[Math.round((array.length - 1) * percent)];
 }
+
+export const ArrayFromRange = (callback, length, start = 0) => {
+  return Array.from({ length }, (_, i) => callback(start + i));
+}

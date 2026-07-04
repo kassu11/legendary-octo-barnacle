@@ -21,8 +21,6 @@ export function HorizontalCardRowScoped(props) {
     prev?.querySelectorAll(":scope > li").forEach(elem => elem.style.viewTransitionName = null);
     reel.querySelectorAll(":scope > li").forEach((elem, i) => elem.style.viewTransitionName = `dragging-${i}`);
 
-    reel.style.scrollSnapType = "unset";
-
     e.preventDefault();
     startX = e.x;
     momentumX = 0;
@@ -58,6 +56,7 @@ export function HorizontalCardRowScoped(props) {
 
     e.preventDefault();
     reel.scrollTo(startScrollX + (startX - e.x), 0);
+    reel.style.scrollSnapType = "unset";
   }
 
   const handleResize = () => reel?.classList.toggle("scrollable", reel.clientWidth < reel.scrollWidth);
@@ -76,4 +75,3 @@ export function HorizontalCardRowScoped(props) {
     </section>
   );
 }
-

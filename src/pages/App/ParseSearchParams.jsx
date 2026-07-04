@@ -22,6 +22,10 @@ export function ParseSearchParams(props) {
       type,
     };
 
+    const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalSearchParams.sort[val]));
+
+    const groupSeasonalEntriesByFormat = searchParams.skipSeasonalFormatGroups !== "true";
+
     if (header === "trending") obj.sort = ["trending_desc"];
     else if (header === "popular") obj.sort = ["popularity_desc", "score_desc"];
     else if (header === "novel") obj.format = "light_novel";
@@ -30,20 +34,21 @@ export function ParseSearchParams(props) {
     else if (header === "top") Object.assign(obj, { sort: ["score_desc"] });
     else if (header === "finished-manga") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", format: "manga" });
     else if (header === "finished-novel") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", format: "light_novel" });
+
     else if (header === "this-season") {
       const dates = getDates();
-      Object.assign(obj, { sort: ["format", "popularity_desc", "score_desc"], year: dates.seasonYear, season: dates.season, });
+      Object.assign(obj, { year: dates.seasonYear, season: dates.season, seasonPage: true });
     }
     else if (header === "next-season") {
       const dates = getDates();
-      Object.assign(obj, { sort: ["format", "popularity_desc", "score_desc"], year: dates.nextYear, season: dates.nextSeason, });
+      Object.assign(obj, { year: dates.nextYear, season: dates.nextSeason, seasonPage: true });
     }
     else if (header === "tba") {
-      Object.assign(obj, { sort: ["popularity_desc", "score_desc"], season: null, status: "not_yet_released" });
+      Object.assign(obj, { season: null, status: "not_yet_released", seasonPage: true });
     }
-    else if (/winter|spring|summer|fall|/.test(header)) {
-      const dates = getDates();
-      Object.assign(obj, { sort: ["format", "popularity_desc", "score_desc"], year: dates.nextYear, season: dates.nextSeason, });
+    else if (/winter|spring|summer|fall/.test(header)) {
+      const [season, year] = header.toUpperCase().split("-");
+      Object.assign(obj, { year, season, seasonPage: true });
     }
 
     const include = wrapToSet(searchParams.genre);
@@ -53,8 +58,16 @@ export function ParseSearchParams(props) {
     include.forEach(v => obj.genres[v] = "inc");
     exclude.forEach(v => obj.genres[v] = "exc");
 
-    const filteredSorts = wrapToArray(searchParams.sort).filter(val => translateInternalSearchParams.sort[val]);
-    if (filteredSorts.length) obj.sort = removeDuplicateIgnoreCaseSensitivity(filteredSorts);
+    if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
+
+    console.log("filteredSorts", filteredSorts);
+    if (filteredSorts.length) obj.sort = filteredSorts;
+    else if (!obj.sort?.length) obj.sort = ["popularity_desc", "score_desc"];
+
+    if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
+      if (groupSeasonalEntriesByFormat) obj.sort = ["format", ...obj.sort];
+      obj.groupSeasonalEntriesByFormat = groupSeasonalEntriesByFormat;
+    }
 
     return obj;
   });

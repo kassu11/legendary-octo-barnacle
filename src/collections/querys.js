@@ -1,3 +1,5 @@
+import { objectToSearchParams } from "../utils/objectUtils";
+
 export { default as anilistMediaById } from "./queries/anilistMediaById.graphql";
 export { default as anilistGetActivityLikes } from "./queries/anilistGetActivityLikes.graphql";
 export { default as anilistUserSearch } from "./queries/anilistUserSearch.graphql";
@@ -98,7 +100,7 @@ export const myAnimeListAnimeCharactersById = id => `https://api.jikan.moe/v4/an
 export const myAnimeListMangaCharactersById = id => `https://api.jikan.moe/v4/manga/${id}/characters`;
 export const myAnimeListCharacterById = ({ id }) => `https://api.jikan.moe/v4/characters/${id}/full`;
 export const myAnimeListAnimeStaffById = ({ id }) => `https://api.jikan.moe/v4/anime/${id}/staff`;
-export const myAnimeListMediaSearch = ({ type, query }) => `https://api.jikan.moe/v4/${type}?${query}`;
+export const myAnimeListMediaSearch = ({ type, ...rest }) => `https://api.jikan.moe/v4/${type}?${objectToSearchParams(rest)}`;
 export const myAnimeListMediaSeasonSearch = ({ season, query }) => `https://api.jikan.moe/v4/seasons/${season}?${query}`;
 export const myAnimeListMediaGenres = ({ type }) => `https://api.jikan.moe/v4/genres/${type}`;
 

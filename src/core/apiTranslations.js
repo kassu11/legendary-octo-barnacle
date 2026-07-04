@@ -27,6 +27,9 @@ export const translateInternalSearchParams = {
     title_romaji_desc: {
       ani: { sort: ["TITLE_ROMAJI_DESC"] },
     },
+    search_match: {
+      ani: { sort: ["SEARCH_MATCH"] },
+    },
   },
   status: {
     complete: {

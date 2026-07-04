@@ -1,9 +1,9 @@
-import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { A, Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
 import { createTimer, formatMSToString } from "../../utils/timeUtils";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
+import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils";
 import { HorizontalCardRowScoped } from "../Browse/HorizontalCardRow.scoped";
 import { VerticalCardRowScoped } from "../Browse/VerticalCardRow.scoped";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
@@ -26,7 +26,7 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false, year, ...rest } = parsedSearchParams();
+  const { q, isAdult = false, year, sortBySearchMatch, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
@@ -35,8 +35,9 @@ function createAnilistMediaQueryVariables() {
     isAdult
   };
 
-  console.log(rest);
-  mergeVariables(api, "sort", obj, rest);
+  if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: ["search_match"] });
+  else mergeVariables(api, "sort", obj, rest);
+
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
   mergeVariables(api, "season", obj, rest);
@@ -45,6 +46,24 @@ function createAnilistMediaQueryVariables() {
     obj.seasonYear = year;
   }
 
+
+  return obj;
+}
+
+function createJikanMediaQueryVariables() {
+  const parsedSearchParams = useParsedSearchParams();
+  const params = useParams();
+  const { type, mode } = params;
+
+  if (mode === "browse" || type === "media") return null;
+
+  const { q, sfw = true } = parsedSearchParams();
+
+  const obj = {
+    q: q?.toLowerCase().trim() || undefined,
+    type,
+    sfw,
+  };
 
   return obj;
 }
@@ -69,12 +88,16 @@ const SEARCH_DEBOUNCE = 400;
 const cachedResults = new Set();
 const searchPageSizes = {} // keep that of how many elements url had, so when user navigates back in history, we can create the right amount of skeleton cards
 
+const LOADER = 0;
+const INACTIVE_LOADER = 1;
+
 export function SearchPage() {
   const params = useParams();
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
 
   const anilistVariables = createMemo(createAnilistMediaQueryVariables);
+  const jikanVariables = createMemo(createJikanMediaQueryVariables);
   const [page, setPage] = createSignal(1);
   const [error, setError] = createSignal();
   const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
@@ -90,19 +113,21 @@ export function SearchPage() {
     setPagelessCacheLoading(true);
     setPage(1);
 
-    pagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless"});
-    if (untrack(previousHistoryDummyData) === undefined) setPreviousHistoryDummyData(Array(searchPageSizes[pagelessFetcher.cacheKey] || 20).fill(null));
+    pagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless3"});
+    if (untrack(previousHistoryDummyData) === undefined) setPreviousHistoryDummyData(Array(searchPageSizes[pagelessFetcher.cacheKey] || 20).fill(LOADER));
     let curKey = pagelessFetcher.cacheKey;
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
+
     if (curKey !== pagelessFetcher.cacheKey) return;
+    if (data?.data.fallback) fallbackPagelessCacheKey = curKey;
 
     // TODO: Make a function to check when we can use long time cache
     // For example when results are smaller than page size or when searching using years etc.
     if (data) setPagelessCacheData(reconcile(data));
     else {
       setPagelessCacheData(reconcile({
-        data: Array(20).fill(null),
+        data: { perPage: null, media: Array(20).fill(LOADER) },
         name: "Anilist media pageless",
         // Keep cache for a week and on rare cases we will keep the cache for longer
         expires: new Date().setHours(24 * 7),
@@ -112,69 +137,134 @@ export function SearchPage() {
     }
   });
 
-  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, cacheKey) => {
-    const key = untrack(pagelessCacheKey);
-    if (key !== cacheKey) return
-
+  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, groupSeasonalEntriesByFormat, isFallbackSearch) => {
     const start = (currentPage - 1) * perPage;
-    assertThruthy(start <= pagelessCacheData.data.length);
+    assertThruthy(start <= pagelessCacheData.data.media.length);
+    assertThruthy(media.length <= perPage);
 
     media.forEach((m, i) => {
-      if (m.id === pagelessCacheData.data[start + i]?.id) setPagelessCacheData("data", start + i, m); // fine grained update
-      else setPagelessCacheData("data", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
+      m.customSection = groupSeasonalEntriesByFormat && pagelessCacheData.data.media[start + i - 1]?.format !== m.format ? m.format || "Unknown format" : false;
+      if (m.id === pagelessCacheData.data.media[start + i]?.id) setPagelessCacheData("data", "media", start + i, m); // fine grained update
+      else setPagelessCacheData("data", "media", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
     });
 
-    if (!hasNextPage) setPagelessCacheData("data", produce(data => data.splice(start + media.length))); // Delete old and null elements
-    else if (pagelessCacheData.data.at(-1) !== null) setPagelessCacheData("data", produce(data => data.push(...Array(4).fill(null)))); // Insert loading elements
+    if (hasNextPage && media.length < perPage) setPagelessCacheData("data", "media", { from: start + media.length, to: start + perPage }, INACTIVE_LOADER);
+
+    if (!hasNextPage) setPagelessCacheData("data", "media", produce(data => data.splice(start + media.length))); // Delete old and null elements
+    else if (pagelessCacheData.data.media.at(-1) != LOADER) setPagelessCacheData("data", "media", produce(data => data.push(...Array(4).fill(LOADER)))); // Insert loading elements
+
+    setPagelessCacheData("data", "perPage", perPage);
+    setPagelessCacheData("data", "fallback", isFallbackSearch);
 
     setFetcherValueToStorage(unwrap(pagelessCacheData));
-
-    // This would be ideal, but splice does not do fine grained updating
-    // setPagelessCacheData(produce(pageless => {
-    //   const start = (currentPage - 1) * perPage;
-    //
-    //   assertThruthy(start <= pageless.data.length);
-    //   pageless.data.splice(start, perPage, ...media);
-    //
-    //   if (!hasNextPage) pageless.data.splice(start + media.length); // Delete old and null elements
-    //   else if (pageless.data.at(-1) !== null) pageless.data.push(...Array(4).fill(null)); // Insert loading elements
-    //
-    //   setFetcherValueToStorage(unwrap(pageless));
-    // }));
   };
+
+  // This is only used when the anilist search returns no values
+  // At least currently in 2026 AniList search is quite bad and for example when searching "shoshimi" you get no results
+  // Jikan will find "shoshimin" without problems, so if anilist does not give results try to search with jikan 
+  // and convert the results to anilist results
+  function jikanFallbackSearch(variables, cacheKey, debounce) {
+    if (fallbackSearchController.signal.aborted) return;
+    fallbackPagelessCacheKey = cacheKey;
+
+    let controller = new AbortController();
+    fallbackSearchController.signal.addEventListener("abort", () => controller?.abort());
+    const jiFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, variables, controller.signal);
+    sendFetcher(jiFetcher, {
+      name: "Jikan fallback search",
+      delay: debounce,
+      // debug: false,
+      onFetch: () => {
+        controller = null;
+        setPagelessCacheLoading(false);
+      },
+      setValue: (jikanRes) => {
+        if (fallbackPagelessCacheKey !== cacheKey) return;
+        if (!jikanRes.data.data.length) return;
+        if (fallbackSearchController.signal.aborted) return;
+
+        setPagelessCacheLoading(false);
+
+        let controller = new AbortController();
+        fallbackSearchController.signal.addEventListener("abort", () => controller?.abort());
+
+        const idMal_in = jikanRes.data.data.map(media => media.mal_id);
+        const aniFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(idMal_in.length), { idMal_in, type: variables.type.toUpperCase() }, controller.signal);
+        sendFetcher(aniFetcher, {
+          name: "Anilist fallback search with mal ids",
+          onFetch: () => controller = null,
+          setValue: (aniRes, { settings }) => {
+            if (fallbackPagelessCacheKey !== cacheKey) return;
+            const key = untrack(pagelessCacheKey);
+            if (key !== cacheKey) return
+
+            const order = Object.fromEntries(idMal_in.map((v, i) => ([v, i])))
+            aniRes.data.data.page1.media.sort((a, b) => order[a.idMal] - order[b.idMal]);
+            const { current_page, has_next_page, items: { per_page } } = jikanRes.data.pagination;
+            const pageInfo = { currentPage: current_page, hasNextPage: has_next_page, perPage: per_page };
+
+            if (aniRes.modified < tabTime && !settings.debug) return;
+            if (cachedResults.has(aniRes.cacheKey)) return;
+            cachedResults.add(aniRes.cacheKey);
+
+            aniRes.data.data.page1.media.forEach(media => {
+              // we don't want the debug enviroment to always fetchs, so we pretend like the data is always fresh
+              media.tabTime = settings.debug ? tabTime : aniRes.modified;
+              // media.tabTime = res.modified;
+            });
+
+            mutatePageless(aniRes.data.data.page1.media, pageInfo, false, true);
+          }
+        });
+      }
+    });
+  }
 
   const [anilistSearchTime, startAnilistSearchTimer, stopAnilistSearchTimer] = createTimer();
   const [anilistSearchLoading, setAnilistSearchLoading] = createSignal(false);
   const [anilistBrowseData, setAnilistBrowseData] = createStore({});
-  let anilistSearchFetcher, anilistSearchController;
+
+  let anilistSearchFetcher, fallbackPagelessCacheKey, anilistSearchController, fallbackSearchController;
   let previousMode = null;
   createEffect(() => {
     anilistSearchController?.abort();
     anilistSearchController = new AbortController();
-    let debounce = 0;
+    fallbackSearchController?.abort();
+    fallbackSearchController = new AbortController();
+    const { signal } = anilistSearchController;
+    let aniVariables, jiVariables;
+    let debounce = SEARCH_DEBOUNCE, currentPage;
 
     const { mode, type } = params;
+    const groupSeasonalEntriesByFormat = parsedSearchParams().groupSeasonalEntriesByFormat;
     if (mode === "browse") {
       const dates = getDates();
-      if (type === "anime") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...dates }, anilistSearchController.signal)
-      else if (type === "manga") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseManga, {}, anilistSearchController.signal);
-      else if (type === "media") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {}, anilistSearchController.signal);
+      if (type === "anime") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...dates }, signal)
+      else if (type === "manga") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseManga, {}, signal);
+      else if (type === "media") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {}, signal);
       else return;
     }
 
     else if (mode === "search") {
-      const variables = anilistVariables();
-      const p = page();
-      if (!variables) return;
+      aniVariables = anilistVariables();
+      jiVariables = jikanVariables();
+      currentPage = page();
+      if (!aniVariables) return;
 
-      const key = pagelessCacheKey();
-      var currentPagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless"});
+      var key = pagelessCacheKey();
+      var currentPagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...aniVariables, page: "pageless3"});
       if (currentPagelessFetcher.cacheKey !== key) return; // Pageless fetcher might load slower, so cancel fetcher if pagelessCacheKey is missing/different
 
-      anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: p }, anilistSearchController.signal);
-      console.log("vars", variables);
-      if (previousMode === "search" && mode === "search") debounce = SEARCH_DEBOUNCE; // Don't debounce on first page load or when switching between browse and search headers
-      if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
+      anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, { ...aniVariables, page: currentPage }, signal);
+    }
+
+    if (mode === "browse") debounce = 0; // We don't debounce browse page
+    else if (previousMode === "browse" && aniVariables?.search?.length !== 1) debounce = 0; // We just jumped from browse to search, without typing to search bar
+    else if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
+
+    if (mode === "search" && fallbackPagelessCacheKey === key && currentPage > 1) {
+      jikanFallbackSearch({ ...jiVariables, page: currentPage }, key, debounce);
+      return
     }
 
     setError(null);
@@ -217,9 +307,14 @@ export function SearchPage() {
         // TODO: There is a slight bug, where tabTime can be fooled, by using another tab
         // This updated the modified time inside cache, and simple tabTime check would seems like this data was fetched in this instant
         if (f.cacheKey !== anilistSearchFetcher.cacheKey) return;
+
         if (mode === "browse") {
           setAnilistBrowseData(reconcile(res.data.data));
         } else if (mode === "search") {
+          if (res.data.data.Page.media.length === 0 && currentPage === 1) {
+            return jikanFallbackSearch({ ...jiVariables, page: 1 }, currentPagelessFetcher.cacheKey, 0);
+          }
+
           if (currentPagelessFetcher.cacheKey === untrack(pagelessCacheKey)) setPagelessCacheLoading(false);
           // TODO: Make a function to check when we can use long time cache
           // For example when results are smaller than page size or when searching using years etc.
@@ -227,13 +322,17 @@ export function SearchPage() {
           if (res.modified < tabTime && !settings.debug) return;
           if (cachedResults.has(res.cacheKey)) return;
           cachedResults.add(res.cacheKey);
-          for (const media of res.data.data.Page.media) {
+
+          const pageInfo = res.data.data.Page.pageInfo;
+          res.data.data.Page.media.forEach(media => {
             // we don't want the debug enviroment to always fetchs, so we pretend like the data is always fresh
             media.tabTime = settings.debug ? tabTime : res.modified;
             // media.tabTime = res.modified;
-          }
-
-          mutatePageless(res.data.data.Page.media, res.data.data.Page.pageInfo, currentPagelessFetcher.cacheKey);
+          });
+ 
+          const key = untrack(pagelessCacheKey);
+          if (key !== currentPagelessFetcher.cacheKey) return
+          mutatePageless(res.data.data.Page.media, pageInfo, groupSeasonalEntriesByFormat, false);
         }
       }
     });
@@ -249,9 +348,10 @@ export function SearchPage() {
   let deltaScrollDistance = 0, prevScrollTop;
   const updatePage = scheduleUtils.debouncer(() => {
     const elems = document.querySelectorAll(".cp-media-card:is(.loading,.skeleton)");
-    if (!elems.length) return;
+    const perPage = pagelessCacheData?.data?.perPage;
+    if (!elems.length || perPage == null) return;
     const index = +elems[elems.length - 1].dataset.index;
-    const p = Math.floor(index / 50) + 1;
+    const p = Math.floor(index / perPage) + 1;
     setPage(p);
     setTimeout(handleScroll, 300);
   });
@@ -278,8 +378,10 @@ export function SearchPage() {
   onCleanup(() => {
     window.removeEventListener("scroll", handleScroll, { passive: true });
     intersectionObserver.disconnect();
-    searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data?.length || 0;
+    searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data?.media.length || 0;
   });
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
@@ -302,6 +404,43 @@ export function SearchPage() {
           </Show>
           <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} time={formatMSToString(anilistSearchTime())} />
         </Match>
+        <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
+          <div class="search-page">
+            <h1>Seasonal search</h1>
+            <A href="/ani/search/anime/this-season">Current</A>
+            <A href="/ani/search/anime/next-season">Next</A>
+            <A href="/ani/search/anime/tba">TBA</A>
+            <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
+              <button onClick={() => setSearchParams({ skipSeasonalFormatGroups: searchParams.skipSeasonalFormatGroups !== "true"})}>Click me</button>
+            </Show>
+            <ol class="cards season">
+              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
+                let ref;
+
+                const handleRef = elem => {
+                  if (ref) intersectionObserver.unobserve(ref);
+                  ref = elem;
+                  intersectionObserver.observe(elem);
+                };
+
+                onCleanup(() => ref && intersectionObserver.unobserve(ref));
+
+                return (
+                  <>
+                    <Show when={media?.customSection}>
+                      <h2>{media.customSection}</h2>
+                    </Show>
+                    <Show when={visibleCardIndices[i()]} fallback={media != INACTIVE_LOADER && <li class="skeleton-card" data-index={i()} ref={handleRef} />}>
+                      <Show when={media != INACTIVE_LOADER}>
+                        <AnilistMediaCard data-index={i()} ref={handleRef} media={media} skeleton={!media.type} loading={media?.tabTime < tabTime} />
+                      </Show>
+                    </Show>
+                  </>
+                )
+              }}</For>
+            </ol>
+          </div>
+        </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
             <Switch>
@@ -316,7 +455,7 @@ export function SearchPage() {
               </Match>
             </Switch>
             <ol class="cards">
-              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data) || previousHistoryDummyData()}>{(media, i) => {
+              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
                 let ref;
 
                 const handleRef = elem => {
@@ -325,11 +464,13 @@ export function SearchPage() {
                   intersectionObserver.observe(elem);
                 };
 
-                onCleanup(() => intersectionObserver.unobserve(ref));
+                onCleanup(() => ref && intersectionObserver.unobserve(ref));
 
                 return (
-                  <Show when={visibleCardIndices[i()]} fallback={<li class="skeleton-card" data-index={i()} ref={handleRef} /> }>
-                    <AnilistMediaCard data-index={i()} ref={handleRef} media={media} skeleton={!media} loading={media?.tabTime < tabTime} />
+                  <Show when={visibleCardIndices[i()]} fallback={media != INACTIVE_LOADER && <li class="skeleton-card" data-index={i()} ref={handleRef} />}>
+                    <Show when={media != INACTIVE_LOADER}>
+                      <AnilistMediaCard data-index={i()} ref={handleRef} media={media} skeleton={!media.type} loading={media?.tabTime < tabTime} />
+                    </Show>
                   </Show>
                 )
               }}</For>
@@ -340,6 +481,7 @@ export function SearchPage() {
     </ErrorBoundary>
   );
 }
+
 
 function BrowsePage(props) {
   const params = useParams();
@@ -384,7 +526,7 @@ function SearchBar() {
 
   let replace = false, timeout;
   const handleInput = e => {
-    setSearchParams({ q: encodeURIComponent(e.target.value) || undefined }, { replace });
+    setSearchParams({ q: encodeURIComponent(e.target.value) || undefined, skipSortByMatch: undefined }, { replace });
     replace = true;
     clearTimeout(timeout);
     timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
@@ -392,7 +534,7 @@ function SearchBar() {
 
   return (
     <div>
-      <input autofocus type="search" onInput={handleInput} value={parsedSearchParams().q}/>
+      <input type="search" onInput={handleInput} value={parsedSearchParams().q}/>
     </div>
   );
 }

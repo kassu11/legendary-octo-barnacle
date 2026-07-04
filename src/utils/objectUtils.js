@@ -55,3 +55,13 @@ const concatMerge = (base, obj) => {
     else concatMerge(base[key], obj[key]);
   }
 }
+
+export const removeUndefinedKeysFromObject = obj => {
+  for (const key in obj) {
+    if (obj[key] === undefined) delete obj[key];
+  }
+
+  return obj;
+}
+
+export const objectToSearchParams = obj => "" + new URLSearchParams(removeUndefinedKeysFromObject(obj));

@@ -9,13 +9,12 @@
     overflow-y: clip;
     scrollbar-width: none;
 
-    &.scrollable {
-      &, _a {
-        cursor: grab;
+    &.scrollable, &.scrollable _a {
+      cursor: grab;
+      user-select: none;
 
-        &:active {
-          cursor: grabbing;
-        }
+      &:active {
+        cursor: grabbing;
       }
     }
 
@@ -24,8 +23,10 @@
       --gap: 8px;
     }
 
+
     li::view-transition-group(*) {
       animation-duration: 0.5s;
+      animation-timing-function: ease-out;
     }
   }
 }

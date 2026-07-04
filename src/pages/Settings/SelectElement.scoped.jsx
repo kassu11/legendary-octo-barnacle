@@ -183,7 +183,7 @@ export function Select(props) {
       <dialog ref={elem => dialog = elem} classList={{ mobile: isTouch() }}>
         <div class="wrapper">
           <form onSubmit={handleSubmit}>
-            <input type="search" autofocus={true} ref={elem => input = elem} onBlur={handleInputBlur} onInput={handleInputChange} onKeyDown={handleKeyDown} />
+            <input type="search" ref={elem => input = elem} onBlur={handleInputBlur} onInput={handleInputChange} onKeyDown={handleKeyDown} />
           </form>
           <div class="items">
             <For each={props.each} children={props.children} />
