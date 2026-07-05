@@ -18,6 +18,7 @@ import { translateInternalSearchParams } from "../../core/apiTranslations";
 import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
 import { capitalize } from "../../utils/formating";
+import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-anilist).scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -434,6 +435,9 @@ export function SearchPage() {
 
                 const handleRef = elem => {
                   if (ref) intersectionObserver.unobserve(ref);
+                  elem.addEventListener("click", () => {
+                    setMediaPageAnilistData({ data: { data: { Media: media } } });
+                  });
                   ref = elem;
                   intersectionObserver.observe(elem);
                 };
@@ -496,6 +500,9 @@ export function SearchPage() {
 
                 const handleRef = elem => {
                   if (ref) intersectionObserver.unobserve(ref);
+                  elem.addEventListener("click", () => {
+                    setMediaPageAnilistData({ data: { data: { Media: media } } });
+                  });
                   ref = elem;
                   intersectionObserver.observe(elem);
                 };

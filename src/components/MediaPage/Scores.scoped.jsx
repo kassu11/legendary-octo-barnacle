@@ -25,7 +25,7 @@ export function MediaPageScores() {
         </span>
       </div>
       <p class="anilist-users">
-        <Show when={anilistData()?.data.data.Media?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)} fallback="-">
+        <Show when={anilistData()?.data.data.Media?.stats?.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)} fallback="-">
           {numberUtils.numberCommas(anilistData()?.data.data.Media?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0))}
         </Show>
         {" "}Users

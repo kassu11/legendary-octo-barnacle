@@ -38,7 +38,7 @@ export const ExtraInfo = (props) => {
             <Show when={!authUserData() || authUserData().data.options.titleLanguage !== "NATIVE"}>
               <li>Native: {props.media.title.native}</li>
             </Show>
-            <Show when={props.media.synonyms.length}>
+            <Show when={props.media.synonyms?.length}>
               <li>
                 Synonyms:
                 <ul>
