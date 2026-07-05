@@ -12,14 +12,9 @@ export function HorizontalCardRowScoped(props) {
 
   let startX, momentumX = 0, startScrollX, reel, preventClick = false;
   const handleMouseDown = e => {
-    if (e.buttons !== 1) return;
+    if (e.buttons !== 1 || reel.scrollWidth === reel.clientWidth) return;
 
-    const prev = document.querySelector("ol.dragging");
-    prev?.classList.remove("dragging");
     reel.classList.add("dragging");
-
-    prev?.querySelectorAll(":scope > li").forEach(elem => elem.style.viewTransitionName = null);
-    reel.querySelectorAll(":scope > li").forEach((elem, i) => elem.style.viewTransitionName = `dragging-${i}`);
 
     e.preventDefault();
     startX = e.x;
@@ -37,15 +32,16 @@ export function HorizontalCardRowScoped(props) {
   };
 
   const handleClick = e => {
+    if (startX == null) return;
     if (preventClick) {
       e.preventDefault();
       e.stopPropagation(); // Make sure that child clicks are cancelled
     }
 
-    document.startViewTransition(() => {
-      reel.style.scrollSnapType = null
-      reel.scrollBy(momentumX, 0);
-    });
+    startX = null;
+    reel.scrollBy(momentumX, 0);
+    reel.classList.remove("dragging");
+    reel.style.scrollSnapType = null;
   }
 
   const handleMouseMove = e => {

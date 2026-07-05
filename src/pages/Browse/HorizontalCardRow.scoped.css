@@ -8,6 +8,10 @@
     --line-clamp: 2;
     overflow-y: clip;
     scrollbar-width: none;
+    scroll-behavior: smooth;
+    &.dragging {
+      scroll-behavior: unset;
+    }
 
     &.scrollable, &.scrollable _a {
       cursor: grab;
@@ -21,12 +25,6 @@
     @media (width < 40em) {
       --padding: 16px;
       --gap: 8px;
-    }
-
-
-    li::view-transition-group(*) {
-      animation-duration: 0.5s;
-      animation-timing-function: ease-out;
     }
   }
 }
