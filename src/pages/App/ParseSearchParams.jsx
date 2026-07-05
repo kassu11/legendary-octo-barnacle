@@ -26,14 +26,15 @@ export function ParseSearchParams(props) {
 
     const groupSeasonalEntriesByFormat = searchParams.skipSeasonalFormatGroups !== "true";
 
-    if (header === "trending") obj.sort = ["trending_desc"];
+    if (header === "trending") obj.sort = "trending_desc";
     else if (header === "popular") obj.sort = ["popularity_desc", "score_desc"];
-    else if (header === "novel") obj.format = "light_novel";
-    else if (header === "finished") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", endDateGreater: 0 });
-    else if (header === "new") Object.assign(obj, { sort: ["id"] });
-    else if (header === "top") Object.assign(obj, { sort: ["score_desc"] });
-    else if (header === "finished-manga") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", format: "manga" });
-    else if (header === "finished-novel") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", format: "light_novel" });
+    else if (header === "novel") Object.assign(obj, { sort: "popularity_desc", format: "light_novel" });
+    else if (header === "manhwa") Object.assign(obj, { sort: "popularity_desc", countryOfOrigin: "KR" });
+    else if (header === "finished") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0 });
+    else if (header === "new") Object.assign(obj, { sort: "id_desc" });
+    else if (header === "top") Object.assign(obj, { sort: "score_desc" });
+    else if (header === "finished-manga") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0, format: "manga" });
+    else if (header === "finished-novel") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0, format: "light_novel" });
 
     else if (header === "this-season") {
       const dates = getDates();
@@ -60,7 +61,6 @@ export function ParseSearchParams(props) {
 
     if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
 
-    console.log("filteredSorts", filteredSorts);
     if (filteredSorts.length) obj.sort = filteredSorts;
     else if (!obj.sort?.length) obj.sort = ["popularity_desc", "score_desc"];
 
@@ -68,6 +68,10 @@ export function ParseSearchParams(props) {
       if (groupSeasonalEntriesByFormat) obj.sort = ["format", ...obj.sort];
       obj.groupSeasonalEntriesByFormat = groupSeasonalEntriesByFormat;
     }
+
+    ["sort", "format", "status"].forEach(key => {
+      if (key in obj) obj[key] = wrapToArray(obj[key]);
+    });
 
     return obj;
   });

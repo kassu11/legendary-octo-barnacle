@@ -3,6 +3,9 @@ export const translateInternalSearchParams = {
     trending_desc: {
       ani: { sort: "TRENDING_DESC" },
     },
+    id_desc: {
+      ani: { sort: "ID_DESC" },
+    },
     end_date_desc: {
       ani: { sort: "END_DATE_DESC" },
     },
@@ -10,25 +13,25 @@ export const translateInternalSearchParams = {
       ani: { sort: ["POPULARITY_DESC", "SCORE_DESC"] },
     },
     popularity_desc: {
-      ani: { sort: ["POPULARITY_DESC"] },
+      ani: { sort: "POPULARITY_DESC" },
     },
     score_desc: {
-      ani: { sort: ["SCORE_DESC"] },
+      ani: { sort: "SCORE_DESC" },
     },
     score: {
-      ani: { sort: ["SCORE"] },
+      ani: { sort: "SCORE" },
     },
     score_plus: {
-      ani: { sort: ["SCORE"], averageScoreGreater: 0 },
+      ani: { sort: "SCORE", averageScoreGreater: 0 },
     },
     format: {
-      ani: { sort: ["FORMAT"] },
+      ani: { sort: "FORMAT" },
     },
     title_romaji_desc: {
-      ani: { sort: ["TITLE_ROMAJI_DESC"] },
+      ani: { sort: "TITLE_ROMAJI_DESC" },
     },
     search_match: {
-      ani: { sort: ["SEARCH_MATCH"] },
+      ani: { sort: "SEARCH_MATCH" },
     },
   },
   status: {
@@ -37,6 +40,20 @@ export const translateInternalSearchParams = {
     },
     not_yet_released: {
       ani: { status: "NOT_YET_RELEASED" },
+    },
+  },
+  format: {
+    light_novel: {
+      ani: { format: "NOVEL" },
+    },
+    manga: {
+      ani: { format: "MANGA" },
+    },
+    manhwa: {
+      ani: { format: "manhwa" },
+    },
+    tv: {
+      ani: { format: "TV" },
     },
   },
   season: {
@@ -62,4 +79,10 @@ export const translateInternalSearchParams = {
       if (api === "ani") return { endDateGreater: value };
     },
   },
+  countryOfOrigin: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { countryOfOrigin: value };
+    },
+  }
 };

@@ -30,6 +30,7 @@ function createAnilistMediaQueryVariables() {
 
   const obj = {
     sort: [],
+    format: [],
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
     isAdult
@@ -41,11 +42,16 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
   mergeVariables(api, "season", obj, rest);
+  mergeVariables(api, "format", obj, rest);
+  mergeVariables(api, "countryOfOrigin", obj, rest);
 
   if (obj.season && year) {
     obj.seasonYear = year;
   }
 
+  for (const key in obj) {
+    if (obj[key] === undefined || obj[key]?.length === 0) delete obj[key];
+  }
 
   return obj;
 }
@@ -267,6 +273,8 @@ export function SearchPage() {
       return
     }
 
+    console.log("vars", aniVariables);
+
     setError(null);
     previousMode = mode;
 
@@ -406,12 +414,19 @@ export function SearchPage() {
         </Match>
         <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
           <div class="search-page">
-            <h1>Seasonal search</h1>
+            <Switch>
+              <Match when={parsedSearchParams().season === null}>
+                <h1>TBA Anime</h1>
+              </Match>
+              <Match when={parsedSearchParams().season}>
+                <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
+              </Match>
+            </Switch>
             <A href="/ani/search/anime/this-season">Current</A>
             <A href="/ani/search/anime/next-season">Next</A>
             <A href="/ani/search/anime/tba">TBA</A>
             <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
-              <button onClick={() => setSearchParams({ skipSeasonalFormatGroups: searchParams.skipSeasonalFormatGroups !== "true"})}>Click me</button>
+              <button onClick={() => setSearchParams({ skipSeasonalFormatGroups: searchParams.skipSeasonalFormatGroups !== "true" })}>Click me</button>
             </Show>
             <ol class="cards season">
               <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
@@ -450,8 +465,29 @@ export function SearchPage() {
               <Match when={params.header === "top" && parsedSearchParams().sort?.[0] === "score_plus"}>
                 <h1>Worst {capitalize(params.type)}</h1>
               </Match>
+              <Match when={params.header === "popular" && parsedSearchParams().sort?.[0] === "popularity_desc"}>
+                <h1>All Time Popular {capitalize(params.type)}</h1>
+              </Match>
               <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
                 <h1>Trending {capitalize(params.type)}</h1>
+              </Match>
+              <Match when={params.header === "finished" && parsedSearchParams().status?.includes("complete")}>
+                <h1>Recently Finished {capitalize(params.type)}</h1>
+              </Match>
+              <Match when={params.header === "novel" && parsedSearchParams().sort?.[0] === "popularity_desc" && parsedSearchParams().format?.includes("light_novel")}>
+                <h1>All Time Popular Light Novels</h1>
+              </Match>
+              <Match when={params.header === "manhwa" && parsedSearchParams().sort?.[0] === "popularity_desc" && parsedSearchParams().countryOfOrigin === "KR" }>
+                <h1>All Time Popular Manhwa</h1>
+              </Match>
+              <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
+                <h1>Recently Finished Mangas</h1>
+              </Match>
+              <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
+                <h1>Recently Finished Light Novels</h1>
+              </Match>
+              <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>
+                <h1>Newly Added {capitalize(params.type)}</h1>
               </Match>
             </Switch>
             <ol class="cards">
@@ -491,29 +527,29 @@ function BrowsePage(props) {
       <p class="time">{props.time}</p>
       <Switch>
         <Match when={params.type === "anime"}>
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.trending?.media} loading={props.loading} href="/ani/search/anime/trending" title="Trending now" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.season?.media} loading={props.loading} href="/ani/search/anime/this-season?order=popularity" title="Popular this season" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.nextSeason?.media} loading={props.loading} href="/ani/search/anime/next-season?order=popularity" title="Upcoming next season" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.finished?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently finished" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.popular?.media} loading={props.loading} href="/ani/search/anime/popular" title="All time popular" />
-          <VerticalCardRowScoped data={props.cards?.season && props.cards?.top?.media} type="anime" href="/ani/search/anime/top" title="Top 100 anime" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.trending?.media} loading={props.loading} href="/ani/search/anime/trending" title="Trending Now" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.season?.media} loading={props.loading} href="/ani/search/anime/this-season?order=popularity" title="Popular This Season" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.nextSeason?.media} loading={props.loading} href="/ani/search/anime/next-season?order=popularity" title="Upcoming Next Season" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.finished?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently Finished" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.popular?.media} loading={props.loading} href="/ani/search/anime/popular" title="All Time Popular" />
+          <VerticalCardRowScoped data={props.cards?.season && props.cards?.top?.media} type="anime" href="/ani/search/anime/top" title="Top 100 Anime" />
         </Match>
         <Match when={params.type === "manga"}>
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.trending?.media} loading={props.loading} href="/ani/search/manga/trending" title="Trending now" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.novel?.media} loading={props.loading} href="/ani/search/manga/novel" title="Popular light novels" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.trending?.media} loading={props.loading} href="/ani/search/manga/trending" title="Trending Now" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.novel?.media} loading={props.loading} href="/ani/search/manga/novel" title="Popular Light Lovels" />
           <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.manhwa?.media} loading={props.loading} href="/ani/search/manga/manhwa" title="Popular Manhwas" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished-manga" title="Recently finished mangas" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedNovel?.media} loading={props.loading} href="/ani/search/manga/finished-novel" title="Recently finished light novels" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.popular?.media} loading={props.loading} href="/ani/search/manga/popular" title="All time popular" />
-          <VerticalCardRowScoped data={props.cards?.novel && props.cards?.top?.media} type="manga" href="/ani/search/manga/top" title="Top 100 manga" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished-manga" title="Recently Finished Mangas" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedNovel?.media} loading={props.loading} href="/ani/search/manga/finished-novel" title="Recently Finished Light Novels" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.popular?.media} loading={props.loading} href="/ani/search/manga/popular" title="All Time Popular" />
+          <VerticalCardRowScoped data={props.cards?.novel && props.cards?.top?.media} type="manga" href="/ani/search/manga/top" title="Top 100 Manga" />
         </Match>
         <Match when={params.type === "media"}>
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.trending?.media} loading={props.loading} href="/ani/search/media/trending" title="Trending anime and manga" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newAnime?.media} loading={props.loading} href="/ani/search/anime/new" title="Newly added anime" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newManga?.media} loading={props.loading} href="/ani/search/manga/new" title="Newly added manga" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedAnime?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently finished anime" />
-          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished" title="Recently finished manga" />
-          <VerticalCardRowScoped data={props.cards?.newAnime && props.cards?.top?.media} type="media" href="/ani/search/media/top" title="Top 100 anime and manga" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.trending?.media} loading={props.loading} href="/ani/search/media/trending" title="Trending Anime and Manga" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newAnime?.media} loading={props.loading} href="/ani/search/anime/new" title="Newly Added Anime" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.newManga?.media} loading={props.loading} href="/ani/search/manga/new" title="Newly Added Manga" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedAnime?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently Finished Anime" />
+          <HorizontalCardRowScoped data={props.cards?.newAnime && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished" title="Recently Finished Manga" />
+          <VerticalCardRowScoped data={props.cards?.newAnime && props.cards?.top?.media} type="media" href="/ani/search/media/top" title="Top 100 Anime And Manga" />
         </Match>
       </Switch>
     </div>
