@@ -10,6 +10,7 @@ import { ParseSearchParams } from "./pages/App/ParseSearchParams";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
+export let globalHoverContainer;
 
 function App(props) {
   let controller = new AbortController();
@@ -51,6 +52,7 @@ function App(props) {
         </div>
       )}</Show>
       <InstallPWAInfoPanel />
+      <div id="hovers" ref={e => globalHoverContainer = e}></div>
       <main id="page-content">
         {props.children}
       </main>

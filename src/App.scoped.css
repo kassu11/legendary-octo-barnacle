@@ -19,4 +19,13 @@
     min-height: 20rem;
     background-color: var(--background-350-old);
   }
+
+  #hovers {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
+    user-select: none;
+  }
 }

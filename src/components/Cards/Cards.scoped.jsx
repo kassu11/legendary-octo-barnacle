@@ -12,14 +12,15 @@ import { QuickActionListButton } from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
-import { Match, Show, Switch } from "solid-js";
+import { For, Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
 import { mediaWithMalId, token2 } from "../../core/globalState.js";
+import { capitalize, formatMediaFormat, languageFromCountry } from "../../utils/formating.js";
 
 function AnilistMediaCardListBody(props) {
   return (
-    <li class="cp-media-card inline-container" data-index={props["data-index"]} classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage?.large}")`, "--media-color": props.media?.coverImage?.color }} ref={props.ref}>
+    <li class="cp-media-card inline-container" data-index={props["data-index"]} classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage?.large}")`, "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>
       <Show when={!props.skeleton}>
         <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
           <div class="wrapper">
@@ -38,8 +39,80 @@ function AnilistMediaCardListBody(props) {
             {props.media.title.userPreferred}
           </p>
         </A>
+        <div class="hover-card" style={{ "--media-background-color": props.media?.coverImage?.color }}>
+          <Show when={props.media?.bannerImage}>
+            <img src={props.media?.bannerImage} />
+          </Show>
+          <h2 class="line-clamp">{props.media.title.userPreferred}</h2>
+          <div class="body">
+            <div class="studios">
+              <For each={props.media.studios?.edges}>{edge => (
+                <p>{edge.node.name}</p>
+              )}</For>
+            </div>
+            <div class="genres">
+              <For each={props.media.genres}>{genre => (
+                <p>{genre}</p>
+              )}</For>
+            </div>
+          </div>
+          <MediaFormatAndSeason
+            format={props.media.format} 
+            countryOfOrigin={props.media.countryOfOrigin} 
+            season={props.media.season} 
+            seasonYear={props.media.seasonYear} 
+            startDate={props.media.startDate} 
+            type={props.media.type} 
+          />
+        </div>
       </Show>
     </li>
+  )
+}
+
+function MediaFormatAndSeason(props) {
+  return (
+    <div class="flex-bullet-separator">
+      <Show when={props.format}>
+        <span>
+          <Switch>
+            <Match when={props.countryOfOrigin !== "JP"}>
+              {formatMediaFormat(props.format)} ({languageFromCountry(props.countryOfOrigin)})
+            </Match>
+            <Match when={props.countryOfOrigin === "JP"}>
+              {formatMediaFormat(props.format)}
+            </Match>
+          </Switch>
+        </span>
+      </Show>
+      <span>
+        <Switch>
+          <Match when={props.type === "MANGA"}>
+            <Switch>
+              <Match when={props.startDate?.year}>
+                {props.startDate.year}
+              </Match>
+              <Match when={props.startDate?.year == null}>
+                TBA
+              </Match>
+            </Switch>
+          </Match>
+          <Match when={props.type === "ANIME"}>
+            <Switch>
+              <Match when={props.seasonYear && props.season}>
+                {capitalize(props.season)} {props.seasonYear}
+              </Match>
+              <Match when={props.startDate?.year}>
+                {props.startDate.year}
+              </Match>
+              <Match when={props.startDate?.year == null}>
+                TBA
+              </Match>
+            </Switch>
+          </Match>
+        </Switch>
+      </span>
+    </div>
   )
 }
 

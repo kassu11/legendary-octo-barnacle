@@ -65,6 +65,7 @@ fragment media on Media {
   episodes
   duration
   chapters
+  countryOfOrigin
   volumes
   genres
   isAdult

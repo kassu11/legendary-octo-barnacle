@@ -5,7 +5,7 @@
   }
 
   .browse-page {
-    width: min(100% - 16px, 100rem);
+    max-width: 98rem;
     margin-inline: auto;
     display: grid;
     gap: 48px;
@@ -14,14 +14,14 @@
 
   .search-page {
     margin-inline: auto;
-    width: min(100% - 64px, 100rem);
+    width: min(100% - 64px, 90rem);
 
     @media (width < 61em) {
-      width: min(100% - 16px, 100rem);
+      width: min(100% - 16px, 90rem);
     }
 
     @media (width < 40em) {
-      width: min(100% - 8px, 100rem);
+      width: min(100% - 8px, 90rem);
     }
 
     h1 {

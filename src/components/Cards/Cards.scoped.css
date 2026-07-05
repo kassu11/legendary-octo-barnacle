@@ -193,7 +193,7 @@
 
       .cp-media-card:has(_:hover, _:focus-visible) & {
         transform: translateY(5px);
-        color: color-mix(var(--media-color, var(--text)), var(--text) 70%);
+        color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
         text-shadow: 0 0 2px black;
       }
 
@@ -247,6 +247,82 @@
         width: 16px;
         height: 16px;
       }
+    }
+
+    .hover-card {
+      display: none
+    }
+  }
+
+  .hover-card {
+    position: absolute;
+    padding: 16px;
+    width: min(100% - 8px, 25rem);
+    aspect-ratio: 5/3;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: color-mix(in oklch, var(--bg), var(--media-background-color, var(--bg-light)) 30%);
+    isolation: isolate;
+    border-radius: 8px;
+    transition: .2s scale, .2s opacity;
+    display: flex;
+    flex-direction: column;
+
+    @starting-style {
+      scale: .82;
+      opacity: 0;
+    }
+
+    img {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      inset: 0px;
+      object-fit: cover;
+      z-index: -1;
+      border-radius: inherit;
+      opacity: 70%;
+      filter: brightness(50%) grayscale(50%);
+      transition: 0.25s scale, 0.5s filter;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+    }
+
+    .body {
+      display: grid;
+      gap: 8px;
+      font-weight: 500;
+
+      .genres {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0;
+        gap: 8px;
+        font-size: var(--fs-300);
+        height: 1.75em;
+        overflow: hidden;
+
+        p {
+          list-style: none;
+          padding: 2px 8px;
+          border-radius: 2em;
+          height: 100%;
+          display: grid;
+          place-items: center;
+          background-color: var(--media-background-color, orange);
+          transition: .2s filter;
+          text-decoration: none;
+          color: rgb(0 0 0 / 90%);
+        }
+      }
+    }
+
+    .flex-bullet-separator {
+      margin-top: auto;
+      font-weight: 500;
     }
   }
 

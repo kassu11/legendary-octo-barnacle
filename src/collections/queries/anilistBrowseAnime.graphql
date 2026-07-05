@@ -80,6 +80,7 @@ fragment media on Media {
   chapters
   volumes
   genres
+  countryOfOrigin
   isAdult
   averageScore
   popularity
