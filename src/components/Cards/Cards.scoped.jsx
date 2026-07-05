@@ -45,16 +45,20 @@ function AnilistMediaCardListBody(props) {
           </Show>
           <h2 class="line-clamp">{props.media.title.userPreferred}</h2>
           <div class="body">
-            <div class="studios">
-              <For each={props.media.studios?.edges}>{edge => (
-                <p>{edge.node.name}</p>
-              )}</For>
-            </div>
-            <div class="genres">
-              <For each={props.media.genres}>{genre => (
-                <p>{genre}</p>
-              )}</For>
-            </div>
+            <Show when={props.media.studios?.edges.length}>
+              <div class="studios">
+                <For each={props.media.studios?.edges}>{edge => (
+                  <p>{edge.node.name}</p>
+                )}</For>
+              </div>
+            </Show>
+            <Show when={props.media.genres.length}>
+              <div class="genres">
+                <For each={props.media.genres}>{genre => (
+                  <p>{genre}</p>
+                )}</For>
+              </div>
+            </Show>
           </div>
           <MediaFormatAndSeason
             format={props.media.format} 

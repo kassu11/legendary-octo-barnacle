@@ -19,6 +19,7 @@ import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
 import { capitalize } from "../../utils/formating";
 import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-anilist).scoped";
+import { globalHoverContainer } from "../../App.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -102,6 +103,8 @@ export function SearchPage() {
   const params = useParams();
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
+
+  initializeMediaCardHover();
 
   const anilistVariables = createMemo(createAnilistMediaQueryVariables);
   const jikanVariables = createMemo(createJikanMediaQueryVariables);
@@ -580,4 +583,52 @@ function SearchBar() {
       <input type="search" onInput={handleInput} value={parsedSearchParams().q}/>
     </div>
   );
+}
+
+function initializeMediaCardHover() {
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  function updateHoverPosition() {
+    const { x, y, width, height } = hoverParent.getBoundingClientRect();
+    if (hover.clientWidth + x + width + 25 < document.body.scrollWidth) {
+      hover.style.left = x + width + 25 + "px";
+      hover.style.top = y + 25 + "px";
+    } else if (x - hover.clientWidth - 25 > 0) {
+      hover.style.left = x - hover.clientWidth - 25 + "px";
+      hover.style.top = y + 25 + "px";
+    } else {
+      const max = document.body.scrollWidth - hover.clientWidth;
+      hover.style.left = Math.max(0, Math.min(x + width / 2 - hover.clientWidth / 2, max)) + "px";
+      hover.style.top = y + height + 25 + "px";
+    }
+  }
+
+  let prevTarget, hoverParent, hover;
+  window.addEventListener("mousemove", e => {
+    if (hover) updateHoverPosition();
+
+    if (prevTarget === e.target) return;
+    prevTarget = e.target
+
+    const target = e.target.classList.contains("cp-media-card") ? e.target : e.target.closest(".cp-media-card");
+    if (target == hoverParent) return;
+    if (!target || target != hoverParent) hoverParent?.append(hover);
+
+    hoverParent = target;
+    hover = target?.querySelector(".hover-card");
+    if (hover) {
+      updateHoverPosition();
+      globalHoverContainer.append(hover);
+    }
+  }, { signal });
+
+  signal.addEventListener("abort", () => {
+    hoverParent?.append(hover);
+    prevTarget = null;
+    hoverParent = null;
+    hover = null;
+  });
+
+  onCleanup(() => controller.abort());
 }

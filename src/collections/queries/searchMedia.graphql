@@ -106,6 +106,7 @@ query (
       format
       status(version: 2)
       episodes
+      countryOfOrigin
       duration
       chapters
       volumes

@@ -189,7 +189,7 @@
       font-weight: 500;
       transition: .2s transform, .2s color, .2s text-shadow, .18s opacity;
       position: absolute;
-      margin-top: 8px;
+      padding-top: 8px;
 
       .cp-media-card:has(_:hover, _:focus-visible) & {
         transform: translateY(5px);
@@ -258,7 +258,6 @@
     position: absolute;
     padding: 16px;
     width: min(100% - 8px, 25rem);
-    aspect-ratio: 5/3;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -268,6 +267,7 @@
     transition: .2s scale, .2s opacity;
     display: flex;
     flex-direction: column;
+    gap: 16px;
 
     @starting-style {
       scale: .82;
@@ -287,12 +287,9 @@
       transition: 0.25s scale, 0.5s filter;
     }
 
-    h2 {
-      margin-bottom: 1rem;
-    }
-
     .body {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
       font-weight: 500;
 
@@ -302,8 +299,6 @@
         padding: 0;
         gap: 8px;
         font-size: var(--fs-300);
-        height: 1.75em;
-        overflow: hidden;
 
         p {
           list-style: none;
@@ -312,7 +307,7 @@
           height: 100%;
           display: grid;
           place-items: center;
-          background-color: var(--media-background-color, orange);
+          background-color: color-mix(var(--media-background-color, orange), white 50%);
           transition: .2s filter;
           text-decoration: none;
           color: rgb(0 0 0 / 90%);
