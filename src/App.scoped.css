@@ -21,11 +21,12 @@
   }
 
   #hovers {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    overflow: hidden;
     z-index: 5;
     pointer-events: none;
     user-select: none;
+    overflow-x: clip;
+    overflow-y: visible;
   }
 }

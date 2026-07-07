@@ -1,7 +1,10 @@
 @layer components {
   .wrapper {
-    anchor-scope: --action-items;
     display: contents;
+
+    .tool-tip {
+      display: none;
+    }
   }
 
   .cp-media-action-item {
@@ -15,7 +18,6 @@
     background-color: color-mix(var(--bg-dark), transparent 10%);
     color: var(--text-muted);
     transition: .1s filter, .1s scale;
-    anchor-name: --action-items;
 
     &.big {
       width: 48px;
@@ -29,30 +31,32 @@
       scale: 1.07;
     }
 
+    &:active {
+      filter: brightness(2);
+      scale: 1.1;
+    }
+
     _svg {
       width: 100%;
       height: 100%;
     }
   }
+}
 
-  .tool-tip {
-    position: fixed;
-    width: max-content;
-    position-anchor: --action-items;
-    position-area: left center;
-    position-try-fallbacks: right center;
-    background-color: var(--bg);
-    font-weight: 500;
-    padding: 4px 8px;
-    border-radius: 4px;
-    z-index: 1;
+.tool-tip {
+  position: absolute;
+  width: max-content;
+  background-color: var(--bg);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 1;
+  transition: .1s opacity, .4s margin;
+  pointer-events: none;
+  translate: 0 -50%;
+
+  @starting-style {
     opacity: 0;
-    transition: .1s opacity, .4s margin;
-    pointer-events: none;
-
-    .wrapper:has(_:hover, _:focus-visible) & {
-      opacity: 1;
-      margin: 4px;
-    }
+    margin-inline: 4px;
   }
 }

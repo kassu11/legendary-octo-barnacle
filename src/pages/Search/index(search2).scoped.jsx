@@ -171,7 +171,7 @@ export function SearchPage() {
 
   // This is only used when the anilist search returns no values
   // At least currently in 2026 AniList search is quite bad and for example when searching "shoshimi" you get no results
-  // Jikan will find "shoshimin" without problems, so if anilist does not give results try to search with jikan 
+  // Jikan will find "shoshimin" without problems, so if anilist does not give results try to search with jikan
   // and convert the results to anilist results
   function jikanFallbackSearch(variables, cacheKey, debounce) {
     if (fallbackSearchController.signal.aborted) return;
@@ -341,7 +341,7 @@ export function SearchPage() {
             media.tabTime = settings.debug ? tabTime : res.modified;
             // media.tabTime = res.modified;
           });
- 
+
           const key = untrack(pagelessCacheKey);
           if (key !== currentPagelessFetcher.cacheKey) return
           mutatePageless(res.data.data.Page.media, pageInfo, groupSeasonalEntriesByFormat, false);
@@ -590,7 +590,11 @@ function initializeMediaCardHover() {
   const { signal } = controller;
 
   function updateHoverPosition() {
-    const { x, y, width, height } = hoverParent.getBoundingClientRect();
+    if (!hover) return;
+    let { x, y, width, height } = hoverParent.getBoundingClientRect();
+    x += document.body.parentElement.scrollLeft;
+    y += document.body.parentElement.scrollTop;
+
     if (hover.clientWidth + x + width + 25 < document.body.scrollWidth) {
       hover.style.left = x + width + 25 + "px";
       hover.style.top = y + 25 + "px";
@@ -602,29 +606,55 @@ function initializeMediaCardHover() {
       hover.style.left = Math.max(0, Math.min(x + width / 2 - hover.clientWidth / 2, max)) + "px";
       hover.style.top = y + height + 25 + "px";
     }
+
+    if (!hoverButton) return;
+
+    ({ x, y, width, height } = hoverButton.getBoundingClientRect());
+    x += document.body.parentElement.scrollLeft;
+    y += document.body.parentElement.scrollTop;
+
+    hoverButtonTooltip.style.top = y + height / 2 + "px";
+    if (x - hoverButtonTooltip.clientWidth - 8 > 0) {
+      hoverButtonTooltip.style.left = x - hoverButtonTooltip.clientWidth - 8 + "px";
+    } else {
+      hoverButtonTooltip.style.left = x + width + 8 + "px";
+    } 
   }
 
   let prevTarget, hoverParent, hover;
+  let hoverButton, hoverButtonTooltip;
   window.addEventListener("mousemove", e => {
-    if (hover) updateHoverPosition();
-
+    updateHoverPosition();
     if (prevTarget === e.target) return;
     prevTarget = e.target
 
     const target = e.target.classList.contains("cp-media-card") ? e.target : e.target.closest(".cp-media-card");
-    if (target == hoverParent) return;
-    if (!target || target != hoverParent) hoverParent?.append(hover);
+    if (target?.classList.contains("skeleton")) return;
+    if (target != hoverParent) {
+      if (!target || target != hoverParent) hoverParent?.append(hover);
 
-    hoverParent = target;
-    hover = target?.querySelector(".hover-card");
-    if (hover) {
-      updateHoverPosition();
-      globalHoverContainer.append(hover);
+      hoverParent = target;
+      hover = target?.querySelector(".hover-card");
+      if (hover) globalHoverContainer.append(hover);
     }
+
+
+    const button = e.target.classList.contains("cp-media-action-item") ? e.target : e.target.closest(".cp-media-action-item");
+    if (button != hoverButton) {
+      if (!button || button != hoverButton) hoverButton?.after(hoverButtonTooltip);
+
+      hoverButton = button;
+      hoverButtonTooltip = button?.nextElementSibling;
+      if (hoverButtonTooltip) globalHoverContainer.append(hoverButtonTooltip);
+    }
+
+
+    updateHoverPosition();
   }, { signal });
 
   signal.addEventListener("abort", () => {
     hoverParent?.append(hover);
+    hoverButton?.after(hoverButtonTooltip);
     prevTarget = null;
     hoverParent = null;
     hover = null;

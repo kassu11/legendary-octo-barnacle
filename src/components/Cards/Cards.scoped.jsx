@@ -52,7 +52,7 @@ function AnilistMediaCardListBody(props) {
                 )}</For>
               </div>
             </Show>
-            <Show when={props.media.genres.length}>
+            <Show when={props.media.genres?.length}>
               <div class="genres">
                 <For each={props.media.genres}>{genre => (
                   <p>{genre}</p>

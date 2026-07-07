@@ -27,6 +27,7 @@
           font-weight: 700;
           color: var(--text-muted);
           justify-self: baseline;
+          z-index: 1;
         }
 
         .vertical-search-card-body {
