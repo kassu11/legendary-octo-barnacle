@@ -194,7 +194,7 @@ export function MediaInfoContent(props) {
                 />
               </Show>
               <Trailer id={mediaPageAnilistData()?.data.data.Media?.trailer?.id} site={mediaPageAnilistData()?.data.data.Media?.trailer?.site} />
-              <Show when={mediaPageAnilistData()?.data.data.Media.studios.edges.filter(edge => edge.isMain)}>{edges => (
+              <Show when={mediaPageAnilistData()?.data.data.Media.studios?.edges.filter(edge => edge.isMain)}>{edges => (
                 <Show when={edges().length > 0}>
                   <div>
                     <h2>Studios</h2>
@@ -210,7 +210,7 @@ export function MediaInfoContent(props) {
                   </div>
                 </Show>
               )}</Show>
-              <Show when={mediaPageAnilistData()?.data.data.Media.studios.edges.filter(edge => edge.isMain === false)}>{edges => (
+              <Show when={mediaPageAnilistData()?.data.data.Media.studios?.edges.filter(edge => edge.isMain === false)}>{edges => (
                 <Show when={edges().length > 0}>
                   <div>
                     <h2>Producers</h2>

@@ -170,9 +170,7 @@ export const mediaUrl = (media) => {
 }
 
 export const formatAnilistDate = (dateObject) => {
-  asserts.assertTrueOLD("year" in dateObject, "No year found");
-  asserts.assertTrueOLD("month" in dateObject, "No month found");
-  asserts.assertTrueOLD("day" in dateObject, "No day found");
+  if (!dateObject) return "";
 
   if (!dateObject.year && !dateObject.month && !dateObject.day) {
     return "";
