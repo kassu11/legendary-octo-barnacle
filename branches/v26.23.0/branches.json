@@ -1,6 +1,7 @@
 [
   "main"
   , "dev"
+  , "feature-display-dev-branch-menu"
   , "rework-update-media-search-and-browse-pages"
   , "v26.23.0"
 ]
