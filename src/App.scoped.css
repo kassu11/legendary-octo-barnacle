@@ -15,6 +15,80 @@
     font-weight: 600;
   }
 
+  .dev-branch2 {
+    position: fixed;
+    max-width: min(100% - 8px, 20rem);
+    max-height: min(100% - 8px, 35rem);
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 16px;
+    left: 8px;
+    bottom: 8px;
+    z-index: 999;
+
+    button, a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      background: var(--bg-light);
+      color: var(--text-muted);
+      transition: .2s background, .2s filter;
+      word-break: break-all;
+      text-align: left;
+
+      &:hover {
+        filter: brightness(1.25);
+      }
+
+      > _* {
+          flex-shrink: 0;
+      }
+    }
+
+    button {
+      width: fit-content;
+      background-color: unset;
+      border: unset;
+
+      &:hover, .open & {
+        background-color: var(--bg-light);
+      }
+    }
+
+    .context-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: -8px;
+      padding: 8px;
+      border-radius: 4px;
+      overflow: auto;
+      display: none;
+      opacity: 0;
+      translate: 0 20px;
+      transition: .2s opacity, .2s translate, display allow-discrete .2s;
+
+      .open & {
+        background: var(--bg);
+        display: flex;
+        opacity: 1;
+        translate: 0 0;
+
+        @starting-style {
+          opacity: 0;
+          translate: 0 20px;
+        }
+      }
+    }
+
+  }
+
   footer {
     min-height: 20rem;
     background-color: var(--background-350);
