@@ -1,5 +1,5 @@
 import { batch, createMemo, createRoot, createSignal, untrack } from "solid-js";
-import { createLocalStorageJsonSignal } from "../utils/localStorageUtils";
+import { createLocalStorageBooleanSignal, createLocalStorageJsonSignal } from "../utils/localStorageUtils";
 import { deleteIndexDBValue, setIndexedDBValue } from "../utils/indexedDButils";
 import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal } from "../utils/sessionStorageUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "../utils/fetcherUtils";
@@ -15,6 +15,8 @@ export const [token2, setToken2] = createOneTimeSessionStorageSignal("LOB-token"
 
 export const authedUserId = createRoot(() => createMemo(() => authUserData()?.data.id));
 export const [mainLoadingCount, setMainLoadingCount] = createSignal(0);
+
+export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 
 export const logoutUser = () => {
   deleteIndexDBValue("tokens", `anilist-${untrack(authedUserId)}`);
