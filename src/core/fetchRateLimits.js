@@ -64,7 +64,7 @@ const baseLimits = {
       return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec) - now;
     }
   },
-  "https://api.jikan.moe/v4": {
+  "https://api.tenrai.org/v4": {
     limit: 60,
     remaining: 60,
     resetTime: 0,

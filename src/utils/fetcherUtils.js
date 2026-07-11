@@ -191,7 +191,7 @@ async function retryDelay(fetcher, response, iteration) {
 
 const requestQueue = [
   { url: "https://graphql.anilist.co", queue: [], timeout: null },
-  { url: "https://api.jikan.moe/v4", queue: [], timeout: null },
+  { url: "https://api.tenrai.org/v1", queue: [], timeout: null },
   { url: "https://api.animethemes.moe", queue: [], timeout: null },
 ]
 
