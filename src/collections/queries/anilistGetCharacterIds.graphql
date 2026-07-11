@@ -1,0 +1,18 @@
+query ($ids: [Int]) {
+  @1: Page(page: @2) {
+    characters(id_in: $ids) {
+      ...characters
+    }
+  }
+  @3
+}
+
+fragment characters on Character {
+  id
+  name {
+    userPreferred
+  }
+  image {
+    large
+  }
+}

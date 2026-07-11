@@ -1,0 +1,36 @@
+query ($type: MediaType, $id_in: [Int], $idMal_in: [Int]) {
+  @1: Page(page: @2) {
+    media(type: $type, id_in: $id_in, idMal_in: $idMal_in) {
+      ...media
+    }
+  }
+  @3
+}
+
+fragment media on Media {
+  id
+  idMal
+  type
+  bannerImage
+  title {
+    userPreferred
+  }
+  season
+  seasonYear
+  format
+  countryOfOrigin
+  coverImage {
+    large
+    extraLarge
+    color
+  }
+  studios(isMain: true) {
+    edges {
+      isMain
+      node {
+        id
+        name
+      }
+    }
+  }
+}
