@@ -1,12 +1,14 @@
 import "./App.scoped.css"
 import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
-import { createEffect } from "solid-js";
-import { Show } from "solid-js";
+import { createSignal, createEffect, createMemo, createResource, For, Match, Switch } from "solid-js";
 import { localizations } from "./collections/collections";
 import { MainNavigation } from "./pages/App/MainNavigation.scoped.jsx";
 import { MainLoadingBar } from "./pages/App/MainLoadingBar.scoped";
 import { ApplicationNotifications } from "./pages/App/ApplicationNotifications.scoped";
 import { ParseSearchParams } from "./pages/App/ParseSearchParams";
+import { settingsShowDevBranch } from "./core/globalState";
+import BranchIcon from "./assets/BranchIcon";
+import { useLocation } from "@solidjs/router";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
@@ -42,7 +44,30 @@ function App(props) {
       <MainLoadingBar />
       <MainNavigation />
       <ApplicationNotifications />
-      <Show when={localStorage.getItem(localizations.LOB_DEV_BRANCH)}>{branch => (
+      <InstallPWAInfoPanel />
+      <div id="hovers" ref={e => globalHoverContainer = e}></div>
+      <DevBranches />
+      <main id="page-content">
+        {props.children}
+      </main>
+      <footer class="main-footer"></footer>
+    </ParseSearchParams>
+  )
+}
+
+function DevBranches() {
+  const [open, setOpen] = createSignal(false);
+  return (
+    <Switch>
+      <Match when={settingsShowDevBranch()}>
+        <div class="dev-branch2" classList={{ open: open() }}>
+          <ContextMenu />
+          <button onClick={() => setOpen(s => !s)}>
+            <BranchIcon /> {localStorage.getItem(localizations.LOB_DEV_BRANCH) || "main"}
+          </button>
+        </div>
+      </Match>
+      <Match when={localStorage.getItem(localizations.LOB_DEV_BRANCH)}>{branch => (
         <div class="dev-branch">
           <p>Preview: {branch}</p>
           <button onClick={() => {
@@ -50,14 +75,34 @@ function App(props) {
             location.reload();
           }}>Back to Production</button>
         </div>
-      )}</Show>
-      <InstallPWAInfoPanel />
-      <div id="hovers" ref={e => globalHoverContainer = e}></div>
-      <main id="page-content">
-        {props.children}
-      </main>
-      <footer class="main-footer"></footer>
-    </ParseSearchParams>
+      )}</Match>
+    </Switch>
+  );
+}
+
+function ContextMenu() {
+  const [branches] = createResource(async () => {
+    const res = await fetch("/legendary-octo-barnacle/branches.json");
+    const text = await res.text();
+    // In coding enviroment we don't have branches.json file, so the fetch returns HTML
+    // This is just quick check if the returned file is json or not
+    if (text?.startsWith("[")) return JSON.parse(text);
+    else return [];
+  });
+
+  const location = useLocation();
+  const search = createMemo(() => location.search.length < 2 ? "?" : location.search + "&");
+  const handleClick = e => window.location.href = e.target.href;
+
+  return (
+    <div class="context-menu">
+      <For each={branches()} fallback="No dev branches available">{branch => (
+        <a href={location.pathname + search() + "dev-branch=" + branch} onClick={handleClick}>
+          <BranchIcon />
+          {branch}
+        </a>
+      )}</For>
+    </div>
   )
 }
 
