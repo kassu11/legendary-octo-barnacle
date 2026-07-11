@@ -11,7 +11,7 @@ export default function solidJsScopedStyling() {
 export const transform = (src, id) => {
   if (id.endsWith(".scoped.jsx")) {
     const attribute = localDataAttributeFromFilePath(id);
-    return src.replace(/(<[^>=+< /]+)/g, (_, tag) => `${tag} ${attribute}`);
+    return src.replace(/(<[^>=+< /"']+)/g, (_, tag) => `${tag} ${attribute}`);
   }
   else if (id.endsWith(".scoped.css")) {
     const attribute = "[" + localDataAttributeFromFilePath(id) + "]";
