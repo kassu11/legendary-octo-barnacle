@@ -1,10 +1,10 @@
 import { createEffect, createRenderEffect, createSignal, For, Show } from "solid-js";
+import { setSettingsShowDevBranch, settingsShowDevBranch } from "../../core/globalState";
 import "./index(settings).scoped.css";
 import { createStore, produce, reconcile } from "solid-js/store";
 import { useSearchParams } from "@solidjs/router";
 import { wrapToSet } from "../../utils/arrays";
 import { useResponsive } from "../../context/providers";
-import { setSettingsShowDevBranch, settingsShowDevBranch } from "../../core/globalState";
 
 export function SettingsPage() {
   const [hovered, setHovered] = createSignal();
@@ -69,22 +69,22 @@ export function SettingsPage() {
 
   return (
     <>
-    <div>
-      <h1>Settings</h1>
-      <label>
-        <input type="checkbox" checked={settingsShowDevBranch()} onChange={() => setSettingsShowDevBranch(v => !v)} />
-        {" "}Enable dev branches
-      </label>
-    </div>
-    <Select each={data} onOpen={handleOpen} onCancel={handleCancel} onHover={setHovered} onSubmit={handleSubmit} onSelect={handleSelect} onSearch={handleSearch}>{(entry, i) => (
-      <>
-        <div class="item" classList={{ inc: searchStore[entry.value] === "inc", exc: searchStore[entry.value] === "exc", hidden: entry.hidden, active: i() === hovered() }} onClick={e => {
-          e.preventDefault();
-          handleSelect(i());
-        }}>{entry.value}</div>
-      </>
-    )}</Select>
-    <button>Click me 2</button>
+      <div>
+        <h1>Settings</h1>
+        <label>
+          <input type="checkbox" checked={settingsShowDevBranch()} onChange={() => setSettingsShowDevBranch(v => !v)} />
+          {" "}Enable dev branches
+        </label>
+      </div>
+      <Select each={data} onOpen={handleOpen} onCancel={handleCancel} onHover={setHovered} onSubmit={handleSubmit} onSelect={handleSelect} onSearch={handleSearch}>{(entry, i) => (
+        <>
+          <div class="item" classList={{ inc: searchStore[entry.value] === "inc", exc: searchStore[entry.value] === "exc", hidden: entry.hidden, active: i() === hovered() }} onClick={e => {
+            e.preventDefault();
+            handleSelect(i());
+          }}>{entry.value}</div>
+        </>
+      )}</Select>
+      <button>Click me 2</button>
     </>
   );
 }

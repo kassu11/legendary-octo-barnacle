@@ -62,3 +62,18 @@ export const createLocalStorageBooleanSignal = (key, initialValue) => {
 
   return [value, setValue];
 }
+
+export const createLocalStorageBooleanSignal = (key, initialValue) => {
+  const val = localStorage.getItem(key);
+  const [value, _setValue] = createSignal(val != null ? val === "true" : initialValue);
+  const setValue = mutate => {
+    _setValue(v => {
+      if (isTypeFunction(mutate)) mutate = mutate(v);
+      if (!mutate) localStorage.removeItem(key);
+      else localStorage.setItem(key, mutate);
+      return mutate;
+    });
+  }
+
+  return [value, setValue];
+}
