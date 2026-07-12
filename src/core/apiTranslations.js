@@ -60,8 +60,8 @@ export const translateInternalSearchParams = {
     WINTER: {
       ani: { season: "WINTER" },
     },
-    SPRINT: {
-      ani: { season: "SPRINT" },
+    SPRING: {
+      ani: { season: "SPRING" },
     },
     SUMMER: {
       ani: { season: "SUMMER" },

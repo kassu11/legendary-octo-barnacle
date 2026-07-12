@@ -49,7 +49,7 @@ export function ParseSearchParams(props) {
     }
     else if (/winter|spring|summer|fall/.test(header)) {
       const [season, year] = header.toUpperCase().split("-");
-      Object.assign(obj, { year, season, seasonPage: true });
+      Object.assign(obj, { year: +year, season, seasonPage: true });
     }
 
     const include = wrapToSet(searchParams.genre);
@@ -72,6 +72,8 @@ export function ParseSearchParams(props) {
     ["sort", "format", "status"].forEach(key => {
       if (key in obj) obj[key] = wrapToArray(obj[key]);
     });
+
+    if (!(obj.year > 0)) delete obj.year;
 
     return obj;
   });
