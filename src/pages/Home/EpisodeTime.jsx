@@ -1,5 +1,6 @@
 import { createMemo, createSignal, Show } from "solid-js";
 import { timeCollection } from "../../collections/collections";
+import { formatingUtils } from "../../utils/utils";
 
 const [currentTime, setCurentTime] = createSignal(
   timeCollection.currentTimeInSeconds,
@@ -47,5 +48,43 @@ export function EpisodeTime(props) {
         />
       </p>
     </>
+  );
+}
+
+export function EpisodeTime2(props) {
+  const time = createMemo(() => Math.max(props.airingAt - currentTime(), 0));
+
+  return (
+    <DurationToTime time={time()} {...props} />
+  );
+}
+
+export function DurationToTime(props) {
+  const text = createMemo(() => {
+    const {time, day, hour, minute} = props;
+    const days = day && Math.floor(time / 3600 / 24);
+    const hours = hour && Math.floor((time / 3600) % 24);
+    const minutes = minute && Math.floor((time % 3600) / 60);
+
+    let returnValue = "";
+
+    if (days) {
+      returnValue += ` ${days}${day}${formatingUtils.plural(days)}`;
+    }
+    if (hours) {
+      returnValue += ` ${hours}${hour}${formatingUtils.plural(hours)}`;
+    }
+    if (minutes) {
+      returnValue += ` ${minutes}${minute}${formatingUtils.plural(minutes)}`;
+    }
+
+    return returnValue.trim();
+  });
+
+  return (
+    <Show when={text()} fallback={props.fallback}>
+      {props.flavorText}
+      {text()}
+    </Show>
   );
 }

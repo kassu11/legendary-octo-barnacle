@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { asserts, queries } from "../../collections/collections.js";
-import { urlUtils } from "../../utils/utils.js";
+import { formatingUtils, urlUtils } from "../../utils/utils.js";
 import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
 import Watching from "../../assets/Watching.jsx";
@@ -16,7 +16,8 @@ import { For, Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
 import { mediaWithMalId, token2 } from "../../core/globalState.js";
-import { capitalize, formatMediaFormat, languageFromCountry } from "../../utils/formating.js";
+import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../utils/formating.js";
+import { DurationToTime, EpisodeTime2 } from "../../pages/Home/EpisodeTime.jsx";
 
 function AnilistMediaCardListBody(props) {
   return (
@@ -43,10 +44,20 @@ function AnilistMediaCardListBody(props) {
           <Show when={props.media?.bannerImage}>
             <img src={props.media?.bannerImage} />
           </Show>
-          <h2 class="line-clamp">{props.media.title.userPreferred}</h2>
+          <p class="line-clamp header shadow">{props.media.title.userPreferred}</p>
+          <Show when={props.media.nextAiringEpisode?.episode && props.media.nextAiringEpisode?.airingAt}>
+            <p class="episodes">
+              <Show when={props.media.format !== "MOVIE"} fallback="Movie ">
+                Ep {props.media.nextAiringEpisode.episode}{" "}
+              </Show>
+              <EpisodeTime2 airingAt={props.media.nextAiringEpisode.airingAt} flavorText="airing in " day=" day" hour=" hour" fallback={
+                <EpisodeTime2 airingAt={props.media.nextAiringEpisode.airingAt} flavorText="airing in " minute=" minute" fallback="has aired" />
+              } />
+            </p>
+          </Show>
           <div class="body">
             <Show when={props.media.studios?.edges.length}>
-              <div class="studios">
+              <div class="studios shadow">
                 <For each={props.media.studios?.edges}>{edge => (
                   <p>{edge.node.name}</p>
                 )}</For>
@@ -60,63 +71,79 @@ function AnilistMediaCardListBody(props) {
               </div>
             </Show>
           </div>
-          <MediaFormatAndSeason
-            format={props.media.format} 
-            countryOfOrigin={props.media.countryOfOrigin} 
-            season={props.media.season} 
-            seasonYear={props.media.seasonYear} 
-            startDate={props.media.startDate} 
-            type={props.media.type} 
-          />
+          <div class="type-and-season">
+            <div class="flex-bullet-separator">
+              <Show when={props.media?.format}>
+                <span>
+                  <Switch>
+                    <Match when={props.media?.countryOfOrigin !== "JP"}>
+                      {formatMediaFormat(props.media?.format)} ({languageFromCountry(props.media?.countryOfOrigin)})
+                    </Match>
+                    <Match when={props.media?.countryOfOrigin === "JP"}>
+                      {formatMediaFormat(props.media?.format)}
+                    </Match>
+                  </Switch>
+                </span>
+              </Show>
+              <span>
+                <Switch>
+                  <Match when={props.media?.type === "MANGA"}>
+                    <Switch>
+                      <Match when={props.media?.format === "NOVEL" && props.media?.volumes}>
+                        {props.media.volumes} Volume{formatingUtils.plural(props.media.volumes)}
+                      </Match>
+                      <Match when={props.media?.chapters}>
+                        {props.media.chapters} Chapter{formatingUtils.plural(props.media.chapters)}
+                      </Match>
+                      <Match when={props.media?.status}>
+                        {formatMediaStatus(props.media.status)}
+                      </Match>
+                    </Switch>
+                  </Match>
+                  <Match when={props.media?.type === "ANIME"}>
+                    <Switch>
+                      <Match when={props.media?.format === "MOVIE" && props.media?.duration}>
+                        <DurationToTime time={props.media.duration * 60} minute=" minute" hour=" hour" />
+                      </Match>
+                      <Match when={props.media?.format !== "MOVIE" && props.media?.episodes}>
+                        {props.media.episodes} Episode{formatingUtils.plural(props.media.episodes)}
+                      </Match>
+                    </Switch>
+                  </Match>
+                </Switch>
+              </span>
+            </div>
+            <span class="season">
+              <Switch>
+                <Match when={props.media?.type === "MANGA"}>
+                  <Switch>
+                    <Match when={props.media?.startDate?.year}>
+                      {props.media?.startDate.year}
+                    </Match>
+                    <Match when={props.media?.startDate?.year == null}>
+                      TBA
+                    </Match>
+                  </Switch>
+                </Match>
+                <Match when={props.media?.type === "ANIME"}>
+                  <Switch>
+                    <Match when={props.media?.seasonYear && props.media?.season}>
+                      {capitalize(props.media?.season)} {props.media?.seasonYear}
+                    </Match>
+                    <Match when={props.media?.startDate?.year}>
+                      {props.media?.startDate.year}
+                    </Match>
+                    <Match when={props.media?.startDate?.year == null}>
+                      TBA
+                    </Match>
+                  </Switch>
+                </Match>
+              </Switch>
+            </span>
+          </div>
         </div>
       </Show>
     </li>
-  )
-}
-
-function MediaFormatAndSeason(props) {
-  return (
-    <div class="flex-bullet-separator">
-      <Show when={props.format}>
-        <span>
-          <Switch>
-            <Match when={props.countryOfOrigin !== "JP"}>
-              {formatMediaFormat(props.format)} ({languageFromCountry(props.countryOfOrigin)})
-            </Match>
-            <Match when={props.countryOfOrigin === "JP"}>
-              {formatMediaFormat(props.format)}
-            </Match>
-          </Switch>
-        </span>
-      </Show>
-      <span>
-        <Switch>
-          <Match when={props.type === "MANGA"}>
-            <Switch>
-              <Match when={props.startDate?.year}>
-                {props.startDate.year}
-              </Match>
-              <Match when={props.startDate?.year == null}>
-                TBA
-              </Match>
-            </Switch>
-          </Match>
-          <Match when={props.type === "ANIME"}>
-            <Switch>
-              <Match when={props.seasonYear && props.season}>
-                {capitalize(props.season)} {props.seasonYear}
-              </Match>
-              <Match when={props.startDate?.year}>
-                {props.startDate.year}
-              </Match>
-              <Match when={props.startDate?.year == null}>
-                TBA
-              </Match>
-            </Switch>
-          </Match>
-        </Switch>
-      </span>
-    </div>
   )
 }
 

@@ -402,6 +402,10 @@
     > * {
       position: relative;
 
+      &:empty {
+        display: none;
+      }
+
       &:not(:first-child)::before {
         content: "";
         position: absolute;
