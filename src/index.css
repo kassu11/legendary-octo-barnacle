@@ -97,6 +97,10 @@
     --shadow-400-old: oklab(0 0 0 / .8);
     --shadow-300-old: oklab(0 0 0 / .9);
 
+    --shadow-light: oklab(0 0 0 / .75);
+    --shadow: oklab(0 0 0 / .8);
+    --shadow-dark: oklab(0 0 0 / .9);
+
     --bg-dark: oklab(0.2 0.01 -0.01);
     --bg: oklab(0.25 0.01 -0.01);
     --bg-light: oklab(.3 0 0);

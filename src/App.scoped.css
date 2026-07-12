@@ -55,6 +55,7 @@
       width: fit-content;
       background-color: unset;
       border: unset;
+      background-color: var(--shadow-light);
 
       &:hover, .open & {
         background-color: var(--bg-light);
