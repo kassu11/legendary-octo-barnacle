@@ -47,7 +47,7 @@ function AnimeThemes() {
         <div>
           <h2>Themes</h2>
           <For each={themeData()?.data?.anime?.[0]?.animethemes}>{theme => (
-            <AnimeTheme theme={theme} video={videoPlayer} />
+            <AnimeTheme href={"https://animethemes.moe/anime/" + themeData()?.data?.anime?.[0]?.slug + "/" + theme.slug} theme={theme} video={videoPlayer} />
           )}</For>
           {videoPlayer}
         </div>
@@ -92,6 +92,7 @@ export function AnimeTheme(props) {
               <For each={row.videos}>{video => (
                 <div className={style.playButton}>
                   <button onClick={() => props.video.src = video.link}>play</button>
+                  <a target="_blank" href={props.href + (row.version > 1 ? "v" + row.version : "") + (video.tags ? "-" + video.tags : "")}>open</a>
                   <span>{video.resolution}</span>
                   <span>{video.source}</span>
                   <span>{video.nc && "NC"}</span>
