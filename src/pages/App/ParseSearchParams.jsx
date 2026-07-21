@@ -6,6 +6,7 @@ import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "..
 import { ParsedSearchParamsContext } from "../../context/providers";
 import { translateInternalSearchParams } from "../../core/apiTranslations";
 import { getDates } from "../../utils/dates";
+import { searchPageGroupSeasonalEntriesByFormat } from "../../core/globalState";
 
 const [searchStore, setSearchStore] = createStore({});
 
@@ -24,7 +25,7 @@ export function ParseSearchParams(props) {
 
     const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalSearchParams.sort[val]));
 
-    const groupSeasonalEntriesByFormat = searchParams.skipSeasonalFormatGroups !== "true";
+    const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
 
     if (header === "trending") obj.sort = "trending_desc";
     else if (header === "popular") obj.sort = ["popularity_desc", "score_desc"];
@@ -63,6 +64,11 @@ export function ParseSearchParams(props) {
 
     if (filteredSorts.length) obj.sort = filteredSorts;
     else if (!obj.sort?.length) obj.sort = ["popularity_desc", "score_desc"];
+
+    obj.genres = wrapToSet(searchParams.genre);
+    obj.excludedGenres = wrapToSet(searchParams.excludedGenre);
+    obj.onList = wrapToArray(searchParams.onList).at(-1);
+    obj.format = wrapToArray(obj.format).concat(wrapToArray(searchParams.format));
 
     if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
       if (groupSeasonalEntriesByFormat) obj.sort = ["format", ...obj.sort];

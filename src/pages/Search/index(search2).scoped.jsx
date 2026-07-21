@@ -1,4 +1,4 @@
-import { A, Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
@@ -10,7 +10,7 @@ import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
 import { AnilistMediaCard } from "../../components/Cards/Cards.scoped";
-import { tabTime } from "../../core/globalState";
+import { setSearchPageGroupSeasonalEntriesByFormat, tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
 import { scheduleUtils } from "../../utils/utils";
 import { assertThruthy } from "../../collections/asserts";
@@ -19,7 +19,9 @@ import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
 import { capitalize } from "../../utils/formating";
 import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-anilist).scoped";
-import { globalHoverContainer } from "../../App.scoped";
+import { initializeMediaCardHover } from "./initializeMediaCardHover";
+import { SearchBar } from "./SearchBar.scoped";
+import { SeasonControls } from "./SeasonControls.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -28,11 +30,13 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false, year, sortBySearchMatch, ...rest } = parsedSearchParams();
+  const { q, isAdult = false, year, genres, excludedGenres, sortBySearchMatch, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
     format: [],
+    genres: [...genres],
+    excludedGenres: [...excludedGenres],
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
     isAdult
@@ -46,6 +50,7 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "season", obj, rest);
   mergeVariables(api, "format", obj, rest);
   mergeVariables(api, "countryOfOrigin", obj, rest);
+  mergeVariables(api, "onList", obj, rest);
 
   if (obj.season && year) {
     obj.seasonYear = year;
@@ -92,7 +97,7 @@ function mergeValue(api, key, to, value) {
   concatMergeObjects(to, val);
 }
 
-const SEARCH_DEBOUNCE = 400;
+export const SEARCH_DEBOUNCE = 400;
 const cachedResults = new Set();
 const searchPageSizes = {} // keep that of how many elements url had, so when user navigates back in history, we can create the right amount of skeleton cards
 
@@ -190,10 +195,10 @@ export function SearchPage() {
       },
       setValue: (jikanRes) => {
         if (fallbackPagelessCacheKey !== cacheKey) return;
+        setPagelessCacheLoading(false);
         if (!jikanRes.data.data.length) return;
         if (fallbackSearchController.signal.aborted) return;
 
-        setPagelessCacheLoading(false);
 
         let controller = new AbortController();
         fallbackSearchController.signal.addEventListener("abort", () => controller?.abort());
@@ -393,8 +398,6 @@ export function SearchPage() {
     searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data?.media.length || 0;
   });
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
   return (
     <ErrorBoundary fallback="Search page has crashed">
       <SearchBar />
@@ -429,8 +432,10 @@ export function SearchPage() {
             <A href="/ani/search/anime/this-season">Current</A>
             <A href="/ani/search/anime/next-season">Next</A>
             <A href="/ani/search/anime/tba">TBA</A>
+            <SeasonControls />
+
             <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
-              <button onClick={() => setSearchParams({ skipSeasonalFormatGroups: searchParams.skipSeasonalFormatGroups !== "true" })}>Click me</button>
+              <button onClick={() => setSearchPageGroupSeasonalEntriesByFormat(v => !v)}>Group by Format</button>
             </Show>
             <ol class="cards season">
               <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
@@ -528,7 +533,6 @@ export function SearchPage() {
   );
 }
 
-
 function BrowsePage(props) {
   const params = useParams();
 
@@ -564,101 +568,4 @@ function BrowsePage(props) {
       </Switch>
     </div>
   )
-}
-
-function SearchBar() {
-  const parsedSearchParams = useParsedSearchParams();
-  const [, setSearchParams] = useSearchParams();
-
-  let replace = false, timeout;
-  const handleInput = e => {
-    setSearchParams({ q: encodeURIComponent(e.target.value) || undefined, skipSortByMatch: undefined }, { replace });
-    replace = true;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
-  };
-
-  return (
-    <div>
-      <input type="search" onInput={handleInput} value={parsedSearchParams().q}/>
-    </div>
-  );
-}
-
-function initializeMediaCardHover() {
-  const controller = new AbortController();
-  const { signal } = controller;
-
-  function updateHoverPosition() {
-    if (!hover) return;
-    let { x, y, width, height } = hoverParent.getBoundingClientRect();
-    x += document.body.parentElement.scrollLeft;
-    y += document.body.parentElement.scrollTop;
-
-    if (hover.clientWidth + x + width + 25 < document.body.scrollWidth) {
-      hover.style.left = x + width + 25 + "px";
-      hover.style.top = y + 25 + "px";
-    } else if (x - hover.clientWidth - 25 > 0) {
-      hover.style.left = x - hover.clientWidth - 25 + "px";
-      hover.style.top = y + 25 + "px";
-    } else {
-      const max = document.body.scrollWidth - hover.clientWidth;
-      hover.style.left = Math.max(0, Math.min(x + width / 2 - hover.clientWidth / 2, max)) + "px";
-      hover.style.top = y + height + 25 + "px";
-    }
-
-    if (!hoverButton) return;
-
-    ({ x, y, width, height } = hoverButton.getBoundingClientRect());
-    x += document.body.parentElement.scrollLeft;
-    y += document.body.parentElement.scrollTop;
-
-    hoverButtonTooltip.style.top = y + height / 2 + "px";
-    if (x - hoverButtonTooltip.clientWidth - 8 > 0) {
-      hoverButtonTooltip.style.left = x - hoverButtonTooltip.clientWidth - 8 + "px";
-    } else {
-      hoverButtonTooltip.style.left = x + width + 8 + "px";
-    } 
-  }
-
-  let prevTarget, hoverParent, hover;
-  let hoverButton, hoverButtonTooltip;
-  window.addEventListener("mousemove", e => {
-    updateHoverPosition();
-    if (prevTarget === e.target) return;
-    prevTarget = e.target
-
-    const target = e.target.classList.contains("cp-media-card") ? e.target : e.target.closest(".cp-media-card");
-    if (target?.classList.contains("skeleton")) return;
-    if (target != hoverParent) {
-      if (!target || target != hoverParent) hoverParent?.append(hover);
-
-      hoverParent = target;
-      hover = target?.querySelector(".hover-card");
-      if (hover) globalHoverContainer.append(hover);
-    }
-
-
-    const button = e.target.classList.contains("cp-media-action-item") ? e.target : e.target.closest(".cp-media-action-item");
-    if (button != hoverButton) {
-      if (!button || button != hoverButton) hoverButton?.after(hoverButtonTooltip);
-
-      hoverButton = button;
-      hoverButtonTooltip = button?.nextElementSibling;
-      if (hoverButtonTooltip) globalHoverContainer.append(hoverButtonTooltip);
-    }
-
-
-    updateHoverPosition();
-  }, { signal });
-
-  signal.addEventListener("abort", () => {
-    hoverParent?.append(hover);
-    hoverButton?.after(hoverButtonTooltip);
-    prevTarget = null;
-    hoverParent = null;
-    hover = null;
-  });
-
-  onCleanup(() => controller.abort());
 }

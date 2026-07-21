@@ -1,0 +1,55 @@
+@layer layout {
+  dialog {
+    padding: 0;
+    border: none;
+    max-height: min(calc(100dvh - .5rem), 30rem);
+    overscroll-behavior: contain;
+    touch-action: none;
+
+    &::backdrop {
+      background-color: rgb(0 0 0 / 60%);
+      backdrop-filter: blur(5px);
+    }
+
+    &.mobile {
+      margin: auto;
+      max-width: unset;
+      max-height: calc(100dvh - .5rem);
+      width: min(calc(100dvw - .5rem), 30rem);
+      height: 100%;
+
+      .wrapper {
+        display: grid;
+        grid-template-rows: auto;
+      }
+    }
+
+    .wrapper {
+      pointer-events: all;
+      padding: 8px;
+      height: 100%;
+    }
+  }
+
+  .item {
+    cursor: pointer;
+    &.inc {
+      background: green;
+    }
+    &.exc {
+      background: red;
+    }
+    &.active {
+      &.inc {
+        background: lime;
+      }
+      &.exc {
+        background: pink;
+      }
+      background: grey;
+    }
+    &.hidden {
+      display: none;
+    }
+  }
+}

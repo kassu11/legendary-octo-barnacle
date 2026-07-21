@@ -12,8 +12,12 @@ fragment media on Media {
   idMal
   type
   bannerImage
+  averageScore
   title {
     userPreferred
+  }
+  mediaListEntry {
+    status
   }
   season
   seasonYear
