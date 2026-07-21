@@ -23,7 +23,7 @@ export function SearchBar() {
   return (
     <div>
       <input type="search" onInput={handleInput} value={parsedSearchParams().q} />
-      {/* <GenreSelect></GenreSelect> */}
+      <GenreSelect></GenreSelect>
     </div>
   );
 }
