@@ -17,7 +17,7 @@ import { assertThruthy } from "../../collections/asserts";
 import { translateInternalSearchParams } from "../../core/apiTranslations";
 import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
-import { capitalize } from "../../utils/formating";
+import { capitalize, formatMediaFormat } from "../../utils/formating";
 import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-anilist).scoped";
 import { initializeMediaCardHover } from "./initializeMediaCardHover";
 import { SearchBar } from "./SearchBar.scoped";
@@ -189,16 +189,16 @@ export function SearchPage() {
       name: "Jikan fallback search",
       delay: debounce,
       // debug: false,
-      onFetch: () => {
-        controller = null;
-        setPagelessCacheLoading(false);
-      },
+      onFetch: () => controller = null,
       setValue: (jikanRes) => {
         if (fallbackPagelessCacheKey !== cacheKey) return;
-        setPagelessCacheLoading(false);
-        if (!jikanRes.data.data.length) return;
         if (fallbackSearchController.signal.aborted) return;
 
+        const pageInfo = jikanPagenationToPageInfo(jikanRes.data.pagination);
+        if (!jikanRes.data.data.length) {
+          mutatePageless([], pageInfo, false, true);
+          return;
+        }
 
         let controller = new AbortController();
         fallbackSearchController.signal.addEventListener("abort", () => controller?.abort());
@@ -215,8 +215,6 @@ export function SearchPage() {
 
             const order = Object.fromEntries(idMal_in.map((v, i) => ([v, i])))
             aniRes.data.data.page1.media.sort((a, b) => order[a.idMal] - order[b.idMal]);
-            const { current_page, has_next_page, items: { per_page } } = jikanRes.data.pagination;
-            const pageInfo = { currentPage: current_page, hasNextPage: has_next_page, perPage: per_page };
 
             if (aniRes.modified < tabTime && !settings.debug) return;
             if (cachedResults.has(aniRes.cacheKey)) return;
@@ -328,11 +326,11 @@ export function SearchPage() {
         if (mode === "browse") {
           setAnilistBrowseData(reconcile(res.data.data));
         } else if (mode === "search") {
+          if (currentPagelessFetcher.cacheKey === untrack(pagelessCacheKey)) setPagelessCacheLoading(false);
+
           if (res.data.data.Page.media.length === 0 && currentPage === 1) {
             return jikanFallbackSearch({ ...jiVariables, page: 1 }, currentPagelessFetcher.cacheKey, 0);
           }
-
-          if (currentPagelessFetcher.cacheKey === untrack(pagelessCacheKey)) setPagelessCacheLoading(false);
           // TODO: Make a function to check when we can use long time cache
           // For example when results are smaller than page size or when searching using years etc.
           // Now we will only allow fetches one time per tab
@@ -455,7 +453,7 @@ export function SearchPage() {
                 return (
                   <>
                     <Show when={media?.customSection}>
-                      <h2>{media.customSection}</h2>
+                      <h2>{formatMediaFormat(media.customSection)}</h2>
                     </Show>
                     <Show when={visibleCardIndices[i()]} fallback={media != INACTIVE_LOADER && <li class="skeleton-card" data-index={i()} ref={handleRef} />}>
                       <Show when={media != INACTIVE_LOADER}>
@@ -531,6 +529,11 @@ export function SearchPage() {
       </Switch>
     </ErrorBoundary>
   );
+}
+
+function jikanPagenationToPageInfo(pagination) {
+  const { current_page, has_next_page, items: { per_page } } = pagination;
+  return { currentPage: current_page, hasNextPage: has_next_page, perPage: per_page };
 }
 
 function BrowsePage(props) {

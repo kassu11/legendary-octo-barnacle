@@ -102,7 +102,6 @@ export const formatMediaFormat = text => {
     case "TV_SPECIAL":
       return "TV special";
     default:
-      console.error("Unknown media format");
       return text;
   }
 }
