@@ -6,6 +6,7 @@ import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcher
 import { authUserData } from "../../../core/globalState.js";
 import "./Following.scoped.css";
 import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 
 export function Following(props) {
   asserts.assertTrueOLD(props.page, "Page is missing");
@@ -13,18 +14,16 @@ export function Following(props) {
   const [followingTime, startFollowingTimer, stopFollowingTimer] = createTimer();
   const [followingData, setFollowingData] = createSignal(undefined, { equals: false });
   const [loading, setLoading] = createSignal(false);
-  let followingFetcher, followingController;
+  const followingController = createCleanUpAbortController();
+  let followingFetcher;
   createEffect(() => {
-    followingController?.abort();
-    followingController = new AbortController();
+    const signal = followingController.abortAndRenew();
 
-    followingFetcher = createAnilistFetcher(queries.anilistGetUserFollowing, { id: user().id, page: props.page }, followingController.signal);
+    followingFetcher = createAnilistFetcher(queries.anilistGetUserFollowing, { id: user().id, page: props.page }, signal);
 
     sendAnilistFetcher(followingFetcher, {
       name: "Anilist socials following",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === followingFetcher.cacheKey) followingController = null;
-      },
+      onFetch: () => followingController.disable(),
       onStart: time => {
         startFollowingTimer(time);
         setLoading(true);

@@ -7,24 +7,23 @@ import { CreatedAt } from "../../components/CreatedAt.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { queries } from "../../collections/collections.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function ActivityPage() {
   const params = useParams();
 
   const [activityTime, startActivityTimer, stopActivityTimer] = createTimer();
   const [activityData, setActivityData] = createSignal(undefined, { equals: false });
-  let activityFetcher, activityController;
+  const activityController = createCleanUpAbortController();
+  let activityFetcher;
   createEffect(() => {
-    activityController?.abort();
-    activityController = new AbortController();
+    const signal = activityController.abortAndRenew();
 
-    activityFetcher = createAnilistFetcher(queries.anilistActivityById, { id: params.id }, activityController.signal);
+    activityFetcher = createAnilistFetcher(queries.anilistActivityById, { id: params.id }, signal);
 
     sendAnilistFetcher(activityFetcher, {
       name: "Anilist activity",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === activityFetcher.cacheKey) activityController = null;
-      },
+      onFetch: () => activityController.disable(),
       onStart: startActivityTimer,
       onStop: stopActivityTimer,
       setValue: (res, { fetcher: f }) => {
@@ -35,18 +34,16 @@ export function ActivityPage() {
 
   const [repliesTime, startRepliesTimer, stopRepliesTimer] = createTimer();
   const [repliesData, setRepliesData] = createSignal(undefined, { equals: false });
-  let repliesFetcher, repliesController;
+  const repliesController = createCleanUpAbortController();
+  let repliesFetcher;
   createEffect(() => {
-    repliesController?.abort();
-    repliesController = new AbortController();
+    const signal = repliesController.abortAndRenew();
 
-    repliesFetcher = createAnilistFetcher(queries.anilistActivityRepliedById, { id: params.id, page: 1}, repliesController.signal);
+    repliesFetcher = createAnilistFetcher(queries.anilistActivityRepliedById, { id: params.id, page: 1}, signal);
 
     sendAnilistFetcher(repliesFetcher, {
       name: "Anilist replies",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === repliesFetcher.cacheKey) repliesController = null;
-      },
+      onFetch: () => repliesController.disable(),
       onStart: startRepliesTimer,
       onStop: stopRepliesTimer,
       setValue: (res, { fetcher: f }) => {

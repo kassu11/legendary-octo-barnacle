@@ -8,30 +8,32 @@ import { isTypeFunction } from "../../utils/functionUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { weekInSeconds } from "../../collections/time.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function CurrentWatchingMediaScoped() {
   const [data, setData] = createSignal();
   const [loading, setLoading] = createSignal(false);
   const [time, startTimer, stopTimer] = createTimer();
 
-  let controller, cacheData;
+  const controller = createCleanUpAbortController();
+  let cacheData;
   createEffect(() => {
     const id = authedUserId();
     const t = token2();
     if (!t || !id) return;
 
-    controller?.abort();
-    controller = new AbortController();
+    const signal = controller.abortAndRenew();
 
     const fetcher = createAnilistFetcher(queries.anilistCurrentWachingMedia2, {
       "userId": id,
       "statusIn": ["CURRENT", "REPEATING"]
-    }, controller.signal);
+    }, signal);
 
     sendAnilistFetcher(fetcher, {
       name: "Currently watching",
       // debug: false,
       // file: "watching.json",
+      onFetch: () => controller.disable(),
       onStart: time => {
         setLoading(true);
         startTimer(time);

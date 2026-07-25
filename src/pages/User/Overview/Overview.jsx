@@ -9,26 +9,25 @@ import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { isTypeFunction } from "../../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
+import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 
 export function Overview() {
   const { user } = useUser();
   const userId = createMemo(() => user().id);
 
   const [anilistActivityData, setAnilistActivityData] = createSignal(undefined, { equals: false });
-  let anilistActivityFetcher, anilistActivityController;
+  const anilistActivityController = createCleanUpAbortController();
+  let anilistActivityFetcher;
   createEffect(() => {
-    anilistActivityController?.abort();
-    anilistActivityController = new AbortController();
+    const signal = anilistActivityController.abortAndRenew();
     const id = userId();
     if (!id) return;
 
-    anilistActivityFetcher = createAnilistFetcher(queries.profileActivity, { id }, anilistActivityController.signal);
+    anilistActivityFetcher = createAnilistFetcher(queries.profileActivity, { id }, signal);
 
     sendAnilistFetcher(anilistActivityFetcher, {
       name: "Anilist activities",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistActivityFetcher.cacheKey) anilistActivityController = null;
-      },
+      onFetch: () => anilistActivityController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === anilistActivityFetcher.cacheKey) setAnilistActivityData(res);
       }

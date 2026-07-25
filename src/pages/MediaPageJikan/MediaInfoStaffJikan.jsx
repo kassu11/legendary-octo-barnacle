@@ -5,6 +5,7 @@ import { MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
 import { createEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function MediaInfoStaffJikan() {
   const params = useParams();
@@ -12,18 +13,16 @@ export function MediaInfoStaffJikan() {
 
   const [staffTime, startStaffTimer, stopStaffTimer] = createTimer();
   const [jikanStaffData, setStaffData] = createSignal(undefined, { equals: false });
-  let staffFetcher, staffController;
+  const staffController = createCleanUpAbortController();
+  let staffFetcher;
   createEffect(() => {
-    staffController?.abort();
-    staffController = new AbortController();
+    const signal = staffController.abortAndRenew();
 
-    staffFetcher = createJsonGetFetcher(queries.myAnimeListAnimeStaffById, { id: params.id }, staffController.signal);
+    staffFetcher = createJsonGetFetcher(queries.myAnimeListAnimeStaffById, { id: params.id }, signal);
 
     sendFetcher(staffFetcher, {
       name: "Jikan staffacters",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === staffFetcher.cacheKey) staffController = null;
-      },
+      onFetch: () => staffController.disable(),
       onStart: startStaffTimer,
       onStop: stopStaffTimer,
       setValue: (res, { fetcher: f }) => {

@@ -6,14 +6,15 @@ import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { getDates } from "../../utils/dates.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { queries } from "../../collections/collections.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function BrowseMediaHomeScoped() {
   const [browseTime, startBrowseTimer, stopBrowseTimer] = createTimer();
   const [browseData, setBrowseData] = createSignal(undefined, { equals: false });
-  let browseFetcher, browseController;
+  const browseController = createCleanUpAbortController();
+  let browseFetcher;
   createEffect(() => {
-    browseController?.abort();
-    browseController = new AbortController();
+    const signal = browseController.abortAndRenew();
 
     const dates = getDates();
     browseFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {
@@ -22,13 +23,11 @@ export function BrowseMediaHomeScoped() {
       "seasonYear": dates.seasonYear,
       "nextSeason": dates.nextSeason,
       "nextYear": dates.nextYear,
-    }, browseController.signal);
+    }, signal);
 
     sendAnilistFetcher(browseFetcher, {
       name: "Anilist browse manga",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === browseFetcher.cacheKey) browseController = null;
-      },
+      onFetch: () => browseController.disable(),
       onStart: startBrowseTimer,
       onStop: stopBrowseTimer,
       setValue: (res, { fetcher: f }) => {

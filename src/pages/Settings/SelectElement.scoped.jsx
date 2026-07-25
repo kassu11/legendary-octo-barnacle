@@ -4,6 +4,7 @@ import { createStore, produce, reconcile } from "solid-js/store";
 import { useSearchParams } from "@solidjs/router";
 import { wrapToSet } from "../../utils/arrays";
 import { useResponsive } from "../../context/providers";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function SelectElement() {
   const [hovered, setHovered] = createSignal();
@@ -83,7 +84,8 @@ export function SelectElement() {
 export function Select(props) {
   const [search, setSearch] = createSignal("");
   const { isTouch } = useResponsive()
-  let dialog, input, controller;
+  const controller = createCleanUpAbortController();
+  let dialog, input;
 
   // For debugging, this will reopen the dialog in mobile if touch changes
   createEffect(() => {
@@ -104,13 +106,12 @@ export function Select(props) {
   }
 
   const handleOpen = () => {
-    controller?.abort();
-    controller = new AbortController();
+    const signal = controller.abortAndRenew();
     openDialog();
     props.onOpen();
 
-    window.addEventListener("focusin", handleFocusIn, { signal: controller.signal });
-    window.addEventListener("click", handleClick, { signal: controller.signal });
+    window.addEventListener("focusin", handleFocusIn, { signal });
+    window.addEventListener("click", handleClick, { signal });
   };
 
   const handleFocusIn = e => {
@@ -120,7 +121,7 @@ export function Select(props) {
   };
 
   const handleClose = () => {
-    controller?.abort();
+    controller.abortAndRenew();
     dialog.close();
   };
 

@@ -12,23 +12,22 @@ import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUti
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function Character() {
   const params = useParams();
   const [anilistCharacterInfoTime, startAnilistCharacterInfoTimer, stopAnilistCharacterInfoTimer] = createTimer();
   const [anilistCharacterInfoData, setAnilistCharacterInfoData] = createSignal(undefined, { equals: false });
-  let anilistCharacterInfoFetcher, anilistCharacterInfoController;
+  const anilistCharacterInfoController = createCleanUpAbortController();
+  let anilistCharacterInfoFetcher;
   createEffect(() => {
-    anilistCharacterInfoController?.abort();
-    anilistCharacterInfoController = new AbortController();
+    const signal = anilistCharacterInfoController.abortAndRenew();
 
-    anilistCharacterInfoFetcher = createAnilistFetcher(queries.anilistCharacterById, { id: params.id }, anilistCharacterInfoController.signal);
+    anilistCharacterInfoFetcher = createAnilistFetcher(queries.anilistCharacterById, { id: params.id }, signal);
 
     sendAnilistFetcher(anilistCharacterInfoFetcher, {
       name: "Anilist character info",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistCharacterInfoFetcher.cacheKey) anilistCharacterInfoController = null;
-      },
+      onFetch: () => anilistCharacterInfoController.disable(),
       onStart: startAnilistCharacterInfoTimer,
       onStop: stopAnilistCharacterInfoTimer,
       setValue: (res, { fetcher: f }) => {
@@ -51,18 +50,16 @@ export function Staff() {
   const params = useParams();
   const [anilistStaffInfoTime, startAnilistStaffInfoTimer, stopAnilistStaffInfoTimer] = createTimer();
   const [anilistStaffInfoData, setAnilistStaffInfoData] = createSignal(undefined, { equals: false });
-  let anilistStaffInfoFetcher, anilistStaffInfoController;
+  const anilistStaffInfoController = createCleanUpAbortController();
+  let anilistStaffInfoFetcher;
   createEffect(() => {
-    anilistStaffInfoController?.abort();
-    anilistStaffInfoController = new AbortController();
+    const signal = anilistStaffInfoController.abortAndRenew();
 
-    anilistStaffInfoFetcher = createAnilistFetcher(queries.anilistStaffById, { id: params.id }, anilistStaffInfoController.signal);
+    anilistStaffInfoFetcher = createAnilistFetcher(queries.anilistStaffById, { id: params.id }, signal);
 
     sendAnilistFetcher(anilistStaffInfoFetcher, {
       name: "Anilist staff info",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistStaffInfoFetcher.cacheKey) anilistStaffInfoController = null;
-      },
+      onFetch: () => anilistStaffInfoController.disable(),
       onStart: startAnilistStaffInfoTimer,
       onStop: stopAnilistStaffInfoTimer,
       setValue: (res, { fetcher: f }) => {
@@ -314,10 +311,10 @@ function CharacterMediaPage(props) {
   const [variables, setVariables] = createSignal(undefined);
   const [anilistCharacterInfoLoading, setAnilistCharacterInfoLoading] = createSignal(false);
   const [anilistCharacterInfoData, setAnilistCharacterInfoData] = createSignal(undefined, { equals: false });
-  let anilistCharacterInfoFetcher, anilistCharacterInfoController;
+  const anilistCharacterInfoController = createCleanUpAbortController();
+  let anilistCharacterInfoFetcher;
   createEffect(() => {
-    anilistCharacterInfoController?.abort();
-    anilistCharacterInfoController = new AbortController();
+    const signal = anilistCharacterInfoController.abortAndRenew();
 
     const { nestLevel } = props;
     const vars = nestLevel === 1 ? props.variables : variables();
@@ -331,13 +328,11 @@ function CharacterMediaPage(props) {
       "onList": vars.onList,
       "withRoles": vars.withRoles || true,
       id: params.id,
-    }, anilistCharacterInfoController.signal);
+    }, signal);
 
     sendAnilistFetcher(anilistCharacterInfoFetcher, {
       name: "Anilist character info",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistCharacterInfoFetcher.cacheKey) anilistCharacterInfoController = null;
-      },
+      onFetch: () => anilistCharacterInfoController.disable(),
       onStart: () => setAnilistCharacterInfoLoading(true),
       onStop: () => setAnilistCharacterInfoLoading(false),
       setValue: (res, { fetcher: f }) => {
@@ -384,10 +379,10 @@ function StaffCharacterPage(props) {
   const [variables, setVariables] = createSignal(undefined);
   const [anilistStaffCharacterLoading, setAnilistStaffCharacterLoading] = createSignal(false);
   const [anilistStaffCharacterData, setAnilistStaffCharacterData] = createSignal(undefined, { equals: false });
-  let anilistStaffCharacterFetcher, anilistStaffCharacterController;
+  const anilistStaffCharacterController = createCleanUpAbortController();
+  let anilistStaffCharacterFetcher;
   createEffect(() => {
-    anilistStaffCharacterController?.abort();
-    anilistStaffCharacterController = new AbortController();
+    const signal = anilistStaffCharacterController.abortAndRenew();
 
     const { nestLevel } = props;
     const vars = nestLevel === 1 ? props.variables : variables();
@@ -400,13 +395,11 @@ function StaffCharacterPage(props) {
         "onList": vars.onList,
         "withCharacterRoles": true,
         id: params.id,
-      }, anilistStaffCharacterController.signal);
+      }, signal);
 
     sendAnilistFetcher(anilistStaffCharacterFetcher, {
       name: "Anilist staff media",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistStaffCharacterFetcher.cacheKey) anilistStaffCharacterController = null;
-      },
+      onFetch: () => anilistStaffCharacterController.disable(),
       onStart: () => setAnilistStaffCharacterLoading(true),
       onStop: () => setAnilistStaffCharacterLoading(false),
       setValue: (res, { fetcher: f }) => {
@@ -447,10 +440,10 @@ function StaffMediaRolePage(props) {
   const lastId = createMemo(() => props.lastMediaId);
   const [anilistStaffMediaLoading, setAnilistStaffMediaLoading] = createSignal(undefined, { equals: false });
   const [anilistStaffMediaData, setAnilistStaffMediaData] = createSignal(undefined, { equals: false });
-  let anilistStaffMediaFetcher, anilistStaffMediaController;
+  const anilistStaffMediaController = createCleanUpAbortController();
+  let anilistStaffMediaFetcher;
   createEffect(() => {
-    anilistStaffMediaController?.abort();
-    anilistStaffMediaController = new AbortController();
+    const signal = anilistStaffMediaController.abortAndRenew();
 
     const { id } = params;
     const { type, nestLevel } = props;
@@ -467,13 +460,11 @@ function StaffMediaRolePage(props) {
       "withStaffRoles": true,
       id,
       type,
-    }, anilistStaffMediaController.signal);
+    }, signal);
 
     sendAnilistFetcher(anilistStaffMediaFetcher, {
       name: "Anilist staff media",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistStaffMediaFetcher.cacheKey) anilistStaffMediaController = null;
-      },
+      onFetch: () => anilistStaffMediaController.disable(),
       onStart: () => setAnilistStaffMediaLoading(true),
       onStop: () => setAnilistStaffMediaLoading(false),
       setValue: (res, { fetcher: f }) => {

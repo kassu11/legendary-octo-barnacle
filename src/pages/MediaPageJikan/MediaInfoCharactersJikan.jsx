@@ -5,6 +5,7 @@ import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from
 import { MalCharacterCard } from "../../components/Cards/Cards.scoped.jsx";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function MediaInfoCharactersJikan() {
   const params = useParams();
@@ -12,18 +13,16 @@ export function MediaInfoCharactersJikan() {
 
   const [charTime, startCharTimer, stopCharTimer] = createTimer();
   const [jikanCharactersData, setCharData] = createSignal(undefined, { equals: false });
-  let charFetcher, charController;
+  const charController = createCleanUpAbortController();
+  let charFetcher;
   createEffect(() => {
-    charController?.abort();
-    charController = new AbortController();
+    const signal = charController.abortAndRenew();
 
-    charFetcher = createJsonGetFetcher(queries.myAnimeListMediaCharactersById, { id: params.id, type: params.type }, charController.signal);
+    charFetcher = createJsonGetFetcher(queries.myAnimeListMediaCharactersById, { id: params.id, type: params.type }, signal);
 
     sendFetcher(charFetcher, {
       name: "Jikan characters",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === charFetcher.cacheKey) charController = null;
-      },
+      onFetch: () => charController.disable(),
       onStart: startCharTimer,
       onStop: stopCharTimer,
       setValue: (res, { fetcher: f }) => {

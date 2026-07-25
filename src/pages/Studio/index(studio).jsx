@@ -11,6 +11,7 @@ import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUti
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function Studio() {
   const params = useParams();
@@ -21,10 +22,11 @@ export function Studio() {
   const [favourite, setFavourite] = createSignal(false);
   const [anilistStudioMediaTime, startAnilistStudioMediaTimer, stopAnilistStudioMediaTimer] = createTimer();
   const [anilistStudioMediaData, setAnilistStudioMediaData] = createSignal(undefined, { equals: false });
-  let anilistStudioMediaFetcher, anilistStudioMediaController;
+
+  const anilistStudioMediaController = createCleanUpAbortController();
+  let anilistStudioMediaFetcher;
   createEffect(() => {
-    anilistStudioMediaController?.abort();
-    anilistStudioMediaController = new AbortController();
+    const signal = anilistStudioMediaController.abortAndRenew();
 
     const vars = variables();
     if (!vars) return;
@@ -35,13 +37,11 @@ export function Studio() {
         "sort": vars.sort || "START_DATE_DESC",
         "onList": vars.onList,
         id: params.id
-      }, anilistStudioMediaController.signal);
+      }, signal);
 
     sendAnilistFetcher(anilistStudioMediaFetcher, {
       name: "Anilist studio media",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistStudioMediaFetcher.cacheKey) anilistStudioMediaController = null;
-      },
+      onFetch: () => anilistStudioMediaController.disable(),
       onStart: startAnilistStudioMediaTimer,
       onStop: stopAnilistStudioMediaTimer,
       setValue: (res, { fetcher: f }) => {
@@ -150,11 +150,11 @@ function CharacterMediaPage(props) {
   const [variables, setVariables] = createSignal(undefined);
   const [anilistStudioMediaLoading, setAnilistStudioMediaLoading] = createSignal(false);
   const [anilistStudioMediaData, setAnilistStudioMediaData] = createSignal(undefined, { equals: false });
-  let anilistStudioMediaFetcher, anilistStudioMediaController;
+  const anilistStudioMediaController = createCleanUpAbortController();
+  let anilistStudioMediaFetcher;
 
   createEffect(() => {
-    anilistStudioMediaController?.abort();
-    anilistStudioMediaController = new AbortController();
+    const signal = anilistStudioMediaController.abortAndRenew();
 
     const {nestLevel} = props;
     const vars = nestLevel === 1 ? props.variables : variables();
@@ -167,13 +167,11 @@ function CharacterMediaPage(props) {
         "sort": vars.sort || "START_DATE_DESC",
         "onList": vars.onList,
         id: params.id
-      }, anilistStudioMediaController.signal);
+      }, signal);
 
     sendAnilistFetcher(anilistStudioMediaFetcher, {
       name: "Anilist studio media",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistStudioMediaFetcher.cacheKey) anilistStudioMediaController = null;
-      },
+      onFetch: () => anilistStudioMediaController.disable(),
       onStart: () => setAnilistStudioMediaLoading(true),
       onStop: () => setAnilistStudioMediaLoading(false),
       setValue: (res, { fetcher: f }) => {

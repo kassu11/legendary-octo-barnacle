@@ -6,24 +6,24 @@ import { queries } from "../../../../collections/collections.js";
 import "./VoiceActors.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();
 
   const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
   const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
-  let userStatsFetcher, userStatsController;
-  createEffect(() => {
-    userStatsController?.abort();
-    userStatsController = new AbortController();
+  const userStatsController = createCleanUpAbortController();
+  let userStatsFetcher;
 
-    userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeVoiceActors, { name: params.name }, userStatsController.signal);
+  createEffect(() => {
+    const signal = userStatsController.abortAndRenew();
+
+    userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeVoiceActors, { name: params.name }, signal);
 
     sendAnilistFetcher(userStatsFetcher, {
       name: "Anilist user voice actor stats",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
-      },
+      onFetch: () => userStatsController.disable(),
       onStart: startUserStatsTimer,
       onStop: stopUserStatsTimer,
       setValue: (res, { fetcher: f }) => {
@@ -51,21 +51,19 @@ function StatsVoiceActors(props) {
   const [mediaStore, setMediaStore] = createStore({});
   const [characterStore, setCharacterStore] = createStore({});
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const pType = pageType();
     const ids = [...mediaIds()];
     if (pType != "media" || !ids.length) return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {
@@ -77,22 +75,20 @@ function StatsVoiceActors(props) {
     });
   });
 
-  let characterFetcher, characterController;
+  const characterController = createCleanUpAbortController();
+  let characterFetcher;
   createEffect(() => {
     const pType = pageType();
     const ids = [...characterIds()];
     if (pType != "characters" || !ids.length) return;
 
-    characterController?.abort();
-    characterController = new AbortController();
+    const signal = characterController.abortAndRenew();
 
-    characterFetcher = createAnilistFetcher(queries.anilistGetCharacterIds(ids.length), { ids }, characterController.signal);
+    characterFetcher = createAnilistFetcher(queries.anilistGetCharacterIds(ids.length), { ids }, signal);
 
     sendAnilistFetcher(characterFetcher, {
       name: "Anilist character ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === characterFetcher.cacheKey) characterController = null;
-      },
+      onFetch: () => characterController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== characterFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {
@@ -209,20 +205,18 @@ function Cards(props) {
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [characterIds, setCharacterIds] = createSignal(new Set());
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const ids = [...mediaIds()];
     if (!ids.length) return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {
@@ -234,21 +228,19 @@ function Cards(props) {
     });
   });
 
-  let characterFetcher, characterController;
+  const characterController = createCleanUpAbortController();
+  let characterFetcher;
   createEffect(() => {
     const ids = [...characterIds()];
     if (!ids.length) return;
 
-    characterController?.abort();
-    characterController = new AbortController();
+    const signal = characterController.abortAndRenew();
 
-    characterFetcher = createAnilistFetcher(queries.anilistGetCharacterIds(ids.length), { ids }, characterController.signal);
+    characterFetcher = createAnilistFetcher(queries.anilistGetCharacterIds(ids.length), { ids }, signal);
 
     sendAnilistFetcher(characterFetcher, {
       name: "Anilist character ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === characterFetcher.cacheKey) characterController = null;
-      },
+      onFetch: () => characterController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== characterFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {

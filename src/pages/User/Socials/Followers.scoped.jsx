@@ -5,6 +5,7 @@ import { queries } from "../../../collections/collections.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
 import "./Followers.scoped.css";
+import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 
 export function Followers(props) {
   const { user } = useUser();
@@ -15,20 +16,18 @@ export function Followers(props) {
   const [followersTime, startFollowersTimer, stopFollowersTimer] = createTimer();
   const [loading, setLoading] = createSignal(false);
   const [followersData, setFollowersData] = createSignal(undefined, { equals: false });
-  let followersFetcher, followersController;
+  const followersController = createCleanUpAbortController();
+  let followersFetcher;
   createEffect(() => {
     const id = userId();
     if (!id) return;
-    followersController?.abort();
-    followersController = new AbortController();
+    const signal = followersController.abortAndRenew();
 
-    followersFetcher = createAnilistFetcher(queries.anilistGetUserFollowers, { id, page: props.page }, followersController.signal);
+    followersFetcher = createAnilistFetcher(queries.anilistGetUserFollowers, { id, page: props.page }, signal);
 
     sendAnilistFetcher(followersFetcher, {
       name: "Anilist followers",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === followersFetcher.cacheKey) followersController = null;
-      },
+      onFetch: () => followersController.disable(),
       onStart: time => {
         startFollowersTimer(time);
         setLoading(true);

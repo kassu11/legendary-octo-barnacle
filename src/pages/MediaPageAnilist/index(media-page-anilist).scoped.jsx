@@ -26,6 +26,7 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { createTimer } from "../../utils/timeUtils.js";
 import { MediaPageApiSwitcher } from "../MediaPageJikan/MediaPageApiSwitcher.scoped.jsx";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export const [mediaPageAnilistData, setMediaPageAnilistData] = createSignal(undefined, { equals: false });
 export function MediaInfoContent(props) {
@@ -39,19 +40,17 @@ export function MediaInfoContent(props) {
   if (params.id != mediaPageAnilistData()?.data.data.Media.id) setMediaPageAnilistData(undefined);
   onCleanup(() => setMediaPageAnilistData(undefined));
 
-  let fetcher, controller;
+  const controller = createCleanUpAbortController();
+  let fetcher;
   createEffect(() => {
-    controller?.abort();
-    controller = new AbortController();
+    const signal = controller.abortAndRenew();
 
-    if (searchParams.isMalId == null) fetcher = createAnilistFetcher(queries.anilistMediaById, { id: params.id }, controller.signal);
-    else fetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() }, controller.signal);
+    if (searchParams.isMalId == null) fetcher = createAnilistFetcher(queries.anilistMediaById, { id: params.id }, signal);
+    else fetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() }, signal);
 
     sendAnilistFetcher(fetcher, {
       name: "Anilist media page",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === fetcher.cacheKey) controller = null;
-      },
+      onFetch: () => controller.disable(),
       onStart: time => {
         startTimer(time);
         setLoading(true);
@@ -85,23 +84,21 @@ export function MediaInfoContent(props) {
     }
     return undefined
   });
-  let jikanFetcher, jikanController;
+  const jikanController = createCleanUpAbortController();
+  let jikanFetcher;
   createEffect(() => {
     if (mediaPageAnilistData()?.data.data.Media.type.toLowerCase() !== params.type) return;
     if (mediaPageAnilistData()?.data.data.Media.id != params.id) return;
     const id = mediaPageAnilistData()?.data.data.Media.idMal;
     if (!id) return;
 
-    jikanController?.abort();
-    jikanController = new AbortController();
+    const signal = jikanController.abortAndRenew();
 
-    jikanFetcher = createJsonGetFetcher(queries.myAnimeListMediaById, { id, type: params.type }, jikanController.signal);
+    jikanFetcher = createJsonGetFetcher(queries.myAnimeListMediaById, { id, type: params.type }, signal);
 
     sendFetcher(jikanFetcher, {
       name: "Jikan media page (Anilist)",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === jikanFetcher.cacheKey) jikanController = null;
-      },
+      onFetch: () => jikanController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === jikanFetcher.cacheKey) setJikanData(res);
       }
@@ -120,7 +117,7 @@ export function MediaInfoContent(props) {
     }
   });
 
-  const keyController = new AbortController();
+  const keyController = createCleanUpAbortController();
 
   onMount(() => {
     window.addEventListener("keydown", e => {
@@ -145,8 +142,6 @@ export function MediaInfoContent(props) {
       }
     }, { signal: keyController.signal });
   });
-
-  onCleanup(() => keyController.abort());
 
   const mutateBothFavourite = (isFavourite, variables) => {
     const id = variables[mediaPageAnilistData()?.data.data.Media?.type] ?? null;

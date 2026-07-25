@@ -54,12 +54,14 @@ export function createAnilistFetcher(query, variables, signal) {
 }
 
 function baseEncoding(url, params) {
-  const paramsAsString = safeStringifyJson(params, "missing");
+  const { method, headers, body } = params;
+  const paramsAsString = safeStringifyJson({ method, headers, body }, "missing");
   return hashKeyFNV32(url) + hashKeyFNV32(paramsAsString) + hashKeyFNV32(url + paramsAsString);
 }
 
 function removeTokenFromEncode(url, params) {
-  let paramsAsString = safeStringifyJson(params, "missing");
+  const { method, headers, body } = params;
+  let paramsAsString = safeStringifyJson({ method, headers, body }, "missing");
   const token = params.headers?.Authorization?.substring(7);
   const userId = allActiveTokens()[token];
   if (token && userId) paramsAsString = paramsAsString.replace(token, userId);
@@ -262,25 +264,20 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   if (res) settings.setValue(res, { fetcher, settings });
 
-  if (!active) {
+  // Fetcher is not active, so it can't fetch, early exit
+  const [url, { signal }] = fetcher;
+  if (!active || signal?.aborted === true) {
     settings.onStop?.(performance.now() - start);
     return;
   }
 
-  const [url, { signal }] = fetcher;
-  // This was added because of media search.
-  // We have added delay and constantly abort the fetch before starting
-  // This will cause the loading bar to start and stop all the time
-  // We want to disable the loading bar if no fetch is ever going to happen anyway
-  if (signal?.aborted === true) settings.loadingBar = false;
   if (settings.loadingBar) setMainLoadingCount(v => v + 1);
-
 
   const queueTarget = requestQueue.find(que => url.includes(que.url));
 
   async function event() {
-    settings.onFetch?.(performance.now() - start, { fetcher });
     if (signal?.aborted !== true) {
+      settings.onFetch?.(performance.now() - start, { fetcher });
       try {
         const response = await fetcherToFetch(fetcher);
 

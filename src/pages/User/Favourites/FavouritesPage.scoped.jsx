@@ -5,6 +5,7 @@ import { Intersection } from "../../../components/utils/Intersection.scoped.jsx"
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { queries } from "../../../collections/collections.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
+import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 
 export function FavouritesPageScoped(props) {
   const { user } = useUser();
@@ -14,22 +15,20 @@ export function FavouritesPageScoped(props) {
 
   const [loading, setLoading] = createSignal(false);
   const [favouritesData, setFavouritesData] = createSignal(undefined, { equals: false });
-  let favouritesFetcher, favouritesController;
+  const favouritesController = createCleanUpAbortController();
+  let favouritesFetcher;
   createEffect(() => {
     const id = userId()
     const p = props.page === 1 ? props.page : page();
     if (!id || !p) return;
 
-    favouritesController?.abort();
-    favouritesController = new AbortController();
+    const signal = favouritesController.abortAndRenew();
 
-    favouritesFetcher = createAnilistFetcher(queries.anilistUserFavouriteById, { id, page: p}, favouritesController.signal);
+    favouritesFetcher = createAnilistFetcher(queries.anilistUserFavouriteById, { id, page: p}, signal);
 
     sendAnilistFetcher(favouritesFetcher, {
       name: "Anilist favourites",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === favouritesFetcher.cacheKey) favouritesController = null;
-      },
+      onFetch: () => favouritesController.disable(),
       onStart: () => setLoading(true),
       onStop: () => setLoading(false),
       setValue: (res, { fetcher: f }) => {

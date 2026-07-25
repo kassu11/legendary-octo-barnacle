@@ -6,26 +6,25 @@ import { GenreItems } from "./GenreItems.scoped.jsx";
 import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
 
 export function StatsMediaGenres() {
   const params = useParams();
 
   const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
   const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
-  let userStatsFetcher, userStatsController;
+  const userStatsController = createCleanUpAbortController();
+  let userStatsFetcher;
   createEffect(() => {
-    userStatsController?.abort();
-    userStatsController = new AbortController();
+    const signal = userStatsController.abortAndRenew();
     const { type } = params;
 
-    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeGenres, { name: params.name }, userStatsController.signal);
-    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaGenres, { name: params.name }, userStatsController.signal);
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeGenres, { name: params.name }, signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaGenres, { name: params.name }, signal);
 
     sendAnilistFetcher(userStatsFetcher, {
       name: "Anilist user genre stats",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
-      },
+      onFetch: () => userStatsController.disable(),
       onStart: startUserStatsTimer,
       onStop: stopUserStatsTimer,
       setValue: (res, { fetcher: f }) => {
@@ -47,20 +46,18 @@ function StatsGenres(props) {
   const [state, setState] = createSignal("count");
   const [store, setStore] = createStore({});
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const ids = [...mediaIds()];
     if (!ids.length) return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {

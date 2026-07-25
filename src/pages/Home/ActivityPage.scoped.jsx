@@ -9,6 +9,7 @@ import "./ActivityPage.scoped.css";
 import { arrayUtils, scheduleUtils } from "../../utils/utils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function HomePageActivityReelContent(props) {
   const [loading, setLoading] = createSignal(false);
@@ -23,17 +24,16 @@ export function HomePageActivityReelContent(props) {
   const freshActivityIDs = new Set();
   const triggerPage = leadingAndTrailing(debounce, num => !loading() && setPage(num), 1000);
 
-  let controller;
+  const controller = createCleanUpAbortController();
   let missedNewPageFetches = 0;
   createEffect(() => {
     const p = page();
     if (!p || props.isDebug()) return;
 
-    controller?.abort();
-    controller = new AbortController();
+    const signal = controller.abortAndRenew();
 
     const pagelessFetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: "pageless" });
-    const fetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: p }, controller.signal);
+    const fetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: p }, signal);
 
     sendAnilistFetcher(fetcher, {
       name: "Activity feed",
@@ -43,6 +43,7 @@ export function HomePageActivityReelContent(props) {
         setLoading(true);
         startTimer(time);
       },
+      onFetch: () => controller.disable(),
       onStop: time => {
         setLoading(false);
         stopTimer(time);

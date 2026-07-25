@@ -8,6 +8,7 @@ import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { authUserData } from "../../core/globalState.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function User(props) {
   const params = useParams();
@@ -15,18 +16,16 @@ export function User(props) {
   const [userTime, startUserTimer, stopUserTimer] = createTimer();
   const [loading, setLoading] = createSignal(false);
   const [userData, setUserData] = createSignal(undefined, { equals: false });
-  let userFetcher, userController;
+  const userController = createCleanUpAbortController();
+  let userFetcher;
   createEffect(() => {
-    userController?.abort();
-    userController = new AbortController();
+    const signal = userController.abortAndRenew();
 
-    userFetcher = createAnilistFetcher(queries.getUserByName, { name: params.name }, userController.signal);
+    userFetcher = createAnilistFetcher(queries.getUserByName, { name: params.name }, signal);
 
     sendAnilistFetcher(userFetcher, {
       name: "Anilist user info",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userFetcher.cacheKey) userController = null;
-      },
+      onFetch: () => userController.disable(),
       onStart: time => {
         startUserTimer(time);
         setLoading(true);

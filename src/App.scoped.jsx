@@ -9,32 +9,16 @@ import { ParseSearchParams } from "./pages/App/ParseSearchParams";
 import { settingsShowDevBranch } from "./core/globalState";
 import BranchIcon from "./assets/BranchIcon";
 import { useLocation } from "@solidjs/router";
+import { createCleanUpAbortController } from "./utils/abortUtils";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
 function App(props) {
-  let controller = new AbortController();
+  const controller = createCleanUpAbortController();
 
   createEffect(() => {
-    controller.abort()
-    controller = new AbortController();
-
-    window.addEventListener("keydown", async e => {
-      if (e.target !== document.body || e.shiftKey || e.ctrlKey) {
-        return;
-      }
-
-      const { port, hostname, href, origin } = location;
-      if (e.key === "d" && e.altKey) {
-        e.preventDefault();
-
-        if (hostname === "localhost") {
-          // Open alternative debug port (used to sign in on alternative user or check behavior between big refactors)
-          if (port != __DEBUG_PORT__ && await portIsOpen(__DEBUG_PORT__)) window.open(href.replace(origin, "http://localhost:" + __DEBUG_PORT__));
-          else window.open(href.replace(origin, "https://kassu11.github.io"));
-        } else window.open(href.replace(origin, "http://localhost:" + __PORT__));
-      }
-    }, { signal: controller.signal });
+    controller.abortAndRenew();
+    window.addEventListener("keydown", debugKeymaps, { signal: controller.signal });
   });
 
   return (
@@ -52,6 +36,23 @@ function App(props) {
       <footer class="main-footer"></footer>
     </ParseSearchParams>
   )
+}
+
+async function debugKeymaps(e) {
+  if (e.target !== document.body || e.shiftKey || e.ctrlKey) {
+    return;
+  }
+
+  const { port, hostname, href, origin } = location;
+  if (e.key === "d" && e.altKey) {
+    e.preventDefault();
+
+    if (hostname === "localhost") {
+      // Open alternative debug port (used to sign in on alternative user or check behavior between big refactors)
+      if (port != __DEBUG_PORT__ && await portIsOpen(__DEBUG_PORT__)) window.open(href.replace(origin, "http://localhost:" + __DEBUG_PORT__));
+      else window.open(href.replace(origin, "https://kassu11.github.io"));
+    } else window.open(href.replace(origin, "http://localhost:" + __PORT__));
+  }
 }
 
 function DevBranches() {

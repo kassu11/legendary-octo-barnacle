@@ -11,6 +11,7 @@ import { Tooltip } from "../../components/Tooltips.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
 import { isTypeFunction } from "../../utils/functionUtils";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function typeToTypes(type) {
   if (type === "airing") return [ "AIRING" ];
@@ -151,23 +152,21 @@ function NotificationsReel(props) {
 function NotificationsPage(props) {
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
   const [anilistNotificationsLoading, setAnilistNotificationsLoading] = createSignal(false);
-  let anilistNotificationsFetcher, anilistNotificationsController;
+  const anilistNotificationsController = createCleanUpAbortController();
+  let anilistNotificationsFetcher;
   createEffect(() => {
-    anilistNotificationsController?.abort();
-    anilistNotificationsController = new AbortController();
+    const signal = anilistNotificationsController.abortAndRenew();
 
     const p = page();
     const types = typeToTypes(props.type);
     if (types === null || !p) return;
 
-    anilistNotificationsFetcher = createAnilistFetcher(queries.anilistUserNotifications, { page: p, types}, anilistNotificationsController.signal);
+    anilistNotificationsFetcher = createAnilistFetcher(queries.anilistUserNotifications, { page: p, types}, signal);
     const pagelessFetcher = createAnilistFetcher(queries.anilistUserNotifications, { types, page: "pageless" });
 
     sendAnilistFetcher(anilistNotificationsFetcher, {
       name: "Anilist notifications",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistNotificationsFetcher.cacheKey) anilistNotificationsController = null;
-      },
+      onFetch: () => anilistNotificationsController.disable(),
       onStart: () => setAnilistNotificationsLoading(true),
       onStop: () => setAnilistNotificationsLoading(false),
       setValue: res => {

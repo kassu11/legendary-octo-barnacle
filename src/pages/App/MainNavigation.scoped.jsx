@@ -16,7 +16,7 @@ export function MainNavigation() {
     const t = token2();
     if (!t) return;
 
-    const fetcher = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
+    const fetcher = createAnilistFetcher(queries.currentUser, {});
     sendAnilistFetcher(fetcher, {
       name: "AniList authed user",
       setValue: (res) => {

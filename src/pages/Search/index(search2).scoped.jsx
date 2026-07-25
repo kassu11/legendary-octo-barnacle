@@ -22,7 +22,7 @@ import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-an
 import { initializeMediaCardHover } from "./initializeMediaCardHover";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
-import { createAbortController } from "../../utils/abortUtils";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -207,20 +207,18 @@ export function SearchPage() {
   // Jikan will find "shoshimin" without problems, so if anilist does not give results try to search with jikan
   // and convert the results to anilist results
   function jikanFallbackSearch(variables, cacheKey, debounce) {
-    if (fallbackSearchController.signal.aborted) return;
+    const signal = fallbackSearchController.abortAndRenew();
     fallbackPagelessCacheKey = cacheKey;
 
-    let controller = new AbortController();
-    fallbackSearchController.signal.addEventListener("abort", () => controller?.abort());
-    const jiFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, variables, controller.signal);
+    const jiFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, variables, signal);
     sendFetcher(jiFetcher, {
       name: "Jikan fallback search",
       delay: debounce,
       // debug: false,
-      onFetch: () => controller = null,
+      onFetch: () => fallbackSearchController.disable(),
       setValue: (jikanRes) => {
         if (fallbackPagelessCacheKey !== cacheKey) return;
-        if (fallbackSearchController.signal.aborted) return;
+        const signal = fallbackSearchAnilistController.abortAndRenew();
 
         const pageInfo = jikanPagenationToPageInfo(jikanRes.data.pagination);
         if (!jikanRes.data.data.length) {
@@ -228,14 +226,11 @@ export function SearchPage() {
           return;
         }
 
-        let controller = new AbortController();
-        fallbackSearchController.signal.addEventListener("abort", () => controller?.abort());
-
         const idMal_in = jikanRes.data.data.map(media => media.mal_id);
-        const aniFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(idMal_in.length), { idMal_in, type: variables.type.toUpperCase() }, controller.signal);
+        const aniFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(idMal_in.length), { idMal_in, type: variables.type.toUpperCase() }, signal);
         sendFetcher(aniFetcher, {
           name: "Anilist fallback search with mal ids",
-          onFetch: () => controller = null,
+          onFetch: () => fallbackSearchAnilistController.disable(),
           setValue: (aniRes, { settings }) => {
             if (fallbackPagelessCacheKey !== cacheKey) return;
             const key = untrack(pagelessCacheKey);
@@ -245,8 +240,8 @@ export function SearchPage() {
             aniRes.data.data.page1.media.sort((a, b) => order[a.idMal] - order[b.idMal]);
 
             if (aniRes.modified < tabTime && !settings.debug) return;
-            if (cachedResults.has(aniRes.cacheKey)) return;
-            cachedResults.add(aniRes.cacheKey);
+            if (cachedResults.has(jikanRes.cacheKey)) return;
+            cachedResults.add(jikanRes.cacheKey);
 
             aniRes.data.data.page1.media.forEach(media => {
               // we don't want the debug enviroment to always fetchs, so we pretend like the data is always fresh
@@ -265,14 +260,13 @@ export function SearchPage() {
   const [anilistSearchLoading, setAnilistSearchLoading] = createSignal(false);
   const [anilistBrowseData, setAnilistBrowseData] = createStore({});
 
-  let anilistSearchFetcher, fallbackPagelessCacheKey, anilistSearchController, fallbackSearchController;
+  const anilistSearchController = createCleanUpAbortController();
+  const fallbackSearchController = createCleanUpAbortController(anilistSearchController);
+  const fallbackSearchAnilistController = createCleanUpAbortController(fallbackSearchController);
+  let anilistSearchFetcher, fallbackPagelessCacheKey;
   let previousMode = null;
   createEffect(() => {
-    anilistSearchController?.abort();
-    anilistSearchController = new AbortController();
-    fallbackSearchController?.abort();
-    fallbackSearchController = new AbortController();
-    const { signal } = anilistSearchController;
+    const signal = anilistSearchController.abortAndRenew();
     let aniVariables, jiVariables;
     let debounce = SEARCH_DEBOUNCE, currentPage;
 
@@ -303,12 +297,12 @@ export function SearchPage() {
     else if (previousMode === "browse" && aniVariables?.search?.length !== 1) debounce = 0; // We just jumped from browse to search, without typing to search bar
     else if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
 
+    console.log("vars", aniVariables);
+
     if (mode === "search" && fallbackPagelessCacheKey === key && currentPage > 1) {
       jikanFallbackSearch({ ...jiVariables, page: currentPage }, key, debounce);
       return
     }
-
-    console.log("vars", aniVariables);
 
     setError(null);
     previousMode = mode;
@@ -322,7 +316,7 @@ export function SearchPage() {
       expires,
       onFetch: (_, { fetcher: f }) => {
         if (f.cacheKey !== anilistSearchFetcher.cacheKey) return;
-        anilistSearchController = null;
+        anilistSearchController.disable()
         if (mode === "search") setPagelessCacheLoading(false);
       },
       onStart: time => {
@@ -381,7 +375,7 @@ export function SearchPage() {
     });
   });
 
-  const anilistGenresAndTagsController = createAbortController();
+  const anilistGenresAndTagsController = createCleanUpAbortController();
   createRenderEffect(() => {
     anilistGenresAndTagsController.abortAndRenew();
 
@@ -393,9 +387,7 @@ export function SearchPage() {
         // Only update genres and tags once a day
         return !res || !settings.debug || (tabTime - res.modified) > timeStringToMs("1d");
       },
-      onFetch() {
-        anilistGenresAndTagsController.disable();
-      },
+      onFetch: () => anilistGenresAndTagsController.disable(),
       setValue: (res) => {
         const genreObject = {
           genres: res.data.data.genres,

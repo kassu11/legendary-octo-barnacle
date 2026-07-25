@@ -1,7 +1,7 @@
-import { onCleanup } from "solid-js";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function initializeMediaCardHover() {
-  const controller = new AbortController();
+  const controller = createCleanUpAbortController();
   const { signal } = controller;
 
   function updateHoverPosition() {
@@ -74,7 +74,5 @@ export function initializeMediaCardHover() {
     hoverParent = null;
     hover = null;
   });
-
-  onCleanup(() => controller.abort());
 }
 

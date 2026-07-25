@@ -27,6 +27,7 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { storeMediaWithMalId } from "../../core/globalState";
 import { Select } from "../Settings/SelectElement.scoped";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 class SearchVariable {
   constructor({ url, key, value, active = true, visuallyDisabled = false, reason, desc, name, hidden = false, canClear = true, addUrl }) {
@@ -493,20 +494,18 @@ export function SearchBar(props) {
 
   const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
   const [anilistGenresAndTagsData2, setAnilistGenresAndTagsData2] = createStore([]);
-  let anilistGenresAndTagsFetcher, anilistGenresAndTagsController;
+  const anilistGenresAndTagsController = createCleanUpAbortController();
+  let anilistGenresAndTagsFetcher;
   createEffect(() => {
     if (searchParams.malSearch === "true") return;
 
-    anilistGenresAndTagsController?.abort();
-    anilistGenresAndTagsController = new AbortController();
+    const signal = anilistGenresAndTagsController.abortAndRenew();
 
-    anilistGenresAndTagsFetcher = createAnilistFetcher(queries.anilistGenresAndTags, {}, anilistGenresAndTagsController.signal);
+    anilistGenresAndTagsFetcher = createAnilistFetcher(queries.anilistGenresAndTags, {}, signal);
 
     sendAnilistFetcher(anilistGenresAndTagsFetcher, {
       name: "Anilist genres and tags",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistGenresAndTagsFetcher.cacheKey) anilistGenresAndTagsController = null;
-      },
+      onFetch: () => anilistGenresAndTagsController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== anilistGenresAndTagsFetcher.cacheKey) return;
 
@@ -542,21 +541,19 @@ export function SearchBar(props) {
   });
 
   const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
-  let externalSourcesFetcher, externalSourcesController;
+  const externalSourcesController = createCleanUpAbortController();
+  let externalSourcesFetcher;
   createEffect(() => {
-    externalSourcesController?.abort();
-    externalSourcesController = new AbortController();
+    const signal = externalSourcesController.abortAndRenew();
 
     const type = params.type.toUpperCase();
     if (searchParams.malSearch === "true" || type === "MEDIA") return;
 
-    externalSourcesFetcher = createAnilistFetcher(queries.anilistExternalSources, { type }, externalSourcesController.signal);
+    externalSourcesFetcher = createAnilistFetcher(queries.anilistExternalSources, { type }, signal);
 
     sendAnilistFetcher(externalSourcesFetcher, {
       name: "Anilist external sources",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === externalSourcesFetcher.cacheKey) externalSourcesController = null;
-      },
+      onFetch: () => externalSourcesController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== externalSourcesFetcher.cacheKey) return;
 
@@ -568,23 +565,21 @@ export function SearchBar(props) {
   });
 
   const [jikanGenresAndThemesData, setJikanGenresAndThemesData] = createSignal(undefined, { equals: false });
-  let jikanGenresAndThemesFetcher, jikanGenresAndThemesController;
+  const jikanGenresAndThemesController = createCleanUpAbortController();
+  let jikanGenresAndThemesFetcher;
   createEffect(() => {
-    jikanGenresAndThemesController?.abort();
-    jikanGenresAndThemesController = new AbortController();
+    const signal = jikanGenresAndThemesController.abortAndRenew();
 
     const { type } = params;
 
     if (searchParams.malSearch !== "true") return;
     if (type !== "anime" && type !== "manga") return;
 
-    jikanGenresAndThemesFetcher = createJsonGetFetcher(queries.myAnimeListMediaGenres({ type }), jikanGenresAndThemesController.signal);
+    jikanGenresAndThemesFetcher = createJsonGetFetcher(queries.myAnimeListMediaGenres({ type }), signal);
 
     sendAnilistFetcher(jikanGenresAndThemesFetcher, {
       name: "Jikan media genres",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === jikanGenresAndThemesFetcher.cacheKey) jikanGenresAndThemesController = null;
-      },
+      onFetch: () => jikanGenresAndThemesController.disable(),
       setValue: (res, { fetcher: f }) => {
         console.log("anilist genres", res);
         if (f.cacheKey !== jikanGenresAndThemesFetcher.cacheKey) return;
@@ -917,10 +912,10 @@ function AnilistMediaSearchContent(props) {
   const [variables, setVariables] = createSignal(undefined);
   const [anilistSearchMediaLoading, setAnilistSearchMediaLoading] = createSignal(false);
   const [anilistSearchMediaData, setAnilistSearchMediaData] = createSignal(undefined, { equals: false });
-  let anilistSearchMediaFetcher, anilistSearchMediaController;
+  const anilistSearchMediaController = createCleanUpAbortController();
+  let anilistSearchMediaFetcher;
   createEffect(() => {
-    anilistSearchMediaController?.abort();
-    anilistSearchMediaController = new AbortController();
+    const signal = anilistSearchMediaController.abortAndRenew();
 
     const { nestLevel, page } = props;
     const vars = nestLevel === 1 ? props.variables : variables();
@@ -931,13 +926,11 @@ function AnilistMediaSearchContent(props) {
       if (entry.active) variableObject[entry.key] = entry.value;
     }
 
-    anilistSearchMediaFetcher = createAnilistFetcher(queries.searchMedia, variableObject, anilistSearchMediaController.signal);
+    anilistSearchMediaFetcher = createAnilistFetcher(queries.searchMedia, variableObject, signal);
 
     sendAnilistFetcher(anilistSearchMediaFetcher, {
       name: "Anilist media search",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistSearchMediaFetcher.cacheKey) anilistSearchMediaController = null;
-      },
+      onFetch: () => anilistSearchMediaController.disable(),
       onStart: () => setAnilistSearchMediaLoading(true),
       onStop: () => setAnilistSearchMediaLoading(false),
       setValue: (res, { fetcher: f }) => {
@@ -971,10 +964,10 @@ function AnilistMediaSeasonContent(props) {
 
   const [variables, setVariables] = createSignal(undefined);
   const [anilistSearchMediaData, setAnilistSearchMediaData] = createSignal(undefined, { equals: false });
-  let anilistSearchMediaFetcher, anilistSearchMediaController;
+  const anilistSearchMediaController = createCleanUpAbortController();
+  let anilistSearchMediaFetcher;
   createEffect(() => {
-    anilistSearchMediaController?.abort();
-    anilistSearchMediaController = new AbortController();
+    const signal = anilistSearchMediaController.abortAndRenew();
 
     const { page, variables, extraVariables} = props;
     if (!variables || !page || !extraVariables) return;
@@ -995,13 +988,11 @@ function AnilistMediaSeasonContent(props) {
       }
     }
 
-    anilistSearchMediaFetcher = createAnilistFetcher(queries.searchMedia, variableObject, anilistSearchMediaController.signal);
+    anilistSearchMediaFetcher = createAnilistFetcher(queries.searchMedia, variableObject, signal);
 
     sendAnilistFetcher(anilistSearchMediaFetcher, {
       name: "Anilist media search",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistSearchMediaFetcher.cacheKey) anilistSearchMediaController = null;
-      },
+      onFetch: () => anilistSearchMediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== anilistSearchMediaFetcher.cacheKey) return;
         setAnilistSearchMediaData(res.data.data.Page);
@@ -1047,10 +1038,10 @@ function MyAnimeListMediaSearchContent(props) {
   const [mediaIds, setMediaIds] = createSignal([]);
   const [jikanMediaSearchLoading, setJikanMediaSearchLoading] = createSignal(false);
   const [jikanMediaSearchData, setJikanMediaSearchData] = createSignal(undefined, { equals: false });
-  let jikanMediaSearchFetcher, jikanMediaSearchController;
+  const jikanMediaSearchController = createCleanUpAbortController();
+  let jikanMediaSearchFetcher;
   createEffect(() => {
-    jikanMediaSearchController?.abort();
-    jikanMediaSearchController = new AbortController();
+    const signal = jikanMediaSearchController.abortAndRenew();
 
     const { type, page, nestLevel } = props;
     const vars = nestLevel === 1 ? props.variables : variables();
@@ -1073,14 +1064,12 @@ function MyAnimeListMediaSearchContent(props) {
 
     const query = queryArray.sort().join("&");
 
-    if (season) jikanMediaSearchFetcher = createJsonGetFetcher(queries.myAnimeListMediaSeasonSearch, { season, query }, jikanMediaSearchController.signal);
-    else jikanMediaSearchFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, { type, query }, jikanMediaSearchController.signal);
+    if (season) jikanMediaSearchFetcher = createJsonGetFetcher(queries.myAnimeListMediaSeasonSearch, { season, query }, signal);
+    else jikanMediaSearchFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, { type, query }, signal);
 
     sendAnilistFetcher(jikanMediaSearchFetcher, {
       name: "Jikan media search",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === jikanMediaSearchFetcher.cacheKey) jikanMediaSearchController = null;
-      },
+      onFetch: () => jikanMediaSearchController.disable(),
       onStart: () => setJikanMediaSearchLoading(true),
       onStop: () => setJikanMediaSearchLoading(false),
       setValue: (res, { fetcher: f }) => {
@@ -1106,21 +1095,19 @@ function MyAnimeListMediaSearchContent(props) {
     });
   });
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const ids = mediaIds();
     const type = props.type.toUpperCase();
     if (!ids.length || type === "MEDIA") return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { idMal_in: ids, type }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { idMal_in: ids, type }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {

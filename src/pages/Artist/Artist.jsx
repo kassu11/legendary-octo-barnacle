@@ -5,24 +5,24 @@ import style from "./Artist.module.scss";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 import { queries } from "../../collections/collections.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 function Artist() {
   const params = useParams();
 
   const [artistTime, startArtistTimer, stopArtistTimer] = createTimer();
   const [artistData, setArtistData] = createSignal(undefined, { equals: false });
-  let artistFetcher, artistController;
-  createEffect(() => {
-    artistController?.abort();
-    artistController = new AbortController();
+  const artistController = createCleanUpAbortController();
+  let artistFetcher;
 
-    artistFetcher = createJsonGetFetcher(queries.animeThemesByArtisSlug, { slug: params.name }, artistController.signal);
+  createEffect(() => {
+    const signal = artistController.abortAndRenew();
+
+    artistFetcher = createJsonGetFetcher(queries.animeThemesByArtisSlug, { slug: params.name }, signal);
 
     sendFetcher(artistFetcher, {
       name: "AnimeThemes artist",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === artistFetcher.cacheKey) artistController = null;
-      },
+      onFetch: () => artistController.disable(),
       onStart: startArtistTimer,
       onStop: stopArtistTimer,
       setValue: (res, { fetcher: f }) => {

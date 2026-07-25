@@ -11,6 +11,7 @@ import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
 import { isTypeFunction } from "../../utils/functionUtils";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function AnimeCharacters() {
   return (
@@ -161,26 +162,24 @@ function CharactersPage(props) {
   const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
   const [anilistCharactersLoading, setAnilistCharactersLoading] = createSignal(false);
   const [anilistCharactersData, setAnilistCharactersData] = createSignal(undefined, { equals: false });
-  let anilistCharactersFetcher, anilistCharactersController;
+  const anilistCharactersController = createCleanUpAbortController();
+  let anilistCharactersFetcher;
   createEffect(() => {
-    anilistCharactersController?.abort();
-    anilistCharactersController = new AbortController();
+    const signal = anilistCharactersController.abortAndRenew();
 
     const { id } = params;
     const p = page();
     if (!id || !p) return;
 
     const pagelessFetcher = createAnilistFetcher(queries.anilistCharacters, { id, page: "pageless"});
-    anilistCharactersFetcher = createAnilistFetcher(queries.anilistCharacters, { id, page: p }, anilistCharactersController.signal);
+    anilistCharactersFetcher = createAnilistFetcher(queries.anilistCharacters, { id, page: p }, signal);
 
     sendAnilistFetcher(anilistCharactersFetcher, {
       name: "Anilist characters",
       cache: null,
       debug: props.isDebug,
       active: (_, settings) => !settings.debug,
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistCharactersFetcher.cacheKey) anilistCharactersController = null;
-      },
+      onFetch: () => anilistCharactersController.disable(),
       onStart: () => setAnilistCharactersLoading(true),
       onStop: () => setAnilistCharactersLoading(false),
       setValue: (res, { fetcher: f }) => {
@@ -320,22 +319,20 @@ function StaffPage(props) {
   const [page, setPage] = createSignal(props.page === 1 ? 1 : undefined);
   const [anilistMediasStaffLoading, setAnilistMediasStaffLoading] = createSignal(undefined, { equals: false });
   const [anilistMediasStaffData, setAnilistMediasStaffData] = createSignal(undefined, { equals: false });
-  let anilistMediasStaffFetcher, anilistMediasStaffController;
+  const anilistMediasStaffController = createCleanUpAbortController();
+  let anilistMediasStaffFetcher;
   createEffect(() => {
-    anilistMediasStaffController?.abort();
-    anilistMediasStaffController = new AbortController();
+    const signal = anilistMediasStaffController.abortAndRenew();
     const { id } = props;
     const p = page();
 
     if (!id || !p) return;
 
-    anilistMediasStaffFetcher = createAnilistFetcher(queries.anilistStaff, { id, page: p }, anilistMediasStaffController.signal);
+    anilistMediasStaffFetcher = createAnilistFetcher(queries.anilistStaff, { id, page: p }, signal);
 
     sendAnilistFetcher(anilistMediasStaffFetcher, {
       name: "Anilist medias staff",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistMediasStaffFetcher.cacheKey) anilistMediasStaffController = null;
-      },
+      onFetch: () => anilistMediasStaffController.disable(),
       onStart: () => setAnilistMediasStaffLoading(true),
       onStop: () => setAnilistMediasStaffLoading(false),
       setValue: (res, { fetcher: f }) => {

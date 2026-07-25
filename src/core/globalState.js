@@ -32,7 +32,7 @@ export const logoutUser = () => {
 
 export const storeAccessToken = async (token, expires) => {
   setToken2(token || null);
-  const fetcher = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
+  const fetcher = createAnilistFetcher(queries.currentUser, {});
   sendAnilistFetcher(fetcher, {
     name: "AniList authed user",
     setValue: async (res) => {
@@ -48,7 +48,7 @@ export const storeAccessToken = async (token, expires) => {
 
       // Because new token is now linked, if we generate the same fetcher, the token should be swapped with id
       // Store the user data to this tokenless cacheKey
-      const fetcherWithoutToken = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
+      const fetcherWithoutToken = createAnilistFetcher(queries.currentUser, {});
       res.cacheKey = fetcherWithoutToken.cacheKey;
       setFetcherValueToStorage(res);
 

@@ -1,8 +1,18 @@
 import { onCleanup } from "solid-js";
 
+export function createCleanUpAbortController(parentController) {
+
+  const controller = createAbortController(parentController);
+  onCleanup(() => controller.abortAndRenew());
+
+  return controller;
+
+}
+
 export function createAbortController(parentController) {
+
   const customController = {
-    enabled: true,
+    enabled: false,
     childControllers: [],
     controller: null,
     signal: null,
@@ -18,27 +28,24 @@ export function createAbortController(parentController) {
 
       abortChilren();
 
-      reset();
+      customController.controller = new AbortController();
+      customController.signal = customController.controller.signal;
+      customController.signal.addEventListener("aborted", abortChilren);
+      customController.enabled = true;
+      customController.childControllers = [];
 
       parentController?.childControllers.push(customController);
+
+      return customController.signal;
     }
   };
-
-  function reset() {
-    customController.controller = new AbortController();
-    customController.signal = customController.controller.signal;
-    customController.signal.addEventListener("aborted", abortChilren);
-    customController.enabled = true;
-    customController.childControllers = [];
-  }
 
   function abortChilren() {
     customController.childControllers.forEach(c => c.abortAndRenew());
   }
 
-  onCleanup(() => customController.abortAndRenew());
-
-  reset();
+  customController.abortAndRenew();
 
   return customController;
+
 }

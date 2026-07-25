@@ -17,6 +17,7 @@ import { arrayUtils, numberUtils } from "../../utils/utils.js";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 const initialMediaCompareList = () => {
   const count = numberUtils.parse(sessionStorage.getItem(window.location.href), 0);
@@ -353,20 +354,18 @@ function UserSearch() {
 
   const [anilistUserSearchTime, startAnilistUserSearchTimer, stopAnilistUserSearchTimer] = createTimer();
   const [anilistUserSearchData, setAnilistUserSearchData] = createSignal(undefined, { equals: false });
-  let anilistUserSearchFetcher, anilistUserSearchController;
+  const anilistUserSearchController = createCleanUpAbortController();
+  let anilistUserSearchFetcher;
   createEffect(() => {
-    anilistUserSearchController?.abort();
-    anilistUserSearchController = new AbortController();
+    const signal = anilistUserSearchController.abortAndRenew();
     const search = searchVar();
     if (!search) return;
 
-    anilistUserSearchFetcher = createAnilistFetcher(queries.anilistUserSearch, { search, page: 1 }, anilistUserSearchController.signal);
+    anilistUserSearchFetcher = createAnilistFetcher(queries.anilistUserSearch, { search, page: 1 }, signal);
 
     sendAnilistFetcher(anilistUserSearchFetcher, {
       name: "Anilist user search",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistUserSearchFetcher.cacheKey) anilistUserSearchController = null;
-      },
+      onFetch: () => anilistUserSearchController.disable(),
       onStart: startAnilistUserSearchTimer,
       onStop: stopAnilistUserSearchTimer,
       setValue: (res, { fetcher: f }) => {
@@ -473,22 +472,20 @@ function UserRow(props) {
 
   const [anilistUserMediaLoading, setAnilistUserMediaLoading] = createSignal(false);
   const [anilistUserMediaData, setAnilistUserMediaData] = createSignal(undefined, { equals: false });
-  let anilistUserMediaFetcher, anilistUserMediaController;
+  const anilistUserMediaController = createCleanUpAbortController();
+  let anilistUserMediaFetcher;
   createEffect(() => {
-    anilistUserMediaController?.abort();
-    anilistUserMediaController = new AbortController();
+    const signal = anilistUserMediaController.abortAndRenew();
     const type = params.type.toUpperCase();
     const userName = name();
 
     if (!type || !userName);
 
-    anilistUserMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, anilistUserMediaController.signal);
+    anilistUserMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, signal);
 
     sendAnilistFetcher(anilistUserMediaFetcher, {
       name: "Anilist user media list",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistUserMediaFetcher.cacheKey) anilistUserMediaController = null;
-      },
+      onFetch: () => anilistUserMediaController.disable(),
       onStart: () => setAnilistUserMediaLoading(true),
       onStop: () => setAnilistUserMediaLoading(false),
       setValue: (res, { fetcher: f }) => {

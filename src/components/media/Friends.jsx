@@ -9,6 +9,7 @@ import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { authUserData } from "../../core/globalState";
 import { createTimer, formatMSToString } from "../../utils/timeUtils";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 function Friends() {
   const params = useParams();
@@ -16,21 +17,19 @@ function Friends() {
   const [friendScoreData, setFriendScoreData] = createSignal();
   const [time, startTimer, stopTimer] = createTimer();
 
-  let fetcher, controller;
+  const controller = createCleanUpAbortController();
+  let fetcher;
   createEffect(() => {
     const id = searchParams.isMalId != null ? anilistData()?.data.data.Media.id : params.id;
     if (!id) return;
-    controller?.abort();
-    controller = new AbortController();
+    const signal = controller.abortAndRenew();
 
-    fetcher = createAnilistFetcher(queries.anilistGetFriendMediaScore, { id, page: 1, perPage: 8 }, controller.signal);
+    fetcher = createAnilistFetcher(queries.anilistGetFriendMediaScore, { id, page: 1, perPage: 8 }, signal);
     sendAnilistFetcher(fetcher, {
       name: "Anilist friends",
       onStart: time => startTimer(time),
       onStop: time => stopTimer(time),
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === fetcher.cacheKey) controller = null;
-      },
+      onFetch: () => controller.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === fetcher.cacheKey) setFriendScoreData(res);
       }

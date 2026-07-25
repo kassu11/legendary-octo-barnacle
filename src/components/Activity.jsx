@@ -10,6 +10,7 @@ import { asserts, queries } from "../collections/collections.js";
 import { CreatedAt } from "./CreatedAt.jsx";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
+import { createAbortController } from "../utils/abortUtils.js";
 
 export function ActivityCard(props) {
   props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, props);
@@ -81,7 +82,7 @@ function MediaListTextContent(props) {
   )
 }
 
-let activityLikesController;
+const activityLikesController = createAbortController();
 function Footer(props) {
   const [isLiked, setIsLiked] = createSignal(props.activity.isLiked);
   const [likeCount, setLikeCount] = createSignal(props.activity.likeCount);
@@ -93,16 +94,13 @@ function Footer(props) {
     const { id } = props.activity;
     if (!id || !showActivityLikeUserList()) return;
 
-    activityLikesController?.abort();
-    activityLikesController = new AbortController();
+    const signal = activityLikesController.abortAndRenew();
 
-    activityLikesFetcher = createAnilistFetcher(queries.anilistGetActivityLikes, { id, type: "ACTIVITY" }, activityLikesController.signal);
+    activityLikesFetcher = createAnilistFetcher(queries.anilistGetActivityLikes, { id, type: "ACTIVITY" }, signal);
 
     sendAnilistFetcher(activityLikesFetcher, {
       name: "Anilist activity likes",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === activityLikesFetcher.cacheKey) activityLikesController = null;
-      },
+      onFetch: () => activityLikesController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === activityLikesFetcher.cacheKey) setActivityLikesData(res.data.data.Page);
       }
