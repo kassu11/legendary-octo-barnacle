@@ -18,7 +18,10 @@ export function ParseSearchParams(props) {
     const { type, header } = params;
 
     const obj = {
-      q: decodeURIComponent(searchParams.q || ""),
+      q: decodeURIComponent(wrapToArray(searchParams.q).at(-1) || ""),
+      onList: wrapToArray(searchParams.onList).at(-1),
+      rank: +wrapToArray(searchParams.rank).at(-1),
+      source: wrapToArray(searchParams.source).at(-1),
       isAdult: false,
       type,
     };
@@ -40,35 +43,26 @@ export function ParseSearchParams(props) {
     else if (header === "this-season") {
       const dates = getDates();
       Object.assign(obj, { year: dates.seasonYear, season: dates.season, seasonPage: true });
-    }
-    else if (header === "next-season") {
+    } else if (header === "next-season") {
       const dates = getDates();
       Object.assign(obj, { year: dates.nextYear, season: dates.nextSeason, seasonPage: true });
-    }
-    else if (header === "tba") {
+    } else if (header === "tba") {
       Object.assign(obj, { season: null, status: "not_yet_released", seasonPage: true });
-    }
-    else if (/winter|spring|summer|fall/.test(header)) {
+    } else if (/winter|spring|summer|fall/.test(header)) {
       const [season, year] = header.toUpperCase().split("-");
       Object.assign(obj, { year: +year, season, seasonPage: true });
     }
-
-    const include = wrapToSet(searchParams.genre);
-    const exclude = wrapToSet(searchParams.excludeGenre);
-
-    obj.genres = {}
-    include.forEach(v => obj.genres[v] = "inc");
-    exclude.forEach(v => obj.genres[v] = "exc");
 
     if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
 
     if (filteredSorts.length) obj.sort = filteredSorts;
     else if (!obj.sort?.length) obj.sort = ["popularity_desc", "score_desc"];
 
-    obj.genres = wrapToSet(searchParams.genre);
-    obj.excludedGenres = wrapToSet(searchParams.excludedGenre);
-    obj.onList = wrapToArray(searchParams.onList).at(-1);
+    obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
+    obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));
     obj.format = wrapToArray(obj.format).concat(wrapToArray(searchParams.format));
+    obj.countryOfOrigin = wrapToArray(searchParams.country).at(-1);
+    if (searchParams.year) obj.year = +wrapToArray(searchParams.year).at(-1);
 
     if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
       if (groupSeasonalEntriesByFormat) obj.sort = ["format", ...obj.sort];
@@ -80,6 +74,7 @@ export function ParseSearchParams(props) {
     });
 
     if (!(obj.year > 0)) delete obj.year;
+    if (!(obj.rank > 0)) delete obj.rank;
 
     return obj;
   });

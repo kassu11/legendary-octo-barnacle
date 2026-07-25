@@ -2,7 +2,7 @@ import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
-import { createTimer, formatMSToString } from "../../utils/timeUtils";
+import { createTimer, formatMSToString, timeStringToMs } from "../../utils/timeUtils";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils";
 import { HorizontalCardRowScoped } from "../Browse/HorizontalCardRow.scoped";
 import { VerticalCardRowScoped } from "../Browse/VerticalCardRow.scoped";
@@ -22,6 +22,9 @@ import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-an
 import { initializeMediaCardHover } from "./initializeMediaCardHover";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
+import { createAbortController } from "../../utils/abortUtils";
+
+const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -30,12 +33,14 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false, year, genres, excludedGenres, sortBySearchMatch, ...rest } = parsedSearchParams();
+  const { q, isAdult = false, year, rank, genres, excludedGenres, sortBySearchMatch, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
     format: [],
-    genres: [...genres],
+    genres: [],
+    tags: [],
+    minimumTagRank: rank,
     excludedGenres: [...excludedGenres],
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
@@ -45,15 +50,19 @@ function createAnilistMediaQueryVariables() {
   if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: ["search_match"] });
   else mergeVariables(api, "sort", obj, rest);
 
+  if (failedToMergeGenresAndTags(genres, obj)) return null;
+
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
   mergeVariables(api, "season", obj, rest);
   mergeVariables(api, "format", obj, rest);
   mergeVariables(api, "countryOfOrigin", obj, rest);
   mergeVariables(api, "onList", obj, rest);
+  mergeVariables(api, "source", obj, rest);
 
-  if (obj.season && year) {
-    obj.seasonYear = year;
+  if (year) {
+    if (obj.season) obj.seasonYear = year;
+    else obj.year = year + "%";
   }
 
   for (const key in obj) {
@@ -61,6 +70,25 @@ function createAnilistMediaQueryVariables() {
   }
 
   return obj;
+}
+
+function failedToMergeGenresAndTags(genres, obj) {
+  const genresObject = genres.size ? anilistGenresAndTagsData() : null;
+  for (const g of genres) {
+    // Missing genres and tags list
+    if (!genresObject) {
+      return true;
+    }
+
+    if (genresObject.validGenres.has(g)) {
+      obj.genres.push(g);
+      continue;
+    }
+    if (genresObject.validTags.has(g)) {
+      obj.tags.push(g);
+      continue;
+    }
+  }
 }
 
 function createJikanMediaQueryVariables() {
@@ -353,6 +381,33 @@ export function SearchPage() {
     });
   });
 
+  const anilistGenresAndTagsController = createAbortController();
+  createRenderEffect(() => {
+    anilistGenresAndTagsController.abortAndRenew();
+
+    const anilistGenresAndTagsFetcher = createAnilistFetcher(queries.anilistGenresAndTags, {}, anilistGenresAndTagsController.signal);
+
+    sendAnilistFetcher(anilistGenresAndTagsFetcher, {
+      name: "Anilist genres",
+      active: (res, settings) => {
+        // Only update genres and tags once a day
+        return !res || !settings.debug || (tabTime - res.modified) > timeStringToMs("1d");
+      },
+      onFetch() {
+        anilistGenresAndTagsController.disable();
+      },
+      setValue: (res) => {
+        const genreObject = {
+          genres: res.data.data.genres,
+          tags: res.data.data.tags,
+          validGenres: new Set(res.data.data.genres.map(g => g.toLowerCase())),
+          validTags: new Set(res.data.data.tags.map(t => t.name.toLowerCase())),
+        };
+        setAnilistGenresAndTagsData(genreObject);
+      }
+    });
+  });
+
   const [visibleCardIndices, setVisibleCardIndices] = createStore([]);
   const intersectionObserver = new IntersectionObserver(entries => {
     for (const entry of entries) {
@@ -545,8 +600,8 @@ function BrowsePage(props) {
       <Switch>
         <Match when={params.type === "anime"}>
           <HorizontalCardRowScoped data={props.cards?.season && props.cards?.trending?.media} loading={props.loading} href="/ani/search/anime/trending" title="Trending Now" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.season?.media} loading={props.loading} href="/ani/search/anime/this-season?order=popularity" title="Popular This Season" />
-          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.nextSeason?.media} loading={props.loading} href="/ani/search/anime/next-season?order=popularity" title="Upcoming Next Season" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.season?.media} loading={props.loading} href="/ani/search/anime/this-season" title="Popular This Season" />
+          <HorizontalCardRowScoped data={props.cards?.season && props.cards?.nextSeason?.media} loading={props.loading} href="/ani/search/anime/next-season" title="Upcoming Next Season" />
           <HorizontalCardRowScoped data={props.cards?.season && props.cards?.finished?.media} loading={props.loading} href="/ani/search/anime/finished" title="Recently Finished" />
           <HorizontalCardRowScoped data={props.cards?.season && props.cards?.popular?.media} loading={props.loading} href="/ani/search/anime/popular" title="All Time Popular" />
           <VerticalCardRowScoped data={props.cards?.season && props.cards?.top?.media} type="anime" href="/ani/search/anime/top" title="Top 100 Anime" />

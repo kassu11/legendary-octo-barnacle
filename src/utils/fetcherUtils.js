@@ -211,7 +211,7 @@ const baseSettings = {
   loadingBar: true,
   cache: {
     get: res => getFetcherValueFromStorage(res, null),
-    set: async res => {
+    set: res => {
       allFetchedCacheKeys.add(res.cacheKey);
       setFetcherValueToStorage(res);
     }

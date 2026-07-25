@@ -44,12 +44,12 @@ export function BrowseAnimeHome() {
       <p>{formatMSToString(browseTime())}</p>
       <Show when={browseData()}>
         <div class="browse-content">
-          <HorizontalCardRowScoped data={browseData().data.data.trending.media} href="/search/anime/trending" title="Trending now" />
-          <HorizontalCardRowScoped data={browseData().data.data.season.media} href="/search/anime/this-season?order=popularity" title="Popular this season" />
-          <HorizontalCardRowScoped data={browseData().data.data.nextSeason.media} href="/search/anime/next-season?order=popularity" title="Upcoming next season" />
-          <HorizontalCardRowScoped data={browseData().data.data.finished.media} href="/search/anime/finished" title="Recently finished" />
-          <HorizontalCardRowScoped data={browseData().data.data.popular.media} href="/search/anime/popular" title="All time popular" />
-          <VerticalCardRowScoped data={browseData().data.data.top.media} type="anime" href="/search/anime/top-100" title="Top 100 anime" />
+          <HorizontalCardRowScoped data={browseData().data.data.trending.media} href="/ani/search/anime/trending" title="Trending now" />
+          <HorizontalCardRowScoped data={browseData().data.data.season.media} href="/ani/search/anime/this-season?order=popularity" title="Popular this season" />
+          <HorizontalCardRowScoped data={browseData().data.data.nextSeason.media} href="/ani/search/anime/next-season?order=popularity" title="Upcoming next season" />
+          <HorizontalCardRowScoped data={browseData().data.data.finished.media} href="/ani/search/anime/finished" title="Recently finished" />
+          <HorizontalCardRowScoped data={browseData().data.data.popular.media} href="/ani/search/anime/popular" title="All time popular" />
+          <VerticalCardRowScoped data={browseData().data.data.top.media} type="anime" href="/ani/search/anime/top-100" title="Top 100 anime" />
         </div>
       </Show>
     </>

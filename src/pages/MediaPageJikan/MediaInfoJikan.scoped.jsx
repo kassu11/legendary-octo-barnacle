@@ -140,39 +140,39 @@ export function MediaInfoWrapperJikan(props) {
                     <Switch>
                       <Match when={jikanData().data.data.year && jikanData().data.data.season}>
                         <A
-                          href={"/search/" + params.type + "?year=" + jikanData().data.data.year + "&season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)} {jikanData().data.data.year}</A>
+                          href={"/ani/search/" + params.type + "?year=" + jikanData().data.data.year + "&season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)} {jikanData().data.data.year}</A>
                       </Match>
                       <Match when={jikanData().data.data.season}>
                         <A
-                          href={"/search/" + params.type + "?season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)}</A>
+                          href={"/ani/search/" + params.type + "?season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)}</A>
                       </Match>
                       <Match when={jikanData().data.data.year}>
                         <A
-                          href={"/search/" + params.type + "?year=" + jikanData().data.data.year + "&malSearch=true"}>{jikanData().data.data.year}</A>
+                          href={"/ani/search/" + params.type + "?year=" + jikanData().data.data.year + "&malSearch=true"}>{jikanData().data.data.year}</A>
                       </Match>
                       <Match
                         when={jikanData().data.data.aired?.prop?.from?.year || jikanData().data.data.published?.prop?.from?.year}>{year => (
-                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                        <A href={"/ani/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
                       )}</Match>
                       <Match
                         when={jikanData().data.data.aired?.prop?.to?.year || jikanData().data.data.published?.prop?.to?.year}>{year => (
-                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                        <A href={"/ani/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
                       )}</Match>
                       <Match when={jikanData().data.data.status == mediaStatuses.jikan.NotYetAired}>
-                        <A href={"/search/" + params.type + "/tba"}>TBA</A>
+                        <A href={"/ani/search/" + params.type + "/tba"}>TBA</A>
                       </Match>
                     </Switch>
                   </li>
                   <li>
                     <A
-                      href={"/search/" + params.type + "?format=" + jikanData().data.data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.data.type}</A>
+                      href={"/ani/search/" + params.type + "?format=" + jikanData().data.data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.data.type}</A>
                   </li>
                   <li>{statusUtils.jikanEnumToFlavorText(jikanData()?.data.data.status)}</li>
                 </ul>
                 <ul>
                   <Show when={jikanData()?.data.data.source}>
                     <li>Source:{" "}
-                      <A href={"/search/" + params.type + "?source=" + jikanData().data.data.source}>
+                      <A href={"/ani/search/" + params.type + "?source=" + jikanData().data.data.source}>
                         {jikanData()?.data.data.source}
                       </A>
                     </li>

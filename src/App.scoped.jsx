@@ -12,8 +12,6 @@ import { useLocation } from "@solidjs/router";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
-export let globalHoverContainer;
-
 function App(props) {
   let controller = new AbortController();
 
@@ -45,7 +43,8 @@ function App(props) {
       <MainNavigation />
       <ApplicationNotifications />
       <InstallPWAInfoPanel />
-      <div id="hovers" ref={e => globalHoverContainer = e}></div>
+      {/* Don't store this element to global variable, because hot reloading will randomly remove this */}
+      <div id="hovers"></div>
       <DevBranches />
       <main id="page-content">
         {props.children}

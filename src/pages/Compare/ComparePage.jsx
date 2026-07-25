@@ -702,12 +702,12 @@ function ContentPage() {
                   <li>
                     <Switch>
                       <Match when={media.countryOfOrigin !== "JP"}> 
-                        <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
+                        <A href={"/ani/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
                           {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
                         </A>
                       </Match>
                       <Match when={media.countryOfOrigin === "JP"}> 
-                        <A href={"/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
+                        <A href={"/ani/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
                           {formatMediaFormat(media.format)}
                         </A>
                       </Match>
@@ -718,23 +718,23 @@ function ContentPage() {
                   <Match when={params.type === "manga"}>
                     <Switch>
                       <Match when={media.startDate?.year}>
-                        <A href={"/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
+                        <A href={"/ani/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
                       </Match>
                       <Match when={media.startDate?.year == null}>
-                        <A href="/search/manga/tba">TBA</A>
+                        <A href="/ani/search/manga/tba">TBA</A>
                       </Match>
                     </Switch>
                   </Match>
                   <Match when={params.type === "anime"}>
                     <Switch>
                       <Match when={media.seasonYear && media.season}>
-                        <A href={"/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
+                        <A href={"/ani/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
                       </Match>
                       <Match when={media.startDate?.year}>
-                        <A href={"/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
+                        <A href={"/ani/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
                       </Match>
                       <Match when={media.startDate?.year == null}>
-                        <A href="/search/anime/tba">TBA</A>
+                        <A href="/ani/search/anime/tba">TBA</A>
                       </Match>
                     </Switch>
                   </Match>

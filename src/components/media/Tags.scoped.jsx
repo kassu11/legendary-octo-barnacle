@@ -27,7 +27,7 @@ export const Tags = (props) => {
       <Show when={props.tags?.length}>
         <div class="pg-media-tags" classList={{loading: props.loading}}>
           <div class="flex-space-between">
-            <A href={"/search/" + props.type.toLowerCase() + "?" + nonSpoilerAndHighRankTags().join("&")}>
+            <A href={"/ani/search/" + props.type.toLowerCase() + "?" + nonSpoilerAndHighRankTags().join("&")}>
               <h2>Tags</h2>
             </A>
             <Show when={props.tags.some(tag => tag.isMediaSpoiler || tag.isGeneralSpoiler)}>
@@ -45,7 +45,7 @@ export const Tags = (props) => {
                 }} 
                 title={tag.description}
               >
-                <A href={ "/search/" + props.type.toLowerCase() + "?genre=" + tag.name + "&rank=" + tag.rank}>{tag.name} <span>{tag.rank}%</span></A>
+                <A href={ "/ani/search/" + props.type.toLowerCase() + "?genre=" + tag.name + "&rank=" + tag.rank}>{tag.name} <span>{tag.rank}%</span></A>
               </li>
             )}</For>
           </ol>

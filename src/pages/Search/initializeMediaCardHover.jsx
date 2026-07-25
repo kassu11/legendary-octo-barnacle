@@ -1,6 +1,4 @@
 import { onCleanup } from "solid-js";
-import { globalHoverContainer } from "../../App.scoped";
-
 
 export function initializeMediaCardHover() {
   const controller = new AbortController();
@@ -52,7 +50,7 @@ export function initializeMediaCardHover() {
 
       hoverParent = target;
       hover = target?.querySelector(".hover-card");
-      if (hover) globalHoverContainer.append(hover);
+      if (hover) document.getElementById("hovers").append(hover);
     }
 
 
@@ -62,7 +60,7 @@ export function initializeMediaCardHover() {
 
       hoverButton = button;
       hoverButtonTooltip = button?.nextElementSibling;
-      if (hoverButtonTooltip) globalHoverContainer.append(hoverButtonTooltip);
+      if (hoverButtonTooltip) document.getElementById("hovers").append(hoverButtonTooltip);
     }
 
 

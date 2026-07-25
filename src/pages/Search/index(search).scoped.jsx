@@ -738,13 +738,13 @@ export function SearchBar(props) {
         />
         <Show when={params.type === "anime"}>
           <div>
-            <A href={"/search/anime/tba" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
+            <A href={"/ani/search/anime/tba" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
               <button>TBA</button>
             </A>
-            <A href={"/search/anime/this-season" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
+            <A href={"/ani/search/anime/this-season" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
               <button>Current season</button>
             </A>
-            <A href={"/search/anime/next-season" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
+            <A href={"/ani/search/anime/next-season" + (searchParams.malSearch === "true" ? "?malSearch=true" : "")}>
               <button>Next season</button>
             </A>
           </div>
@@ -848,9 +848,9 @@ export function SearchContent(props) {
             <li>
               <button onClick={() => {
                 if (searchParams.malSearch === "true") {
-                  navigate("/search/" + params.type + "?malSearch=true");
+                  navigate("/ani/search/" + params.type + "?malSearch=true");
                 } else {
-                  navigate("/search/" + params.type);
+                  navigate("/ani/search/" + params.type);
                 }
               }}>
                 Clear all

@@ -44,13 +44,13 @@ export function BrowseMangaHomeScoped() {
       <p>{formatMSToString(browseTime())}</p>
       <Show when={browseData()}>
         <div class="browse-content">
-          <HorizontalCardRowScoped data={browseData().data.data.trending.media} href="/search/manga/trending" title="Trending now" />
-          <HorizontalCardRowScoped data={browseData().data.data.novel.media} href="/search/manga/novel" title="Popular light novels" />
-          <HorizontalCardRowScoped data={browseData().data.data.manhwa.media} href="/search/manga/manhwa" title="Popular Manhwas" />
-          <HorizontalCardRowScoped data={browseData().data.data.finishedManga.media} href="/search/manga/finished-manga" title="Recently finished mangas" />
-          <HorizontalCardRowScoped data={browseData().data.data.finishedNovel.media} href="/search/manga/finished-novel" title="Recently finished light novels" />
-          <HorizontalCardRowScoped data={browseData().data.data.popular.media} href="/search/manga/popular" title="All time popular" />
-          <VerticalCardRowScoped data={browseData().data.data.top.media} type="manga" href="/search/manga/top-100" title="Top 100 manga" />
+          <HorizontalCardRowScoped data={browseData().data.data.trending.media} href="/ani/search/manga/trending" title="Trending now" />
+          <HorizontalCardRowScoped data={browseData().data.data.novel.media} href="/ani/search/manga/novel" title="Popular light novels" />
+          <HorizontalCardRowScoped data={browseData().data.data.manhwa.media} href="/ani/search/manga/manhwa" title="Popular Manhwas" />
+          <HorizontalCardRowScoped data={browseData().data.data.finishedManga.media} href="/ani/search/manga/finished-manga" title="Recently finished mangas" />
+          <HorizontalCardRowScoped data={browseData().data.data.finishedNovel.media} href="/ani/search/manga/finished-novel" title="Recently finished light novels" />
+          <HorizontalCardRowScoped data={browseData().data.data.popular.media} href="/ani/search/manga/popular" title="All time popular" />
+          <VerticalCardRowScoped data={browseData().data.data.top.media} type="manga" href="/ani/search/manga/top-100" title="Top 100 manga" />
         </div>
       </Show>
     </>
