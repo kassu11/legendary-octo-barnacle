@@ -60,6 +60,8 @@ export function ParseSearchParams(props) {
 
     obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
     obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));
+    obj.tags = wrapToSet(wrapToArray(searchParams.tag).map(name => name.toLowerCase()));
+    obj.excludedTags = wrapToSet(wrapToArray(searchParams.excludedTag).map(name => name.toLowerCase()));
     obj.format = wrapToArray(obj.format).concat(wrapToArray(searchParams.format));
     obj.countryOfOrigin = wrapToArray(searchParams.country).at(-1);
     if (searchParams.year) obj.year = +wrapToArray(searchParams.year).at(-1);

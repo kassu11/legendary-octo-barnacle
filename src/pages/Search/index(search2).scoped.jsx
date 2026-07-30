@@ -33,7 +33,8 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false, year, rank, genres, excludedGenres, sortBySearchMatch, ...rest } = parsedSearchParams();
+  const { q, isAdult = false, year, rank, genres, tags, excludedGenres, sortBySearchMatch, ...rest } = parsedSearchParams();
+  const tagsAndGenres = genres.union(tags);
 
   const obj = {
     sort: [],
@@ -50,7 +51,7 @@ function createAnilistMediaQueryVariables() {
   if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: ["search_match"] });
   else mergeVariables(api, "sort", obj, rest);
 
-  if (failedToMergeGenresAndTags(genres, obj)) return null;
+  if (failedToMergeGenresAndTags(tagsAndGenres, obj)) return null;
 
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
@@ -72,9 +73,9 @@ function createAnilistMediaQueryVariables() {
   return obj;
 }
 
-function failedToMergeGenresAndTags(genres, obj) {
-  const genresObject = genres.size ? anilistGenresAndTagsData() : null;
-  for (const g of genres) {
+function failedToMergeGenresAndTags(tagsAndGenres, obj) {
+  const genresObject = tagsAndGenres.size ? anilistGenresAndTagsData() : null;
+  for (const g of tagsAndGenres) {
     // Missing genres and tags list
     if (!genresObject) {
       return true;

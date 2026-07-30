@@ -45,8 +45,8 @@ export const translateInternalSearchParams = {
   },
 
   onList: {
-    exclude: { ani: { onList: false } },
-    include: { ani: { onList: true  } },
+    false: { ani: { onList: false } },
+    true: { ani: { onList: true  } },
   },
 
   status: {
