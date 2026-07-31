@@ -479,7 +479,7 @@ const [genreAndTagTranslations, setGenreAndTagTranslations] = createStore({
 
 const [externalSourceStore, setExternalSourceStore] = createStore({});
 
-export function SearchBar(props) {
+export function SearchBarOLD(props) {
   const changeType = useVirtualType();
   const params = useParams();
   const parsedSearchParams = useParsedSearchParams();

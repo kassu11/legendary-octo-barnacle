@@ -33,7 +33,6 @@ export { default as anilistDeleteMediaListEntry } from "./queries/anilistDeleteM
 export { default as anilistMutateToggleFavourite } from "./queries/anilistMutateToggleFavourite.graphql";
 export { default as anilistMutateToggleLike } from "./queries/anilistMutateToggleLike.graphql";
 export { default as anilistActivity } from "./queries/anilistActivity.graphql";
-export { default as currentWachingMedia } from "./queries/currentWachingMedia.graphql";
 export { default as anilistCurrentWachingMedia2 } from "./queries/anilistCurrentWachingMedia2.graphql";
 export { default as anilistMutateMedia } from "./queries/anilistMutateMedia.graphql";
 export { default as anilistStaffById } from "./queries/anilistStaffById.graphql";

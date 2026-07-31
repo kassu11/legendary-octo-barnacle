@@ -60,7 +60,6 @@ export const translateInternalSearchParams = {
     manhwa:      { ani: { format: "manhwa"   } },
     movie:       { ani: { format: "MOVIE"    } },
     music:       { ani: { format: "MUSIC"    } },
-    novel:       { ani: { format: "NOVEL"    } },
     ona:         { ani: { format: "ONA"      } },
     one_shot:    { ani: { format: "ONE_SHOT" } },
     ova:         { ani: { format: "OVA"      } },
@@ -108,5 +107,41 @@ export const translateInternalSearchParams = {
       if (api === "ani") return { countryOfOrigin: value };
     },
   }
+
+};
+
+export const translateToInternalSearchParams = {
+
+  format: {
+    NOVEL: "light_novel",
+    MANGA: "manga",
+    manhwa: "manhwa",
+    MOVIE: "movie",
+    MUSIC: "music",
+    ONA: "ona",
+    ONE_SHOT: "one_shot",
+    OVA: "ova",
+    SPECIAL: "special",
+    TV: "tv",
+    TV_SHORT: "tv_short",
+  },
+
+  source: {
+    ANIME: "anime",
+    COMIC: "comic",
+    DOUJINSHI: "doujinshi",
+    GAME: "game",
+    LIGHT_NOVEL: "light_novel",
+    LIVE_ACTION: "live_action",
+    MANGA: "manga",
+    MULTIMEDIA_PROJECT: "multimedia_project",
+    NOVEL: "novel",
+    ORIGINAL: "original",
+    OTHER: "other",
+    PICTURE_BOOK: "picture_book",
+    VIDEO_GAME: "video_game",
+    VISUAL_NOVEL: "visual_novel",
+    WEB_NOVEL: "web_novel",
+  },
 
 };
