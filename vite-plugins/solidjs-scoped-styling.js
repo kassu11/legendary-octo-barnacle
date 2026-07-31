@@ -10,11 +10,14 @@ export default function solidJsScopedStyling() {
 // Export for the testing script
 export const transform = (src, id) => {
   if (id.endsWith(".scoped.jsx")) {
-    const attribute = localDataAttributeFromFilePath(id);
+    const hash = localHashFromFilePath(id);
+    const attribute = localDataAttributeFromHash(hash);
     return src.replace(/(<[^>=+< /"']+)/g, (_, tag) => `${tag} ${attribute}`);
   }
   else if (id.endsWith(".scoped.css")) {
-    const attribute = "[" + localDataAttributeFromFilePath(id) + "]";
+    const hash = localHashFromFilePath(id);
+    const attribute = localDataAttributeFromHash(hash);
+    const scopingSelector = "[" + attribute + "]";
 
     let returnQuery = "";
     let isCommend = false;
@@ -27,7 +30,10 @@ export const transform = (src, id) => {
     let insideNonScopableBlock = 0; // don't scope inside @keyframes or @page (0 == false and higher than 0 means nesting level)
 
     const length = src.length;
+    // Scope all css selectors
     main: for (let start = 0; start < length; start++) {
+      // Setup start and end position
+      // src.substring(start, end) should be a valid selector, but some extra validation needs to be done after this
       for (var end = start; end < length; end++) {
         // Positions is inside commend block
         // Early exit scoping
@@ -77,6 +83,26 @@ export const transform = (src, id) => {
       if (end === length) {
         returnQuery += src.substring(start, end);
         break;
+      }
+
+      // Move starting index to first non whitespace character
+      for (let i = start; i < end; i++) {
+        if (src[i] !== " " && src[i] !== "\n" && src[i] !== "\r") {
+          returnQuery += src.substring(start, i);
+          start = i;
+          break;
+        }
+      }
+
+      // Line starts with comment block, move start to the end of the comment block
+      if (src[start] === "/" && src[start + 1] === "*" && src[start - 1] !== "\\") {
+        for (let i = start; i < end; i++) {
+          if (src[i] === "/" && src[i - 1] === "*" && src[i - 2] !== "\\") {
+            returnQuery += src.substring(start, i + 1);
+            start = i + 1;
+            break;
+          }
+        }
       }
 
       // Move starting index to first non whitespace character
@@ -160,7 +186,7 @@ export const transform = (src, id) => {
         // Check if we want to scope the selector
         else if (src[i] === " " || src[i] === "," || src[i] === ")" || src[i] === "+" || src[i] === "~" || src[i] === ">" || src[i] === "\n" || src[i] === "\r") {
           if (scopeCurrentSelector && hasSelector) {
-            returnQuery += attribute;
+            returnQuery += scopingSelector;
           }
           // If selector was already scoped before the pseudo selector no need to rescope the selector
           // This check will just make CSS file little smaller
@@ -205,7 +231,7 @@ export const transform = (src, id) => {
         else if (src[i] === ":") {
           // Don't scope :root, if there are any other pseudo selectors that you should not scope add them here
           if (!equalsforwards(":root", src, i) && scopeCurrentSelector) {
-            returnQuery += attribute;
+            returnQuery += scopingSelector;
           }
           scopeCurrentSelector = false;
           isPseudoClass = true;
@@ -224,12 +250,27 @@ export const transform = (src, id) => {
 
 
       if (scopeCurrentSelector && hasSelector) {
-        returnQuery += attribute;
+        returnQuery += scopingSelector;
       }
       returnQuery += "{"
 
       start = end;
     }
+
+    // Scope all animation keyframe names
+    const names = [];
+    returnQuery.matchAll(/@keyframes +([^{]+)/g).forEach(([, name]) => names.push(name.trim()));
+
+    names.forEach(name => {
+      const regex = new RegExp(`(\\s|:)${name}(\\s|{|;)`, "g");
+      returnQuery = returnQuery.replace(regex, (_, a, b) => {
+        // Remove "_" from keyframe names
+        if (name.startsWith("_")) return a + name.substring(1) + b;
+        // Scope keyframe name
+        return `${a}${name}-${hash}${b}`;
+      });
+    });
+
 
     return returnQuery;
   }
@@ -252,15 +293,25 @@ const equalsforwards = (string, string2, index) => {
 const removeFileType = filePath => filePath.replace(/\.[^.]+$/, "");
 
 function hashString(filePath) {
-  return createHash('sha256').update(filePath).digest('hex').substring(0, 8);
+  return createHash("sha256").update(filePath).digest("hex").substring(0, 8);
 }
 
-function localDataAttributeFromFilePath(filePath) {
-  if (process.env.NODE_ENV !== "production") {
-    // return "data-vite-dev-path=\"" + removeFileType(removeFileType(filePath)).split("/src/")[1] + "\"";
-  }
+function localDataAttributeFromHash(hash) {
+  // if (process.env.NODE_ENV !== "production") {
+  //   return "data-vite-dev-path=\"" + hash + "\"";
+  // }
 
   // First remove .jsx .tsx etc.
   // Then remove .scoped
-  return "data-k-" + hashString(removeFileType(removeFileType(filePath)));
+  return "data-k-" + hash;
+}
+
+function localHashFromFilePath(filePath) {
+  // if (process.env.NODE_ENV !== "production") {
+  //   return removeFileType(removeFileType(filePath)).split("/src/")[1];
+  // }
+
+  // First remove .jsx .tsx etc.
+  // Then remove .scoped
+  return hashString(removeFileType(removeFileType(filePath)));
 }
