@@ -9,6 +9,7 @@ import openInEditor from "./vite-plugins/open-in-editor";
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
+const __BASE__ = "/legendary-octo-barnacle";
 
 
 // eslint-disable-next-line no-undef
@@ -57,7 +58,7 @@ export default defineConfig({
       ],
     })
   ],
-  base: "/legendary-octo-barnacle" + (branch !== "main" ? "/branches/" + branch : ""),
+  base: __BASE__ + (branch !== "main" ? "/branches/" + branch : ""),
   build: {
     chunkSizeWarningLimit: 1000,
     cssTarget: ["es2024"]
@@ -71,6 +72,7 @@ export default defineConfig({
   define: {
     __PORT__,
     __DEBUG_PORT__,
+    __BASE__: JSON.stringify(__BASE__),
     // Branch is definitely just a string, but this is the only way to pass a string, dont ask why
     __BRANCH__: JSON.stringify(branch),
   },

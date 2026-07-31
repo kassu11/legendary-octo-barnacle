@@ -65,7 +65,7 @@ render(
     <AuthenticationProvider>
       <ResponsiveProvider>
         <EditMediaEntriesProvider>
-          <Router root={App} base="/legendary-octo-barnacle">
+          <Router root={App} base={__BASE__}>
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />

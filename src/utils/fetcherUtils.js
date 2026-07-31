@@ -259,7 +259,7 @@ export async function sendFetcher(fetcher, settings = {}) {
   const start = performance.now();
   settings.onStart?.(performance.now() - start);
 
-  var res = settings.file ? await (await fetch("/legendary-octo-barnacle/" + settings.file)).json() : await settings.cache?.get?.(fetcher, settings);
+  var res = settings.file ? await (await fetch(__BASE__ + "/" + settings.file)).json() : await settings.cache?.get?.(fetcher, settings);
   const active = settings.active?.(res, settings);
 
   if (res) settings.setValue(res, { fetcher, settings });

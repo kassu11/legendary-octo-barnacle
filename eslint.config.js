@@ -16,6 +16,7 @@ export default [
         ...globals.browser,
         __PORT__: "readonly",
         __DEBUG_PORT__: "readonly",
+        __BASE__: "readonly",
       },
       parser: tsParser,      // Use the TS parser for JSX support
       parserOptions: {

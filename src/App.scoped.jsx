@@ -82,7 +82,7 @@ function DevBranches() {
 
 function ContextMenu() {
   const [branches] = createResource(async () => {
-    const res = await fetch("/legendary-octo-barnacle/branches.json");
+    const res = await fetch(__BASE__ + "/branches.json");
     const text = await res.text();
     // In coding enviroment we don't have branches.json file, so the fetch returns HTML
     // This is just quick check if the returned file is json or not
