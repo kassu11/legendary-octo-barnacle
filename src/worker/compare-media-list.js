@@ -55,6 +55,7 @@ function excludeCompareList(listData, entries) {
 }
 
 function formatCompareList(entries, minUserCount, filterObject) {
+  const tagsSet = new Set();
   entries = Object.values(entries).filter(entry => {
     if (entry.exclude) {
       return false;
@@ -85,13 +86,25 @@ function formatCompareList(entries, minUserCount, filterObject) {
       return false;
     }
 
-    return entry.mediaEntries.length >= minUserCount;
+    if (entry.mediaEntries.length < minUserCount) {
+      return false;
+    }
+
+    for (const tag of entry.tags) {
+      if (tag.rank > 50) {
+        tagsSet.add(tag.name);
+      } else {
+        break;
+      }
+    }
+
+    return true;
   });
 
   const sortFunction = generateSortFunction(filterObject.sort, filterObject.reverse ? -1 : 1);
   entries.sort(sortFunction);
 
-  postMessage(entries);
+  postMessage({ entries: entries, tags: [...tagsSet].sort() });
 }
 
 function generateSortFunction(sort, direction = 1) {
@@ -176,6 +189,21 @@ function filter(entry, filterObject) {
   if (filterObject.missingScore === false && entry.score === 0) {
     return false;
   }
-
+  if (filterObject.studio) studio: {
+    for (const studio of entry.media.studios.edges) {
+      if (studio.isMain && studio.node.name === filterObject.studio) {
+        break studio;
+      }
+    }
+    return false;
+  }
+  if (filterObject.tag) tag: {
+    for (const tag of entry.media.tags) {
+      if (tag.rank > 50 && tag.name=== filterObject.tag) {
+        break tag;
+      }
+    }
+    return false;
+  }
   return true;
 }

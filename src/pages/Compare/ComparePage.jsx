@@ -64,7 +64,9 @@ export default function ComparePage() {
     setSearchParams({ "user": users });
   }));
 
+  const [tags, setTags] = createSignal(undefined, { equals: false });
   const search = () => searchParams.search || "";
+  const tag = () => searchParams.tag || "";
   const format = () => searchParams.format || "";
   const reviewsNeeded = () => searchParams.reviewsNeeded || wrapToSet(searchParams.user).size;
   const status = () => searchParams.status || "";
@@ -101,6 +103,7 @@ export default function ComparePage() {
       format: format(),
       status: status(),
       genre: genre(),
+      tag: tag(),
       reverse: reverse(),
       countryOfOrigin: countryOfOrigin(),
       missingStart: missingStartFilter(),
@@ -121,7 +124,8 @@ export default function ComparePage() {
 
     worker.onmessage = message => {
       setLoading(false);
-      setCompareMediaList(message.data || []);
+      setTags(message.data.tags);
+      setCompareMediaList(message.data.entries || []);
     }
   }
 
@@ -232,6 +236,15 @@ export default function ComparePage() {
             <option value="Supernatural">Supernatural</option>
             <option value="Thriller">Thriller</option>
           </select>
+          <select name="tag" onChange={e => setSearchParams({ tag: e.target.value || undefined })} value={tag() || ""}>
+            <option value="" hidden>Tag</option>
+            <Show when={tag()}>
+              <option value="">All tags</option>
+            </Show>
+            <For each={tags()}>{t => (
+              <option value={t} selected={t === tag()}>{t}</option>
+            )}</For>
+          </select>
           <select name="countryOfOrigin" onChange={e => setSearchParams({ countryOfOrigin: e.target.value || undefined })} value={countryOfOrigin() || ""}>
             <option value="" hidden>Country</option>
             <Show when={countryOfOrigin()}>
@@ -323,6 +336,7 @@ export default function ComparePage() {
                   format: undefined,
                   status: undefined,
                   genre: undefined,
+                  tag: undefined,
                   countryOfOrigin: undefined,
                   reviewsNeeded: undefined,
                   missingStart: undefined,
@@ -603,7 +617,6 @@ function ContentPage() {
   const { compareMediaList, users } = useCompareMediaList();
   const params = useParams();
   const observerList = [];
-  // eslint-disable-next-line
   function observe(target) {
     observerList.push(target);
   }
@@ -627,7 +640,7 @@ function ContentPage() {
 
   return (
     <For each={compareMediaList()}>{(media, i) => (
-      <li use:observe attr:data-index={i()} class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
+      <li ref={observe} attr:data-index={i()} class="pg-compare-media-card inline-container" style={{"--color": media.coverImage.color}}>
         <div class="wrapper">
           <Show when={cardsVisibility[i()] && media.id !== -1}>
             <Show when={media.bannerImage}>
