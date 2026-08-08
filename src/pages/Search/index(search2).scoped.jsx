@@ -128,7 +128,10 @@ function mergeValue(api, key, to, value) {
 
 export const SEARCH_DEBOUNCE = 400;
 const cachedResults = new Set();
-const searchPageSizes = {} // keep that of how many elements url had, so when user navigates back in history, we can create the right amount of skeleton cards
+// Keeps track of how many cards search results contained.
+// This is used when we go back in history, so we can prerender the right amount of skeleton cards.
+// This prevent the browser from scrolling back to the top of the page
+const searchPageSizes = {};
 
 const LOADER = 0;
 const INACTIVE_LOADER = 1;

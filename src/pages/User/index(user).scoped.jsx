@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
+import { createEffect, createRenderEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { formatTimeToDate } from "../../utils/formating.js";
 import { UserContext, useUser } from "../../context/providers.js";
 import "./index(user).scoped.css";
@@ -18,13 +18,14 @@ export function User(props) {
   const [userData, setUserData] = createSignal(undefined, { equals: false });
   const userController = createCleanUpAbortController();
   let userFetcher;
-  createEffect(() => {
+  createRenderEffect(() => {
     const signal = userController.abortAndRenew();
 
     userFetcher = createAnilistFetcher(queries.getUserByName, { name: params.name }, signal);
 
     sendAnilistFetcher(userFetcher, {
       name: "Anilist user info",
+      alwaysUseQuickCache: true,
       onFetch: () => userController.disable(),
       onStart: time => {
         startUserTimer(time);
@@ -112,13 +113,13 @@ function Content(props) {
           </div>
         </div>
       </div>
-      <nav class="profile-navigation">
+      <nav class="cp-profile-navigation">
         <ul>
           <li><A href="">Overview</A></li>
-          <li><A href="anime">Anime list</A></li>
-          <li><A href="manga">Manga list</A></li>
+          <li><A href="anime/list">Anime list</A></li>
+          <li><A href="manga/list">Manga list</A></li>
           <li><A href="favourites">Favourites</A></li>
-          <li><A href="stats">Stats</A></li>
+          <li><A href="anime/stats/overview">Stats</A></li>
           <li><A href="socials">Socials</A></li>
         </ul>
       </nav>

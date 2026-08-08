@@ -34,6 +34,7 @@ import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/Medi
 import { Socials } from "./pages/User/Socials/Socials.scoped.jsx";
 import { SettingsPage } from "./pages/Settings/index(settings).scoped";
 import { SearchPage } from "./pages/Search/index(search2).scoped";
+import { UserRelations } from "./pages/User/Relations/index-(user-relations).scoped";
 
 const root = document.getElementById("root")
 
@@ -112,6 +113,7 @@ render(
               </Route>
             </Route>
             <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, type: ["anime", "manga"] }} component={MediaPageRedirect} />
+
             <Route path="/:api">
               <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
                 <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHome} />
@@ -132,26 +134,40 @@ render(
                 </Route>
               </Route>
             </Route>
+
+            {/* User profile page */}
             <Route path="/user/:name" component={User}>
+              {/* Default to user overview page */}
               <Route path="/" component={Overview} />
-              <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={UserMediaList} />
-              <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={UserMediaList} />
-              <Route path="/favourites" component={IndexFavouriteScoped} />
-              <Route path="/stats" component={Stats}>
-                <Route path="/" component={() => <Navigate href="anime" />} />
-                <Route path="/:type" matchFilters={{ type: ["anime", "manga"] }}>
+
+              {/* All pages that can change content based on media type */}
+              <Route path="/:type" matchFilters={{ type: [ "anime", "manga" ] }}>
+
+                {/* Default to list view */}
+                <Route path="/" component={() => <Navigate href="list" />} />
+                <Route path="/list/:list?" component={UserMediaList} />
+                <Route path="/relations" component={UserRelations} />
+
+                {/* User stats page */}
+                <Route path="/stats" component={Stats}>
+                  {/* Default to stats overview page */}
                   <Route path="/" component={() => <Navigate href="overview" />} />
+
                   <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsMediaTags} />
                   <Route path="/staff" component={StatsMediaStaff} />
+
+                  {/* Mangas don't have studios or voice actors */}
+                  <Route path="/studios" matchFilters={{ type: "anime" }} component={StatsAnimeStudios} />
+                  <Route path="/voice-actors" matchFilters={{ type: "anime" }} component={StatsAnimeVoiceActors} />
+
                 </Route>
-                <Route path="/:type" matchFilters={{ type: "anime" }}>
-                  <Route path="/studios" component={StatsAnimeStudios} />
-                  <Route path="/voice-actors" component={StatsAnimeVoiceActors} />
-                </Route>
+
               </Route>
+              <Route path="/favourites" component={IndexFavouriteScoped} />
               <Route path="/socials" component={Socials} />
+
             </Route>
             <Route path="*404" component={() => <div>Not fould 404</div>} />
           </Router>

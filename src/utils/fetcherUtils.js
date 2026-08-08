@@ -241,6 +241,14 @@ const baseSettings = {
 //  Maybe this will cause raise condition if multiple tabs are opened
 // TODO: How to handle
 
+// Quick cache should only be used, when response body is small, and the request cache needs to respond immediately.
+// For example user page, has nested requests, so we want the top level user id request to be quick cached, so all the child requests that depend on the result, will load faster
+// Without this, its not possible to keep scroll position on user media list etc, when using history navigation.
+// NOTE: Every request is quick cached by default inside session storage, in production, but not in debug.
+//       So this settings should only be used inside debug, when you have confirmed that the loading delay causes problems
+//       This will also work in production, but it's kind of useless, because most of not all request should be already quick cached.
+const quickCache = {};
+
 /**
  * This is as close as normal fetch as you can get
  * The only difference is, that this function does not return anything
@@ -259,10 +267,16 @@ export async function sendFetcher(fetcher, settings = {}) {
   const start = performance.now();
   settings.onStart?.(performance.now() - start);
 
-  var res = settings.file ? await (await fetch(__BASE__ + "/" + settings.file)).json() : await settings.cache?.get?.(fetcher, settings);
+  let res;
+  if (settings.alwaysUseQuickCache && fetcher.cacheKey in quickCache) res = quickCache[fetcher.cacheKey];
+  else if (settings.file) res = await (await fetch(__BASE__ + "/" + settings.file)).json();
+  else res = await settings.cache?.get?.(fetcher, settings);
+
   const active = settings.active?.(res, settings);
 
   if (res) settings.setValue(res, { fetcher, settings });
+
+  if (settings.alwaysUseQuickCache && res) quickCache[fetcher.cacheKey] = res;
 
   // Fetcher is not active, so it can't fetch, early exit
   const [url, { signal }] = fetcher;

@@ -51,7 +51,7 @@
     border-radius: .25em;
   }
 
-  .profile-navigation ul {
+  .cp-profile-navigation ul {
     background-color: var(--background-500-old);
     display: flex;
     flex-wrap: wrap;

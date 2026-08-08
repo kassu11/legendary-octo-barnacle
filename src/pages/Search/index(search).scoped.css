@@ -16,7 +16,7 @@
       display: flex;
     }
 
-    .grid-column-auto-fill > input[type="search"] {
+    .grid-column-auto-fill > _input[type="search"] {
       grid-column: span 2;
     }
 

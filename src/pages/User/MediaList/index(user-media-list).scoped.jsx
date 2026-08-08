@@ -22,7 +22,7 @@ export const useListNavigation = () => {
   const params = useParams();
 
   return listName => {
-    navigate(`/user/${user().name}/${params.type}${listName ? "/" + listName : ""}${location.search}`, { replace: true });
+    navigate(`/user/${user().name}/${params.type}/list${listName ? "/" + listName : ""}${location.search}`, { replace: true });
   }
 }
 

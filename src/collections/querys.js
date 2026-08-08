@@ -34,6 +34,7 @@ export { default as anilistMutateToggleFavourite } from "./queries/anilistMutate
 export { default as anilistMutateToggleLike } from "./queries/anilistMutateToggleLike.graphql";
 export { default as anilistActivity } from "./queries/anilistActivity.graphql";
 export { default as anilistCurrentWachingMedia2 } from "./queries/anilistCurrentWachingMedia2.graphql";
+export { default as anilistUserMediaRelations } from "./queries/anilistUserMediaRelations.graphql";
 export { default as anilistMutateMedia } from "./queries/anilistMutateMedia.graphql";
 export { default as anilistStaffById } from "./queries/anilistStaffById.graphql";
 export { default as anilistStudioById } from "./queries/anilistStudioById.graphql";

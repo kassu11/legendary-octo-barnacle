@@ -21,39 +21,43 @@ export const isInteger = (value, varName = "Value", message = "") => {
   assertTrueOLD(value && Number.isInteger(+value), localMessage);
 }
 
-export const assertTypeArray = (target, message = "Value is not type Array", varName) => {
-  _throwAssertIfFalse(Array.isArray(target), message, varName);
+export const assertTypeArray = (target, message = "Value is not array", varName) => {
+  throwAssertIfFalsy(Array.isArray(target), message, varName);
 }
 
-export const assertTypeObject = (target, message = "Value is not type Object", varName) => {
-  _throwAssertIfFalse(isTypeObject(target), message, varName);
+export const assertTypeObject = (target, message = "Value is not object", varName) => {
+  throwAssertIfFalsy(isTypeObject(target), message, varName);
 }
 
-export const assertTypeString = (target, message = "Value is not type String", varName) => {
-  _throwAssertIfFalse(typeof target === "string", message, varName);
+export const assertTypeString = (target, message = "Value is not string", varName) => {
+  throwAssertIfFalsy(typeof target === "string", message, varName);
 }
 
-export const assertTypeInteger = (target, message = "Value is not type Integer", varName) => {
-  _throwAssertIfFalse(Number.isInteger(target), message, varName);
+export const assertTypeInteger = (target, message = "Value is not integer", varName) => {
+  throwAssertIfFalsy(Number.isInteger(target), message, varName);
+}
+
+export const assertTypeFunction = (target, message = "Value is not function", varName) => {
+  throwAssertIfFalsy(typeof target === "function", message, varName);
 }
 
 export const assertThruthy = (target, message = "Value is not thruthy", varName) => {
-  _throwAssertIfFalse(target, message, varName);
+  throwAssertIfFalsy(target, message, varName);
 }
 
 export const assertFalsy = (target, message = "Value is not falsy", varName) => {
-  _throwAssertIfTrue(target, message, varName);
+  throwAssertIfTruthy(target, message, varName);
 }
 
-const _throwAssertIfTrue = (boolean, message, varName) => {
-  if (boolean) _throwAssert(message, varName);
+export const throwAssertIfTruthy = (boolean, message, varName) => {
+  if (boolean) throwAssert(message, varName);
 }
 
-const _throwAssertIfFalse = (boolean, message, varName) => {
-  if (!boolean) _throwAssert(message, varName);
+export const throwAssertIfFalsy = (boolean, message, varName) => {
+  if (!boolean) throwAssert(message, varName);
 }
 
-const _throwAssert = (message, varName) => {
+export const throwAssert = (message, varName) => {
   message ??= "Assertion failed.";
 
   if (varName) {

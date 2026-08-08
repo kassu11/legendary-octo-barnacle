@@ -12,7 +12,13 @@ export const transform = (src, id) => {
   if (id.endsWith(".scoped.jsx")) {
     const hash = localHashFromFilePath(id);
     const attribute = localDataAttributeFromHash(hash);
-    return src.replace(/(<[^>=+< /"']+)/g, (_, tag) => `${tag} ${attribute}`);
+    return src.replace(/(<[^>=+< /"']+)|(\$createComponent\([^{]+\{[^}{]*)scoped:\s?true/g, (_, tag, createComponent) => {
+      if (tag) {
+        return `${tag} ${attribute}`
+      } else {
+        return `${createComponent}"${attribute}": ""`;
+      }
+    });
   }
   else if (id.endsWith(".scoped.css")) {
     const hash = localHashFromFilePath(id);
@@ -262,7 +268,7 @@ export const transform = (src, id) => {
     returnQuery.matchAll(/@keyframes +([^{]+)/g).forEach(([, name]) => names.push(name.trim()));
 
     names.forEach(name => {
-      const regex = new RegExp(`(\\s|:)${name}(\\s|{|;)`, "g");
+      const regex = new RegExp(`(\\s|:)${name}(\\s|{|;|,)`, "g");
       returnQuery = returnQuery.replace(regex, (_, a, b) => {
         // Remove "_" from keyframe names
         if (name.startsWith("_")) return a + name.substring(1) + b;

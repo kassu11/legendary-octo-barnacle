@@ -19,10 +19,23 @@ fragment media on Media {
   mediaListEntry {
     status
   }
+  startDate {
+    year
+  }
+  status(version: 2)
+  chapters
+  volumes
   season
   seasonYear
+  episodes
+  duration
   format
+  genres
   countryOfOrigin
+  nextAiringEpisode {
+    airingAt
+    episode
+  }
   coverImage {
     large
     extraLarge

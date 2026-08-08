@@ -8,6 +8,7 @@ import "./Studio.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
 import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
+import { useUser } from "../../../../context/providers.js";
 
 export function StatsAnimeStudios() {
   const params = useParams();
@@ -44,6 +45,7 @@ export function StatsAnimeStudios() {
 
 function StatsStudios(props) {
   const params = useParams();
+  const { user } = useUser();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
   const [store, setStore] = createStore({});
@@ -133,6 +135,10 @@ function StatsStudios(props) {
               </ol>
             </div>
             <div class="wrapper tags">
+              <div className="flex-space-between">
+                <p>From user list</p>
+                <A href={"/user/" + user().name + "/" + params.type + "/list?studio=" + genre.studio.name}>Show all</A>
+              </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>
           </li>

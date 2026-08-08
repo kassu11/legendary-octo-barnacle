@@ -163,6 +163,7 @@ export function MediaInfoContent(props) {
             <Show when={mediaPageAnilistData()}>
               <img src={mediaPageAnilistData()?.data.data.Media?.coverImage.extraLarge} alt="Cover" class="media-page-cover" />
               <MediaPageApiSwitcher anilistData={mediaPageAnilistData} jikanData={jikanData} />
+              <QuickEdit />
               <MediaPageScores />
               <Show when={accessToken()}>
                 <button onClick={() => {
@@ -304,5 +305,15 @@ function StreamingEpisodes(props) {
         </ol>
       </div>
     </Show>
+  );
+}
+
+function QuickEdit() {
+  return (
+    <div>
+      <button>-</button>
+      <input type="number" name="" id="" />
+      <button>+</button>
+    </div>
   );
 }
