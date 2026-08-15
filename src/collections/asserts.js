@@ -37,6 +37,10 @@ export const assertTypeInteger = (target, message = "Value is not integer", varN
   throwAssertIfFalsy(Number.isInteger(target), message, varName);
 }
 
+export const assertNonNanNumber = (target, message = "Value is not number", varName) => {
+  throwAssertIfFalsy(!Number.isNaN(target) && typeof target === "number", message, varName);
+}
+
 export const assertTypeFunction = (target, message = "Value is not function", varName) => {
   throwAssertIfFalsy(typeof target === "function", message, varName);
 }
