@@ -163,7 +163,7 @@ export function MediaInfoContent(props) {
             <Show when={mediaPageAnilistData()}>
               <img src={mediaPageAnilistData()?.data.data.Media?.coverImage.extraLarge} alt="Cover" class="media-page-cover" />
               <MediaPageApiSwitcher anilistData={mediaPageAnilistData} jikanData={jikanData} />
-              <QuickEdit />
+              {/* <QuickEdit /> */}
               <MediaPageScores />
               <Show when={accessToken()}>
                 <button onClick={() => {
@@ -308,12 +308,12 @@ function StreamingEpisodes(props) {
   );
 }
 
-function QuickEdit() {
-  return (
-    <div>
-      <button>-</button>
-      <input type="number" name="" id="" />
-      <button>+</button>
-    </div>
-  );
-}
+// function QuickEdit() {
+//   return (
+//     <div>
+//       <button>-</button>
+//       <input type="number" name="" id="" />
+//       <button>+</button>
+//     </div>
+//   );
+// }
