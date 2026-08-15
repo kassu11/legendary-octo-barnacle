@@ -6,17 +6,18 @@ import { assertNonNanNumber } from "../../collections/asserts";
 
 const [topElements, setTopElements] = createSignal([document.body]);
 
+// Make sure that when ever modal is opened, we place the progress bar on top
 const originalShowModal = HTMLDialogElement.prototype.showModal;
 HTMLDialogElement.prototype.showModal = function() {
   originalShowModal.call(this);
   setTopElements(v => [...v, this]);
 
+  // Modal is closed, so remove modal from list
   this.addEventListener("close", () => setTopElements(v => v.filter(elem => elem !== this)), { once: true })
 };
 
 const START_DELAY = 200;
 const MAX_PROGRESS_TIME = 40_000;
-
 const PROGRESS_DONE_DURATION = 200;
 
 // @keyframes loading-progress {
@@ -31,18 +32,18 @@ const PROGRESS_DONE_DURATION = 200;
 //   100% { transform: scaleX(.98); }
 // }
 
-const keyframes = [
-  // Percent, scaleX
-  [ 0,     0    ],
-  [ 0.002, 0.1  ],
-  [ 0.01,  0.2  ],
-  [ 0.03,  0.4  ],
-  [ 0.04,  0.6  ],
-  [ 0.06,  0.7  ],
-  [ 0.10, 0.8   ],
-  [ 0.17, 0.93  ],
-  [ 0.30, 0.95  ],
-  [ 1,     0.98 ],
+const loadingScaleKeyframes = [
+  // Percent                           scaleX
+  [ 0/* %     { transform: scaleX( */ ,0    /* ); } */ ],
+  [ 0.002/* % { transform: scaleX( */ ,0.1  /* ); } */ ],
+  [ 0.01/* %  { transform: scaleX( */ ,0.2  /* ); } */ ],
+  [ 0.03/* %  { transform: scaleX( */ ,0.4  /* ); } */ ],
+  [ 0.04/* %  { transform: scaleX( */ ,0.6  /* ); } */ ],
+  [ 0.06/* %  { transform: scaleX( */ ,0.7  /* ); } */ ],
+  [ 0.10/* %  { transform: scaleX( */ ,0.8  /* ); } */ ],
+  [ 0.17/* %  { transform: scaleX( */ ,0.93 /* ); } */ ],
+  [ 0.30/* %  { transform: scaleX( */ ,0.95 /* ); } */ ],
+  [ 1/* %     { transform: scaleX( */ ,0.98 /* ); } */ ],
 ];
 
 export function MainLoadingBar() {
@@ -56,37 +57,37 @@ export function MainLoadingBar() {
 
   function gameLoop(prevTime, curTime) {
     const deltaTime = curTime - prevTime;
-
     progressTime += deltaTime;
-    const t = Math.min(Math.max(0, progressTime - START_DELAY), MAX_PROGRESS_TIME);
-    const percent = t / MAX_PROGRESS_TIME;
-    let scale;
-    for (let i = 0; i < keyframes.length; i++) {
-      const [p, s] = keyframes[i];
-      if (percent === s) {
-        scale = s;
+
+    const time = Math.min(Math.max(0, progressTime - START_DELAY), MAX_PROGRESS_TIME);
+    const percent = time / MAX_PROGRESS_TIME;
+    let scaleX;
+    for (let i = 0; i < loadingScaleKeyframes.length; i++) {
+      const [p1, s1] = loadingScaleKeyframes[i];
+      if (percent === s1) {
+        scaleX = s1;
         break;
       }
 
-      if (percent < p) {
-        const [p2, s2] = keyframes[i - 1];
-        const delta = p - p2;
-        scale = ((percent - p2) / delta) * (s - s2) + s2;
+      if (percent < p1) {
+        const [p2, s2] = loadingScaleKeyframes[i - 1];
+        const delta = p1 - p2;
+        scaleX = ((percent - p2) / delta) * (s1 - s2) + s2;
         break;
       }
     }
 
-    assertNonNanNumber(scale);
+    assertNonNanNumber(scaleX);
 
     // Animate the progress bar
     if (!done()) {
-      ref.style.transform = `scaleX(${scale})`;
+      ref.style.transform = `scaleX(${scaleX})`;
     }
     // Animate progress done
     else {
       endingTime += deltaTime;
       const percent = Math.min(endingTime / PROGRESS_DONE_DURATION, 1);
-      ref.style.transform = `scaleX(${scale + (1 - scale) * percent})`;
+      ref.style.transform = `scaleX(${scaleX + (1 - scaleX) * percent})`;
     }
 
     // End loop, when endingTime is over
