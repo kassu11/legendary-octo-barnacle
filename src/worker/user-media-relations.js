@@ -98,10 +98,12 @@ function modifyMediaListData(listData, options) {
   // listData.total = mediaSet.size;
   // listData.studios = Array.from(studiosSet).sort();
   // listData.tags = Array.from(tagsSet).sort();
+
   const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
   data.sort(sortFunction);
 
-  console.log("Size:", data);
+  console.log("Size:", data.length);
+  // postMessage(Array(50).fill(data).flat());
   postMessage(data);
 }
 

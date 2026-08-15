@@ -5,7 +5,6 @@ import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
 import Watching from "../../assets/Watching.jsx";
 import Complete from "../../assets/Complete.jsx";
-import Rewatched from "../../assets/Rewatched.jsx";
 import { useEditMediaEntries } from "../../context/providers.js";
 import Star from "../../assets/Star.jsx";
 import { QuickActionListButton } from "../Buttons.scoped.jsx";
@@ -18,6 +17,7 @@ import { addApplicationNotification } from "../../pages/App/ApplicationNotificat
 import { mediaWithMalId, token2 } from "../../core/globalState.js";
 import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../utils/formating.js";
 import { DurationToTime, EpisodeTime2 } from "../../pages/Home/EpisodeTime.jsx";
+import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
 
 function AnilistMediaCardListBody(props) {
   return (
@@ -234,7 +234,7 @@ function QuickActionItemList(props) {
           <Complete />
         </QuickActionListButton>
         <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEATING")}>
-          <Rewatched />
+          <RepeatIcon />
         </QuickActionListButton>
       </ul>
     </Show>

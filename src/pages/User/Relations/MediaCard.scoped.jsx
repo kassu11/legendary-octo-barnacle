@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
+import { createMemo, createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../../utils/formating";
 import "./index-(user-relations).scoped.css";
 import { DurationToTime, EpisodeTime2 } from "../../Home/EpisodeTime";
@@ -8,8 +8,19 @@ import Star from "../../../assets/Star";
 import { setMediaPageAnilistData } from "../../MediaPageAnilist/index(media-page-anilist).scoped";
 import "./MediaCard.scoped.css";
 import { Portal } from "solid-js/web";
-import { assertTypeFunction } from "../../../collections/asserts";
 import { ImageLoader } from "./ImageLoader.scoped";
+import Complete from "../../../assets/Complete";
+import { RepeatIcon } from "../../../assets/RepeatIcon";
+import Planning from "../../../assets/Planning";
+import Watching from "../../../assets/Watching";
+import TrashIcon from "../../../assets/TrashIcon";
+import StopIcon from "../../../assets/StopIcon";
+import { useEditMediaEntries } from "../../../context/providers";
+import { createAnilistFetcher, fetcherToFetch } from "../../../utils/fetcherUtils";
+import { queries } from "../../../collections/collections";
+import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped";
+import { globalEditedMedia, storeGlobalEditedMedia, token2 } from "../../../core/globalState";
+import Edit from "../../../assets/Edit";
 
 
 const hovers = [];
@@ -52,8 +63,6 @@ const removeRef = elem => {
 
 const gen = handleHover => {
 
-  assertTypeFunction(handleHover);
-
   const [show, setShow] = createSignal();
   let parent;
   onCleanup(() => {
@@ -65,14 +74,16 @@ const gen = handleHover => {
     parent = elem;
     hovers.push(elem);
     elem[SHOW_HOVER] = setShow;
-    elem[PLACE_HOVER] = handleHover;
+    if (handleHover) {
+      elem[PLACE_HOVER] = handleHover;
+    }
   };
 
   const childRef = hoverElem => {
     parent[CHILD] = hoverElem;
   };
 
-  return [handleRef, childRef, show];
+  return [handleRef, show, childRef];
 };
 
 const handleCardHover = (parent, hover) => {
@@ -94,6 +105,31 @@ const handleCardHover = (parent, hover) => {
   }
 };
 
+const handleActionHover = (parent, hover) => {
+  if (!hover) return;
+  let { x, y, width, height } = parent.getBoundingClientRect();
+  const offset = 16;
+  x += document.body.parentElement.scrollLeft;
+  y += document.body.parentElement.scrollTop;
+
+  // Left
+  if (x - hover.clientWidth - offset > 0) {
+    hover.style.left = x - hover.clientWidth - offset + "px";
+    hover.style.top = y + height / 2 + "px";
+  }
+  // Right
+  else if (hover.clientWidth + x + width + offset < document.body.scrollWidth) {
+    hover.style.left = x + width + offset + "px";
+    hover.style.top = y + height / 2 + "px";
+  }
+  // Middle
+  else {
+    const max = document.body.scrollWidth - hover.clientWidth;
+    hover.style.left = Math.max(0, Math.min(x + width / 2 - hover.clientWidth / 2, max)) + "px";
+    hover.style.top = y + height + offset + "px";
+  }
+};
+
 export function MediaCard(props) {
 
   // We don't want this to be reactive, because if they switch between animation, the animation will stop
@@ -103,23 +139,139 @@ export function MediaCard(props) {
     setMediaPageAnilistData({ data: { data: { Media: props.media } } });
   };
 
-  const [refFunc, childRef, hovered] = gen(handleCardHover);
+  const status = createMemo(() => {
+
+    const entry = globalEditedMedia[props.media.id];
+    if (entry === undefined) {
+      return props.media.mediaListEntry?.status;
+    }
+
+    return entry?.status
+
+  });
+
+  const [refFunc, hovered, childRef] = gen(handleCardHover);
 
   return (
-    <A scoped ref={refFunc} href={urlUtils.anilistMediaUrl(props.media)} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": props.loading }} style={{ "--media-background-color": props.media.coverImage?.color }} onClick={handleClick}>
+    <A scoped ref={refFunc} href={urlUtils.anilistMediaUrl(props.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": props.loading }} style={{ "--media-background-color": props.media.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="bg" fadeIn={props.coverFadeIn} src={props.media.coverImage.extraLarge || props.media.coverImage.large} />
       <Show when={props.media.averageScore}>
         <div class="score">
           <Star scoped /> {(props.media.averageScore / 10)}
         </div>
       </Show>
-      <p class="line-clamp">{props.media.title.userPreferred}</p>
+      <p class="line-clamp">
+        <StatusIcon status={status()} />
+        {props.media.title.userPreferred}
+      </p>
       <Show when={hovered()}>
+        <QuickActionItemList {...props} status={status()} />
         <Portal mount={document.getElementById("hovers")}>
           <HoverCard {...props} ref={childRef} />
         </Portal>
       </Show>
     </A>
+  )
+}
+
+function QuickActionItemList(props) {
+  const { openEditor } = useEditMediaEntries();
+
+  const handleClick = status => async e => {
+    e.preventDefault();
+
+    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: props.media.id, status }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher);
+    if (res.status === 200) {
+      const json = await res.json();
+      storeGlobalEditedMedia(json.data.SaveMediaListEntry.mediaId, json.data.SaveMediaListEntry);
+    } else {
+      addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });
+    }
+  };
+
+  const [refFunc, hovered] = gen();
+
+  return (
+    <Show when={token2()}>
+      <div class="quick-action-wrapper" ref={refFunc}>
+
+        <QuickActionButton label="Edit media" onClick={e => {
+          e.preventDefault();
+          openEditor(props.media);
+        }}>
+          <Edit scoped />
+        </QuickActionButton>
+
+        <Show when={hovered()}>
+
+          <QuickActionButton active={props.status === "PLANNING"} onClick={handleClick("PLANNING")} label="Set to planning">
+            <Planning scoped />
+          </QuickActionButton>
+
+          <QuickActionButton active={props.status === "CURRENT"} onClick={handleClick("CURRENT")} label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")}>
+            <Watching scoped />
+          </QuickActionButton>
+
+          <QuickActionButton active={props.status === "COMPLETED"} onClick={handleClick("COMPLETED")} label="Set to completed">
+            <Complete scoped />
+          </QuickActionButton>
+
+          <QuickActionButton active={props.status === "REPEATING"} onClick={handleClick("REPEATING")} label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")}>
+            <RepeatIcon scoped />
+          </QuickActionButton>
+
+        </Show>
+
+      </div>
+    </Show>
+  );
+}
+
+function QuickActionButton(props) {
+
+  const [refFunc, hovered, childRef] = gen(handleActionHover);
+
+  return (
+    <>
+      <button class="action-button" classList={{ active: props.active }} onClick={props.onClick} ref={refFunc}>
+        {props.children}
+      </button>
+      <Show when={hovered()}>
+        <Portal mount={document.getElementById("hovers")}>
+          <div class="action-tool-tip" ref={childRef}>{props.label}</div>
+        </Portal>
+      </Show>
+    </>
+  )
+}
+
+function StatusIcon(props) {
+  return (
+    <Show when={props.status}>
+      <div class="list-status2">
+        <Switch>
+          <Match when={props.status === "COMPLETED"}>
+            <Complete scoped />
+          </Match>
+          <Match when={props.status === "REPEATING"}>
+            <RepeatIcon scoped />
+          </Match>
+          <Match when={props.status === "PLANNING"}>
+            <Planning scoped />
+          </Match>
+          <Match when={props.status === "CURRENT"}>
+            <Watching scoped />
+          </Match>
+          <Match when={props.status === "DROPPED"}>
+            <TrashIcon scoped />
+          </Match>
+          <Match when={props.status === "PAUSED"}>
+            <StopIcon scoped />
+          </Match>
+        </Switch>
+      </div>
+    </Show>
   )
 }
 

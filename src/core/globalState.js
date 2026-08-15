@@ -30,6 +30,8 @@ export const logoutUser = () => {
   });
 };
 
+export const [globalEditedMedia, storeGlobalEditedMedia] = createStore({});
+
 export const storeAccessToken = async (token, expires) => {
   setToken2(token || null);
   const fetcher = createAnilistFetcher(queries.currentUser, {});

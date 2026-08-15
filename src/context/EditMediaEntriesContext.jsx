@@ -6,7 +6,7 @@ import { EditMediaEntriesContext } from "./providers.js";
 import { asserts, queries } from "../collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
-import { authUserData } from "../core/globalState";
+import { authUserData, storeGlobalEditedMedia } from "../core/globalState";
 
 function formState(auth, initialData) {
   asserts.assertTrueOLD(!initialData || auth, "Should not be able to edit if not authenticated");
@@ -215,7 +215,10 @@ export function EditMediaEntriesProvider(props) {
         const res = await fetcherToFetch(fetcher);
         if (res.status === 200) {
           const json = await res.json();
-          mutates()?.mutateMedia?.(json.data.SaveMediaListEntry);
+          batch(() => {
+            mutates()?.mutateMedia?.(json.data.SaveMediaListEntry);
+            storeGlobalEditedMedia(json.data.SaveMediaListEntry.mediaId, json.data.SaveMediaListEntry);
+          });
         } else {
           addApplicationNotification({ type: "error", message: "Failed to save media updates", duration: 30_000 });
         }
@@ -493,10 +496,14 @@ export function EditMediaEntriesProvider(props) {
             <form method="dialog">
               <button onClick={async () => {
                 editor.close();
-                const fetcher = createAnilistFetcher(queries.anilistDeleteMediaListEntry, { id: mediaListEntry().mediaListEntry.id }, AbortSignal.timeout(30_000));
+                const { id, mediaId } = mediaListEntry().mediaListEntry;
+                const fetcher = createAnilistFetcher(queries.anilistDeleteMediaListEntry, { id }, AbortSignal.timeout(30_000));
                 const res = await fetcherToFetch(fetcher);
                 if (res.status === 200) {
-                  mutates()?.deleteMedia?.();
+                  batch(() => {
+                    mutates()?.deleteMedia?.();
+                    storeGlobalEditedMedia(mediaId, null);
+                  });
                 } else {
                   addApplicationNotification({ type: "error", message: "Failed to delete media", duration: 30_000 });
                 }
