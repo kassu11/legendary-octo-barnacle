@@ -1,4 +1,4 @@
-import { asserts } from "../collections/collections";
+import { isTypeInteger, isTypeString } from "../collections/types";
 import { formatingUtils } from "./utils";
 
 export const jikanMediaUrl= (type, card) => {
@@ -10,10 +10,13 @@ export const jikanCharacterUrl= character => {
 }
 
 export const anilistMediaUrl = media => {
-  asserts.isTypeStringOLD(media.type, "Media type");
-  asserts.isTypeInteger(media.id, "Media id");
+  let base;
 
-  const base = "/ani/" + media.type.toLowerCase() + "/" + media.id;
+  if (isTypeInteger(media?.id) && isTypeString(media?.type)) {
+    base = "/ani/" + media.type.toLowerCase() + "/" + media.id;
+  } else {
+    return "";
+  }
 
   if (!media.title.userPreferred) {
     return base;

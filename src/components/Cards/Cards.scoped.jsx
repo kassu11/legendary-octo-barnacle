@@ -246,7 +246,7 @@ export function AnilistMediaRecommendationCard(props) {
   asserts.assertTypeFunctionOLD(props.handleRateUp, "handleRateUp");
   asserts.assertTypeFunctionOLD(props.handleRateDown, "handleRateDown");
   asserts.isTypeStringOLD(props.userRating, "userRating");
-  asserts.isTypeInteger(props.rating, "rating");
+  asserts.isTypeIntegerOLD(props.rating, "rating");
 
   return (
     <AnilistMediaCardListBody media={props.node.mediaRecommendation}>

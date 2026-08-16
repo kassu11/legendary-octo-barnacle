@@ -141,9 +141,9 @@ export function MediaCard(props) {
 
   const status = createMemo(() => {
 
-    const entry = globalEditedMedia[props.media.id];
+    const entry = globalEditedMedia[props.media?.id];
     if (entry === undefined) {
-      return props.media.mediaListEntry?.status;
+      return props.media?.mediaListEntry?.status;
     }
 
     return entry?.status
@@ -153,18 +153,20 @@ export function MediaCard(props) {
   const [refFunc, hovered, childRef] = gen(handleCardHover);
 
   return (
-    <A scoped ref={refFunc} href={urlUtils.anilistMediaUrl(props.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": props.loading }} style={{ "--media-background-color": props.media.coverImage?.color }} onClick={handleClick}>
-      <ImageLoader scoped class="bg" fadeIn={props.coverFadeIn} src={props.media.coverImage.extraLarge || props.media.coverImage.large} />
-      <Show when={props.media.averageScore}>
+    <A scoped ref={refFunc} href={urlUtils.anilistMediaUrl(props.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": props.loading }} style={{ "--media-background-color": props.media?.coverImage?.color }} onClick={handleClick}>
+      <ImageLoader scoped class="bg" fadeIn={props.coverFadeIn} src={props.media?.coverImage.extraLarge || props.media?.coverImage.large} />
+      <Show when={props.media?.averageScore}>
         <div class="score">
           <Star scoped /> {(props.media.averageScore / 10)}
         </div>
       </Show>
-      <p class="line-clamp">
-        <StatusIcon status={status()} />
-        {props.media.title.userPreferred}
-      </p>
-      <Show when={hovered()}>
+      <Show when={props.media?.title.userPreferred}>
+        <p class="line-clamp">
+          <StatusIcon status={status()} />
+          {props.media.title.userPreferred}
+        </p>
+      </Show>
+      <Show when={hovered() && props.media}>
         <QuickActionItemList {...props} status={status()} />
         <Portal mount={document.getElementById("hovers")}>
           <HoverCard {...props} ref={childRef} />

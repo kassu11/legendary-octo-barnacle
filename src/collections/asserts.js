@@ -7,13 +7,13 @@ export const assertTrueOLD = (condition, message = "Not true") => {
 }
 
 export const assertFalseOLD = (condition, message = "Not false") => assertTrueOLD(!condition, message);
-export const notNullish = value => assertTrueOLD(value != null, "Value is null or undefined");
-export const unreachable = (message = "Assert unreachable") => assertTrueOLD(false, message);
+export const notNullishOLD = value => assertTrueOLD(value != null, "Value is null or undefined");
+export const unreachableOLD = (message = "Assert unreachable") => assertTrueOLD(false, message);
 
 
 export const isTypeStringOLD = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "string", varName + " is not type of string. " + message);
 export const assertTypeFunctionOLD = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "function", varName + " is not type of function. " + message);
-export const isTypeInteger = (value, varName = "Value", message = "") => assertTrueOLD(Number.isInteger(value), varName + " is not type of integer. " + message);
+export const isTypeIntegerOLD = (value, varName = "Value", message = "") => assertTrueOLD(Number.isInteger(value), varName + " is not type of integer. " + message);
 
 export const isInteger = (value, varName = "Value", message = "") => {
   const localMessage = varName + " is not integer. " + message;

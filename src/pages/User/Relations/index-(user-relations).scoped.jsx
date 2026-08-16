@@ -15,6 +15,7 @@ import { hashKeyFNV32 } from "../../../utils/hashUtils";
 import { createStore, reconcile } from "solid-js/store";
 import { MediaCard } from "./MediaCard.scoped";
 import { tabTime } from "../../../core/globalState";
+import { useIntersectionVisible } from "./useIntersectionVisible";
 
 const mediaIds = new Set();
 const [store, setStore] = createStore({});
@@ -181,10 +182,10 @@ export function UserRelations() {
       <div class="grid" classList={{ "grid-loading": listData.loading }}>
         <For each={listData.data} fallback={<FallbackCardsTokeepScrollPosition />}>{media => {
 
-          const handleRef = generateVisibilityRef();
+          const handleVisibilityRef = generateVisibilityRef();
 
           return (
-            <div class="wrapper" data-id={media.id} ref={handleRef}>
+            <div class="wrapper" data-id={media.id} ref={handleVisibilityRef}>
               <Show when={isVisible[media.id]}>
                 <MediaCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
                 { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */ }
@@ -218,33 +219,4 @@ export function UserRelations() {
   }
 }
 
-export function useIntersectionVisible() {
-  const [isVisible, storeVisibilities] = createStore([]);
 
-  const intersectionCallback = entries => {
-    for (const entry of entries) {
-      storeVisibilities(entry.target.dataset.id, entry.isIntersecting);
-    }
-  };
-
-  const intersectionObserver = new IntersectionObserver(intersectionCallback, { rootMargin: "500px" });
-  onCleanup(() => intersectionObserver.disconnect());
-
-  return {
-    isVisible,
-    generateVisibilityRef: () => {
-      let ref;
-
-      onCleanup(() => ref && intersectionObserver.unobserve(ref));
-
-      return elem => {
-        if (ref) {
-          intersectionObserver.unobserve(ref);
-        }
-
-        ref = elem;
-        intersectionObserver.observe(elem);
-      };
-    }
-  }
-}

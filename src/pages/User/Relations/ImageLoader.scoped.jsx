@@ -1,5 +1,9 @@
 import { batch, createRenderEffect, createSignal, onCleanup, Show, } from "solid-js";
 
+// We want to cancel the image loading, but img.src = "" causes problems: https://humanwhocodes.com/blog/2009/11/30/empty-image-src-can-destroy-your-site/
+// Because of this, we will set the image to a real image, so the previous image fetching is stopped
+const EMPTY_IMG = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>";
+
 export function ImageLoader(props) {
   const [showCover, setShowCover] = createSignal();
   const [fadeIn, setFadeIn] = createSignal();
@@ -8,12 +12,15 @@ export function ImageLoader(props) {
 
   onCleanup(() => {
     controller.abort();
-    img.src = "";
+    img.src = EMPTY_IMG;
   });
 
   let fade = false;
   const img = new Image();
   img.addEventListener("load", () => {
+    if (img.src === EMPTY_IMG) {
+      return;
+    }
     batch(() => {
       setFadeIn(fade);
       setShowCover(true);
@@ -29,6 +36,11 @@ export function ImageLoader(props) {
     }
 
     setShowCover(false);
+
+    if (!src) {
+      return;
+    }
+
     img.src = src;
 
     const fadeIn = props.fadeIn;
