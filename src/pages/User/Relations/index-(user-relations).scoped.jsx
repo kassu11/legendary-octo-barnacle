@@ -179,16 +179,16 @@ export function UserRelations() {
 
       <h1>Relations {listData.data?.length}</h1>
       <div class="grid" classList={{ "grid-loading": listData.loading }}>
-        <For each={listData.data} fallback={<FallbackCardsTokeepScrollPosition />}>{(media, i) => {
+        <For each={listData.data} fallback={<FallbackCardsTokeepScrollPosition />}>{media => {
 
           const handleRef = generateVisibilityRef();
 
           return (
-            <div class="wrapper" data-index={i()} ref={handleRef}>
-              <Show when={isVisible[i()]}>
-                <MediaCard cardZoomIn={!preventZoomIn.has(i())} coverFadeIn={!preventZoomIn.has(i())} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
+            <div class="wrapper" data-id={media.id} ref={handleRef}>
+              <Show when={isVisible[media.id]}>
+                <MediaCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
                 { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */ }
-                {preventZoomIn.add(i()) && true} 
+                {preventZoomIn.add(media.id) && true} 
               </Show>
             </div>
           )
@@ -223,7 +223,7 @@ export function useIntersectionVisible() {
 
   const intersectionCallback = entries => {
     for (const entry of entries) {
-      storeVisibilities(entry.target.dataset.index, entry.isIntersecting);
+      storeVisibilities(entry.target.dataset.id, entry.isIntersecting);
     }
   };
 
@@ -238,7 +238,10 @@ export function useIntersectionVisible() {
       onCleanup(() => ref && intersectionObserver.unobserve(ref));
 
       return elem => {
-        if (ref) intersectionObserver.unobserve(ref);
+        if (ref) {
+          intersectionObserver.unobserve(ref);
+        }
+
         ref = elem;
         intersectionObserver.observe(elem);
       };
