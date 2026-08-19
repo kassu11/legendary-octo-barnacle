@@ -8,7 +8,6 @@ import { queries } from "../../../collections/collections";
 import { capitalize  } from "../../../utils/formating";
 import UserMediaRelationsWorker from "../../../worker/user-media-relations.js?worker";
 import { debounce } from "@solid-primitives/scheduled";
-import { AnilistMediaCardOLD } from "../../../components/Cards/Cards.scoped";
 import "./index-(user-relations).scoped.css";
 import { safeStringifyJson } from "../../../utils/jsonUtils";
 import { hashKeyFNV32 } from "../../../utils/hashUtils";
@@ -195,9 +194,6 @@ export function UserRelations() {
           )
         }}</For>
       </div>
-      <Show when={false}>
-        <AnilistMediaCardOLD />
-      </Show>
     </div>
   );
 

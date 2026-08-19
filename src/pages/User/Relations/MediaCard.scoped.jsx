@@ -314,11 +314,11 @@ function HoverCard(props) {
           <Show when={props.media?.format}>
             <span>
               <Switch>
+                <Match when={!props.media?.countryOfOrigin || props.media.countryOfOrigin === "JP"}>
+                  {formatMediaFormat(props.media?.format)}
+                </Match>
                 <Match when={props.media?.countryOfOrigin !== "JP"}>
                   {formatMediaFormat(props.media?.format)} ({languageFromCountry(props.media?.countryOfOrigin)})
-                </Match>
-                <Match when={props.media?.countryOfOrigin === "JP"}>
-                  {formatMediaFormat(props.media?.format)}
                 </Match>
               </Switch>
             </span>

@@ -4,7 +4,6 @@ import "./index(studio).scss";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { asserts, queries } from "../../collections/collections.js";
-import { AnilistMediaCardOLD } from "../../components/Cards/Cards.scoped.jsx";
 import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContainer.scoped.jsx";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
@@ -12,6 +11,7 @@ import { isTypeFunction } from "../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { MediaCard } from "../User/Relations/MediaCard.scoped";
 
 export function Studio() {
   const params = useParams();
@@ -238,7 +238,7 @@ function MediaCards(props) {
     <For each={props.edges.reduce(merge, [])}>{(edge, i) => (
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
-        <AnilistMediaCardOLD media={edge.node} />
+        <MediaCard cardZoomIn coverFadeIn media={edge.node} />
       </>
     )}</For>
   );

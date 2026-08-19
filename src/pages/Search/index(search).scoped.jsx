@@ -21,7 +21,7 @@ import { useVirtualHeaderRedirect, useVirtualSearchParams, useVirtualType } from
 import { SeasonInputScoped } from "./inputs/SeasonInput.scoped.jsx";
 import { moveSeasonObject } from "../../utils/dates.js";
 import { asserts, localizations, searchObjects, queries } from "../../collections/collections.js";
-import { AnilistMediaCardOLD, JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
+import { JikanMediaCard } from "../../components/Cards/Cards.scoped.jsx";
 import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContainer.scoped.jsx";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
@@ -1161,7 +1161,7 @@ function AniCardRowWithFormatHeader(props) {
               <h2>{formatMediaFormat(media.format)}</h2>
             </li>
           </Show>
-          <AnilistMediaCardOLD media={media} />
+          {/* <AnilistMediaCardOLD media={media} /> */}
         </>
       )}</For>
     </>
@@ -1171,7 +1171,7 @@ function AniCardRowWithFormatHeader(props) {
 function AniCardRow(props) {
   return (
     <For each={props.data}>
-      {media => <AnilistMediaCardOLD media={media} /> }
+      {/* {media => <AnilistMediaCardOLD media={media} /> } */}
     </For>
   );
 }

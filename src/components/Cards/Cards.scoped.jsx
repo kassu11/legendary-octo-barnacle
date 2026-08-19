@@ -175,14 +175,6 @@ function JikanMediaCardListBody(props) {
   )
 }
 
-export function AnilistMediaCardOLD(props) {
-  return (
-    <AnilistMediaCardListBody {...props}>
-      <QuickActionItemList {...props} />
-    </AnilistMediaCardListBody>
-  );
-}
-
 export function JikanMediaCard(props) {
   asserts.assertTrueOLD(props.media, "Missing media");
   asserts.isTypeStringOLD(props.type);
