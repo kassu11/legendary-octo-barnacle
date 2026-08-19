@@ -1,0 +1,19 @@
+@layer layout {
+  /* Remove this background hack when styling refactoring is done */
+  _body:has(*) {
+    background: var(--bg-dark);
+  }
+
+  .browse-page {
+    max-width: 98rem;
+    margin-inline: auto;
+    display: grid;
+    gap: 48px;
+    margin-bottom: 6rem;
+  }
+
+  .time {
+    position: absolute;
+  }
+}
+

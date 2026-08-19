@@ -4,14 +4,6 @@
     background: var(--bg-dark);
   }
 
-  .browse-page {
-    max-width: 98rem;
-    margin-inline: auto;
-    display: grid;
-    gap: 48px;
-    margin-bottom: 6rem;
-  }
-
   .search-page {
     margin-inline: auto;
     width: min(100% - 64px, 90rem);
@@ -75,9 +67,5 @@
         margin-top: 4.5rem;
       }
     }
-  }
-
-  .time {
-    position: absolute;
   }
 }
