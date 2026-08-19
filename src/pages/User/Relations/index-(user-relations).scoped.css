@@ -1,42 +1,44 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: 6rem 48px;
-  margin-bottom: 6rem;
-  margin-top: 64px;
-
-  @media (width < 58em) {
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  }
-  @media (width < 38em) {
+@layer layout {
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     gap: 6rem 48px;
-    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  }
-  @media (width < 32em) {
-    gap: 5rem 16px;
-  }
-  @media (width < 25em) {
-    grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
-    gap: 5rem 8px;
-  }
+    margin-bottom: 6rem;
+    margin-top: 64px;
 
-  .wrapper {
-    aspect-ratio: 5.5/8;
-    width: 100%;
-    position: relative;
-
-    > _* {
-      position: absolute;
-      width: 100%;
+    @media (width < 58em) {
+      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
     }
-  }
+    @media (width < 38em) {
+      gap: 6rem 48px;
+      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    }
+    @media (width < 32em) {
+      gap: 5rem 16px;
+    }
+    @media (width < 25em) {
+      grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+      gap: 5rem 8px;
+    }
 
-  /* TODO: Remove this hack */
-  _body:has(&)  {
-    background-color: var(--bg-dark);
+    .wrapper {
+      aspect-ratio: 5.5/8;
+      width: 100%;
+      position: relative;
 
-    _.cp-profile-navigation _ul {
-      background-color: var(--bg);
+      > _* {
+        position: absolute;
+        width: 100%;
+      }
+    }
+
+    /* TODO: Remove this hack */
+    _body:has(&)  {
+      background-color: var(--bg-dark);
+
+      _.cp-profile-navigation _ul {
+        background-color: var(--bg);
+      }
     }
   }
 }

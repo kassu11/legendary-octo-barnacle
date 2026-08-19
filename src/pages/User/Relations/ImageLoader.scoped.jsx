@@ -1,4 +1,5 @@
 import { batch, createRenderEffect, createSignal, onCleanup, Show, } from "solid-js";
+import "./ImageLoader.scoped.css";
 
 // We want to cancel the image loading, but img.src = "" causes problems: https://humanwhocodes.com/blog/2009/11/30/empty-image-src-can-destroy-your-site/
 // Because of this, we will set the image to a real image, so the previous image fetching is stopped

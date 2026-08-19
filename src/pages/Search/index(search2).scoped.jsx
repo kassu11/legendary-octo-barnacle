@@ -1,5 +1,5 @@
 import { A, Navigate, useLocation, useParams } from "@solidjs/router";
-import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, splitProps, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
 import { createTimer, formatMSToString, timeStringToMs } from "../../utils/timeUtils";
@@ -9,20 +9,20 @@ import { VerticalCardRowScoped } from "../Browse/VerticalCardRow.scoped";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
-import { AnilistMediaCard } from "../../components/Cards/Cards.scoped";
 import { setSearchPageGroupSeasonalEntriesByFormat, tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
-import { scheduleUtils } from "../../utils/utils";
 import { assertThruthy } from "../../collections/asserts";
 import { translateInternalSearchParams } from "../../core/apiTranslations";
 import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
 import { capitalize, formatMediaFormat } from "../../utils/formating";
-import { setMediaPageAnilistData } from "../MediaPageAnilist/index(media-page-anilist).scoped";
 import { initializeMediaCardHover } from "./initializeMediaCardHover";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
 import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { useIntersectionVisible } from "../User/Relations/useIntersectionVisible";
+import { MediaCard } from "../User/Relations/MediaCard.scoped";
+import { debounce } from "@solid-primitives/scheduled";
 
 const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -134,7 +134,11 @@ const cachedResults = new Set();
 const searchPageSizes = {};
 
 const LOADER = 0;
-const INACTIVE_LOADER = 1;
+// Sometimes anilist or jikan can return a page that has a next page, but the current page is not "full"
+// The page can have 1 or 2 missing entries, and if these add up, they will make the index to page ratio broken
+// In there cases, we add the padding media, to make sure every page is the full expected page size
+// These elements are never to be rendered
+const MEDIA_PADDING_SPACE = 1;
 
 export function SearchPage() {
   const params = useParams();
@@ -146,6 +150,7 @@ export function SearchPage() {
   const anilistVariables = createMemo(createAnilistMediaQueryVariables);
   const jikanVariables = createMemo(createJikanMediaQueryVariables);
   const [page, setPage] = createSignal(1);
+  const setDebouncePage = debounce(setPage, 300);
   const [error, setError] = createSignal();
   const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
   const [previousHistoryDummyData, setPreviousHistoryDummyData] = createSignal();
@@ -195,7 +200,7 @@ export function SearchPage() {
       else setPagelessCacheData("data", "media", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
     });
 
-    if (hasNextPage && media.length < perPage) setPagelessCacheData("data", "media", { from: start + media.length, to: start + perPage }, INACTIVE_LOADER);
+    if (hasNextPage && media.length < perPage) setPagelessCacheData("data", "media", { from: start + media.length, to: start + perPage }, MEDIA_PADDING_SPACE);
 
     if (!hasNextPage) setPagelessCacheData("data", "media", produce(data => data.splice(start + media.length))); // Delete old and null elements
     else if (pagelessCacheData.data.media.at(-1) != LOADER) setPagelessCacheData("data", "media", produce(data => data.push(...Array(4).fill(LOADER)))); // Insert loading elements
@@ -404,48 +409,38 @@ export function SearchPage() {
     });
   });
 
-  const [visibleCardIndices, setVisibleCardIndices] = createStore([]);
-  const intersectionObserver = new IntersectionObserver(entries => {
-    for (const entry of entries) {
-      setVisibleCardIndices(entry.target.dataset.index, entry.isIntersecting);
-    }
-  }, { rootMargin: "800px" });
+  const generateVisibilityRef = useIntersectionVisible();
+  const [pageIndexKey, DataElement] = useDataElement();
 
-  let deltaScrollDistance = 0, prevScrollTop;
-  const updatePage = scheduleUtils.debouncer(() => {
-    const elems = document.querySelectorAll(".cp-media-card:is(.loading,.skeleton)");
-    const perPage = pagelessCacheData?.data?.perPage;
-    if (!elems.length || perPage == null) return;
-    const index = +elems[elems.length - 1].dataset.index;
-    const p = Math.floor(index / perPage) + 1;
-    setPage(p);
-    setTimeout(handleScroll, 300);
-  });
-  const handleScroll = () => {
-
-    // Disable card opacity and scale animations if scrolling fast, to make the interface keep up
-    const currentPos = document.body.parentElement.scrollTop;
-    if (prevScrollTop) {
-      var delta = Math.abs(prevScrollTop - currentPos);
-      deltaScrollDistance += delta;
-      setTimeout(() => {
-        deltaScrollDistance -= delta;
-        document.querySelector(".search-page")?.classList.toggle("prevent-animation", deltaScrollDistance > 1000);
-      }, 1000);
-    }
-    prevScrollTop = currentPos;
-
-    // If user is scrolling too fast start to debounce setPage
-    updatePage(deltaScrollDistance > 500 ? 300 : 0);
-  };
-
-  window.addEventListener("scroll", handleScroll, { passive: true });
+  const { signal } = createCleanUpAbortController();
+  let lastScolledElement, fetchPageTimeout;
+  window.addEventListener("scroll", handleScroll, { signal, passive: true });
 
   onCleanup(() => {
-    window.removeEventListener("scroll", handleScroll, { passive: true });
-    intersectionObserver.disconnect();
     searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data?.media.length || 0;
   });
+
+  function handleScroll() {
+    const perPage = pagelessCacheData?.data?.perPage;
+    if (!perPage) return;
+    const targets = document.querySelectorAll(".fetch-trigger");
+
+    if (!targets.length) return;
+    if (lastScolledElement == targets[targets.length - 1]) {
+      clearTimeout(fetchPageTimeout);
+      fetchPageTimeout = setTimeout(handleScroll, 500);
+      return;
+    }
+    lastScolledElement = targets[targets.length - 1];
+    const index = lastScolledElement[pageIndexKey]();
+
+    const page = Math.floor(index / perPage) + 1;
+    // After the debounce retrigger page fetch, this should stop when no fetch triggers are left
+    setDebouncePage(() => {
+      handleScroll();
+      return page;
+    });
+  }
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
@@ -486,35 +481,30 @@ export function SearchPage() {
             <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
               <button onClick={() => setSearchPageGroupSeasonalEntriesByFormat(v => !v)}>Group by Format</button>
             </Show>
-            <ol class="cards season">
+
+            <div class="cards">
               <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
-                let ref;
 
-                const handleRef = elem => {
-                  if (ref) intersectionObserver.unobserve(ref);
-                  elem.addEventListener("click", () => {
-                    setMediaPageAnilistData({ data: { data: { Media: media } } });
-                  });
-                  ref = elem;
-                  intersectionObserver.observe(elem);
-                };
-
-                onCleanup(() => ref && intersectionObserver.unobserve(ref));
+                const [handleVisibilityRef, isVisible] = generateVisibilityRef();
 
                 return (
-                  <>
+                  <Show when={media != MEDIA_PADDING_SPACE}>
                     <Show when={media?.customSection}>
                       <h2>{formatMediaFormat(media.customSection)}</h2>
                     </Show>
-                    <Show when={visibleCardIndices[i()]} fallback={media != INACTIVE_LOADER && <li class="skeleton-card" data-index={i()} ref={handleRef} />}>
-                      <Show when={media != INACTIVE_LOADER}>
-                        <AnilistMediaCard data-index={i()} ref={handleRef} media={media} skeleton={!media.type} loading={media?.tabTime < tabTime} />
+                    <div class="wrapper" ref={handleVisibilityRef}>
+                      <Show when={isVisible()}>
+                        <MediaCard scoped className="search-card" cardZoomIn coverFadeIn loading={media?.tabTime < tabTime} media={media} />
+                        <Show when={(media?.tabTime < tabTime || media === LOADER)}>
+                          <DataElement class="fetch-trigger" data={i} />
+                        </Show>
                       </Show>
-                    </Show>
-                  </>
+                    </div>
+                  </Show>
                 )
               }}</For>
-            </ol>
+            </div>
+
           </div>
         </Match>
         <Match when={params.mode === "search"}>
@@ -551,35 +541,52 @@ export function SearchPage() {
                 <h1>Newly Added {capitalize(params.type)}</h1>
               </Match>
             </Switch>
-            <ol class="cards">
+
+            <div class="cards">
               <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
-                let ref;
 
-                const handleRef = elem => {
-                  if (ref) intersectionObserver.unobserve(ref);
-                  elem.addEventListener("click", () => {
-                    setMediaPageAnilistData({ data: { data: { Media: media } } });
-                  });
-                  ref = elem;
-                  intersectionObserver.observe(elem);
-                };
-
-                onCleanup(() => ref && intersectionObserver.unobserve(ref));
+                const [handleVisibilityRef, isVisible] = generateVisibilityRef();
 
                 return (
-                  <Show when={visibleCardIndices[i()]} fallback={media != INACTIVE_LOADER && <li class="skeleton-card" data-index={i()} ref={handleRef} />}>
-                    <Show when={media != INACTIVE_LOADER}>
-                      <AnilistMediaCard data-index={i()} ref={handleRef} media={media} skeleton={!media.type} loading={media?.tabTime < tabTime} />
-                    </Show>
+                  <Show when={media != MEDIA_PADDING_SPACE}>
+                    <div class="wrapper" ref={handleVisibilityRef}>
+                      <Show when={isVisible()}>
+                        <MediaCard scoped className="search-card" cardZoomIn coverFadeIn loading={media?.tabTime < tabTime} media={media} />
+                        <Show when={(media?.tabTime < tabTime || media === LOADER)}>
+                          <DataElement class="fetch-trigger" data={i} />
+                        </Show>
+                      </Show>
+                    </div>
                   </Show>
                 )
               }}</For>
-            </ol>
+            </div>
+
           </div>
         </Match>
       </Switch>
     </ErrorBoundary>
   );
+}
+
+function useDataElement() {
+
+  const key = Symbol("data");
+
+  function DataElement(props) {
+    const [local, other] = splitProps(props, ["data"]);
+
+    const handleRef = elem => {
+      elem[key] = local.data;
+    }
+
+    return (
+      <div {...other} ref={handleRef} />
+    );
+  }
+
+  return [key, DataElement];
+
 }
 
 function jikanPagenationToPageInfo(pagination) {

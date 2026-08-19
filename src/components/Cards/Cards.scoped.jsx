@@ -175,7 +175,7 @@ function JikanMediaCardListBody(props) {
   )
 }
 
-export function AnilistMediaCard(props) {
+export function AnilistMediaCardOLD(props) {
   return (
     <AnilistMediaCardListBody {...props}>
       <QuickActionItemList {...props} />

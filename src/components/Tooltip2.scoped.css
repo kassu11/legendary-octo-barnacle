@@ -1,4 +1,4 @@
-@layer components {
+@layer component {
   tool-tip2 {
     display: block;
     background-color: var(--bg-dark-old);

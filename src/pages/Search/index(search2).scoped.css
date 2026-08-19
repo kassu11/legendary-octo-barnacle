@@ -9,7 +9,7 @@
     margin-inline: auto;
     display: grid;
     gap: 48px;
-    margin-bottom: 64px;
+    margin-bottom: 6rem;
   }
 
   .search-page {
@@ -32,38 +32,41 @@
       display: grid;
       padding: 0;
       grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-      gap: 32px 48px;
+      gap: 6rem 48px;
       margin-bottom: 64px;
       list-style: none;
       position: relative;
 
       @media (width < 61em) {
         grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
-        gap: 32px 32px;
+        gap: 5rem 32px;
       }
 
       @media (width < 40em) {
         grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-        gap: 8px 8px;
+        gap: 5rem 8px;
       }
 
-      &:has(_.cp-media-card.loading) _.cp-media-card.skeleton {
-        position: absolute;
-        visibility: hidden;
-        left: 0;
-        bottom: 0;
-      }
+      .wrapper {
+        width: 100%;
+        aspect-ratio: 5.5 / 8;
+        position: relative;
 
-      /* We already have a cache match, because we have generated loading media cards, */
-      /* but we still have loading skeleton cards (these are the cards at the end of search page) */
-      /* This is just a visual thing, but hide the loading skeleton cards, if we have loading cached cards */
-      /* Its possible that the cache has already all the cards, and its stupid to visually show more loading cards, that don't exist */
-      _.cp-media-card {
-        .cards:has(&.loading) &.skeleton {
+        /* We already have a cache match, because we have generated loading media cards, */
+        /* but we still have loading skeleton cards (these are the cards at the end of search page) */
+        /* This is just a visual thing, but hide the loading skeleton cards, if we have loading cached cards */
+        /* Its possible that the cache has already all the cards, and its stupid to visually show more loading cards, that don't exist */
+        .cards:has(.search-card.loading:not(:empty)) &:has(.search-card:empty) {
           position: absolute;
           visibility: hidden;
           left: 0;
           bottom: 0;
+          width: 0;
+        }
+
+        > _* {
+          position: absolute;
+          width: 100%;
         }
       }
 
@@ -71,15 +74,6 @@
         grid-column: 1 / -1;
         margin-top: 4.5rem;
       }
-    }
-
-    &.prevent-animation _* {
-      transition: unset !important; 
-    }
-
-    .skeleton-card {
-      aspect-ratio: 5.5/8;
-      margin-bottom: 4.5rem;
     }
   }
 

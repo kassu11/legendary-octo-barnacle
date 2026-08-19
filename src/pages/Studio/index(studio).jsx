@@ -4,7 +4,7 @@ import "./index(studio).scss";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { asserts, queries } from "../../collections/collections.js";
-import { AnilistMediaCard } from "../../components/Cards/Cards.scoped.jsx";
+import { AnilistMediaCardOLD } from "../../components/Cards/Cards.scoped.jsx";
 import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContainer.scoped.jsx";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
@@ -238,7 +238,7 @@ function MediaCards(props) {
     <For each={props.edges.reduce(merge, [])}>{(edge, i) => (
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
-        <AnilistMediaCard media={edge.node} />
+        <AnilistMediaCardOLD media={edge.node} />
       </>
     )}</For>
   );

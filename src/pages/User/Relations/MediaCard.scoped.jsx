@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createMemo, createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
+import { createMemo, createSignal, For, Match, onCleanup, Show, splitProps, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../../utils/formating";
 import "./index-(user-relations).scoped.css";
 import { DurationToTime, EpisodeTime2 } from "../../Home/EpisodeTime";
@@ -133,17 +133,18 @@ const handleActionHover = (parent, hover) => {
 export function MediaCard(props) {
 
   // We don't want this to be reactive, because if they switch between animation, the animation will stop
-  const { cardZoomIn } = props;
+  const [local, scoping] = splitProps(props, ["media", "coverFadeIn", "loading", "cardZoomIn"]);
+  const { cardZoomIn } = local;
 
   const handleClick = () => {
-    setMediaPageAnilistData({ data: { data: { Media: props.media } } });
+    setMediaPageAnilistData({ data: { data: { Media: local.media } } });
   };
 
   const status = createMemo(() => {
 
-    const entry = globalEditedMedia[props.media?.id];
+    const entry = globalEditedMedia[local.media?.id];
     if (entry === undefined) {
-      return props.media?.mediaListEntry?.status;
+      return local.media?.mediaListEntry?.status;
     }
 
     return entry?.status
@@ -153,23 +154,23 @@ export function MediaCard(props) {
   const [refFunc, hovered, childRef] = gen(handleCardHover);
 
   return (
-    <A scoped ref={refFunc} href={urlUtils.anilistMediaUrl(props.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": props.loading }} style={{ "--media-background-color": props.media?.coverImage?.color }} onClick={handleClick}>
-      <ImageLoader scoped class="bg" fadeIn={props.coverFadeIn} src={props.media?.coverImage.extraLarge || props.media?.coverImage.large} />
-      <Show when={props.media?.averageScore}>
+    <A scoped {...scoping} ref={refFunc} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
+      <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
+      <Show when={local.media?.averageScore}>
         <div class="score">
-          <Star scoped /> {(props.media.averageScore / 10)}
+          <Star scoped /> {(local.media.averageScore / 10)}
         </div>
       </Show>
-      <Show when={props.media?.title.userPreferred}>
+      <Show when={local.media?.title?.userPreferred}>
         <p class="line-clamp">
           <StatusIcon status={status()} />
-          {props.media.title.userPreferred}
+          {local.media.title.userPreferred}
         </p>
       </Show>
-      <Show when={hovered() && props.media}>
-        <QuickActionItemList {...props} status={status()} />
+      <Show when={hovered() && local.media}>
+        <QuickActionItemList {...local} status={status()} />
         <Portal mount={document.getElementById("hovers")}>
-          <HoverCard {...props} ref={childRef} />
+          <HoverCard {...local} ref={childRef} />
         </Portal>
       </Show>
     </A>

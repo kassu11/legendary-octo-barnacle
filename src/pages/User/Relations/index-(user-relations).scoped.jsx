@@ -8,7 +8,7 @@ import { queries } from "../../../collections/collections";
 import { capitalize  } from "../../../utils/formating";
 import UserMediaRelationsWorker from "../../../worker/user-media-relations.js?worker";
 import { debounce } from "@solid-primitives/scheduled";
-import { AnilistMediaCard } from "../../../components/Cards/Cards.scoped";
+import { AnilistMediaCardOLD } from "../../../components/Cards/Cards.scoped";
 import "./index-(user-relations).scoped.css";
 import { safeStringifyJson } from "../../../utils/jsonUtils";
 import { hashKeyFNV32 } from "../../../utils/hashUtils";
@@ -164,7 +164,7 @@ export function UserRelations() {
   };
 
 
-  const { isVisible, generateVisibilityRef } = useIntersectionVisible();
+  const generateVisibilityRef = useIntersectionVisible();
   return (
     <div class="relations">
       <p>{formatMSToString(userRelationsTime())}</p>
@@ -179,14 +179,14 @@ export function UserRelations() {
       <Checkbox label="Show not yeat released" name="allowNotYetReleased" /><br />
 
       <h1>Relations {listData.data?.length}</h1>
-      <div class="grid" classList={{ "grid-loading": listData.loading }}>
+      <div class="grid">
         <For each={listData.data} fallback={<FallbackCardsTokeepScrollPosition />}>{media => {
 
-          const handleVisibilityRef = generateVisibilityRef();
+          const [handleVisibilityRef, isVisible] = generateVisibilityRef();
 
           return (
-            <div class="wrapper" data-id={media.id} ref={handleVisibilityRef}>
-              <Show when={isVisible[media.id]}>
+            <div class="wrapper" ref={handleVisibilityRef}>
+              <Show when={isVisible()}>
                 <MediaCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
                 { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */ }
                 {preventZoomIn.add(media.id) && true} 
@@ -196,7 +196,7 @@ export function UserRelations() {
         }}</For>
       </div>
       <Show when={false}>
-        <AnilistMediaCard />
+        <AnilistMediaCardOLD />
       </Show>
     </div>
   );

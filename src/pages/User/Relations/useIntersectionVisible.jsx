@@ -1,35 +1,32 @@
-import { onCleanup } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createSignal, onCleanup } from "solid-js";
 
 
+const SET_VISIBILITY = Symbol("SET_VISIBILITY");
 export function useIntersectionVisible() {
-  const [isVisible, storeVisibilities] = createStore([]);
-
   const intersectionCallback = entries => {
     for (const entry of entries) {
-      storeVisibilities(entry.target.dataset.id, entry.isIntersecting);
+      entry.target[SET_VISIBILITY](entry.isIntersecting);
     }
   };
 
   const intersectionObserver = new IntersectionObserver(intersectionCallback, { rootMargin: "500px" });
   onCleanup(() => intersectionObserver.disconnect());
 
-  return {
-    isVisible,
-    generateVisibilityRef: () => {
-      let ref;
+  const generateVisibilityRef = () => {
+    const [visible, setVisibility] = createSignal(false);
+    let ref;
 
-      onCleanup(() => ref && intersectionObserver.unobserve(ref));
+    onCleanup(() => ref && intersectionObserver.unobserve(ref));
 
-      return elem => {
-        if (ref) {
-          intersectionObserver.unobserve(ref);
-        }
+    const handleRef = elem => {
+      ref = elem;
+      elem[SET_VISIBILITY] = setVisibility;
+      intersectionObserver.observe(elem);
+    };
 
-        ref = elem;
-        intersectionObserver.observe(elem);
-      };
-    }
-  };
+    return [handleRef, visible];
+  }
+
+  return generateVisibilityRef;
 }
 
