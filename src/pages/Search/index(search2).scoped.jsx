@@ -174,6 +174,8 @@ export function SearchPage() {
     if (curKey !== pagelessFetcher.cacheKey) return;
     if (data?.data.fallback) fallbackPagelessCacheKey = curKey;
 
+    preventZoomIn.clear();
+
     // TODO: Make a function to check when we can use long time cache
     // For example when results are smaller than page size or when searching using years etc.
     if (data) setPagelessCacheData(reconcile(data));
@@ -442,6 +444,8 @@ export function SearchPage() {
     });
   }
 
+  const preventZoomIn = new Set();
+
   return (
     <ErrorBoundary fallback="Search page has crashed">
       <SearchBar />
@@ -462,50 +466,6 @@ export function SearchPage() {
             <Navigate href={"/" + params.api + "/search/" + params.type + (params.header ? ("/" + params.header) : "") +  location.search} />
           </Show>
           <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} time={formatMSToString(anilistSearchTime())} />
-        </Match>
-        <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
-          <div class="search-page">
-            <Switch>
-              <Match when={parsedSearchParams().season === null}>
-                <h1>TBA Anime</h1>
-              </Match>
-              <Match when={parsedSearchParams().season}>
-                <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
-              </Match>
-            </Switch>
-            <A href="/ani/search/anime/this-season">Current</A>
-            <A href="/ani/search/anime/next-season">Next</A>
-            <A href="/ani/search/anime/tba">TBA</A>
-            <SeasonControls />
-
-            <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
-              <button onClick={() => setSearchPageGroupSeasonalEntriesByFormat(v => !v)}>Group by Format</button>
-            </Show>
-
-            <div class="cards">
-              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
-
-                const [handleVisibilityRef, isVisible] = generateVisibilityRef();
-
-                return (
-                  <Show when={media != MEDIA_PADDING_SPACE}>
-                    <Show when={media?.customSection}>
-                      <h2>{formatMediaFormat(media.customSection)}</h2>
-                    </Show>
-                    <div class="wrapper" ref={handleVisibilityRef}>
-                      <Show when={isVisible()}>
-                        <MediaCard scoped className="search-card" cardZoomIn coverFadeIn loading={media?.tabTime < tabTime} media={media} />
-                        <Show when={(media?.tabTime < tabTime || media === LOADER)}>
-                          <DataElement class="fetch-trigger" data={i} />
-                        </Show>
-                      </Show>
-                    </div>
-                  </Show>
-                )
-              }}</For>
-            </div>
-
-          </div>
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
@@ -540,6 +500,27 @@ export function SearchPage() {
               <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>
                 <h1>Newly Added {capitalize(params.type)}</h1>
               </Match>
+              <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
+                <Switch>
+                  <Match when={parsedSearchParams().season === null}>
+                    <h1>TBA Anime</h1>
+                  </Match>
+                  <Match when={parsedSearchParams().season}>
+                    <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
+                  </Match>
+                </Switch>
+
+                <A href="/ani/search/anime/this-season">Current</A>
+                <A href="/ani/search/anime/next-season">Next</A>
+                <A href="/ani/search/anime/tba">TBA</A>
+
+                <SeasonControls />
+
+                <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
+                  <button onClick={() => setSearchPageGroupSeasonalEntriesByFormat(v => !v)}>Group by Format</button>
+                </Show>
+
+              </Match>
             </Switch>
 
             <div class="cards">
@@ -549,9 +530,14 @@ export function SearchPage() {
 
                 return (
                   <Show when={media != MEDIA_PADDING_SPACE}>
+                    <Show when={media?.customSection}>
+                      <h2>{formatMediaFormat(media.customSection)}</h2>
+                    </Show>
                     <div class="wrapper" ref={handleVisibilityRef}>
                       <Show when={isVisible()}>
-                        <MediaCard scoped className="search-card" cardZoomIn coverFadeIn loading={media?.tabTime < tabTime} media={media} />
+                        <MediaCard scoped className="search-card" cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} />
+                        { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
+                        {preventZoomIn.add(media.id) && true}
                         <Show when={(media?.tabTime < tabTime || media === LOADER)}>
                           <DataElement class="fetch-trigger" data={i} />
                         </Show>
