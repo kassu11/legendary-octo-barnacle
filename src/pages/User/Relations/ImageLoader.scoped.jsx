@@ -1,4 +1,4 @@
-import { batch, createRenderEffect, createSignal, onCleanup, Show, } from "solid-js";
+import { batch, createRenderEffect, createSignal, onCleanup, Show, splitProps, } from "solid-js";
 import "./ImageLoader.scoped.css";
 
 // We want to cancel the image loading, but img.src = "" causes problems: https://humanwhocodes.com/blog/2009/11/30/empty-image-src-can-destroy-your-site/
@@ -6,6 +6,7 @@ import "./ImageLoader.scoped.css";
 const EMPTY_IMG = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>";
 
 export function ImageLoader(props) {
+  const [local, scoping] = splitProps(props, ["src", "fadeIn", "waitBeforeFade"]);
   const [showCover, setShowCover] = createSignal();
   const [fadeIn, setFadeIn] = createSignal();
 
@@ -18,7 +19,7 @@ export function ImageLoader(props) {
 
   let fade = false;
   const img = new Image();
-  img.addEventListener("load", () => {
+  img.addEventListener("load", async () => {
     if (img.src === EMPTY_IMG) {
       return;
     }
@@ -30,7 +31,7 @@ export function ImageLoader(props) {
 
   createRenderEffect(() => {
 
-    const src = props.src;
+    const src = local.src;
 
     if (img.src == src) {
       return;
@@ -44,8 +45,8 @@ export function ImageLoader(props) {
 
     img.src = src;
 
-    const fadeIn = props.fadeIn;
-    const wait = props.waitBeforeFade;
+    const fadeIn = local.fadeIn;
+    const wait = local.waitBeforeFade;
 
     if (wait) {
 
@@ -69,7 +70,7 @@ export function ImageLoader(props) {
 
   return (
     <Show when={showCover()}>
-      <div {...props} classList={{ "fade-in": fadeIn() }} style={{ "background-image": `url("${props.src}")` }} />
+      <div {...scoping} classList={{ "fade-in": fadeIn() }} style={{ "background-image": `url("${local.src}")` }} />
     </Show>
   );
 }

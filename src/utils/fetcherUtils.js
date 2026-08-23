@@ -260,6 +260,9 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   assertTypeArray(fetcher);
 
+  // File is used to imitate actual fetch, so we want to disable debug fetching
+  if (settings.file) settings.debug = false;
+
   settings = mergeObjects({ ...baseSettings, cache: { ...baseSettings.cache } }, settings);
 
   if (settings.delay) await new Promise(res => setTimeout(res, settings.delay));
@@ -269,7 +272,6 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   let res;
   if (settings.alwaysUseQuickCache && fetcher.cacheKey in quickCache) res = quickCache[fetcher.cacheKey];
-  else if (settings.file) res = await (await fetch(__BASE__ + "/" + settings.file)).json();
   else res = await settings.cache?.get?.(fetcher, settings);
 
   const active = settings.active?.(res, settings);
@@ -284,6 +286,27 @@ export async function sendFetcher(fetcher, settings = {}) {
     settings.onStop?.(performance.now() - start);
     return;
   }
+
+  if (settings.file) {
+    const response = await fetch(__BASE__ + "/" + settings.file);
+    const data = await settings.parse(response);
+    settings.onFetch?.(performance.now() - start, { fetcher });
+    // Fake fetch delay
+    await new Promise(res => setTimeout(res, 600));
+    const res = {
+      cacheKey: fetcher.cacheKey,
+      data,
+      expires: settings.expires || (new Date().getTime() + 1000 * 60 * 60 * 24 * 30), // 1kk
+      modified: new Date().getTime(),
+    };
+
+    if (settings.name) res.name = settings.name;
+    settings.setValue({ ...res, cache: false }, { fetcher, settings });
+    if (data) settings.cache?.set?.(res, { fetcher });
+    settings.onStop?.(performance.now() - start);
+    return;
+  }
+
 
   if (settings.loadingBar) setMainLoadingCount(v => v + 1);
 

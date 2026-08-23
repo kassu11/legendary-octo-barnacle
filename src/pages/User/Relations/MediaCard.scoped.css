@@ -51,11 +51,10 @@
     .bg {
       isolation: isolate;
       border-radius: inherit;
-      transition: .4s opacity, filter .3s;
+      transition: filter .3s;
 
       .media-card.loading & {
-        opacity: .15;
-        filter: grayscale(.8);
+        filter: grayscale(.8) opacity(.15);
       }
 
       &::before, &::after {

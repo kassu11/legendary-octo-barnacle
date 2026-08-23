@@ -14,7 +14,6 @@ import { translateInternalSearchParams } from "../../core/apiTranslations";
 import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
 import { capitalize, formatMediaFormat } from "../../utils/formating";
-import { initializeMediaCardHover } from "./initializeMediaCardHover";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
 import { createCleanUpAbortController } from "../../utils/abortUtils";
@@ -145,7 +144,9 @@ export function SearchPage() {
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
 
-  initializeMediaCardHover();
+  createEffect(() => {
+    document.title = `${capitalize(params.type)} search - LOB`;
+  });
 
   const anilistVariables = createMemo(createAnilistMediaQueryVariables);
   const jikanVariables = createMemo(createJikanMediaQueryVariables);
