@@ -396,8 +396,10 @@ export function SearchPage() {
     sendAnilistFetcher(anilistGenresAndTagsFetcher, {
       name: "Anilist genres",
       active: (res, settings) => {
+        if (!res) return true;
+        if (settings.debug) return false;
         // Only update genres and tags once a day
-        return !res || !settings.debug || (tabTime - res.modified) > timeStringToMs("1d");
+        return (tabTime - res.modified) > timeStringToMs("1d");
       },
       onFetch: () => anilistGenresAndTagsController.disable(),
       setValue: (res) => {
