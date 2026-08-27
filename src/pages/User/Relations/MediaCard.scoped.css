@@ -28,6 +28,13 @@
       z-index: -1;
     }
 
+    /* Performance optimization to stop gradient animation */
+    &:not(.loading, :empty):has(.bg) {
+      &::before, &::after {
+        animation: move-gradient 2s infinite, stop-gradient .5s forwards;
+      }
+    }
+
     /* Card can only be empty, when no media data was passed, so this is empty skeleton card */
     &:empty {
       pointer-events: none;
@@ -334,6 +341,13 @@
     }
     80%, 100% {
       background-position-x: calc(-800px * sin(45deg) + var(--offset, 0px));
+    }
+  }
+
+  @keyframes stop-gradient {
+    0% { }
+    99%, 100% {
+      background: var(--bg);
     }
   }
 }
