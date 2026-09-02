@@ -64,7 +64,7 @@ export function MainLoadingBar() {
     let scaleX;
     for (let i = 0; i < loadingScaleKeyframes.length; i++) {
       const [p1, s1] = loadingScaleKeyframes[i];
-      if (percent === s1) {
+      if (percent === p1) {
         scaleX = s1;
         break;
       }
