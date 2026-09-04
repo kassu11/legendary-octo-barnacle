@@ -158,6 +158,7 @@ export function SearchPage() {
   const [pagelessCacheData, setPagelessCacheData] = createStore({});
   const pagelessCacheKey = createMemo(() => pagelessCacheData?.cacheKey);
 
+  let highestPageMutated = 0; 
   let pagelessFetcher;
   createRenderEffect(async () => {
     const variables = anilistVariables();
@@ -179,6 +180,7 @@ export function SearchPage() {
 
     // TODO: Make a function to check when we can use long time cache
     // For example when results are smaller than page size or when searching using years etc.
+    highestPageMutated = 0;
     if (data) setPagelessCacheData(reconcile(data));
     else {
       setPagelessCacheData(reconcile({
@@ -206,12 +208,18 @@ export function SearchPage() {
     if (hasNextPage && media.length < perPage) setPagelessCacheData("data", "media", { from: start + media.length, to: start + perPage }, MEDIA_PADDING_SPACE);
 
     if (!hasNextPage) setPagelessCacheData("data", "media", produce(data => data.splice(start + media.length))); // Delete old and null elements
-    else if (pagelessCacheData.data.media.at(-1) != LOADER) setPagelessCacheData("data", "media", produce(data => data.push(...Array(4).fill(LOADER)))); // Insert loading elements
+    else if (currentPage > highestPageMutated && pagelessCacheData.data.media.at(-1) != LOADER) setPagelessCacheData("data", "media", produce(data => data.push(...Array(4).fill(LOADER)))); // Insert loading elements
 
     setPagelessCacheData("data", "perPage", perPage);
     setPagelessCacheData("data", "fallback", isFallbackSearch);
 
     setFetcherValueToStorage(unwrap(pagelessCacheData));
+
+    // This is dump, but anilist will sometimes say we have another page, when we don't. In these very specific and rare cases, the user can first fetch page 3
+    // page 3 return 0 data, and tells nextPage is false
+    // Then user then fetches page 2, return 50 entries, and tells there is nextPage
+    // This will add loaders at the end, and because page 3 has already been fetched, the loaders will stay for ever
+    highestPageMutated = Math.max(highestPageMutated, currentPage);
   };
 
   // This is only used when the anilist search returns no values
@@ -437,7 +445,7 @@ export function SearchPage() {
       return;
     }
     lastScolledElement = targets[targets.length - 1];
-    const index = lastScolledElement[pageIndexKey]();
+    const index = lastScolledElement[pageIndexKey]?.();
 
     const page = Math.floor(index / perPage) + 1;
     // After the debounce retrigger page fetch, this should stop when no fetch triggers are left
