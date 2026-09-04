@@ -7,7 +7,7 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
-import { setSearchPageGroupSeasonalEntriesByFormat, tabTime } from "../../core/globalState";
+import { searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat, tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
 import { assertThruthy } from "../../collections/asserts";
 import { translateInternalSearchParams } from "../../core/apiTranslations";
@@ -533,8 +533,8 @@ export function SearchPage() {
 
                 return (
                   <Show when={media != MEDIA_PADDING_SPACE}>
-                    <Show when={media?.customSection}>
-                      <h2>{formatMediaFormat(media.customSection)}</h2>
+                    <Show when={media?.customSection || (media === LOADER && i() === 0 && searchPageGroupSeasonalEntriesByFormat())}>
+                      <h2>{formatMediaFormat(media.customSection || "TV")}</h2>
                     </Show>
                     <div class="wrapper" ref={handleVisibilityRef}>
                       <Show when={isVisible()}>
