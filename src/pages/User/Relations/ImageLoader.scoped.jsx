@@ -7,7 +7,7 @@ const EMPTY_IMG = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>"
 
 export function ImageLoader(props) {
   const [local, scoping] = splitProps(props, ["src", "fadeIn", "waitBeforeFade"]);
-  const [showCover, setShowCover] = createSignal();
+  const [loaderSrc, setLoaderSrc] = createSignal("");
   const [fadeIn, setFadeIn] = createSignal();
 
   const controller = new AbortController();
@@ -25,7 +25,7 @@ export function ImageLoader(props) {
     }
     batch(() => {
       setFadeIn(fade);
-      setShowCover(true);
+      setLoaderSrc(img.src);
     });
   }, { signal: controller.signal });
 
@@ -36,8 +36,6 @@ export function ImageLoader(props) {
     if (img.src == src) {
       return;
     }
-
-    setShowCover(false);
 
     if (!src) {
       return;
@@ -69,7 +67,7 @@ export function ImageLoader(props) {
   });
 
   return (
-    <Show when={showCover()}>
+    <Show when={loaderSrc() === local.src && local.src}>
       <div {...scoping} classList={{ "fade-in": fadeIn() }} style={{ "background-image": `url("${local.src}")` }} />
     </Show>
   );
