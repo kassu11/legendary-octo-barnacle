@@ -12,6 +12,7 @@ export function SeasonControls() {
 
   const seasons = ["WINTER", "SPRING", "SUMMER", "FALL"];
   const index = createMemo(() => seasons.indexOf(parsedSearchParams().season));
+  const yearOrCurrentYear = createMemo(() => +parsedSearchParams().year || new Date().getFullYear());
 
   const searchWithoutSeasonsOrYear = createMemo(() => {
     let search = location.search || "";
@@ -24,7 +25,7 @@ export function SeasonControls() {
 
   const seasonHeader = (delta) => {
     const i = index();
-    const y = +parsedSearchParams().year;
+    const y = yearOrCurrentYear();
 
     const yearDelta = Math.floor((i + delta) / seasons.length);
     const year = y + yearDelta;
@@ -37,9 +38,9 @@ export function SeasonControls() {
     <div>
       <A href={`/${params.api}/${params.mode}/${params.type}/${seasonHeader(-1)}${searchWithoutSeasonsOrYear()}`}>{"<"}</A>
       <For each={seasons}>{season => (
-        <A href={`/${params.api}/${params.mode}/${params.type}/${season.toLowerCase()}-${parsedSearchParams().year}${searchWithoutSeasonsOrYear()}`} classList={{ selected: season === parsedSearchParams().season }}>
+        <A href={`/${params.api}/${params.mode}/${params.type}/${season.toLowerCase()}-${yearOrCurrentYear()}${searchWithoutSeasonsOrYear()}`} classList={{ selected: season === parsedSearchParams().season }}>
           <p>{capitalize(season)}</p>
-          <p>{parsedSearchParams().year}</p>
+          <p>{yearOrCurrentYear()}</p>
         </A>
       )}</For>
       <A href={`/${params.api}/${params.mode}/${params.type}/${seasonHeader(1)}${searchWithoutSeasonsOrYear()}`}>{">"}</A>

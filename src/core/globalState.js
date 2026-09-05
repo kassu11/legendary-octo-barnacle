@@ -20,6 +20,7 @@ export const authedUserId = createRoot(() => createMemo(() => authUserData()?.da
 export const [mainLoadingCount, setMainLoadingCount] = createSignal(0);
 
 export const [searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-seasons-by-format", true);
+export const [searchPageGroupTBAEntriesByFormat, setSearchPageGroupTBAEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-tba-by-format", false);
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 
 export const logoutUser = () => {

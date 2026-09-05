@@ -7,7 +7,7 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
-import { searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat, tabTime } from "../../core/globalState";
+import { setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
 import { assertThruthy } from "../../collections/asserts";
 import { translateInternalSearchParams } from "../../core/apiTranslations";
@@ -194,13 +194,13 @@ export function SearchPage() {
     }
   });
 
-  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, groupSeasonalEntriesByFormat, isFallbackSearch) => {
+  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, groupEntriesByFormat, isFallbackSearch) => {
     const start = (currentPage - 1) * perPage;
     assertThruthy(start <= pagelessCacheData.data.media.length);
     assertThruthy(media.length <= perPage);
 
     media.forEach((m, i) => {
-      m.customSection = groupSeasonalEntriesByFormat && pagelessCacheData.data.media[start + i - 1]?.format !== m.format ? m.format || "Unknown format" : false;
+      m.customSection = groupEntriesByFormat && pagelessCacheData.data.media[start + i - 1]?.format !== m.format ? m.format || "Format TBA" : false;
       if (m.id === pagelessCacheData.data.media[start + i]?.id) setPagelessCacheData("data", "media", start + i, m); // fine grained update
       else setPagelessCacheData("data", "media", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
     });
@@ -291,7 +291,7 @@ export function SearchPage() {
     let debounce = SEARCH_DEBOUNCE, currentPage;
 
     const { mode, type } = params;
-    const groupSeasonalEntriesByFormat = parsedSearchParams().groupSeasonalEntriesByFormat;
+    const groupEntriesByFormat = parsedSearchParams().groupEntriesByFormat;
     if (mode === "browse") {
       const dates = getDates();
       if (type === "anime") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...dates }, signal)
@@ -389,7 +389,7 @@ export function SearchPage() {
 
           const key = untrack(pagelessCacheKey);
           if (key !== currentPagelessFetcher.cacheKey) return
-          mutatePageless(res.data.data.Page.media, pageInfo, groupSeasonalEntriesByFormat, false);
+          mutatePageless(res.data.data.Page.media, pageInfo, groupEntriesByFormat, false);
         }
       }
     });
@@ -527,8 +527,11 @@ export function SearchPage() {
 
                 <SeasonControls />
 
-                <Show when={parsedSearchParams().groupSeasonalEntriesByFormat != undefined}>
-                  <button onClick={() => setSearchPageGroupSeasonalEntriesByFormat(v => !v)}>Group by Format</button>
+                <Show when={parsedSearchParams().groupEntriesByFormat != undefined}>
+                  <button onClick={() => {
+                    if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
+                    else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
+                  }}>Group by Format</button>
                 </Show>
 
               </Match>
@@ -541,8 +544,8 @@ export function SearchPage() {
 
                 return (
                   <Show when={media != MEDIA_PADDING_SPACE}>
-                    <Show when={media?.customSection || (media === LOADER && i() === 0 && searchPageGroupSeasonalEntriesByFormat())}>
-                      <h2>{formatMediaFormat(media.customSection || "TV")}</h2>
+                    <Show when={media?.customSection || (media === LOADER && i() === 0 && parsedSearchParams().groupEntriesByFormat)}>
+                      <h2>{formatMediaFormat(media.customSection || "Loading")}</h2>
                     </Show>
                     <div class="wrapper" ref={handleVisibilityRef}>
                       <Show when={isVisible()}>

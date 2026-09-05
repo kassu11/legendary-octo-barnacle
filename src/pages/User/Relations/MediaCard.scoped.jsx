@@ -311,7 +311,7 @@ function HoverCard(props) {
       </div>
       <div class="type-and-season">
         <div class="flex-bullet-separator">
-          <Show when={props.media?.format}>
+          <Show when={props.media?.format} fallback="Format TBA">
             <span>
               <Switch>
                 <Match when={!props.media?.countryOfOrigin || props.media.countryOfOrigin === "JP"}>
