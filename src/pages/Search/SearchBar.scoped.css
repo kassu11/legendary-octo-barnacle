@@ -1,10 +1,42 @@
 @layer layout {
+  .custom-select {
+    position: relative;
+    width: max-content;
+    max-width: 300px;
+    width: 200px;
+  }
+
+  .open-button {
+    width: 100%;
+    background-color: var(--bg);
+    padding: 1rem 2rem;
+    border: unset;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: filter .2s;
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+  }
+
   dialog {
     padding: 0;
     border: none;
     max-height: min(calc(100dvh - .5rem), 30rem);
-    overscroll-behavior: contain;
+    background-color: var(--bg);
     touch-action: none;
+    z-index: 1;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 8px;
+    border: unset;
+    border-radius: 4px;
+
+    &[open] {
+      display: flex;
+      flex-direction: column;
+    }
 
     &::backdrop {
       background-color: rgb(0 0 0 / 60%);
@@ -17,39 +49,138 @@
       max-height: calc(100dvh - .5rem);
       width: min(calc(100dvw - .5rem), 30rem);
       height: 100%;
+      background: transparent;
 
-      .wrapper {
-        display: grid;
-        grid-template-rows: auto;
+      form {
+        order: 1;
+      }
+    }
+
+
+    form {
+      padding: 8px;
+
+      .mobile & {
+        padding: 0;
+      }
+
+      input {
+        border-radius: 100px;
+        width: 100%;
+        border: unset;
+        padding: .5em 1em;
+        color: var(--text);
+        background-color: var(--bg-dark);
+        font-weight: 600;
+        outline: none;
+
+        .mobile & {
+          border-radius: 4px;
+          outline: none;
+          box-shadow: inset 0 0 4px var(--shadow);
+          padding: .75em 1em;
+          background-color: var(--bg);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--bg-light);
+        }
+
+        &::placeholder {
+          color: var(--text-muted);
+          opacity: .5;
+        }
+
+        &::-webkit-search-cancel-button {
+          display: none;
+        }
+
       }
     }
 
     .wrapper {
+      display: flex;
+      flex-direction: column;
       pointer-events: all;
-      padding: 8px;
       height: 100%;
-    }
-  }
+      overflow: hidden;
+      border-radius: 8px;
+      gap: 8px;
 
-  .item {
-    cursor: pointer;
-    &.inc {
-      background: green;
-    }
-    &.exc {
-      background: red;
-    }
-    &.active {
-      &.inc {
-        background: lime;
+      .items {
+        margin-top: auto;
+        overflow: auto;
+        overscroll-behavior: contain;
+        border-radius: 4px;
+        user-select: none;
+        outline: unset;
+
+        .item {
+          cursor: pointer;
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          padding: 4px 8px;
+          background-color: var(--bg);
+          font-weight: 400;
+
+          &.hovered {
+            filter: brightness(1.25);
+          }
+
+          &.active {
+            background-color: var(--bg-light);
+          }
+
+          &.hidden {
+            display: none;
+          }
+
+          .icon-wrapper {
+            transition: margin .2s;
+            position: relative;
+
+            .item:not(.active) & {
+              opacity: 0;
+              margin-left: calc(-1.25em - 8px);
+            }
+
+            svg {
+              width: 1.25em;
+              height: 1.25em;
+            }
+
+            .order {
+              position: absolute;
+              bottom: 100%;
+              right: 100%;
+              translate: 35% 35%;
+              font-weight: 900;
+              text-shadow: 0 0 3px black;
+            }
+          }
+        }
       }
-      &.exc {
-        background: pink;
-      }
-      background: grey;
     }
-    &.hidden {
-      display: none;
+
+    .footer {
+      order: 1;
+      display: flex;
+      gap: 16px;
+
+      button {
+        width: 100%;
+        background-color: var(--bg-dark);
+        padding: .5rem 1rem;
+        border: unset;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: filter .2s;
+
+        &:hover {
+          filter: brightness(1.1);
+        }
+      }
     }
   }
 }

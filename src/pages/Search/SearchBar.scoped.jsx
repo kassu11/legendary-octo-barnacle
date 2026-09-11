@@ -1,12 +1,12 @@
 import { useSearchParams } from "@solidjs/router";
-import { useParsedSearchParams } from "../../context/providers";
+import { CustomInputs, useCustomInpunts, useParsedSearchParams } from "../../context/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
-import { createEffect, createRenderEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createRenderEffect, createSignal, For, mergeProps, Show, } from "solid-js";
 import "./SearchBar.scoped.css";
-import { createStore, produce, reconcile } from "solid-js/store";
-import { wrapToSet } from "../../utils/arrays";
+import { createStore, produce } from "solid-js/store";
 import { useResponsive } from "../../context/providers";
-
+import SortAscending from "../../assets/SortAscending";
+import SortDescending from "../../assets/SortDescending";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -20,87 +20,142 @@ export function SearchBar() {
     timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
   };
 
+  const [each, store] = createStore([
+    { value: "ID",            id: "ID" },
+    { value: "Title Romaji",  id: "TITLE_ROMAJI" },
+    { value: "Title English", id: "TITLE_ENGLISH" },
+    { value: "Title Native",  id: "TITLE_NATIVE" },
+    { value: "Type",          id: "TYPE" },
+    { value: "Format",        id: "FORMAT" },
+    { value: "Starting Date", id: "START_DATE" },
+    { value: "Finished Date", id: "END_DATE" },
+    { value: "Score",         id: "SCORE" },
+    { value: "Popularity",    id: "POPULARITY" },
+    { value: "Trending",      id: "TRENDING" },
+    { value: "Episodes",      id: "EPISODES" },
+    { value: "Duration",      id: "DURATION" },
+    { value: "Status",        id: "STATUS" },
+    { value: "Chapters",      id: "CHAPTERS" },
+    { value: "Volumes",       id: "VOLUMES" },
+    { value: "Last Updated",  id: "UPDATED_AT" },
+    { value: "Favourites",    id: "FAVOURITES" },
+  ]);
+
   return (
     <div>
       <input type="search" onInput={handleInput} value={parsedSearchParams().q} />
-      <GenreSelect></GenreSelect>
+      <StoreSelect each={each} store={store} states={["asc", "desc"]}>{(entry, i) => {
+
+        const handleSelect = useCustomInpunts();
+
+        const handleClick = e => {
+          e.preventDefault();
+          handleSelect(i(), e.shiftKey);
+        };
+
+        return (
+          <div class="item" classList={{ active: !!entry.state, hidden: entry.hidden, hovered: entry.hovered }} onClick={handleClick}>
+            <div class="icon-wrapper">
+              <Show when={entry.state === "asc"} fallback={<SortDescending scoped />}>
+                <SortAscending scoped />
+              </Show>
+              <Show when={entry.order}>
+                <p class="order">{entry.order}</p>
+              </Show>
+            </div>
+            <p>{entry.value}</p>
+          </div>
+        )
+
+      }}</StoreSelect>
     </div>
   );
 }
 
+function StoreSelect(props) {
 
-function GenreSelect() {
-  const [hovered, setHovered] = createSignal();
-  const [searchStore, setSearchStore] = createStore({});
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [data, setData] = createStore([
-    { value: "nimi" },
-    { value: "nimi tulee tähän" },
-    { value: "osoite" },
-    { value: "anime" },
-    { value: "sao" },
-    { value: "idk" },
-  ]);
+  props = mergeProps({ states: [true] }, props);
 
-  createRenderEffect(() => {
-    const include = wrapToSet(searchParams.include);
-    const exclude = wrapToSet(searchParams.exclude);
+  let hovered = 0;
+  const setHovered = i => {
 
-    const newObject = {}
-    include.forEach(v => newObject[v] = "inc");
-    exclude.forEach(v => newObject[v] = "exc");
+    props.store(produce(entries => {
+      if (hovered != null) entries[hovered].hovered = false;
+      if (i != null) entries[i].hovered = true;
+    }));
 
-    setSearchStore(reconcile(newObject));
-  });
+    hovered = i;
+
+  };
 
   const handleSearch = search => {
-    setData(produce(data => {
+    const regex = new RegExp(search, "i");
+    props.store(produce(entries => {
       const indecies = [];
-      data.forEach((entry, i) => {
-        if (!(entry.hidden = !entry.value.includes(search))) indecies.push(i);
+      entries.forEach((entry, i) => {
+        if (!(entry.hidden = !regex.test(entry.value))) indecies.push(i);
       });
 
-      data.indecies = indecies
+      entries.indecies = indecies
     }));
   };
 
-  const handleSelect = i => {
+  const values = [];
+
+  const handleSelect = (i, multiSelect) => {
     if (i == null) return;
-    const value = data[i].value;
-    const val = searchStore[value];
 
-    const include = wrapToSet(searchParams.include);
-    const exclude = wrapToSet(searchParams.exclude);
-    include.delete(value);
-    exclude.delete(value);
+    props.store(produce(entries => {
+      if (!multiSelect) {
+        entries[i].order = null;
+        for (const index of values) {
+          entries[index].order = null;
+          if (index != i) {
+            memory[index] ??= props.each[index].state;
+            entries[index].state = undefined;
+          }
+        }
+        values.length = 0;
+      }
 
-    if (!val) include.add(value);
-    else if (val == "inc") exclude.add(value);
-    setSearchParams({ include: [...include], exclude: [...exclude] })
+      memory[i] ??= props.each[i].state;
+
+      const index = props.states.indexOf(entries[i].state);
+      entries[i].state = props.states[index + 1];
+
+      if (!values.includes(i)) values.push(i);
+
+      if (multiSelect) {
+        let order = 1;
+        for (const index of values) {
+          entries[index].order = order++;
+        }
+      }
+
+    }));
+
+
   };
 
-  const handleSubmit = () => handleSelect(hovered());
+  const handleSubmit = () => handleSelect(hovered);
 
   let memory;
   const handleOpen = () => {
-    memory = { include: undefined, exclude: undefined, ...searchParams };
+    memory = {};
   };
 
   const handleCancel = () => {
-    setSearchParams(memory);
+    props.store(produce(entries => {
+      for (const key in memory) {
+        entries[key].state = memory[key];
+      }
+    }));
   };
 
   return (
-    <>
-      <Select each={data} onOpen={handleOpen} onCancel={handleCancel} onHover={setHovered} onSubmit={handleSubmit} onSelect={handleSelect} onSearch={handleSearch}>{(entry, i) => (
-        <>
-          <div class="item" classList={{ inc: searchStore[entry.value] === "inc", exc: searchStore[entry.value] === "exc", hidden: entry.hidden, active: i() === hovered() }} onClick={e => {
-            e.preventDefault();
-            handleSelect(i());
-          }}>{entry.value}</div>
-        </>
-      )}</Select>
-    </>
+    <CustomInputs.Provider value={handleSelect}>
+      <Select onOpen={handleOpen} onCancel={handleCancel} onHover={setHovered} onSubmit={handleSubmit} onSelect={handleSelect} onSearch={handleSearch} {...props}></Select>
+    </CustomInputs.Provider>
   );
 }
 
@@ -128,13 +183,24 @@ function Select(props) {
     // Dialog is only clicked in mobile, when user clicks outside the select area
     if (e.target === dialog) handleClose();
     if (dialog.open && e.target.closest("dialog") !== dialog) handleClose();
+    else {
+      input.focus();
+      input.select();
+    }
   }
+
+  let itemsRef;
+  const handleHover = i => {
+    props.onHover(i);
+    itemsRef?.children?.[i]?.scrollIntoView({ block: "center" });
+  };
 
   const handleOpen = () => {
     controller?.abort();
     controller = new AbortController();
     openDialog();
     props.onOpen();
+    handleHover(props.each.indecies[index]);
 
     window.addEventListener("focusin", handleFocusIn, { signal: controller.signal });
     console.log("Adding");
@@ -160,22 +226,33 @@ function Select(props) {
   const handleClose = () => {
     controller?.abort();
     dialog.close();
+    setSearch("");
+    index = 0;
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    props.onSubmit();
+    props.onSubmit(e.shiftKey);
     input.select(); // Select text to make the text removal easier after selection
   };
 
   const handleInputChange = e => {
     setSearch(e.target.value);
     index = 0;
-    props.onHover(props.each.indecies[index]);
+    handleHover(props.each.indecies[index]);
   }
+
+  const [holdingShift, setHoldingShift] = createSignal(false);
 
   let index = 0;
   const handleKeyDown = e => {
+    if (e.key === "Escape") {
+      handleClose()
+      return;
+    }
+
+    setHoldingShift(e.shiftKey);
+
     const length = Math.max(props.each.indecies.length, 1);
     if (e.key === "ArrowDown") index += 1;
     else if (e.key === "ArrowUp") index += length - 1;
@@ -183,7 +260,11 @@ function Select(props) {
 
     e.preventDefault();
     index %= length;
-    props.onHover(props.each.indecies[index]);
+    handleHover(props.each.indecies[index]);
+  }
+
+  const handleKeyUp = e => {
+    setHoldingShift(e.shiftKey);
   }
 
   const handleInputBlur = e => {
@@ -204,7 +285,6 @@ function Select(props) {
   };
 
   createRenderEffect(() => props.onSearch(search()));
-  props.onHover(props.each.indecies[index]);
 
   const handleCancel = () => {
     props.onCancel();
@@ -220,14 +300,14 @@ function Select(props) {
 
 
   return (
-    <>
-      <button onMouseDown={handleMouseDown} onClick={handleButtonClick}>Click me</button>
+    <div class="custom-select" classList={{ "holding-shift": holdingShift() }}>
+      <button onMouseDown={handleMouseDown} onClick={handleButtonClick} class="open-button">Sort</button>
       <dialog ref={elem => dialog = elem} classList={{ mobile: isTouch() }}>
         <div class="wrapper">
           <form onSubmit={handleSubmit}>
-            <input type="search" ref={elem => input = elem} onBlur={handleInputBlur} onInput={handleInputChange} onKeyDown={handleKeyDown} />
+            <input type="search" value={search()} placeholder="Search..." autocorrect="off" ref={elem => input = elem} onBlur={handleInputBlur} onInput={handleInputChange} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} />
           </form>
-          <div class="items">
+          <div class="items" ref={elem => itemsRef = elem} tabindex="-1">
             <For each={props.each} children={props.children} />
           </div>
           <Show when={isTouch()}>
@@ -238,6 +318,6 @@ function Select(props) {
           </Show>
         </div>
       </dialog>
-    </>
+    </div>
   )
 }

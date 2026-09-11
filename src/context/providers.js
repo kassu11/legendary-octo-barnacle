@@ -30,5 +30,5 @@ export const useFavourites = () => useContext(FavouritesContext);
 export const MediaInfoContext = createContext();
 export const useMediaInfo = () => useContext(MediaInfoContext);
 
-export const GenericTestingContext = createContext();
-export const useGenericTesting = () => useContext(GenericTestingContext);
+export const CustomInputs = createContext();
+export const useCustomInpunts = () => useContext(CustomInputs);
