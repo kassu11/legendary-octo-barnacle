@@ -40,7 +40,7 @@ export function ActivityHistoryScoped(props) {
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <Show when={props.history.at(-1).date > start}>
+    <Show when={props.history?.at(-1)?.date > start}>
       <div>
         <h3>Activity</h3>
         <div class="activity-history-container">
