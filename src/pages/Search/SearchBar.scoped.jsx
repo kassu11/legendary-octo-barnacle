@@ -1,12 +1,15 @@
 import { useSearchParams } from "@solidjs/router";
-import { CustomInputs, useCustomInpunts, useParsedSearchParams } from "../../context/providers";
+import { useParsedSearchParams } from "../../context/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
-import { createEffect, createRenderEffect, createSignal, For, mergeProps, Show, } from "solid-js";
+import { createEffect, createRenderEffect, createSignal, For, Show, } from "solid-js";
 import "./SearchBar.scoped.css";
-import { createStore, produce } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import { useResponsive } from "../../context/providers";
 import SortAscending from "../../assets/SortAscending";
 import SortDescending from "../../assets/SortDescending";
+import { arrayUtils } from "../../utils/utils";
+import { isTypeInteger } from "../../collections/types";
+import { untrack } from "solid-js/web";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -20,149 +23,132 @@ export function SearchBar() {
     timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
   };
 
-  const [each, store] = createStore([
-    { value: "ID",            id: "ID" },
-    { value: "Title Romaji",  id: "TITLE_ROMAJI" },
-    { value: "Title English", id: "TITLE_ENGLISH" },
-    { value: "Title Native",  id: "TITLE_NATIVE" },
-    { value: "Type",          id: "TYPE" },
-    { value: "Format",        id: "FORMAT" },
-    { value: "Starting Date", id: "START_DATE" },
-    { value: "Finished Date", id: "END_DATE" },
-    { value: "Score",         id: "SCORE" },
-    { value: "Popularity",    id: "POPULARITY" },
-    { value: "Trending",      id: "TRENDING" },
-    { value: "Episodes",      id: "EPISODES" },
-    { value: "Duration",      id: "DURATION" },
-    { value: "Status",        id: "STATUS" },
-    { value: "Chapters",      id: "CHAPTERS" },
-    { value: "Volumes",       id: "VOLUMES" },
-    { value: "Last Updated",  id: "UPDATED_AT" },
-    { value: "Favourites",    id: "FAVOURITES" },
+  const each = [
+    { description: "ID",            id: "ID" },
+    { description: "Title Romaji",  id: "TITLE_ROMAJI" },
+    { description: "Title English", id: "TITLE_ENGLISH" },
+    { description: "Title Native",  id: "TITLE_NATIVE" },
+    { description: "Type",          id: "TYPE" },
+    { description: "Format",        id: "FORMAT" },
+    { description: "Starting Date", id: "START_DATE" },
+    { description: "Finished Date", id: "END_DATE" },
+    { description: "Score",         id: "SCORE" },
+    { description: "Popularity",    id: "POPULARITY" },
+    { description: "Trending",      id: "TRENDING" },
+    { description: "Episodes",      id: "EPISODES" },
+    { description: "Duration",      id: "DURATION" },
+    { description: "Status",        id: "STATUS" },
+    { description: "Chapters",      id: "CHAPTERS" },
+    { description: "Volumes",       id: "VOLUMES" },
+    { description: "Last Updated",  id: "UPDATED_AT" },
+    { description: "Favourites",    id: "FAVOURITES" },
+  ];
+
+  const [value, setValue] = createSignal([
+    { description: "Favourites",    id: "FAVOURITES", value: "desc" },
   ]);
+
+  const handleChange = e => {
+    setValue(values => {
+
+      if (e.oldValue) {
+        return [...e.oldValue];
+      }
+
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        if (value.id !== e.target) continue;
+        if (value.value === "desc") {
+          value.value = "asc";
+        }
+        else if (value.value === "asc") {
+          values.splice(i, 1);
+        }
+
+        return [...values];
+
+      }
+
+      values.push({id: e.target, value: "desc"});
+      return [...values];
+
+    });
+
+  };
 
   return (
     <div>
       <input type="search" onInput={handleInput} value={parsedSearchParams().q} />
-      <StoreSelect each={each} store={store} states={["asc", "desc"]}>{(entry, i) => {
-
-        const handleSelect = useCustomInpunts();
-
-        const handleClick = e => {
-          e.preventDefault();
-          handleSelect(i(), e.shiftKey);
-        };
-
+      <StoreSelect each={each} value={value()} onChange={handleChange}>{entry => {
         return (
-          <div class="item" classList={{ active: !!entry.state, hidden: entry.hidden, hovered: entry.hovered }} onClick={handleClick}>
+          <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
             <div class="icon-wrapper">
-              <Show when={entry.state === "asc"} fallback={<SortDescending scoped />}>
+              <Show when={entry.value === "asc"} fallback={<SortDescending scoped />}>
                 <SortAscending scoped />
               </Show>
               <Show when={entry.order}>
                 <p class="order">{entry.order}</p>
               </Show>
             </div>
-            <p>{entry.value}</p>
+            <p>{entry.description}</p>
           </div>
         )
-
       }}</StoreSelect>
     </div>
   );
 }
 
 function StoreSelect(props) {
+  const [extraMetadata, storeExtraMetadata] = createStore({});
+  const [hovered, setHovered] = createSignal(-1);
+  const visibleIndices = [];
+  const [search, setSearch] = createSignal("");
 
-  props = mergeProps({ states: [true] }, props);
+  // Update metadata
+  createRenderEffect(() => {
+    const metadata = {};
+    // Handle selected values user gives by props.value
+    arrayUtils.wrapToArray(props.value).forEach(({ id, ...rest }) => {
+      metadata[id] = rest;
+    });
 
-  let hovered = 0;
-  const setHovered = i => {
+    // Handle searched indices
+    const allValues = props.each || [];
+    const searchString = search();
+    if (searchString) {
+      const regex = new RegExp(searchString, "i");
+      visibleIndices.length = 0;
 
-    props.store(produce(entries => {
-      if (hovered != null) entries[hovered].hovered = false;
-      if (i != null) entries[i].hovered = true;
-    }));
+      allValues.forEach((value, i) => {
 
-    hovered = i;
+        if (regex.test(value.description)) visibleIndices.push(i);
+        else {
+          metadata[value.id] ??= {};
+          metadata[value.id].hidden = true;
+        }
 
-  };
-
-  const handleSearch = search => {
-    const regex = new RegExp(search, "i");
-    props.store(produce(entries => {
-      const indecies = [];
-      entries.forEach((entry, i) => {
-        if (!(entry.hidden = !regex.test(entry.value))) indecies.push(i);
       });
 
-      entries.indecies = indecies
-    }));
-  };
-
-  const values = [];
-
-  const handleSelect = (i, multiSelect) => {
-    if (i == null) return;
-
-    props.store(produce(entries => {
-      if (!multiSelect) {
-        entries[i].order = null;
-        for (const index of values) {
-          entries[index].order = null;
-          if (index != i) {
-            memory[index] ??= props.each[index].state;
-            entries[index].state = undefined;
-          }
-        }
-        values.length = 0;
-      }
-
-      memory[i] ??= props.each[i].state;
-
-      const index = props.states.indexOf(entries[i].state);
-      entries[i].state = props.states[index + 1];
-
-      if (!values.includes(i)) values.push(i);
-
-      if (multiSelect) {
-        let order = 1;
-        for (const index of values) {
-          entries[index].order = order++;
-        }
-      }
-
-    }));
+    } else if (allValues.length !== visibleIndices.length) {
+      visibleIndices.length = 0;
+      for (let i = 0; i < allValues.length; i++) visibleIndices[i] = i;
+    }
 
 
-  };
+    // Highlight the hovered element
+    const index = visibleIndices[hovered()];
+    const hoverTarget = allValues[index];
+    if (hoverTarget) {
+      metadata[hoverTarget.id] ??= {};
+      metadata[hoverTarget.id].hovered = true;
+    }
 
-  const handleSubmit = () => handleSelect(hovered);
+
+    storeExtraMetadata(reconcile(metadata));
+  });
 
   let memory;
-  const handleOpen = () => {
-    memory = {};
-  };
 
-  const handleCancel = () => {
-    props.store(produce(entries => {
-      for (const key in memory) {
-        entries[key].state = memory[key];
-      }
-    }));
-  };
-
-  return (
-    <CustomInputs.Provider value={handleSelect}>
-      <Select onOpen={handleOpen} onCancel={handleCancel} onHover={setHovered} onSubmit={handleSubmit} onSelect={handleSelect} onSearch={handleSearch} {...props}></Select>
-    </CustomInputs.Provider>
-  );
-}
-
-function Select(props) {
-  // props.onClick
-  // props.onChange => (target)
-  const [search, setSearch] = createSignal("");
   const { isTouch } = useResponsive()
   let dialog, input, controller;
 
@@ -191,19 +177,21 @@ function Select(props) {
 
   let itemsRef;
   const handleHover = i => {
-    props.onHover(i);
-    itemsRef?.children?.[i]?.scrollIntoView({ block: "center" });
+    setHovered(i);
+    const index = visibleIndices[i];
+    if (isTypeInteger(index)) {
+      itemsRef?.children?.[index]?.scrollIntoView({ block: "center" });
+    }
   };
 
   const handleOpen = () => {
     controller?.abort();
     controller = new AbortController();
     openDialog();
-    props.onOpen();
-    handleHover(props.each.indecies[index]);
+    handleHover(-1);
+    memory = structuredClone(props.value);
 
     window.addEventListener("focusin", handleFocusIn, { signal: controller.signal });
-    console.log("Adding");
     window.addEventListener("click", handleClick, { signal: controller.signal });
   };
 
@@ -227,24 +215,34 @@ function Select(props) {
     controller?.abort();
     dialog.close();
     setSearch("");
-    index = 0;
+    handleHover(-1);
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    props.onSubmit(e.shiftKey);
-    input.select(); // Select text to make the text removal easier after selection
+    const index = untrack(hovered);
+    if (index !== -1 && visibleIndices.length) {
+      props.onChange({ target: props.each[visibleIndices[index]].id });
+    }
+
+    input.select(); // Select text to make the text removal easier after submit
+
+    if (index === -1) {
+      handleClose();
+    }
   };
 
   const handleInputChange = e => {
     setSearch(e.target.value);
-    index = 0;
-    handleHover(props.each.indecies[index]);
+    if (e.target.value) {
+      handleHover(0);
+    } else {
+      handleHover(-1);
+    }
   }
 
   const [holdingShift, setHoldingShift] = createSignal(false);
 
-  let index = 0;
   const handleKeyDown = e => {
     if (e.key === "Escape") {
       handleClose()
@@ -253,14 +251,16 @@ function Select(props) {
 
     setHoldingShift(e.shiftKey);
 
-    const length = Math.max(props.each.indecies.length, 1);
-    if (e.key === "ArrowDown") index += 1;
-    else if (e.key === "ArrowUp") index += length - 1;
+    let index = untrack(hovered);
+    const max = visibleIndices.length - 1;
+    if (e.key === "ArrowDown" && index >= max) index = Math.min(0, max);
+    else if (e.key === "ArrowDown") index += 1;
+    else if (e.key === "ArrowUp" && index <= 0) index = max;
+    else if (e.key === "ArrowUp") index -= 1;
     else return;
 
     e.preventDefault();
-    index %= length;
-    handleHover(props.each.indecies[index]);
+    handleHover(index);
   }
 
   const handleKeyUp = e => {
@@ -284,10 +284,8 @@ function Select(props) {
     }
   };
 
-  createRenderEffect(() => props.onSearch(search()));
-
   const handleCancel = () => {
-    props.onCancel();
+    props.onChange({ oldValue: memory });
     handleClose();
   }
 
@@ -298,6 +296,12 @@ function Select(props) {
     else handleOpen()
   };
 
+  const handleItemClick = (value) => e => {
+    e.stopPropagation();
+    props.onChange({ target: value.id });
+    input.focus();
+    input.select();
+  }
 
   return (
     <div class="custom-select" classList={{ "holding-shift": holdingShift() }}>
@@ -308,7 +312,9 @@ function Select(props) {
             <input type="search" value={search()} placeholder="Search..." autocorrect="off" ref={elem => input = elem} onBlur={handleInputBlur} onInput={handleInputChange} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} />
           </form>
           <div class="items" ref={elem => itemsRef = elem} tabindex="-1">
-            <For each={props.each} children={props.children} />
+            <For each={props.each}>{(v, i) => (
+              <div class="contents" onClick={handleItemClick(v)}>{props.children(extraMetadata[v.id] ? { ...v, ...extraMetadata[v.id] } : v, i)}</div>
+            )}</For>
           </div>
           <Show when={isTouch()}>
             <div class="footer">
