@@ -32,7 +32,7 @@ export function ParseSearchParams(props) {
     const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
 
     if (header === "trending") obj.sort = "trending_desc";
-    else if (header === "popular") obj.sort = ["popularity_desc", "score_desc"];
+    else if (header === "popular") obj.sort = ["popularity_desc"];
     else if (header === "novel") Object.assign(obj, { sort: "popularity_desc", format: "light_novel" });
     else if (header === "manhwa") Object.assign(obj, { sort: "popularity_desc", countryOfOrigin: "KR" });
     else if (header === "finished") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0 });
@@ -57,7 +57,7 @@ export function ParseSearchParams(props) {
     if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
 
     if (filteredSorts.length) obj.sort = filteredSorts;
-    else if (!obj.sort?.length) obj.sort = ["popularity_desc", "score_desc"];
+    else if (!obj.sort?.length) obj.sort = ["popularity_desc"];
 
     obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
     obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));
