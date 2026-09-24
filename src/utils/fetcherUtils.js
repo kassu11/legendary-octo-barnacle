@@ -224,7 +224,7 @@ const baseSettings = {
   onStart: () => { },
   onError: (res, { fetcher }) => {
     if (!res) {
-      if (fetcher[1]?.signal.aborted) return;
+      if (fetcher[1]?.signal?.aborted) return;
       addApplicationNotification({ type: "error", message: "CORS error", duration: 10_000 });
     } else {
       addApplicationNotification({ type: "error", message: `Error status code: ${res.status}.`, duration: 30_000 });
