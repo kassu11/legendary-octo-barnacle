@@ -49,12 +49,11 @@ export function SearchBar() {
     if (type === "media") {
       options.push({ description: "Chapters / Episodes", id: "progress", type: "numeric", values: [ "progress_desc_plus", "progress_plus" ] });
       options.push({ description: "Type", id: "type", type: "alphabetic", values: [ "type_desc", "type" ] });
-      options.push({ description: "Volumes", id: "volumes", type: "numeric", values: [ "volumes_desc", "volumes" ] });
     } else if (type === "anime") {
       options.push({ description: "Episodes", id: "progress", type: "numeric", values: [ "progress_desc_plus", "progress_plus" ] });
     } else if (type === "manga") {
       options.push({ description: "Chapters", id: "progress", type: "numeric", values: [ "progress_desc_plus", "progress_plus" ] });
-      options.push({ description: "Volumes", id: "volumes", type: "numeric", values: [ "volumes_desc", "volumes" ] });
+      options.push({ description: "Volumes", id: "volumes", type: "numeric", values: [ "volumes_desc_plus", "volumes_plus" ] });
     }
 
     return options.sort((a, b) => a.description.localeCompare(b.description));

@@ -52,6 +52,9 @@ export const translateInternalSearchParams = {
 
     start_date_plus:      { ani: { sort: "START_DATE",      yearGreater: 0     } },
     start_date_desc_plus: { ani: { sort: "START_DATE_DESC", yearGreater: 0     } },
+
+    volumes_plus:       { ani: { sort: "VOLUMES",      volumeGreater: 0        } },
+    volumes_desc_plus:  { ani: { sort: "VOLUMES_DESC", volumeGreater: 0        } },
   },
 
   onList: {
