@@ -1,4 +1,4 @@
-import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
+import { useSearchParams, useNavigate } from "@solidjs/router";
 import { createMemo, Show } from "solid-js";
 import { useParsedSearchParams } from "../../context/providers";
 import { arrayUtils } from "../../utils/utils";
@@ -9,7 +9,6 @@ import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
 export function MediaSourceSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const params = useParams();
   const navigate = useNavigate();
 
   const sourceOptions = [
@@ -51,15 +50,6 @@ export function MediaSourceSelect() {
     }
 
     setSearchParams({ source: newActiveValues.map(e => e.id) }, { replace: true });
-
-    if (newActiveValues.length === 0) {
-      const header = params.header;
-      // Remove headers that add sources
-      if (header === "novel" || header === "finished-manga" || header === "finished-novel") {
-        const path = window.location.href.split(__BASE__)[1].replace(/\/novel|finished-manga|finished-novel/, "");
-        navigate(path);
-      }
-    }
 
   };
 

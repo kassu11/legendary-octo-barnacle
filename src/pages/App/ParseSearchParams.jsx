@@ -27,7 +27,9 @@ export function ParseSearchParams(props) {
     };
 
     const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalApiParams.sort[val]));
+    const filteredCountry = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.country)).sort();
     const filteredFormats = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.format).filter(val => translateInternalApiParams.format[val])).sort();
+    const filteredStatus = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.status).filter(val => translateInternalApiParams.status[val])).sort();
 
     const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
     const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
@@ -35,7 +37,7 @@ export function ParseSearchParams(props) {
     if (header === "trending") obj.sort = ["trending_desc"];
     else if (header === "popular") obj.sort = ["popularity_desc"];
     else if (header === "novel") Object.assign(obj, { sort: ["popularity_desc"], format: "light_novel" });
-    else if (header === "manhwa") Object.assign(obj, { sort: ["popularity_desc"], countryOfOrigin: "KR" });
+    else if (header === "manhwa") Object.assign(obj, { sort: ["popularity_desc"], country: "KR" });
     else if (header === "finished") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", endDateGreater: 0 });
     else if (header === "new") Object.assign(obj, { sort: ["id_desc"] });
     else if (header === "top") Object.assign(obj, { sort: ["score_desc", "popularity_desc"] });
@@ -61,12 +63,13 @@ export function ParseSearchParams(props) {
     else if (!obj.sort?.length) obj.sort = ["popularity_desc"];
 
     if (filteredFormats.length) obj.format = filteredFormats;
+    if (filteredCountry.length) obj.country = filteredCountry;
+    if (filteredStatus.length) obj.status = filteredStatus;
 
     obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
     obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));
     obj.tags = wrapToSet(wrapToArray(searchParams.tag).map(name => name.toLowerCase()));
     obj.excludedTags = wrapToSet(wrapToArray(searchParams.excludedTag).map(name => name.toLowerCase()));
-    obj.countryOfOrigin = wrapToArray(searchParams.country).at(-1) || obj.countryOfOrigin;
     if (searchParams.year) obj.year = +wrapToArray(searchParams.year).at(-1);
 
     if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
@@ -77,7 +80,7 @@ export function ParseSearchParams(props) {
 
     if (obj.groupEntriesByFormat) obj.sort = ["format", ...obj.sort];
 
-    ["format", "status"].forEach(key => {
+    ["format", "status", "country", "source"].forEach(key => {
       if (key in obj) obj[key] = wrapToArray(obj[key]);
     });
 
@@ -98,23 +101,3 @@ export function ParseSearchParams(props) {
     </ParsedSearchParamsContext.Provider>
   )
 }
-
-// const animeSearch = {
-//   type: "anime",
-//   header: (string) => {
-//     if (string.match(/^(summer|fall|spring|winter)-\d+$/)) {
-//       return true;
-//     }
-//
-//     return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top"].includes(string);
-//   }
-// }
-// const mangaSearch = {
-//   type: "manga",
-//   header: ["finished", "finished-manga", "tba", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top"],
-// }
-//
-// const bothSearch = {
-//   type: "media",
-//   header: ["finished", "trending", "popular", "top", "tba"],
-// }

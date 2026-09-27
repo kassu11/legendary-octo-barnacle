@@ -42,6 +42,8 @@ function createAnilistMediaQueryVariables() {
     genres: [],
     tags: [],
     sourceIn: [],
+    countryOfOriginIn: [],
+    statusIn: [],
     minimumTagRank: rank,
     excludedGenres: [...excludedGenres],
     search: q?.toLowerCase().trim() || undefined,
@@ -58,7 +60,7 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "status", obj, rest);
   mergeVariables(api, "season", obj, rest);
   mergeVariables(api, "format", obj, rest);
-  mergeVariables(api, "countryOfOrigin", obj, rest);
+  mergeVariables(api, "country", obj, rest);
   mergeVariables(api, "onList", obj, rest);
   mergeVariables(api, "source", obj, rest);
 
@@ -489,20 +491,24 @@ export function SearchPage() {
               <Match when={params.header === "top" && parsedSearchParams().sort?.[0] === "score_plus"}>
                 <h1>Worst {capitalize(params.type)}</h1>
               </Match>
-              <Match when={params.header === "popular" && parsedSearchParams().sort?.[0] === "popularity_desc"}>
-                <h1>All Time Popular {capitalize(params.type)}</h1>
+              <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
+                <Switch>
+                  <Match when={params.header == "popular"}>
+                    <h1>All Time Popular {capitalize(params.type)}</h1>
+                  </Match>
+                  <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
+                    <h1>All Time Popular Light Novels</h1>
+                  </Match>
+                  <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
+                    <h1>All Time Popular Manhwa</h1>
+                  </Match>
+                </Switch>
               </Match>
               <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
                 <h1>Trending {capitalize(params.type)}</h1>
               </Match>
               <Match when={params.header === "finished" && parsedSearchParams().status?.includes("complete")}>
                 <h1>Recently Finished {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={params.header === "novel" && parsedSearchParams().sort?.[0] === "popularity_desc" && parsedSearchParams().format?.includes("light_novel")}>
-                <h1>All Time Popular Light Novels</h1>
-              </Match>
-              <Match when={params.header === "manhwa" && parsedSearchParams().sort?.[0] === "popularity_desc" && parsedSearchParams().countryOfOrigin === "KR" }>
-                <h1>All Time Popular Manhwa</h1>
               </Match>
               <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
                 <h1>Recently Finished Mangas</h1>

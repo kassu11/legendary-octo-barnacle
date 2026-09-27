@@ -5,7 +5,6 @@ query (
   $isAdult: Boolean
   $search: String
   $format: [MediaFormat]
-  $status: MediaStatus
   $countryOfOrigin: CountryCode
   $sourceIn: [MediaSource]
   $season: MediaSeason
@@ -34,6 +33,8 @@ query (
   $minimumTagRank: Int
   $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
   $averageScoreGreater: Int
+  $countryOfOriginIn: [CountryCode]
+  $statusIn: [MediaStatus]
 ) {
   Page(page: $page) {
     pageInfo {
@@ -48,7 +49,6 @@ query (
       type: $type
       season: $season
       format_in: $format
-      status: $status
       countryOfOrigin: $countryOfOrigin
       search: $search
       onList: $onList
@@ -78,6 +78,8 @@ query (
       isAdult: $isAdult
       averageScore_greater: $averageScoreGreater
       source_in: $sourceIn
+      countryOfOrigin_in: $countryOfOriginIn
+      status_in: $statusIn
     ) {
       id
       title {

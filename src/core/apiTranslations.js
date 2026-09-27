@@ -63,8 +63,11 @@ export const translateInternalApiParams = {
   },
 
   status: {
-    complete:         { ani: { status: "FINISHED"         }, },
-    not_yet_released: { ani: { status: "NOT_YET_RELEASED" }, },
+    cancelled:        { ani: { statusIn: "CANCELLED"        }, },
+    complete:         { ani: { statusIn: "FINISHED"         }, },
+    hiatus:           { ani: { statusIn: "HIATUS"           }, },
+    not_yet_released: { ani: { statusIn: "NOT_YET_RELEASED" }, },
+    releasing:        { ani: { statusIn: "RELEASING"        }, },
   },
 
   format: {
@@ -113,10 +116,10 @@ export const translateInternalApiParams = {
     },
   },
 
-  countryOfOrigin: {
+  country: {
     _default: (api, value) => {
       if (value === undefined) return;
-      if (api === "ani") return { countryOfOrigin: value };
+      if (api === "ani") return { countryOfOriginIn: value };
     },
   },
 
