@@ -25,7 +25,7 @@ query {
     }
   }
   top: Page(page: 1, perPage: 10) {
-    media(sort: SCORE_DESC, isAdult: false) {
+    media(sort: [SCORE_DESC, POPULARITY_DESC], isAdult: false) {
       ...media
     }
   }

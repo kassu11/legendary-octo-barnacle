@@ -37,7 +37,7 @@ export function ParseSearchParams(props) {
     else if (header === "manhwa") Object.assign(obj, { sort: "popularity_desc", countryOfOrigin: "KR" });
     else if (header === "finished") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0 });
     else if (header === "new") Object.assign(obj, { sort: "id_desc" });
-    else if (header === "top") Object.assign(obj, { sort: "score_desc" });
+    else if (header === "top") Object.assign(obj, { sort: ["score_desc", "popularity_desc"] });
     else if (header === "finished-manga") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0, format: "manga" });
     else if (header === "finished-novel") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0, format: "light_novel" });
 
