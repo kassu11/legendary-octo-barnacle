@@ -61,7 +61,7 @@ export function wrapToSet(value) {
 }
 
 export function removeDuplicateIgnoreCaseSensitivity(array) {
-  asserts.assertTrueOLD(isTypeArray(array), "Not array");
+  asserts.assertTypeArray(array);
   const map = new Map();
   array.forEach(value => map.set(value.toLowerCase(), value));
   return Array.from(map.values());

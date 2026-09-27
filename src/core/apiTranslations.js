@@ -1,4 +1,4 @@
-export const translateInternalSearchParams = {
+export const translateInternalApiParams = {
 
   sort: {
     id:                 { ani: { sort: "ID"                                    } },
@@ -70,7 +70,6 @@ export const translateInternalSearchParams = {
   format: {
     light_novel: { ani: { format: "NOVEL"    } },
     manga:       { ani: { format: "MANGA"    } },
-    manhwa:      { ani: { format: "manhwa"   } },
     movie:       { ani: { format: "MOVIE"    } },
     music:       { ani: { format: "MUSIC"    } },
     ona:         { ani: { format: "ONA"      } },
@@ -82,21 +81,21 @@ export const translateInternalSearchParams = {
   },
 
   source: {
-    anime:              { ani: { source: "ANIME"              } },
-    comic:              { ani: { source: "COMIC"              } },
-    doujinshi:          { ani: { source: "DOUJINSHI"          } },
-    game:               { ani: { source: "GAME"               } },
-    light_novel:        { ani: { source: "LIGHT_NOVEL"        } },
-    live_action:        { ani: { source: "LIVE_ACTION"        } },
-    manga:              { ani: { source: "MANGA"              } },
-    multimedia_project: { ani: { source: "MULTIMEDIA_PROJECT" } },
-    novel:              { ani: { source: "NOVEL"              } },
-    original:           { ani: { source: "ORIGINAL"           } },
-    other:              { ani: { source: "OTHER"              } },
-    picture_book:       { ani: { source: "PICTURE_BOOK"       } },
-    video_game:         { ani: { source: "VIDEO_GAME"         } },
-    visual_novel:       { ani: { source: "VISUAL_NOVEL"       } },
-    web_novel:          { ani: { source: "WEB_NOVEL"          } },
+    anime:              { ani: { sourceIn: "ANIME"              } },
+    comic:              { ani: { sourceIn: "COMIC"              } },
+    doujinshi:          { ani: { sourceIn: "DOUJINSHI"          } },
+    game:               { ani: { sourceIn: "GAME"               } },
+    light_novel:        { ani: { sourceIn: "LIGHT_NOVEL"        } },
+    live_action:        { ani: { sourceIn: "LIVE_ACTION"        } },
+    manga:              { ani: { sourceIn: "MANGA"              } },
+    multimedia_project: { ani: { sourceIn: "MULTIMEDIA_PROJECT" } },
+    novel:              { ani: { sourceIn: "NOVEL"              } },
+    original:           { ani: { sourceIn: "ORIGINAL"           } },
+    other:              { ani: { sourceIn: "OTHER"              } },
+    picture_book:       { ani: { sourceIn: "PICTURE_BOOK"       } },
+    video_game:         { ani: { sourceIn: "VIDEO_GAME"         } },
+    visual_novel:       { ani: { sourceIn: "VISUAL_NOVEL"       } },
+    web_novel:          { ani: { sourceIn: "WEB_NOVEL"          } },
   },
 
   season: {
@@ -119,7 +118,14 @@ export const translateInternalSearchParams = {
       if (value === undefined) return;
       if (api === "ani") return { countryOfOrigin: value };
     },
-  }
+  },
+
+  q: {
+    _default: (api, value) => {
+      value = value?.toLowerCase().trim() || undefined;
+      if (api === "ani") return { search: value }
+    },
+  },
 
 };
 

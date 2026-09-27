@@ -96,7 +96,7 @@ export function MediaSortSelect() {
   };
 
   return (
-    <MultiSelect each={sortOptions()} value={sortValues()} onChange={handleChange}>{entry => {
+    <MultiSelect each={sortOptions()} value={sortValues()} onChange={handleChange} button="Sort">{entry => {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <div class="icon-wrapper">

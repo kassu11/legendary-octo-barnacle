@@ -220,7 +220,7 @@ export function MultiSelect(props) {
 
   return (
     <div class="custom-select" classList={{ "holding-shift": holdingShift() }}>
-      <button onMouseDown={handleMouseDown} onClick={handleButtonClick} class="open-button">Sort</button>
+      <button onMouseDown={handleMouseDown} onClick={handleButtonClick} class="open-button">{props.button}</button>
       <dialog ref={elem => dialog = elem} classList={{ mobile: isTouch() }}>
         <div class="wrapper">
           <form onSubmit={handleSubmit}>

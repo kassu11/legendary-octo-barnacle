@@ -3,6 +3,9 @@ import { useParsedSearchParams } from "../../context/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
 import "./SearchBar.scoped.css";
 import { MediaSortSelect } from "./MediaSortSelect.scoped";
+import { SearchActiveQueries } from "./SearchActiveQueries.scoped";
+import { MediaFormatSelect } from "./MediaFormatSelect.scoped";
+import { MediaSourceSelect } from "./MediaSourceSelect.scoped";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -20,6 +23,9 @@ export function SearchBar() {
     <div>
       <input type="search" onInput={handleInput} value={parsedSearchParams().q} />
       <MediaSortSelect />
+      <MediaFormatSelect />
+      <MediaSourceSelect />
+      queries: <SearchActiveQueries />
     </div>
   );
 }

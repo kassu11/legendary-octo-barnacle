@@ -10,7 +10,7 @@ import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../util
 import { setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "../../core/globalState";
 import { useParsedSearchParams } from "../../context/providers";
 import { assertThruthy } from "../../collections/asserts";
-import { translateInternalSearchParams } from "../../core/apiTranslations";
+import { translateInternalApiParams } from "../../core/apiTranslations";
 import { concatMergeObjects } from "../../utils/objectUtils";
 import { isTypeArray } from "../../utils/arrays";
 import { capitalize, formatMediaFormat } from "../../utils/formating";
@@ -28,7 +28,8 @@ const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(und
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
   const params = useParams();
-  const { api, type, mode } = params;
+  const api = "ani";
+  const { type, mode } = params;
 
   if (mode === "browse") return null;
 
@@ -40,6 +41,7 @@ function createAnilistMediaQueryVariables() {
     format: [],
     genres: [],
     tags: [],
+    sourceIn: [],
     minimumTagRank: rank,
     excludedGenres: [...excludedGenres],
     search: q?.toLowerCase().trim() || undefined,
@@ -119,8 +121,8 @@ function mergeVariables(api, key, to, from) {
 
 function mergeValue(api, key, to, value) {
   let val;
-  if (!(value in translateInternalSearchParams[key])) val = translateInternalSearchParams[key]._default?.(api, value);
-  else val = translateInternalSearchParams[key][value]?.[api];
+  if (!(value in translateInternalApiParams[key])) val = translateInternalApiParams[key]._default?.(api, value);
+  else val = translateInternalApiParams[key][value]?.[api];
 
   concatMergeObjects(to, val);
 }
@@ -158,7 +160,7 @@ export function SearchPage() {
   const [pagelessCacheData, setPagelessCacheData] = createStore({});
   const pagelessCacheKey = createMemo(() => pagelessCacheData?.cacheKey);
 
-  let highestPageMutated = 0; 
+  let highestPageMutated = 0;
   let pagelessFetcher;
   createRenderEffect(async () => {
     const variables = anilistVariables();
@@ -573,4 +575,3 @@ function jikanPagenationToPageInfo(pagination) {
   const { current_page, has_next_page, items: { per_page } } = pagination;
   return { currentPage: current_page, hasNextPage: has_next_page, perPage: per_page };
 }
-

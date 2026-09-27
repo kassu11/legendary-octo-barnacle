@@ -4,7 +4,7 @@ import "./MainNavigation.scoped.css";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays";
 import { ParsedSearchParamsContext } from "../../context/providers";
-import { translateInternalSearchParams } from "../../core/apiTranslations";
+import { translateInternalApiParams } from "../../core/apiTranslations";
 import { getDates } from "../../utils/dates";
 import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "../../core/globalState";
 
@@ -21,25 +21,26 @@ export function ParseSearchParams(props) {
       q: decodeURIComponent(wrapToArray(searchParams.q).at(-1) || ""),
       onList: wrapToArray(searchParams.onList).at(-1),
       rank: +wrapToArray(searchParams.rank).at(-1),
-      source: wrapToArray(searchParams.source).at(-1),
+      source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
       isAdult: false,
       type,
     };
 
-    const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalSearchParams.sort[val]));
+    const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalApiParams.sort[val]));
+    const filteredFormats = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.format).filter(val => translateInternalApiParams.format[val])).sort();
 
     const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
     const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
 
-    if (header === "trending") obj.sort = "trending_desc";
+    if (header === "trending") obj.sort = ["trending_desc"];
     else if (header === "popular") obj.sort = ["popularity_desc"];
-    else if (header === "novel") Object.assign(obj, { sort: "popularity_desc", format: "light_novel" });
-    else if (header === "manhwa") Object.assign(obj, { sort: "popularity_desc", countryOfOrigin: "KR" });
-    else if (header === "finished") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0 });
-    else if (header === "new") Object.assign(obj, { sort: "id_desc" });
+    else if (header === "novel") Object.assign(obj, { sort: ["popularity_desc"], format: "light_novel" });
+    else if (header === "manhwa") Object.assign(obj, { sort: ["popularity_desc"], countryOfOrigin: "KR" });
+    else if (header === "finished") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", endDateGreater: 0 });
+    else if (header === "new") Object.assign(obj, { sort: ["id_desc"] });
     else if (header === "top") Object.assign(obj, { sort: ["score_desc", "popularity_desc"] });
-    else if (header === "finished-manga") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0, format: "manga" });
-    else if (header === "finished-novel") Object.assign(obj, { sort: "end_date_desc", status: "complete", endDateGreater: 0, format: "light_novel" });
+    else if (header === "finished-manga") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", endDateGreater: 0, format: "manga" });
+    else if (header === "finished-novel") Object.assign(obj, { sort: ["end_date_desc"], status: "complete", endDateGreater: 0, format: "light_novel" });
 
     else if (header === "this-season") {
       const dates = getDates();
@@ -59,12 +60,13 @@ export function ParseSearchParams(props) {
     if (filteredSorts.length) obj.sort = filteredSorts;
     else if (!obj.sort?.length) obj.sort = ["popularity_desc"];
 
+    if (filteredFormats.length) obj.format = filteredFormats;
+
     obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
     obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));
     obj.tags = wrapToSet(wrapToArray(searchParams.tag).map(name => name.toLowerCase()));
     obj.excludedTags = wrapToSet(wrapToArray(searchParams.excludedTag).map(name => name.toLowerCase()));
-    obj.format = wrapToArray(obj.format).concat(wrapToArray(searchParams.format));
-    obj.countryOfOrigin = wrapToArray(searchParams.country).at(-1);
+    obj.countryOfOrigin = wrapToArray(searchParams.country).at(-1) || obj.countryOfOrigin;
     if (searchParams.year) obj.year = +wrapToArray(searchParams.year).at(-1);
 
     if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
@@ -75,7 +77,7 @@ export function ParseSearchParams(props) {
 
     if (obj.groupEntriesByFormat) obj.sort = ["format", ...obj.sort];
 
-    ["sort", "format", "status"].forEach(key => {
+    ["format", "status"].forEach(key => {
       if (key in obj) obj[key] = wrapToArray(obj[key]);
     });
 

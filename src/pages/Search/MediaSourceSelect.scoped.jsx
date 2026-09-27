@@ -1,0 +1,82 @@
+import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
+import { createMemo, Show } from "solid-js";
+import { useParsedSearchParams } from "../../context/providers";
+import { arrayUtils } from "../../utils/utils";
+import { MultiSelect } from "./MultiSelect.scoped";
+import "./MediaSourceSelect.scoped.css"
+import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
+
+export function MediaSourceSelect() {
+  const parsedSearchParams = useParsedSearchParams();
+  const [, setSearchParams] = useSearchParams();
+  const params = useParams();
+  const navigate = useNavigate();
+
+  const sourceOptions = [
+    { description: "Anime",              id: "anime"              },
+    { description: "Comic",              id: "comic"              },
+    { description: "Doujinshi",          id: "doujinshi"          },
+    { description: "Game",               id: "game"               },
+    { description: "Light Novel",        id: "light_novel"        },
+    { description: "Live Action",        id: "live_action"        },
+    { description: "Manga",              id: "manga"              },
+    { description: "Multimedia Project", id: "multimedia_project" },
+    { description: "Novel",              id: "novel"              },
+    { description: "Original",           id: "original"           },
+    { description: "Other",              id: "other"              },
+    { description: "Picture Book",       id: "picture_book"       },
+    { description: "Video Game",         id: "video_game"         },
+    { description: "Visual Novel",       id: "visual_novel"       },
+    { description: "Web Novel",          id: "web_novel"          },
+  ];
+
+  const sourceValues = createMemo(() => {
+    return arrayUtils.wrapToArray(parsedSearchParams().source).map(id => ({ id, value: true }));
+  });
+
+  const handleChange = e => {
+    if (e.oldUrl) {
+      const path = e.oldUrl.split(__BASE__)[1];
+      navigate(path);
+      return;
+    }
+
+    const newActiveValues = [...sourceValues()];
+    const index = newActiveValues.findIndex(val => val.id === e.target);
+
+    if (index == -1) {
+      newActiveValues.push({ id: e.target, value: true });
+    } else {
+      newActiveValues.splice(index, 1);
+    }
+
+    setSearchParams({ source: newActiveValues.map(e => e.id) }, { replace: true });
+
+    if (newActiveValues.length === 0) {
+      const header = params.header;
+      // Remove headers that add sources
+      if (header === "novel" || header === "finished-manga" || header === "finished-novel") {
+        const path = window.location.href.split(__BASE__)[1].replace(/\/novel|finished-manga|finished-novel/, "");
+        navigate(path);
+      }
+    }
+
+  };
+
+  return (
+    <MultiSelect each={sourceOptions} value={sourceValues()} onChange={handleChange} button="Source">{entry => {
+      return (
+        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+          <div class="checkbox" classList={{ checked: entry.value }}>
+            <Show when={entry.value}>
+              <CheckMarkIcon scoped />
+            </Show>
+          </div>
+
+          <p>{entry.description}</p>
+        </div>
+      );
+    }}</MultiSelect>
+  );
+}
+
