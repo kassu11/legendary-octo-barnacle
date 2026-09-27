@@ -22,13 +22,15 @@ export function SearchBar() {
   };
 
   return (
-    <div>
-      <input type="search" onInput={handleInput} value={parsedSearchParams().q} />
-      <MediaSortSelect />
-      <MediaFormatSelect />
-      <MediaSourceSelect />
-      <MediaCountrySelect />
-      <MediaStatusSelect />
+    <div class="page">
+      <div class="flex">
+        <input type="search" placeholder="Search..." onInput={handleInput} value={parsedSearchParams().q} />
+        <MediaSortSelect />
+        <MediaFormatSelect />
+        <MediaSourceSelect />
+        <MediaCountrySelect />
+        <MediaStatusSelect />
+      </div>
       queries: <SearchActiveQueries />
     </div>
   );

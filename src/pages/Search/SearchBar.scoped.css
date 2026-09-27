@@ -1,2 +1,38 @@
 @layer layout {
+  .page {
+    margin-inline: auto;
+    display: grid;
+    gap: 4px;
+    width: min(100% - 64px, 90rem);
+    margin-top: 8px;
+
+    input {
+      border-radius: 100px;
+      border: unset;
+      padding: .5em 1em;
+      color: var(--text);
+      background-color: var(--bg);
+      font-weight: 600;
+      outline: none;
+
+      &:focus-visible {
+        outline: 2px solid var(--bg-light);
+      }
+
+      &::placeholder {
+        color: var(--text-muted);
+        opacity: .5;
+      }
+
+      &::-webkit-search-cancel-button {
+        display: none;
+      }
+    }
+
+    .flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+  }
 }
