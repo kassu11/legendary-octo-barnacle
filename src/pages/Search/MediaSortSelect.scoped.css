@@ -5,10 +5,10 @@
     gap: 4px;
     align-items: center;
     padding: 4px 8px;
-    background-color: var(--bg);
     font-weight: 400;
 
     &.hovered, &:hover {
+      background-color: var(--bg);
       filter: brightness(1.25);
     }
 

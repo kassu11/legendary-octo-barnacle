@@ -23,6 +23,7 @@ export function ParseSearchParams(props) {
       rank: +wrapToArray(searchParams.rank).at(-1),
       source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
       isAdult: false,
+      externalSources: [...wrapToSet(searchParams.externalSources)].map(Number).sort(),
       type,
     };
 

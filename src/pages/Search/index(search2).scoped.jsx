@@ -22,6 +22,7 @@ import { MediaCard } from "../User/Relations/MediaCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./BrowsePage.scoped";
+import { externalSourcesData } from "./MediaExternalSourcesSelect.scoped";
 
 const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -33,7 +34,7 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, isAdult = false, year, rank, genres, tags, excludedGenres, sortBySearchMatch, ...rest } = parsedSearchParams();
+  const { q, year, rank, genres, tags, excludedGenres, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
   const tagsAndGenres = genres.union(tags);
 
   const obj = {
@@ -43,18 +44,20 @@ function createAnilistMediaQueryVariables() {
     tags: [],
     sourceIn: [],
     countryOfOriginIn: [],
+    licensedBy: [],
     statusIn: [],
     minimumTagRank: rank,
     excludedGenres: [...excludedGenres],
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
-    isAdult
+    isAdult: false,
   };
 
   if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: ["search_match"] });
   else mergeVariables(api, "sort", obj, rest);
 
   if (failedToMergeGenresAndTags(tagsAndGenres, obj)) return null;
+  if (failedToMergeExternalSources(externalSources, type, obj)) return null;
 
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
@@ -90,6 +93,24 @@ function failedToMergeGenresAndTags(tagsAndGenres, obj) {
     }
     if (genresObject.validTags.has(g)) {
       obj.tags.push(g);
+      continue;
+    }
+  }
+}
+
+function failedToMergeExternalSources(listOfExternalSources = [], type, obj) {
+  const sourceObject = listOfExternalSources.length ? externalSourcesData() : null;
+  for (const source of listOfExternalSources) {
+    if (!sourceObject) {
+      return true;
+    }
+
+    if (type !== sourceObject.type) {
+      return true;
+    }
+
+    if (sourceObject.validIds.has(source)) {
+      obj.licensedBy.push(source);
       continue;
     }
   }

@@ -8,6 +8,7 @@ import { MediaFormatSelect } from "./MediaFormatSelect.scoped";
 import { MediaSourceSelect } from "./MediaSourceSelect.scoped";
 import { MediaCountrySelect } from "./MediaCountrySelect.scoped";
 import { MediaStatusSelect } from "./MediaStatusSelect.scoped";
+import { MediaExternalSourcesSelect } from "./MediaExternalSourcesSelect.scoped";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -30,6 +31,7 @@ export function SearchBar() {
         <MediaSourceSelect />
         <MediaCountrySelect />
         <MediaStatusSelect />
+        <MediaExternalSourcesSelect />
       </div>
       queries: <SearchActiveQueries />
     </div>

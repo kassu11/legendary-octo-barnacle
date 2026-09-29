@@ -7,6 +7,15 @@
     padding: 4px 8px;
     font-weight: 400;
 
+    img {
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      display: inline-block;
+      width: 24px;
+      padding: 4px;
+      border-radius: 2px;
+    }
+
     &.hovered, &:hover {
       background-color: var(--bg);
       filter: brightness(1.25);
@@ -26,6 +35,8 @@
       border-radius: 2px;
       border: 2px solid var(--bg-light);
       background-color: var(--bg-dark);
+      flex-shrink: 0;
+      margin-left: auto;
 
       &.checked {
         border: 2px solid var(--shadow-light);
