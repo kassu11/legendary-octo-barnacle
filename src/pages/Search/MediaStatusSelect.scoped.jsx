@@ -1,10 +1,10 @@
 import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
-import { createMemo, Show } from "solid-js";
+import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../context/providers";
 import { arrayUtils } from "../../utils/utils";
 import { MultiSelect } from "./MultiSelect.scoped";
 import "./MediaStatusSelect.scoped.css"
-import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
+import { Checkbox } from "./Checkbox.scoped";
 
 export function MediaStatusSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -67,16 +67,10 @@ export function MediaStatusSelect() {
     <MultiSelect each={statusOptions()} value={statusValues()} onChange={handleChange} button="Status">{entry => {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <div class="checkbox" classList={{ checked: entry.value }}>
-            <Show when={entry.value}>
-              <CheckMarkIcon scoped />
-            </Show>
-          </div>
-
+          <Checkbox checked={entry.value} />
           <p>{entry.description}</p>
         </div>
       );
     }}</MultiSelect>
   );
 }
-

@@ -4,12 +4,12 @@ import { useParsedSearchParams } from "../../context/providers";
 import { arrayUtils } from "../../utils/utils";
 import { MultiSelect } from "./MultiSelect.scoped";
 import "./MediaExternalSourcesSelect.scoped.css"
-import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
 import { createCleanUpAbortController } from "../../utils/abortUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { queries } from "../../collections/collections";
 import { tabTime } from "../../core/globalState";
 import { timeStringToMs } from "../../utils/timeUtils";
+import { Checkbox } from "./Checkbox.scoped";
 
 export const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
 
@@ -118,11 +118,7 @@ export function MediaExternalSourcesSelect() {
               </Show>
             </p>
 
-            <div class="checkbox" classList={{ checked: entry.value }}>
-              <Show when={entry.value}>
-                <CheckMarkIcon scoped />
-              </Show>
-            </div>
+            <Checkbox scoped checked={entry.value} class="checkbox" />
 
           </div>
         );
@@ -130,4 +126,3 @@ export function MediaExternalSourcesSelect() {
     </Show>
   );
 }
-

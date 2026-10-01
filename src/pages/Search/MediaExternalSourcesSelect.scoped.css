@@ -30,22 +30,7 @@
     }
 
     .checkbox {
-      width: 1.5em;
-      height: 1.5em;
-      border-radius: 2px;
-      border: 2px solid var(--bg-light);
-      background-color: var(--bg-dark);
-      flex-shrink: 0;
       margin-left: auto;
-
-      &.checked {
-        border: 2px solid var(--shadow-light);
-        background-color: var(--light-blue-400);
-
-        svg {
-          color: var(--bg-dark);
-        }
-      }
     }
   }
 }

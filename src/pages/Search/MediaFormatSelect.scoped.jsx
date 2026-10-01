@@ -1,10 +1,10 @@
 import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
-import { createMemo, Show } from "solid-js";
+import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../context/providers";
 import { arrayUtils } from "../../utils/utils";
 import { MultiSelect } from "./MultiSelect.scoped";
 import "./MediaFormatSelect.scoped.css"
-import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
+import { Checkbox } from "./Checkbox.scoped";
 
 export function MediaFormatSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -73,11 +73,7 @@ export function MediaFormatSelect() {
     <MultiSelect each={formatOptions()} value={formatValues()} onChange={handleChange} button="Format">{entry => {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <div class="checkbox" classList={{ checked: entry.value }}>
-            <Show when={entry.value}>
-              <CheckMarkIcon scoped />
-            </Show>
-          </div>
+          <Checkbox checked={entry.value} />
 
           <p>{entry.description}</p>
         </div>
@@ -85,4 +81,3 @@ export function MediaFormatSelect() {
     }}</MultiSelect>
   );
 }
-

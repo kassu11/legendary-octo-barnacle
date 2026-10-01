@@ -1,10 +1,10 @@
 import { useSearchParams, useNavigate } from "@solidjs/router";
-import { createMemo, Show } from "solid-js";
+import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../context/providers";
 import { arrayUtils } from "../../utils/utils";
 import { MultiSelect } from "./MultiSelect.scoped";
 import "./MediaAgeSelect.scoped.css"
-import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
+import { Checkbox } from "./Checkbox.scoped";
 
 export function MediaAgeSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -41,16 +41,10 @@ export function MediaAgeSelect() {
     <MultiSelect each={ageOptions} value={ageValues()} onChange={handleChange} button="Age">{entry => {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <div class="checkbox" classList={{ checked: entry.value }}>
-            <Show when={entry.value}>
-              <CheckMarkIcon scoped />
-            </Show>
-          </div>
-
+          <Checkbox checked={entry.value} />
           <p>{entry.description}</p>
         </div>
       );
     }}</MultiSelect>
   );
 }
-
