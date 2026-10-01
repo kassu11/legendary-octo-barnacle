@@ -109,6 +109,16 @@ export const translateInternalApiParams = {
     [null]: { ani: { season: null     } },
   },
 
+  age: {
+    any:  { ani: { isAdult: undefined } }, // Any rating
+    g:    {                             }, // G - All ages (jikan)
+    pg:   {                             }, // PG - Children (jikan)
+    pg13: {                             }, // PG-13 - Teen 13 or older (jikan)
+    r17:  {                             }, // R - 17+ (violence & profanity) (jikan)
+    r:    { ani: { isAdult: false     } }, // R+ - (violence, profanity & mild nudity)
+    rx:   { ani: { isAdult: true      } }, // Rx - Hentai
+  },
+
   endDateGreater: {
     _default: (api, value) => {
       if (value === undefined) return;

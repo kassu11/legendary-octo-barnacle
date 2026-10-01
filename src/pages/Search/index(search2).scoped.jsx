@@ -66,6 +66,7 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "country", obj, rest);
   mergeVariables(api, "onList", obj, rest);
   mergeVariables(api, "source", obj, rest);
+  mergeVariables(api, "age", obj, rest);
 
   if (year) {
     if (obj.season) obj.seasonYear = year;
@@ -395,7 +396,7 @@ export function SearchPage() {
         } else if (mode === "search") {
           if (currentPagelessFetcher.cacheKey === untrack(pagelessCacheKey)) setPagelessCacheLoading(false);
 
-          if (res.data.data.Page.media.length === 0 && currentPage === 1) {
+          if (res.data.data.Page.media.length === 0 && currentPage === 1 && aniVariables.search?.length) {
             return jikanFallbackSearch({ ...jiVariables, page: 1 }, currentPagelessFetcher.cacheKey, 0);
           }
           // TODO: Make a function to check when we can use long time cache

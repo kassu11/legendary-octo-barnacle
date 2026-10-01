@@ -22,7 +22,6 @@ export function ParseSearchParams(props) {
       onList: wrapToArray(searchParams.onList).at(-1),
       rank: +wrapToArray(searchParams.rank).at(-1),
       source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
-      isAdult: false,
       externalSources: [...wrapToSet(searchParams.externalSources)].map(Number).sort(),
       type,
     };
@@ -31,6 +30,7 @@ export function ParseSearchParams(props) {
     const filteredCountry = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.country)).sort();
     const filteredFormats = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.format).filter(val => translateInternalApiParams.format[val])).sort();
     const filteredStatus = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.status).filter(val => translateInternalApiParams.status[val])).sort();
+    const filteredAge = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.age).filter(val => translateInternalApiParams.age[val])).sort();
 
     const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
     const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
@@ -62,6 +62,8 @@ export function ParseSearchParams(props) {
 
     if (filteredSorts.length) obj.sort = filteredSorts;
     else if (!obj.sort?.length) obj.sort = ["popularity_desc"];
+    if (filteredAge.length) obj.age = filteredAge;
+    else obj.age = ["r"];
 
     if (filteredFormats.length) obj.format = filteredFormats;
     if (filteredCountry.length) obj.country = filteredCountry;

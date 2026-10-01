@@ -1,0 +1,40 @@
+@layer layout {
+  .item {
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 8px;
+    font-weight: 400;
+
+    &.hovered, &:hover {
+      background-color: var(--bg);
+      filter: brightness(1.25);
+    }
+
+    &.active {
+      background-color: var(--bg-light);
+    }
+
+    &.hidden {
+      display: none;
+    }
+
+    .checkbox {
+      width: 1.5em;
+      height: 1.5em;
+      border-radius: 2px;
+      border: 2px solid var(--bg-light);
+      background-color: var(--bg-dark);
+
+      &.checked {
+        border: 2px solid var(--shadow-light);
+        background-color: var(--light-blue-400);
+
+        svg {
+          color: var(--bg-dark);
+        }
+      }
+    }
+  }
+}
