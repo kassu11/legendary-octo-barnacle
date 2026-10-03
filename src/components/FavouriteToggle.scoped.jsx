@@ -1,5 +1,5 @@
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import "./FavouriteToggle.scss";
+import "./FavouriteToggle.scoped.css";
 import { compactNumber } from "../utils/formating.js";
 import { asserts, queries } from "../collections/collections.js";
 import { Match, Show, Switch, untrack } from "solid-js";
@@ -39,7 +39,7 @@ export function FavouriteToggle(props) {
         props.onChange(e.target.checked);
         triggerLikeToggle({[props.idType]: props.variableId}, e.target.checked);
       }}/>
-      <Heart />
+      <Heart scoped />
       <Scores />
     </label>
   );
@@ -54,7 +54,7 @@ export function FavouriteToggle(props) {
           <Show when={anilist()}>
             <div class="grid-center">
               <span class="visually-hidden">Anilist favourites: </span>
-              <Anilist />
+              <Anilist scoped />
               <Switch>
                 <Match when={props.anilistLoading}>...</Match>
                 <Match when={props.anilistValue != null}>{compactNumber(props.anilistValue)}</Match>
@@ -65,7 +65,7 @@ export function FavouriteToggle(props) {
           <Show when={jikan()}>
             <div class="grid-center">
               <span class="visually-hidden">MyAnimeList favourites: </span>
-              <MyAnimeList />
+              <MyAnimeList scoped />
               <Switch>
                 <Match when={props.jikanLoading}>...</Match>
                 <Match when={props.jikanValue != null}>{compactNumber(props.jikanValue)}</Match>

@@ -19,7 +19,7 @@ import "./index(media-page-anilist).scoped.css";
 import { queries } from "../../collections/collections.js";
 import { formatingUtils, navigationUtils } from "../../utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
-import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
 import { Trailer } from "../MediaPage/Trailer.scoped.jsx";
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";

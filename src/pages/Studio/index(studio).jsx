@@ -1,7 +1,7 @@
 import {  useParams, useSearchParams } from "@solidjs/router";
 import { Switch, Match, Show, createSignal, createEffect, For, untrack } from "solid-js";
 import "./index(studio).scss";
-import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { asserts, queries } from "../../collections/collections.js";
 import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContainer.scoped.jsx";

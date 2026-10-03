@@ -3,7 +3,7 @@ import { Switch, Match, Show, createSignal, createEffect, For, createMemo, untra
 import { OldMarkdownComponent } from "../../components/Markdown.jsx";
 import "./Entity.scoped.css";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
-import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { wrapToArray } from "../../utils/arrays.js";
 import { asserts, queries } from "../../collections/collections.js";

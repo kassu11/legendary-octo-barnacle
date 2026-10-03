@@ -1,6 +1,6 @@
 import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
 import ScoreInput from "../components/media/ScoreInput";
-import { FavouriteToggle } from "../components/FavouriteToggle.jsx";
+import { FavouriteToggle } from "../components/FavouriteToggle.scoped.jsx";
 import "./EditMediaEntriesContext.scss";
 import { EditMediaEntriesContext } from "./providers.js";
 import { asserts, queries } from "../collections/collections.js";

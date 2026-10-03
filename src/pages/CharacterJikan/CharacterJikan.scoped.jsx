@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { Show, For, createRenderEffect, ErrorBoundary, createEffect, createSignal } from "solid-js";
 import { Markdown } from "../../components/Markdown.jsx";
-import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
 import { queries } from "../../collections/collections.js";
 import { arrayUtils } from "../../utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
