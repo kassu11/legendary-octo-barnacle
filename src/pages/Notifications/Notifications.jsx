@@ -6,7 +6,7 @@ import { CreatedAt } from "../../components/CreatedAt.jsx";
 import { arrayUtils, scheduleUtils } from "../../utils/utils.js";
 import { asserts, modes, signals, queries } from "../../collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { LoaderCircle } from "../../components/LoaderCircle.jsx";
+import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
@@ -271,7 +271,7 @@ function NotificationsPage(props) {
   return (
     <>
       <Show when={anilistNotificationsLoading() && page() === 1}>
-        <LoaderCircle class="refresh">
+        <LoaderCircle scoped class="spinner refresh">
           <Tooltip tipPosition="bottom">
             <Show when={props.cache.length === 0} fallback="Fetching fresh notifications">
               Loading notifications
@@ -352,7 +352,7 @@ function NotificationsPage(props) {
       </ol>
       <Switch>
         <Match when={anilistNotificationsLoading() && page() > maxPage && props.cache.length}>
-          <LoaderCircle class="new">
+          <LoaderCircle scoped class="spinner new">
             <Tooltip tipPosition="bottom">Loading notifications</Tooltip>
           </LoaderCircle>
         </Match>

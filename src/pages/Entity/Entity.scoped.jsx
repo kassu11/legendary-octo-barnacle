@@ -546,10 +546,10 @@ function CharacterAndActorCards(props) {
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language())}>{roles => (
           <li class="entity-page-media-voice-actor">
-            <A href={mediaUrl(edge.node)}>
+            <A scoped href={mediaUrl(edge.node)}>
               <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
             </A>
-            <A href={mediaUrl(edge.node)}>
+            <A scoped href={mediaUrl(edge.node)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
@@ -564,7 +564,7 @@ function CharacterAndActorCards(props) {
               <ol>
                 <For each={roles()}>{role => (
                   <li>
-                    <A class="actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)}>
+                    <A scoped class="actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)}>
                       <span>{role.voiceActor.name.userPreferred}</span>
                       <Show when={role.roleNotes}>
                         <span class="role"> ({role.roleNotes})</span>
@@ -603,7 +603,7 @@ function MediaCards(props) {
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
         <li>
-          <A href={mediaUrl(edge.node)}>
+          <A scoped href={mediaUrl(edge.node)}>
             <img src={edge.node.coverImage.large} alt="Character" class="background"/>
             <p>
               <Show when={edge.node.mediaListEntry?.status}>
@@ -635,18 +635,18 @@ function CharacterAndMediaCards(props) {
           <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
           <li>
             <div class="entity-page-character-cover">
-              <A href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
+              <A scope href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
                 <img src={character.image.large} alt="Character" class="background"/>
               </A>
-              <A class="media" href={mediaUrl(edge.node)}>
+              <A scoped class="media" href={mediaUrl(edge.node)}>
                 <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
               </A>
             </div>
-            <A href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
+            <A scoped href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
               <span>{character.name.userPreferred}</span>
               <span class="role"> {capitalize(edge.characterRole)}</span>
             </A>
-            <A href={mediaUrl(edge.node)}>
+            <A scoped href={mediaUrl(edge.node)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />

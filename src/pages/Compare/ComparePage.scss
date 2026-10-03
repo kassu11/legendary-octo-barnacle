@@ -118,12 +118,12 @@
     --grid-column-width: 32rem;
 
     &:not(.loading) {
-      .cp-loader-circle {
+      .spinner {
         opacity: 0;
         visibility: hidden;
       }
     }
-    .cp-loader-circle {
+    .spinner {
       position: absolute;
       z-index: 1;
       justify-self: center;
@@ -135,7 +135,7 @@
     }
 
     &.loading {
-      .cp-loader-circle {
+      .spinner {
         transition-delay: .2s;
       }
 

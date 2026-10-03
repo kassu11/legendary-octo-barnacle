@@ -20,7 +20,7 @@ export function ActivityCard(props) {
       <Match when={props.activity.type === "TEXT"}>
         <Dynamic scoped component={props.wrapper} class="activity-card-text">
           <div class="header">
-            <A href={"/user/" + props.activity.user.name} class="activity-profile-header">
+            <A scoped href={"/user/" + props.activity.user.name} class="activity-profile-header">
               <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
               {props.activity.user.name}
             </A>
@@ -36,7 +36,7 @@ export function ActivityCard(props) {
       </Match>
       <Match when={props.activity.type === "ANIME_LIST" || props.activity.type === "MANGA_LIST"}>
         <Dynamic scoped component={props.wrapper} class="activity-card-media" classList={{small: props.small}}>
-          <A href={mediaUrl(props.activity.media)}>
+          <A scoped href={mediaUrl(props.activity.media)}>
             <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
           </A>
           <div class="main">
@@ -47,10 +47,10 @@ export function ActivityCard(props) {
                 </p>
               </Match>
               <Match when={props.hideProfile === false}>
-                <A href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
+                <A scoped href={"/user/" + props.activity.user.name}>{props.activity.user.name}</A>
                 <p>
                   <MediaListTextContent {...props} />
-                  <A href={"/user/" + props.activity.user.name}>
+                  <A scoped href={"/user/" + props.activity.user.name}>
                     <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
                   </A>
                 </p>
@@ -77,7 +77,7 @@ function MediaListTextContent(props) {
       <Show when={(props.activity.status.includes("episode") || props.activity.status.includes("chapter")) && props.activity.progress}>
         {props.activity.progress} of{" "}
       </Show>
-      <A href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
+      <A scoped href={mediaUrl(props.activity.media)}>{props.activity.media.title.userPreferred}</A>
     </>
   )
 }

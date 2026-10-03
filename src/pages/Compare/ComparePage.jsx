@@ -4,7 +4,7 @@ import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays.js";
 import { CompareMediaListContext, useCompareMediaList } from "../../context/providers.js";
-import { LoaderCircle } from "../../components/LoaderCircle.jsx";
+import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../../utils/formating.js";
@@ -540,7 +540,7 @@ function UserRow(props) {
       <Switch>
         <Match when={anilistUserMediaData() || anilistUserMediaLoading()}>
           <Show when={anilistUserMediaData()} fallback={
-            <LoaderCircle>
+            <LoaderCircle scoped class="spinner">
               <Tooltip tipPosition="right">
                 <p>Loading user data</p>
               </Tooltip>
@@ -596,7 +596,7 @@ function CompareMediaListContent() {
     <>
       <h1>Total {params.type} {compareMediaList().length}</h1>
       <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
-        <LoaderCircle />
+        <LoaderCircle scoped class="spinner" />
         <Show when={compareMediaList()} keyed>
           <ContentPage />
         </Show>
