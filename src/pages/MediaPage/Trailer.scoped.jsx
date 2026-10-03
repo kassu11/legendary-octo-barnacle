@@ -1,5 +1,5 @@
 import { createSignal, Match, Show, Switch } from "solid-js";
-import "./Trailer.scss";
+import "./Trailer.scoped.css";
 
 export function Trailer(props) {
   const [open, setOpen] = createSignal(false);
@@ -12,7 +12,7 @@ export function Trailer(props) {
         dialog.showModal();
         setOpen(true);
       }}>Watch trailer</button>
-      <dialog class="cp-trailer-dialog" onClose={() => setOpen(false)} ref={dialog} onClick={e => e.target === dialog && dialog.close()}>
+      <dialog class="trailer-dialog" onClose={() => setOpen(false)} ref={dialog} onClick={e => e.target === dialog && dialog.close()}>
         <div class="wrapper">
           <Show when={open()}>
             <Switch>

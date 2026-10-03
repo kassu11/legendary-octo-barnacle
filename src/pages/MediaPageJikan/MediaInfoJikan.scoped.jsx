@@ -4,7 +4,7 @@ import { localizations, mediaStatuses, queries } from "../../collections/collect
 import { arrayUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scoped.css";
-import { Trailer } from "../MediaPage/Trailer.jsx";
+import { Trailer } from "../MediaPage/Trailer.scoped.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { Markdown } from "../../components/Markdown.jsx";
 import { MalCharacterCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";

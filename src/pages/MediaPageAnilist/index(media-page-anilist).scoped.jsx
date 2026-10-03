@@ -20,7 +20,7 @@ import { queries } from "../../collections/collections.js";
 import { formatingUtils, navigationUtils } from "../../utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
-import { Trailer } from "../MediaPage/Trailer.jsx";
+import { Trailer } from "../MediaPage/Trailer.scoped.jsx";
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";

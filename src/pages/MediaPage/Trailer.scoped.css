@@ -1,4 +1,4 @@
-.cp-trailer-dialog {
+.trailer-dialog {
   border: none;
   outline: none;
   background: transparent;
@@ -30,7 +30,6 @@
       cursor: pointer;
     }
   }
-
 
   iframe {
     width: 100%;
