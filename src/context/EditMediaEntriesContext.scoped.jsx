@@ -1,7 +1,7 @@
 import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
 import ScoreInput from "../components/media/ScoreInput.scoped";
 import { FavouriteToggle } from "../components/FavouriteToggle.scoped.jsx";
-import "./EditMediaEntriesContext.scss";
+import "./EditMediaEntriesContext.scoped.css";
 import { EditMediaEntriesContext } from "./providers.js";
 import { asserts, queries } from "../collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
@@ -328,7 +328,7 @@ export function EditMediaEntriesProvider(props) {
                   </select>
                 </div>
                 <div class="media-editor-input score">
-                  <ScoreInput value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
+                  <ScoreInput scoped value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
                 </div>
                 <div class="media-editor-input progress">
                   <label htmlFor="progress">
