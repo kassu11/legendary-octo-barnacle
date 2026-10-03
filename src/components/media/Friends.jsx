@@ -1,6 +1,6 @@
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import Status from "./Status";
-import Score from "./Score";
+import Score from "./Score.scoped";
 import style from "./Friends.module.scss";
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { useMediaInfo } from "../../context/providers";

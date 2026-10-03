@@ -1,6 +1,6 @@
 import Star from "../../assets/Star";
 import { Show, Switch, Match } from "solid-js";
-import "./Score.scss";
+import "./Score.scoped.css";
 import EmojiByScoreScoped from "../EmojiByScore.scoped.jsx";
 
 function Score(props) {
@@ -11,12 +11,12 @@ function Score(props) {
           <Match when={props.format === "POINT_10"}>{props.score}/10</Match>
           <Match when={props.format === "POINT_100"}>{props.score}/100</Match>
           <Match when={props.format === "POINT_10_DECIMAL"}>{props.score}/10</Match>
-          <Match when={props.format === "POINT_5"}>{props.score}/5 <Star class="score-star" /></Match>
+          <Match when={props.format === "POINT_5"}>{props.score}/5 <Star scoped class="score-star" /></Match>
           <Match when={props.format === "POINT_3"}>
             <Switch>
-              <Match when={props.score === 1}><EmojiByScoreScoped class="score-emoji" score={0} /></Match>
-              <Match when={props.score === 2}><EmojiByScoreScoped class="score-emoji" score={70} /></Match>
-              <Match when={props.score === 3}><EmojiByScoreScoped class="score-emoji" score={80} /></Match>
+              <Match when={props.score === 1}><EmojiByScoreScoped scoped class="score-emoji" score={0} /></Match>
+              <Match when={props.score === 2}><EmojiByScoreScoped scoped class="score-emoji" score={70} /></Match>
+              <Match when={props.score === 3}><EmojiByScoreScoped scoped class="score-emoji" score={80} /></Match>
             </Switch>
           </Match>
         </Switch>

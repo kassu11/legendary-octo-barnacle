@@ -9,7 +9,7 @@ import { Tooltip } from "../../components/Tooltips.jsx";
 import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../../utils/formating.js";
 import "./ComparePage.scss";
-import Score from "../../components/media/Score.jsx";
+import Score from "../../components/media/Score.scoped.jsx";
 import Star from "../../assets/Star.jsx";
 import { debounce } from "@solid-primitives/scheduled";
 import { asserts, queries, searchObjects, signals } from "../../collections/collections.js";
