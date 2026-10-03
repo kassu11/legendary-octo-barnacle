@@ -5,7 +5,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays.js";
 import { CompareMediaListContext, useCompareMediaList } from "../../context/providers.js";
 import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { Tooltip } from "../../components/Tooltips.jsx";
+import { OLDTooltip } from "../../components/Tooltips.jsx";
 import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../../utils/formating.js";
 import "./ComparePage.scoped.css";
@@ -323,9 +323,9 @@ export default function ComparePage() {
               id="reviewsNeeded"  
             />
             <button class="help">?
-              <Tooltip tipPosition="bottom">
+              <OLDTooltip tipPosition="bottom">
                 Count of how many users need to have the {params.type} on their list <i>(default is all users)</i>
-              </Tooltip>
+              </OLDTooltip>
             </button>
           </label>
           <Switch>
@@ -541,9 +541,9 @@ function UserRow(props) {
         <Match when={anilistUserMediaData() || anilistUserMediaLoading()}>
           <Show when={anilistUserMediaData()} fallback={
             <LoaderCircle scoped class="spinner">
-              <Tooltip tipPosition="right">
+              <OLDTooltip tipPosition="right">
                 <p>Loading user data</p>
-              </Tooltip>
+              </OLDTooltip>
             </LoaderCircle>
           }>
             <img src={anilistUserMediaData().avatar.large} alt={anilistUserMediaData().name + " profile picture"} />
@@ -555,16 +555,16 @@ function UserRow(props) {
           </p>
           <label>
             <input type="checkbox" name="enable" checked={!enabled()} onChange={handleEnabledChange} /> Disable <button>?
-              <Tooltip tipPosition="bottom">
+              <OLDTooltip tipPosition="bottom">
                 Disabling a user removes them from search and filtering, just like removing them.
-              </Tooltip>
+              </OLDTooltip>
             </button>
           </label>
           <label>
             <input type="checkbox" name="enable" checked={exclude()} onChange={handleExcludeChange} /> Filter out <button>?
-              <Tooltip tipPosition="bottom">
+              <OLDTooltip tipPosition="bottom">
                 Filters out all {params.type} from user {anilistUserMediaData()?.name || props.name}
-              </Tooltip>
+              </OLDTooltip>
             </button>
           </label>
         </Match>
@@ -650,13 +650,13 @@ function ContentPage() {
               <div class="header flex-space-between">
                 <Show when={media.repeat}>
                   <div class="cp-card-repeat">
-                    <Tooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</Tooltip>
+                    <OLDTooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</OLDTooltip>
                     {media.repeat}
                     <RepeatIcon scoped />
                   </div>
                 </Show>
                 <div class="score">
-                  <Tooltip tipPosition="right">Global average score</Tooltip>
+                  <OLDTooltip tipPosition="right">Global average score</OLDTooltip>
                   <Star scoped /> {(media.averageScore / 10) || "N/A"}
                 </div>
               </div>
@@ -679,7 +679,7 @@ function ContentPage() {
                   <Show when={media.score}>
                     <span>
                       {Math.round(media.score * 100) / 100}
-                      <Tooltip tipPosition="right">Users average score</Tooltip>
+                      <OLDTooltip tipPosition="right">Users average score</OLDTooltip>
                     </span>
                   </Show>
                 </div>

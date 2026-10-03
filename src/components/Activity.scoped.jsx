@@ -4,7 +4,7 @@ import "./Activity.scoped.css";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { capitalize, mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
-import { Tooltip } from "./Tooltips.jsx";
+import { OLDTooltip } from "./Tooltips.jsx";
 import { Dynamic } from "solid-js/web"
 import { asserts, queries } from "../collections/collections.js";
 import { CreatedAt } from "./CreatedAt.jsx";
@@ -141,7 +141,7 @@ function Footer(props) {
         });
       }}>Like {likeCount()}
         <Show when={showActivityLikeUserList() && activityLikesData()?.likes.length}>
-          <Tooltip tipPosition="left">
+          <OLDTooltip tipPosition="left">
             <ol>
               <For each={activityLikesData().likes}>{user => (
                 <li>
@@ -150,7 +150,7 @@ function Footer(props) {
                 </li>
               )}</For>
             </ol>
-          </Tooltip>
+          </OLDTooltip>
         </Show>
       </button>
       {/* <button>Reply {props.activity.replyCount}</button> */}
