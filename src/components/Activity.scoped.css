@@ -4,6 +4,12 @@
   border-radius: .25rem;
   padding: .5rem;
 
+  .activity-profile-header {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -45,13 +51,6 @@
 }
 
 
-.activity-profile-header {
-  display: flex;
-  gap: .75rem;
-  align-items: center;
-}
-
-
 
 .activity-card-media {
   position: relative;
@@ -64,7 +63,6 @@
   &.small {
     grid-template-columns: 3.5rem 1fr auto;
   }
-
 
   .cover {
     height: 100%;

@@ -1,6 +1,6 @@
 import { Switch, Show, Match, createSignal, mergeProps, For, createEffect } from "solid-js";
-import { OldMarkdownComponent } from "../components/Markdown.jsx";
-import "./Activity.scss";
+import { OldMarkdownComponent } from "./Markdown.jsx";
+import "./Activity.scoped.css";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { capitalize, mediaUrl } from "../utils/formating.js";
 import { A } from "@solidjs/router";
@@ -18,13 +18,13 @@ export function ActivityCard(props) {
   return (
     <Switch>
       <Match when={props.activity.type === "TEXT"}>
-        <Dynamic component={props.wrapper} class="activity-card-text">
+        <Dynamic scoped component={props.wrapper} class="activity-card-text">
           <div class="header">
             <A href={"/user/" + props.activity.user.name} class="activity-profile-header">
               <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
               {props.activity.user.name}
             </A>
-            <CreatedAt createdAt={props.activity.createdAt} />
+            <CreatedAt scoped createdAt={props.activity.createdAt} />
           </div>
           <div class="content">
             <OldMarkdownComponent children={props.activity.text} />
@@ -35,7 +35,7 @@ export function ActivityCard(props) {
         </Dynamic>
       </Match>
       <Match when={props.activity.type === "ANIME_LIST" || props.activity.type === "MANGA_LIST"}>
-        <Dynamic component={props.wrapper} class="activity-card-media" classList={{small: props.small}}>
+        <Dynamic scoped component={props.wrapper} class="activity-card-media" classList={{small: props.small}}>
           <A href={mediaUrl(props.activity.media)}>
             <img class="cover" src={props.activity.media.coverImage.large} alt="Cover" />
           </A>
@@ -58,13 +58,13 @@ export function ActivityCard(props) {
             </Switch>
           </div>
           <div class="right">
-            <CreatedAt createdAt={props.activity.createdAt} />
+            <CreatedAt scoped createdAt={props.activity.createdAt} />
             <Footer mutateCache={props.mutateCache} activity={props.activity}/>
           </div>
         </Dynamic>
       </Match>
       <Match when={props.activity.type === "MESSAGE"}>
-        <Dynamic component={props.wrapper}>message</Dynamic>
+        <Dynamic scoped component={props.wrapper}>message</Dynamic>
       </Match>
     </Switch>
   );

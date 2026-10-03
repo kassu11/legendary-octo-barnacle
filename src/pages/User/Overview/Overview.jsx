@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import { useUser } from "../../../context/providers.js";
 import { formatTitleToUrl, mediaUrl, numberCommas } from "../../../utils/formating.js";
-import { ActivityCard } from "../../../components/Activity.jsx";
+import { ActivityCard } from "../../../components/Activity.scoped.jsx";
 import "./Overview.scss";
 import { asserts, queries } from "../../../collections/collections.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";

@@ -1,22 +1,24 @@
-import { createSignal, onCleanup, Match, Switch } from "solid-js";
+import { createSignal, onCleanup, Match, Switch, splitProps } from "solid-js";
 import { plural } from "../utils/formating.js";
 
 export function CreatedAt(props) {
-  const [time, setTime] = createSignal(Math.max(1, Math.abs(new Date() / 1000 - props.createdAt)));
+  const [local, scoping] = splitProps(props, ["createdAt"]);
+  const [time, setTime] = createSignal(Math.max(1, Math.abs(new Date() / 1000 - local.createdAt)));
 
   let interval = null;
   if (time() < 60) {
-    interval = setInterval(() => setTime(Math.max(1, Math.abs(new Date() / 1000 - props.createdAt))), 1000);
+    interval = setInterval(() => setTime(Math.max(1, Math.abs(new Date() / 1000 - local.createdAt))), 1000);
   } else if (time() < 3600) {
-    interval = setInterval(() => setTime(Math.max(1, Math.abs(new Date() / 1000 - props.createdAt))), 1000 * 60);
+    interval = setInterval(() => setTime(Math.max(1, Math.abs(new Date() / 1000 - local.createdAt))), 1000 * 60);
   }
 
   onCleanup(() => clearInterval(interval));
   return (
     <time
+      {...scoping}
       class="cp-created-at"
-      dateTime={(new Date(props.createdAt * 1000)).toISOString()}
-      title={(new Date(props.createdAt * 1000)).toLocaleString()}>
+      dateTime={(new Date(local.createdAt * 1000)).toISOString()}
+      title={(new Date(local.createdAt * 1000)).toLocaleString()}>
       <Switch>
         <Match when={Math.floor(time() / 3600 / 24 / 365.25)} children={years => (<>{years} years{plural(years())} ago </>)} />
         <Match when={Math.floor(time() / 3600 / 24 / 30)} children={months => (<>{months} month{plural(months())} ago </>)} />
