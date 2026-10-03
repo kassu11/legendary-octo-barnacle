@@ -1,5 +1,5 @@
 import "./App.scoped.css"
-import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.jsx";
+import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.scoped.jsx";
 import { createSignal, createEffect, createMemo, createResource, For, Match, Switch } from "solid-js";
 import { localizations } from "./collections/collections";
 import { MainNavigation } from "./pages/App/MainNavigation.scoped.jsx";

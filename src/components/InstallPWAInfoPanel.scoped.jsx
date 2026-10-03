@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import "./InstallPWAInfoPanel.scss";
+import "./InstallPWAInfoPanel.scoped.css";
 import { useResponsive } from "../context/providers";
 
 export function InstallPWAInfoPanel() {
@@ -15,7 +15,7 @@ export function InstallPWAInfoPanel() {
 
   return (
     <Show when={visible() && isTouch() && !isPWA()}>
-      <div class="cp-install-pwa-container">
+      <div class="install-pwa-container">
         Install as Progressive Web App to get more screen space.
         <Show when={error()}> Failed to install</Show>
         <button onClick={async () => {

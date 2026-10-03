@@ -1,5 +1,5 @@
 @layer layout {
-  .cp-install-pwa-container {
+  .install-pwa-container {
     display: grid;
     grid-template-columns: 1fr auto auto;
     gap: 1rem;
