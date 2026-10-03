@@ -31,6 +31,7 @@ export function ParseSearchParams(props) {
     const filteredFormats = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.format).filter(val => translateInternalApiParams.format[val])).sort();
     const filteredStatus = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.status).filter(val => translateInternalApiParams.status[val])).sort();
     const filteredAge = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.age).filter(val => translateInternalApiParams.age[val])).sort();
+    const filteredSeason = wrapToArray(searchParams.season).findLast(val => val in translateInternalApiParams.season);
 
     const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
     const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
@@ -47,14 +48,14 @@ export function ParseSearchParams(props) {
 
     else if (header === "this-season") {
       const dates = getDates();
-      Object.assign(obj, { year: dates.seasonYear, season: dates.season, seasonPage: true });
+      Object.assign(obj, { year: dates.seasonYear, season: dates.season.toLowerCase(), seasonPage: true });
     } else if (header === "next-season") {
       const dates = getDates();
-      Object.assign(obj, { year: dates.nextYear, season: dates.nextSeason, seasonPage: true });
+      Object.assign(obj, { year: dates.nextYear, season: dates.nextSeason.toLowerCase(), seasonPage: true });
     } else if (header === "tba") {
-      Object.assign(obj, { season: null, status: "not_yet_released", seasonPage: true });
+      Object.assign(obj, { season: "tba", seasonPage: true });
     } else if (/winter|spring|summer|fall/.test(header)) {
-      const [season, year] = header.toUpperCase().split("-");
+      const [season, year] = header.split("-");
       Object.assign(obj, { year: +year, season, seasonPage: true });
     }
 
@@ -68,6 +69,7 @@ export function ParseSearchParams(props) {
     if (filteredFormats.length) obj.format = filteredFormats;
     if (filteredCountry.length) obj.country = filteredCountry;
     if (filteredStatus.length) obj.status = filteredStatus;
+    if (filteredSeason) obj.season = filteredSeason;
 
     obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
     obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));

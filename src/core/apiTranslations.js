@@ -102,11 +102,11 @@ export const translateInternalApiParams = {
   },
 
   season: {
-    WINTER: { ani: { season: "WINTER" } },
-    SPRING: { ani: { season: "SPRING" } },
-    SUMMER: { ani: { season: "SUMMER" } },
-    FALL:   { ani: { season: "FALL"   } },
-    [null]: { ani: { season: null     } },
+    winter: { ani: { season: "WINTER"                            } },
+    spring: { ani: { season: "SPRING"                            } },
+    summer: { ani: { season: "SUMMER"                            } },
+    fall:   { ani: { season: "FALL"                              } },
+    tba:    { ani: { season: null, statusIn: "NOT_YET_RELEASED", } },
   },
 
   age: {

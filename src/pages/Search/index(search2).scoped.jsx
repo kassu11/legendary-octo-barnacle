@@ -507,22 +507,13 @@ export function SearchPage() {
         <Match when={params.mode === "search"}>
           <div class="search-page">
             <Switch>
-              <Match when={params.header === "top" && parsedSearchParams().sort?.[0] === "score_desc"}>
-                <h1>Top {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={params.header === "top" && parsedSearchParams().sort?.[0] === "score_plus"}>
-                <h1>Worst {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
+              <Match when={params.header === "top"}>
                 <Switch>
-                  <Match when={params.header == "popular"}>
-                    <h1>All Time Popular {capitalize(params.type)}</h1>
+                  <Match when={parsedSearchParams().sort?.[0] === "score_desc"}>
+                    <h1>Top {capitalize(params.type)}</h1>
                   </Match>
-                  <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
-                    <h1>All Time Popular Light Novels</h1>
-                  </Match>
-                  <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
-                    <h1>All Time Popular Manhwa</h1>
+                  <Match when={parsedSearchParams().sort?.[0] === "score_plus"}>
+                    <h1>Worst {capitalize(params.type)}</h1>
                   </Match>
                 </Switch>
               </Match>
@@ -564,6 +555,19 @@ export function SearchPage() {
                   }}>Group by Format</button>
                 </Show>
 
+              </Match>
+              <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
+                <Switch>
+                  <Match when={params.header == "popular"}>
+                    <h1>All Time Popular {capitalize(params.type)}</h1>
+                  </Match>
+                  <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
+                    <h1>All Time Popular Light Novels</h1>
+                  </Match>
+                  <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
+                    <h1>All Time Popular Manhwa</h1>
+                  </Match>
+                </Switch>
               </Match>
             </Switch>
 
