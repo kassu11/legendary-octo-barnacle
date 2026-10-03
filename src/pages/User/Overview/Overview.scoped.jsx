@@ -3,7 +3,7 @@ import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untra
 import { useUser } from "../../../context/providers.js";
 import { formatTitleToUrl, mediaUrl, numberCommas } from "../../../utils/formating.js";
 import { ActivityCard } from "../../../components/Activity.scoped.jsx";
-import "./Overview.scss";
+import "./Overview.scoped.css";
 import { asserts, queries } from "../../../collections/collections.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
