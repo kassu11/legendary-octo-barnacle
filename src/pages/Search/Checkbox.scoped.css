@@ -6,12 +6,21 @@
     border: 2px solid var(--bg-light);
     background-color: var(--bg-dark);
     flex-shrink: 0;
+    position: relative;
+
+    &.radio {
+      border-radius: 100%;
+    }
 
     &.checked {
       border: 2px solid var(--shadow-light);
       background-color: var(--light-blue-400);
 
       svg {
+        position: absolute;
+        translate: -50% -50%;
+        left: 50%;
+        top: 50%;
         color: var(--bg-dark);
       }
     }

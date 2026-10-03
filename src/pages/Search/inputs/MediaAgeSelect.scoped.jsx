@@ -41,7 +41,7 @@ export function MediaAgeSelect() {
     <MultiSelect each={ageOptions} value={ageValues()} onChange={handleChange} button="Age">{entry => {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox checked={entry.value} />
+          <Checkbox radio checked={entry.value} />
           <p>{entry.description}</p>
         </div>
       );
