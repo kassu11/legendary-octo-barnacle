@@ -22,7 +22,7 @@ import { MediaCard } from "../User/Relations/MediaCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./BrowsePage.scoped";
-import { externalSourcesData } from "./MediaExternalSourcesSelect.scoped";
+import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped.jsx";
 
 const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 

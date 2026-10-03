@@ -1,12 +1,12 @@
 import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
 import { createMemo, Show, Switch, Match } from "solid-js";
-import SortAlphabetDescendingIcon from "../../assets/SortAlphaDown";
-import SortAlphabetAscendingIcon from "../../assets/SortAlphaUp";
-import SortNumericDescendingIcon from "../../assets/SortNumericDown";
-import SortNumericAscendingIcon from "../../assets/SortNumericUp";
-import { useParsedSearchParams } from "../../context/providers";
-import { arrayUtils } from "../../utils/utils";
-import { MultiSelect } from "./MultiSelect.scoped";
+import SortAlphabetDescendingIcon from "../../../assets/SortAlphaDown.jsx";
+import SortAlphabetAscendingIcon from "../../../assets/SortAlphaUp.jsx";
+import SortNumericDescendingIcon from "../../../assets/SortNumericDown.jsx";
+import SortNumericAscendingIcon from "../../../assets/SortNumericUp.jsx";
+import { useParsedSearchParams } from "../../../context/providers.js";
+import { arrayUtils } from "../../../utils/utils.js";
+import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaSortSelect.scoped.css"
 
 export function MediaSortSelect() {

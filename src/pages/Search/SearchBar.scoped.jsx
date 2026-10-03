@@ -2,14 +2,14 @@ import { useSearchParams } from "@solidjs/router";
 import { useParsedSearchParams } from "../../context/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
 import "./SearchBar.scoped.css";
-import { MediaSortSelect } from "./MediaSortSelect.scoped";
+import { MediaSortSelect } from "./inputs/MediaSortSelect.scoped.jsx";
 import { SearchActiveQueries } from "./SearchActiveQueries.scoped";
-import { MediaFormatSelect } from "./MediaFormatSelect.scoped";
-import { MediaSourceSelect } from "./MediaSourceSelect.scoped";
-import { MediaCountrySelect } from "./MediaCountrySelect.scoped";
-import { MediaStatusSelect } from "./MediaStatusSelect.scoped";
-import { MediaExternalSourcesSelect } from "./MediaExternalSourcesSelect.scoped";
-import { MediaAgeSelect } from "./MediaAgeSelect.scoped";
+import { MediaFormatSelect } from "./inputs/MediaFormatSelect.scoped.jsx";
+import { MediaSourceSelect } from "./inputs/MediaSourceSelect.scoped.jsx";
+import { MediaCountrySelect } from "./inputs/MediaCountrySelect.scoped.jsx";
+import { MediaStatusSelect } from "./inputs/MediaStatusSelect.scoped.jsx";
+import { MediaExternalSourcesSelect } from "./inputs/MediaExternalSourcesSelect.scoped.jsx";
+import { MediaAgeSelect } from "./inputs/MediaAgeSelect.scoped.jsx";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();

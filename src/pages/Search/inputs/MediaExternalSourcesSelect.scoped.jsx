@@ -1,15 +1,15 @@
 import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { useParsedSearchParams } from "../../context/providers";
-import { arrayUtils } from "../../utils/utils";
-import { MultiSelect } from "./MultiSelect.scoped";
+import { useParsedSearchParams } from "../../../context/providers.js";
+import { arrayUtils } from "../../../utils/utils.js";
+import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaExternalSourcesSelect.scoped.css"
-import { createCleanUpAbortController } from "../../utils/abortUtils";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
-import { queries } from "../../collections/collections";
-import { tabTime } from "../../core/globalState";
-import { timeStringToMs } from "../../utils/timeUtils";
-import { Checkbox } from "./Checkbox.scoped";
+import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
+import { queries } from "../../../collections/collections.js";
+import { tabTime } from "../../../core/globalState.js";
+import { timeStringToMs } from "../../../utils/timeUtils.js";
+import { Checkbox } from "../Checkbox.scoped.jsx";
 
 export const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
 
