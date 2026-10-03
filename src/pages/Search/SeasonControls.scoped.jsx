@@ -10,9 +10,9 @@ export function SeasonControls() {
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
 
-  const seasons = ["WINTER", "SPRING", "SUMMER", "FALL"];
+  const seasons = ["winter", "spring", "summer", "fall"];
   const index = createMemo(() => seasons.indexOf(parsedSearchParams().season));
-  const yearOrCurrentYear = createMemo(() => +parsedSearchParams().year || new Date().getFullYear());
+  const yearOrCurrentYear = createMemo(() => parsedSearchParams().year || new Date().getFullYear());
 
   const searchWithoutSeasonsOrYear = createMemo(() => {
     let search = location.search || "";

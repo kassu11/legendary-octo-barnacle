@@ -1,5 +1,6 @@
 import { Show, splitProps } from "solid-js";
 import { CheckMarkIcon } from "../../assets/CheckMarkIcon";
+import "./Checkbox.scoped.css";
 
 export function Checkbox(props) {
 

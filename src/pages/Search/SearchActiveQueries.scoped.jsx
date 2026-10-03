@@ -1,5 +1,5 @@
 import { createMemo, For } from "solid-js";
-import "./SearchBar.scoped.css";
+import "./SearchActiveQueries.scoped.css";
 import { useParsedSearchParams } from "../../context/providers";
 import { useSearchParams } from "@solidjs/router";
 
