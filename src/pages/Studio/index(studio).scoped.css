@@ -6,6 +6,10 @@
 
     --grid-column-width: 11rem;
 
+    @media (width < 40rem) {
+      --grid-column-width: 8rem;
+    }
+
     form {
       display: flex;
       flex-wrap: wrap;
@@ -13,24 +17,11 @@
       gap: 0 1rem;
     }
 
-    img {
-      aspect-ratio: 5.5/8;
-      width: 100%;
-      object-fit: cover;
+    .grid-column-auto-fill {
+      @media (width < 26em) {
+        --grid-column-width: 6rem;
+      }
     }
-  }
-}
 
-@layer resize {
-  @media (width < 40rem) {
-    .studio-page {
-      --grid-column-width: 8rem;
-    }
-  }
-
-  @media (width < 26em) {
-    .studio-page .grid-column-auto-fill {
-      --grid-column-width: 6rem;
-    }
   }
 }

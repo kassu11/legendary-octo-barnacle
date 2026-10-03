@@ -17,7 +17,7 @@ import Artist from "./pages/Artist/Artist.scoped.jsx";
 import Notifications from "./pages/Notifications/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.scoped.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.scoped.jsx";
-import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
+import { Studio as AnilistStudio } from "./pages/Studio/index(studio).scoped.jsx";
 import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
 import ComparePage from "./pages/Compare/ComparePage.scoped.jsx";
