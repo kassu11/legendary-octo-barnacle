@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { batch, createEffect, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
-import "./Notifications.scss";
+import "./Notifications.scoped.css";
 import { mediaUrl } from "../../utils/formating.js";
 import { CreatedAt } from "../../components/CreatedAt.jsx";
 import { arrayUtils, scheduleUtils } from "../../utils/utils.js";
@@ -299,7 +299,7 @@ function NotificationsPage(props) {
                       </A>
                       {notification.context}
                     </p>
-                    <CreatedAt createdAt={notification.createdAt} />
+                    <CreatedAt scoped createdAt={notification.createdAt} />
                   </div>
                 </Match>
                 <Match when={notification.type === "AIRING"}>
@@ -316,7 +316,7 @@ function NotificationsPage(props) {
                       </A>
                       {notification.contexts[2]}
                     </p>
-                    <CreatedAt createdAt={notification.createdAt} />
+                    <CreatedAt scoped createdAt={notification.createdAt} />
                   </div>
                 </Match>
                 <Match when={notification.type === "ACTIVITY_REPLY_LIKE" || notification.type === "ACTIVITY_LIKE" || notification.type === "ACTIVITY_REPLY"}>
@@ -328,7 +328,7 @@ function NotificationsPage(props) {
                       {notification.user.name}
                       {notification.context}
                     </A>
-                    <CreatedAt createdAt={notification.createdAt} />
+                    <CreatedAt scoped createdAt={notification.createdAt} />
                   </div>
                 </Match>
                 <Match when={notification.type === "FOLLOWING"}>
@@ -342,7 +342,7 @@ function NotificationsPage(props) {
                       </A>
                       {notification.context}
                     </p>
-                    <CreatedAt createdAt={notification.createdAt} />
+                    <CreatedAt scoped createdAt={notification.createdAt} />
                   </div>
                 </Match>
               </Switch>

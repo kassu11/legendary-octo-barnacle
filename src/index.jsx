@@ -14,7 +14,7 @@ import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx"
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
 import { StatsMediaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
 import Artist from "./pages/Artist/Artist.scoped.jsx";
-import Notifications from "./pages/Notifications/Notifications.jsx";
+import Notifications from "./pages/Notifications/Notifications.scoped.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.scoped.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.scoped.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio/index(studio).scoped.jsx";
