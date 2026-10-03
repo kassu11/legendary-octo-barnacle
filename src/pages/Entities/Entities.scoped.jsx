@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
-import "./Entities.scss";
+import "./Entities.scoped.css";
 import { capitalize, languageFromCountry } from "../../utils/formating.js";
 import { asserts, modes, signals, queries } from "../../collections/collections.js";
 import { arrayUtils } from "../../utils/utils.js";
@@ -364,7 +364,7 @@ function CharacterCard(props) {
 
   return (
     <li ref={ref} attr:data-page={props.page} class="entities-page-entity">
-      <A href={"/ani/character/" + props.edge.node.id} class="entity-left">
+      <A scoped href={"/ani/character/" + props.edge.node.id} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Character" />
         <div class="content">
           <p class="line-clamp">{props.edge.node.name.userPreferred}</p>
@@ -372,7 +372,7 @@ function CharacterCard(props) {
         </div>
       </A>
       <Show when={props.actorRole}>
-        <A href={"/ani/staff/" + props.actorRole.voiceActor.id} class="entity-right">
+        <A scoped href={"/ani/staff/" + props.actorRole.voiceActor.id} class="entity-right">
           <div class="content">
             <Show when={props.actorRole.roleNotes} fallback={
               <p class="line-clamp">{props.actorRole.voiceActor.name.userPreferred}</p>
@@ -392,7 +392,7 @@ function CharacterCard(props) {
 function StaffCard(props) {
   return (
     <li class="entities-page-entity">
-      <A href={"/ani/staff/" + props.edge.node.id} class="entity-left">
+      <A scoped href={"/ani/staff/" + props.edge.node.id} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Staff" />
         <div class="content">
           <p class="line-clamp">{props.edge.node.name.userPreferred}</p>
