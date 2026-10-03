@@ -1,5 +1,5 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import style from "./AnimeThemes.module.scss";
+import "./AnimeThemes.scoped.css";
 import { queries } from "../../collections/collections.js";
 import { asserts } from "../../collections/collections.js";
 import { localizations } from "../../collections/collections.js";
@@ -63,8 +63,8 @@ export function AnimeTheme(props) {
 
   return (
     <ErrorBoundary fallback="AnimeThemes row error">
-      <div className={style.themeContainer}>
-        <div className={style.header}>
+      <div class="theme-container">
+        <div class="header">
           <p>{props.theme.slug}</p>
           <Show when={props.theme.song}>
             <p>{props.theme.song.title}
@@ -84,13 +84,13 @@ export function AnimeTheme(props) {
           </Show>
         </div>
         <For each={props.theme.animethemeentries}>{row => (
-          <div className={style.details}>
+          <div class="details">
             <p>v{row.version || 1}</p>
             <p>Ep: {row.episodes || "-"}</p>
-            <Show when={row.spoiler}><p className={style.spoiler}>Spoilers</p></Show>
-            <div className={style.playButtonContainer}>
+            <Show when={row.spoiler}><p class="spoiler">Spoilers</p></Show>
+            <div class="play-button-container">
               <For each={row.videos}>{video => (
-                <div className={style.playButton}>
+                <div class="play-button">
                   <button onClick={() => props.video.src = video.link}>play</button>
                   <a target="_blank" href={props.href + (row.version > 1 ? "v" + row.version : "") + (video.tags ? "-" + video.tags : "")}>open</a>
                   <span>{video.resolution}</span>

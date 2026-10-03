@@ -5,7 +5,7 @@ import { createEffect, createMemo, createRenderEffect, createSignal, ErrorBounda
 import { Markdown } from "../../components/Markdown.scoped.jsx";
 import { StaffPreview } from "./StaffPreview.scoped.jsx";
 import Friends from "../../components/media/Friends.scoped.jsx";
-import AnimeThemes from "../../components/MediaPage/AnimeThemes.jsx";
+import AnimeThemes from "../../components/MediaPage/AnimeThemes.scoped.jsx";
 import { Recommendations } from "./Recommendations.scoped.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../../context/providers.js";
 import { AnilistMediaInfo } from "./MediaInfo.scoped.jsx";
