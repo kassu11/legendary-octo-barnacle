@@ -8,7 +8,7 @@ import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "../../components/Tooltips.jsx";
 import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../../utils/formating.js";
-import "./ComparePage.scss";
+import "./ComparePage.scoped.css";
 import Score from "../../components/media/Score.scoped.jsx";
 import Star from "../../assets/Star.jsx";
 import { debounce } from "@solid-primitives/scheduled";
@@ -652,15 +652,15 @@ function ContentPage() {
                   <div class="cp-card-repeat">
                     <Tooltip tipPosition="right">Compined {params.type === "anime" ? "rewatches" : "rereads"} {media.repeat}</Tooltip>
                     {media.repeat}
-                    <RepeatIcon />
+                    <RepeatIcon scoped />
                   </div>
                 </Show>
                 <div class="score">
                   <Tooltip tipPosition="right">Global average score</Tooltip>
-                  <Star /> {(media.averageScore / 10) || "N/A"}
+                  <Star scoped /> {(media.averageScore / 10) || "N/A"}
                 </div>
               </div>
-              <A class="cover-link" href={mediaUrl(media)}>
+              <A scoped class="cover-link" href={mediaUrl(media)}>
                 <img class="cover" loading="lazy" src={media.coverImage.large} alt="Media cover" />
               </A>
               <Show when={media.episodes || media.chapters || media.volumes || media.score}>
@@ -690,7 +690,7 @@ function ContentPage() {
               <ol class="pg-compare-media-users">
                 <For each={media.mediaEntries}>{user => (
                   <li>
-                    <A href={ "/user/" + user.name } class="name">
+                    <A scoped href={ "/user/" + user.name } class="name">
                       <img class="profile" src={users[user.name].avatar.large} alt="Profile picture" />
                       {user.name}
                     </A>
@@ -700,7 +700,7 @@ function ContentPage() {
                     <Show when={user.repeat}>
                       <div class="cp-card-repeat">
                         {user.repeat}
-                        <RepeatIcon />
+                        <RepeatIcon scoped />
                       </div>
                     </Show>
                     <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
@@ -712,12 +712,12 @@ function ContentPage() {
                   <li>
                     <Switch>
                       <Match when={media.countryOfOrigin !== "JP"}> 
-                        <A href={"/ani/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
+                        <A scoped href={"/ani/search/" + media.type.toLowerCase() + "?format=" + formatApiValue() + "&country=" + media.countryOfOrigin}>
                           {formatMediaFormat(media.format)} ({languageFromCountry(media.countryOfOrigin)})
                         </A>
                       </Match>
                       <Match when={media.countryOfOrigin === "JP"}> 
-                        <A href={"/ani/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
+                        <A scoped href={"/ani/search/" + media.type.toLowerCase() + "?format=" + formatApiValue()}>
                           {formatMediaFormat(media.format)}
                         </A>
                       </Match>
@@ -728,23 +728,23 @@ function ContentPage() {
                   <Match when={params.type === "manga"}>
                     <Switch>
                       <Match when={media.startDate?.year}>
-                        <A href={"/ani/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
+                        <A scoped href={"/ani/search/manga?year=" + media.startDate.year}>{media.startDate.year}</A>
                       </Match>
                       <Match when={media.startDate?.year == null}>
-                        <A href="/ani/search/manga/tba">TBA</A>
+                        <A scoped href="/ani/search/manga/tba">TBA</A>
                       </Match>
                     </Switch>
                   </Match>
                   <Match when={params.type === "anime"}>
                     <Switch>
                       <Match when={media.seasonYear && media.season}>
-                        <A href={"/ani/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
+                        <A scoped href={"/ani/search/anime/" + media.season.toLowerCase() + "-" + media.seasonYear}>{capitalize(media.season)} {media.seasonYear}</A>
                       </Match>
                       <Match when={media.startDate?.year}>
-                        <A href={"/ani/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
+                        <A scoped href={"/ani/search/anime?year=" + media.startDate.year}>{media.startDate.year}</A>
                       </Match>
                       <Match when={media.startDate?.year == null}>
-                        <A href="/ani/search/anime/tba">TBA</A>
+                        <A scoped href="/ani/search/anime/tba">TBA</A>
                       </Match>
                     </Switch>
                   </Match>

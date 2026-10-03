@@ -4,47 +4,48 @@
     display: grid;
     gap: 1rem;
     margin-inline: auto;
-  }
-  .pg-compare-user-search {
-    position: relative;
-    margin: auto;
-    width: min(100% - 1rem, 20rem);
 
-    input {
-      padding: .5rem 1rem;
-      font-size: var(--fs-500);
-      width: 100%;
-    }
+    .pg-compare-user-search {
+      position: relative;
+      margin: auto;
+      width: min(100% - 1rem, 20rem);
 
-    ol {
-      position: absolute;
-      width: 100%;
-      list-style: none;
-      padding: 0;
-      max-height: 20rem;
-      overflow: auto;
-      z-index: 2;
-    }
-
-    li {
-      display: grid;
-      gap: .25rem;
-      grid-template-columns: 2rem 1fr;
-      background-color: var(--background-400-old);
-      align-items: center;
-      cursor: pointer;
-
-      &.selected {
-        background-color: var(--background-700-old);
+      input {
+        padding: .5rem 1rem;
+        font-size: var(--fs-500);
+        width: 100%;
       }
-    }
 
-    img {
-      aspect-ratio: 1/1;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background-color: var(--background-300-old);
+      ol {
+        position: absolute;
+        width: 100%;
+        list-style: none;
+        padding: 0;
+        max-height: 20rem;
+        overflow: auto;
+        z-index: 2;
+      }
+
+      li {
+        display: grid;
+        gap: .25rem;
+        grid-template-columns: 2rem 1fr;
+        background-color: var(--background-400-old);
+        align-items: center;
+        cursor: pointer;
+
+        &.selected {
+          background-color: var(--background-700-old);
+        }
+      }
+
+      img {
+        aspect-ratio: 1/1;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background-color: var(--background-300-old);
+      }
     }
   }
 
@@ -68,7 +69,7 @@
       transition: opacity .2s, filter .2s, background-color .2s;
 
       &:hover {
-        z-index: 1; // Fix tooltip z-index that filter breaks;
+        z-index: 1; /* Fix tooltip z-index that filter breaks; */
       }
 
       &.disabled {
@@ -160,7 +161,7 @@
       position: relative;
       isolation: isolate;
       display: grid;
-      // column width auto works inside chrome, but not inside firefox so this might be changed later when firefox has fixed this issue
+      /* column width auto works inside chrome, but not inside firefox so this might be changed later when firefox has fixed this issue */
       grid-template-columns: calc((16rem - 1rem) * (5.5/8)) 1fr;
       min-height: 16rem;
       height: 16rem;

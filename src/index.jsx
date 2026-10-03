@@ -20,7 +20,7 @@ import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/En
 import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
 import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
-import ComparePage from "./pages/Compare/ComparePage.jsx";
+import ComparePage from "./pages/Compare/ComparePage.scoped.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.scoped.jsx";
 import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
