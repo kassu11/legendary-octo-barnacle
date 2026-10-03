@@ -1,5 +1,5 @@
 import { Switch, Show, Match, createSignal, mergeProps, For, createEffect } from "solid-js";
-import { OldMarkdownComponent } from "./Markdown.jsx";
+import { OldMarkdownComponent } from "./Markdown.scoped.jsx";
 import "./Activity.scoped.css";
 import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
 import { capitalize, mediaUrl } from "../utils/formating.js";

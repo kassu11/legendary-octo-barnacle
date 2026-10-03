@@ -1,6 +1,6 @@
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
-import style from "./Markdown.module.scss";
+import "./Markdown.scoped.css";
 import { createMemo, For } from "solid-js";
 
 const spoilerExtension = {
@@ -20,7 +20,7 @@ const spoilerExtension = {
     }
   },
   renderer(token) {
-    return `<details class="${style.spoiler}"><summary><span class="${style.text}">${marked.parseInline(token.text)}</span></summary></details>`;
+    return `<details class="spoiler"><summary><span class="text">${marked.parseInline(token.text)}</span></summary></details>`;
   }
 };
 
@@ -31,11 +31,13 @@ export function OldMarkdownComponent(props) {
   if (!props.children) return null;
   const dirty = marked(props.children)
   const clean = DOMPurify.sanitize(dirty);
-  const elem = <div innerHTML={clean}></div>; 
+  const elem = <div innerHTML={clean}></div>;
   return <For each={elem.childNodes}>{e => e}</For>
 }
+
 const singleLineBreakCharacterRegex = /([^\n])\n([^\n])/g;
 const replaceSingleLineBreakWithBrElement = (_, p1, p2) => p1 + "<br>" + p2;
+
 export function Markdown(props) {
   const children = createMemo(() => {
     if (!props.text) {

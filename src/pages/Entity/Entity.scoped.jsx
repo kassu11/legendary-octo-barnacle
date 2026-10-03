@@ -1,6 +1,6 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { Switch, Match, Show, createSignal, createEffect, For, createMemo, untrack } from "solid-js";
-import { OldMarkdownComponent } from "../../components/Markdown.jsx";
+import { OldMarkdownComponent } from "../../components/Markdown.scoped.jsx";
 import "./Entity.scoped.css";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";

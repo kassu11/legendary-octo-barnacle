@@ -6,7 +6,7 @@ import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Mat
 import "./MediaInfoJikan.scoped.css";
 import { Trailer } from "../MediaPage/Trailer.scoped.jsx";
 import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
-import { Markdown } from "../../components/Markdown.jsx";
+import { Markdown } from "../../components/Markdown.scoped.jsx";
 import { MalCharacterCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import { ExternalLinks } from "../../components/media/ExternalLinks.scoped.jsx";
