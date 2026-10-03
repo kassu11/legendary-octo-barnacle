@@ -1,6 +1,6 @@
 import { A, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { AnilistRelationsPreview } from "./RelationsPreview.scoped.jsx";
-import Characters from "../../components/media/Characters.jsx";
+import Characters from "../../components/media/Characters.scoped.jsx";
 import { createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { Markdown } from "../../components/Markdown.scoped.jsx";
 import { StaffPreview } from "./StaffPreview.scoped.jsx";

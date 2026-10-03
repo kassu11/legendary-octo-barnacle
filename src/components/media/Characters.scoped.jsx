@@ -1,5 +1,5 @@
 import { createEffect, createSignal, ErrorBoundary, For, mergeProps, Show } from "solid-js";
-import style from "./Characters.module.scss";
+import "./Characters.scoped.css";
 import { A } from "@solidjs/router";
 import { formatTitleToUrl, languageFromCountry } from "../../utils/formating";
 
@@ -24,24 +24,24 @@ function Characters(props) {
   return (
     <ErrorBoundary fallback="Characters error">
       <Show when={merged.characters.length}>
-        <div class={style.characterContainer}>
+        <div class="character-container">
           <A href="characters">
             <h2>Characters</h2>
           </A>
           <ol class="grid-column-auto-fill">
             <For each={merged.characters}>{char => (
-              <li class={style.character}>
-                <A href={"/ani/character/" + char.node.id + "/" + formatTitleToUrl(char.node.name.userPreferred)} class={style.characterLeft}>
+              <li class="character">
+                <A scoped href={"/ani/character/" + char.node.id + "/" + formatTitleToUrl(char.node.name.userPreferred)} class="character-left">
                   <img src={char.node.image.large} alt="Character" />
-                  <div class={style.content}>
-                    <p class={style.lineClamp}>{char.node.name.userPreferred}</p>
+                  <div class="content">
+                    <p class="line-clamp">{char.node.name.userPreferred}</p>
                     <p>{char.role}</p>
                   </div>
                 </A>
                 <Show when={char.voiceActors.find(actor => actor.language === language())}>{actor => (
-                  <A href={"/ani/staff/" + actor().id + "/" + formatTitleToUrl(actor().name.userPreferred)} class={style.characterRight}>
-                    <div class={style.content}>
-                      <p class={style.lineClamp}>{actor().name.userPreferred}</p>
+                  <A scoped href={"/ani/staff/" + actor().id + "/" + formatTitleToUrl(actor().name.userPreferred)} class="character-right">
+                    <div class="content">
+                      <p class="line-clamp">{actor().name.userPreferred}</p>
                       <p>{actor().language}</p>
                     </div>
                     <img src={actor().image.large} alt="Voice actor" />
