@@ -1,6 +1,6 @@
 import Star from "../../assets/Star";
 import { Switch, Match, mergeProps, splitProps, Show, For } from "solid-js";
-import "./ScoreInput.scss";
+import "./ScoreInput.scoped.css";
 import EmojiByScoreScoped from "../EmojiByScore.scoped.jsx";
 import { asserts } from "../../collections/collections.js";
 
@@ -81,7 +81,7 @@ function StarRadioRange(props) {
             }
           }}
           name={props.name} id={props.id} value={i} checked={props.value == i}/>
-        <Star class="score-star" />
+        <Star scoped class="score-star" />
       </label>
     )}</For>
   );
@@ -92,19 +92,15 @@ function EmojiRadioRange(props) {
   return (
     <For each={[1,2,3]}>{i => (
       <label classList={{"radio-container": true, selected: i == props.value}}>
-        <input 
-          type="radio" 
-          class="radio"
-          onClick={e => {
-            if (props.value == e.target.value) {
-              e.target.checked = false;
-              props.onChange(0);
-            } else {
-              props.onChange(+e.target.value);
-            }
-          }}
-          name={props.name} id={props.id} value={i} checked={props.value == i}/>
-        <EmojiByScoreScoped score={values[i]} />
+        <input type="radio" class="radio" name={props.name} id={props.id} value={i} checked={props.value == i} onClick={e => {
+          if (props.value == e.target.value) {
+            e.target.checked = false;
+            props.onChange(0);
+          } else {
+            props.onChange(+e.target.value);
+          }
+        }} />
+        <EmojiByScoreScoped scoped score={values[i]} />
       </label>
     )}</For>
   );
