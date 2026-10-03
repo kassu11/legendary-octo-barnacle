@@ -13,7 +13,7 @@ import { StatsMediaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
 import { StatsMediaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
-import Artist from "./pages/Artist/Artist.jsx";
+import Artist from "./pages/Artist/Artist.scoped.jsx";
 import Notifications from "./pages/Notifications/Notifications.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.scoped.jsx";
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.scoped.jsx";

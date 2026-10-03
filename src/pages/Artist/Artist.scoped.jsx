@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { AnimeTheme } from "../../components/MediaPage/AnimeThemes.jsx";
-import style from "./Artist.module.scss";
+import "./Artist.scoped.css";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
 import { queries } from "../../collections/collections.js";
@@ -43,9 +43,9 @@ function Artist() {
         <Show when={artistData().data.artist.images.length} fallback={<img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg" alt="Artist missing" />}>
           <img src={artistData().data.artist.images[0].link} alt="Artist" />
         </Show>
-        <div class={style.themes}>
+        <div class="themes">
           <For each={artistData().data.artist.songs}>{theme => (
-            <div class={style.episode}>
+            <div class="episode">
               <For each={theme.animethemes}>{theme => (
                 <AnimeTheme theme={theme} video={video} mainArtist={params.name} />
               )}</For>
