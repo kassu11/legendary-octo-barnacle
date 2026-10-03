@@ -377,7 +377,7 @@
       grid-column: 3;
     }
 
-    .score-component-container {
+    .score-component {
       grid-column: 4;
       justify-self: end;
     }

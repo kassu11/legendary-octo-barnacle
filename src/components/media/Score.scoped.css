@@ -1,4 +1,4 @@
-.score-component-container {
+div {
   display: flex;
   gap: .25rem;
   padding-left: 1.25rem;

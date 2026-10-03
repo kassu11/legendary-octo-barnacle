@@ -703,7 +703,7 @@ function ContentPage() {
                         <RepeatIcon scoped />
                       </div>
                     </Show>
-                    <Score score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
+                    <Score scoped class="score-component" score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
                   </li>
                 )}</For>
               </ol>

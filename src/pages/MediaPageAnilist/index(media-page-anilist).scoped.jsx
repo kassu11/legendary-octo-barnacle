@@ -4,7 +4,7 @@ import Characters from "../../components/media/Characters.jsx";
 import { createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { Markdown } from "../../components/Markdown.scoped.jsx";
 import { StaffPreview } from "./StaffPreview.scoped.jsx";
-import Friends from "../../components/media/Friends.jsx";
+import Friends from "../../components/media/Friends.scoped.jsx";
 import AnimeThemes from "../../components/MediaPage/AnimeThemes.jsx";
 import { Recommendations } from "./Recommendations.scoped.jsx";
 import { MediaInfoContext, useAuthentication, useEditMediaEntries, useMediaInfo } from "../../context/providers.js";

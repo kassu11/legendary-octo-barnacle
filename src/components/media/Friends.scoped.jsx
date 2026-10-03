@@ -1,7 +1,7 @@
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import Status from "./Status";
 import Score from "./Score.scoped";
-import style from "./Friends.module.scss";
+import "./Friends.scoped.css";
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { useMediaInfo } from "../../context/providers";
 import { queries } from "../../collections/collections.js";
@@ -53,7 +53,7 @@ function Friends() {
   return (
     <ErrorBoundary fallback="Friends error">
       <Show when={(friendScoreData()?.data.data.Page.mediaList.length || ownProfileInfo()) && anilistData() && authUserData()}>
-        <div class={style.friendContainer}>
+        <div class="friend-container">
           <p>{formatMSToString(time())}</p>
           <ul>
             <Show when={ownProfileInfo()}>
@@ -78,17 +78,17 @@ function Friend(props) {
 
   return (
     <li>
-      <A class={style.friend} href={"/user/" + props.friend.user.name}>
+      <A scoped class="friend" href={"/user/" + props.friend.user.name}>
         <img src={props.friend.user.avatar.large} alt="User profile" />
         <p>{props.friend.user.name}</p>
-        <Status friend={props.friend} media={anilistData()?.data.data.Media} type={anilistData()?.data.data.Media.type} />
+        <Status scoped class="friend-list-status" friend={props.friend} media={anilistData()?.data.data.Media} type={anilistData()?.data.data.Media.type} />
         <Show when={props.friend.repeat}>
-          <div class={style.friendRepeat}>
+          <div class="friend-repeat">
             {props.friend.repeat}
-            <RepeatIcon />
+            <RepeatIcon scoped />
           </div>
         </Show>
-        <Score format={props.friend.user.mediaListOptions.scoreFormat} score={props.friend.score} />
+        <Score scoped class="score" format={props.friend.user.mediaListOptions.scoreFormat} score={props.friend.score} />
       </A>
     </li>
   );

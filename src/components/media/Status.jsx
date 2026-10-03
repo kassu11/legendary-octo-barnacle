@@ -1,34 +1,37 @@
-import { Switch, Match, Show } from "solid-js";
+import { Switch, Match, Show, splitProps } from "solid-js";
 
 function Status(props) {
+
+  const [local, scoping] = splitProps(props, ["friend", "type", "media"]);
+
   return (
-    <p class="friend-list-status">
-      <Switch fallback={props.friend.status}>
-        <Match when={props.friend.status === "COMPLETED"}>Completed</Match>
-        <Match when={props.friend.status === "CURRENT"}>
+    <p {...scoping}>
+      <Switch fallback={local.friend.status}>
+        <Match when={local.friend.status === "COMPLETED"}>Completed</Match>
+        <Match when={local.friend.status === "CURRENT"}>
           <Switch>
-            <Match when={props.type === "ANIME"}>Watching</Match>
-            <Match when={props.type === "MANGA"}>Reading</Match>
+            <Match when={local.type === "ANIME"}>Watching</Match>
+            <Match when={local.type === "MANGA"}>Reading</Match>
           </Switch>
         </Match>
-        <Match when={props.friend.status === "DROPPED"}>Dropped</Match>
-        <Match when={props.friend.status === "PAUSED"}>Paused</Match>
-        <Match when={props.friend.status === "PLANNING"}>Planning</Match>
-        <Match when={props.friend.status === "REPEATING"}>
+        <Match when={local.friend.status === "DROPPED"}>Dropped</Match>
+        <Match when={local.friend.status === "PAUSED"}>Paused</Match>
+        <Match when={local.friend.status === "PLANNING"}>Planning</Match>
+        <Match when={local.friend.status === "REPEATING"}>
           <Switch>
-            <Match when={props.type === "ANIME"}>Rewatching</Match>
-            <Match when={props.type === "MANGA"}>Rereading</Match>
+            <Match when={local.type === "ANIME"}>Rewatching</Match>
+            <Match when={local.type === "MANGA"}>Rereading</Match>
           </Switch>
         </Match>
       </Switch>
-      <Show when={props.friend.progress > 0 && props.friend.progress !== props.media.episodes && props.friend.progress !== props.media.chapters}>
+      <Show when={local.friend.progress > 0 && local.friend.progress !== local.media.episodes && local.friend.progress !== local.media.chapters}>
         <Switch>
-          <Match when={props.type === "ANIME"}> Ep. {props.friend.progress}</Match>
-          <Match when={props.type === "MANGA"}> Ch. {props.friend.progress}</Match>
+          <Match when={local.type === "ANIME"}> Ep. {local.friend.progress}</Match>
+          <Match when={local.type === "MANGA"}> Ch. {local.friend.progress}</Match>
         </Switch>
       </Show>
-      <Show when={props.friend.progressVolumes > 0 && props.friend.progressVolumes !== props.media.volumes}>
-        {" "}Vol. {props.friend.progressVolumes}
+      <Show when={local.friend.progressVolumes > 0 && local.friend.progressVolumes !== local.media.volumes}>
+        {" "}Vol. {local.friend.progressVolumes}
       </Show>
     </p>
   );
