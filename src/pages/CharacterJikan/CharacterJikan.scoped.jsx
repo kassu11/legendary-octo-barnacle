@@ -1,7 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { Show, For, createRenderEffect, ErrorBoundary, createEffect, createSignal } from "solid-js";
 import { Markdown } from "../../components/Markdown.jsx";
-import "../Entity/Entity.scss";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { queries } from "../../collections/collections.js";
 import { arrayUtils } from "../../utils/utils.js";

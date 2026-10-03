@@ -1,7 +1,7 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { Switch, Match, Show, createSignal, createEffect, For, createMemo, untrack } from "solid-js";
 import { OldMarkdownComponent } from "../../components/Markdown.jsx";
-import "./Entity.scss";
+import "./Entity.scoped.css";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
 import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
