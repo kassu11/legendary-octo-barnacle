@@ -17,7 +17,7 @@ export function GenreItems(props) {
           <div class="header">
             <div class="flex-space-between">
               <h2>
-                <A href={"/ani/search/" + params.type + "?onList=false&genre=" + genre.genre}>
+                <A href={"/ani/search/" + params.type + "?onList=false&theme=" + genre.genre}>
                   {genre.genre}
                 </A>
               </h2>
@@ -28,7 +28,7 @@ export function GenreItems(props) {
           <div class="wrapper">
             <div className="flex-space-between">
               <p>User {params.type}</p>
-              <A href={"/user/" + user().name + "/" + params.type + "/list?genre=" + genre.genre}>Show all</A>
+              <A href={"/user/" + user().name + "/" + params.type + "/list?theme=" + genre.genre}>Show all</A>
             </div>
             <GenreMediaCardsScoped store={props.store} setStore={props.setStore} mediaIds={genre.mediaIds} allMediaIds={props.mediaIds()} />
           </div>
