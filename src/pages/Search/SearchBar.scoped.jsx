@@ -13,6 +13,7 @@ import { MediaAgeSelect } from "./inputs/MediaAgeSelect.scoped.jsx";
 import { MediaSeasonSelect } from "./inputs/MediaSeasonSelect.scoped";
 import { MediaGenresAndTagsSelect } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { TwoStateToggle } from "./TwoStateToggle.scoped";
+import { MediaYearSelect } from "./inputs/MediaYearSelect.scoped";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -39,6 +40,7 @@ export function SearchBar() {
         <MediaSeasonSelect />
         <MediaExternalSourcesSelect />
         <MediaGenresAndTagsSelect />
+        <MediaYearSelect />
         <TwoStateToggle name="onList" label="On My List" />
         <TwoStateToggle name="licensed" label="Licensed" />
       </div>

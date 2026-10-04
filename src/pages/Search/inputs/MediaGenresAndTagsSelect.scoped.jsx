@@ -41,8 +41,8 @@ export function MediaGenresAndTagsSelect() {
       setValue: res => {
         const genreObject = {
           entries: [
-            ...res.data.data.genres.map((id)         => ({ description: id, id: id.toLowerCase(), values: ["+", "-"] })),
-            ...res.data.data.tags.map(({ name: id }) => ({ description: id, id: id.toLowerCase(), values: ["+", "-"] })),
+            ...res.data.data.genres.map((id)         => ({ description: id, id: id.toLowerCase() })),
+            ...res.data.data.tags.map(({ name: id }) => ({ description: id, id: id.toLowerCase() })),
           ],
           genres: res.data.data.genres,
           tags: res.data.data.tags,
