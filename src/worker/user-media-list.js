@@ -1,19 +1,11 @@
+import { fuse } from "../utils/stringUtils.js";
+
 onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);
 }
 
 function modifyMediaListData(listData, type, options) {
-  if (options.search) {
-    options.search = options.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&");
-
-    if (options.search.trim() === "") {
-      options.searchRegex = new RegExp(options.search, "i");
-    } else if(options.search.match(/\W/)) {
-      options.searchRegex = new RegExp(options.search.replace(/ +/g, "\\W"), "i");
-    } else {
-      options.searchRegex = new RegExp(options.search.split("").join("\\W?"), "i");
-    }
-  }
+  options.searchRegex = fuse(options.search);
 
   const mediaSet = new Set();
   const tagsSet = new Set();

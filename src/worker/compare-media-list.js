@@ -1,3 +1,5 @@
+import { fuse } from "../utils/stringUtils.js";
+
 onmessage = ({ data: { includeKeys, excludeKeys, data, ...filtering } }) => {
   const entries = {}
   for (const entry of Object.values(data)) {
@@ -20,16 +22,7 @@ onmessage = ({ data: { includeKeys, excludeKeys, data, ...filtering } }) => {
 }
 
 function includeCompareList(listData, entries, filterObject) {
-  if (filterObject.search) {
-    filterObject.search = filterObject.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&");
-    if (filterObject.search.trim() === "") {
-      filterObject.searchRegex = new RegExp(filterObject.search, "i");
-    } else if(filterObject.search.match(/\W/)) {
-      filterObject.searchRegex = new RegExp(filterObject.search.replace(/ +/g, "\\W"), "i");
-    } else {
-      filterObject.searchRegex = new RegExp(filterObject.search.split("").join("\\W?"), "i");
-    }
-  }
+  filterObject.searchRegex = fuse(filterObject.search);
 
   listData.lists.forEach((list) => {
     list.entries.forEach((entry) => {
