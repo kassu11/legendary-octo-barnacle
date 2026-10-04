@@ -37,7 +37,7 @@
 
       @media (width < 40em) {
         grid-template-columns: repeat(3, 1fr);
-        gap: 6rem 8px;
+        gap: 4.5rem 8px;
       }
 
       @media (width < 30em) {
