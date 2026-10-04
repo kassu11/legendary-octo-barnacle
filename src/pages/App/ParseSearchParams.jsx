@@ -71,10 +71,9 @@ export function ParseSearchParams(props) {
     if (filteredStatus.length) obj.status = filteredStatus;
     if (filteredSeason) obj.season = filteredSeason;
 
-    obj.genres = wrapToSet(wrapToArray(searchParams.genre).map(name => name.toLowerCase()));
-    obj.excludedGenres = wrapToSet(wrapToArray(searchParams.excludedGenre).map(name => name.toLowerCase()));
-    obj.tags = wrapToSet(wrapToArray(searchParams.tag).map(name => name.toLowerCase()));
-    obj.excludedTags = wrapToSet(wrapToArray(searchParams.excludedTag).map(name => name.toLowerCase()));
+    const themes = wrapToArray(searchParams.theme).map(name => name.toLowerCase()).sort();
+    obj.themes         = themes.filter(val => !val.startsWith("-"));
+    obj.excludedThemes = themes.filter(val =>  val.startsWith("-")).map(val => val.substring(1));
     if (searchParams.year) obj.year = +wrapToArray(searchParams.year).at(-1);
 
     if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {

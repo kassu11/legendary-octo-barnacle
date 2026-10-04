@@ -2,7 +2,7 @@ import { A, Navigate, useLocation, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
-import { createTimer, formatMSToString, timeStringToMs } from "../../utils/timeUtils";
+import { createTimer, formatMSToString } from "../../utils/timeUtils";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
@@ -22,9 +22,7 @@ import { MediaCard } from "../User/Relations/MediaCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./BrowsePage.scoped";
-import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped.jsx";
-
-const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
+import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -34,30 +32,33 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, year, rank, genres, tags, excludedGenres, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
-  const tagsAndGenres = genres.union(tags);
+  const { q, year, rank, themes, excludedThemes, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
     format: [],
-    genres: [],
-    tags: [],
     sourceIn: [],
     countryOfOriginIn: [],
-    licensedBy: [],
+    licensedBy: [...externalSources],    // Anilist will work with invalid licenseIDs, so no need to validate
     statusIn: [],
     minimumTagRank: rank,
-    excludedGenres: [...excludedGenres],
+    excludedThemes: [...excludedThemes], // Anilist will work with invalid exclusions, so no need to validate
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
     isAdult: false,
   };
 
+  console.log(obj.excludedGenres);
+
+  // Validate genres and tags
+  const genresObject    = themes.length ? anilistGenresAndTagsData() : null;
+  if (themes.length && !genresObject) return null;
+
+  obj.genres = themes.filter(g => genresObject.validGenres.has(g));
+  obj.tags   = themes.filter(t => genresObject.validTags  .has(t));
+
   if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: ["search_match"] });
   else mergeVariables(api, "sort", obj, rest);
-
-  if (failedToMergeGenresAndTags(tagsAndGenres, obj)) return null;
-  if (failedToMergeExternalSources(externalSources, type, obj)) return null;
 
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);
@@ -78,43 +79,6 @@ function createAnilistMediaQueryVariables() {
   }
 
   return obj;
-}
-
-function failedToMergeGenresAndTags(tagsAndGenres, obj) {
-  const genresObject = tagsAndGenres.size ? anilistGenresAndTagsData() : null;
-  for (const g of tagsAndGenres) {
-    // Missing genres and tags list
-    if (!genresObject) {
-      return true;
-    }
-
-    if (genresObject.validGenres.has(g)) {
-      obj.genres.push(g);
-      continue;
-    }
-    if (genresObject.validTags.has(g)) {
-      obj.tags.push(g);
-      continue;
-    }
-  }
-}
-
-function failedToMergeExternalSources(listOfExternalSources = [], type, obj) {
-  const sourceObject = listOfExternalSources.length ? externalSourcesData() : null;
-  for (const source of listOfExternalSources) {
-    if (!sourceObject) {
-      return true;
-    }
-
-    if (type !== sourceObject.type) {
-      return true;
-    }
-
-    if (sourceObject.validIds.has(source)) {
-      obj.licensedBy.push(source);
-      continue;
-    }
-  }
 }
 
 function createJikanMediaQueryVariables() {
@@ -417,33 +381,6 @@ export function SearchPage() {
           if (key !== currentPagelessFetcher.cacheKey) return
           mutatePageless(res.data.data.Page.media, pageInfo, groupEntriesByFormat, false);
         }
-      }
-    });
-  });
-
-  const anilistGenresAndTagsController = createCleanUpAbortController();
-  createRenderEffect(() => {
-    anilistGenresAndTagsController.abortAndRenew();
-
-    const anilistGenresAndTagsFetcher = createAnilistFetcher(queries.anilistGenresAndTags, {}, anilistGenresAndTagsController.signal);
-
-    sendAnilistFetcher(anilistGenresAndTagsFetcher, {
-      name: "Anilist genres",
-      active: (res, settings) => {
-        if (!res) return true;
-        if (settings.debug) return false;
-        // Only update genres and tags once a day
-        return (tabTime - res.modified) > timeStringToMs("1d");
-      },
-      onFetch: () => anilistGenresAndTagsController.disable(),
-      setValue: (res) => {
-        const genreObject = {
-          genres: res.data.data.genres,
-          tags: res.data.data.tags,
-          validGenres: new Set(res.data.data.genres.map(g => g.toLowerCase())),
-          validTags: new Set(res.data.data.tags.map(t => t.name.toLowerCase())),
-        };
-        setAnilistGenresAndTagsData(genreObject);
       }
     });
   });

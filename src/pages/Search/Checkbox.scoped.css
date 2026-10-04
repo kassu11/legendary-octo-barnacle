@@ -8,21 +8,28 @@
     flex-shrink: 0;
     position: relative;
 
+    svg {
+      position: absolute;
+      translate: -50% -50%;
+      left: 50%;
+      top: 50%;
+      color: var(--bg-dark);
+    }
+
     &.radio {
       border-radius: 100%;
     }
-
     &.checked {
       border: 2px solid var(--shadow-light);
       background-color: var(--light-blue-400);
-
-      svg {
-        position: absolute;
-        translate: -50% -50%;
-        left: 50%;
-        top: 50%;
-        color: var(--bg-dark);
-      }
+    }
+    &.include {
+      border: 2px solid var(--shadow-light);
+      background-color: var(--lime-400);
+    }
+    &.exclude {
+      border: 2px solid var(--shadow-light);
+      background-color: var(--crimson-400);
     }
   }
 }

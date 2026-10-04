@@ -6,6 +6,7 @@
     align-items: center;
     padding: 4px 8px;
     font-weight: 400;
+    word-break: break-word;
 
     &.hovered, &:hover {
       background-color: var(--bg);

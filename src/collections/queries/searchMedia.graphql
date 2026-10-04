@@ -27,9 +27,8 @@ query (
   $licensedBy: [Int]
   $isLicensed: Boolean
   $genres: [String]
-  $excludedGenres: [String]
+  $excludedThemes: [String]
   $tags: [String]
-  $excludedTags: [String]
   $minimumTagRank: Int
   $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
   $averageScoreGreater: Int
@@ -70,9 +69,9 @@ query (
       licensedById_in: $licensedBy
       isLicensed: $isLicensed
       genre_in: $genres
-      genre_not_in: $excludedGenres
+      genre_not_in: $excludedThemes
       tag_in: $tags
-      tag_not_in: $excludedTags
+      tag_not_in: $excludedThemes
       minimumTagRank: $minimumTagRank
       sort: $sort
       isAdult: $isAdult

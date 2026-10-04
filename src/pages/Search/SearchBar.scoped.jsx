@@ -11,6 +11,7 @@ import { MediaStatusSelect } from "./inputs/MediaStatusSelect.scoped.jsx";
 import { MediaExternalSourcesSelect } from "./inputs/MediaExternalSourcesSelect.scoped.jsx";
 import { MediaAgeSelect } from "./inputs/MediaAgeSelect.scoped.jsx";
 import { MediaSeasonSelect } from "./inputs/MediaSeasonSelect.scoped";
+import { MediaGenresAndTagsSelect } from "./inputs/MediaGenresAndTagsSelect.scoped";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -36,6 +37,7 @@ export function SearchBar() {
         <MediaAgeSelect />
         <MediaSeasonSelect />
         <MediaExternalSourcesSelect />
+        <MediaGenresAndTagsSelect />
       </div>
       queries: <SearchActiveQueries />
     </div>
