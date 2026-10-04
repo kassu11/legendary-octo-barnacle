@@ -62,6 +62,11 @@ export const translateInternalApiParams = {
     true:  { ani: { onList: true  } },
   },
 
+  licensed: {
+    false: { ani: { isLicensed: false } },
+    true:  { ani: { isLicensed: true  } },
+  },
+
   status: {
     cancelled:        { ani: { statusIn: "CANCELLED"        }, },
     complete:         { ani: { statusIn: "FINISHED"         }, },

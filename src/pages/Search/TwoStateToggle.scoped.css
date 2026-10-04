@@ -1,0 +1,10 @@
+@layer component {
+  button {
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--bg);
+    place-items: center;
+    font-weight: 600;
+  }
+}

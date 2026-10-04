@@ -20,6 +20,7 @@ export function ParseSearchParams(props) {
     const obj = {
       q: decodeURIComponent(wrapToArray(searchParams.q).at(-1) || ""),
       onList: wrapToArray(searchParams.onList).at(-1),
+      licensed: wrapToArray(searchParams.licensed).at(-1),
       rank: +wrapToArray(searchParams.rank).at(-1),
       source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
       externalSources: [...wrapToSet(searchParams.externalSources)].map(Number).sort(),

@@ -48,8 +48,6 @@ function createAnilistMediaQueryVariables() {
     isAdult: false,
   };
 
-  console.log(obj.excludedGenres);
-
   // Validate genres and tags
   const genresObject    = themes.length ? anilistGenresAndTagsData() : null;
   if (themes.length && !genresObject) return null;
@@ -66,6 +64,7 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "format", obj, rest);
   mergeVariables(api, "country", obj, rest);
   mergeVariables(api, "onList", obj, rest);
+  mergeVariables(api, "licensed", obj, rest);
   mergeVariables(api, "source", obj, rest);
   mergeVariables(api, "age", obj, rest);
 
