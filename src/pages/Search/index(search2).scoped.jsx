@@ -470,7 +470,7 @@ export function SearchPage() {
               </Match>
               <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
                 <Switch>
-                  <Match when={parsedSearchParams().season === null}>
+                  <Match when={parsedSearchParams().season === "tba"}>
                     <h1>TBA Anime</h1>
                   </Match>
                   <Match when={parsedSearchParams().season}>

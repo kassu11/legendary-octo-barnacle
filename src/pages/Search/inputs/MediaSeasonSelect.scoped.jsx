@@ -43,7 +43,7 @@ export function MediaSeasonSelect() {
 
     // 1. Selected already active season, remove all seasons
     if (e.target === season?.id) {
-      return navigate(path => path.replace(/\/this-season|next-season|winter-\d+|spring-\d+|summer-\d+|fall-\d+/, ""), { season: undefined }, { replace: true });
+      return navigate(path => path.replace(/\/this-season|next-season|winter-\d+|spring-\d+|summer-\d+|fall-\d+|tba/, ""), { season: undefined }, { replace: true });
     }
     // 2. Already in seasons header, update header
     else if (hasSpecialSeasonControlsOpen) {
