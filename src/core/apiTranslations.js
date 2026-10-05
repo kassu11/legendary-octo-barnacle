@@ -138,6 +138,20 @@ export const translateInternalApiParams = {
     },
   },
 
+  yearGreater: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { yearGreater: Number(`${value - 1}9999`)};
+    },
+  },
+
+  yearLesser: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { yearLesser: Number(`${value + 1}0000`)};
+    },
+  },
+
   q: {
     _default: (api, value) => {
       value = value?.toLowerCase().trim() || undefined;
