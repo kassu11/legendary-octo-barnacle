@@ -45,6 +45,12 @@ export function useNavigateAndSearch() {
 
   return (url, query = {}, options) => {
     if (isTypeFunction(url)) url = url(window.location.pathname.split(__BASE__)[1]);
+
+    // Add missing url
+    url ??= window.location.pathname;
+    // Modify the url to relative url, if not
+    if (url.includes(__BASE__)) url = url.split(__BASE__)[1];
+
     url = url.replace(/\?.*$/, ""); // Remove search from url, if present
     url = url.replace(/\/$/, ""); // Trim trailing "/" at the end
 
