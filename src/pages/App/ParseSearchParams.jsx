@@ -81,6 +81,9 @@ export function ParseSearchParams(props) {
     if (searchParams.progressLesser) obj.progressLesser = +wrapToArray(searchParams.progressLesser).at(-1);
     if (searchParams.progressGreater) obj.progressGreater = +wrapToArray(searchParams.progressGreater).at(-1);
     if (searchParams.progress && !obj.progressLesser && !obj.progressGreater) obj.progress = +wrapToArray(searchParams.progress).at(-1);
+    if (searchParams.lengthLesser) obj.lengthLesser = +wrapToArray(searchParams.lengthLesser).at(-1);
+    if (searchParams.lengthGreater) obj.lengthGreater = +wrapToArray(searchParams.lengthGreater).at(-1);
+    if (searchParams.length && !obj.lengthLesser && !obj.lengthGreater) obj.length = +wrapToArray(searchParams.length).at(-1);
 
     if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
       obj.groupEntriesByFormat = groupSeasonalEntriesByFormat;

@@ -152,6 +152,7 @@ export const translateInternalApiParams = {
     },
   },
 
+  // Progress = Episodes / Chapters
   progressGreater: {
     _default: (api, value) => {
       if (value === undefined) return;
@@ -170,6 +171,28 @@ export const translateInternalApiParams = {
     _default: (api, value) => {
       if (value === undefined) return;
       if (api === "ani") return { episodeGreater: value - 1, episodeLesser: value + 1 };
+    },
+  },
+
+  // Length = volumes / duration
+  lengthGreater: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { durationGreater: value };
+    },
+  },
+
+  lengthLesser: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { durationLesser: value };
+    },
+  },
+
+  length: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { durationGreater: value - 1, durationLesser: value + 1 };
     },
   },
 
