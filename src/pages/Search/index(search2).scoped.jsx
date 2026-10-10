@@ -69,6 +69,9 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "age", obj, rest);
   mergeVariables(api, "yearLesser", obj, rest);
   mergeVariables(api, "yearGreater", obj, rest);
+  mergeVariables(api, "progressLesser", obj, rest);
+  mergeVariables(api, "progressGreater", obj, rest);
+  mergeVariables(api, "progress", obj, rest);
 
   if (year) {
     if (obj.season) obj.seasonYear = year;

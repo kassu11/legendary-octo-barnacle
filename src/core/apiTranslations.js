@@ -152,6 +152,27 @@ export const translateInternalApiParams = {
     },
   },
 
+  progressGreater: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { episodeGreater: value };
+    },
+  },
+
+  progressLesser: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { episodeLesser: value };
+    },
+  },
+
+  progress: {
+    _default: (api, value) => {
+      if (value === undefined) return;
+      if (api === "ani") return { episodeGreater: value - 1, episodeLesser: value + 1 };
+    },
+  },
+
   q: {
     _default: (api, value) => {
       value = value?.toLowerCase().trim() || undefined;
