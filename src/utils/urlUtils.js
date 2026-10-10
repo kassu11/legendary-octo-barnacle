@@ -51,7 +51,7 @@ export function useNavigateAndSearch() {
     let search = window.location.search;
     Object.entries(query).forEach(([key, value]) => {
       // 1. Remove all old keys from search
-      const re = new RegExp(`(\\?|&)${key}[^&]*`);
+      const re = new RegExp(`(\\?|&)${key}[^&]*`, "g");
       search = search.replace(re, "");
 
       // 2. Make sure search starts with ?
