@@ -23,6 +23,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
+import { usersData } from "./inputs/MediaUsersSelect.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -32,7 +33,7 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, year, rank, themes, excludedThemes, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
+  const { q, year, rank, themes, users, excludedThemes, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
@@ -75,6 +76,18 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "lengthLesser", obj, rest);
   mergeVariables(api, "lengthGreater", obj, rest);
   mergeVariables(api, "length", obj, rest);
+
+  if (users?.length) {
+    let ids = new Set();
+    const userMediaIds = usersData();
+    for (const name of users) {
+      if (!userMediaIds[name]) return null;
+      if (type === "anime" || type === "media") ids = ids.union(userMediaIds[name].anime);
+      if (type === "manga" || type === "media") ids = ids.union(userMediaIds[name].manga);
+    }
+
+    obj.idNotIn = [...ids].sort((a, b) => a - b);
+  }
 
   if (year) {
     if (obj.season) obj.seasonYear = year;

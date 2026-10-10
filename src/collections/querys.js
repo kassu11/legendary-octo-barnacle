@@ -25,6 +25,7 @@ export { default as anilistGetUserFollowers } from "./queries/anilistGetUserFoll
 export { default as anilistGetUserFollowing } from "./queries/anilistGetUserFollowing.graphql";
 export { default as anilistGetFriendMediaScore } from "./queries/anilistGetFriendMediaScore.graphql";
 export { default as anilistUserMutateFavourites } from "./queries/anilistUserMutateFavourites.graphql";
+export { default as anilistAllUserMediaIds } from "./queries/anilistAllUserMediaIds.graphql";
 export { default as anilistUserFavouriteById } from "./queries/anilistUserFavouriteById.graphql";
 export { default as anilistUserMediaList } from "./queries/anilistUserMediaList.graphql";
 export { default as anilistCharacters } from "./queries/anilistCharacters.graphql";

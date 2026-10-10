@@ -34,6 +34,7 @@ query (
   $averageScoreGreater: Int
   $countryOfOriginIn: [CountryCode]
   $statusIn: [MediaStatus]
+  $idNotIn: [Int]
 ) {
   Page(page: $page) {
     pageInfo {
@@ -79,6 +80,7 @@ query (
       source_in: $sourceIn
       countryOfOrigin_in: $countryOfOriginIn
       status_in: $statusIn
+      id_not_in: $idNotIn
     ) {
       id
       title {
