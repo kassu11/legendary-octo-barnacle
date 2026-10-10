@@ -1,16 +1,14 @@
-import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaCountrySelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export function MediaCountrySelect() {
   const parsedSearchParams = useParsedSearchParams();
-  const [, setSearchParams] = useSearchParams();
-  const params = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
 
   const countryOptions = [
     { description: "China",       id: "CN" },
@@ -39,17 +37,8 @@ export function MediaCountrySelect() {
       newActiveValues.splice(index, 1);
     }
 
-    setSearchParams({ country: newActiveValues.map(e => e.id) }, { replace: true });
-
-    if (newActiveValues.length === 0) {
-      const header = params.header;
-      // Remove headers that add country
-      if (header === "manhwa") {
-        const path = window.location.href.split(__BASE__)[1].replace("/manhwa", "");
-        navigate(path);
-      }
-    }
-
+    // Set new country value, and remove header, if present
+    navigate(path => path.replace("/manhwa", ""), { country: newActiveValues.map(e => e.id) }, { replace: true });
   };
 
   return (

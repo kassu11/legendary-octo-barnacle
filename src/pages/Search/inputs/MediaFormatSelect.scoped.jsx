@@ -1,16 +1,17 @@
-import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
+import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaFormatSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export function MediaFormatSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
 
   const formatOptions = createMemo(() => {
     const { type } = params;
@@ -56,15 +57,15 @@ export function MediaFormatSelect() {
       newActiveValues.splice(index, 1);
     }
 
-    setSearchParams({ format: newActiveValues.map(e => e.id) }, { replace: true });
-
-    if (newActiveValues.length === 0) {
-      const header = params.header;
-      // Remove headers that add formats
-      if (header === "novel" || header === "finished-manga" || header === "finished-novel") {
-        const path = window.location.href.split(__BASE__)[1].replace(/\/novel|finished-manga|finished-novel/, "");
-        navigate(path);
-      }
+    const header = params.header || "";
+    // 1. Remove a header that adds a format, but keep all other header values
+    if (/\/novel|finished-manga|finished-novel/.test(header)) {
+      const { sort, status } = parsedSearchParams();
+      navigate(path => path.replace("/" + header, ""), { sort, status, format: newActiveValues.map(e => e.id) }, { replace: true });
+    }
+    // 2. Normal just change the format
+    else {
+      setSearchParams(                                 {               format: newActiveValues.map(e => e.id) }, { replace: true });
     }
 
   };

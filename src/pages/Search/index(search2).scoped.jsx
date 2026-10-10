@@ -477,13 +477,13 @@ export function SearchPage() {
               <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
                 <h1>Trending {capitalize(params.type)}</h1>
               </Match>
-              <Match when={params.header === "finished" && parsedSearchParams().status?.includes("complete")}>
+              <Match when={params.header === "finished" && parsedSearchParams().sort?.[0] === "end_date_desc_plus"}>
                 <h1>Recently Finished {capitalize(params.type)}</h1>
               </Match>
-              <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
+              <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
                 <h1>Recently Finished Mangas</h1>
               </Match>
-              <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
+              <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
                 <h1>Recently Finished Light Novels</h1>
               </Match>
               <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>

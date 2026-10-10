@@ -1,16 +1,17 @@
-import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
+import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaStatusSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export function MediaStatusSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
 
   const statusOptions = createMemo(() => {
     const { type } = params;
@@ -50,15 +51,15 @@ export function MediaStatusSelect() {
       newActiveValues.splice(index, 1);
     }
 
-    setSearchParams({ status: newActiveValues.map(e => e.id) }, { replace: true });
-
-    if (newActiveValues.length === 0) {
-      const header = params.header;
-      // Remove headers that add statuses
-      if (header === "finished" || header === "finished-manga" || header === "finished-novel") {
-        const path = window.location.href.split(__BASE__)[1].replace(/\/finished|finished-manga|finished-novel/, "");
-        navigate(path);
-      }
+    const header = params.header || "";
+    // 1. Remove a header that adds a status, but keep all other header values
+    if (/\/novel|finished-manga|finished-novel/.test(header)) {
+      const { sort, format } = parsedSearchParams();
+      navigate(path => path.replace("/" + header, ""), { sort, format, status: newActiveValues.map(e => e.id) }, { replace: true });
+    }
+    // 2. Normal just change the status
+    else {
+      setSearchParams(                                 {               status: newActiveValues.map(e => e.id) }, { replace: true });
     }
 
   };
