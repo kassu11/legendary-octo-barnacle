@@ -16,6 +16,7 @@ import { TwoStateToggle } from "./TwoStateToggle.scoped";
 import { MediaYearSelect } from "./inputs/MediaYearSelect.scoped";
 import { MediaProgressSelect } from "./inputs/MediaProgressSelect.scoped";
 import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
+import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -45,6 +46,7 @@ export function SearchBar() {
         <MediaYearSelect />
         <MediaProgressSelect />
         <MediaLengthSelect />
+        <MediaTagRankSelect />
         <TwoStateToggle name="onList" label="On My List" />
         <TwoStateToggle name="licensed" label="Licensed" />
       </div>
