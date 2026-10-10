@@ -18,6 +18,7 @@ import { MediaProgressSelect } from "./inputs/MediaProgressSelect.scoped";
 import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
 import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
+import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
@@ -36,6 +37,7 @@ export function SearchBar() {
       <div class="flex">
         <input type="search" placeholder="Search..." onInput={handleInput} value={parsedSearchParams().q} />
         <MediaSortSelect />
+        <MediaTypeSelect />
         <MediaFormatSelect />
         <MediaSourceSelect />
         <MediaCountrySelect />

@@ -24,6 +24,7 @@ import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
+import { formatingUtils } from "../../utils/utils";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -492,18 +493,20 @@ export function SearchPage() {
               <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
                 <Switch>
                   <Match when={parsedSearchParams().season === "tba"}>
-                    <h1>TBA Anime</h1>
+                    <h1>TBA {formatingUtils.capitalize(params.type)}</h1>
                   </Match>
                   <Match when={parsedSearchParams().season}>
                     <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
                   </Match>
                 </Switch>
 
-                <A href="/ani/search/anime/this-season">Current</A>
-                <A href="/ani/search/anime/next-season">Next</A>
-                <A href="/ani/search/anime/tba">TBA</A>
+                <Show when={params.type === "anime"}>
+                  <A href="/ani/search/anime/this-season">Current</A>
+                  <A href="/ani/search/anime/next-season">Next</A>
+                  <A href="/ani/search/anime/tba">TBA</A>
 
-                <SeasonControls />
+                  <SeasonControls />
+                </Show>
 
                 <Show when={parsedSearchParams().groupEntriesByFormat != undefined}>
                   <button onClick={() => {
