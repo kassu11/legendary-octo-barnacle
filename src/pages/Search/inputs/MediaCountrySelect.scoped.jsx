@@ -22,11 +22,9 @@ export function MediaCountrySelect() {
   });
 
   const handleChange = e => {
-    if (e.oldUrl) {
-      const path = e.oldUrl.split(__BASE__)[1];
-      navigate(path);
-    }
-    if (e.oldUrl || !e.target) return;
+
+    if (e.oldUrl) return navigate(e.oldUrl);
+    if (!e.target) return;
 
     const newActiveValues = [...countryValues()];
     const index = newActiveValues.findIndex(val => val.id === e.target);
@@ -39,6 +37,7 @@ export function MediaCountrySelect() {
 
     // Set new country value, and remove header, if present
     navigate(path => path.replace("/manhwa", ""), { country: newActiveValues.map(e => e.id) }, { replace: true });
+
   };
 
   return (

@@ -27,7 +27,6 @@ export function MediaTypeSelect() {
     if (e.oldUrl) return navigate(e.oldUrl);
     if (!e.target) return;
 
-
     const { header, type } = params;
     if (type == e.target) return;
 

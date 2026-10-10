@@ -85,11 +85,8 @@ export function MediaUsersSelect() {
   });
 
   const handleChange = e => {
-    if (e.oldUrl) {
-      const path = e.oldUrl.split(__BASE__)[1];
-      navigate(path);
-      return;
-    }
+
+    if (e.oldUrl) return navigate(e.oldUrl);
 
     setInput(e.input || "");
     if (!e.target && !e.search) return;

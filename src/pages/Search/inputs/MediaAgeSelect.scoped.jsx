@@ -26,11 +26,9 @@ export function MediaAgeSelect() {
   });
 
   const handleChange = e => {
-    if (e.oldUrl) {
-      const path = e.oldUrl.split(__BASE__)[1];
-      navigate(path);
-    }
-    if (e.oldUrl || !e.target) return;
+
+    if (e.oldUrl) return navigate(e.oldUrl);
+    if (!e.target) return;
 
     if (e.target === "r") setSearchParams({ age: undefined }, { replace: true });
     else setSearchParams({ age: e.target }, { replace: true });
