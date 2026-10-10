@@ -38,8 +38,8 @@ export function MediaLengthSelect() {
     if (e.oldUrl) {
       const path = e.oldUrl.split(__BASE__)[1];
       navigate(path);
-      return;
     }
+    if (e.oldUrl || !e.target) return;
 
     let { length, lengthLesser, lengthGreater } = parsedSearchParams();
 

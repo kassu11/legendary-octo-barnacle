@@ -29,8 +29,8 @@ export function MediaAgeSelect() {
     if (e.oldUrl) {
       const path = e.oldUrl.split(__BASE__)[1];
       navigate(path);
-      return;
     }
+    if (e.oldUrl || !e.target) return;
 
     if (e.target === "r") setSearchParams({ age: undefined }, { replace: true });
     else setSearchParams({ age: e.target }, { replace: true });

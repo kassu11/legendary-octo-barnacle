@@ -132,13 +132,21 @@ export function MultiSelect(props) {
   const handleSubmit = e => {
     e.preventDefault();
     const index = untrack(hovered);
+    const s = untrack(search);
     if (index !== -1 && visibleIndices.length) {
       const value = props.each[visibleIndices[index]];
       const entry = extraMetadata[value.id] ? { ...value, ...extraMetadata[value.id] } : value;
-      props.onChange({ target: value.id, entry, shiftKey: holdingShift() });
+      props.onChange({ target: value.id, entry, shiftKey: holdingShift(), search: s });
+    } else {
+      props.onChange({ shiftKey: holdingShift(), search: s });
     }
 
     input.select(); // Select text to make the text removal easier after submit
+
+    if (!visibleIndices.length) {
+      setSearch("");
+      handleHover(-1);
+    }
 
     if (index === -1) {
       handleClose();
@@ -147,6 +155,7 @@ export function MultiSelect(props) {
 
   const handleInputChange = e => {
     setSearch(e.target.value);
+    props.onChange({ shiftKey: e.shiftKey, input: e.target.value });
     if (e.target.value) {
       handleHover(0);
     } else {

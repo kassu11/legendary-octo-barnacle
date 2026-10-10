@@ -76,8 +76,8 @@ export function MediaGenresAndTagsSelect() {
     if (e.oldUrl) {
       const path = e.oldUrl.split(__BASE__)[1];
       navigate(path);
-      return;
     }
+    if (e.oldUrl || !e.target) return;
 
     const newActiveValues = [...genresAndTagsValues()];
     const index = newActiveValues.findIndex(val => val.id == e.target);
