@@ -1,4 +1,4 @@
-import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
+import { useSearchParams, useParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
@@ -9,6 +9,7 @@ import { queries } from "../../../collections/collections.js";
 import { tabTime } from "../../../core/globalState.js";
 import { timeStringToMs } from "../../../utils/timeUtils.js";
 import { Checkbox } from "../Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -16,7 +17,7 @@ export function MediaGenresAndTagsSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
 
   const genresAndTagsController = createCleanUpAbortController();
   const [genresAndTagsLoading, setGenresAndTagsLoading] = createSignal(false);

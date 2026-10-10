@@ -1,4 +1,4 @@
-import { useSearchParams, useParams, useNavigate } from "@solidjs/router";
+import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo, Show, Switch, Match } from "solid-js";
 import SortAlphabetDescendingIcon from "../../../assets/SortAlphaDown.jsx";
 import SortAlphabetAscendingIcon from "../../../assets/SortAlphaUp.jsx";
@@ -8,12 +8,13 @@ import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaSortSelect.scoped.css"
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export function MediaSortSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
 
   // Note: These sort options have been removed because they did not work: format, title_english_desc, title_native,
   const sortOptions = createMemo(() => {

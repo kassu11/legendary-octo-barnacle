@@ -1,4 +1,4 @@
-import { useSearchParams, useNavigate } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
@@ -8,13 +8,14 @@ import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcher
 import { queries } from "../../../collections/collections.js";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { LoaderCircle } from "../../../components/LoaderCircle.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export const [usersData, setUsersData] = createSignal({}, { equals: false });
 
 export function MediaUsersSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
   const [searchUser, setSearchUser] = createSignal(undefined);
   const [input, setInput] = createSignal("");
 

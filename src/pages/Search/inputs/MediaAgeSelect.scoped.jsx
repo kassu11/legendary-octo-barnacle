@@ -1,15 +1,16 @@
-import { useSearchParams, useNavigate } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import "./MediaAgeSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 
 export function MediaAgeSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const navigate = useNavigateAndSearch();
 
   const ageOptions = [
     { description: "Any Rating",                               id: "any" },
