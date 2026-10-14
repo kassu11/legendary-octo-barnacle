@@ -128,7 +128,7 @@ export function MediaUsersSelect() {
       options.push(obj);
     });
 
-    options.sort((a, b) => a.description.localeCompare(b.description));
+    options.sort((a, b) => a.id.localeCompare(b.id));
 
     if (input().length && !optionsMap.has(input().toLowerCase())) options.push({ id: input().toLowerCase(), description: input(), internalSearch: true });
 
