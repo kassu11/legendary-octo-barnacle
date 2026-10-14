@@ -12,13 +12,15 @@ import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { createLocalStorageJsonSignal } from "../../../utils/localStorageUtils.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 import { UserSearchIcon } from "../../../assets/UserSearchIcon.jsx";
+import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
+import { arrayUtils } from "../../../utils/utils.js";
 
 export const [usersData, setUsersData] = createSignal({}, { equals: false });
 const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
 
 export function MediaUsersSelect() {
   const parsedSearchParams = useParsedSearchParams();
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigateAndSearch();
   const [searchUser, setSearchUser] = createSignal(undefined);
   const [input, setInput] = createSignal("");
@@ -54,6 +56,28 @@ export function MediaUsersSelect() {
     sendAnilistFetcher(anilistUserSearchFetcher, {
       name: "Anilist All User Media IDs",
       onFetch: () => anilistUserSearchController.disable(),
+      // TODO: Change erros better
+      onError: async res => {
+        if (!res) return;
+        if (Error.isError(res)) {
+          console.error(res);
+          return;
+        }
+        try {
+          const { errors } = await res.json();
+          for (const { message, status } of errors) {
+            // Token has expired so lets log out the user
+            if (status === 404 && message === "User not found") {
+              addApplicationNotification({ type: "info", message: `Anilist did not find a valid user with a name: "${userName}".`, duration: 10_000 });
+              setSearchParams({ user: arrayUtils.wrapToArray(searchParams.user).filter(name => name.toLowerCase() !== "in-" + userName && name.toLowerCase() !== "ex-" + userName) }, { replace: true });
+              return;
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          addApplicationNotification({ type: "error", message: `Anilist errored with a status code: ${res.status || "404"}.`, duration: 10_000 });
+        }
+      },
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== anilistUserSearchFetcher.cacheKey) return;
 

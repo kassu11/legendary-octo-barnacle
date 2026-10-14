@@ -97,7 +97,7 @@ function createAnilistMediaQueryVariables() {
     if (type === "manga" || type === "media") idIn = idIn.union(userMediaIds[name].manga);
   }
 
-  if (idIn.size) obj.idIn = [...idIn].sort((a, b) => a - b);
+  if (idIn.size) obj.idIn = [...idIn.difference(idNotIn)].sort((a, b) => a - b);
 
 
   if (year) {
