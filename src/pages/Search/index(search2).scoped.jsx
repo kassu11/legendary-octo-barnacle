@@ -34,7 +34,7 @@ function createAnilistMediaQueryVariables() {
 
   if (mode === "browse") return null;
 
-  const { q, year, rank, themes, users, excludedThemes, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
+  const { q, year, rank, themes, users, excludedUsers, excludedThemes, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
 
   const obj = {
     sort: [],
@@ -78,17 +78,27 @@ function createAnilistMediaQueryVariables() {
   mergeVariables(api, "lengthGreater", obj, rest);
   mergeVariables(api, "length", obj, rest);
 
-  if (users?.length) {
-    let ids = new Set();
-    const userMediaIds = usersData();
-    for (const name of users) {
-      if (!userMediaIds[name]) return null;
-      if (type === "anime" || type === "media") ids = ids.union(userMediaIds[name].anime);
-      if (type === "manga" || type === "media") ids = ids.union(userMediaIds[name].manga);
-    }
-
-    obj.idNotIn = [...ids].sort((a, b) => a - b);
+  const userMediaIds = (users?.length || excludedUsers?.length) && usersData();
+  let idNotIn = new Set();
+  for (let name of excludedUsers) {
+    name = name.toLowerCase();
+    if (!userMediaIds[name]) return null;
+    if (type === "anime" || type === "media") idNotIn = idNotIn.union(userMediaIds[name].anime);
+    if (type === "manga" || type === "media") idNotIn = idNotIn.union(userMediaIds[name].manga);
   }
+
+  if (idNotIn.size) obj.idNotIn = [...idNotIn].sort((a, b) => a - b);
+
+  let idIn = new Set();
+  for (let name of users) {
+    name = name.toLowerCase();
+    if (!userMediaIds[name]) return null;
+    if (type === "anime" || type === "media") idIn = idIn.union(userMediaIds[name].anime);
+    if (type === "manga" || type === "media") idIn = idIn.union(userMediaIds[name].manga);
+  }
+
+  if (idIn.size) obj.idIn = [...idIn].sort((a, b) => a - b);
+
 
   if (year) {
     if (obj.season) obj.seasonYear = year;

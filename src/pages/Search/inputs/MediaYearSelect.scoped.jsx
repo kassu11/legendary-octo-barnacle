@@ -92,7 +92,6 @@ export function MediaYearSelect() {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />
-
           <p>{entry.description}</p>
         </div>
       );

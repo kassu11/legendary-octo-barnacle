@@ -45,8 +45,6 @@ export function MediaCountrySelect() {
       return (
         <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox checked={entry.value} />
-
-
           <p>{entry.description}</p>
         </div>
       );

@@ -35,6 +35,7 @@ query (
   $countryOfOriginIn: [CountryCode]
   $statusIn: [MediaStatus]
   $idNotIn: [Int]
+  $idIn: [Int]
 ) {
   Page(page: $page) {
     pageInfo {
@@ -81,6 +82,7 @@ query (
       countryOfOrigin_in: $countryOfOriginIn
       status_in: $statusIn
       id_not_in: $idNotIn
+      id_in: $idIn
     ) {
       id
       title {

@@ -1,16 +1,16 @@
-query ($userName: String, $statusNotIn: [MediaListStatus]) {
-  anime: MediaListCollection(userName: $userName type: ANIME status_not_in: $statusNotIn) {
+query ($userName: String, $userId: Int, $statusNotIn: [MediaListStatus]) {
+  anime: MediaListCollection(userName: $userName userId: $userId type: ANIME status_not_in: $statusNotIn) {
     ...mediaListCollection
   }
-  manga: MediaListCollection(userName: $userName type: MANGA status_not_in: $statusNotIn) {
+  manga: MediaListCollection(userName: $userName userId: $userId type: MANGA status_not_in: $statusNotIn) {
     ...mediaListCollection
   }
 }
 
-
 fragment mediaListCollection on MediaListCollection {
   user {
     name
+    id
     avatar {
       medium
     }

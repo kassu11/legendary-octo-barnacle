@@ -23,7 +23,6 @@ export function ParseSearchParams(props) {
       licensed: wrapToArray(searchParams.licensed).at(-1),
       rank: +wrapToArray(searchParams.rank).at(-1),
       source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
-      users: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.user).map(name => name.toLowerCase())).sort(),
       externalSources: [...wrapToSet(searchParams.externalSources)].map(Number).sort(),
       type,
     };
@@ -76,6 +75,21 @@ export function ParseSearchParams(props) {
     const themes = wrapToArray(searchParams.theme).map(name => name.toLowerCase()).sort();
     obj.themes         = themes.filter(val => !val.startsWith("-"));
     obj.excludedThemes = themes.filter(val =>  val.startsWith("-")).map(val => val.substring(1));
+
+    // Filter duplicate and conflicting states
+    const usersMap = new Map();
+    wrapToArray(searchParams.user).forEach(user => {
+      if (user.startsWith("in-") || user.startsWith("ex-")) usersMap.set(user.substring(3).toLowerCase(), user);
+    });
+    obj.users         = [];
+    obj.excludedUsers = [];
+    usersMap.forEach(user => {
+      if (user.startsWith("in-")) obj.users        .push(user.substring(3));
+      if (user.startsWith("ex-")) obj.excludedUsers.push(user.substring(3));
+    });
+    obj.users.sort();
+    obj.excludedUsers.sort();
+
     if (searchParams.yearLesser) obj.yearLesser = +wrapToArray(searchParams.yearLesser).at(-1);
     if (searchParams.yearGreater) obj.yearGreater = +wrapToArray(searchParams.yearGreater).at(-1);
     if (searchParams.year && !obj.yearLesser && !obj.yearGreater) obj.year = +wrapToArray(searchParams.year).at(-1);

@@ -118,6 +118,11 @@
           user-select: none;
           outline: unset;
           background-color: var(--bg-dark);
+
+          dialog:not(.mobile) &:empty {
+            /* Remove the 8px visual gap between items and footer, when item list is empty */
+            position: absolute;
+          }
         }
       }
 

@@ -19,8 +19,8 @@ export function setLocalStorageJson(key, value) {
   }
 }
 
-export const createLocalStorageJsonSignal = (key, initialValue) => {
-  const [value, _setValue] = createSignal(getLocalStorageJson(key, initialValue));
+export const createLocalStorageJsonSignal = (key, initialValue, options) => {
+  const [value, _setValue] = createSignal(getLocalStorageJson(key, initialValue), options);
   const setValue = val => {
     _setValue(v => {
       const value = isTypeFunction(val) ? val(v) : val;
