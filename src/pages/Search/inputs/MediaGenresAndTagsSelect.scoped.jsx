@@ -2,7 +2,6 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import "./MediaGenresAndTagsSelect.scoped.css"
 import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { queries } from "../../../collections/collections.js";
@@ -10,6 +9,7 @@ import { tabTime } from "../../../core/globalState.js";
 import { timeStringToMs } from "../../../utils/timeUtils.js";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -97,10 +97,10 @@ export function MediaGenresAndTagsSelect() {
     <Show when={params.type !== "media"}>
       <MultiSelect each={genresAndTagsOptions()?.entries} value={genresAndTagsValues()} onChange={handleChange} button="Genres and Tags">{entry => {
         return (
-          <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+          <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
             <Checkbox include={entry.include} exclude={entry.exclude} />
             <p>{entry.description}</p>
-          </div>
+          </MediaSelectItem>
         );
       }}</MultiSelect>
     </Show>

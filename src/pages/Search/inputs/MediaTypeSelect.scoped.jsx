@@ -1,11 +1,11 @@
 import { createMemo } from "solid-js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import "./MediaTypeSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { useParams } from "@solidjs/router";
 import { useParsedSearchParams } from "../../../context/providers.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaTypeSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -45,10 +45,10 @@ export function MediaTypeSelect() {
   return (
     <MultiSelect each={typeOptions} value={typeValues()} onChange={handleChange} button="Type">{entry => {
       return (
-        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox checked={entry.value} radio />
           <p>{entry.description}</p>
-        </div>
+        </MediaSelectItem>
       );
     }}</MultiSelect>
   );

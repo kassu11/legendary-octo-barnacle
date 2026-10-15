@@ -1,37 +1,14 @@
-@layer layout {
-  .item {
-    cursor: pointer;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding: 4px 8px;
-    font-weight: 400;
-    word-break: break-word;
+@layer component {
+  img {
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    display: inline-block;
+    width: 24px;
+    padding: 4px;
+    border-radius: 2px;
+  }
 
-    img {
-      aspect-ratio: 1 / 1;
-      object-fit: contain;
-      display: inline-block;
-      width: 24px;
-      padding: 4px;
-      border-radius: 2px;
-    }
-
-    &.hovered, &:hover {
-      background-color: var(--bg);
-      filter: brightness(1.25);
-    }
-
-    &.active {
-      background-color: var(--bg-light);
-    }
-
-    &.hidden {
-      display: none;
-    }
-
-    .checkbox {
-      margin-left: auto;
-    }
+  .checkbox {
+    margin-left: auto;
   }
 }

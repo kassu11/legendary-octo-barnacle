@@ -2,9 +2,9 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import "./MediaCountrySelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaCountrySelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -43,10 +43,10 @@ export function MediaCountrySelect() {
   return (
     <MultiSelect each={countryOptions} value={countryValues()} onChange={handleChange} button="Country">{entry => {
       return (
-        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox checked={entry.value} />
           <p>{entry.description}</p>
-        </div>
+        </MediaSelectItem>
       );
     }}</MultiSelect>
   );

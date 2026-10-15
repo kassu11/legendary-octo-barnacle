@@ -2,9 +2,9 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import "./MediaProgressSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaProgressSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -85,10 +85,10 @@ export function MediaProgressSelect() {
   return (
     <MultiSelect each={progressOptions()} value={progressValues()} onChange={handleChange} button={text()}>{entry => {
       return (
-        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />
           <p>{entry.description}</p>
-        </div>
+        </MediaSelectItem>
       );
     }}</MultiSelect>
   );

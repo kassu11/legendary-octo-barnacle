@@ -14,6 +14,7 @@ import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 import { UserSearchIcon } from "../../../assets/UserSearchIcon.jsx";
 import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
 import { arrayUtils } from "../../../utils/utils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export const [usersData, setUsersData] = createSignal({}, { equals: false });
 const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
@@ -170,7 +171,7 @@ export function MediaUsersSelect() {
   return (
     <MultiSelect each={usersOptions()} value={usersValues()} onChange={handleChange} button="User Filtering">{entry => {
       return (
-        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered, search: entry.internalSearch }}>
+        <MediaSelectItem scoped class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered, search: entry.internalSearch }}>
           <Switch>
 
             <Match when={entry.internalSearch}>
@@ -191,7 +192,7 @@ export function MediaUsersSelect() {
             </Match>
           </Switch>
 
-        </div>
+        </MediaSelectItem>
       );
     }}</MultiSelect>
   );

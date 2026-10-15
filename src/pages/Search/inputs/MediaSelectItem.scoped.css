@@ -1,5 +1,5 @@
-@layer layout {
-  .item {
+@layer component {
+  div {
     cursor: pointer;
     display: flex;
     gap: 8px;

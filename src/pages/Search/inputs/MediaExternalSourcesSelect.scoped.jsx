@@ -11,6 +11,7 @@ import { tabTime } from "../../../core/globalState.js";
 import { timeStringToMs } from "../../../utils/timeUtils.js";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
 
@@ -93,7 +94,7 @@ export function MediaExternalSourcesSelect() {
     <Show when={params.type !== "media"}>
       <MultiSelect each={externalSourcesOptions()} value={externalSourcesValues()} onChange={handleChange} button={params.type === "anime" ? "Streaming On" : "Readable On"}>{entry => {
         return (
-          <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+          <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
             <Show when={entry.icon}>
               <img src={entry.icon} alt="External source icon" style={{ "background-color": entry.color }} />
             </Show>
@@ -119,7 +120,7 @@ export function MediaExternalSourcesSelect() {
 
             <Checkbox scoped checked={entry.value} class="checkbox" />
 
-          </div>
+          </MediaSelectItem>
         );
       }}</MultiSelect>
     </Show>

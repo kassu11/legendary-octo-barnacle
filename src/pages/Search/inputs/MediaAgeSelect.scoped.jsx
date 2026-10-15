@@ -3,9 +3,9 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import "./MediaAgeSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaAgeSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -39,10 +39,10 @@ export function MediaAgeSelect() {
   return (
     <MultiSelect each={ageOptions} value={ageValues()} onChange={handleChange} button="Age">{entry => {
       return (
-        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio checked={entry.value} />
           <p>{entry.description}</p>
-        </div>
+        </MediaSelectItem>
       );
     }}</MultiSelect>
   );

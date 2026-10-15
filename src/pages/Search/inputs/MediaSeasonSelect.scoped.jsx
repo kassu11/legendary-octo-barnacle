@@ -2,9 +2,9 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import "./MediaSeasonSelect.scoped.css"
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaSeasonSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -69,10 +69,10 @@ export function MediaSeasonSelect() {
   return (
     <MultiSelect each={seasonOptions} value={seasonValues()} onChange={handleChange} button="Season">{entry => {
       return (
-        <div class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio checked={entry.value} />
           <p>{entry.description}</p>
-        </div>
+        </MediaSelectItem>
       );
     }}</MultiSelect>
   );
