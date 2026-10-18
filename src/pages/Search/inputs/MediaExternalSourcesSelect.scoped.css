@@ -11,4 +11,19 @@
   .checkbox {
     margin-left: auto;
   }
+
+  .spinner-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    overflow: clip;
+
+    .spinner {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      --loader-border-size: 4px;
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { useSearchParams, useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
@@ -10,6 +10,8 @@ import { timeStringToMs } from "../../../utils/timeUtils.js";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
+import { LoaderCircle } from "../../../components/LoaderCircle.scoped.jsx";
+import "./MediaGenresAndTagsSelect.scoped.css";
 
 export const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -58,10 +60,9 @@ export function MediaGenresAndTagsSelect() {
   const genresAndTagsOptions = createMemo(() => {
     const genresAndTags = anilistGenresAndTagsData();
     const loading = genresAndTagsLoading();
-    if (!genresAndTags?.entries?.length && loading) return [{ id: "internal_loading" }];
+    if (!genresAndTags?.entries?.length && loading) return [{ id: "internal_loading", description: "Loading list" }];
 
-    return genresAndTags;
-
+    return genresAndTags?.entries || [{ id: "internal_error", description: "Failed to fetch Anilist genres and tags" }];
   });
 
   const genresAndTagsValues = createMemo(() => {
@@ -76,7 +77,7 @@ export function MediaGenresAndTagsSelect() {
   const handleChange = e => {
 
     if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
+    if (!e.target || e.target === "internal_loading" || e.target === "internal_error") return;
 
     const newActiveValues = [...genresAndTagsValues()];
     const index = newActiveValues.findIndex(val => val.id == e.target);
@@ -95,11 +96,28 @@ export function MediaGenresAndTagsSelect() {
 
   return (
     <Show when={params.type !== "media"}>
-      <MultiSelect each={genresAndTagsOptions()?.entries} value={genresAndTagsValues()} onChange={handleChange} button="Genres and Tags">{entry => {
+      <MultiSelect each={genresAndTagsOptions()} value={genresAndTagsValues()} onChange={handleChange} button="Genres and Tags">{entry => {
         return (
           <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-            <Checkbox include={entry.include} exclude={entry.exclude} />
-            <p>{entry.description}</p>
+            <Switch>
+
+              <Match when={entry.id === "internal_loading"}>
+                <div class="spinner-wrapper">
+                  <LoaderCircle scoped class="spinner" />
+                </div>
+                <p>{entry.description}</p>
+              </Match>
+
+              <Match when={entry.id === "internal_error"}>
+                <p>{entry.description}</p>
+              </Match>
+
+              <Match when={true}>
+                <Checkbox include={entry.include} exclude={entry.exclude} />
+                <p>{entry.description}</p>
+              </Match>
+
+            </Switch>
           </MediaSelectItem>
         );
       }}</MultiSelect>

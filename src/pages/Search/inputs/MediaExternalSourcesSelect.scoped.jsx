@@ -12,6 +12,7 @@ import { timeStringToMs } from "../../../utils/timeUtils.js";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
+import { LoaderCircle } from "../../../components/LoaderCircle.scoped.jsx";
 
 export const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
 
@@ -61,11 +62,9 @@ export function MediaExternalSourcesSelect() {
     const externalValues = externalSourcesData();
     const loading = externalSourcesLoading();
     const { type } = params;
-    if (type !== externalValues?.type && loading) return [{ id: "internal_loading" }];
+    if (type !== externalValues?.type && loading) return [{ id: "internal_loading", description: "Loading sources" }];
 
-    return externalValues?.sources?.map(({ site, ...rest }) => ({ description: site, ...rest }));
-
-
+    return externalValues?.sources?.map(({ site, ...rest }) => ({ description: site, ...rest })) || [{ id: "internal_error", description: "Failed to fetch Anilist media sources" }];
   });
 
   const externalSourcesValues = createMemo(() => {
@@ -75,7 +74,7 @@ export function MediaExternalSourcesSelect() {
   const handleChange = e => {
 
     if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
+    if (!e.target || e.target === "internal_loading" || e.target === "internal_error") return;
 
     const newActiveValues = [...externalSourcesValues()];
     const index = newActiveValues.findIndex(val => val.id == e.target);
@@ -95,30 +94,49 @@ export function MediaExternalSourcesSelect() {
       <MultiSelect each={externalSourcesOptions()} value={externalSourcesValues()} onChange={handleChange} button={params.type === "anime" ? "Streaming On" : "Readable On"}>{entry => {
         return (
           <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-            <Show when={entry.icon}>
-              <img src={entry.icon} alt="External source icon" style={{ "background-color": entry.color }} />
-            </Show>
-            <p>
-              {entry.description}{" "}
-              <Show when={entry.language}>
-                <sup>
-                  <Switch fallback={entry.language}>
-                    <Match when={entry.language === "Chinese"}>ZH</Match>
-                    <Match when={entry.language === "English"}>EN</Match>
-                    <Match when={entry.language === "French"}>FR</Match>
-                    <Match when={entry.language === "German"}>DE</Match>
-                    <Match when={entry.language === "Indonesian"}>ID</Match>
-                    <Match when={entry.language === "Japanese"}>JA</Match>
-                    <Match when={entry.language === "Korean"}>KO</Match>
-                    <Match when={entry.language === "Portuguese"}>PT</Match>
-                    <Match when={entry.language === "Spanish"}>ES</Match>
-                    <Match when={entry.language === "Thai"}>TH</Match>
-                  </Switch>
-                </sup>
-              </Show>
-            </p>
+            <Switch>
 
-            <Checkbox scoped checked={entry.value} class="checkbox" />
+              <Match when={entry.id === "internal_loading"}>
+                <div class="spinner-wrapper">
+                  <LoaderCircle scoped class="spinner" />
+                </div>
+                <p>{entry.description}</p>
+              </Match>
+
+              <Match when={entry.id === "internal_error"}>
+                <p>{entry.description}</p>
+              </Match>
+
+              <Match when={true}>
+
+                <Show when={entry.icon}>
+                  <img src={entry.icon} alt="External source icon" style={{ "background-color": entry.color }} />
+                </Show>
+                <p>
+                  {entry.description}{" "}
+                  <Show when={entry.language}>
+                    <sup>
+                      <Switch fallback={entry.language}>
+                        <Match when={entry.language === "Chinese"}>ZH</Match>
+                        <Match when={entry.language === "English"}>EN</Match>
+                        <Match when={entry.language === "French"}>FR</Match>
+                        <Match when={entry.language === "German"}>DE</Match>
+                        <Match when={entry.language === "Indonesian"}>ID</Match>
+                        <Match when={entry.language === "Japanese"}>JA</Match>
+                        <Match when={entry.language === "Korean"}>KO</Match>
+                        <Match when={entry.language === "Portuguese"}>PT</Match>
+                        <Match when={entry.language === "Spanish"}>ES</Match>
+                        <Match when={entry.language === "Thai"}>TH</Match>
+                      </Switch>
+                    </sup>
+                  </Show>
+                </p>
+
+                <Checkbox scoped checked={entry.value} class="checkbox" />
+
+              </Match>
+
+            </Switch>
 
           </MediaSelectItem>
         );
