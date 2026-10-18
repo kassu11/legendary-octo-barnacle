@@ -26,7 +26,7 @@ export function MediaTagRankSelect() {
   const tagRankValues = createMemo(() => {
     const { rank } = parsedSearchParams();
 
-    if (rank) return [...Array(Math.max(endTagRank - rank + 1, 0))].map((_, i) => ({ id: endTagRank - i, value: true }));
+    if (rank) return [...Array(Math.max(endTagRank - rank + 1, 0))].map((_, i) => ({ id: endTagRank - i, value: true, toast: `>${rank - 1}`}));
   });
 
   const handleChange = e => {
@@ -44,7 +44,7 @@ export function MediaTagRankSelect() {
   };
 
   return (
-    <MultiSelect each={tagRankOptions()} value={tagRankValues()} onChange={handleChange} button="Tag Rank">{entry => {
+    <MultiSelect each={tagRankOptions()} value={tagRankValues()} onChange={handleChange} button="Tag Rank" hideCount>{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />

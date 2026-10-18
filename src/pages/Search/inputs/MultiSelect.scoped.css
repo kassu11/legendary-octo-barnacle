@@ -8,14 +8,53 @@
     .open-button {
       width: 100%;
       background-color: var(--bg);
-      padding: 1rem 2rem;
+      padding: .5em;
       border: unset;
       border-radius: 4px;
       font-weight: 600;
       transition: filter .2s;
+      text-align: left;
+      display: flex;
+      gap: 8px;
+      border: 2px solid var(--bg-light);
+      transition: .2s border, .2s filter, .2s background, .2s color;
+      text-shadow: 0 0 3px var(--bg-dark);
 
       &:hover {
         filter: brightness(1.1);
+      }
+
+      .no-selections & {
+        border: 2px solid var(--bg);
+        background-color: color-mix(in oklab, var(--bg-dark), var(--bg) 30%);
+        color: var(--text-muted);
+        border-style: dashed;
+      }
+
+      .line-clamp {
+        --line-clamp: 1;
+        width: 0;
+        flex-grow: 1;
+        color: var(--text-muted);
+        font-weight: 450;
+      }
+
+      .count {
+        position: relative;
+        font-weight: 900;
+        padding: .1em .3em;
+        margin: -.1em -.3em;
+        text-shadow: 0 0 3px var(--text);
+        background-color: var(--text);
+        color: var(--bg-light);
+        border-radius: 2px;
+        margin-left: auto;
+        display: grid;
+        place-items: center;
+
+        span {
+          text-box: trim-both cap alphabetic;
+        }
       }
     }
 

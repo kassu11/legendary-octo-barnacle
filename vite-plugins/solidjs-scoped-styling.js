@@ -12,7 +12,7 @@ export const transform = (src, id) => {
   if (id.endsWith(".scoped.jsx")) {
     const hash = localHashFromFilePath(id);
     const attribute = localDataAttributeFromHash(hash);
-    return src.replace(/(<[^>=+< /"']+)|(\$createComponent\([^{]+\{[^}{]*)scoped:\s?true/g, (_, tag, createComponent) => {
+    return src.replace(/(<[^>=+< /"'$]+)|(\$createComponent\([^{]+\{[^}{]*)scoped:\s?true/g, (_, tag, createComponent) => {
       if (tag) {
         return `${tag} ${attribute}`
       } else {

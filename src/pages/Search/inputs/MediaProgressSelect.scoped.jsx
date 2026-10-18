@@ -27,10 +27,10 @@ export function MediaProgressSelect() {
   const progressValues = createMemo(() => {
     const { progress, progressLesser, progressGreater } = parsedSearchParams();
 
-    if (progress) return [{ id: progress, value: true }];
-    if (progressLesser && progressGreater) return [...Array(Math.max(progressLesser - progressGreater - 1, 0))].map((_, i) => ({ id: progressLesser - i - 1, value: true }));
-    if (progressLesser) return [...Array(Math.max(progressLesser - startProgress, 0))].map((_, i) => ({ id: startProgress + i, value: true }));
-    if (progressGreater) return [...Array(Math.max(endProgress - progressGreater, 0))].map((_, i) => ({ id: endProgress - i, value: true }));
+    if (progress)                          return [                                                                            { id: progress,               value: true                                                        }];
+    if (progressLesser && progressGreater) return [...Array(Math.max(progressLesser - progressGreater - 1, 0))].map((_, i) => ({ id: progressLesser - i - 1, value: true, toast: `${progressGreater + 1}-${progressLesser - 1}` }));
+    if (progressLesser)                    return [...Array(Math.max(progressLesser - startProgress, 0))].map((_, i) => (      { id: startProgress + i,      value: true, toast: `<${progressLesser}`                           }));
+    if (progressGreater)                   return [...Array(Math.max(endProgress - progressGreater, 0))].map((_, i) => (       { id: endProgress - i,        value: true, toast: `>${progressGreater}`                          }));
   });
 
   let lastProgressSelection = null;
@@ -83,7 +83,7 @@ export function MediaProgressSelect() {
   };
 
   return (
-    <MultiSelect each={progressOptions()} value={progressValues()} onChange={handleChange} button={text()}>{entry => {
+    <MultiSelect each={progressOptions()} value={progressValues()} onChange={handleChange} button={text()} hideCount>{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />

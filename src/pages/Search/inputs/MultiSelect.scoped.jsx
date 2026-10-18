@@ -228,8 +228,22 @@ export function MultiSelect(props) {
   };
 
   return (
-    <div class="custom-select" classList={{ "holding-shift": holdingShift() }}>
-      <button onMouseDown={handleMouseDown} onClick={handleButtonClick} class="open-button">{props.button}</button>
+    <div class="custom-select" classList={{ "holding-shift": holdingShift(), "no-selections": !props.value?.length }}>
+      <button onMouseDown={handleMouseDown} onClick={handleButtonClick} class="open-button">
+        <Show when={props.value?.length && extraMetadata[props.value[0].id] ? { ...props.each?.find(entry => entry.id === props.value[0].id), ...extraMetadata[props.value[0].id] } : null} fallback={<span>{props.button}</span>}>{entry => (
+          <>
+            <span class="label">{props.button}:</span>
+            <span class="line-clamp" title={entry().toast || entry().description}>{entry().toast || entry().description}</span>
+            <Show when={!props.hideCount && props.value?.length > 1}>
+              <div class="count">
+                <span>
+                  +{props.value?.length - 1}
+                </span>
+              </div>
+            </Show>
+          </>
+        )}</Show>
+      </button>
       <dialog ref={elem => dialog = elem} classList={{ mobile: isTouch() }}>
         <div class="wrapper">
           <form onSubmit={handleSubmit}>

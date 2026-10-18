@@ -14,8 +14,8 @@ export function MediaAgeSelect() {
 
   const ageOptions = [
     { description: "Any Rating",                               id: "any" },
-    { description: "R+ - (violence, profanity & mild nudity)", id: "r"   },
-    { description: "Rx - Hentai",                              id: "rx"  },
+    { description: "R+ - (violence, profanity & mild nudity)", id: "r",  toast: "R+" },
+    { description: "Rx - Hentai",                              id: "rx", toast: "Rx" },
   ];
 
   const ageValues = createMemo(() => {

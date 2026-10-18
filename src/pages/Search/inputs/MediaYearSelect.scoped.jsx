@@ -26,10 +26,10 @@ export function MediaYearSelect() {
   const yearValues = createMemo(() => {
     const { year, yearLesser, yearGreater } = parsedSearchParams();
 
-    if (year) return [{ id: year, value: true }];
-    if (yearLesser && yearGreater) return [...Array(Math.max(yearLesser - yearGreater - 1, 0))].map((_, i) => ({ id: yearLesser - i - 1, value: true }));
-    if (yearLesser) return [...Array(Math.max(yearLesser - startYear, 0))].map((_, i) => ({ id: startYear + i, value: true }));
-    if (yearGreater) return [...Array(Math.max(endYear - yearGreater, 0))].map((_, i) => ({ id: endYear - i, value: true }));
+    if (year)                      return [                                                                    { id: year,               value: true                                                }];
+    if (yearLesser && yearGreater) return [...Array(Math.max(yearLesser - yearGreater - 1, 0))].map((_, i) => ({ id: yearLesser - i - 1, value: true, toast: `${yearLesser - 1}-${yearGreater + 1}` }));
+    if (yearLesser)                return [...Array(Math.max(yearLesser - startYear, 0))].map((_, i) => (      { id: startYear + i,      value: true, toast: `<${yearLesser}`                       }));
+    if (yearGreater)               return [...Array(Math.max(endYear - yearGreater, 0))].map((_, i) => (       { id: endYear - i,        value: true, toast: `>${yearGreater}`                      }));
   });
 
   let lastYearSelection = null;
@@ -88,7 +88,7 @@ export function MediaYearSelect() {
   };
 
   return (
-    <MultiSelect each={yearOptions()} value={yearValues()} onChange={handleChange} button="Year">{entry => {
+    <MultiSelect each={yearOptions()} value={yearValues()} onChange={handleChange} button="Year" hideCount>{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />

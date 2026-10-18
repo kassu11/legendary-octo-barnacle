@@ -27,10 +27,10 @@ export function MediaLengthSelect() {
   const lengthValues = createMemo(() => {
     const { length, lengthLesser, lengthGreater } = parsedSearchParams();
 
-    if (length) return [{ id: length, value: true }];
-    if (lengthLesser && lengthGreater) return [...Array(Math.max(lengthLesser - lengthGreater - 1, 0))].map((_, i) => ({ id: lengthLesser - i - 1, value: true }));
-    if (lengthLesser) return [...Array(Math.max(lengthLesser - startLength, 0))].map((_, i) => ({ id: startLength + i, value: true }));
-    if (lengthGreater) return [...Array(Math.max(endLength - lengthGreater, 0))].map((_, i) => ({ id: endLength - i, value: true }));
+    if (length)                        return [                                                                        { id: length,               value: true                                                    }];
+    if (lengthLesser && lengthGreater) return [...Array(Math.max(lengthLesser - lengthGreater - 1, 0))].map((_, i) => ({ id: lengthLesser - i - 1, value: true, toast: `${lengthGreater + 1}-${lengthLesser - 1}` }));
+    if (lengthLesser)                  return [...Array(Math.max(lengthLesser - startLength, 0))].map((_, i) => (      { id: startLength + i,      value: true, toast: `<${lengthLesser}`                         }));
+    if (lengthGreater)                 return [...Array(Math.max(endLength - lengthGreater, 0))].map((_, i) => (       { id: endLength - i,        value: true, toast: `>${lengthGreater}`                        }));
   });
 
   let lastLengthSelection = null;
@@ -83,7 +83,7 @@ export function MediaLengthSelect() {
   };
 
   return (
-    <MultiSelect each={lengthOptions()} value={lengthValues()} onChange={handleChange} button={text()}>{entry => {
+    <MultiSelect each={lengthOptions()} value={lengthValues()} onChange={handleChange} button={text()} hideCount>{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />
