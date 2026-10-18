@@ -1,4 +1,4 @@
-import { useSearchParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { useParsedSearchParams } from "../../context/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
 import "./SearchBar.scoped.css";
@@ -19,10 +19,12 @@ import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
 import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
+import { Show } from "solid-js";
 
 export function SearchBar() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
+  const params = useParams();
 
   let replace = false, timeout;
   const handleInput = e => {
@@ -43,7 +45,9 @@ export function SearchBar() {
         <MediaCountrySelect />
         <MediaStatusSelect />
         <MediaAgeSelect />
-        <MediaSeasonSelect />
+        <Show when={params.type === "anime"}>
+          <MediaSeasonSelect />
+        </Show>
         <MediaExternalSourcesSelect />
         <MediaGenresAndTagsSelect />
         <MediaYearSelect />

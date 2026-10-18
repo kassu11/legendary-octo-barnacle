@@ -109,7 +109,7 @@ export function ParseSearchParams(props) {
     if (obj.groupEntriesByFormat) obj.sort = ["format", ...obj.sort];
 
     ["format", "status", "country", "source"].forEach(key => {
-      if (key in obj) obj[key] = wrapToArray(obj[key]);
+      obj[key] = wrapToArray(obj[key]);
     });
 
     if (!(obj.year > 0)) delete obj.year;

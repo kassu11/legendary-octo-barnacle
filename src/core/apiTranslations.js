@@ -240,3 +240,52 @@ export const translateToInternalSearchParams = {
   },
 
 };
+
+export const localizeInternalSearchParams = {
+
+  // Formats and sources
+  "anime":              "Anime",
+  "comic":              "Comic",
+  "doujinshi":          "Doujinshi",
+  "game":               "Game",
+  "light_novel":        "Light Novel",
+  "live_action":        "Live Action",
+  "manga":              "Manga",
+  "manhwa":             "Manhwa",
+  "movie":              "Movie",
+  "multimedia_project": "Multimedia Project",
+  "music":              "Music",
+  "novel":              "Novel",
+  "ona":                "Ona",
+  "one_shot":           "One Shot",
+  "original":           "Original",
+  "other":              "Other",
+  "ova":                "OVA",
+  "picture_book":       "Picture Book",
+  "special":            "Special",
+  "tv":                 "TV",
+  "tv_short":           "TV Short",
+  "video_game":         "Video Game",
+  "visual_novel":       "Visual Novel",
+  "web_novel":          "Web Novel",
+
+  // Country
+  "CN":              "China",
+  "JP":              "Japan",
+  "KR":              "South Korea",
+  "TW":              "Taiwan",
+ 
+ 
+  // Status
+  "cancelled":        "Cancelled",
+  "complete":         "Complete",
+  "not_yet_released": "Not Yet Released",
+  "releasing":        "Releasing",
+
+  // Age
+  "any":        "Show Any Ages",
+  "rx":         "Show Hentai",
+
+ 
+
+};

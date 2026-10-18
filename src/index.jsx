@@ -44,7 +44,7 @@ const idFilter = {
 const animeSearch = {
   type: "anime",
   header: (string) => {
-    if (string.match(/^(summer|fall|spring|winter)-\d+$/)) {
+    if (/^(summer|fall|spring|winter)-\d+$/.test(string)) {
       return true;
     }
 
