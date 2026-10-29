@@ -33,7 +33,7 @@ export function SearchActiveQueries() {
 
     const returnValue = [];
 
-    const { q, sort, format, themes, excludedThemes, country, status, age, season, year, yearLesser, yearGreater, source, externalSources } = parsedSearchParams();
+    const { q, sort, format, themes, excludedThemes, country, status, age, season, year, yearLesser, yearGreater, source, externalSources, progress, progressLesser, progressGreater, length, lengthLesser, lengthGreater, rank, users, excludedUsers, onList, licensed } = parsedSearchParams();
 
     const sortObject = arrayUtils.objectFromArrayEntries(sort);
     if (sortObject["score_plus"     ] || sortObject["score_desc_plus"     ]) returnValue.push({ type: "misc", description: "Must have a score",             query: { sort: sort.map(e => e.includes("score"     ) ? e.replace("_plus", "") : e) } });
@@ -81,21 +81,66 @@ export function SearchActiveQueries() {
       returnValue.push({ type: "01.search", description: `Searching "${q}"`, query: { q: undefined } });
     }
 
-    if (year) {
-      returnValue.push({ type: "year", description: year, query: { year: undefined, season } });
+    if (year) returnValue.push({ type: "year", description: "Year: " + year,              query: { year: undefined, season } });
+    if (yearLesser) returnValue.push({ type: "yearLesser", description: "Year<" + yearLesser,   query: { yearLesser: undefined } });
+    if (yearGreater) returnValue.push({ type: "yearGreater", description: "Year>" + yearGreater, query: { yearGreater: undefined } });
+
+    if (season) returnValue.push({ type: "season", description: formatingUtils.capitalize(season), query: { season: undefined, year } });
+
+
+    if (progress) {
+      if      (params.type === "anime") returnValue.push({ type: "progress", description: "Episodes: " + progress, query: { progress: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "progress", description: "Chapters: " + progress, query: { progress: undefined } });
+      else                              returnValue.push({ type: "progress", description: "Ep/Ch: " +    progress, query: { progress: undefined } });
     }
 
-    if (yearLesser) {
-      returnValue.push({ type: "yearLesser", description: "<" + yearLesser, query: { yearLesser: undefined } });
+    if (progressLesser) {
+      if      (params.type === "anime") returnValue.push({ type: "progressLesser", description: "Episodes<" + progressLesser, query: { progressLesser: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "progressLesser", description: "Chapters<" + progressLesser, query: { progressLesser: undefined } });
+      else                              returnValue.push({ type: "progressLesser", description: "Ep/Ch<" +    progressLesser, query: { progressLesser: undefined } });
     }
 
-    if (yearGreater) {
-      returnValue.push({ type: "yearGreater", description: ">" + yearGreater, query: { yearGreater: undefined } });
+    if (progressGreater) {
+      if      (params.type === "anime") returnValue.push({ type: "progressGreater", description: "Episodes>" + progressGreater, query: { progressGreater: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "progressGreater", description: "Chapters>" + progressGreater, query: { progressGreater: undefined } });
+      else                              returnValue.push({ type: "progressGreater", description: "Ep/Ch>" +    progressGreater, query: { progressGreater: undefined } });
     }
 
-    if (season) {
-      returnValue.push({ type: "season", description: formatingUtils.capitalize(season), query: { season: undefined, year } });
+    if (length) {
+      if      (params.type === "anime") returnValue.push({ type: "length", description: "Duration: " + length, query: { length: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "length", description: "Volumes: " + length, query: { length: undefined } });
+      else                              returnValue.push({ type: "length", description: "Duration / Volumes: " +    length, query: { length: undefined } });
     }
+
+    if (lengthLesser) {
+      if      (params.type === "anime") returnValue.push({ type: "lengthLesser", description: "Duration<" + lengthLesser, query: { lengthLesser: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "lengthLesser", description: "Volumes<" + lengthLesser, query: { lengthLesser: undefined } });
+      else                              returnValue.push({ type: "lengthLesser", description: "Duration / Volumes<" +    lengthLesser, query: { lengthLesser: undefined } });
+    }
+
+    if (lengthGreater) {
+      if      (params.type === "anime") returnValue.push({ type: "lengthGreater", description: "Duration>" + lengthGreater, query: { lengthGreater: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "lengthGreater", description: "Volumes>" + lengthGreater, query: { lengthGreater: undefined } });
+      else                              returnValue.push({ type: "lengthGreater", description: "Duration / Volumes>" +    lengthGreater, query: { lengthGreater: undefined } });
+    }
+
+    if (rank) returnValue.push({ type: "rank", description: "Tag Rank > " + (+rank - 1) + "%", query: { rank: undefined } });
+
+    const rawUsers = arrayUtils.wrapToArray(searchParams.user);
+    for (const v of users) {
+      returnValue.push({ type: "users", description: "Include User: " + v, query: { user: rawUsers.filter(v2 => v2 !== "in-" + v) } });
+    }
+
+    for (const v of excludedUsers) {
+      returnValue.push({ type: "users", description: "Exclude User: " + v, query: { user: rawUsers.filter(v2 => v2 !== "ex-" + v) } });
+    }
+
+    if (onList == "true")  returnValue.push({ type: "onList", description: "On My List", query: { onList: undefined } });
+    if (onList == "false") returnValue.push({ type: "onList", description: "Not in My List", query: { onList: undefined } });
+
+    if (licensed == "true")  returnValue.push({ type: "licensed", description: "Licensed", query: { licensed: undefined } });
+    if (licensed == "false") returnValue.push({ type: "licensed", description: "Not Licensed", query: { licensed: undefined } });
+
 
     return returnValue.sort((a, b) => a.type.localeCompare(b.type) || a.description.localeCompare(b.description));
 
