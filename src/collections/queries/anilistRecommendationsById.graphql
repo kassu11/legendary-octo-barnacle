@@ -18,16 +18,46 @@ query media($id: Int, $page: Int) {
         userRating
         mediaRecommendation {
           id
+          idMal
+          type
+          bannerImage
+          averageScore
           title {
             userPreferred
           }
-          format
-          type
-          averageScore
+          mediaListEntry {
+            status
+          }
+          startDate {
+            year
+          }
           status(version: 2)
-          bannerImage
+          chapters
+          volumes
+          season
+          seasonYear
+          episodes
+          duration
+          format
+          genres
+          countryOfOrigin
+          nextAiringEpisode {
+            airingAt
+            episode
+          }
           coverImage {
             large
+            extraLarge
+            color
+          }
+          studios(isMain: true) {
+            edges {
+              isMain
+              node {
+                id
+                name
+              }
+            }
           }
         }
         user {
