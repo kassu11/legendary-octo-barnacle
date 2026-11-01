@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createMemo, createSignal, For, Match, onCleanup, Show, splitProps, Switch } from "solid-js";
+import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../../utils/formating";
 import "./index-(user-relations).scoped.css";
 import { DurationToTime, EpisodeTime2 } from "../../Home/EpisodeTime";
@@ -7,7 +7,6 @@ import { formatingUtils, urlUtils } from "../../../utils/utils";
 import Star from "../../../assets/Star";
 import { setMediaPageAnilistData } from "../../MediaPageAnilist/index(media-page-anilist).scoped";
 import "./MediaCard.scoped.css";
-import { Portal } from "solid-js/web";
 import { ImageLoader } from "./ImageLoader.scoped";
 import Complete from "../../../assets/Complete";
 import { RepeatIcon } from "../../../assets/RepeatIcon";
@@ -21,114 +20,8 @@ import { queries } from "../../../collections/collections";
 import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped";
 import { globalEditedMedia, storeGlobalEditedMedia, token2 } from "../../../core/globalState";
 import Edit from "../../../assets/Edit";
+import { createHover, HoverPortal } from "../../../hooks/createHover";
 
-
-const hovers = [];
-const SHOW_HOVER = Symbol("SHOW_HOVER");
-const PLACE_HOVER = Symbol("PLACE_HOVER");
-const CHILD = Symbol("CHILD");
-
-// Hot reload will always start a new requestAnimationFrame so we make a global "key" to know when hotreload has reloaded file
-// When this happens, the old requestAnimationFrame will be stopped
-const current = performance.now();
-window.currentHotReloadAnimationFrame = current;
-requestAnimationFrame(handleHovers);
-
-function handleHovers() {
-
-  hovers.forEach(elem => {
-    const hovered = elem.matches(":hover, :focus-visible, :has(:focus-visible)");
-    elem[SHOW_HOVER](hovered);
-    if (hovered) {
-      const child = elem[CHILD];
-      if (child) {
-        elem[PLACE_HOVER](elem, child);
-      }
-    }
-  });
-
-  if (window.currentHotReloadAnimationFrame === current) {
-    requestAnimationFrame(handleHovers);
-  }
-
-}
-
-const removeRef = elem => {
-  if (elem) {
-    const index = hovers.indexOf(elem);
-    hovers[index] = hovers.at(-1);
-    hovers.pop();
-  }
-};
-
-const gen = handleHover => {
-
-  const [show, setShow] = createSignal();
-  let parent;
-  onCleanup(() => {
-    removeRef(parent);
-  });
-
-  const handleRef = elem => {
-    removeRef(parent);
-    parent = elem;
-    hovers.push(elem);
-    elem[SHOW_HOVER] = setShow;
-    if (handleHover) {
-      elem[PLACE_HOVER] = handleHover;
-    }
-  };
-
-  const childRef = hoverElem => {
-    parent[CHILD] = hoverElem;
-  };
-
-  return [handleRef, show, childRef];
-};
-
-const handleCardHover = (parent, hover) => {
-  if (!hover) return;
-  let { x, y, width, height } = parent.getBoundingClientRect();
-  x += document.body.parentElement.scrollLeft;
-  y += document.body.parentElement.scrollTop;
-
-  if (hover.clientWidth + x + width + 25 < document.body.scrollWidth) {
-    hover.style.left = x + width + 25 + "px";
-    hover.style.top = y + 25 + "px";
-  } else if (x - hover.clientWidth - 25 > 0) {
-    hover.style.left = x - hover.clientWidth - 25 + "px";
-    hover.style.top = y + 25 + "px";
-  } else {
-    const max = document.body.scrollWidth - hover.clientWidth;
-    hover.style.left = Math.max(0, Math.min(x + width / 2 - hover.clientWidth / 2, max)) + "px";
-    hover.style.top = y + height + 25 + "px";
-  }
-};
-
-const handleActionHover = (parent, hover) => {
-  if (!hover) return;
-  let { x, y, width, height } = parent.getBoundingClientRect();
-  const offset = 16;
-  x += document.body.parentElement.scrollLeft;
-  y += document.body.parentElement.scrollTop;
-
-  // Left
-  if (x - hover.clientWidth - offset > 0) {
-    hover.style.left = x - hover.clientWidth - offset + "px";
-    hover.style.top = y + height / 2 + "px";
-  }
-  // Right
-  else if (hover.clientWidth + x + width + offset < document.body.scrollWidth) {
-    hover.style.left = x + width + offset + "px";
-    hover.style.top = y + height / 2 + "px";
-  }
-  // Middle
-  else {
-    const max = document.body.scrollWidth - hover.clientWidth;
-    hover.style.left = Math.max(0, Math.min(x + width / 2 - hover.clientWidth / 2, max)) + "px";
-    hover.style.top = y + height + offset + "px";
-  }
-};
 
 export function MediaCard(props) {
 
@@ -151,10 +44,10 @@ export function MediaCard(props) {
 
   });
 
-  const [refFunc, hovered, childRef] = gen(handleCardHover);
+  const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
 
   return (
-    <A scoped {...scoping} ref={refFunc} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
+    <A scoped {...scoping} ref={hover.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media?.averageScore}>
         <div class="score">
@@ -167,11 +60,11 @@ export function MediaCard(props) {
           {local.media.title.userPreferred}
         </p>
       </Show>
-      <Show when={hovered() && local.media}>
+      <Show when={hover.isOpen() && local.media}>
         <QuickActionItemList {...local} status={status()} />
-        <Portal mount={document.getElementById("hovers")}>
-          <HoverCard {...local} ref={childRef} />
-        </Portal>
+        <HoverPortal>
+          <HoverCard {...local} ref={hover.floatingRef} />
+        </HoverPortal>
       </Show>
     </A>
   )
@@ -193,11 +86,11 @@ function QuickActionItemList(props) {
     }
   };
 
-  const [refFunc, hovered] = gen();
+  const hover = createHover();
 
   return (
     <Show when={token2()}>
-      <div class="quick-action-wrapper" ref={refFunc}>
+      <div class="quick-action-wrapper" ref={hover.triggerRef}>
 
         <QuickActionButton label="Edit media" onClick={e => {
           e.preventDefault();
@@ -206,7 +99,7 @@ function QuickActionItemList(props) {
           <Edit scoped />
         </QuickActionButton>
 
-        <Show when={hovered()}>
+        <Show when={hover.isOpen()}>
 
           <QuickActionButton active={props.status === "PLANNING"} onClick={handleClick("PLANNING")} label="Set to planning">
             <Planning scoped />
@@ -233,17 +126,17 @@ function QuickActionItemList(props) {
 
 function QuickActionButton(props) {
 
-  const [refFunc, hovered, childRef] = gen(handleActionHover);
+  const hover = createHover({ placements: ["left", "right", "bottom"], offset: 16 });
 
   return (
     <>
-      <button class="action-button" classList={{ active: props.active }} onClick={props.onClick} ref={refFunc}>
+      <button class="action-button" classList={{ active: props.active }} onClick={props.onClick} ref={hover.triggerRef}>
         {props.children}
       </button>
-      <Show when={hovered()}>
-        <Portal mount={document.getElementById("hovers")}>
-          <div class="action-tool-tip" ref={childRef}>{props.label}</div>
-        </Portal>
+      <Show when={hover.isOpen()}>
+        <HoverPortal>
+          <div class="action-tool-tip" ref={hover.floatingRef}>{props.label}</div>
+        </HoverPortal>
       </Show>
     </>
   )

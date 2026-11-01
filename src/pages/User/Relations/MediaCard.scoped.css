@@ -310,7 +310,6 @@
     background-color: var(--shadow);
     padding: 6px 12px;
     border-radius: 4px;
-    transform: translateY(-50%);
     font-weight: 500;
     color: var(--text-muted);
     transition: margin .2s, opacity .2s;
