@@ -10,7 +10,7 @@ import { Portal } from "solid-js/web";
  * @property {HoverPlacement[]} [placements] Placements tried in order, the first one that fits is used. The last one is the fallback.
  * @property {number} [offset] Gap between the trigger and the floating element
  * @property {number} [alignOffset] Inset from the aligned edge for "start" and "end" alignments, e.g. "right-start" with 25 moves the floating element 25px down
- * @property {(trigger: HTMLElement, floating: HTMLElement) => void} [place] Custom positioning, replaces placements
+ * @property {(trigger: HTMLElement, floating: HTMLElement) => void} [place] Custom positioning, replaces placements. placeFirstFit can be used inside it
  *
  * @typedef {Object} Hover
  * @property {(elem: HTMLElement) => void} triggerRef Ref for the element that opens the hover
@@ -20,50 +20,104 @@ import { Portal } from "solid-js/web";
 
 const HOVER_SELECTOR = ":hover, :focus-visible, :has(:focus-visible)";
 
-/** @type {Set<HoverEntry>} */
-const entries = new Set();
-let frame;
-
 /**
  * @typedef {Object} HoverEntry
  * @property {HTMLElement} [trigger]
  * @property {HTMLElement} [floating]
  * @property {(open: boolean) => void} setOpen
  * @property {(trigger: HTMLElement, floating: HTMLElement) => void} [place]
+ * @property {boolean} [disposed]
  */
 
+/** @type {WeakMap<Element, Set<HoverEntry>>} */
+const entriesByTrigger = new WeakMap();
+/** @type {Set<HoverEntry>} */
+const openEntries = new Set();
+let entryCount = 0;
+let frame;
+let pointerTarget;
+
+const handlePointerOver = e => pointerTarget = e.target;
+window.addEventListener("pointerover", handlePointerOver, { passive: true, capture: true });
+
 // Hover state is polled every frame instead of using pointer events,
-// because pointerleave is not reliable when elements move or get removed under the cursor
+// because pointerleave is not reliable when elements move or get removed under the cursor.
+// Only the triggers that are ancestors of the hovered or focused element can open,
+// so we don't need to check every registered trigger.
 function tick() {
-  for (const entry of entries) {
-    if (!entry.trigger) {
+  const candidates = new Set(openEntries);
+  addAncestorEntries(candidates, pointerTarget);
+  addAncestorEntries(candidates, document.activeElement);
+
+  for (const entry of candidates) {
+    // Closing a hover can dispose nested hovers during this loop
+    if (entry.disposed) {
       continue;
     }
 
-    const open = entry.trigger.matches(HOVER_SELECTOR);
+    const open = !!entry.trigger?.isConnected && entry.trigger.matches(HOVER_SELECTOR);
     // setOpen renders the floating element synchronously, so it can be placed in the same frame
     entry.setOpen(open);
 
-    if (open && entry.place && entry.floating?.isConnected) {
-      entry.place(entry.trigger, entry.floating);
+    if (open) {
+      openEntries.add(entry);
+      if (entry.place && entry.floating?.isConnected) {
+        entry.place(entry.trigger, entry.floating);
+      }
+    } else {
+      openEntries.delete(entry);
     }
   }
 
-  frame = entries.size ? requestAnimationFrame(tick) : undefined;
+  frame = entryCount ? requestAnimationFrame(tick) : undefined;
 }
 
-function register(entry) {
-  entries.add(entry);
+function addAncestorEntries(candidates, elem) {
+  for (; elem; elem = elem.parentElement) {
+    entriesByTrigger.get(elem)?.forEach(entry => candidates.add(entry));
+  }
+}
+
+function setTrigger(entry, elem) {
+  if (entry.trigger === elem) {
+    return;
+  }
+
+  removeTrigger(entry);
+  entry.trigger = elem;
+  if (elem) {
+    if (!entriesByTrigger.has(elem)) {
+      entriesByTrigger.set(elem, new Set());
+    }
+    entriesByTrigger.get(elem).add(entry);
+  }
+}
+
+function removeTrigger(entry) {
+  const entries = entry.trigger && entriesByTrigger.get(entry.trigger);
+  entries?.delete(entry);
+  if (entries?.size === 0) {
+    entriesByTrigger.delete(entry.trigger);
+  }
+}
+
+function register() {
+  entryCount++;
   frame ??= requestAnimationFrame(tick);
 }
 
 function unregister(entry) {
-  entries.delete(entry);
+  entry.disposed = true;
+  entryCount--;
+  removeTrigger(entry);
+  openEntries.delete(entry);
 }
 
 import.meta.hot?.dispose(() => {
   cancelAnimationFrame(frame);
-  entries.clear();
+  window.removeEventListener("pointerover", handlePointerOver, { capture: true });
+  entryCount = 0;
+  openEntries.clear();
 });
 
 /**
@@ -91,11 +145,11 @@ export function createHover(options = {}) {
     place: options.place ?? (options.placements && placeFirstFit(options)),
   };
 
-  register(entry);
+  register();
   onCleanup(() => unregister(entry));
 
   return {
-    triggerRef: elem => entry.trigger = elem,
+    triggerRef: elem => setTrigger(entry, elem),
     floatingRef: elem => entry.floating = elem,
     isOpen,
   };
@@ -114,8 +168,11 @@ export function HoverPortal(props) {
 }
 
 /**
+ * Positions the floating element to the first placement that fits.
+ * The chosen placement is returned and stored in floating.dataset.placement for styling.
+ *
  * @param {HoverOptions} options
- * @returns {(trigger: HTMLElement, floating: HTMLElement) => void}
+ * @returns {(trigger: HTMLElement, floating: HTMLElement) => HoverPlacement}
  */
 export function placeFirstFit({ placements, offset = 0, alignOffset = 0 }) {
   const parsed = placements.map(placement => {
@@ -138,8 +195,9 @@ export function placeFirstFit({ placements, offset = 0, alignOffset = 0 }) {
     const size = { width: floating.offsetWidth, height: floating.offsetHeight };
     const maxX = container.clientWidth - size.width;
 
-    let position;
-    for (const placement of parsed) {
+    let position, index;
+    for (index = 0; index < parsed.length; index++) {
+      const placement = parsed[index];
       position = computePosition(rect, size, placement, offset, alignOffset);
 
       // Top and bottom placements are clamped horizontally, so they always fit sideways
@@ -152,8 +210,13 @@ export function placeFirstFit({ placements, offset = 0, alignOffset = 0 }) {
       }
     }
 
+    const placement = placements[Math.min(index, placements.length - 1)];
     floating.style.left = position.x + "px";
     floating.style.top = position.y + "px";
+    if (floating.dataset.placement !== placement) {
+      floating.dataset.placement = placement;
+    }
+    return placement;
   };
 }
 

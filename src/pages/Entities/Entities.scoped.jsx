@@ -6,7 +6,7 @@ import { asserts, modes, signals, queries } from "../../collections/collections.
 import { arrayUtils } from "../../utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { OLDTooltip } from "../../components/Tooltips.jsx";
+import { Tooltip } from "../../components/Tooltip.scoped";
 import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
@@ -308,7 +308,7 @@ function CharactersPage(props) {
       </ol>
       <Show when={anilistCharactersLoading() &&  page() > Math.ceil(props.cache.length / hardcodedPageCount) && props.cache.length}>
         <LoaderCircle scoped class="spinner">
-          <OLDTooltip tipPosition="bottom">Loading characters</OLDTooltip>
+          <Tooltip placements={["bottom", "top"]}>Loading characters</Tooltip>
         </LoaderCircle>
       </Show>
     </>

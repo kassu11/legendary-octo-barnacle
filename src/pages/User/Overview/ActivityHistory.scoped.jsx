@@ -1,5 +1,5 @@
 import { createMemo, For, Show } from "solid-js";
-import { OLDTooltip } from "../../../components/Tooltips.jsx";
+import { Tooltip } from "../../../components/Tooltip.scoped";
 import { formatTimeToDate } from "../../../utils/formating.js";
 import "./ActivityHistory.scoped.css";
 import { arrayUtils, numberUtils } from "../../../utils/utils.js";
@@ -62,20 +62,11 @@ export function ActivityHistoryScoped(props) {
   );
 
   function ActivityTooltip(props) {
-    const getTipPosition = date => {
-      if (date < (start + 3600 * 24 * 60) * 1000) {
-        return "right";
-      }
-      if (date > (start + 3600 * 24 * (180 - 60)) * 1000) {
-        return "left";
-      }
-    }
-
     return (
-      <OLDTooltip tipPosition={getTipPosition(props.date)}>
+      <Tooltip>
         <p>{formatTimeToDate(props.date)}</p>
         <p>Amount: {props.amount || 0}</p>
-      </OLDTooltip>
+      </Tooltip>
     );
   }
 }

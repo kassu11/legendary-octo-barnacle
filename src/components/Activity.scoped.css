@@ -18,7 +18,7 @@
     margin-top: .5rem;
     word-break: break-all;
 
-    * {
+    _* {
       white-space: break-spaces;
     }
   }
@@ -30,13 +30,12 @@
   }
 }
 
-.cp-activity-like {
-  ol {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    gap: .25rem;
-  }
+.activity-like-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: .25rem;
 
   li {
     display: flex;

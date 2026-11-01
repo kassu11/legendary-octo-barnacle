@@ -1,0 +1,20 @@
+@layer component {
+  .tooltip {
+    position: absolute;
+    width: max-content;
+    max-width: min(30ch, 100%);
+    background-color: var(--shadow);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: normal;
+    text-align: start;
+    color: var(--text-muted);
+    transition: opacity .2s;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+}

@@ -22,7 +22,6 @@ import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
 import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.scoped.jsx";
 import ComparePage from "./pages/Compare/ComparePage.scoped.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.scoped.jsx";
-import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
 import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikan.scoped.jsx";

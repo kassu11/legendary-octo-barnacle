@@ -21,6 +21,7 @@ import { addApplicationNotification } from "../../App/ApplicationNotifications.s
 import { globalEditedMedia, storeGlobalEditedMedia, token2 } from "../../../core/globalState";
 import Edit from "../../../assets/Edit";
 import { createHover, HoverPortal } from "../../../hooks/createHover";
+import { Tooltip } from "../../../components/Tooltip.scoped";
 
 
 export function MediaCard(props) {
@@ -63,7 +64,7 @@ export function MediaCard(props) {
       <Show when={hover.isOpen() && local.media}>
         <QuickActionItemList {...local} status={status()} />
         <HoverPortal>
-          <HoverCard {...local} ref={hover.floatingRef} />
+          <MediaHoverCard {...local} ref={hover.floatingRef} />
         </HoverPortal>
       </Show>
     </A>
@@ -125,21 +126,12 @@ function QuickActionItemList(props) {
 }
 
 function QuickActionButton(props) {
-
-  const hover = createHover({ placements: ["left", "right", "bottom"], offset: 16 });
-
   return (
-    <>
-      <button class="action-button" classList={{ active: props.active }} onClick={props.onClick} ref={hover.triggerRef}>
-        {props.children}
-      </button>
-      <Show when={hover.isOpen()}>
-        <HoverPortal>
-          <div class="action-tool-tip" ref={hover.floatingRef}>{props.label}</div>
-        </HoverPortal>
-      </Show>
-    </>
-  )
+    <button class="action-button" classList={{ active: props.active }} onClick={props.onClick}>
+      {props.children}
+      <Tooltip placements={["left", "right", "bottom"]} offset={16}>{props.label}</Tooltip>
+    </button>
+  );
 }
 
 function StatusIcon(props) {
@@ -171,7 +163,7 @@ function StatusIcon(props) {
   )
 }
 
-function HoverCard(props) {
+export function MediaHoverCard(props) {
   return (
     <div class="hover-card" classList={{ loading: props.loading }} style={{ "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>
       <ImageLoader scoped class="banner" waitBeforeFade={300} fadeIn src={props.media?.bannerImage} />

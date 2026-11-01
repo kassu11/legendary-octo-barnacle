@@ -2,7 +2,7 @@ import { createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switc
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
 import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { OLDTooltip } from "../../components/Tooltips.jsx";
+import { Tooltip } from "../../components/Tooltip.scoped";
 import { ActivityCard } from "../../components/Activity.scoped.jsx";
 import { asserts, queries } from "../../collections/collections.js";
 import "./ActivityPage.scoped.css";
@@ -144,11 +144,11 @@ export function HomePageActivityReelContent(props) {
     <>
       <Show when={loading() && page() === 1}>
         <LoaderCircle scoped class="spinner refresh">
-          <OLDTooltip tipPosition="bottom">
+          <Tooltip placements={["bottom", "top"]}>
             <Show when={props.cache.length === 0} fallback="Fetching fresh activities">
               Loading activities
             </Show>
-          </OLDTooltip>
+          </Tooltip>
         </LoaderCircle>
       </Show>
       <p>{formatMSToString(time())}</p>
@@ -168,7 +168,7 @@ export function HomePageActivityReelContent(props) {
       <Switch>
         <Match when={loading() && page() > maxPage && props.cache.length}>
           <LoaderCircle scoped class="spinner new">
-            <OLDTooltip tipPosition="bottom">Loading activities</OLDTooltip>
+            <Tooltip placements={["bottom", "top"]}>Loading activities</Tooltip>
           </LoaderCircle>
         </Match>
         <Match when={!allowPageFetches() && props.cache.length}>

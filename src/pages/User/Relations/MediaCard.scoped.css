@@ -304,22 +304,6 @@
     }
   }
 
-  .action-tool-tip {
-    position: absolute;
-    background-color: var(--bg);
-    background-color: var(--shadow);
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: margin .2s, opacity .2s;
-
-    @starting-style {
-      margin-inline: 5px;
-      opacity: 0;
-    }
-  }
-
   @keyframes load-card-in {
     0%, 20% {
       opacity: 0;

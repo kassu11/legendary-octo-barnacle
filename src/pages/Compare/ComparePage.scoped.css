@@ -68,10 +68,6 @@
       --loader-border-size: .35rem;
       transition: opacity .2s, filter .2s, background-color .2s;
 
-      &:hover {
-        z-index: 1; /* Fix tooltip z-index that filter breaks; */
-      }
-
       &.disabled {
         filter: grayscale(1) brightness(.75);
 

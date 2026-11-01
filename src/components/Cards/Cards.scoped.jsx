@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { asserts, queries } from "../../collections/collections.js";
-import { formatingUtils, urlUtils } from "../../utils/utils.js";
+import { urlUtils } from "../../utils/utils.js";
 import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
 import Watching from "../../assets/Watching.jsx";
@@ -11,19 +11,21 @@ import { QuickActionListButton } from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
 import ThumbDown from "../../assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
-import { For, Match, Show, Switch } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
 import { mediaWithMalId, token2 } from "../../core/globalState.js";
-import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../utils/formating.js";
-import { DurationToTime, EpisodeTime2 } from "../../pages/Home/EpisodeTime.jsx";
 import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
+import { createHover, HoverPortal } from "../../hooks/createHover";
+import { MediaHoverCard } from "../../pages/User/Relations/MediaCard.scoped.jsx";
 
 function AnilistMediaCardListBody(props) {
+  const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
+
   return (
     <li class="cp-media-card inline-container" data-index={props["data-index"]} classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage?.large}")`, "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>
       <Show when={!props.skeleton}>
-        <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
+        <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)} ref={hover.triggerRef}>
           <div class="wrapper">
             <img class="absolute-inset" src={props.media.coverImage.extraLarge || props.media.coverImage.large} alt="Cover." />
             <Show when={props.media.averageScore}>
@@ -40,108 +42,11 @@ function AnilistMediaCardListBody(props) {
             {props.media.title.userPreferred}
           </p>
         </A>
-        <div class="hover-card" style={{ "--media-background-color": props.media?.coverImage?.color }}>
-          <Show when={props.media?.bannerImage}>
-            <img src={props.media?.bannerImage} />
-          </Show>
-          <p class="line-clamp header shadow">{props.media.title.userPreferred}</p>
-          <Show when={props.media.nextAiringEpisode?.episode && props.media.nextAiringEpisode?.airingAt}>
-            <p class="episodes">
-              <Show when={props.media.format !== "MOVIE"} fallback="Movie ">
-                Ep {props.media.nextAiringEpisode.episode}{" "}
-              </Show>
-              <EpisodeTime2 airingAt={props.media.nextAiringEpisode.airingAt} flavorText="airing in " day=" day" hour=" hour" fallback={
-                <EpisodeTime2 airingAt={props.media.nextAiringEpisode.airingAt} flavorText="airing in " minute=" minute" fallback="has aired" />
-              } />
-            </p>
-          </Show>
-          <div class="body">
-            <Show when={props.media.studios?.edges.length}>
-              <div class="studios shadow">
-                <For each={props.media.studios?.edges}>{edge => (
-                  <p>{edge.node.name}</p>
-                )}</For>
-              </div>
-            </Show>
-            <Show when={props.media.genres?.length}>
-              <div class="genres">
-                <For each={props.media.genres}>{genre => (
-                  <p>{genre}</p>
-                )}</For>
-              </div>
-            </Show>
-          </div>
-          <div class="type-and-season">
-            <div class="flex-bullet-separator">
-              <Show when={props.media?.format}>
-                <span>
-                  <Switch>
-                    <Match when={props.media?.countryOfOrigin !== "JP"}>
-                      {formatMediaFormat(props.media?.format)} ({languageFromCountry(props.media?.countryOfOrigin)})
-                    </Match>
-                    <Match when={props.media?.countryOfOrigin === "JP"}>
-                      {formatMediaFormat(props.media?.format)}
-                    </Match>
-                  </Switch>
-                </span>
-              </Show>
-              <span>
-                <Switch>
-                  <Match when={props.media?.type === "MANGA"}>
-                    <Switch>
-                      <Match when={props.media?.format === "NOVEL" && props.media?.volumes}>
-                        {props.media.volumes} Volume{formatingUtils.plural(props.media.volumes)}
-                      </Match>
-                      <Match when={props.media?.chapters}>
-                        {props.media.chapters} Chapter{formatingUtils.plural(props.media.chapters)}
-                      </Match>
-                      <Match when={props.media?.status}>
-                        {formatMediaStatus(props.media.status)}
-                      </Match>
-                    </Switch>
-                  </Match>
-                  <Match when={props.media?.type === "ANIME"}>
-                    <Switch>
-                      <Match when={props.media?.format === "MOVIE" && props.media?.duration}>
-                        <DurationToTime time={props.media.duration * 60} minute=" minute" hour=" hour" />
-                      </Match>
-                      <Match when={props.media?.format !== "MOVIE" && props.media?.episodes}>
-                        {props.media.episodes} Episode{formatingUtils.plural(props.media.episodes)}
-                      </Match>
-                    </Switch>
-                  </Match>
-                </Switch>
-              </span>
-            </div>
-            <span class="season">
-              <Switch>
-                <Match when={props.media?.type === "MANGA"}>
-                  <Switch>
-                    <Match when={props.media?.startDate?.year}>
-                      {props.media?.startDate.year}
-                    </Match>
-                    <Match when={props.media?.startDate?.year == null}>
-                      TBA
-                    </Match>
-                  </Switch>
-                </Match>
-                <Match when={props.media?.type === "ANIME"}>
-                  <Switch>
-                    <Match when={props.media?.seasonYear && props.media?.season}>
-                      {capitalize(props.media?.season)} {props.media?.seasonYear}
-                    </Match>
-                    <Match when={props.media?.startDate?.year}>
-                      {props.media?.startDate.year}
-                    </Match>
-                    <Match when={props.media?.startDate?.year == null}>
-                      TBA
-                    </Match>
-                  </Switch>
-                </Match>
-              </Switch>
-            </span>
-          </div>
-        </div>
+        <Show when={hover.isOpen()}>
+          <HoverPortal>
+            <MediaHoverCard media={props.media} ref={hover.floatingRef} />
+          </HoverPortal>
+        </Show>
       </Show>
     </li>
   )
