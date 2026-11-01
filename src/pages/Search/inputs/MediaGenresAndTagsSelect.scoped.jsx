@@ -2,6 +2,7 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { GenreIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { queries } from "../../../collections/collections.js";
@@ -12,6 +13,29 @@ import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 import { LoaderCircle } from "../../../components/LoaderCircle.scoped.jsx";
 import "./MediaGenresAndTagsSelect.scoped.css";
+
+// Anilist doesn't provide descriptions for genres, only for tags
+const genreDescriptions = {
+  "Action":        "Exciting fights, chases and physical conflict drive the story.",
+  "Adventure":     "Characters travel or explore, often on a journey or quest.",
+  "Comedy":        "Focuses on humor and making the audience laugh.",
+  "Drama":         "Emotional, character-driven stories with serious conflicts.",
+  "Ecchi":         "Contains sexual humor and suggestive fan service, without explicit content.",
+  "Fantasy":       "Set in worlds with magic, supernatural creatures or other fantastical elements.",
+  "Hentai":        "Sexually explicit adult content.",
+  "Horror":        "Aims to frighten, disturb or unsettle the audience.",
+  "Mahou Shoujo":  "Magical girls who transform and use their powers, often to fight evil.",
+  "Mecha":         "Features giant robots or mechanical suits piloted by people.",
+  "Music":         "Music or musicians are central to the story.",
+  "Mystery":       "Revolves around solving a crime, puzzle or unexplained event.",
+  "Psychological": "Explores the minds, emotions and mental states of the characters.",
+  "Romance":       "Focuses on romantic relationships between characters.",
+  "Sci-Fi":        "Based on imagined science and technology, such as space travel or the future.",
+  "Slice of Life": "Depicts the everyday lives of the characters.",
+  "Sports":        "Centers around a sport and its competitions.",
+  "Supernatural":  "Includes ghosts, spirits, powers or other phenomena beyond the natural world.",
+  "Thriller":      "Tense and suspenseful, keeping the audience on edge.",
+};
 
 export const [anilistGenresAndTagsData, setAnilistGenresAndTagsData] = createSignal(undefined, { equals: false });
 
@@ -44,8 +68,8 @@ export function MediaGenresAndTagsSelect() {
       setValue: res => {
         const genreObject = {
           entries: [
-            ...res.data.data.genres.map((id)         => ({ description: id, id: id.toLowerCase() })),
-            ...res.data.data.tags.map(({ name: id }) => ({ description: id, id: id.toLowerCase() })),
+            ...res.data.data.genres.map(id => ({ description: id, id: id.toLowerCase(), tooltipTitle: "Genre", tooltip: genreDescriptions[id] })),
+            ...res.data.data.tags.map(tag  => ({ description: tag.name, id: tag.name.toLowerCase(), tooltipTitle: tag.category + (tag.isAdult ? " (18+)" : ""), tooltip: tag.description })),
           ],
           genres: res.data.data.genres,
           tags: res.data.data.tags,
@@ -96,9 +120,9 @@ export function MediaGenresAndTagsSelect() {
 
   return (
     <Show when={params.type !== "media"}>
-      <MultiSelect each={genresAndTagsOptions()} value={genresAndTagsValues()} onChange={handleChange} button="Genres and Tags">{entry => {
+      <MultiSelect tooltip="Genres and tags. Click once to include, twice to exclude. Hover a theme to see its description" each={genresAndTagsOptions()} value={genresAndTagsValues()} onChange={handleChange} icon={<GenreIcon />} button="Theme">{entry => {
         return (
-          <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+          <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }} tooltip={entry.tooltip} tooltipTitle={entry.tooltipTitle}>
             <Switch>
 
               <Match when={entry.id === "internal_loading"}>

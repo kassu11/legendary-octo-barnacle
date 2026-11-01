@@ -3,6 +3,7 @@ import { createEffect, createMemo, createSignal, Match, Show, Switch } from "sol
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { StreamingIcon } from "../../../assets/SearchFilterIcons.jsx";
 import "./MediaExternalSourcesSelect.scoped.css"
 import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
@@ -91,7 +92,7 @@ export function MediaExternalSourcesSelect() {
 
   return (
     <Show when={params.type !== "media"}>
-      <MultiSelect each={externalSourcesOptions()} value={externalSourcesValues()} onChange={handleChange} button={params.type === "anime" ? "Streaming On" : "Readable On"}>{entry => {
+      <MultiSelect tooltip={params.type === "anime" ? "Show only media available on these streaming services" : "Show only media readable on these sites"} each={externalSourcesOptions()} value={externalSourcesValues()} onChange={handleChange} icon={<StreamingIcon />} button={params.type === "anime" ? "Streaming On" : "Readable On"}>{entry => {
         return (
           <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
             <Switch>

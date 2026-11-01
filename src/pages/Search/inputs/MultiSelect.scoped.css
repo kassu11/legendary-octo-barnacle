@@ -1,9 +1,8 @@
 @layer component {
   .custom-select {
     position: relative;
-    width: max-content;
-    max-width: 300px;
-    width: 200px;
+    max-width: var(--select-max-width, 300px);
+    width: var(--select-width, 200px);
 
     .open-button {
       width: 100%;
@@ -22,6 +21,14 @@
 
       &:hover {
         filter: brightness(1.1);
+      }
+
+      .icon {
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        color: var(--text-muted);
+        font-size: 1.1em;
       }
 
       .no-selections & {

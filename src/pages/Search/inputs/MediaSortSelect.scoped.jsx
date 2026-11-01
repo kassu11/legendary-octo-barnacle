@@ -7,6 +7,7 @@ import SortNumericAscendingIcon from "../../../assets/SortNumericUp.jsx";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { SortIcon } from "../../../assets/SearchFilterIcons.jsx";
 import "./MediaSortSelect.scoped.css"
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -96,7 +97,7 @@ export function MediaSortSelect() {
   };
 
   return (
-    <MultiSelect each={sortOptions()} value={sortValues()} onChange={handleChange} button="Sort">{entry => {
+    <MultiSelect tooltip="Order the results. Click a sort again to reverse it, hold Shift to sort by multiple fields" each={sortOptions()} value={sortValues()} onChange={handleChange} icon={<SortIcon />} button="Sort">{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <div class="icon-wrapper">

@@ -1,6 +1,7 @@
 import { createMemo } from "solid-js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { TypeIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { useParams } from "@solidjs/router";
@@ -43,7 +44,7 @@ export function MediaTypeSelect() {
   };
 
   return (
-    <MultiSelect each={typeOptions} value={typeValues()} onChange={handleChange} button="Type">{entry => {
+    <MultiSelect tooltip="Search anime, manga or both at the same time" each={typeOptions} value={typeValues()} onChange={handleChange} icon={<TypeIcon />} button="Type">{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox checked={entry.value} radio />

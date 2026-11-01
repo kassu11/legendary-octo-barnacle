@@ -1,2 +1,83 @@
 @layer layout {
+  .active-queries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    /* Active queries should not take multiple rows of the screen in mobile */
+    &.single-row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+
+      li {
+        flex-shrink: 0;
+      }
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: .35em .8em;
+      border: 1px solid var(--bg-light);
+      border-radius: 15px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-weight: 500;
+      font-size: var(--fs-300);
+      transition: filter .2s, border-color .2s, color .2s;
+
+      &:hover, &:focus-visible {
+        filter: brightness(1.2);
+        border-color: var(--text-muted);
+      }
+
+      .icon {
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        color: var(--text-muted);
+
+        &.extra-padding {
+          padding: .15em;
+          border-radius: 2px;
+
+          img {
+            width: .9em;
+            height: .9em;
+          }
+        }
+
+        img {
+          width: 1.25em;
+          height: 1.25em;
+          border-radius: 4px;
+          object-fit: contain;
+        }
+      }
+
+      > svg {
+        width: 1.25em;
+        height: 1.25em;
+        color: var(--text-muted);
+      }
+
+      &.clear {
+        padding-inline: .8em;
+        border-style: dashed;
+        background-color: transparent;
+        color: var(--text-muted);
+
+        &:hover, &:focus-visible {
+          color: color-mix(in oklab, var(--red-400), var(--text-muted));
+          border-color: var(--red-400);
+          outline-color: var(--red-400);
+        }
+      }
+    }
+  }
 }

@@ -3,6 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { AgeIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -37,7 +38,7 @@ export function MediaAgeSelect() {
   };
 
   return (
-    <MultiSelect each={ageOptions} value={ageValues()} onChange={handleChange} button="Age">{entry => {
+    <MultiSelect tooltip="Include adult content in the results" each={ageOptions} value={ageValues()} onChange={handleChange} icon={<AgeIcon />} button="Age">{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio checked={entry.value} />

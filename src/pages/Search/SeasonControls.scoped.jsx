@@ -1,11 +1,13 @@
 import { useParams, useLocation, A } from "@solidjs/router";
-import { createMemo, For } from "solid-js";
+import { createMemo, For, Show } from "solid-js";
 import { useParsedSearchParams } from "../../context/providers";
 import { capitalize } from "../../utils/formating";
 import { arrayUtils } from "../../utils/utils";
+import { ChevronLeftIcon, ChevronRightIcon } from "../../assets/SearchFilterIcons.jsx";
+import { Checkbox } from "./Checkbox.scoped";
 import "./SeasonControls.scoped.css";
 
-export function SeasonControls() {
+export function SeasonControls(props) {
   const params = useParams();
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
@@ -34,17 +36,37 @@ export function SeasonControls() {
     return `${season.toLowerCase()}-${year}`;
   };
 
+  const headerUrl = header => `/${params.api}/${params.mode}/${params.type}/${header}${searchWithoutSeasonsOrYear()}`;
+
   return (
-    <div>
-      <A href={`/${params.api}/${params.mode}/${params.type}/${seasonHeader(-1)}${searchWithoutSeasonsOrYear()}`}>{"<"}</A>
-      <For each={seasons}>{season => (
-        <A href={`/${params.api}/${params.mode}/${params.type}/${season.toLowerCase()}-${yearOrCurrentYear()}${searchWithoutSeasonsOrYear()}`} classList={{ selected: season === parsedSearchParams().season }}>
-          <p>{capitalize(season)}</p>
-          <p>{yearOrCurrentYear()}</p>
-        </A>
-      )}</For>
-      <A href={`/${params.api}/${params.mode}/${params.type}/${seasonHeader(1)}${searchWithoutSeasonsOrYear()}`}>{">"}</A>
+    <div class="season-controls">
+      <Show when={params.type === "anime"}>
+        <nav class="season-nav" aria-label="Seasons">
+          <A scoped class="arrow" href={headerUrl(seasonHeader(-1))} aria-label="Previous season">
+            <ChevronLeftIcon scoped />
+          </A>
+          <For each={seasons}>{season => (
+            <A scoped class="season" href={headerUrl(`${season}-${yearOrCurrentYear()}`)} classList={{ selected: season === parsedSearchParams().season }}>
+              <span class="name">{capitalize(season)}</span>
+              <span class="year">{yearOrCurrentYear()}</span>
+            </A>
+          )}</For>
+          <A scoped class="arrow" href={headerUrl(seasonHeader(1))} aria-label="Next season">
+            <ChevronRightIcon scoped />
+          </A>
+        </nav>
+        <nav class="quick-links" aria-label="Season shortcuts">
+          <A scoped href="/ani/search/anime/this-season" end>This Season</A>
+          <A scoped href="/ani/search/anime/next-season" end>Next Season</A>
+          <A scoped href="/ani/search/anime/tba" end>TBA</A>
+        </nav>
+      </Show>
+      <Show when={props.groupByFormat !== undefined}>
+        <button class="group-toggle" classList={{ active: props.groupByFormat }} aria-pressed={props.groupByFormat} onClick={() => props.onGroupByFormatChange()}>
+          <p>Group by Format</p>
+          <Checkbox scoped class="checkbox" checked={props.groupByFormat} />
+        </button>
+      </Show>
     </div>
   );
 }
-

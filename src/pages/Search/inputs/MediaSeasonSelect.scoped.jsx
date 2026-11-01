@@ -2,6 +2,7 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { SeasonIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -67,7 +68,7 @@ export function MediaSeasonSelect() {
   };
 
   return (
-    <MultiSelect each={seasonOptions} value={seasonValues()} onChange={handleChange} button="Season">{entry => {
+    <MultiSelect tooltip="Anime airing season. Combine with year to browse a specific season" each={seasonOptions} value={seasonValues()} onChange={handleChange} icon={<SeasonIcon />} button="Season">{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio checked={entry.value} />

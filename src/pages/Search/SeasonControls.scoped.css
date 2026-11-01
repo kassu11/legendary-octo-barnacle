@@ -1,27 +1,124 @@
-div {
-  display: flex;
-  gap: 9px;
-  align-items: center;
+@layer component {
+  .season-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-bottom: 2rem;
+  }
 
-  _a {
-    padding: 8px 16px;
-    display: block;
-    background: var(--bg);
-    border-radius: 4px;
-    border: var(--bg-dark);
-    text-decoration: none;
-    color: var(--text-muted);
-    display: grid;
-    place-items: center;
+  .season-nav {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 8px;
+    background-color: var(--bg);
 
-    &:hover {
-      filter: brightness(1.5);
+    @media (width < 40em) {
+      width: 100%;
     }
 
-    &.selected {
+    .season, .arrow {
+      display: grid;
+      place-items: center;
+      border-radius: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: .2s background-color, .2s color;
+
+      &:hover {
+        background-color: color-mix(in oklab, var(--bg), var(--bg-light) 50%);
+        color: var(--text);
+      }
+
+    }
+
+    .arrow {
+      padding-inline: 4px;
+
+      svg {
+        width: 1.25em;
+        height: 1.25em;
+      }
+      @media (width < 20em) {
+        display: none;
+      }
+    }
+
+    .season {
+      flex: 1;
+      min-width: 4.5em;
+      padding: 4px 12px;
+      line-height: 1.2;
+
+      .name {
+        font-weight: 600;
+      }
+
+      .year {
+        font-size: var(--fs-300);
+        opacity: .7;
+      }
+
+      &.selected {
+        background-color: var(--bg-light);
+        color: var(--text);
+      }
+    }
+  }
+
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    a {
+      padding: .4em .9em;
+      border: 2px dashed var(--bg);
+      border-radius: 100px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-decoration: none;
+      transition: .2s border, .2s background-color, .2s color;
+
+      &:hover {
+        color: var(--text);
+        border-style: solid;
+      }
+
+      &.active {
+        border: 2px solid var(--bg-light);
+        background-color: var(--bg);
+        color: var(--text);
+      }
+    }
+  }
+
+  .group-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    padding: .4em .5em .4em .9em;
+    border: 2px dashed var(--bg);
+    border-radius: 100px;
+    background-color: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: .2s border, .2s background-color, .2s color;
+
+    &:hover {
       color: var(--text);
-      font-weight: 500;
-      background: var(--bg-light);
+    }
+
+    &.active {
+      border: 2px solid var(--bg-light);
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    > .checkbox {
+      margin-block: -.25em;
     }
   }
 }

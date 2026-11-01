@@ -4,6 +4,7 @@ import { untrack } from "solid-js/web";
 import { isTypeInteger } from "../../../collections/types.js";
 import { useResponsive } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
+import { Tooltip } from "../../../components/Tooltip.scoped.jsx";
 import "./MultiSelect.scoped.css";
 
 export function MultiSelect(props) {
@@ -60,6 +61,7 @@ export function MultiSelect(props) {
   let memory, memoryUrl;
 
   const { isTouch } = useResponsive();
+  const [isOpen, setIsOpen] = createSignal(false);
   let dialog, input, controller;
 
   // For debugging, this will reopen the dialog in mobile if touch changes
@@ -73,6 +75,7 @@ export function MultiSelect(props) {
   const openDialog = () => {
     if (isTouch()) dialog.showModal();
     else dialog.show();
+    setIsOpen(true);
   };
 
   const handleClick = e => {
@@ -125,6 +128,7 @@ export function MultiSelect(props) {
   const handleClose = () => {
     controller?.abort();
     dialog.close();
+    setIsOpen(false);
     setSearch("");
     handleHover(-1);
   };
@@ -230,6 +234,9 @@ export function MultiSelect(props) {
   return (
     <div class="custom-select" classList={{ "holding-shift": holdingShift(), "no-selections": !props.value?.length }}>
       <button onMouseDown={handleMouseDown} onClick={handleButtonClick} class="open-button">
+        <Show when={props.icon}>
+          <span class="icon">{props.icon}</span>
+        </Show>
         <Show when={props.value?.length && extraMetadata[props.value[0].id] ? { ...props.each?.find(entry => entry.id === props.value[0].id), ...extraMetadata[props.value[0].id] } : null} fallback={<span>{props.button}</span>}>{entry => (
           <>
             <span class="label">{props.button}:</span>
@@ -243,6 +250,9 @@ export function MultiSelect(props) {
             </Show>
           </>
         )}</Show>
+        <Show when={props.tooltip && !isOpen() && !isTouch()}>
+          <Tooltip placements={["bottom", "top"]} delay={600}>{props.tooltip}</Tooltip>
+        </Show>
       </button>
       <dialog ref={elem => dialog = elem} classList={{ mobile: isTouch() }}>
         <div class="wrapper">

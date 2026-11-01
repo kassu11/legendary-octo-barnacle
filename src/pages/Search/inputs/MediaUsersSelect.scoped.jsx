@@ -2,6 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { UsersIcon } from "../../../assets/SearchFilterIcons.jsx";
 import "./MediaUsersSelect.scoped.css"
 import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
@@ -169,7 +170,7 @@ export function MediaUsersSelect() {
   };
 
   return (
-    <MultiSelect each={usersOptions()} value={usersValues()} onChange={handleChange} button="User Filtering">{entry => {
+    <MultiSelect tooltip="Filter by the lists of other users. Click once to include, twice to exclude" each={usersOptions()} value={usersValues()} onChange={handleChange} icon={<UsersIcon />} button="User List">{entry => {
       return (
         <MediaSelectItem scoped class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered, search: entry.internalSearch }}>
           <Switch>

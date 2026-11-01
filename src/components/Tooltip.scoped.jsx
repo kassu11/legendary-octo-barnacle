@@ -13,6 +13,7 @@ import "./Tooltip.scoped.css";
  * @param {Object} props
  * @param {import("../hooks/createHover").HoverPlacement[]} [props.placements]
  * @param {number} [props.offset]
+ * @param {number} [props.delay] Milliseconds the parent needs to be hovered before the tooltip fades in
  */
 export function Tooltip(props) {
   const hover = createHover({ placements: props.placements ?? ["top", "bottom"], offset: props.offset ?? 8 });
@@ -25,7 +26,7 @@ export function Tooltip(props) {
       {anchor}
       <Show when={hover.isOpen()}>
         <HoverPortal>
-          <div role="tooltip" class="tooltip" ref={hover.floatingRef}>
+          <div role="tooltip" class="tooltip" ref={hover.floatingRef} style={{ "transition-delay": props.delay ? props.delay + "ms" : undefined }}>
             {props.children}
           </div>
         </HoverPortal>

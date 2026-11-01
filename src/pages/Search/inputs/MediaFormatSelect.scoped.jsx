@@ -3,6 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FormatIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -19,18 +20,18 @@ export function MediaFormatSelect() {
     const options = [];
 
     if (type === "anime" || type === "media") {
-      options.push({ description: "Movie",       id: "movie",       });
-      options.push({ description: "Music",       id: "music",       });
-      options.push({ description: "ONA",         id: "ona",         });
-      options.push({ description: "OVA",         id: "ova",         });
-      options.push({ description: "Special",     id: "special",     });
-      options.push({ description: "TV",          id: "tv",          });
-      options.push({ description: "TV Short",    id: "tv_short",    });
+      options.push({ description: "Movie",       id: "movie",    tooltip: "Feature length film, usually released in theaters"         });
+      options.push({ description: "Music",       id: "music",    tooltip: "Short anime music video"                                   });
+      options.push({ description: "ONA",         id: "ona",      tooltip: "Original Net Animation, released online"                   });
+      options.push({ description: "OVA",         id: "ova",      tooltip: "Original Video Animation, released directly on home video" });
+      options.push({ description: "Special",     id: "special",  tooltip: "Special episodes, often released alongside a TV series"    });
+      options.push({ description: "TV",          id: "tv",       tooltip: "Anime series broadcast on television"                      });
+      options.push({ description: "TV Short",    id: "tv_short", tooltip: "TV series with episodes shorter than 15 minutes"           });
     }
     if (type === "manga" || type === "media") {
-      options.push({ description: "Light Novel", id: "light_novel", });
-      options.push({ description: "Manga",       id: "manga",       });
-      options.push({ description: "One-Shot",    id: "one_shot",    });
+      options.push({ description: "Light Novel", id: "light_novel", tooltip: "Japanese prose novels with illustrations"               });
+      options.push({ description: "Manga",       id: "manga",       tooltip: "Japanese comics, also includes manhwa and manhua"       });
+      options.push({ description: "One-Shot",    id: "one_shot",    tooltip: "Manga with a single chapter"                            });
     }
 
     return options.sort((a, b) => a.description.localeCompare(b.description));
@@ -69,9 +70,9 @@ export function MediaFormatSelect() {
   };
 
   return (
-    <MultiSelect each={formatOptions()} value={formatValues()} onChange={handleChange} button="Format">{entry => {
+    <MultiSelect tooltip="How the media was released, e.g. TV series, movie, manga or light novel" each={formatOptions()} value={formatValues()} onChange={handleChange} icon={<FormatIcon />} button="Format">{entry => {
       return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }} tooltip={entry.tooltip}>
           <Checkbox checked={entry.value} />
           <p>{entry.description}</p>
         </MediaSelectItem>

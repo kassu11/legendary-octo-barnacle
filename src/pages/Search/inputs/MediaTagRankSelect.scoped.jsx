@@ -2,6 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { TagRankIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -44,7 +45,7 @@ export function MediaTagRankSelect() {
   };
 
   return (
-    <MultiSelect each={tagRankOptions()} value={tagRankValues()} onChange={handleChange} button="Tag Rank" hideCount>{entry => {
+    <MultiSelect tooltip="Minimum tag relevance percentage. Higher values only match media where the selected tags are a major part of the story" each={tagRankOptions()} value={tagRankValues()} onChange={handleChange} icon={<TagRankIcon />} button="Tag Rank" hideCount>{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />

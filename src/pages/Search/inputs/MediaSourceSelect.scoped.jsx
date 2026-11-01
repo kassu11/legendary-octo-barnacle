@@ -3,6 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { SourceIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -53,7 +54,7 @@ export function MediaSourceSelect() {
   };
 
   return (
-    <MultiSelect each={sourceOptions} value={sourceValues()} onChange={handleChange} button="Source">{entry => {
+    <MultiSelect tooltip="The original material the media was adapted from" each={sourceOptions} value={sourceValues()} onChange={handleChange} icon={<SourceIcon />} button="Source">{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox checked={entry.value} />

@@ -2,6 +2,7 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { LengthIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -83,7 +84,7 @@ export function MediaLengthSelect() {
   };
 
   return (
-    <MultiSelect each={lengthOptions()} value={lengthValues()} onChange={handleChange} button={text()} hideCount>{entry => {
+    <MultiSelect tooltip="Filter by episode length in minutes or by volume count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={lengthOptions()} value={lengthValues()} onChange={handleChange} icon={<LengthIcon />} button={text()} hideCount>{entry => {
       return (
         <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
           <Checkbox radio={!entry.value} checked={entry.value} />

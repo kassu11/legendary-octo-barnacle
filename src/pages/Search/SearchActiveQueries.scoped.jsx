@@ -1,11 +1,14 @@
-import { createMemo, For } from "solid-js";
+import { createMemo, For, Show } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import "./SearchActiveQueries.scoped.css";
 import { useParsedSearchParams } from "../../context/providers";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { useNavigateAndSearch } from "../../utils/urlUtils";
 import { arrayUtils, formatingUtils } from "../../utils/utils";
 import { localizeInternalSearchParams } from "../../core/apiTranslations";
+import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, StreamingIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "../../assets/SearchFilterIcons";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
+import { usersData } from "./inputs/MediaUsersSelect.scoped";
 
 const invalidateHeader = [
   { header: "finished",                          params: ["status"] },
@@ -23,13 +26,38 @@ const invalidateHeader = [
   { header: /^(summer|fall|spring|winter)-\d+$/, params: ["season", "year"] },
 ]
 
-export function SearchActiveQueries() {
-  const parsedSearchParams = useParsedSearchParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const params = useParams();
-  const navigate = useNavigateAndSearch();
+const typeIcons = {
+  "01.search": SearchIcon,
+  misc: SortIcon,
+  format: FormatIcon,
+  source: SourceIcon,
+  country: CountryIcon,
+  externalSources: StreamingIcon,
+  themes: GenreIcon,
+  age: AgeIcon,
+  status: StatusIcon,
+  year: YearIcon,
+  yearLesser: YearIcon,
+  yearGreater: YearIcon,
+  season: SeasonIcon,
+  progress: ProgressIcon,
+  progressLesser: ProgressIcon,
+  progressGreater: ProgressIcon,
+  length: LengthIcon,
+  lengthLesser: LengthIcon,
+  lengthGreater: LengthIcon,
+  rank: TagRankIcon,
+  users: UsersIcon,
+  onList: OnListIcon,
+  licensed: LicensedIcon,
+};
 
-  const queryButtons = createMemo(() => {
+export function useActiveSearchQueries() {
+  const parsedSearchParams = useParsedSearchParams();
+  const [searchParams] = useSearchParams();
+  const params = useParams();
+
+  return createMemo(() => {
 
     const returnValue = [];
 
@@ -57,7 +85,7 @@ export function SearchActiveQueries() {
 
     for (const v of externalSources) {
       const target = externalSourcesData()?.sources.find(v2 => v2.id === v);
-      if (target) returnValue.push({ type: "externalSources", description: "ExternalSources: " + target.site, query: { externalSources: externalSources.filter(v2 => v2 !== v) } });
+      if (target) returnValue.push({ type: "externalSources", description: "ExternalSources: " + target.site, image: target.icon, imageColor: target.color, query: { externalSources: externalSources.filter(v2 => v2 !== v) } });
     }
 
     const rawThemes = arrayUtils.wrapToArray(searchParams.theme);
@@ -128,11 +156,11 @@ export function SearchActiveQueries() {
 
     const rawUsers = arrayUtils.wrapToArray(searchParams.user);
     for (const v of users) {
-      returnValue.push({ type: "users", description: "Include User: " + v, query: { user: rawUsers.filter(v2 => v2 !== "in-" + v) } });
+      returnValue.push({ type: "users", description: "Include User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "in-" + v) } });
     }
 
     for (const v of excludedUsers) {
-      returnValue.push({ type: "users", description: "Exclude User: " + v, query: { user: rawUsers.filter(v2 => v2 !== "ex-" + v) } });
+      returnValue.push({ type: "users", description: "Exclude User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "ex-" + v) } });
     }
 
     if (onList == "true")  returnValue.push({ type: "onList", description: "On My List", query: { onList: undefined } });
@@ -145,27 +173,61 @@ export function SearchActiveQueries() {
     return returnValue.sort((a, b) => a.type.localeCompare(b.type) || a.description.localeCompare(b.description));
 
   });
-
-  return (
-    <div>
-      <For each={queryButtons()}>{entry => (
-        <button onClick={() => {
-          const header = params.header;
-          const headerThatCouldNeedInvalidating = invalidateHeader.find(h => h.header === header || h.header.test?.(header));
-          if (headerThatCouldNeedInvalidating) {
-            for (const param of Object.keys(entry.query)) {
-              if (headerThatCouldNeedInvalidating.params.includes(param)) {
-                // Invalidate header and update query
-                return navigate(path => path.replace("/" + header, ""), entry.query);
-              }
-            }
-          }
-
-          // Normal set search params
-          setSearchParams(entry.query);
-        }}>{entry.description}</button>
-      )}</For>
-    </div>
-  );
 }
 
+export function SearchActiveQueries(props) {
+  const [, setSearchParams] = useSearchParams();
+  const params = useParams();
+  const navigate = useNavigateAndSearch();
+  const queryButtons = useActiveSearchQueries();
+
+  const removeQuery = query => {
+    const header = params.header;
+    const headerThatCouldNeedInvalidating = invalidateHeader.find(h => h.header === header || h.header.test?.(header));
+    if (headerThatCouldNeedInvalidating) {
+      for (const param of Object.keys(query)) {
+        if (headerThatCouldNeedInvalidating.params.includes(param)) {
+          // Invalidate header and update query
+          return navigate(path => path.replace("/" + header, ""), query);
+        }
+      }
+    }
+
+    // Normal set search params
+    setSearchParams(query);
+  };
+
+  const clearAll = () => {
+    const query = {};
+    for (const entry of queryButtons()) {
+      if (entry.type === "01.search") continue; // Keep the search text, only clear the filters
+      for (const key of Object.keys(entry.query)) query[key] = undefined;
+    }
+    removeQuery(query);
+  };
+
+  return (
+    <Show when={queryButtons().length}>
+      <ul class="active-queries" classList={{ "single-row": props.singleRow }}>
+        <For each={queryButtons()}>{entry => (
+          <li>
+            <button class="query" onClick={() => removeQuery(entry.query)} title="Remove filter">
+              <span class="icon" classList={{ "extra-padding": !!entry.imageColor }} style={{ "background-color": entry.imageColor }}>
+                <Show when={entry.image} fallback={<Dynamic component={typeIcons[entry.type]} />}>
+                  <img src={entry.image} alt="" />
+                </Show>
+              </span>
+              <span>{entry.description}</span>
+              <XIcon scoped />
+            </button>
+          </li>
+        )}</For>
+        <Show when={queryButtons().some(entry => entry.type !== "01.search")}>
+          <li>
+            <button class="clear" onClick={clearAll}>Clear all</button>
+          </li>
+        </Show>
+      </ul>
+    </Show>
+  );
+}

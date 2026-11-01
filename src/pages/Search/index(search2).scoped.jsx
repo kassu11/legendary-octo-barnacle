@@ -1,4 +1,4 @@
-import { A, Navigate, useLocation, useParams } from "@solidjs/router";
+import { Navigate, useLocation, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
@@ -510,20 +510,13 @@ export function SearchPage() {
                   </Match>
                 </Switch>
 
-                <Show when={params.type === "anime"}>
-                  <A href="/ani/search/anime/this-season">Current</A>
-                  <A href="/ani/search/anime/next-season">Next</A>
-                  <A href="/ani/search/anime/tba">TBA</A>
-
-                  <SeasonControls />
-                </Show>
-
-                <Show when={parsedSearchParams().groupEntriesByFormat != undefined}>
-                  <button onClick={() => {
+                <SeasonControls
+                  groupByFormat={parsedSearchParams().groupEntriesByFormat}
+                  onGroupByFormatChange={() => {
                     if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
                     else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
-                  }}>Group by Format</button>
-                </Show>
+                  }}
+                />
 
               </Match>
               <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>

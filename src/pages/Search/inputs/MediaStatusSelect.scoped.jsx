@@ -3,6 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "../../../context/providers.js";
 import { arrayUtils } from "../../../utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { StatusIcon } from "../../../assets/SearchFilterIcons.jsx";
 import { Checkbox } from "../Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
@@ -17,14 +18,14 @@ export function MediaStatusSelect() {
     const { type } = params;
 
     const options = [
-      { description: "Cancelled",        id: "cancelled"        },
-      { description: "Complete",         id: "complete"         },
-      { description: "Not Yet Released", id: "not_yet_released" },
-      { description: "Releasing",        id: "releasing"        },
+      { description: "Cancelled",        id: "cancelled",        tooltip: "Ended before it was completed and will not continue" },
+      { description: "Complete",         id: "complete",         tooltip: "Finished releasing"                                  },
+      { description: "Not Yet Released", id: "not_yet_released", tooltip: "Announced, but not released yet"                     },
+      { description: "Releasing",        id: "releasing",        tooltip: "Currently airing or being published"                 },
     ];
 
     if (type === "manga") {
-      options.push({ description: "Hiatus", id: "HIATUS" });
+      options.push({ description: "Hiatus", id: "HIATUS", tooltip: "Publishing is paused, but may continue later" });
     }
 
     return options.sort((a, b) => a.description.localeCompare(b.description));
@@ -63,9 +64,9 @@ export function MediaStatusSelect() {
   };
 
   return (
-    <MultiSelect each={statusOptions()} value={statusValues()} onChange={handleChange} button="Status">{entry => {
+    <MultiSelect tooltip="Current release status of the media" each={statusOptions()} value={statusValues()} onChange={handleChange} icon={<StatusIcon />} button="Status">{entry => {
       return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }} tooltip={entry.tooltip}>
           <Checkbox checked={entry.value} />
           <p>{entry.description}</p>
         </MediaSelectItem>
