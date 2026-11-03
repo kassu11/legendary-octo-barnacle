@@ -1,20 +1,30 @@
 @layer layout {
-  section {
-    display: grid;
-    gap: .25rem;
-
-    > _.header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+  .grid-reel-auto-fill {
+    padding-block: 16px;
+    --spill-ratio: 1;
+    --padding: 64px;
+    --spill-ration-correction-padding: 0px;
+    --gap: 48px;
+    --line-clamp: 2;
+    overflow-y: clip;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    &.dragging {
+      scroll-behavior: unset;
     }
 
-    .grid-reel-auto-fill {
-      margin-inline: -16px;
-      --spill-ratio: 1;
+    &.scrollable, &.scrollable _a {
+      cursor: grab;
+      user-select: none;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    @media (width < 40em) {
       --padding: 16px;
-      --spill-ration-correction-padding: 0px;
-      --gap: 16px;
+      --gap: 8px;
     }
   }
 }

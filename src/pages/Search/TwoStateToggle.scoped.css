@@ -1,0 +1,44 @@
+@layer component {
+  button {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: var(--select-width, 200px);
+    max-width: var(--select-max-width, 300px);
+    padding: .5em;
+    border: 2px solid var(--bg-light);
+    border-radius: 4px;
+    background-color: var(--bg);
+    font-weight: 600;
+    text-align: left;
+    text-shadow: 0 0 3px var(--bg-dark);
+    transition: .2s border, .2s filter, .2s background, .2s color;
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+
+    &:not(.active) {
+      border: 2px dashed var(--bg);
+      background-color: color-mix(in oklab, var(--bg-dark), var(--bg) 30%);
+      color: var(--text-muted);
+    }
+
+    .icon {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: 1.1em;
+    }
+
+    p {
+      flex-grow: 1;
+    }
+
+    /* Checkbox is taller than the text, don't let it grow the button height */
+    > .checkbox {
+      margin-block: -.25em;
+    }
+  }
+}

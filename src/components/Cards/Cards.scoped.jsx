@@ -5,8 +5,7 @@ import Edit from "../../assets/Edit.jsx";
 import Planning from "../../assets/Planning.jsx";
 import Watching from "../../assets/Watching.jsx";
 import Complete from "../../assets/Complete.jsx";
-import Rewatched from "../../assets/Rewatched.jsx";
-import { useAuthentication, useEditMediaEntries } from "../../context/providers.js";
+import { useEditMediaEntries } from "../../context/providers.js";
 import Star from "../../assets/Star.jsx";
 import { QuickActionListButton } from "../Buttons.scoped.jsx";
 import ThumbUp from "../../assets/ThumbUp.jsx";
@@ -15,30 +14,40 @@ import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { addApplicationNotification } from "../../pages/App/ApplicationNotifications.scoped.jsx";
-import { mediaWithMalId } from "../../core/globalState.js";
+import { mediaWithMalId, token2 } from "../../core/globalState.js";
+import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
+import { createHover, HoverPortal } from "../../hooks/createHover";
+import { MediaHoverCard } from "../../pages/User/Relations/MediaCard.scoped.jsx";
 
 function AnilistMediaCardListBody(props) {
-  asserts.assertTrueOLD(props.media, "Missing media");
+  const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
 
   return (
-    <li class="cp-media-card inline-container">
-      <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)}>
-        <div class="wrapper">
-          <img class="absolute-inset" src={props.media.coverImage.large} alt="Cover." />
-          <Show when={props.media.averageScore}>
-            <div class="score">
-              <Star /> {(props.media.averageScore / 10)}
-            </div>
-          </Show>
-          {props.children}
-        </div>
-        <p class="line-clamp">
-          <Show when={props.media.mediaListEntry?.status}>
-            <div class="list-status" attr:data-status={props.media.mediaListEntry.status}></div>
-          </Show>
-          {props.media.title.userPreferred}
-        </p>
-      </A>
+    <li class="cp-media-card inline-container" data-index={props["data-index"]} classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage?.large}")`, "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>
+      <Show when={!props.skeleton}>
+        <A class="block-link" href={urlUtils.anilistMediaUrl(props.media)} ref={hover.triggerRef}>
+          <div class="wrapper">
+            <img class="absolute-inset" src={props.media.coverImage.extraLarge || props.media.coverImage.large} alt="Cover." />
+            <Show when={props.media.averageScore}>
+              <div class="score">
+                <Star /> {(props.media.averageScore / 10)}
+              </div>
+            </Show>
+            {props.children}
+          </div>
+          <p class="line-clamp">
+            <Show when={props.media.mediaListEntry?.status}>
+              <div class="list-status" attr:data-status={props.media.mediaListEntry.status}></div>
+            </Show>
+            {props.media.title.userPreferred}
+          </p>
+        </A>
+        <Show when={hover.isOpen()}>
+          <HoverPortal>
+            <MediaHoverCard media={props.media} ref={hover.floatingRef} />
+          </HoverPortal>
+        </Show>
+      </Show>
     </li>
   )
 }
@@ -71,16 +80,6 @@ function JikanMediaCardListBody(props) {
   )
 }
 
-export function AnilistMediaCard(props) {
-  asserts.assertTrueOLD(props.media, "Missing media");
-
-  return (
-    <AnilistMediaCardListBody {...props}>
-      <QuickActionItemList {...props} />
-    </AnilistMediaCardListBody>
-  );
-}
-
 export function JikanMediaCard(props) {
   asserts.assertTrueOLD(props.media, "Missing media");
   asserts.isTypeStringOLD(props.type);
@@ -96,7 +95,6 @@ export function JikanMediaCard(props) {
 
 function QuickActionItemList(props) {
   const { openEditor } = useEditMediaEntries();
-  const { accessToken } = useAuthentication();
 
   asserts.assertTrueOLD(props.media, "Missing media");
 
@@ -106,8 +104,8 @@ function QuickActionItemList(props) {
     const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: props.media.id, status }, AbortSignal.timeout(30_000));
     const res = await fetcherToFetch(fetcher);
     if (res.status === 200) {
-      const json = await res.json();
-      console.log("JSON", json)
+      // const json = await res.json();
+      // console.log("JSON", json)
       // props.activity.likeCount = json.data.ToggleLike.likeCount;
     } else {
       addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });
@@ -115,7 +113,7 @@ function QuickActionItemList(props) {
   };
 
   return (
-    <Show when={accessToken()}>
+    <Show when={token2()}>
       <ul class="cp-media-card-quick-action-items">
         <QuickActionListButton label="Edit media" onClick={e => {
           e.preventDefault();
@@ -132,8 +130,8 @@ function QuickActionItemList(props) {
         <QuickActionListButton label="Set to completed" onClick={handleClick("COMPLETED")}>
           <Complete />
         </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEAT")}>
-          <Rewatched />
+        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEATING")}>
+          <RepeatIcon />
         </QuickActionListButton>
       </ul>
     </Show>
@@ -145,7 +143,7 @@ export function AnilistMediaRecommendationCard(props) {
   asserts.assertTypeFunctionOLD(props.handleRateUp, "handleRateUp");
   asserts.assertTypeFunctionOLD(props.handleRateDown, "handleRateDown");
   asserts.isTypeStringOLD(props.userRating, "userRating");
-  asserts.isTypeInteger(props.rating, "rating");
+  asserts.isTypeIntegerOLD(props.rating, "rating");
 
   return (
     <AnilistMediaCardListBody media={props.node.mediaRecommendation}>

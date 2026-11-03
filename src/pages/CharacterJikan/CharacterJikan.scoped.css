@@ -52,14 +52,14 @@
       gap: 16px;
 
       details & {
-        background-color: var(--bg);
+        background-color: var(--bg-old);
         &::before {
           content: "[closed]";
         }
       }
 
       details[open] & {
-        background-color: var(--bg-light);
+        background-color: var(--bg-light-old);
         &::before {
           content: "[open]";
         }

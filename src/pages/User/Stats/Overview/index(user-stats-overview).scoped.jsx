@@ -10,25 +10,24 @@ import { StatsYearLineChartsScoped } from "./StatsYearLineCharts.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
 import { localizations, queries } from "../../../../collections/collections.js";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
 
 export function StatsMediaOverview() {
   const params = useParams();
 
   const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
   const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
-  let userStatsFetcher, userStatsController;
+  const userStatsController = createCleanUpAbortController();
+  let userStatsFetcher;
   createEffect(() => {
-    userStatsController?.abort();
-    userStatsController = new AbortController();
+    const signal = userStatsController.abortAndRenew();
 
-    if (params.type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStats, { name: params.name }, userStatsController.signal);
-    if (params.type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaStats, { name: params.name }, userStatsController.signal);
+    if (params.type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStats, { name: params.name }, signal);
+    if (params.type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaStats, { name: params.name }, signal);
 
     sendAnilistFetcher(userStatsFetcher, {
       name: "Anilist user stats",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
-      },
+      onFetch: () => userStatsController.disable(),
       onStart: startUserStatsTimer,
       onStop: stopUserStatsTimer,
       setValue: (res, { fetcher: f }) => {

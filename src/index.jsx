@@ -6,7 +6,6 @@ import { Home } from "./pages/Home/index(home).scoped.jsx"
 import Authentication from "./pages/Authentication/Authentication.jsx";
 import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./context/ResponsiveContext";
-import { RedirectSearchHeaders, SearchBar, SearchContent } from "./pages/Search/index(search).scoped.jsx";
 import { User } from "./pages/User/index(user).scoped.jsx";
 import { StatsMediaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
 import { StatsMediaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
@@ -14,30 +13,27 @@ import { StatsMediaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
 import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
 import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
 import { StatsMediaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
-import Artist from "./pages/Artist/Artist.jsx";
-import Notifications from "./pages/Notifications/Notifications.jsx";
-import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.jsx";
-import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.jsx";
-import { Studio as AnilistStudio } from "./pages/Studio/index(studio).jsx";
+import Artist from "./pages/Artist/Artist.scoped.jsx";
+import Notifications from "./pages/Notifications/Notifications.scoped.jsx";
+import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.scoped.jsx";
+import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.scoped.jsx";
+import { Studio as AnilistStudio } from "./pages/Studio/index(studio).scoped.jsx";
 import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
-import { BrowseRedirect } from "./pages/Browse/Browse.scoped.jsx";
-import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.jsx";
-import ComparePage from "./pages/Compare/ComparePage.jsx";
+import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.scoped.jsx";
+import ComparePage from "./pages/Compare/ComparePage.scoped.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/MediaPageJikan/MediaInfoJikan.scoped.jsx";
-import "./libs/tooltips.js";
 import { MediaInfoCharactersJikan } from "./pages/MediaPageJikan/MediaInfoCharactersJikan.jsx";
 import { MediaInfoStaffJikan } from "./pages/MediaPageJikan/MediaInfoStaffJikan.jsx";
 import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikan.scoped.jsx";
-import { Overview } from "./pages/User/Overview/Overview.jsx";
+import { Overview } from "./pages/User/Overview/Overview.scoped.jsx";
 import { UserMediaList } from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
 import { IndexFavouriteScoped } from "./pages/User/Favourites/index(favourite).scoped.jsx";
 import { Stats } from "./pages/User/Stats/index(user-stats).scoped.jsx";
 import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/MediaPageAnilist/index(media-page-anilist).scoped.jsx";
 import { Socials } from "./pages/User/Socials/Socials.scoped.jsx";
-import { BrowseMangaHomeScoped } from "./pages/Browse/BrowseMangaHome.scoped.jsx";
-import { BrowseAnimeHome } from "./pages/Browse/BrowseAnimeHome.scoped.jsx";
-import { BrowseMediaHomeScoped } from "./pages/Browse/BrowseMediaHome.scoped.jsx";
 import { SettingsPage } from "./pages/Settings/index(settings).scoped";
+import { SearchPage } from "./pages/Search/index(search2).scoped";
+import { UserRelations } from "./pages/User/Relations/index-(user-relations).scoped";
 
 const root = document.getElementById("root")
 
@@ -47,21 +43,21 @@ const idFilter = {
 const animeSearch = {
   type: "anime",
   header: (string) => {
-    if (string.match(/^(summer|fall|spring|winter)-\d+$/)) {
+    if (/^(summer|fall|spring|winter)-\d+$/.test(string)) {
       return true;
     }
 
-    return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top-100"].includes(string);
+    return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top"].includes(string);
   }
 }
 const mangaSearch = {
   type: "manga",
-  header: ["finished", "finished-manga", "tba", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top-100"],
+  header: ["finished", "finished-manga", "tba", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top"],
 }
 
 const bothSearch = {
   type: "media",
-  header: ["finished", "trending", "popular", "top-100", "tba"],
+  header: ["finished", "trending", "popular", "top", "tba"],
 }
 
 render(
@@ -69,7 +65,7 @@ render(
     <AuthenticationProvider>
       <ResponsiveProvider>
         <EditMediaEntriesProvider>
-          <Router root={App} base="/legendary-octo-barnacle">
+          <Router root={App} base={__BASE__}>
             <Route path="/" component={Home} />
             <Route path="/authentication" component={Authentication} />
             <Route path="/notifications" component={Notifications} />
@@ -81,21 +77,26 @@ render(
               <Route path="/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} />
               <Route path="*" component={() => <Navigate href="/compare" />} />
             </Route>
-            <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}>
-              <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}>
-                <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHomeScoped} />
-                <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} />
-                <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHomeScoped} />
-              </Route>
-              <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}>
-                <Route path="/" component={() => <Navigate href="media" />} />
-                <Route path="/:type" matchFilters={{ type: ["anime", "manga", "media"] }}>
-                  <Route path="/:header?" matchFilters={animeSearch} />
-                  <Route path="/:header?" matchFilters={mangaSearch} />
-                  <Route path="/:header?" matchFilters={bothSearch} />
-                  <Route path="/:header?" component={RedirectSearchHeaders} />
-                </Route>
-              </Route>
+            {/* <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}> */}
+            {/*   <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}> */}
+            {/*     <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHomeScoped} /> */}
+            {/*     <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} /> */}
+            {/*     <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHomeScoped} /> */}
+            {/*   </Route> */}
+            {/*   <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}> */}
+            {/*     <Route path="/" component={() => <Navigate href="media" />} /> */}
+            {/*     <Route path="/:type" matchFilters={{ type: ["anime", "manga", "media"] }}> */}
+            {/*       <Route path="/:header?" matchFilters={animeSearch} /> */}
+            {/*       <Route path="/:header?" matchFilters={mangaSearch} /> */}
+            {/*       <Route path="/:header?" matchFilters={bothSearch} /> */}
+            {/*       <Route path="/:header?" component={RedirectSearchHeaders} /> */}
+            {/*     </Route> */}
+            {/*   </Route> */}
+            {/* </Route> */}
+            <Route path="/:api/:mode/:type" matchFilters={{ api: ["ani", "mal"], mode: ["browse", "search"], type: ["anime", "manga", "media"] }} component={SearchPage}>
+              <Route path="/:header?" matchFilters={animeSearch} />
+              <Route path="/:header?" matchFilters={mangaSearch} />
+              <Route path="/:header?" matchFilters={bothSearch} />
             </Route>
             <Route path="/artist/:name" component={Artist} />
             <Route path="/:api">
@@ -111,6 +112,7 @@ render(
               </Route>
             </Route>
             <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, type: ["anime", "manga"] }} component={MediaPageRedirect} />
+
             <Route path="/:api">
               <Route path="/:type/:id/:name?" matchFilters={{ ...idFilter, api: "ani" }} component={MediaInfoContent}>
                 <Route path="/" matchFilters={{ type: ["anime", "manga"] }} component={MediaInfoHome} />
@@ -131,26 +133,40 @@ render(
                 </Route>
               </Route>
             </Route>
+
+            {/* User profile page */}
             <Route path="/user/:name" component={User}>
+              {/* Default to user overview page */}
               <Route path="/" component={Overview} />
-              <Route path="/:type/:list?" matchFilters={{ type: "anime" }} component={UserMediaList} />
-              <Route path="/:type/:list?" matchFilters={{ type: "manga" }} component={UserMediaList} />
-              <Route path="/favourites" component={IndexFavouriteScoped} />
-              <Route path="/stats" component={Stats}>
-                <Route path="/" component={() => <Navigate href="anime" />} />
-                <Route path="/:type" matchFilters={{ type: ["anime", "manga"] }}>
+
+              {/* All pages that can change content based on media type */}
+              <Route path="/:type" matchFilters={{ type: [ "anime", "manga" ] }}>
+
+                {/* Default to list view */}
+                <Route path="/" component={() => <Navigate href="list" />} />
+                <Route path="/list/:list?" component={UserMediaList} />
+                <Route path="/relations" component={UserRelations} />
+
+                {/* User stats page */}
+                <Route path="/stats" component={Stats}>
+                  {/* Default to stats overview page */}
                   <Route path="/" component={() => <Navigate href="overview" />} />
+
                   <Route path="/overview" component={StatsMediaOverview} />
                   <Route path="/genres" component={StatsMediaGenres} />
                   <Route path="/tags" component={StatsMediaTags} />
                   <Route path="/staff" component={StatsMediaStaff} />
+
+                  {/* Mangas don't have studios or voice actors */}
+                  <Route path="/studios" matchFilters={{ type: "anime" }} component={StatsAnimeStudios} />
+                  <Route path="/voice-actors" matchFilters={{ type: "anime" }} component={StatsAnimeVoiceActors} />
+
                 </Route>
-                <Route path="/:type" matchFilters={{ type: "anime" }}>
-                  <Route path="/studios" component={StatsAnimeStudios} />
-                  <Route path="/voice-actors" component={StatsAnimeVoiceActors} />
-                </Route>
+
               </Route>
+              <Route path="/favourites" component={IndexFavouriteScoped} />
               <Route path="/socials" component={Socials} />
+
             </Route>
             <Route path="*404" component={() => <div>Not fould 404</div>} />
           </Router>

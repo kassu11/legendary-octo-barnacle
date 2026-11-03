@@ -6,14 +6,15 @@ import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { getDates } from "../../utils/dates.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { queries } from "../../collections/collections.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function BrowseMediaHomeScoped() {
   const [browseTime, startBrowseTimer, stopBrowseTimer] = createTimer();
   const [browseData, setBrowseData] = createSignal(undefined, { equals: false });
-  let browseFetcher, browseController;
+  const browseController = createCleanUpAbortController();
+  let browseFetcher;
   createEffect(() => {
-    browseController?.abort();
-    browseController = new AbortController();
+    const signal = browseController.abortAndRenew();
 
     const dates = getDates();
     browseFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {
@@ -22,13 +23,11 @@ export function BrowseMediaHomeScoped() {
       "seasonYear": dates.seasonYear,
       "nextSeason": dates.nextSeason,
       "nextYear": dates.nextYear,
-    }, browseController.signal);
+    }, signal);
 
     sendAnilistFetcher(browseFetcher, {
       name: "Anilist browse manga",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === browseFetcher.cacheKey) browseController = null;
-      },
+      onFetch: () => browseController.disable(),
       onStart: startBrowseTimer,
       onStop: stopBrowseTimer,
       setValue: (res, { fetcher: f }) => {
@@ -44,12 +43,12 @@ export function BrowseMediaHomeScoped() {
     <p>{formatMSToString(browseTime())}</p>
     <Show when={browseData()}>
       <div class="browse-content">
-        <HorizontalCardRowScoped data={browseData().data.data.trending.media} href="/search/media/trending" title="Trending anime and manga"/>
-        <HorizontalCardRowScoped data={browseData().data.data.newAnime.media} href="/search/anime/new" title="Newly added anime"/>
-        <HorizontalCardRowScoped data={browseData().data.data.newManga.media} href="/search/manga/new" title="Newly added manga"/>
-        <HorizontalCardRowScoped data={browseData().data.data.finishedAnime.media} href="/search/anime/finished" title="Recently finished anime"/>
-        <HorizontalCardRowScoped data={browseData().data.data.finishedManga.media} href="/search/manga/finished" title="Recently finished manga"/>
-        <VerticalCardRowScoped data={browseData().data.data.top.media} type="media" href="/search/media/top-100" title="Top 100 anime and manga" />
+        <HorizontalCardRowScoped data={browseData().data.data.trending.media} href="/ani/search/media/trending" title="Trending anime and manga"/>
+        <HorizontalCardRowScoped data={browseData().data.data.newAnime.media} href="/ani/search/anime/new" title="Newly added anime"/>
+        <HorizontalCardRowScoped data={browseData().data.data.newManga.media} href="/ani/search/manga/new" title="Newly added manga"/>
+        <HorizontalCardRowScoped data={browseData().data.data.finishedAnime.media} href="/ani/search/anime/finished" title="Recently finished anime"/>
+        <HorizontalCardRowScoped data={browseData().data.data.finishedManga.media} href="/ani/search/manga/finished" title="Recently finished manga"/>
+        <VerticalCardRowScoped data={browseData().data.data.top.media} type="media" href="/ani/search/media/top-100" title="Top 100 anime and manga" />
       </div>
     </Show>
     </>

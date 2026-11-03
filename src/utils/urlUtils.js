@@ -1,5 +1,7 @@
-import { asserts } from "../collections/collections";
-import { formatingUtils } from "./utils";
+import { useNavigate } from "@solidjs/router";
+import { isTypeInteger, isTypeString } from "../collections/types";
+import { arrayUtils, formatingUtils } from "./utils";
+import { isTypeFunction } from "./functionUtils";
 
 export const jikanMediaUrl= (type, card) => {
   return "/mal/" + type + "/" + card.mal_id + "/" + formatingUtils.titleToUrl(card.title);
@@ -10,10 +12,13 @@ export const jikanCharacterUrl= character => {
 }
 
 export const anilistMediaUrl = media => {
-  asserts.isTypeStringOLD(media.type, "Media type");
-  asserts.isTypeInteger(media.id, "Media id");
+  let base;
 
-  const base = "/ani/" + media.type.toLowerCase() + "/" + media.id;
+  if (isTypeInteger(media?.id) && isTypeString(media?.type)) {
+    base = "/ani/" + media.type.toLowerCase() + "/" + media.id;
+  } else {
+    return "";
+  }
 
   if (!media.title.userPreferred) {
     return base;
@@ -32,4 +37,48 @@ export const anilistClientId = () => {
   }
 
   return -1;
+}
+
+// Sometimes you need to navigate and change search params at the same time, so this helpers combines both
+export function useNavigateAndSearch() {
+  const navigate = useNavigate();
+
+  return (url, query = {}, options) => {
+    if (isTypeFunction(url)) url = url(window.location.pathname.split(__BASE__)[1]);
+
+    // Add missing url
+    url ??= window.location.pathname;
+    // Modify the url to relative url, if not
+    if (url.includes(__BASE__)) url = url.split(__BASE__)[1];
+
+    url = url.replace(/\?.*$/, ""); // Remove search from url, if present
+    url = url.replace(/\/$/, ""); // Trim trailing "/" at the end
+
+    let search = window.location.search;
+    Object.entries(query).forEach(([key, value]) => {
+      // 1. Remove all old keys from search
+      const re = new RegExp(`(\\?|&)${key}[^&]*`, "g");
+      search = search.replace(re, "");
+
+      // 2. Make sure search starts with ?
+      if (search[0] !== "?") {
+        search = "?" + search.substring(1);
+      }
+
+
+      if (value == undefined) return;
+
+      // 3. Make sure line ends with &
+      if (search.length > 1 && search.at(-1) != "&") {
+        search += "&";
+      }
+
+      search += arrayUtils.wrapToArray(value).map(v => `${key}=${v}`).join("&");
+
+    });
+
+    if (search.length > 1) navigate(url + search, options);
+    else navigate(url, options);
+
+  }
 }

@@ -1,0 +1,32 @@
+.cp-toggle-favourite-button {
+  display: flex;
+  background-color: var(--background-400-old);
+  border-radius: .5rem;
+  align-items: center;
+  gap: 1.5rem;
+  padding: .75rem;
+  cursor: pointer;
+  justify-content: center;
+
+  .svg-heart {
+    height: 2.25rem;
+  }
+
+  input {
+    all: unset;
+    position: absolute;
+
+    &:checked + svg {
+      color: var(--crimson-400);
+      filter: drop-shadow(0px 0px 5px currentColor);
+    }
+  }
+
+  .flex-no-shrink {
+    gap: 2rem;
+
+    svg {
+      height: 1rem;
+    }
+  }
+}

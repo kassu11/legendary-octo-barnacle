@@ -9,6 +9,16 @@ export function getSessionStorageJson(key, defaultValue) {
   return safeParseJson(data, defaultValue);
 }
 
+export function getOrInsertSessionStorageInt(key, defaultValue) {
+  const data = +get(key);
+  if (!data) {
+    set(key, defaultValue);
+    return defaultValue;
+  }
+
+  return data;
+}
+
 export function setSessionStorageJson(key, value, defaultValue) {
   set(key, safeStringifyJson(value, defaultValue));
 }
@@ -18,7 +28,9 @@ function set(key, value) {
     sessionStorage.setItem(key, value);
   } catch {
     // Probably hit session storage limit, so lets clean sessionStorage
+    const sessionTime = get("LOB-session-time"); // We don't want to ever clear sessionTime, so lets keep it in memory
     sessionStorage.clear();
+    sessionStorage.setItem("LOB-session-time", sessionTime);
     sessionStorage.setItem(key, value);
   }
 }

@@ -1,0 +1,47 @@
+@layer layout {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-inline: 64px;
+
+    @media (width < 40em) {
+      padding-inline: 16px;
+    }
+
+    > * {
+      /* Firefox will line wrap h2, if this is not given idk why */
+      flex-grow: 1;
+    }
+
+    _.view-all {
+      color: var(--text-muted);
+      font-weight: 500;
+      text-decoration: none;
+      background-color: var(--bg);
+      padding: 4px 16px;
+      border-radius: 8px;
+      display: flex;
+      place-items: center;
+      gap: 8px;
+      transition: .2s all;
+
+      &:hover {
+        background-color: var(--bg-light);
+        color: var(--text);
+
+        _svg {
+          translate: 4px 1px;
+        }
+      }
+
+      _svg {
+        translate: 0 1px;
+        transition: .2s translate;
+        height: 100%;
+        width: 10px;
+      }
+    }
+  }
+}
+

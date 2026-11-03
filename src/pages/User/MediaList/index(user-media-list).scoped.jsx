@@ -14,6 +14,7 @@ import { isTypeFunction } from "../../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
 import { authUserData } from "../../../core/globalState";
+import { createCleanUpAbortController } from "../../../utils/abortUtils";
 
 export const useListNavigation = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export const useListNavigation = () => {
   const params = useParams();
 
   return listName => {
-    navigate(`/user/${user().name}/${params.type}${listName ? "/" + listName : ""}${location.search}`, { replace: true });
+    navigate(`/user/${user().name}/${params.type}/list${listName ? "/" + listName : ""}${location.search}`, { replace: true });
   }
 }
 
@@ -31,23 +32,21 @@ export function UserMediaList() {
   const name = createMemo(() => user().name);
   const [userMediaTime, startUserMediaTimer, stopUserMediaTimer] = createTimer();
   const [userMediaData, setUserMediaData] = createSignal(undefined, { equals: false });
-  let userMediaFetcher, userMediaController;
+  const userMediaController = createCleanUpAbortController();
+  let userMediaFetcher;
   createEffect(() => {
-    userMediaController?.abort();
-    userMediaController = new AbortController();
+    const signal = userMediaController.abortAndRenew();
 
     const userName = name();
     const type = params.type.toUpperCase();
 
     if (!userName || !type) return;
 
-    userMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, userMediaController.signal);
+    userMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, signal);
 
     sendAnilistFetcher(userMediaFetcher, {
       name: "Anilist user media page",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userMediaFetcher.cacheKey) userMediaController = null;
-      },
+      onFetch: () => userMediaController.disable(),
       onStart: startUserMediaTimer,
       onStop: stopUserMediaTimer,
       setValue: (res, { fetcher: f }) => {

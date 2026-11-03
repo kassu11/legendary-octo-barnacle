@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "@solidjs/router";
-import { setAccessToken } from "../../core/globalState.js";
+import { storeAccessToken } from "../../core/globalState.js";
 
 function Authentication() {
   const location = useLocation();
@@ -9,7 +9,7 @@ function Authentication() {
   const expires = +search.get("expires_in") || 356 * 24 * 60 * 60;
 
   if (token?.length > 50) {
-    setAccessToken(token, expires);
+    storeAccessToken(token, expires);
   }
 
   document.title = "Authentication - LOB";

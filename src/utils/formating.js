@@ -84,16 +84,17 @@ export const formatMediaFormat = text => {
     case "TV":
       return text;
     case "DOUJIN":
-    case "LIGHTNOVEL":
     case "MANGA":
     case "MANHUA":
     case "MANHWA":
     case "MOVIE":
     case "MUSIC":
-    case "NOVEL":
     case "ONE-SHOT":
     case "SPECIAL":
       return capitalize(text);
+    case "LIGHTNOVEL":
+    case "NOVEL":
+      return "Light Novel";
     case "ONE_SHOT":
       return "One-shot"
     case "TV_SHORT":
@@ -101,7 +102,6 @@ export const formatMediaFormat = text => {
     case "TV_SPECIAL":
       return "TV special";
     default:
-      console.error("Unknown media format");
       return text;
   }
 }
@@ -169,9 +169,7 @@ export const mediaUrl = (media) => {
 }
 
 export const formatAnilistDate = (dateObject) => {
-  asserts.assertTrueOLD("year" in dateObject, "No year found");
-  asserts.assertTrueOLD("month" in dateObject, "No month found");
-  asserts.assertTrueOLD("day" in dateObject, "No day found");
+  if (!dateObject) return "";
 
   if (!dateObject.year && !dateObject.month && !dateObject.day) {
     return "";

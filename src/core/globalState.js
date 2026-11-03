@@ -1,11 +1,14 @@
 import { batch, createMemo, createRoot, createSignal, untrack } from "solid-js";
 import { createLocalStorageBooleanSignal, createLocalStorageJsonSignal } from "../utils/localStorageUtils";
 import { deleteIndexDBValue, setIndexedDBValue } from "../utils/indexedDButils";
-import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal } from "../utils/sessionStorageUtils";
+import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal, getOrInsertSessionStorageInt } from "../utils/sessionStorageUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "../utils/fetcherUtils";
 import { queries } from "../collections/collections";
 import { setFetcherValueToStorage } from "../utils/storageUtils";
 import { createStore } from "solid-js/store";
+
+export const tabTime = new Date().getTime();
+export const sessionTime = getOrInsertSessionStorageInt(new Date().getTime());
 
 export const [mediaWithMalId, storeMediaWithMalId] = createStore({});
 
@@ -16,6 +19,8 @@ export const [token2, setToken2] = createOneTimeSessionStorageSignal("LOB-token"
 export const authedUserId = createRoot(() => createMemo(() => authUserData()?.data.id));
 export const [mainLoadingCount, setMainLoadingCount] = createSignal(0);
 
+export const [searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-seasons-by-format", true);
+export const [searchPageGroupTBAEntriesByFormat, setSearchPageGroupTBAEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-tba-by-format", false);
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 
 export const logoutUser = () => {
@@ -26,9 +31,11 @@ export const logoutUser = () => {
   });
 };
 
-export const setAccessToken = async (token, expires) => {
+export const [globalEditedMedia, storeGlobalEditedMedia] = createStore({});
+
+export const storeAccessToken = async (token, expires) => {
   setToken2(token || null);
-  const fetcher = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
+  const fetcher = createAnilistFetcher(queries.currentUser, {});
   sendAnilistFetcher(fetcher, {
     name: "AniList authed user",
     setValue: async (res) => {
@@ -44,7 +51,7 @@ export const setAccessToken = async (token, expires) => {
 
       // Because new token is now linked, if we generate the same fetcher, the token should be swapped with id
       // Store the user data to this tokenless cacheKey
-      const fetcherWithoutToken = createAnilistFetcher(queries.currentUser, {}, new AbortController().signal);
+      const fetcherWithoutToken = createAnilistFetcher(queries.currentUser, {});
       res.cacheKey = fetcherWithoutToken.cacheKey;
       setFetcherValueToStorage(res);
 

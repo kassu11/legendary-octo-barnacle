@@ -1,0 +1,67 @@
+import { useSearchParams } from "@solidjs/router";
+import { createMemo } from "solid-js";
+import { useParsedSearchParams } from "../../../context/providers.js";
+import { arrayUtils } from "../../../utils/utils.js";
+import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { SourceIcon } from "../../../assets/SearchFilterIcons.jsx";
+import { Checkbox } from "../Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
+
+export function MediaSourceSelect() {
+  const parsedSearchParams = useParsedSearchParams();
+  const [, setSearchParams] = useSearchParams();
+  const navigate = useNavigateAndSearch();
+
+  const sourceOptions = [
+    { description: "Anime",              id: "anime"              },
+    { description: "Comic",              id: "comic"              },
+    { description: "Doujinshi",          id: "doujinshi"          },
+    { description: "Game",               id: "game"               },
+    { description: "Light Novel",        id: "light_novel"        },
+    { description: "Live Action",        id: "live_action"        },
+    { description: "Manga",              id: "manga"              },
+    { description: "Multimedia Project", id: "multimedia_project" },
+    { description: "Novel",              id: "novel"              },
+    { description: "Original",           id: "original"           },
+    { description: "Other",              id: "other"              },
+    { description: "Picture Book",       id: "picture_book"       },
+    { description: "Video Game",         id: "video_game"         },
+    { description: "Visual Novel",       id: "visual_novel"       },
+    { description: "Web Novel",          id: "web_novel"          },
+  ];
+
+  const sourceValues = createMemo(() => {
+    return arrayUtils.wrapToArray(parsedSearchParams().source).map(id => ({ id, value: true }));
+  });
+
+  const handleChange = e => {
+
+    if (e.oldUrl) return navigate(e.oldUrl);
+    if (!e.target) return;
+
+    const newActiveValues = [...sourceValues()];
+    const index = newActiveValues.findIndex(val => val.id === e.target);
+
+    if (index == -1) {
+      newActiveValues.push({ id: e.target, value: true });
+    } else {
+      newActiveValues.splice(index, 1);
+    }
+
+    setSearchParams({ source: newActiveValues.map(e => e.id) }, { replace: true });
+
+  };
+
+  return (
+    <MultiSelect tooltip="The original material the media was adapted from" each={sourceOptions} value={sourceValues()} onChange={handleChange} icon={<SourceIcon />} button="Source">{entry => {
+      return (
+        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
+          <Checkbox checked={entry.value} />
+          <p>{entry.description}</p>
+        </MediaSelectItem>
+      );
+    }}</MultiSelect>
+  );
+}
+

@@ -1,14 +1,15 @@
 import { createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
-import { LoaderCircle } from "../../components/LoaderCircle.jsx";
-import { Tooltip } from "../../components/Tooltips.jsx";
-import { ActivityCard } from "../../components/Activity.jsx";
+import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
+import { Tooltip } from "../../components/Tooltip.scoped";
+import { ActivityCard } from "../../components/Activity.scoped.jsx";
 import { asserts, queries } from "../../collections/collections.js";
 import "./ActivityPage.scoped.css";
 import { arrayUtils, scheduleUtils } from "../../utils/utils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function HomePageActivityReelContent(props) {
   const [loading, setLoading] = createSignal(false);
@@ -23,17 +24,16 @@ export function HomePageActivityReelContent(props) {
   const freshActivityIDs = new Set();
   const triggerPage = leadingAndTrailing(debounce, num => !loading() && setPage(num), 1000);
 
-  let controller;
+  const controller = createCleanUpAbortController();
   let missedNewPageFetches = 0;
   createEffect(() => {
     const p = page();
     if (!p || props.isDebug()) return;
 
-    controller?.abort();
-    controller = new AbortController();
+    const signal = controller.abortAndRenew();
 
     const pagelessFetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: "pageless" });
-    const fetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: p }, controller.signal);
+    const fetcher = createAnilistFetcher(queries.anilistActivity, { ...props.variables, page: p }, signal);
 
     sendAnilistFetcher(fetcher, {
       name: "Activity feed",
@@ -43,6 +43,7 @@ export function HomePageActivityReelContent(props) {
         setLoading(true);
         startTimer(time);
       },
+      onFetch: () => controller.disable(),
       onStop: time => {
         setLoading(false);
         stopTimer(time);
@@ -142,8 +143,8 @@ export function HomePageActivityReelContent(props) {
   return (
     <>
       <Show when={loading() && page() === 1}>
-        <LoaderCircle class="refresh">
-          <Tooltip tipPosition="bottom">
+        <LoaderCircle scoped class="spinner refresh">
+          <Tooltip placements={["bottom", "top"]}>
             <Show when={props.cache.length === 0} fallback="Fetching fresh activities">
               Loading activities
             </Show>
@@ -166,8 +167,8 @@ export function HomePageActivityReelContent(props) {
       </ol>
       <Switch>
         <Match when={loading() && page() > maxPage && props.cache.length}>
-          <LoaderCircle class="new">
-            <Tooltip tipPosition="bottom">Loading activities</Tooltip>
+          <LoaderCircle scoped class="spinner new">
+            <Tooltip placements={["bottom", "top"]}>Loading activities</Tooltip>
           </LoaderCircle>
         </Match>
         <Match when={!allowPageFetches() && props.cache.length}>

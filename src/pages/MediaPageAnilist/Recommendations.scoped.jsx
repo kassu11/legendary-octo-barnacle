@@ -8,6 +8,7 @@ import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../
 import { addApplicationNotification } from "../App/ApplicationNotifications.scoped";
 import { Intersection } from "../../components/utils/Intersection.scoped";
 import { setFetcherValueToStorage } from "../../utils/storageUtils";
+import { createCleanUpAbortController } from "../../utils/abortUtils";
 
 export function Recommendations(props) {
   const params = useParams();
@@ -53,21 +54,19 @@ function RecommendationsPage(props) {
   const [id, setId] = createSignal(undefined)
   const [anilistRecommendationsLoading, setAnilistRecommendationsLoading] = createSignal(false);
   const [anilistRecommendationsData, setAnilistRecommendationsData] = createSignal(undefined, { equals: false });
-  let anilistRecommendationsFetcher, anilistRecommendationsController;
+  const anilistRecommendationsController = createCleanUpAbortController();
+  let anilistRecommendationsFetcher;
   createEffect(() => {
-    anilistRecommendationsController?.abort();
-    anilistRecommendationsController = new AbortController();
+    const signal = anilistRecommendationsController.abortAndRenew();
 
     const i = id();
     if (!i) return;
 
-    anilistRecommendationsFetcher = createAnilistFetcher(queries.anilistRecommendationsById, { id: i, page: props.page }, anilistRecommendationsController.signal);
+    anilistRecommendationsFetcher = createAnilistFetcher(queries.anilistRecommendationsById, { id: i, page: props.page }, signal);
 
     sendAnilistFetcher(anilistRecommendationsFetcher, {
       name: "Anilist recommendations",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === anilistRecommendationsFetcher.cacheKey) anilistRecommendationsController = null;
-      },
+      onFetch: () => anilistRecommendationsController.disable(),
       onStart: () => setAnilistRecommendationsLoading(true),
       onStop: () => setAnilistRecommendationsLoading(false),
       setValue: (res, { fetcher: f }) => {

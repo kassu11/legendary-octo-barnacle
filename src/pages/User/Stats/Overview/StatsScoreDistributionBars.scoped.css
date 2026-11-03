@@ -1,6 +1,6 @@
 @layer layout {
   section {
-    background-color: var(--background-400);
+    background-color: var(--background-400-old);
 
     ol {
       display: flex;

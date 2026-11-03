@@ -1,3 +1,5 @@
+import { fuse } from "../utils/stringUtils.js";
+
 onmessage = ({ data: { includeKeys, excludeKeys, data, ...filtering } }) => {
   const entries = {}
   for (const entry of Object.values(data)) {
@@ -20,16 +22,7 @@ onmessage = ({ data: { includeKeys, excludeKeys, data, ...filtering } }) => {
 }
 
 function includeCompareList(listData, entries, filterObject) {
-  if (filterObject.search) {
-    filterObject.search = filterObject.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&");
-    if (filterObject.search.trim() === "") {
-      filterObject.searchRegex = new RegExp(filterObject.search, "i");
-    } else if(filterObject.search.match(/\W/)) {
-      filterObject.searchRegex = new RegExp(filterObject.search.replace(/ +/g, "\\W"), "i");
-    } else {
-      filterObject.searchRegex = new RegExp(filterObject.search.split("").join("\\W?"), "i");
-    }
-  }
+  filterObject.searchRegex = fuse(filterObject.search);
 
   listData.lists.forEach((list) => {
     list.entries.forEach((entry) => {
@@ -55,6 +48,7 @@ function excludeCompareList(listData, entries) {
 }
 
 function formatCompareList(entries, minUserCount, filterObject) {
+  const tagsSet = new Set();
   entries = Object.values(entries).filter(entry => {
     if (entry.exclude) {
       return false;
@@ -71,7 +65,10 @@ function formatCompareList(entries, minUserCount, filterObject) {
       }
       repeatTotal += v.repeat;
       entry.updatedAt = Math.max(entry.updatedAt ?? v.updatedAt, v.updatedAt);
-      entry.completedAt = Math.max(entry.completedAt ?? v.completedAt, v.completedAt);
+      entry.completedAt ??= v.completedAt?.year && {...v.completedAt};
+      if (entry.completedAt?.year < v.completedAt?.year) entry.completedAt = { ...v.completedAt };
+      else if (entry.completedAt?.year == v.completedAt?.year && entry.completedAt?.month < v.completedAt?.month) entry.completedAt = { ...v.completedAt };
+      else if (entry.completedAt?.year == v.completedAt?.year && entry.completedAt?.month == v.completedAt?.month && entry.completedAt?.day == v.completedAt?.day) entry.completedAt = { ...v.completedAt };
     });
 
     entry.score = scoreTotal / scoreCount;
@@ -82,13 +79,25 @@ function formatCompareList(entries, minUserCount, filterObject) {
       return false;
     }
 
-    return entry.mediaEntries.length >= minUserCount;
+    if (entry.mediaEntries.length < minUserCount) {
+      return false;
+    }
+
+    for (const tag of entry.tags) {
+      if (tag.rank > 50) {
+        tagsSet.add(tag.name);
+      } else {
+        break;
+      }
+    }
+
+    return true;
   });
 
   const sortFunction = generateSortFunction(filterObject.sort, filterObject.reverse ? -1 : 1);
   entries.sort(sortFunction);
 
-  postMessage(entries);
+  postMessage({ entries: entries, tags: [...tagsSet].sort() });
 }
 
 function generateSortFunction(sort, direction = 1) {
@@ -173,6 +182,21 @@ function filter(entry, filterObject) {
   if (filterObject.missingScore === false && entry.score === 0) {
     return false;
   }
-
+  if (filterObject.studio) studio: {
+    for (const studio of entry.media.studios.edges) {
+      if (studio.isMain && studio.node.name === filterObject.studio) {
+        break studio;
+      }
+    }
+    return false;
+  }
+  if (filterObject.tag) tag: {
+    for (const tag of entry.media.tags) {
+      if (tag.rank > 50 && tag.name=== filterObject.tag) {
+        break tag;
+      }
+    }
+    return false;
+  }
   return true;
 }

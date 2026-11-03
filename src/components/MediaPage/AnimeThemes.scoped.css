@@ -1,0 +1,33 @@
+.theme-container {
+  background-color: var(--background-400-old);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 4rem 1fr auto;
+  gap: .5rem;
+}
+
+.details {
+  display: flex;
+  gap: .5rem;
+}
+
+.play-button-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: auto;
+  gap: .5rem;
+}
+
+.play-button {
+  background-color: var(--background-600-old);
+  padding: .25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.spoiler {
+  background-color: red;
+}

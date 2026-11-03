@@ -8,26 +8,25 @@ import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
 import "./Tags.scoped.css";
 import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
 
 export function StatsMediaTags() {
   const params = useParams();
 
   const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
   const [userStatsData, setUserStatsData] = createSignal(undefined, { equals: false });
-  let userStatsFetcher, userStatsController;
+  const userStatsController = createCleanUpAbortController();
+  let userStatsFetcher;
   createEffect(() => {
-    userStatsController?.abort();
-    userStatsController = new AbortController();
+    const signal = userStatsController.abortAndRenew();
     const { type } = params;
 
-    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeTags, { name: params.name }, userStatsController.signal);
-    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaTags, { name: params.name }, userStatsController.signal);
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeTags, { name: params.name }, signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaTags, { name: params.name }, signal);
 
     sendAnilistFetcher(userStatsFetcher, {
       name: "Anilist user tag stats",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userStatsFetcher.cacheKey) userStatsController = null;
-      },
+      onFetch: () => userStatsController.disable(),
       onStart: startUserStatsTimer,
       onStop: stopUserStatsTimer,
       setValue: (res, { fetcher: f }) => {
@@ -53,20 +52,18 @@ function StatsTags(props) {
   const [state, setState] = createSignal("count");
   const [store, setStore] = createStore({});
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const ids = [...mediaIds()];
     if (!ids.length) return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {
@@ -106,7 +103,7 @@ function StatsTags(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/search/" + params.type + "?onList=false&tag=" + genre.tag.name}>
+                  <A href={"/ani/search/" + params.type + "?onList=false&theme=" + genre.tag.name}>
                     {genre.tag.name}
                   </A>
                 </h2>
@@ -142,7 +139,7 @@ function StatsTags(props) {
             <div class="wrapper tags">
               <div className="flex-space-between">
                 <p>User {params.type}</p>
-                <A href={"/user/" + user().name + "/" + params.type + "?tag=" + genre.tag.name}>Show all</A>
+                <A href={"/user/" + user().name + "/" + params.type + "/list?theme=" + genre.tag.name}>Show all</A>
               </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>
@@ -157,20 +154,18 @@ function Cards(props) {
   const params = useParams();
   const [mediaIds, setMediaIds] = createSignal(new Set());
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const ids = [...mediaIds()];
     if (!ids.length) return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {

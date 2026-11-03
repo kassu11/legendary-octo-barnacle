@@ -1,0 +1,31 @@
+@layer component {
+  div {
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 8px;
+    font-weight: 400;
+    word-break: break-word;
+
+    &.hovered, &:hover {
+      background-color: var(--bg);
+      filter: brightness(1.25);
+    }
+
+    &.active {
+      background-color: var(--bg-light);
+    }
+
+    &.hidden {
+      display: none;
+    }
+  }
+
+  .tooltip-title {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--text);
+    font-weight: 700;
+  }
+}

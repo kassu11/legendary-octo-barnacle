@@ -8,6 +8,9 @@ import { queries, timeCollection } from "../../collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
 import { assertTypeInteger } from "../../collections/asserts.js";
 import { mergeObjects } from "../../utils/objectUtils.js";
+import { createHover, HoverPortal, placeFirstFit } from "../../hooks/createHover";
+
+const placeCardHover = placeFirstFit({ placements: ["right-start", "left-start", "bottom"] });
 
 function nextAiringEpisode(nextAiringEpisodeObject) {
   if (!nextAiringEpisodeObject?.episode) {
@@ -85,8 +88,19 @@ export function CurrentCardScoped(props) {
   const gapPercent = () => Math.min(tiles() / 10, .45);
   const width = () => 1 / (tiles() - gapPercent()) * 100;
 
+  const hover = createHover({
+    place: (card, floating) => {
+      floating.style.setProperty("--card-width", card.offsetWidth + "px");
+      floating.style.setProperty("--card-height", card.offsetHeight + "px");
+      const placement = placeCardHover(card, floating);
+      if (card.dataset.hoverPlacement !== placement) {
+        card.dataset.hoverPlacement = placement;
+      }
+    },
+  });
+
   return (
-    <A href={mediaUrl(props.data.media)} data-tooltip-trigger class="cp-current-card">
+    <A href={mediaUrl(props.data.media)} ref={hover.triggerRef} class="cp-current-card">
       <img src={props.data.media.coverImage.large} alt="Cover." />
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class="cp-current-card-info">
@@ -98,38 +112,42 @@ export function CurrentCardScoped(props) {
         </div>
       </Show>
       <ProgressButton data={props.data} mutateCache={props.mutateCache} progress={progress} setProgress={setProgress} />
-      <div class="hover" data-tooltip-positions="right left middle">
-        <Switch>
-          <Match when={airingEpisode() && isBehind()}>
-            <p>
-              {airingEpisode() - (progress() + 1)} episode
-              {airingEpisode() - (progress() + 1) > 1 && "s"} behind
+      <Show when={hover.isOpen()}>
+        <HoverPortal>
+          <div class="hover" ref={hover.floatingRef}>
+            <Switch>
+              <Match when={airingEpisode() && isBehind()}>
+                <p>
+                  {airingEpisode() - (progress() + 1)} episode
+                  {airingEpisode() - (progress() + 1) > 1 && "s"} behind
+                </p>
+              </Match>
+              <Match when={airingEpisode() == null && props.data.media.episodes - progress() > 0}>
+                <p>
+                  {props.data.media.episodes - progress()} episode
+                  {props.data.media.episodes - progress() > 1 && "s"} left
+                </p>
+              </Match>
+              <Match when={props.data.media.chapters - progress() > 0}>
+                <p>
+                  {props.data.media.chapters - progress()} chapter
+                  {props.data.media.chapters - progress() > 1 && "s"} left
+                </p>
+              </Match>
+            </Switch>
+            <p class="line-clamp">{props.data.media.title.userPreferred}</p>
+            <p class="progress-status">
+              Progress: {progress()}
+              <Show when={props.data.media.episodes}>
+                /{props.data.media.episodes}
+              </Show>
+              <Show when={props.data.media.chapters}>
+                /{props.data.media.chapters}
+              </Show>
             </p>
-          </Match>
-          <Match when={airingEpisode() == null && props.data.media.episodes - progress() > 0}>
-            <p>
-              {props.data.media.episodes - progress()} episode
-              {props.data.media.episodes - progress() > 1 && "s"} left
-            </p>
-          </Match>
-          <Match when={props.data.media.chapters - progress() > 0}>
-            <p>
-              {props.data.media.chapters - progress()} chapter
-              {props.data.media.chapters - progress() > 1 && "s"} left
-            </p>
-          </Match>
-        </Switch>
-        <p class="line-clamp">{props.data.media.title.userPreferred}</p>
-        <p class="progress-status">
-          Progress: {progress()}
-          <Show when={props.data.media.episodes}>
-            /{props.data.media.episodes}
-          </Show>
-          <Show when={props.data.media.chapters}>
-            /{props.data.media.chapters}
-          </Show>
-        </p>
-      </div>
+          </div>
+        </HoverPortal>
+      </Show>
     </A>
   );
 }

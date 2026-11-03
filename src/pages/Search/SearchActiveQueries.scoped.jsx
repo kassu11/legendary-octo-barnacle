@@ -1,0 +1,233 @@
+import { createMemo, For, Show } from "solid-js";
+import { Dynamic } from "solid-js/web";
+import "./SearchActiveQueries.scoped.css";
+import { useParsedSearchParams } from "../../context/providers";
+import { useParams, useSearchParams } from "@solidjs/router";
+import { useNavigateAndSearch } from "../../utils/urlUtils";
+import { arrayUtils, formatingUtils } from "../../utils/utils";
+import { localizeInternalSearchParams } from "../../core/apiTranslations";
+import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "../../assets/SearchFilterIcons";
+import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
+import { usersData } from "./inputs/MediaUsersSelect.scoped";
+
+const invalidateHeader = [
+  { header: "finished",                          params: ["status"] },
+  { header: "finished-manga",                    params: ["status", "format"] },
+  { header: "finished-novel",                    params: ["status", "format"] },
+  { header: "manhwa",                            params: ["format", "country"] },
+  { header: "new",                               params: [] },
+  { header: "next-season",                       params: ["season", "year"] },
+  { header: "novel",                             params: ["format"] },
+  { header: "popular",                           params: [] },
+  { header: "tba",                               params: [] },
+  { header: "this-season",                       params: ["season", "year"] },
+  { header: "top",                               params: [] },
+  { header: "trending",                          params: [] },
+  { header: /^(summer|fall|spring|winter)-\d+$/, params: ["season", "year"] },
+]
+
+const typeIcons = {
+  "01.search": SearchIcon,
+  misc: SortIcon,
+  format: FormatIcon,
+  source: SourceIcon,
+  country: CountryIcon,
+  externalSources: AvailableIcon,
+  themes: GenreIcon,
+  age: AgeIcon,
+  status: StatusIcon,
+  year: YearIcon,
+  yearLesser: YearIcon,
+  yearGreater: YearIcon,
+  season: SeasonIcon,
+  progress: ProgressIcon,
+  progressLesser: ProgressIcon,
+  progressGreater: ProgressIcon,
+  length: LengthIcon,
+  lengthLesser: LengthIcon,
+  lengthGreater: LengthIcon,
+  rank: TagRankIcon,
+  users: UsersIcon,
+  onList: OnListIcon,
+  licensed: LicensedIcon,
+};
+
+export function useActiveSearchQueries() {
+  const parsedSearchParams = useParsedSearchParams();
+  const [searchParams] = useSearchParams();
+  const params = useParams();
+
+  return createMemo(() => {
+
+    const returnValue = [];
+
+    const { q, sort, format, themes, excludedThemes, country, status, age, season, year, yearLesser, yearGreater, source, externalSources, progress, progressLesser, progressGreater, length, lengthLesser, lengthGreater, rank, users, excludedUsers, onList, licensed } = parsedSearchParams();
+
+    const sortObject = arrayUtils.objectFromArrayEntries(sort);
+    if (sortObject["score_plus"     ] || sortObject["score_desc_plus"     ]) returnValue.push({ type: "misc", description: "Must have a score",             query: { sort: sort.map(e => e.includes("score"     ) ? e.replace("_plus", "") : e) } });
+    if (sortObject["progress_plus"  ] || sortObject["progress_desc_plus"  ]) returnValue.push({ type: "misc", description: "Must have known episode count", query: { sort: sort.map(e => e.includes("progress"  ) ? e.replace("_plus", "") : e) } });
+    if (sortObject["duration_plus"  ] || sortObject["duration_desc_plus"  ]) returnValue.push({ type: "misc", description: "Must have known duration",      query: { sort: sort.map(e => e.includes("duration"  ) ? e.replace("_plus", "") : e) } });
+    if (sortObject["end_date_plus"  ] || sortObject["end_date_desc_plus"  ]) returnValue.push({ type: "misc", description: "Must have known end date",      query: { sort: sort.map(e => e.includes("end_date"  ) ? e.replace("_plus", "") : e) } });
+    if (sortObject["start_date_plus"] || sortObject["start_date_desc_plus"]) returnValue.push({ type: "misc", description: "Must have known start date",    query: { sort: sort.map(e => e.includes("start_date") ? e.replace("_plus", "") : e) } });
+    if (sortObject["volumes_plus"   ] || sortObject["volumes_desc_plus"   ]) returnValue.push({ type: "misc", description: "Must have known volume count",  query: { sort: sort.map(e => e.includes("volumes"   ) ? e.replace("_plus", "") : e) } });
+
+    for (const v of format) {
+      if (v in localizeInternalSearchParams) returnValue.push({ type: "format", description: "Format: " + localizeInternalSearchParams[v], query: { format: format.filter(v2 => v2 !== v) } });
+    }
+
+    for (const v of source) {
+      if (v in localizeInternalSearchParams) returnValue.push({ type: "source", description: "Source: " + localizeInternalSearchParams[v], query: { source: source.filter(v2 => v2 !== v) } });
+    }
+
+    for (const v of country) {
+      if (v in localizeInternalSearchParams) returnValue.push({ type: "country", description: "Country: " + localizeInternalSearchParams[v], query: { country: country.filter(v2 => v2 !== v) } });
+    }
+
+    for (const v of externalSources) {
+      const target = externalSourcesData()?.sources.find(v2 => v2.id === v);
+      if (target) returnValue.push({ type: "externalSources", description: "ExternalSources: " + target.site, image: target.icon, imageColor: target.color, query: { externalSources: externalSources.filter(v2 => v2 !== v) } });
+    }
+
+    const rawThemes = arrayUtils.wrapToArray(searchParams.theme);
+    for (const v of themes) {
+      returnValue.push({ type: "themes", description: "Theme: " + formatingUtils.capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== v) } });
+    }
+
+    for (const v of excludedThemes) {
+      returnValue.push({ type: "themes", description: "Theme: " + formatingUtils.capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== "-" + v) } });
+    }
+
+    for (const v of age) {
+      if (v in localizeInternalSearchParams) returnValue.push({ type: "age", description: "Age: " + localizeInternalSearchParams[v], query: { age: age.filter(v2 => v2 !== v) } });
+    }
+
+    for (const v of status) {
+      if (v in localizeInternalSearchParams) returnValue.push({ type: "status", description: "Status: " + localizeInternalSearchParams[v], query: { status: status.filter(v2 => v2 !== v) } });
+    }
+
+    if (q?.length) {
+      returnValue.push({ type: "01.search", description: `Searching "${q}"`, query: { q: undefined } });
+    }
+
+    if (year) returnValue.push({ type: "year", description: "Year: " + year,              query: { year: undefined, season } });
+    if (yearLesser) returnValue.push({ type: "yearLesser", description: "Year<" + yearLesser,   query: { yearLesser: undefined } });
+    if (yearGreater) returnValue.push({ type: "yearGreater", description: "Year>" + yearGreater, query: { yearGreater: undefined } });
+
+    if (season) returnValue.push({ type: "season", description: formatingUtils.capitalize(season), query: { season: undefined, year } });
+
+
+    if (progress) {
+      if      (params.type === "anime") returnValue.push({ type: "progress", description: "Episodes: " + progress, query: { progress: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "progress", description: "Chapters: " + progress, query: { progress: undefined } });
+      else                              returnValue.push({ type: "progress", description: "Ep/Ch: " +    progress, query: { progress: undefined } });
+    }
+
+    if (progressLesser) {
+      if      (params.type === "anime") returnValue.push({ type: "progressLesser", description: "Episodes<" + progressLesser, query: { progressLesser: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "progressLesser", description: "Chapters<" + progressLesser, query: { progressLesser: undefined } });
+      else                              returnValue.push({ type: "progressLesser", description: "Ep/Ch<" +    progressLesser, query: { progressLesser: undefined } });
+    }
+
+    if (progressGreater) {
+      if      (params.type === "anime") returnValue.push({ type: "progressGreater", description: "Episodes>" + progressGreater, query: { progressGreater: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "progressGreater", description: "Chapters>" + progressGreater, query: { progressGreater: undefined } });
+      else                              returnValue.push({ type: "progressGreater", description: "Ep/Ch>" +    progressGreater, query: { progressGreater: undefined } });
+    }
+
+    if (length) {
+      if      (params.type === "anime") returnValue.push({ type: "length", description: "Duration: " + length, query: { length: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "length", description: "Volumes: " + length, query: { length: undefined } });
+      else                              returnValue.push({ type: "length", description: "Duration / Volumes: " +    length, query: { length: undefined } });
+    }
+
+    if (lengthLesser) {
+      if      (params.type === "anime") returnValue.push({ type: "lengthLesser", description: "Duration<" + lengthLesser, query: { lengthLesser: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "lengthLesser", description: "Volumes<" + lengthLesser, query: { lengthLesser: undefined } });
+      else                              returnValue.push({ type: "lengthLesser", description: "Duration / Volumes<" +    lengthLesser, query: { lengthLesser: undefined } });
+    }
+
+    if (lengthGreater) {
+      if      (params.type === "anime") returnValue.push({ type: "lengthGreater", description: "Duration>" + lengthGreater, query: { lengthGreater: undefined } });
+      else if (params.type === "manga") returnValue.push({ type: "lengthGreater", description: "Volumes>" + lengthGreater, query: { lengthGreater: undefined } });
+      else                              returnValue.push({ type: "lengthGreater", description: "Duration / Volumes>" +    lengthGreater, query: { lengthGreater: undefined } });
+    }
+
+    if (rank) returnValue.push({ type: "rank", description: "Tag Rank > " + (+rank - 1) + "%", query: { rank: undefined } });
+
+    const rawUsers = arrayUtils.wrapToArray(searchParams.user);
+    for (const v of users) {
+      returnValue.push({ type: "users", description: "Include User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "in-" + v) } });
+    }
+
+    for (const v of excludedUsers) {
+      returnValue.push({ type: "users", description: "Exclude User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "ex-" + v) } });
+    }
+
+    if (onList == "true")  returnValue.push({ type: "onList", description: "On My List", query: { onList: undefined } });
+    if (onList == "false") returnValue.push({ type: "onList", description: "Not in My List", query: { onList: undefined } });
+
+    if (licensed == "true")  returnValue.push({ type: "licensed", description: "Licensed", query: { licensed: undefined } });
+    if (licensed == "false") returnValue.push({ type: "licensed", description: "Not Licensed", query: { licensed: undefined } });
+
+
+    return returnValue.sort((a, b) => a.type.localeCompare(b.type) || a.description.localeCompare(b.description));
+
+  });
+}
+
+export function SearchActiveQueries(props) {
+  const [, setSearchParams] = useSearchParams();
+  const params = useParams();
+  const navigate = useNavigateAndSearch();
+  const queryButtons = useActiveSearchQueries();
+
+  const removeQuery = query => {
+    const header = params.header;
+    const headerThatCouldNeedInvalidating = invalidateHeader.find(h => h.header === header || h.header.test?.(header));
+    if (headerThatCouldNeedInvalidating) {
+      for (const param of Object.keys(query)) {
+        if (headerThatCouldNeedInvalidating.params.includes(param)) {
+          // Invalidate header and update query
+          return navigate(path => path.replace("/" + header, ""), query);
+        }
+      }
+    }
+
+    // Normal set search params
+    setSearchParams(query);
+  };
+
+  const clearAll = () => {
+    const query = {};
+    for (const entry of queryButtons()) {
+      if (entry.type === "01.search") continue; // Keep the search text, only clear the filters
+      for (const key of Object.keys(entry.query)) query[key] = undefined;
+    }
+    removeQuery(query);
+  };
+
+  return (
+    <Show when={queryButtons().length}>
+      <ul class="active-queries" classList={{ "single-row": props.singleRow }}>
+        <For each={queryButtons()}>{entry => (
+          <li>
+            <button class="query" onClick={() => removeQuery(entry.query)} title="Remove filter">
+              <span class="icon" classList={{ "extra-padding": !!entry.imageColor }} style={{ "background-color": entry.imageColor }}>
+                <Show when={entry.image} fallback={<Dynamic component={typeIcons[entry.type]} />}>
+                  <img src={entry.image} alt="" />
+                </Show>
+              </span>
+              <span>{entry.description}</span>
+              <XIcon scoped />
+            </button>
+          </li>
+        )}</For>
+        <Show when={queryButtons().some(entry => entry.type !== "01.search")}>
+          <li>
+            <button class="clear" onClick={clearAll}>Clear all</button>
+          </li>
+        </Show>
+      </ul>
+    </Show>
+  );
+}

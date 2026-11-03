@@ -17,22 +17,22 @@ export function Stats(props) {
             Anime stats
             <ol>
               <li>
-                <A href={"/user/" + user().name + "/stats/anime/overview"}>Overview</A>
+                <A href={"/user/" + user().name + "/anime/stats/overview"}>Overview</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/anime/genres"}>Genres</A>
+                <A href={"/user/" + user().name + "/anime/stats/genres"}>Genres</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/anime/tags"}>Tags</A>
+                <A href={"/user/" + user().name + "/anime/stats/tags"}>Tags</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/anime/voice-actors"}>Voice actors</A>
+                <A href={"/user/" + user().name + "/anime/stats/voice-actors"}>Voice actors</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/anime/studios"}>Studios</A>
+                <A href={"/user/" + user().name + "/anime/stats/studios"}>Studios</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/anime/staff"}>Staff</A>
+                <A href={"/user/" + user().name + "/anime/stats/staff"}>Staff</A>
               </li>
             </ol>
           </li>
@@ -40,16 +40,16 @@ export function Stats(props) {
             Manga stats
             <ol>
               <li>
-                <A href={"/user/" + user().name + "/stats/manga/overview"}>Overview</A>
+                <A href={"/user/" + user().name + "/manga/stats/overview"}>Overview</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/manga/genres"}>Genres</A>
+                <A href={"/user/" + user().name + "/manga/stats/genres"}>Genres</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/manga/tags"}>Tags</A>
+                <A href={"/user/" + user().name + "/manga/stats/tags"}>Tags</A>
               </li>
               <li>
-                <A href={"/user/" + user().name + "/stats/manga/staff"}>Staff</A>
+                <A href={"/user/" + user().name + "/manga/stats/staff"}>Staff</A>
               </li>
             </ol>
           </li>

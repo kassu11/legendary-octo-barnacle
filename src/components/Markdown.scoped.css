@@ -1,0 +1,24 @@
+.spoiler {
+  display: inline-block;
+  background-color: var(--background-400-old);
+
+  &:not([open]) {
+    background-color: var(--background-500-old);
+    * {
+      color: transparent;
+    }
+
+    summary * {
+      pointer-events: none;
+    }
+  }
+
+  > summary {
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}

@@ -2,7 +2,7 @@
   details {
     &:not([open]) {
       summary {
-        background-color: var(--background-300);
+        background-color: var(--background-300-old);
       }
       button {
         display: none;
@@ -13,7 +13,7 @@
       position: sticky;
       top: 48px;
       padding: 16px;
-      background-color: var(--background-400);
+      background-color: var(--background-400-old);
       z-index: 1;
 
       h3 {
@@ -75,7 +75,7 @@
 
         _li {
           padding: 16px;
-          background-color: var(--background-500);
+          background-color: var(--background-500-old);
         }
       }
     }

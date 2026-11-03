@@ -1,0 +1,45 @@
+query ($userId: Int, $userName: String, $type: MediaType) {
+  MediaListCollection(userId: $userId, userName: $userName, type: $type) {
+    lists {
+      name
+      entries {
+        ...mediaListEntry
+      }
+    }
+    user {
+      id
+      name
+    }
+  }
+}
+
+fragment mediaListEntry on MediaList {
+  status
+  media {
+    id
+    format
+    relations {
+      edges {
+        relationType(version: 3)
+        node {
+          id
+          idMal
+          synonyms
+          averageScore
+          status(version: 3)
+          coverImage {
+            extraLarge
+          }
+          title {
+            romaji
+            english
+            native
+            userPreferred
+          }
+          type
+          format
+        }
+      }
+    }
+  }
+}

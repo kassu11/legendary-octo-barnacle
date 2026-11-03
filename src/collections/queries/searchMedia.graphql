@@ -1,19 +1,18 @@
 query (
-  $page: Int = 1
+  $page: Int
   $id: Int
   $type: MediaType
   $isAdult: Boolean
   $search: String
   $format: [MediaFormat]
-  $status: MediaStatus
   $countryOfOrigin: CountryCode
-  $source: MediaSource
+  $sourceIn: [MediaSource]
   $season: MediaSeason
   $year: String
   $seasonYear: Int
   $endDateLike: String
-  $endDateLesser: FuzzyDateInt 
-  $endDateGreater: FuzzyDateInt 
+  $endDateLesser: FuzzyDateInt
+  $endDateGreater: FuzzyDateInt
   $onList: Boolean
   $yearLesser: FuzzyDateInt
   $yearGreater: FuzzyDateInt
@@ -28,11 +27,15 @@ query (
   $licensedBy: [Int]
   $isLicensed: Boolean
   $genres: [String]
-  $excludedGenres: [String]
+  $excludedThemes: [String]
   $tags: [String]
-  $excludedTags: [String]
   $minimumTagRank: Int
   $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
+  $averageScoreGreater: Int
+  $countryOfOriginIn: [CountryCode]
+  $statusIn: [MediaStatus]
+  $idNotIn: [Int]
+  $idIn: [Int]
 ) {
   Page(page: $page) {
     pageInfo {
@@ -47,9 +50,7 @@ query (
       type: $type
       season: $season
       format_in: $format
-      status: $status
       countryOfOrigin: $countryOfOrigin
-      source: $source
       search: $search
       onList: $onList
       seasonYear: $seasonYear
@@ -70,12 +71,18 @@ query (
       licensedById_in: $licensedBy
       isLicensed: $isLicensed
       genre_in: $genres
-      genre_not_in: $excludedGenres
+      genre_not_in: $excludedThemes
       tag_in: $tags
-      tag_not_in: $excludedTags
+      tag_not_in: $excludedThemes
       minimumTagRank: $minimumTagRank
       sort: $sort
       isAdult: $isAdult
+      averageScore_greater: $averageScoreGreater
+      source_in: $sourceIn
+      countryOfOrigin_in: $countryOfOriginIn
+      status_in: $statusIn
+      id_not_in: $idNotIn
+      id_in: $idIn
     ) {
       id
       title {
@@ -104,6 +111,7 @@ query (
       format
       status(version: 2)
       episodes
+      countryOfOrigin
       duration
       chapters
       volumes

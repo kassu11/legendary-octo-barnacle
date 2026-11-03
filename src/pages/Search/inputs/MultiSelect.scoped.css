@@ -1,0 +1,196 @@
+@layer component {
+  .custom-select {
+    position: relative;
+    max-width: var(--select-max-width, 300px);
+    width: var(--select-width, 200px);
+
+    .open-button {
+      width: 100%;
+      background-color: var(--bg);
+      padding: .5em;
+      border: unset;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: filter .2s;
+      text-align: left;
+      display: flex;
+      gap: 8px;
+      border: 2px solid var(--bg-light);
+      transition: .2s border, .2s filter, .2s background, .2s color;
+      text-shadow: 0 0 3px var(--bg-dark);
+
+      &:hover {
+        filter: brightness(1.1);
+      }
+
+      .icon {
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        color: var(--text-muted);
+        font-size: 1.1em;
+      }
+
+      .no-selections & {
+        border: 2px solid var(--bg);
+        background-color: color-mix(in oklab, var(--bg-dark), var(--bg) 30%);
+        color: var(--text-muted);
+        border-style: dashed;
+      }
+
+      .line-clamp {
+        --line-clamp: 1;
+        width: 0;
+        flex-grow: 1;
+        color: var(--text-muted);
+        font-weight: 450;
+      }
+
+      .count {
+        position: relative;
+        font-weight: 900;
+        padding: .1em .3em;
+        margin: -.1em -.3em;
+        text-shadow: 0 0 3px var(--text);
+        background-color: var(--text);
+        color: var(--bg-light);
+        border-radius: 2px;
+        margin-left: auto;
+        display: grid;
+        place-items: center;
+
+        span {
+          text-box: trim-both cap alphabetic;
+        }
+      }
+    }
+
+    dialog {
+      padding: 0;
+      border: none;
+      max-height: min(calc(100dvh - .5rem), 30rem);
+      background-color: var(--bg);
+      touch-action: none;
+      z-index: 1;
+      overflow: hidden;
+      width: 100%;
+      margin-top: 8px;
+      border: unset;
+      border-radius: 4px;
+      z-index: 5;
+      padding: 8px;
+
+      &[open] {
+        display: flex;
+        flex-direction: column;
+      }
+
+      &::backdrop {
+        background-color: rgb(0 0 0 / 60%);
+        backdrop-filter: blur(5px);
+      }
+
+      &.mobile {
+        margin: auto;
+        max-width: unset;
+        max-height: calc(100dvh - .5rem);
+        width: min(calc(100dvw - .5rem), 30rem);
+        height: 100%;
+        background: transparent;
+
+        form {
+          order: 1;
+        }
+      }
+
+
+      form {
+
+        .mobile & {
+          padding: 0;
+        }
+
+        input {
+          border-radius: 4px;
+          width: 100%;
+          border: unset;
+          padding: .5em 1em;
+          color: var(--text);
+          background-color: var(--bg-dark);
+          font-weight: 600;
+          outline: none;
+
+          .mobile & {
+            outline: none;
+            box-shadow: inset 0 0 2px var(--shadow);
+            padding: .75em 1em;
+          }
+
+          &:focus-visible {
+            &::placeholder {
+              opacity: .5;
+            }
+          }
+
+          &::placeholder {
+            color: var(--text-muted);
+            opacity: .2;
+          }
+
+          &::-webkit-search-cancel-button {
+            display: none;
+          }
+
+        }
+      }
+
+      .wrapper {
+        display: flex;
+        flex-direction: column;
+        pointer-events: all;
+        height: 100%;
+        overflow: hidden;
+        gap: 8px;
+
+        .contents {
+          display: contents;
+        }
+
+        .items {
+          margin-top: auto;
+          overflow: auto;
+          overscroll-behavior: contain;
+          border-radius: 4px;
+          user-select: none;
+          outline: unset;
+          background-color: var(--bg-dark);
+
+          dialog:not(.mobile) &:empty {
+            /* Remove the 8px visual gap between items and footer, when item list is empty */
+            position: absolute;
+          }
+        }
+      }
+
+      .footer {
+        order: 1;
+        display: flex;
+        gap: 16px;
+
+        button {
+          width: 100%;
+          background-color: var(--bg-dark);
+          padding: .5rem 1rem;
+          border: unset;
+          border-radius: 4px;
+          font-weight: 600;
+          transition: filter .2s;
+
+          &:hover {
+            filter: brightness(1.1);
+          }
+        }
+      }
+    }
+  }
+}

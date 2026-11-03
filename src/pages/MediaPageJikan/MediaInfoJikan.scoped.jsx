@@ -4,9 +4,9 @@ import { localizations, mediaStatuses, queries } from "../../collections/collect
 import { arrayUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scoped.css";
-import { Trailer } from "../MediaPage/Trailer.jsx";
-import { FavouriteToggle } from "../../components/FavouriteToggle.jsx";
-import { Markdown } from "../../components/Markdown.jsx";
+import { Trailer } from "../MediaPage/Trailer.scoped.jsx";
+import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
+import { Markdown } from "../../components/Markdown.scoped.jsx";
 import { MalCharacterCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
 import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
 import { ExternalLinks } from "../../components/media/ExternalLinks.scoped.jsx";
@@ -15,24 +15,23 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { isTypeFunction } from "../../utils/functionUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { MediaPageApiSwitcher } from "./MediaPageApiSwitcher.scoped.jsx";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();
 
   const [time, startTimer, stopTimer] = createTimer();
   const [jikanData, setJikanData] = createSignal(undefined, { equals: false });
-  let jikanFetcher, jikanController;
+  const jikanController = createCleanUpAbortController();
+  let jikanFetcher;
   createEffect(() => {
-    jikanController?.abort();
-    jikanController = new AbortController();
+    const signal = jikanController.abortAndRenew();
 
-    jikanFetcher = createJsonGetFetcher(queries.myAnimeListMediaById, { id: params.id, type: params.type }, jikanController.signal);
+    jikanFetcher = createJsonGetFetcher(queries.myAnimeListMediaById, { id: params.id, type: params.type }, signal);
 
     sendFetcher(jikanFetcher, {
       name: "Jikan media page",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === jikanFetcher.cacheKey) jikanController = null;
-      },
+      onFetch: () => jikanController.disable(),
       onStart: startTimer,
       onStop: stopTimer,
       setValue: (res, { fetcher: f }) => {
@@ -50,18 +49,16 @@ export function MediaInfoWrapperJikan(props) {
     });
   }
 
-  let aniFetcher, aniController;
+  const aniController = createCleanUpAbortController();
+  let aniFetcher;
   createEffect(() => {
-    aniController?.abort();
-    aniController = new AbortController();
+    const signal = aniController.abortAndRenew();
 
-    aniFetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() }, aniController.signal);
+    aniFetcher = createAnilistFetcher(queries.anilistMediaById, { idMal: params.id, type: params.type.toUpperCase() }, signal);
 
     sendAnilistFetcher(aniFetcher, {
       name: "Anilist media page (jikan)",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === aniFetcher.cacheKey) aniController = null;
-      },
+      onFetch: () => aniController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey === aniFetcher.cacheKey) setAnilistData(res);
       }
@@ -140,39 +137,39 @@ export function MediaInfoWrapperJikan(props) {
                     <Switch>
                       <Match when={jikanData().data.data.year && jikanData().data.data.season}>
                         <A
-                          href={"/search/" + params.type + "?year=" + jikanData().data.data.year + "&season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)} {jikanData().data.data.year}</A>
+                          href={"/ani/search/" + params.type + "?year=" + jikanData().data.data.year + "&season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)} {jikanData().data.data.year}</A>
                       </Match>
                       <Match when={jikanData().data.data.season}>
                         <A
-                          href={"/search/" + params.type + "?season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)}</A>
+                          href={"/ani/search/" + params.type + "?season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)}</A>
                       </Match>
                       <Match when={jikanData().data.data.year}>
                         <A
-                          href={"/search/" + params.type + "?year=" + jikanData().data.data.year + "&malSearch=true"}>{jikanData().data.data.year}</A>
+                          href={"/ani/search/" + params.type + "?year=" + jikanData().data.data.year + "&malSearch=true"}>{jikanData().data.data.year}</A>
                       </Match>
                       <Match
                         when={jikanData().data.data.aired?.prop?.from?.year || jikanData().data.data.published?.prop?.from?.year}>{year => (
-                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                        <A href={"/ani/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
                       )}</Match>
                       <Match
                         when={jikanData().data.data.aired?.prop?.to?.year || jikanData().data.data.published?.prop?.to?.year}>{year => (
-                        <A href={"/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
+                        <A href={"/ani/search/" + params.type + "?year=" + year() + "&malSearch=true"}>{year()}</A>
                       )}</Match>
                       <Match when={jikanData().data.data.status == mediaStatuses.jikan.NotYetAired}>
-                        <A href={"/search/" + params.type + "/tba"}>TBA</A>
+                        <A href={"/ani/search/" + params.type + "/tba"}>TBA</A>
                       </Match>
                     </Switch>
                   </li>
                   <li>
                     <A
-                      href={"/search/" + params.type + "?format=" + jikanData().data.data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.data.type}</A>
+                      href={"/ani/search/" + params.type + "?format=" + jikanData().data.data.type.toLowerCase() + "&malSearch=true"}>{jikanData().data.data.type}</A>
                   </li>
                   <li>{statusUtils.jikanEnumToFlavorText(jikanData()?.data.data.status)}</li>
                 </ul>
                 <ul>
                   <Show when={jikanData()?.data.data.source}>
                     <li>Source:{" "}
-                      <A href={"/search/" + params.type + "?source=" + jikanData().data.data.source}>
+                      <A href={"/ani/search/" + params.type + "?source=" + jikanData().data.data.source}>
                         {jikanData()?.data.data.source}
                       </A>
                     </li>
@@ -209,20 +206,18 @@ export function MediaInfoHomeJikan() {
   const [staffTime, startStaffTimer, stopStaffTimer] = createTimer();
   const [charData, setCharData] = createSignal(undefined, { equals: false });
   const [staffData, setStaffData] = createSignal(undefined, { equals: false });
-  let charFetcher, charController, staffFetcher, staffController;
+  const charController = createCleanUpAbortController();
+  const staffController = createCleanUpAbortController();
+  let charFetcher, staffFetcher;
   createEffect(() => {
-    charController?.abort();
-    staffController?.abort();
-    charController = new AbortController();
-    staffController = new AbortController();
+    const charSignal = charController.abortAndRenew();
+    const staffSignal = staffController.abortAndRenew();
 
-    charFetcher = createJsonGetFetcher(queries.myAnimeListMediaCharactersById, { id: params.id, type: params.type }, charController.signal);
+    charFetcher = createJsonGetFetcher(queries.myAnimeListMediaCharactersById, { id: params.id, type: params.type }, charSignal);
 
     sendFetcher(charFetcher, {
       name: "Jikan characters",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === charFetcher.cacheKey) charController = null;
-      },
+      onFetch: () => charController.disable(),
       onStart: startCharTimer,
       onStop: stopCharTimer,
       setValue: (res, { fetcher: f }) => {
@@ -231,13 +226,11 @@ export function MediaInfoHomeJikan() {
     });
 
     if (params.type !== localizations.anime) return;
-    staffFetcher = createJsonGetFetcher(queries.myAnimeListAnimeStaffById, { id: params.id }, charController.signal);
+    staffFetcher = createJsonGetFetcher(queries.myAnimeListAnimeStaffById, { id: params.id }, staffSignal);
 
     sendFetcher(staffFetcher, {
       name: "Jikan staff",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === staffFetcher.cacheKey) staffController = null;
-      },
+      onFetch: () => staffController.disable(),
       onStart: startStaffTimer,
       onStop: stopStaffTimer,
       setValue: (res, { fetcher: f }) => {

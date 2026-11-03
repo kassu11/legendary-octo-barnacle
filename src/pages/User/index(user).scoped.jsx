@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
+import { createEffect, createRenderEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { formatTimeToDate } from "../../utils/formating.js";
 import { UserContext, useUser } from "../../context/providers.js";
 import "./index(user).scoped.css";
@@ -8,6 +8,7 @@ import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../
 import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
 import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
 import { authUserData } from "../../core/globalState.js";
+import { createCleanUpAbortController } from "../../utils/abortUtils.js";
 
 export function User(props) {
   const params = useParams();
@@ -15,18 +16,17 @@ export function User(props) {
   const [userTime, startUserTimer, stopUserTimer] = createTimer();
   const [loading, setLoading] = createSignal(false);
   const [userData, setUserData] = createSignal(undefined, { equals: false });
-  let userFetcher, userController;
-  createEffect(() => {
-    userController?.abort();
-    userController = new AbortController();
+  const userController = createCleanUpAbortController();
+  let userFetcher;
+  createRenderEffect(() => {
+    const signal = userController.abortAndRenew();
 
-    userFetcher = createAnilistFetcher(queries.getUserByName, { name: params.name }, userController.signal);
+    userFetcher = createAnilistFetcher(queries.getUserByName, { name: params.name }, signal);
 
     sendAnilistFetcher(userFetcher, {
       name: "Anilist user info",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === userFetcher.cacheKey) userController = null;
-      },
+      alwaysUseQuickCache: true,
+      onFetch: () => userController.disable(),
       onStart: time => {
         startUserTimer(time);
         setLoading(true);
@@ -113,13 +113,13 @@ function Content(props) {
           </div>
         </div>
       </div>
-      <nav class="profile-navigation">
+      <nav class="cp-profile-navigation">
         <ul>
           <li><A href="">Overview</A></li>
-          <li><A href="anime">Anime list</A></li>
-          <li><A href="manga">Manga list</A></li>
+          <li><A href="anime/list">Anime list</A></li>
+          <li><A href="manga/list">Manga list</A></li>
           <li><A href="favourites">Favourites</A></li>
-          <li><A href="stats">Stats</A></li>
+          <li><A href="anime/stats/overview">Stats</A></li>
           <li><A href="socials">Socials</A></li>
         </ul>
       </nav>

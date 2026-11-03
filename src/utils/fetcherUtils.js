@@ -54,12 +54,14 @@ export function createAnilistFetcher(query, variables, signal) {
 }
 
 function baseEncoding(url, params) {
-  const paramsAsString = safeStringifyJson(params, "missing");
+  const { method, headers, body } = params;
+  const paramsAsString = safeStringifyJson({ method, headers, body }, "missing");
   return hashKeyFNV32(url) + hashKeyFNV32(paramsAsString) + hashKeyFNV32(url + paramsAsString);
 }
 
 function removeTokenFromEncode(url, params) {
-  let paramsAsString = safeStringifyJson(params, "missing");
+  const { method, headers, body } = params;
+  let paramsAsString = safeStringifyJson({ method, headers, body }, "missing");
   const token = params.headers?.Authorization?.substring(7);
   const userId = allActiveTokens()[token];
   if (token && userId) paramsAsString = paramsAsString.replace(token, userId);
@@ -191,7 +193,7 @@ async function retryDelay(fetcher, response, iteration) {
 
 const requestQueue = [
   { url: "https://graphql.anilist.co", queue: [], timeout: null },
-  { url: "https://api.jikan.moe/v4", queue: [], timeout: null },
+  { url: "https://api.tenrai.org/v1", queue: [], timeout: null },
   { url: "https://api.animethemes.moe", queue: [], timeout: null },
 ]
 
@@ -205,14 +207,14 @@ const baseSettings = {
   active: (res, settings) => {
     if (!res) return true;
     else if (settings.debug) return false;
-    return !cache.has(res.cacheKey);
+    return !allFetchedCacheKeys.has(res.cacheKey);
   },
   debug: modes.debug,
   loadingBar: true,
   cache: {
     get: res => getFetcherValueFromStorage(res, null),
-    set: async res => {
-      cache.add(res.cacheKey);
+    set: res => {
+      allFetchedCacheKeys.add(res.cacheKey);
       setFetcherValueToStorage(res);
     }
   },
@@ -220,9 +222,13 @@ const baseSettings = {
   parse: res => res.json(),
   queue: true,
   onStart: () => { },
-  onError: res => {
-    if (!res) return;
-    addApplicationNotification({ type: "error", message: `Error status code: ${res.status}.`, duration: 10_000 });
+  onError: (res, { fetcher }) => {
+    if (!res) {
+      if (fetcher[1]?.signal?.aborted) return;
+      addApplicationNotification({ type: "error", message: "CORS error", duration: 10_000 });
+    } else {
+      addApplicationNotification({ type: "error", message: `Error status code: ${res.status}.`, duration: 30_000 });
+    }
   },
   onFetch: () => { },
 };
@@ -235,6 +241,14 @@ const baseSettings = {
 //  Maybe this will cause raise condition if multiple tabs are opened
 // TODO: How to handle
 
+// Quick cache should only be used, when response body is small, and the request cache needs to respond immediately.
+// For example user page, has nested requests, so we want the top level user id request to be quick cached, so all the child requests that depend on the result, will load faster
+// Without this, its not possible to keep scroll position on user media list etc, when using history navigation.
+// NOTE: Every request is quick cached by default inside session storage, in production, but not in debug.
+//       So this settings should only be used inside debug, when you have confirmed that the loading delay causes problems
+//       This will also work in production, but it's kind of useless, because most of not all request should be already quick cached.
+const quickCache = {};
+
 /**
  * This is as close as normal fetch as you can get
  * The only difference is, that this function does not return anything
@@ -246,29 +260,61 @@ export async function sendFetcher(fetcher, settings = {}) {
 
   assertTypeArray(fetcher);
 
+  // File is used to imitate actual fetch, so we want to disable debug fetching
+  if (settings.file) settings.debug = false;
+
   settings = mergeObjects({ ...baseSettings, cache: { ...baseSettings.cache } }, settings);
+
+  if (settings.delay) await new Promise(res => setTimeout(res, settings.delay));
 
   const start = performance.now();
   settings.onStart?.(performance.now() - start);
 
-  var res = settings.file ? await (await fetch("/legendary-octo-barnacle/" + settings.file)).json() : await settings.cache?.get?.(fetcher, settings);
+  let res;
+  if (settings.alwaysUseQuickCache && fetcher.cacheKey in quickCache) res = quickCache[fetcher.cacheKey];
+  else res = await settings.cache?.get?.(fetcher, settings);
+
   const active = settings.active?.(res, settings);
 
-  if (res) settings.setValue(res, { fetcher });
+  if (res) settings.setValue(res, { fetcher, settings });
 
-  if (!active) {
+  if (settings.alwaysUseQuickCache && res) quickCache[fetcher.cacheKey] = res;
+
+  // Fetcher is not active, so it can't fetch, early exit
+  const [url, { signal }] = fetcher;
+  if (!active || signal?.aborted === true) {
     settings.onStop?.(performance.now() - start);
     return;
   }
 
+  if (settings.file) {
+    const response = await fetch(__BASE__ + "/" + settings.file);
+    const data = await settings.parse(response);
+    settings.onFetch?.(performance.now() - start, { fetcher });
+    // Fake fetch delay
+    await new Promise(res => setTimeout(res, 600));
+    const res = {
+      cacheKey: fetcher.cacheKey,
+      data,
+      expires: settings.expires || (new Date().getTime() + 1000 * 60 * 60 * 24 * 30), // 1kk
+      modified: new Date().getTime(),
+    };
+
+    if (settings.name) res.name = settings.name;
+    settings.setValue({ ...res, cache: false }, { fetcher, settings });
+    if (data) settings.cache?.set?.(res, { fetcher });
+    settings.onStop?.(performance.now() - start);
+    return;
+  }
+
+
   if (settings.loadingBar) setMainLoadingCount(v => v + 1);
 
-  const [url, { signal }] = fetcher;
   const queueTarget = requestQueue.find(que => url.includes(que.url));
 
   async function event() {
-    settings.onFetch?.(performance.now() - start, { fetcher });
-    if (signal?.aborded !== true) {
+    if (signal?.aborted !== true) {
+      settings.onFetch?.(performance.now() - start, { fetcher });
       try {
         const response = await fetcherToFetch(fetcher);
 
@@ -286,10 +332,11 @@ export async function sendFetcher(fetcher, settings = {}) {
 
         if (settings.name) res.name = settings.name;
 
-        settings.setValue({ ...res, cache: false }, { fetcher });
+        settings.setValue({ ...res, cache: false }, { fetcher, settings });
         if (data) settings.cache?.set?.(res, { fetcher });
       } catch (err) {
-        settings.onError?.(err);
+        if (modes.debug) console.error(err);
+        settings.onError?.(err, { fetcher });
       }
     }
 
@@ -328,7 +375,7 @@ export async function sendFetcher(fetcher, settings = {}) {
   }
 }
 
-const cache = new Set();
+const allFetchedCacheKeys = new Set();
 const anilistBaseFetcherSettings = {
   name: "AniList fetch",
   onError: async res => {

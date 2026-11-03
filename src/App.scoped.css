@@ -6,7 +6,7 @@
     display: grid;
     justify-items: left;
     gap: 8px;
-    background-color: var(--background-350);
+    background-color: var(--background-350-old);
     border-radius: 4px;
     left: 0px;
     bottom: 0px;
@@ -55,6 +55,7 @@
       width: fit-content;
       background-color: unset;
       border: unset;
+      background-color: var(--shadow-light);
 
       &:hover, .open & {
         background-color: var(--bg-light);
@@ -91,6 +92,16 @@
 
   footer {
     min-height: 20rem;
-    background-color: var(--background-350);
+    background-color: var(--background-350-old);
+  }
+
+  #hovers {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    user-select: none;
+    overflow-x: clip;
+    overflow-y: visible;
   }
 }

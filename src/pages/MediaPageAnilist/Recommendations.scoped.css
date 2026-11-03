@@ -1,5 +1,7 @@
 .recommendations {
   --grid-column-width: 8rem;
+  --gap: 16px;
+  --line-clamp: 2;
 
   li {
     position: relative;

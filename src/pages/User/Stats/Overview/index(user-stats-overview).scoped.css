@@ -15,7 +15,7 @@
         grid-template-columns: 3rem 1fr;
         align-items: center;
         gap: .5rem;
-        background-color: var(--background-400);
+        background-color: var(--background-400-old);
         border-radius: .25rem;
 
         .svg-container {
@@ -46,4 +46,3 @@
     }
   }
 }
-

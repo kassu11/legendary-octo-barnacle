@@ -4,25 +4,24 @@ import { formatTitleToUrl } from "../../../../utils/formating.js";
 import { queries } from "../../../../collections/collections.js";
 import "./GenreMediaCards.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
 
 export function GenreMediaCardsScoped(props) {
   const params = useParams();
   const [mediaIds, setMediaIds] = createSignal(new Set());
 
-  let mediaFetcher, mediaController;
+  const mediaController = createCleanUpAbortController();
+  let mediaFetcher;
   createEffect(() => {
     const ids = [...mediaIds()];
     if (!ids.length) return;
-    mediaController?.abort();
-    mediaController = new AbortController();
+    const signal = mediaController.abortAndRenew();
 
-    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, mediaController.signal);
+    mediaFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(ids.length), { id_in: ids }, signal);
 
     sendAnilistFetcher(mediaFetcher, {
       name: "Anilist media ids",
-      onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey === mediaFetcher.cacheKey) mediaController = null;
-      },
+      onFetch: () => mediaController.disable(),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== mediaFetcher.cacheKey) return;
         Object.values(res.data.data).forEach(page => {

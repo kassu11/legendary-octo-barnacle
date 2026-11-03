@@ -1,12 +1,15 @@
-@layer components {
+@layer component {
   .cp-media-action-item {
     position: relative;
     height: 32px;
     width: 32px;
-    padding: 8px;
+    padding: 10px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
+    background-color: color-mix(var(--bg-dark), transparent 10%);
+    color: var(--text-muted);
+    transition: .1s filter, .1s scale;
 
     &.big {
       width: 48px;
@@ -16,7 +19,13 @@
     }
 
     &:hover {
-      background-color: grey;
+      filter: brightness(1.5);
+      scale: 1.07;
+    }
+
+    &:active {
+      filter: brightness(2);
+      scale: 1.1;
     }
 
     _svg {
@@ -25,4 +34,3 @@
     }
   }
 }
-

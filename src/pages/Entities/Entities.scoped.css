@@ -1,0 +1,66 @@
+.entities-page {
+  display: grid;
+  background-color: var(--background-400-old);
+  gap: 1rem;
+
+  .spinner {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.entities-page-entity {
+  background-color: var(--background-350-old);
+  display: flex;
+  gap: .5rem;
+  text-decoration: none;
+  color: white;
+  word-break: break-all;
+  word-break: break-word;
+  font-size: .9rem;
+  line-height: 120%;
+
+  .entity-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 3.5/5;
+  }
+
+  .entity-left, .entity-right {
+    width: 100%;
+    display: grid;
+    gap: .5rem;
+    text-decoration: none;
+    color: white;
+  }
+  .content {
+    padding-block: .5rem;
+    display: flex;
+    flex-direction: column;
+
+    .line-clamp.small {
+      --line-clamp: 2;
+    }
+  }
+  .entity-left .content {
+    justify-content: space-between;
+  }
+
+  .entity-left {
+    grid-template-columns: 4rem 1fr;
+  }
+  .entity-right {
+    grid-template-columns: 1fr 4rem;
+    text-align: right;
+  }
+
+
+  .voice-actor-language {
+    margin-top: auto;
+  }
+
+  .role-notes {
+    color: wheat;
+  }
+}

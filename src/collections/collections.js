@@ -1,5 +1,5 @@
 export * as modes from "./modes.js";
-export * as searchObjects from "./searchObjects.js";
+export * as searchObjects from "./searchObjects-OLD.js";
 export * as localizations from "./localizations.js";
 export * as asserts from "./asserts.js";
 export * as mediaStatuses from "./mediaStatuses/mediaStatuses.js";

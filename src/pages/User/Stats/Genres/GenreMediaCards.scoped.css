@@ -3,7 +3,7 @@
     --grid-max-column-count: 5.5;
     --grid-column-width: 9rem;
     padding-bottom: 1rem;
-    background-color: var(--background-350);
+    background-color: var(--background-350-old);
 
     li {
       width: 100%;
@@ -15,7 +15,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      background-color: var(--background-500);
+      background-color: var(--background-500-old);
     }
   }
 }

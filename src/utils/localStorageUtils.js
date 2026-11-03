@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import { safeParseJson, safeStringifyJson } from "./jsonUtils";
 import { isTypeFunction } from "./functionUtils";
+import { assertThruthy, assertTypeString } from "../collections/asserts";
 
 export function getLocalStorageJson(key, defaultValue) {
   const data = localStorage[key];
@@ -18,8 +19,8 @@ export function setLocalStorageJson(key, value) {
   }
 }
 
-export const createLocalStorageJsonSignal = (key, initialValue) => {
-  const [value, _setValue] = createSignal(getLocalStorageJson(key, initialValue));
+export const createLocalStorageJsonSignal = (key, initialValue, options) => {
+  const [value, _setValue] = createSignal(getLocalStorageJson(key, initialValue), options);
   const setValue = val => {
     _setValue(v => {
       const value = isTypeFunction(val) ? val(v) : val;
@@ -37,6 +38,7 @@ export const createLocalStorageSignal = (key, initialValue) => {
     _setValue(v => {
       if (isTypeFunction(mutate)) mutate = mutate(v);
       if (!mutate) localStorage.removeItem(key);
+      else localStorage.setItem(key, mutate);
       return mutate;
     });
   }
@@ -45,12 +47,14 @@ export const createLocalStorageSignal = (key, initialValue) => {
 }
 
 export const createLocalStorageBooleanSignal = (key, initialValue) => {
-  const val = localStorage.getItem(key);
-  const [value, _setValue] = createSignal(val != null ? val === "true" : initialValue);
+  assertTypeString(key);
+  assertThruthy(key);
+  const start = localStorage.getItem(key);
+  const [value, _setValue] = createSignal(start ? start === "true" : initialValue);
   const setValue = mutate => {
     _setValue(v => {
       if (isTypeFunction(mutate)) mutate = mutate(v);
-      if (!mutate) localStorage.removeItem(key);
+      if (mutate == null) localStorage.removeItem(key);
       else localStorage.setItem(key, mutate);
       return mutate;
     });

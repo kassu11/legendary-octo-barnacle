@@ -1,0 +1,131 @@
+import { useParams, useSearchParams } from "@solidjs/router";
+import { createMemo } from "solid-js";
+import "./MainNavigation.scoped.css";
+import { createStore, reconcile } from "solid-js/store";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays";
+import { ParsedSearchParamsContext } from "../../context/providers";
+import { translateInternalApiParams } from "../../core/apiTranslations";
+import { getDates } from "../../utils/dates";
+import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "../../core/globalState";
+
+const [searchStore, setSearchStore] = createStore({});
+
+export function ParseSearchParams(props) {
+  const [searchParams] = useSearchParams();
+  const params = useParams();
+
+  const searchObject = createMemo(() => {
+    const { type, header } = params;
+
+    const obj = {
+      q: decodeURIComponent(wrapToArray(searchParams.q).at(-1) || ""),
+      onList: wrapToArray(searchParams.onList).at(-1),
+      licensed: wrapToArray(searchParams.licensed).at(-1),
+      rank: +wrapToArray(searchParams.rank).at(-1),
+      source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
+      externalSources: [...wrapToSet(searchParams.externalSources)].map(Number).sort(),
+      type,
+    };
+
+    const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalApiParams.sort[val]));
+    const filteredCountry = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.country)).sort();
+    const filteredFormats = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.format).filter(val => translateInternalApiParams.format[val])).sort();
+    const filteredStatus = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.status).filter(val => translateInternalApiParams.status[val])).sort();
+    const filteredAge = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.age).filter(val => translateInternalApiParams.age[val])).sort();
+    const filteredSeason = wrapToArray(searchParams.season).findLast(val => val in translateInternalApiParams.season);
+
+    const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
+    const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
+
+    if (header === "trending") obj.sort = ["trending_desc"];
+    else if (header === "popular") obj.sort = ["popularity_desc"];
+    else if (header === "novel") Object.assign(obj, { sort: ["popularity_desc"], format: "light_novel" });
+    else if (header === "manhwa") Object.assign(obj, { sort: ["popularity_desc"], country: "KR" });
+    else if (header === "finished") Object.assign(obj, { sort: ["end_date_desc_plus"], status: "complete" });
+    else if (header === "new") Object.assign(obj, { sort: ["id_desc"] });
+    else if (header === "top") Object.assign(obj, { sort: ["score_desc", "popularity_desc"] });
+    else if (header === "finished-manga") Object.assign(obj, { sort: ["end_date_desc_plus"], status: "complete", format: "manga" });
+    else if (header === "finished-novel") Object.assign(obj, { sort: ["end_date_desc_plus"], status: "complete", format: "light_novel" });
+
+    else if (header === "this-season") {
+      const dates = getDates();
+      Object.assign(obj, { year: dates.seasonYear, season: dates.season.toLowerCase(), seasonPage: true });
+    } else if (header === "next-season") {
+      const dates = getDates();
+      Object.assign(obj, { year: dates.nextYear, season: dates.nextSeason.toLowerCase(), seasonPage: true });
+    } else if (header === "tba") {
+      Object.assign(obj, { season: "tba", seasonPage: true });
+    } else if (/winter|spring|summer|fall/.test(header)) {
+      const [season, year] = header.split("-");
+      Object.assign(obj, { year: +year, season, seasonPage: true });
+    }
+
+    if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
+
+    if (filteredSorts.length) obj.sort = filteredSorts;
+    else if (!obj.sort?.length) obj.sort = ["popularity_desc"];
+    if (filteredAge.length) obj.age = filteredAge;
+    else obj.age = ["r"];
+
+    if (filteredFormats.length) obj.format = filteredFormats;
+    if (filteredCountry.length) obj.country = filteredCountry;
+    if (filteredStatus.length) obj.status = filteredStatus;
+    if (filteredSeason) obj.season = filteredSeason;
+
+    const themes = wrapToArray(searchParams.theme).map(name => name.toLowerCase()).sort();
+    obj.themes         = themes.filter(val => !val.startsWith("-"));
+    obj.excludedThemes = themes.filter(val =>  val.startsWith("-")).map(val => val.substring(1));
+
+    // Filter duplicate and conflicting states
+    const usersMap = new Map();
+    wrapToArray(searchParams.user).forEach(user => {
+      if (user.startsWith("in-") || user.startsWith("ex-")) usersMap.set(user.substring(3).toLowerCase(), user);
+    });
+    obj.users         = [];
+    obj.excludedUsers = [];
+    usersMap.forEach(user => {
+      if (user.startsWith("in-")) obj.users        .push(user.substring(3));
+      if (user.startsWith("ex-")) obj.excludedUsers.push(user.substring(3));
+    });
+    obj.users.sort();
+    obj.excludedUsers.sort();
+
+    if (searchParams.yearLesser) obj.yearLesser = +wrapToArray(searchParams.yearLesser).at(-1);
+    if (searchParams.yearGreater) obj.yearGreater = +wrapToArray(searchParams.yearGreater).at(-1);
+    if (searchParams.year && !obj.yearLesser && !obj.yearGreater) obj.year = +wrapToArray(searchParams.year).at(-1);
+    if (searchParams.progressLesser) obj.progressLesser = +wrapToArray(searchParams.progressLesser).at(-1);
+    if (searchParams.progressGreater) obj.progressGreater = +wrapToArray(searchParams.progressGreater).at(-1);
+    if (searchParams.progress && !obj.progressLesser && !obj.progressGreater) obj.progress = +wrapToArray(searchParams.progress).at(-1);
+    if (searchParams.lengthLesser) obj.lengthLesser = +wrapToArray(searchParams.lengthLesser).at(-1);
+    if (searchParams.lengthGreater) obj.lengthGreater = +wrapToArray(searchParams.lengthGreater).at(-1);
+    if (searchParams.length && !obj.lengthLesser && !obj.lengthGreater) obj.length = +wrapToArray(searchParams.length).at(-1);
+
+    if (/this-season|next-season|winter|spring|summer|fall/.test(header)) {
+      obj.groupEntriesByFormat = groupSeasonalEntriesByFormat;
+    } else if (header === "tba") {
+      obj.groupEntriesByFormat = groupTBAEntriesByFormat;
+    }
+
+    if (obj.groupEntriesByFormat) obj.sort = ["format", ...obj.sort];
+
+    ["format", "status", "country", "source"].forEach(key => {
+      obj[key] = wrapToArray(obj[key]);
+    });
+
+    if (!(obj.year > 0)) delete obj.year;
+    if (!(obj.rank > 0)) delete obj.rank;
+
+    return obj;
+  });
+
+  const parsedSearchParams = createMemo(() => {
+    setSearchStore(reconcile(searchObject()));
+    return searchStore;
+  });
+
+  return (
+    <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
+      {props.children}
+    </ParsedSearchParamsContext.Provider>
+  )
+}
