@@ -55,17 +55,23 @@ export function SeasonControls(props) {
             <ChevronRightIcon scoped />
           </A>
         </nav>
-        <nav class="quick-links" aria-label="Season shortcuts">
-          <A scoped href="/ani/search/anime/this-season" end>This Season</A>
-          <A scoped href="/ani/search/anime/next-season" end>Next Season</A>
-          <A scoped href="/ani/search/anime/tba" end>TBA</A>
-        </nav>
       </Show>
-      <Show when={props.groupByFormat !== undefined}>
-        <button class="group-toggle" classList={{ active: props.groupByFormat }} aria-pressed={props.groupByFormat} onClick={() => props.onGroupByFormatChange()}>
-          <p>Group by Format</p>
-          <Checkbox scoped class="checkbox" checked={props.groupByFormat} />
-        </button>
+      <Show when={params.type === "anime" || props.groupByFormat !== undefined}>
+        <div class="right-side">
+          <Show when={params.type === "anime"}>
+            <nav class="quick-links" aria-label="Season shortcuts">
+              <A scoped href="/ani/search/anime/this-season" end>This Season</A>
+              <A scoped href="/ani/search/anime/next-season" end>Next Season</A>
+              <A scoped href="/ani/search/anime/tba" end>TBA</A>
+            </nav>
+          </Show>
+          <Show when={props.groupByFormat !== undefined}>
+            <button class="group-toggle" classList={{ active: props.groupByFormat }} aria-pressed={props.groupByFormat} onClick={() => props.onGroupByFormatChange()}>
+              <p>Group by Format</p>
+              <Checkbox scoped class="checkbox" checked={props.groupByFormat} />
+            </button>
+          </Show>
+        </div>
       </Show>
     </div>
   );

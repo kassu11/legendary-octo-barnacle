@@ -5,6 +5,45 @@
     align-items: center;
     gap: 8px 16px;
     margin-bottom: 2rem;
+
+    .right-side {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px 16px;
+      flex-grow: 1;
+
+      * {
+        white-space: nowrap;
+      }
+
+      .group-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        padding: .4em .5em .4em .9em;
+        border: 2px dashed var(--bg);
+        border-radius: 100px;
+        background-color: transparent;
+        color: var(--text-muted);
+        font-weight: 600;
+        transition: .2s border, .2s background-color, .2s color;
+
+        &:hover {
+          color: var(--text);
+        }
+
+        &.active {
+          border: 2px solid var(--bg-light);
+          background-color: var(--bg);
+          color: var(--text);
+        }
+
+        > .checkbox {
+          margin-block: -.25em;
+        }
+      }
+    }
   }
 
   .season-nav {
@@ -91,34 +130,6 @@
         background-color: var(--bg);
         color: var(--text);
       }
-    }
-  }
-
-  .group-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-    padding: .4em .5em .4em .9em;
-    border: 2px dashed var(--bg);
-    border-radius: 100px;
-    background-color: transparent;
-    color: var(--text-muted);
-    font-weight: 600;
-    transition: .2s border, .2s background-color, .2s color;
-
-    &:hover {
-      color: var(--text);
-    }
-
-    &.active {
-      border: 2px solid var(--bg-light);
-      background-color: var(--bg);
-      color: var(--text);
-    }
-
-    > .checkbox {
-      margin-block: -.25em;
     }
   }
 }
