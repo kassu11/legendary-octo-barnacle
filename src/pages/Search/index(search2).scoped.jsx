@@ -338,8 +338,6 @@ export function SearchPage() {
     else if (previousMode === "browse" && aniVariables?.search?.length !== 1) debounce = 0; // We just jumped from browse to search, without typing to search bar
     else if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
 
-    console.log("vars", aniVariables);
-
     if (mode === "search" && fallbackPagelessCacheKey === key && currentPage > 1) {
       jikanFallbackSearch({ ...jiVariables, page: currentPage }, key, debounce);
       return

@@ -509,8 +509,6 @@ export function SearchBarOLD(props) {
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== anilistGenresAndTagsFetcher.cacheKey) return;
 
-        console.log("anilist genres", res);
-
         const genres = res.data.data.genres.map(name => ({ name }));
         genres[0].category = "Genres";
         const tags = {};
@@ -526,8 +524,6 @@ export function SearchBarOLD(props) {
             return items;
           }).flat()
         ];
-
-        console.log(genresAndTags);
 
         setAnilistGenresAndTagsData2(reconcile(genresAndTags));
 
@@ -581,7 +577,6 @@ export function SearchBarOLD(props) {
       name: "Jikan media genres",
       onFetch: () => jikanGenresAndThemesController.disable(),
       setValue: (res, { fetcher: f }) => {
-        console.log("anilist genres", res);
         if (f.cacheKey !== jikanGenresAndThemesFetcher.cacheKey) return;
         const clone = structuredClone(res.data.data);
 

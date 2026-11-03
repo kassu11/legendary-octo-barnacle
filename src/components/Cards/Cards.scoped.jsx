@@ -104,8 +104,8 @@ function QuickActionItemList(props) {
     const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: props.media.id, status }, AbortSignal.timeout(30_000));
     const res = await fetcherToFetch(fetcher);
     if (res.status === 200) {
-      const json = await res.json();
-      console.log("JSON", json)
+      // const json = await res.json();
+      // console.log("JSON", json)
       // props.activity.likeCount = json.data.ToggleLike.likeCount;
     } else {
       addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });

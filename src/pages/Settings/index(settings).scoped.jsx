@@ -112,7 +112,6 @@ function Select(props) {
   }
 
   const handleClick = e => {
-    console.log(e.target);
     // Dialog is only clicked in mobile, when user clicks outside the select area
     if (e.target === dialog) handleClose();
   }

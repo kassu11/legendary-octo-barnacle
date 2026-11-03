@@ -94,7 +94,6 @@ function modifyMediaListData(listData, options) {
   const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
   data.sort(sortFunction);
 
-  console.log("Size:", data.length);
   // postMessage(Array(50).fill(data).flat());
   postMessage(data);
 }

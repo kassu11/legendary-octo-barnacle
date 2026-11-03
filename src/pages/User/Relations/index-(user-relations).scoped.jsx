@@ -62,7 +62,6 @@ export function UserRelations() {
       },
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== userRelationsFetcher.cacheKey) return;
-        // console.log(res);
         setUserRelationsData(res);
         document.title = `${userName} ${capitalize(type)} relations - LOB`;
       }
