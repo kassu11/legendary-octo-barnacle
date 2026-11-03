@@ -2,7 +2,6 @@ import { Navigate, useLocation, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getDates } from "../../utils/dates";
 import { queries } from "../../collections/collections";
-import { createTimer, formatMSToString } from "../../utils/timeUtils";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./index(search2).scoped.css";
@@ -297,7 +296,6 @@ export function SearchPage() {
     });
   }
 
-  const [anilistSearchTime, startAnilistSearchTimer, stopAnilistSearchTimer] = createTimer();
   const [anilistSearchLoading, setAnilistSearchLoading] = createSignal(false);
   const [anilistBrowseData, setAnilistBrowseData] = createStore({});
 
@@ -358,19 +356,11 @@ export function SearchPage() {
         anilistSearchController.disable()
         if (mode === "search") setPagelessCacheLoading(false);
       },
-      onStart: time => {
-        batch(() => {
-          setAnilistSearchLoading(true);
-          startAnilistSearchTimer(time);
-        });
-      },
-      onStop: time => {
-        batch(() => {
-          setPreviousHistoryDummyData(null); // This value is used only ones the page load, then its cleared
-          setAnilistSearchLoading(false);
-          stopAnilistSearchTimer(time);
-        });
-      },
+      onStart: () => setAnilistSearchLoading(true),
+      onStop: () => batch(() => {
+        setPreviousHistoryDummyData(null); // This value is used only ones the page load, then its cleared
+        setAnilistSearchLoading(false);
+      }),
       onError: async (response, { fetcher: f }) => {
         if (f.cacheKey !== anilistSearchFetcher.cacheKey || response?.status !== 400) return;
         try {
@@ -468,7 +458,7 @@ export function SearchPage() {
           <Show when={location.search || params.header}>
             <Navigate href={"/" + params.api + "/search/" + params.type + (params.header ? ("/" + params.header) : "") +  location.search} />
           </Show>
-          <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} time={formatMSToString(anilistSearchTime())} />
+          <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} />
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">

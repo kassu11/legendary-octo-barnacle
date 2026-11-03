@@ -10,7 +10,6 @@ export function BrowsePage(props) {
 
   return (
     <div class="browse-page">
-      <p class="time">{props.time}</p>
       <Switch>
         <Match when={params.type === "anime"}>
           <HorizontalCardRowScoped data={props.cards?.season && props.cards?.trending?.media} loading={props.loading} href="/ani/search/anime/trending" title="Trending Now" />
