@@ -6,7 +6,6 @@ export const assertTrueOLD = (condition, message = "Not true") => {
   }
 }
 
-export const assertFalseOLD = (condition, message = "Not false") => assertTrueOLD(!condition, message);
 export const notNullishOLD = value => assertTrueOLD(value != null, "Value is null or undefined");
 export const unreachableOLD = (message = "Assert unreachable") => assertTrueOLD(false, message);
 

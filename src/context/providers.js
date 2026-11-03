@@ -1,8 +1,5 @@
 import { createContext, useContext } from "solid-js";
 
-export const SearchBarContext = createContext();
-export const useSearchBar = () => useContext(SearchBarContext);
-
 export const ParsedSearchParamsContext = createContext();
 export const useParsedSearchParams= () => useContext(ParsedSearchParamsContext);
 
@@ -29,6 +26,3 @@ export const useFavourites = () => useContext(FavouritesContext);
 
 export const MediaInfoContext = createContext();
 export const useMediaInfo = () => useContext(MediaInfoContext);
-
-export const CustomInputs = createContext();
-export const useCustomInpunts = () => useContext(CustomInputs);

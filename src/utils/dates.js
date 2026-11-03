@@ -18,7 +18,7 @@ export const getDates = (offsetDays = 7) => {
   };
 }
 
-export function moveSeasonObject(season, year, move = 0) {
+function moveSeasonObject(season, year, move = 0) {
   asserts.assertTrueOLD(typeof year === "number", "year is not a number");
   asserts.assertTrueOLD(typeof season === "string", "season is not a string");
   const seasonMove = move % 4;

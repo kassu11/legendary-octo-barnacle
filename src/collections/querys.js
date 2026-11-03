@@ -71,8 +71,6 @@ export const myAnimeListMangaCharactersById = id => `https://api.tenrai.org/v1/m
 export const myAnimeListCharacterById = ({ id }) => `https://api.tenrai.org/v1/characters/${id}/full`;
 export const myAnimeListAnimeStaffById = ({ id }) => `https://api.tenrai.org/v1/anime/${id}/staff`;
 export const myAnimeListMediaSearch = ({ type, ...rest }) => `https://api.tenrai.org/v1/${type}?${objectToSearchParams(rest)}`;
-export const myAnimeListMediaSeasonSearch = ({ season, query }) => `https://api.tenrai.org/v1/seasons/${season}?${query}`;
-export const myAnimeListMediaGenres = ({ type }) => `https://api.tenrai.org/v1/genres/${type}`;
 
 
 // The expected input contains @1, @2 and @3 texts.

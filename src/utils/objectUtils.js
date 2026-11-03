@@ -56,7 +56,7 @@ const concatMerge = (base, obj) => {
   }
 }
 
-export const removeUndefinedKeysFromObject = obj => {
+const removeUndefinedKeysFromObject = obj => {
   for (const key in obj) {
     if (obj[key] === undefined) delete obj[key];
   }
