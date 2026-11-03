@@ -6,7 +6,7 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { useNavigateAndSearch } from "../../utils/urlUtils";
 import { arrayUtils, formatingUtils } from "../../utils/utils";
 import { localizeInternalSearchParams } from "../../core/apiTranslations";
-import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, StreamingIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "../../assets/SearchFilterIcons";
+import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "../../assets/SearchFilterIcons";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 
@@ -32,7 +32,7 @@ const typeIcons = {
   format: FormatIcon,
   source: SourceIcon,
   country: CountryIcon,
-  externalSources: StreamingIcon,
+  externalSources: AvailableIcon,
   themes: GenreIcon,
   age: AgeIcon,
   status: StatusIcon,
