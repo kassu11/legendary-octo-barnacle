@@ -64,9 +64,9 @@ const baseLimits = {
       return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec) - now;
     }
   },
-  "https://api.tenrai.org/v4": {
-    limit: 60,
-    remaining: 60,
+  "https://api.tenrai.org/v1": {
+    limit: 120,
+    remaining: 120,
     resetTime: 0,
     requests: [],
     timeToWait: self => {
@@ -74,8 +74,8 @@ const baseLimits = {
       // Anilist internal rate limit has been hit, resume only after reset time has passed
       if (self.resetTime > now) return self.resetTime - now;
 
-      // Only allow 1 request in one second
-      const only1ReqIn1Sec = self.requests.at(-1)?.start + 1500 || now;
+      // Only allow 4 request in 1.5 second
+      const only1ReqIn1Sec = self.requests.at(-4)?.start + 1500 || now;
 
       return Math.max(now, only1ReqIn1Sec) - now;
     }
