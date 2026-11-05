@@ -4,8 +4,26 @@ onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);
 }
 
+const tokenFilters = ["format", "status", "countryOfOrigin", "year", "isAdult", "genre", "userStatus", "studio", "tag"];
+
+// Excluded values have a "-" prefix
+function parseTokens(tokens) {
+  const parsed = { include: [], exclude: [] };
+  for (const token of tokens) {
+    if (token[0] === "-") parsed.exclude.push(token.slice(1));
+    else parsed.include.push(token);
+  }
+  return parsed;
+}
+
+const matchesAny = ({ include, exclude }, test) => (!include.length || include.some(test)) && !exclude.some(test);
+const matchesAll = ({ include, exclude }, test) => include.every(test) && !exclude.some(test);
+
 function modifyMediaListData(listData, type, options) {
   options.searchRegex = fuse(options.search);
+  for (const name of tokenFilters) {
+    options[name] = parseTokens(options[name]);
+  }
 
   const mediaSet = new Set();
   const tagsSet = new Set();
@@ -45,7 +63,7 @@ function modifyMediaListData(listData, type, options) {
   listData.total = mediaSet.size;
   listData.studios = Array.from(studiosSet).sort();
   listData.tags = Array.from(tagsSet).sort();
-  const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
+  const sortFunction = generateSortFunction(options.sort);
   listData.lists.forEach(list => {
     list.entries.sort(sortFunction);
   });
@@ -57,30 +75,23 @@ function modifyMediaListData(listData, type, options) {
   postMessage(listData);
 }
 
-function generateSortFunction(sort, direction = 1) {
-  switch (sort) {
-    case "score":
-      return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
-    case "title":
-      return (a, b) => (sortFunctions.title(a, b) * direction) || sortFunctions.score(a, b);
-    case "progress":
-      return (a, b) => (sortFunctions.progress(a, b) * direction) || sortFunctions.title(a, b);
-    case "updatedAt":
-      return (a, b) => (sortFunctions.updatedAt(a, b) * direction) || sortFunctions.title(a, b);
-    case "startedAt":
-      return (a, b) => (sortFunctions.startedAt(a, b) || sortFunctions.completedAt(a, b)) * direction || sortFunctions.title(a, b);
-    case "completedAt":
-      return (a, b) => (sortFunctions.completedAt(a, b) || sortFunctions.updatedAt(a, b)) * direction;
-    case "releaseDate":
-      return (a, b) => (sortFunctions.releaseDate(a, b) * direction) || sortFunctions.title(a, b);
-    case "averageScore":
-      return (a, b) => (sortFunctions.averageScore(a, b) * direction) || sortFunctions.title(a, b);
-    case "popularity":
-      return (a, b) => (sortFunctions.popularity(a, b) * direction) || sortFunctions.title(a, b);
-    case "repeat":
-      return (a, b) => ((sortFunctions.repeat(a, b) || sortFunctions.progress(a, b)) * direction) || sortFunctions.title(a, b);
-    default:
-      return (a, b) => (sortFunctions.score(a, b) * direction) || sortFunctions.title(a, b);
+// Sort values are "field" or "field_reverse", later fields settle the ties of the earlier ones
+function generateSortFunction(sort) {
+  const comparators = sort.flatMap(value => {
+    const reversed = value.endsWith("_reverse");
+    const compare = sortFields[reversed ? value.slice(0, -"_reverse".length) : value];
+    if (!compare) return [];
+    return reversed ? (a, b) => compare(b, a) : compare;
+  });
+  if (!comparators.length) comparators.push(sortFunctions.score);
+  comparators.push(sortFunctions.title, sortFunctions.score);
+
+  return (a, b) => {
+    for (const compare of comparators) {
+      const result = compare(a, b);
+      if (result) return result;
+    }
+    return 0;
   };
 }
 
@@ -88,13 +99,20 @@ const sortFunctions = {
   "score": (a, b) => (b.score || 0) - (a.score || 0),
   "title": (a, b) => a.media.title.userPreferred.localeCompare(b.media.title.userPreferred),
   "progress": (a, b) => (b.progress || 0) - (a.progress || 0),
-  "updatedAt": (a, b) => (a.updatedAt || 0) > (b.updatedAt || 0) ? -1 : 1,
+  "updatedAt": (a, b) => (b.updatedAt || 0) - (a.updatedAt || 0),
   "startedAt": (a, b) => (b.startedAt?.year || 0) - (a.startedAt?.year || 0) || (b.startedAt?.month || 0) - (a.startedAt?.month || 0) || (b.startedAt?.day || 0) - (a.startedAt?.day || 0),
   "completedAt": (a, b) => (b.completedAt?.year || 0) - (a.completedAt?.year || 0) || (b.completedAt?.month || 0) - (a.completedAt?.month || 0) || (b.completedAt?.day || 0) - (a.completedAt?.day || 0),
   "releaseDate": (a, b) => (b.media.startDate?.year || 0) - (a.media.startDate?.year || 0) || (b.media.startDate?.month || 0) - (a.media.startDate?.month || 0) || (b.media.startDate?.day || 0) - (a.media.startDate?.day || 0),
   "averageScore": (a, b) => (b.media.averageScore || 0) - (a.media.averageScore || 0),
   "popularity": (a, b) => (b.media.popularity || 0) - (a.media.popularity || 0),
   "repeat": (a, b) => (b.repeat || 0) - (a.repeat || 0),
+}
+
+const sortFields = {
+  ...sortFunctions,
+  "startedAt": (a, b) => sortFunctions.startedAt(a, b) || sortFunctions.completedAt(a, b),
+  "completedAt": (a, b) => sortFunctions.completedAt(a, b) || sortFunctions.updatedAt(a, b),
+  "repeat": (a, b) => sortFunctions.repeat(a, b) || sortFunctions.progress(a, b),
 }
 
 function filter(entry, filterObject) {
@@ -107,25 +125,27 @@ function filter(entry, filterObject) {
     return false;
   }
 
-  if (filterObject.format && entry.media.format !== filterObject.format) {
+  if (!matchesAny(filterObject.format, format => format === entry.media.format)) {
     return false;
   }
-  if (filterObject.status && entry.media.status !== filterObject.status) {
+  if (!matchesAny(filterObject.status, status => status === entry.media.status)) {
     return false;
   }
-  if (filterObject.countryOfOrigin && entry.media.countryOfOrigin !== filterObject.countryOfOrigin) {
+  if (!matchesAny(filterObject.countryOfOrigin, country => country === entry.media.countryOfOrigin)) {
     return false;
   }
-  if (filterObject.year && entry.media.startDate?.year !== filterObject.year) {
+  if (!matchesAny(filterObject.year, year => year === String(entry.media.startDate?.year))) {
     return false;
   }
-  if (typeof filterObject.isAdult === "boolean" && entry.media.isAdult !== filterObject.isAdult) {
+  if (!matchesAny(filterObject.isAdult, isAdult => isAdult === String(entry.media.isAdult))) {
     return false;
   }
-  if (filterObject.genre && entry.media.genres.every(genre => genre !== filterObject.genre)) {
+  // Entry needs to have all the included genres and tags, other filters match any of the included values.
+  // Entry can't have any of the excluded values
+  if (!matchesAll(filterObject.genre, genre => entry.media.genres.includes(genre))) {
     return false;
   }
-  if (filterObject.userStatus && entry.status !== filterObject.userStatus) {
+  if (!matchesAny(filterObject.userStatus, status => status === entry.status)) {
     return false;
   }
   if (filterObject.private && !entry.private) {
@@ -143,20 +163,10 @@ function filter(entry, filterObject) {
   if (filterObject.missingScore && entry.score !== 0) {
     return false;
   }
-  if (filterObject.studio) studio: {
-    for (const studio of entry.media.studios.edges) {
-      if (studio.isMain && studio.node.name === filterObject.studio) {
-        break studio;
-      }
-    }
+  if (!matchesAny(filterObject.studio, name => entry.media.studios.edges.some(studio => studio.isMain && studio.node.name === name))) {
     return false;
   }
-  if (filterObject.tag) tag: {
-    for (const tag of entry.media.tags) {
-      if (tag.rank > 50 && tag.name=== filterObject.tag) {
-        break tag;
-      }
-    }
+  if (!matchesAll(filterObject.tag, name => entry.media.tags.some(tag => tag.rank > 50 && tag.name === name))) {
     return false;
   }
 
