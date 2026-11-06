@@ -92,9 +92,9 @@ function ContextMenu() {
   return (
     <div class="context-menu">
       <For each={branches()} fallback="No dev branches available">{branch => (
-        <a href={location.pathname + search() + "dev-branch=" + branch} onClick={handleClick}>
+        <a href={location.pathname + search() + "dev-branch=" + branch.path} onClick={handleClick}>
           <BranchIcon />
-          {branch}
+          {branch.name}
         </a>
       )}</For>
     </div>
