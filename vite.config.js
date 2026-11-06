@@ -6,7 +6,6 @@ import checker from 'vite-plugin-checker';
 import AutoImport from "unplugin-auto-import/vite"
 import grapqlMinimizer from "./vite-plugins/graphql-minimize";
 import openInEditor from "./vite-plugins/open-in-editor";
-import { version } from "./package.json";
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
@@ -76,7 +75,9 @@ export default defineConfig({
     __BASE__: JSON.stringify(__BASE__),
     // Branch is definitely just a string, but this is the only way to pass a string, dont ask why
     __BRANCH__: JSON.stringify(branch),
-    __VERSION__: JSON.stringify(version),
+    // Set by the deploy script, other builds don't have any deployment details
+    // eslint-disable-next-line no-undef
+    __DEPLOYMENT__: process.env.DEPLOYMENT_INFO || "null",
   },
   server: {
     port: __PORT__

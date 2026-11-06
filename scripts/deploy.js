@@ -6,7 +6,7 @@
 //
 // The name "main" is published to the site root, all others to branches/<name>/.
 import { execFileSync, execSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 
 const PAGES_BRANCH = "gh-pages";
@@ -60,47 +60,55 @@ function publishFiles(dist, worktree, slug) {
   }
 }
 
-// branches.json is read by the dev branch menu in the footer, and it lists what actually exists on gh-pages
-function writeManifest(worktree) {
+// branches.json is read by the dev branch menu in the footer. The folders on gh-pages decide what is listed,
+// and the details of each entry are carried over from the previous manifest, as only the current deployment is known here.
+function writeManifest(worktree, deployment) {
+  const manifestPath = join(worktree, "branches.json");
   const branchesDir = join(worktree, "branches");
+  const previous = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, "utf8")) : [];
+  const entries = new Map(previous.map(entry => [entry.path, entry]));
+  if (deployment) entries.set(deployment.path, deployment);
+
   const branches = existsSync(branchesDir)
     ? readdirSync(branchesDir, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort()
     : [];
-  const manifest = JSON.stringify(["main", ...branches], null, 2) + "\n";
+  const manifest = ["main", ...branches].map(path => entries.get(path)).filter(Boolean);
+  const content = JSON.stringify(manifest, null, 2) + "\n";
 
-  writeFileSync(join(worktree, "branches.json"), manifest);
-  for (const branch of branches) writeFileSync(join(branchesDir, branch, "branches.json"), manifest);
+  writeFileSync(manifestPath, content);
+  for (const branch of branches) writeFileSync(join(branchesDir, branch, "branches.json"), content);
 }
 
 function commitAndPush(worktree, message) {
   pagesGit(worktree, "add", "-A");
-  if (!pagesGit(worktree, "status", "--porcelain")) return false;
-
   pagesGit(worktree, "commit", "-m", message);
   console.log(`\nPushing ${PAGES_BRANCH}...`);
   pagesGit(worktree, "push", "origin", PAGES_BRANCH);
-  return true;
 }
 
 function deploy(root, customName) {
   const name = customName || git(root, "branch", "--show-current") || git(root, "log", "-1", "--format=%s");
   const slug = toSlug(name);
   const dirty = git(root, "status", "--porcelain") !== "";
-  const commit = git(root, "rev-parse", "--short", "HEAD") + (dirty ? "-dirty" : "");
+  const hash = git(root, "rev-parse", "HEAD");
+  const commit = hash.slice(0, 7) + (dirty ? "-dirty" : "");
 
   console.log(`Deploying ${commit} as "${slug}"`);
   if (dirty) console.warn("Warning: uncommitted changes will be included in this deployment");
 
+  // Baked into the build for the footer, and added to branches.json for the dev branch menu
+  const deployment = { name, path: slug, commit: hash, dirty, updatedAt: new Date().toISOString() };
+
   const shell = { cwd: root, stdio: "inherit" };
   execSync("pnpm install --frozen-lockfile", shell);
-  execSync("pnpm run build", { ...shell, env: { ...process.env, SAFE_BRANCH_NAME: slug } });
+  execSync("pnpm run build", { ...shell, env: { ...process.env, SAFE_BRANCH_NAME: slug, DEPLOYMENT_INFO: JSON.stringify(deployment) } });
 
   const worktree = preparePagesWorktree(root);
   publishFiles(join(root, "dist"), worktree, slug);
-  writeManifest(worktree);
+  writeManifest(worktree, deployment);
 
-  const pushed = commitAndPush(worktree, `Deploy ${slug} to Pages (${commit})`);
-  console.log(pushed ? "\nDeployed, Pages usually updates in 1-2 minutes:" : "\nNo changes to deploy:");
+  commitAndPush(worktree, `Deploy ${slug} to Pages (${commit})`);
+  console.log("\nDeployed, Pages usually updates in 1-2 minutes:");
   console.log(slug === "main" ? SITE_URL : `${SITE_URL}?dev-branch=${slug}`);
 }
 
