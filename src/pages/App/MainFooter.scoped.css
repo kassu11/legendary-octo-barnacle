@@ -43,7 +43,6 @@
 
       &:hover {
         color: var(--text);
-        text-decoration: underline;
       }
     }
 
@@ -60,8 +59,20 @@
 
     .build {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 16px;
+    }
+
+    .deployment-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-weight: 400;
+    }
+
+    .hash {
+      font-family: monospace;
     }
   }
 
@@ -101,6 +112,12 @@
       &:hover, .open & {
         background-color: var(--bg-light);
       }
+    }
+
+    .branch {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
     .context-menu {

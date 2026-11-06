@@ -2,7 +2,7 @@ import { A, useLocation } from "@solidjs/router";
 import { createMemo, createResource, createSignal, For, Show } from "solid-js";
 import "./MainFooter.scoped.css";
 import BranchIcon from "../../assets/BranchIcon";
-import { localizations } from "../../collections/collections";
+import { CreatedAt } from "../../components/CreatedAt.jsx";
 import { settingsShowDevBranch } from "../../core/globalState";
 
 const repositoryUrl = "https://github.com/kassu11/legendary-octo-barnacle";
@@ -47,10 +47,7 @@ export function MainFooter() {
             © {new Date().getFullYear()} <ExternalLink href="https://github.com/kassu11">kassu11</ExternalLink>.
             {" "}Not affiliated with AniList or MyAnimeList. All media data and images belong to their respective owners.
           </p>
-          <div class="build">
-            <span>{__VERSION__}</span>
-            <DevBranchSwitcher />
-          </div>
+          <BuildInfo />
         </div>
       </div>
     </footer>
@@ -61,21 +58,47 @@ function ExternalLink(props) {
   return <a href={props.href} target="_blank" rel="noreferrer">{props.children}</a>;
 }
 
-function DevBranchSwitcher() {
+function BuildInfo() {
+  // Comes from the running build instead of branches.json, which only knows the latest deployment
+  const name = __DEPLOYMENT__?.name ?? __BRANCH__;
+
+  return (
+    <div class="build">
+      <Show when={__DEPLOYMENT__}>
+        <DeploymentDetails branch={__DEPLOYMENT__} />
+      </Show>
+      <Show when={settingsShowDevBranch()} fallback={<span>{name}</span>}>
+        <DevBranchSwitcher name={name} />
+      </Show>
+    </div>
+  );
+}
+
+function DeploymentDetails(props) {
+  return (
+    <span class="deployment-details">
+      <span class="hash" title={props.branch.commit}>
+        {props.branch.commit.slice(0, 7)}{props.branch.dirty ? "-dirty" : ""}
+      </span>
+      <CreatedAt createdAt={Date.parse(props.branch.updatedAt) / 1000} />
+    </span>
+  );
+}
+
+function DevBranchSwitcher(props) {
   const [open, setOpen] = createSignal(false);
   return (
-    <Show when={settingsShowDevBranch()}>
-      <div class="dev-branch-switcher" classList={{ open: open() }}>
-        <ContextMenu />
-        <button onClick={() => setOpen(s => !s)}>
-          <BranchIcon /> {localStorage.getItem(localizations.LOB_DEV_BRANCH) || "main"}
-        </button>
-      </div>
-    </Show>
+    <div class="dev-branch-switcher" classList={{ open: open() }}>
+      <ContextMenu />
+      <button onClick={() => setOpen(s => !s)}>
+        <BranchIcon /> {props.name}
+      </button>
+    </div>
   );
 }
 
 function ContextMenu() {
+  console.log("??");
   const [branches] = createResource(async () => {
     const res = await fetch(__BASE__ + "/branches.json");
     const text = await res.text();
@@ -87,14 +110,17 @@ function ContextMenu() {
 
   const location = useLocation();
   const search = createMemo(() => location.search.length < 2 ? "?" : location.search + "&");
-  const handleClick = e => window.location.href = e.target.href;
+  const handleClick = e => window.location.href = e.currentTarget.href;
 
   return (
     <div class="context-menu">
       <For each={branches()} fallback="No dev branches available">{branch => (
         <a href={location.pathname + search() + "dev-branch=" + branch.path} onClick={handleClick}>
           <BranchIcon />
-          {branch.name}
+          <span class="branch">
+            <span>{branch.name}</span>
+            <DeploymentDetails branch={branch} />
+          </span>
         </a>
       )}</For>
     </div>

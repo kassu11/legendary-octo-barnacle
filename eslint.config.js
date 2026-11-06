@@ -17,7 +17,8 @@ export default [
         __PORT__: "readonly",
         __DEBUG_PORT__: "readonly",
         __BASE__: "readonly",
-        __VERSION__: "readonly",
+        __BRANCH__: "readonly",
+        __DEPLOYMENT__: "readonly",
       },
       parser: tsParser,      // Use the TS parser for JSX support
       parserOptions: {

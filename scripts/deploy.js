@@ -96,13 +96,16 @@ function deploy(root, customName) {
   console.log(`Deploying ${commit} as "${slug}"`);
   if (dirty) console.warn("Warning: uncommitted changes will be included in this deployment");
 
+  // Baked into the build for the footer, and added to branches.json for the dev branch menu
+  const deployment = { name, path: slug, commit: hash, dirty, updatedAt: new Date().toISOString() };
+
   const shell = { cwd: root, stdio: "inherit" };
   execSync("pnpm install --frozen-lockfile", shell);
-  execSync("pnpm run build", { ...shell, env: { ...process.env, SAFE_BRANCH_NAME: slug } });
+  execSync("pnpm run build", { ...shell, env: { ...process.env, SAFE_BRANCH_NAME: slug, DEPLOYMENT_INFO: JSON.stringify(deployment) } });
 
   const worktree = preparePagesWorktree(root);
   publishFiles(join(root, "dist"), worktree, slug);
-  writeManifest(worktree, { name, path: slug, commit: hash, dirty, updatedAt: new Date().toISOString() });
+  writeManifest(worktree, deployment);
 
   commitAndPush(worktree, `Deploy ${slug} to Pages (${commit})`);
   console.log("\nDeployed, Pages usually updates in 1-2 minutes:");
