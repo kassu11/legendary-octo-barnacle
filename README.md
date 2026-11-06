@@ -36,4 +36,15 @@ Your app is ready to be deployed!
 
 ## Deployment
 
+Deployments are run manually, and they are published through the `gh-pages` branch. The branch is checked out to a git worktree next to this repository (`../<repo>-gh-pages`), which gets created on the first run.
+
+### `pnpm run deploy [name]`
+
+Builds the current checkout, including any uncommitted changes, and pushes it to `gh-pages`.<br>
+The name defaults to the current branch, or to the commit message on a detached HEAD. `main` is published to the site root, and all other names to `branches/<name>/`.
+
+### `pnpm run deploy:remove <name>`
+
+Removes a published preview from `gh-pages`, for example after its branch has been merged.
+
 Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)

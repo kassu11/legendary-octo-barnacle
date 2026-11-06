@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "node scripts/deploy.js",
+    "deploy:remove": "node scripts/deploy.js --remove"
   },
   "dependencies": {
     "@solid-primitives/scheduled": "^1.5.0",
