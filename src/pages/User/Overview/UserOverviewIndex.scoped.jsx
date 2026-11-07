@@ -342,13 +342,12 @@ function UserActivityPage(props) {
     <>
       <div class="user-profile-activity">
         <For each={props.cache}>{(activity, i) => {
-          // eslint-disable-next-line no-unassigned-vars
           let ref;
           onMount(() => intersectionObserver.observe(ref));
 
           return (
             <ActivityCard activity={activity} mutateCache={props.mutateCache} hideProfile={true} small={true} wrapper={wrapperProps => (
-              <div ref={ref} attr:data-page={Math.ceil((i() + 1) / hardcodedPageCount)} {...wrapperProps} />
+              <div ref={elem => ref = elem} attr:data-page={Math.ceil((i() + 1) / hardcodedPageCount)} {...wrapperProps} />
             )}/>
           );
         }}</For>

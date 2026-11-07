@@ -3,7 +3,6 @@ import "./Trailer.scoped.css";
 
 export function Trailer(props) {
   const [open, setOpen] = createSignal(false);
-  // eslint-disable-next-line no-unassigned-vars
   let dialog;
 
   return (
@@ -12,7 +11,7 @@ export function Trailer(props) {
         dialog.showModal();
         setOpen(true);
       }}>Watch trailer</button>
-      <dialog class="trailer-dialog" onClose={() => setOpen(false)} ref={dialog} onClick={e => e.target === dialog && dialog.close()}>
+      <dialog class="trailer-dialog" onClose={() => setOpen(false)} ref={elem => dialog = elem} onClick={e => e.target === dialog && dialog.close()}>
         <div class="wrapper">
           <Show when={open()}>
             <Switch>

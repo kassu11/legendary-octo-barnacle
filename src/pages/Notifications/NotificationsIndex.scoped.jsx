@@ -282,12 +282,11 @@ function NotificationsPage(props) {
       </Show>
       <ol class="notifications-container" classList={{loading: anilistNotificationsLoading() && page() === 1}}>
         <For each={props.cache}>{notification =>  {
-          // eslint-disable-next-line no-unassigned-vars
           let ref;
           onMount(() => intersectionObserver.observe(ref))
 
           return (
-            <li ref={ref} attr:data-id={notification.id}>
+            <li ref={elem => ref = elem} attr:data-id={notification.id}>
               <Switch fallback={"Notification type \"" + notification.type + "\" not supported."}>
                 <Match when={notification.type === "RELATED_MEDIA_ADDITION"}>
                   <A href={mediaUrl(notification.media)}>

@@ -4,11 +4,10 @@ export function DraggableScrollContainerScoped(props) {
   let xStart = 0;
   let xScroll = 0;
   let xPrev = NaN;
-  // eslint-disable-next-line no-unassigned-vars
   let scrollContainer;
 
   return (
-    <div class="scroll-line-chart" ref={scrollContainer} onMouseMove={e => {
+    <div class="scroll-line-chart" ref={elem => scrollContainer = elem} onMouseMove={e => {
       if (e.buttons === 1) {
         e.preventDefault();
         const xDelta = e.clientX - xStart;
@@ -43,11 +42,10 @@ export function DraggableScrollContainerScoped2(props) {
   let xStart = 0;
   let xScroll = 0;
   let xPrev = NaN;
-  // eslint-disable-next-line no-unassigned-vars
   let scrollContainer;
 
   return (
-    <div class="scroll-bar-chart" ref={scrollContainer} onMouseMove={e => {
+    <div class="scroll-bar-chart" ref={elem => scrollContainer = elem} onMouseMove={e => {
       if (e.buttons === 1) {
         e.preventDefault();
         const xDelta = e.clientX - xStart;

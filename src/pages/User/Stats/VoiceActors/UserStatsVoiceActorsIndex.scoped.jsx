@@ -253,7 +253,6 @@ function Cards(props) {
     });
   });
 
-  // eslint-disable-next-line no-unassigned-vars
   let gridReel;
 
   let fetchNewCards = false;
@@ -272,7 +271,7 @@ function Cards(props) {
 
   return (
     <div class="inline-container">
-      <ol class="grid-reel-auto-fill" ref={gridReel} onScroll={() => {
+      <ol class="grid-reel-auto-fill" ref={elem => gridReel = elem} onScroll={() => {
         if (!fetchNewCards) {
           return;
         }

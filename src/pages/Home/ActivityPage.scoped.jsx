@@ -155,13 +155,12 @@ export function HomePageActivityReelContent(props) {
       <p>{formatMSToString(time())}</p>
       <ol class="flex-space-between activity" classList={{loading: loading() && page() === 1}}>
         <For each={props.cache}>{activity => {
-          // eslint-disable-next-line no-unassigned-vars
           let ref;
           onMount(() => intersectionObserver.observe(ref))
 
           return (
             <ActivityCard activity={activity} mutateCache={props.mutateCache} wrapper={wrapperProps => (
-              <li ref={ref} attr:data-id={activity.id} {...wrapperProps} />
+              <li ref={elem => ref = elem} attr:data-id={activity.id} {...wrapperProps} />
             )}/>
           )
         }}</For>

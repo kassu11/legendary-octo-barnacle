@@ -2,7 +2,6 @@ import { onCleanup, onMount } from "solid-js";
 import "./Intersection.scoped.css";
 
 export function Intersection(props) {
-  // eslint-disable-next-line no-unassigned-vars
   let intersection, intersected = false;
 
   onCleanup(() => {
@@ -44,7 +43,7 @@ export function Intersection(props) {
   }, { rootMargin: props.rootMargin || "800px" });
 
   return (
-    <div class="intersection" ref={intersection}>
+    <div class="intersection" ref={elem => intersection = elem}>
       {props.children}
     </div>
   );
