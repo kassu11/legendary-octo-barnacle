@@ -226,7 +226,7 @@ function YearHeader(props) {
 
 
 function MediaCards(props) {
-  asserts.assertTrueOLD(props.showYears, "showYears signal is missing");
+  asserts.assertTruthy(props.showYears, "showYears signal is missing");
 
   const merge = (acc, edge) => {
     if (acc.at(-1)?.node.id !== edge.node.id && props.lastMediaId !== edge.node.id) {

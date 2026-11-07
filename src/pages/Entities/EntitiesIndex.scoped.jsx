@@ -188,7 +188,7 @@ function CharactersPage(props) {
         setAnilistCharactersData(res.data.data.Media);
 
         if (!res.data.data.Media.characters.edges.length) return;
-        asserts.assertThruthy(hardcodedPageCount === res.data.data.Media.characters.pageInfo.perPage, "Page count is wrong");
+        asserts.assertTruthy(hardcodedPageCount === res.data.data.Media.characters.pageInfo.perPage, "Page count is wrong");
         freshPages.add(res.data.data.Media.characters.pageInfo.currentPage);
 
         props.updateCache(res, voiceActorRoles(), pagelessFetcher);
@@ -267,7 +267,7 @@ function CharactersPage(props) {
   const intersectionCallback = (entries) => {
     for (const entry of entries) {
       const page = parseInt(entry.target.dataset.page);
-      asserts.assertTrueOLD(Number.isInteger(page));
+      asserts.assertTruthy(Number.isInteger(page));
 
       if (entry.isIntersecting) {
         visiblePages.add(page);

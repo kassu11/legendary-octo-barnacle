@@ -148,7 +148,7 @@ export const numberCommas = num => {
 
 export const compactNumber = num => {
   if (num == undefined) return;
-  asserts.assertTrueOLD(typeof num === "number", "Number is not typeof number");
+  asserts.assertTruthy(typeof num === "number", "Number is not typeof number");
 
   return Intl.NumberFormat('en-US', {
     notation: "compact",
@@ -157,13 +157,13 @@ export const compactNumber = num => {
 }
 
 export const formatTitleToUrl = (title) => {
-  asserts.assertTrueOLD(title != null, "No title given");
+  asserts.assertTruthy(title != null, "No title given");
   return encodeURI(title.toLowerCase().replace(/[#%?]+/g, "").replace(/[/\\\-\u2010-\u2015_{}[\]]+/g, " ").trim().replace(/ +/g, "-"));
 }
 
 export const mediaUrl = (media) => {
-  asserts.assertTrueOLD(media.type, "type is missing");
-  asserts.assertTrueOLD("id" in media, "id is missing");
+  asserts.assertTruthy(media.type, "type is missing");
+  asserts.assertTruthy("id" in media, "id is missing");
 
   return "/ani/" + media.type.toLowerCase() + "/" + media.id + "/" + formatTitleToUrl(media.title.userPreferred);
 }

@@ -8,7 +8,7 @@ import "./SearchIndex.scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
 import { setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
 import { useParsedSearchParams } from "@/state/providers";
-import { assertThruthy } from "@/utils/asserts";
+import { assertTruthy } from "@/utils/asserts";
 import { translateInternalApiParams } from "@/api/apiTranslations";
 import { concatMergeObjects } from "@/utils/objectUtils";
 import { isTypeArray } from "@/utils/arrays";
@@ -215,8 +215,8 @@ export function SearchPage() {
 
   const mutatePageless = (media, { currentPage, perPage, hasNextPage }, groupEntriesByFormat, isFallbackSearch) => {
     const start = (currentPage - 1) * perPage;
-    assertThruthy(start <= pagelessCacheData.data.media.length);
-    assertThruthy(media.length <= perPage);
+    assertTruthy(start <= pagelessCacheData.data.media.length);
+    assertTruthy(media.length <= perPage);
 
     media.forEach((m, i) => {
       m.customSection = groupEntriesByFormat && pagelessCacheData.data.media[start + i - 1]?.format !== m.format ? m.format || "Format TBA" : false;

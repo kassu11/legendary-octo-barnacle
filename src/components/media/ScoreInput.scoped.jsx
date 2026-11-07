@@ -5,8 +5,8 @@ import EmojiByScoreScoped from "@/components/EmojiByScore.scoped.jsx";
 import { asserts } from "@/utils/utils.js";
 
 function ScoreInput(props) {
-  asserts.assertTrueOLD(props.format, "Score format is missing");
-  asserts.assertTrueOLD(props.onChange, "onChange is missing (give signal)");
+  asserts.assertTruthy(props.format, "Score format is missing");
+  asserts.assertTruthy(props.onChange, "onChange is missing (give signal)");
   props = mergeProps({name: "score", id: "score", value: 0}, props);
   const [local, scoping] = splitProps(props, ["label", "format", "onChange"]);
   const [info] = splitProps(props, ["id", "name", "value"]);

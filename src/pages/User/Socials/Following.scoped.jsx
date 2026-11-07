@@ -10,7 +10,7 @@ import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function Following(props) {
-  asserts.assertTrueOLD(props.page, "Page is missing");
+  asserts.assertTruthy(props.page, "Page is missing");
 
   const [followingTime, startFollowingTimer, stopFollowingTimer] = createTimer();
   const [followingData, setFollowingData] = createSignal(undefined, { equals: false });
@@ -57,7 +57,6 @@ export function Following(props) {
                 <Show when={user().id === authUserData()?.data.id}>
                   <button onClick={async e => {
                     e.preventDefault();
-                    // const response = await apiOLD.anilist.toggleFollow(accessToken(), follower.id);
                   }}>Unfollow</button>
                 </Show>
               </A>

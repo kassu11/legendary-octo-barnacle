@@ -12,8 +12,8 @@ export function QuickActionListButton(props) {
 }
 
 export function QuickActionButton(props) {
-  asserts.isTypeStringOLD(props.label, "label");
-  asserts.assertTypeFunctionOLD(props.onClick, "onClick");
+  asserts.assertTypeString(props.label, "label is not type of string");
+  asserts.assertTypeFunction(props.onClick, "onClick is not type of function");
 
   return (
     <button class="cp-media-action-item" classList={{ big: props.big }} onClick={props.onClick}>

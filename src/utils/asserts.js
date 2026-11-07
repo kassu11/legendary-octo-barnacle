@@ -1,25 +1,5 @@
 import { isTypeObject } from "@/utils/objectUtils";
 
-export const assertTrueOLD = (condition, message = "Not true") => {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
-
-export const notNullishOLD = value => assertTrueOLD(value != null, "Value is null or undefined");
-export const unreachableOLD = (message = "Assert unreachable") => assertTrueOLD(false, message);
-
-
-export const isTypeStringOLD = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "string", varName + " is not type of string. " + message);
-export const assertTypeFunctionOLD = (value, varName = "Value", message = "") => assertTrueOLD(typeof value === "function", varName + " is not type of function. " + message);
-export const isTypeIntegerOLD = (value, varName = "Value", message = "") => assertTrueOLD(Number.isInteger(value), varName + " is not type of integer. " + message);
-
-export const isInteger = (value, varName = "Value", message = "") => {
-  const localMessage = varName + " is not integer. " + message;
-  assertTrueOLD(typeof value === "string" || Number.isInteger(value), localMessage);
-  assertTrueOLD(value && Number.isInteger(+value), localMessage);
-}
-
 export const assertTypeArray = (target, message = "Value is not array", varName) => {
   throwAssertIfFalsy(Array.isArray(target), message, varName);
 }
@@ -44,7 +24,7 @@ export const assertTypeFunction = (target, message = "Value is not function", va
   throwAssertIfFalsy(typeof target === "function", message, varName);
 }
 
-export const assertThruthy = (target, message = "Value is not thruthy", varName) => {
+export const assertTruthy = (target, message = "Value is not truthy", varName) => {
   throwAssertIfFalsy(target, message, varName);
 }
 

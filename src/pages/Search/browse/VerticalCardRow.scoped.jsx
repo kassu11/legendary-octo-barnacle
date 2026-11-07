@@ -8,8 +8,8 @@ import { formatSecondsToLongString } from "@/utils/timeUtils.js";
 import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 
 export function VerticalCardRowScoped(props) {
-  asserts.assertTrueOLD("href" in props, "Link is missing");
-  asserts.isTypeStringOLD(props.type, "type");
+  asserts.assertTruthy("href" in props, "Link is missing");
+  asserts.assertTypeString(props.type, "type is not type of string");
 
   return (
     <section>

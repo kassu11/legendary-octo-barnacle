@@ -77,7 +77,7 @@ export const localStorageJSON = (key, initialValue) => {
 export const debug = (booleanToGiveWhenInDubugMode = true) => createSignal(modes.debug === booleanToGiveWhenInDubugMode);
 
 export const createSignalWithSignal = signal => {
-  asserts.assertTypeFunctionOLD(signal);
+  asserts.assertTypeFunction(signal);
 
   const [value, setValue] = createSignal();
   createRenderEffect(() => {

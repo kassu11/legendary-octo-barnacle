@@ -9,8 +9,8 @@ import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils.js";
 import { addApplicationNotification } from "@/state/notifications";
 
 export function FavouriteSectionScoped(props) {
-  asserts.assertTrueOLD(props.title, "title missing");
-  asserts.assertTrueOLD(props.type, "type missing");
+  asserts.assertTruthy(props.title, "title missing");
+  asserts.assertTruthy(props.type, "type missing");
   const [visible, setVisible] = createSignal(false);
   const [reorder, setReorder] = createSignal(false);
   const [allEdges, setAllEdges] = createSignal([]);

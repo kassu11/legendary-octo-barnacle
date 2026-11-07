@@ -5,7 +5,7 @@ import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 import { MediaCard } from "@/components/media/MediaCard.scoped.jsx";
 
 export function HorizontalCardRowScoped(props) {
-  asserts.assertTrueOLD("href" in props, "Link is missing");
+  asserts.assertTruthy("href" in props, "Link is missing");
 
   const controller = new AbortController();
   const { signal } = controller;
