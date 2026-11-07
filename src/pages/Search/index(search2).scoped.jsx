@@ -20,7 +20,7 @@ import { useIntersectionVisible } from "@/hooks/useIntersectionVisible";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { useDataElement } from "./useDataElement";
-import { BrowsePage } from "./BrowsePage.scoped";
+import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 

@@ -5,17 +5,17 @@ import { capitalize, numberCommas, plural } from "@/utils/formating.js";
 import { arrayUtils, statusUtils, urlUtils } from "@/utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scoped.css";
-import { Trailer } from "@/pages/MediaPage/Trailer.scoped.jsx";
+import { Trailer } from "@/pages/Media/Trailer.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { Markdown } from "@/components/Markdown.scoped.jsx";
 import { MalCharacterCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
-import { MediaPageScores } from "@/components/MediaPage/Scores.scoped.jsx";
-import { ExternalLinks } from "@/components/media/ExternalLinks.scoped.jsx";
+import { MediaPageScores } from "@/pages/Media/Scores.scoped.jsx";
+import { ExternalLinks } from "@/pages/Media/ExternalLinks.scoped.jsx";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { MediaPageApiSwitcher } from "./MediaPageApiSwitcher.scoped.jsx";
+import { MediaPageApiSwitcher } from "@/pages/Media/MediaPageApiSwitcher.scoped.jsx";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function MediaInfoWrapperJikan(props) {
