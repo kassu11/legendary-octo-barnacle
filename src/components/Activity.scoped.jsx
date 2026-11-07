@@ -6,10 +6,11 @@ import { capitalize, mediaUrl } from "@/utils/formating.js";
 import { A } from "@solidjs/router";
 import { Tooltip } from "./Tooltip.scoped";
 import { Dynamic } from "solid-js/web"
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
 import { CreatedAt } from "./CreatedAt.jsx";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/core/notifications";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { addApplicationNotification } from "@/state/notifications";
 import { createAbortController } from "@/utils/abortUtils.js";
 
 export function ActivityCard(props) {

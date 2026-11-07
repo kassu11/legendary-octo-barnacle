@@ -1,5 +1,6 @@
 import { createRenderEffect, createSignal } from "solid-js";
-import { asserts, modes } from "@/collections/collections.js";
+import { modes } from "@/constants/constants.js";
+import * as asserts from "./asserts.js";
 
 export const localStorageString = (key, initialValue) => {
   const [value, _setValue] = createSignal(localStorage.getItem(key) ?? initialValue);

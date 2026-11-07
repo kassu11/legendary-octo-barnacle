@@ -2,12 +2,13 @@ import { A, useParams } from "@solidjs/router";
 import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { useUser } from "@/context/providers.js";
-import { localizations, queries } from "@/collections/collections.js";
+import { useUser } from "@/state/providers.js";
+import { queries } from "@/api/api.js";
+import { localizations } from "@/constants/constants.js";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
 import "./Tags.scoped.css";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function StatsMediaTags() {

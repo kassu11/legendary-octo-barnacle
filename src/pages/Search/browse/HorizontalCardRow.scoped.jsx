@@ -1,6 +1,6 @@
 import { For, onCleanup, onMount } from "solid-js";
 import "./HorizontalCardRow.scoped.css";
-import { asserts } from "@/collections/collections.js";
+import { asserts } from "@/utils/utils.js";
 import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 import { MediaCard } from "@/components/media/MediaCard.scoped.jsx";
 

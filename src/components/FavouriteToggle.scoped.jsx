@@ -1,13 +1,14 @@
 import { leadingAndTrailingDebounce } from "@/utils/scheduled.js";
 import "./FavouriteToggle.scoped.css";
 import { compactNumber } from "@/utils/formating.js";
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
 import { Match, Show, Switch, untrack } from "solid-js";
 import Heart from "@/assets/Heart.jsx";
 import Anilist from "@/assets/Anilist.jsx";
 import MyAnimeList from "@/assets/MyAnimeList.jsx";
-import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/core/notifications";
+import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils.js";
+import { addApplicationNotification } from "@/state/notifications";
 
 export function FavouriteToggle(props) {
   let localChecked = null;

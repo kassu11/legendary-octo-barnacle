@@ -1,4 +1,4 @@
-import { assertTypeInteger } from "@/collections/asserts";
+import { assertTypeInteger } from "@/utils/asserts";
 import { getLocalStorageJson } from "@/utils/localStorageUtils";
 import { leftJoinObjects } from "@/utils/objectUtils";
 

@@ -1,9 +1,9 @@
 import { A, useParams } from "@solidjs/router";
 import { createEffect, createSignal, For, on, Show } from "solid-js";
 import { formatTitleToUrl } from "@/utils/formating.js";
-import { queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
 import "./GenreMediaCards.scoped.css";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function GenreMediaCardsScoped(props) {

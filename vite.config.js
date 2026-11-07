@@ -49,10 +49,12 @@ export default defineConfig({
       dirs: [
         "./src/assets",
         "./src/components/**",
-        "./src/context",
+        "./src/app",
+        "./src/state",
         "./src/hooks",
         "./src/pages/**",
-        "./src/collections/collections.js",
+        "./src/api/api.js",
+        "./src/constants/constants.js",
         "./src/utils/utils.js",
       ],
     })

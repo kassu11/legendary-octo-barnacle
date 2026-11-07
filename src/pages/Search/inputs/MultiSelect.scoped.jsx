@@ -1,8 +1,8 @@
 import { createSignal, createRenderEffect, createEffect, For, Show } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { untrack } from "solid-js/web";
-import { isTypeInteger } from "@/collections/types.js";
-import { useResponsive } from "@/context/providers.js";
+import { isTypeInteger } from "@/utils/types.js";
+import { useResponsive } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./MultiSelect.scoped.css";

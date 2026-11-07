@@ -4,7 +4,7 @@ import SortAlphabetDescendingIcon from "@/assets/SortAlphaDown.jsx";
 import SortAlphabetAscendingIcon from "@/assets/SortAlphaUp.jsx";
 import SortNumericDescendingIcon from "@/assets/SortNumericDown.jsx";
 import SortNumericAscendingIcon from "@/assets/SortNumericUp.jsx";
-import { useParsedSearchParams } from "@/context/providers.js";
+import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { SortIcon } from "@/assets/SearchFilterIcons.jsx";

@@ -1,12 +1,13 @@
 import { A } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
-import { useUser } from "@/context/providers.js";
+import { useUser } from "@/state/providers.js";
 import { formatTitleToUrl, mediaUrl, numberCommas } from "@/utils/formating.js";
 import { ActivityCard } from "@/components/Activity.scoped.jsx";
 import "./Overview.scoped.css";
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";

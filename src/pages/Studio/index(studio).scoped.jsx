@@ -3,10 +3,11 @@ import { Switch, Match, Show, createSignal, createEffect, For, untrack } from "s
 import "./index(studio).scoped.css";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
 import { MediaCardContainerScoped } from "@/components/Cards/MediaCardContainer.scoped.jsx";
 import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";

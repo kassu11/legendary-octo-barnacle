@@ -1,9 +1,10 @@
 import { A } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
-import { useUser } from "@/context/providers.js";
-import { asserts, queries } from "@/collections/collections.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { authUserData } from "@/core/globalState.js";
+import { useUser } from "@/state/providers.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { authUserData } from "@/state/globalState.js";
 import "./Following.scoped.css";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";

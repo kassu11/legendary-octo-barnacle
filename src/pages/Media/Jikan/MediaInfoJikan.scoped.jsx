@@ -1,6 +1,7 @@
 import { A, useParams } from "@solidjs/router";
-import { MediaInfoContext, useMediaInfo } from "@/context/providers.js";
-import { localizations, mediaStatuses, queries } from "@/collections/collections.js";
+import { MediaInfoContext, useMediaInfo } from "@/state/providers.js";
+import { queries } from "@/api/api.js";
+import { localizations, mediaStatuses } from "@/constants/constants.js";
 import { capitalize, numberCommas, plural } from "@/utils/formating.js";
 import { arrayUtils, statusUtils, urlUtils } from "@/utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
@@ -12,7 +13,7 @@ import { MalCharacterCard, MalStaffCard } from "@/components/Cards/Cards.scoped.
 import { MediaPageScores } from "@/pages/Media/Scores.scoped.jsx";
 import { ExternalLinks } from "@/pages/Media/ExternalLinks.scoped.jsx";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
-import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { MediaPageApiSwitcher } from "@/pages/Media/MediaPageApiSwitcher.scoped.jsx";

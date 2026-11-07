@@ -1,4 +1,4 @@
-import { localizations, mediaStatuses } from "@/collections/collections";
+import { localizations, mediaStatuses } from "@/constants/constants";
 import { capitalize } from "./formating";
 
 export const anilistEnumToFlavorText = status => {

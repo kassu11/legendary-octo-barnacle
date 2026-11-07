@@ -5,7 +5,7 @@ import ErrorIcon from "@/assets/ErrorIcon";
 import SuccessIcon from "@/assets/SuccessIcon";
 import InfoIcon from "@/assets/InfoIcon";
 import WarningIcon from "@/assets/WarningIcon";
-import { notifications, startNotificationInterval, stopNotificationInterval } from "@/core/notifications";
+import { notifications, startNotificationInterval, stopNotificationInterval } from "@/state/notifications";
 
 export function ApplicationNotifications() {
   return (

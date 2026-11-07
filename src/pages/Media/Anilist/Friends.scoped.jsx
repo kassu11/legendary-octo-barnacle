@@ -3,11 +3,11 @@ import Status from "./Status";
 import Score from "@/components/media/Score.scoped";
 import "./Friends.scoped.css";
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import { useMediaInfo } from "@/context/providers";
-import { queries } from "@/collections/collections.js";
+import { useMediaInfo } from "@/state/providers";
+import { queries } from "@/api/api.js";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils";
-import { authUserData } from "@/core/globalState";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
+import { authUserData } from "@/state/globalState";
 import { createTimer, formatMSToString } from "@/utils/timeUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 

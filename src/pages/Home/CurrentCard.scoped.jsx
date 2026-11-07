@@ -4,9 +4,10 @@ import { A } from "@solidjs/router";
 import { mediaUrl } from "@/utils/formating.js";
 import { EpisodeTime } from "@/components/media/EpisodeTime.jsx";
 import "./CurrentCard.scoped.css";
-import { queries, timeCollection } from "@/collections/collections.js";
-import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { assertTypeInteger } from "@/collections/asserts.js";
+import { queries } from "@/api/api.js";
+import { timeCollection } from "@/constants/constants.js";
+import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils.js";
+import { assertTypeInteger } from "@/utils/asserts.js";
 import { mergeObjects } from "@/utils/objectUtils.js";
 import { createHover, HoverPortal, placeFirstFit } from "@/hooks/createHover";
 

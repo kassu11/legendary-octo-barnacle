@@ -1,6 +1,6 @@
 import { Match, splitProps, Switch } from "solid-js";
 import "./EmojiByScore.scoped.css";
-import { asserts } from "@/collections/collections.js";
+import { asserts } from "@/utils/utils.js";
 
 export default function EmojiByScoreScoped(props) {
   asserts.assertTrueOLD("score" in props, "Score is missing");

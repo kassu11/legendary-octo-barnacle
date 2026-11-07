@@ -1,11 +1,11 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import "./AnimeThemes.scoped.css";
-import { queries } from "@/collections/collections.js";
-import { asserts } from "@/collections/collections.js";
-import { localizations } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
+import { localizations } from "@/constants/constants.js";
 import { createEffect, createSignal, ErrorBoundary, For, Match, Show, Switch } from "solid-js";
-import { useMediaInfo } from "@/context/providers.js";
-import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils";
+import { useMediaInfo } from "@/state/providers.js";
+import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils";
 
 function AnimeThemes() {
   const params = useParams();

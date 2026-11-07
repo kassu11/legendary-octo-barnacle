@@ -1,14 +1,14 @@
 import { useSearchParams, useParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { useParsedSearchParams } from "@/context/providers.js";
+import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { AvailableIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./MediaExternalSourcesSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { queries } from "@/collections/collections.js";
-import { tabTime } from "@/core/globalState.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { queries } from "@/api/api.js";
+import { tabTime } from "@/state/globalState.js";
 import { timeStringToMs } from "@/utils/timeUtils.js";
 import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";

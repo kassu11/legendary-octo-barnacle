@@ -1,13 +1,13 @@
 import { createEffect, createSignal, For } from "solid-js";
 import { CurrentCardsScoped } from "./CurrentCards.scoped.jsx";
 import "./CurrentWatchingMedia.scoped.css";
-import { queries } from "@/collections/collections.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { authedUserId, token2 } from "@/core/globalState.js";
+import { queries } from "@/api/api.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { authedUserId, token2 } from "@/state/globalState.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { weekInSeconds } from "@/collections/time.js";
+import { weekInSeconds } from "@/constants/time.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function CurrentWatchingMediaScoped() {

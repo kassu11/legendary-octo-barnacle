@@ -6,9 +6,10 @@ import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "@/uti
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { wrapToArray } from "@/utils/arrays.js";
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
+import { asserts } from "@/utils/utils.js";
 import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";

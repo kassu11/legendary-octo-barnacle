@@ -1,11 +1,11 @@
 import { A } from "@solidjs/router";
 import { createEffect, Match, Show, Switch } from "solid-js";
 import "./MainNavigation.scoped.css";
-import { queries } from "@/collections/collections";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils";
+import { queries } from "@/api/api";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
 import { anilistClientId } from "@/utils/urlUtils";
-import { useAuthentication } from "@/context/providers";
-import { authUserData, setAuthUserData, token2 } from "@/core/globalState";
+import { useAuthentication } from "@/state/providers";
+import { authUserData, setAuthUserData, token2 } from "@/state/globalState";
 
 const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${anilistClientId()}&response_type=token`;
 

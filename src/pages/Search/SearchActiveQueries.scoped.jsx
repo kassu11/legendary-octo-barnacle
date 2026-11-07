@@ -1,12 +1,12 @@
 import { createMemo, For, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import "./SearchActiveQueries.scoped.css";
-import { useParsedSearchParams } from "@/context/providers";
+import { useParsedSearchParams } from "@/state/providers";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { useNavigateAndSearch } from "@/utils/urlUtils";
 import { capitalize } from "@/utils/formating.js";
 import { arrayUtils } from "@/utils/utils";
-import { localizeInternalSearchParams } from "@/core/apiTranslations";
+import { localizeInternalSearchParams } from "@/api/apiTranslations";
 import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";

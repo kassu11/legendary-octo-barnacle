@@ -1,19 +1,19 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { useParsedSearchParams, useUser } from "@/context/providers";
+import { useParsedSearchParams, useUser } from "@/state/providers";
 import { createEffect, createMemo, createRenderEffect, createSignal, For, onCleanup, Show } from "solid-js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils";
-import { queries } from "@/collections/collections";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
+import { queries } from "@/api/api";
 import { capitalize  } from "@/utils/formating";
-import UserMediaRelationsWorker from "@/worker/user-media-relations.js?worker";
+import UserMediaRelationsWorker from "@/workers/user-media-relations.js?worker";
 import { debounce } from "@solid-primitives/scheduled";
 import "./index-(user-relations).scoped.css";
 import { safeStringifyJson } from "@/utils/jsonUtils";
 import { hashKeyFNV32 } from "@/utils/hashUtils";
 import { createStore, reconcile } from "solid-js/store";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
-import { tabTime } from "@/core/globalState";
+import { tabTime } from "@/state/globalState";
 import { useIntersectionVisible } from "@/hooks/useIntersectionVisible";
 
 const mediaIds = new Set();

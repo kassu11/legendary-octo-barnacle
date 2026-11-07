@@ -1,13 +1,13 @@
-import { assertTypeArray, assertTypeString } from "@/collections/asserts";
-import { localizations, modes } from "@/collections/collections";
-import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "@/core/fetchRateLimits";
-import { allActiveTokens, logoutUser, setMainLoadingCount, token2 } from "@/core/globalState";
-import { addApplicationNotification } from "@/core/notifications";
-import { isTypeFunction } from "./functionUtils";
-import { hashKeyFNV32 } from "./hashUtils";
-import { safeStringifyJson } from "./jsonUtils";
-import { isTypeObject, mergeObjects } from "./objectUtils";
-import { getFetcherValueFromStorage, setFetcherValueToStorage } from "./storageUtils";
+import { assertTypeArray, assertTypeString } from "@/utils/asserts";
+import { localizations, modes } from "@/constants/constants";
+import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "@/api/fetchRateLimits";
+import { allActiveTokens, logoutUser, setMainLoadingCount, token2 } from "@/state/globalState";
+import { addApplicationNotification } from "@/state/notifications";
+import { isTypeFunction } from "@/utils/functionUtils";
+import { hashKeyFNV32 } from "@/utils/hashUtils";
+import { safeStringifyJson } from "@/utils/jsonUtils";
+import { isTypeObject, mergeObjects } from "@/utils/objectUtils";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
 
 export function createFetcher(url, params, encode = baseEncoding) {
   assertTypeString(url);

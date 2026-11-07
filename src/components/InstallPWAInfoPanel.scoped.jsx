@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 import "./InstallPWAInfoPanel.scoped.css";
-import { useResponsive } from "@/context/providers";
+import { useResponsive } from "@/state/providers";
 
 export function InstallPWAInfoPanel() {
   const { isTouch, isPWA } = useResponsive();

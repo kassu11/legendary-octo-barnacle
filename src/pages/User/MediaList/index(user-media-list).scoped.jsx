@@ -2,19 +2,19 @@ import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/rout
 import { createEffect, createMemo, createSignal, onCleanup, Show, untrack } from "solid-js";
 import "./index(user-media-list).scoped.css";
 import { capitalize } from "@/utils/formating.js";
-import UserMediaListWorker from "@/worker/user-media-list.js?worker";
-import { UserMediaListContext, useUser } from "@/context/providers.js";
+import UserMediaListWorker from "@/workers/user-media-list.js?worker";
+import { UserMediaListContext, useUser } from "@/state/providers.js";
 import { debouncer, leadingAndTrailingDebounce } from "@/utils/scheduled.js";
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
-import { arrayUtils } from "@/utils/utils.js";
+import { asserts, arrayUtils } from "@/utils/utils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { addApplicationNotification } from "@/core/notifications";
-import { authUserData } from "@/core/globalState";
+import { addApplicationNotification } from "@/state/notifications";
+import { authUserData } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 // Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
