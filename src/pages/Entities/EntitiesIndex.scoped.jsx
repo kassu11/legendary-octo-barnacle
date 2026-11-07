@@ -359,12 +359,11 @@ function StaffPage(props) {
 }
 
 function CharacterCard(props) {
-  // eslint-disable-next-line no-unassigned-vars
   let ref;
   onMount(() => props.intersectionObserver.observe(ref))
 
   return (
-    <li ref={ref} attr:data-page={props.page} class="entities-page-entity">
+    <li ref={elem => ref = elem} attr:data-page={props.page} class="entities-page-entity">
       <A scoped href={"/ani/character/" + props.edge.node.id} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Character" />
         <div class="content">

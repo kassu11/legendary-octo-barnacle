@@ -7,7 +7,6 @@ import { numberUtils } from "@/utils/utils.js";
 import "./StatsYearLineCharts.scoped.css";
 
 export function StatsYearLineChartsScoped(props) {
-  // eslint-disable-next-line no-unassigned-vars
   let container;
   const [max, setMax] = createSignal(0);
   const containerWidth = useWidth(() => container);
@@ -52,7 +51,7 @@ export function StatsYearLineChartsScoped(props) {
 
   return (
     <Show when={props.data.length}>
-      <section class="no-motion" ref={container}>
+      <section class="no-motion" ref={elem => container = elem}>
         <div class="flex-space-between">
           <h2>{props.heading}</h2>
           <SortHeaderButtons setState={ setState } />

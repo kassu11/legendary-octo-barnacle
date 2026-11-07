@@ -51,8 +51,6 @@ export function MainLoadingBar() {
 
   let progressTime = 0; // Timer when animating progress
   let endingTime = 0; // Timer when progress is done, and we want to smoothly convert x to 100%
-
-  // eslint-disable-next-line no-unassigned-vars
   let ref;
 
   function gameLoop(prevTime, curTime) {
@@ -125,7 +123,7 @@ export function MainLoadingBar() {
     // Dialog will go over loading bar, so we want to always portal to the top element layer.
     // But this will always replay animations, so we HAVE TO make the animations using javascripts :c
     <Portal mount={topElements().at(-1)}>
-      <div ref={ref} class="loading-bar" classList={{ done: done() }}></div>
+      <div ref={elem => ref = elem} class="loading-bar" classList={{ done: done() }}></div>
     </Portal>
   );
 };

@@ -110,8 +110,6 @@ export function EditMediaEntriesProvider(props) {
   const [mediaListEntry, setMediaListEntry] = createSignal(undefined);
   const [mutates, setMutates] = createSignal(undefined);
   const [state, setState] = formState();
-
-  // eslint-disable-next-line no-unassigned-vars
   let editor, warning;
 
   const handleSubmit = async e => {
@@ -276,7 +274,7 @@ export function EditMediaEntriesProvider(props) {
 
   return (
     <EditMediaEntriesContext.Provider value={{ openEditor }}>
-      <dialog ref={editor} class="media-editor">
+      <dialog ref={elem => editor = elem} class="media-editor">
         <Show when={mediaListEntry()}>
           <form class="exit-media-editor" method="dialog">
             <button>Close</button>
@@ -507,7 +505,7 @@ export function EditMediaEntriesProvider(props) {
               </div>
             </div>
           </form>
-          <dialog ref={warning} class="media-editor-warning-dialog" >
+          <dialog ref={elem => warning = elem} class="media-editor-warning-dialog" >
             <p>Are you sure you want to delete this media entry</p>
             <form method="dialog">
               <button onClick={async () => {

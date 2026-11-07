@@ -1,44 +1,23 @@
 import { A } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
+import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { useUser } from "@/state/providers.js";
 import { formatTitleToUrl, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
 import { ActivityCard } from "@/components/Activity.scoped.jsx";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped";
 import "./UserOverviewIndex.scoped.css";
 import { queries } from "@/api/api.js";
-import { asserts } from "@/utils/utils.js";
+import { asserts, arrayUtils } from "@/utils/utils.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
-import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function Overview() {
   const { user } = useUser();
   const userId = createMemo(() => user().id);
-
-  const [anilistActivityData, setAnilistActivityData] = createSignal(undefined, { equals: false });
-  const anilistActivityController = createCleanUpAbortController();
-  let anilistActivityFetcher;
-  createEffect(() => {
-    const signal = anilistActivityController.abortAndRenew();
-    const id = userId();
-    if (!id) return;
-
-    anilistActivityFetcher = createAnilistFetcher(queries.profileActivity, { id }, signal);
-
-    sendAnilistFetcher(anilistActivityFetcher, {
-      name: "Anilist activities",
-      onFetch: () => anilistActivityController.disable(),
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === anilistActivityFetcher.cacheKey) setAnilistActivityData(res);
-      }
-    });
-  });
-
-  const mutateActivityCache = mutate => {
-    if (isTypeFunction(mutate)) mutate = mutate(untrack(anilistActivityData));
-    setFetcherValueToStorage(mutate);
-  };
 
   return (
     <div class="user-profile-overview-body">
@@ -173,13 +152,212 @@ export function Overview() {
           <GenrePreview title="Anime genre overview" type="anime" genres={user().statistics.anime.genrePreview} total={user().statistics.anime.count}/>
           <GenrePreview title="Manga genre overview" type="manga" genres={user().statistics.manga.genrePreview} total={user().statistics.manga.count}/>
         </div>
-        <div class="user-profile-activity">
-          <For each={anilistActivityData()?.data.data.Page.activities}>{activity => (
-            <ActivityCard activity={activity} mutateCache={mutateActivityCache} hideProfile={true} small={true}/>
-          )}</For>
-        </div>
+        <Show when={userId()} keyed>
+          <UserActivityReel userId={userId()} />
+        </Show>
       </div>
     </div>
+  );
+}
+
+function updateCacheMap(start, end, cacheMap, entries) {
+  for (let i = start; i <= end; i++) {
+    cacheMap[entries[i].id] = i;
+  }
+
+  return cacheMap;
+}
+
+function UserActivityReel(props) {
+  const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
+  const [pagelessCacheData, setPagelessCacheData] = createSignal(undefined, { equals: false });
+
+  createRenderEffect(async () => {
+    setPagelessCacheLoading(true);
+    const pagelessFetcher = createAnilistFetcher(queries.profileActivity, { id: props.userId, page: "pageless" });
+    const data = await getFetcherValueFromStorage(pagelessFetcher);
+
+    batch(() => {
+      if (data) setPagelessCacheData(data);
+      else {
+        setPagelessCacheData({
+          data: null,
+          name: "Anilist profile activities pageless",
+          expires: new Date().setHours(24 * 356),
+          modified: new Date(),
+          cacheKey: pagelessFetcher.cacheKey
+        });
+      }
+      setPagelessCacheLoading(false);
+    });
+  });
+
+  const mutateCache = mutate => {
+    if (isTypeFunction(mutate)) mutate = mutate(untrack(pagelessCacheData));
+    setFetcherValueToStorage(mutate);
+  };
+
+  // Pinned activities are sorted first, so the activities are placed by their page index instead of their id
+  const updateCache = (onePageRes, pagelessFetcher) => {
+    if (pagelessFetcher.cacheKey !== pagelessCacheData().cacheKey) return;
+    const { pageInfo, activities } = onePageRes.data.data.Page;
+
+    setPagelessCacheData(pagelessRes => {
+      try {
+        if (!pagelessRes?.data?.items?.length) {
+          pagelessRes.data = {
+            items: activities,
+            indices: updateCacheMap(0, activities.length - 1, {}, activities),
+          };
+          return pagelessRes;
+        }
+
+        const { items, indices } = pagelessRes.data;
+        const start = (pageInfo.currentPage - 1) * pageInfo.perPage;
+        for (let i = 0; i < activities.length; i++) {
+          const activity = activities[i];
+          if (activity.id in indices) {
+            const cacheIndex = indices[activity.id];
+            items.splice(cacheIndex, 1);
+            const newIndex = Math.min(start + i, items.length);
+            items.splice(newIndex, 0, activity);
+            updateCacheMap(Math.min(newIndex, cacheIndex), Math.max(newIndex, cacheIndex), indices, items);
+          } else {
+            // New id added
+            const newIndex = Math.min(start + i, items.length);
+            items.splice(newIndex, 0, activity);
+            updateCacheMap(newIndex, items.length - 1, indices, items);
+          }
+        }
+
+        // Activities after the last page don't exist anymore
+        if (!pageInfo.hasNextPage) {
+          for (const activity of items.splice(start + activities.length)) {
+            delete indices[activity.id];
+          }
+        }
+
+        return pagelessRes;
+      } finally {
+        mutateCache(pagelessRes);
+      }
+    });
+  };
+
+  return (
+    <Show when={!pagelessCacheLoading()}>
+      <UserActivityPage cache={pagelessCacheData()?.data?.items || []} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+    </Show>
+  );
+}
+
+// Anilist gives an error when going over 5000 entries, but the last allowed page still claims to have a next page
+const maxActivityPage = 5000 / 25;
+
+function UserActivityPage(props) {
+  const [page, setPage] = createSignal(props.cache.length ? undefined : 1);
+  const [hasNextPage, setHasNextPage] = createSignal(true);
+  const [anilistActivityLoading, setAnilistActivityLoading] = createSignal(false);
+  const anilistActivityController = createCleanUpAbortController();
+  let anilistActivityFetcher;
+  createEffect(() => {
+    const signal = anilistActivityController.abortAndRenew();
+    const p = page();
+    if (!p) return;
+
+    const pagelessFetcher = createAnilistFetcher(queries.profileActivity, { id: props.userId, page: "pageless" });
+    anilistActivityFetcher = createAnilistFetcher(queries.profileActivity, { id: props.userId, page: p }, signal);
+
+    sendAnilistFetcher(anilistActivityFetcher, {
+      name: "Anilist activities",
+      cache: null,
+      onFetch: () => anilistActivityController.disable(),
+      onStart: () => setAnilistActivityLoading(true),
+      onStop: () => setAnilistActivityLoading(false),
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey !== anilistActivityFetcher.cacheKey) return;
+        const { pageInfo, activities } = res.data.data.Page;
+        asserts.assertTruthy(hardcodedPageCount === pageInfo.perPage, "Page count is wrong");
+        freshPages.add(pageInfo.currentPage);
+        // Anilist can say we have a next page, even when the current page is empty
+        setHasNextPage(pageInfo.hasNextPage && activities.length > 0 && pageInfo.currentPage < maxActivityPage);
+
+        props.updateCache(res, pagelessFetcher);
+        updatePage();
+      }
+    });
+  });
+
+  const freshPages = new Set();
+  const triggerPage = leadingAndTrailing(debounce, num => !anilistActivityLoading() && setPage(num), 1000);
+
+  function updatePage() {
+    const nextPage = getPageNumberByScrollPosition();
+    if (nextPage) {
+      triggerPage(nextPage);
+    }
+  }
+
+  const hardcodedPageCount = 25;
+
+  function getPageNumberByScrollPosition() {
+    const nextPage = untrack(hasNextPage);
+    const pageCount = Math.ceil(props.cache.length / hardcodedPageCount);
+
+    if (visiblePages.has(pageCount) && !freshPages.has(pageCount)) {
+      return pageCount;
+    } else if (visiblePages.has(pageCount) && nextPage && freshPages.has(pageCount)) {
+      return pageCount + 1;
+    } else {
+      const notFreshPages = [...visiblePages.difference(freshPages)].sort((a, b) => b - a);
+
+      if (!notFreshPages.length) {
+        return;
+      }
+
+      return arrayUtils.atPercent(notFreshPages, .5);
+    }
+  }
+
+  const visiblePages = new Set();
+  const intersectionCallback = (entries) => {
+    for (const entry of entries) {
+      const page = parseInt(entry.target.dataset.page);
+      asserts.assertTruthy(Number.isInteger(page));
+
+      if (entry.isIntersecting) {
+        visiblePages.add(page);
+      } else {
+        visiblePages.delete(page);
+      }
+    }
+
+    updatePage();
+  };
+
+  const intersectionObserver = new IntersectionObserver(intersectionCallback, { rootMargin: "500px" });
+  onCleanup(() => intersectionObserver.disconnect());
+
+  return (
+    <>
+      <div class="user-profile-activity">
+        <For each={props.cache}>{(activity, i) => {
+          let ref;
+          onMount(() => intersectionObserver.observe(ref));
+
+          return (
+            <ActivityCard activity={activity} mutateCache={props.mutateCache} hideProfile={true} small={true} wrapper={wrapperProps => (
+              <div ref={elem => ref = elem} attr:data-page={Math.ceil((i() + 1) / hardcodedPageCount)} {...wrapperProps} />
+            )}/>
+          );
+        }}</For>
+      </div>
+      <Show when={anilistActivityLoading() && page() > Math.ceil(props.cache.length / hardcodedPageCount)}>
+        <LoaderCircle scoped class="spinner">
+          <Tooltip placements={["bottom", "top"]}>Loading activities</Tooltip>
+        </LoaderCircle>
+      </Show>
+    </>
   );
 }
 

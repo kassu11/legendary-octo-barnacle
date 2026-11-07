@@ -390,7 +390,6 @@ function UserSearch() {
     });
   });
 
-  // eslint-disable-next-line no-unassigned-vars
   let form;
 
   createEffect(on(index, i => {
@@ -453,7 +452,7 @@ function UserSearch() {
   };
 
   return (
-    <form class="pg-compare-user-search" ref={form} onKeyDown={handleKeyDown} onSubmit={handleSubmit}>
+    <form class="pg-compare-user-search" ref={elem => form = elem} onKeyDown={handleKeyDown} onSubmit={handleSubmit}>
       <input type="search" name="user" id="user" value={search()} placeholder="Search users" onInput={handleInput} />
       <Switch>
         <Match when={search() && anilistUserSearchData()?.users.length}>
