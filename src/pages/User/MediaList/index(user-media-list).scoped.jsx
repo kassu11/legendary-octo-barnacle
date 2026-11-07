@@ -1,34 +1,29 @@
-import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { createEffect, createMemo, createSignal, onCleanup, Show, untrack } from "solid-js";
 import "./index(user-media-list).scoped.css";
 import { capitalize } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import { UserMediaListContext, useUser } from "../../../context/providers.js";
-import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
+import { debouncer, leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
 import { asserts, queries } from "../../../collections/collections.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
 import { isTypeFunction } from "../../../utils/functionUtils.js";
+import { arrayUtils } from "../../../utils/utils.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
 import { authUserData } from "../../../core/globalState";
 import { createCleanUpAbortController } from "../../../utils/abortUtils";
 
-export const useListNavigation = () => {
-  const navigate = useNavigate();
-  const { user } = useUser();
-  const params = useParams();
-
-  return listName => {
-    navigate(`/user/${user().name}/${params.type}/list${listName ? "/" + listName : ""}${location.search}`, { replace: true });
-  }
-}
+// Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
+export const ALL_LISTS = "";
 
 export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
+  const location = useLocation();
   const name = createMemo(() => user().name);
   const [userMediaTime, startUserMediaTimer, stopUserMediaTimer] = createTimer();
   const [userMediaData, setUserMediaData] = createSignal(undefined, { equals: false });
@@ -70,27 +65,34 @@ export function UserMediaList() {
   const setSearchParams = (options) => {
     _setSearchParams(options, { replace: true });
   }
+  const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
   const search = () => searchParams.search || "";
-  const format = () => searchParams.format || "";
-  const status = () => searchParams.status || "";
-  const genre = () => searchParams.genre || "";
-  const countryOfOrigin = () => searchParams.countryOfOrigin || "";
-  const isAdult = () => {
-    if (searchParams.isAdult === "true") return true;
-    if (searchParams.isAdult === "false") return false;
-    return undefined;
+  const listParam = multiParam("list");
+  const list = () => listParam().length ? listParam() : [ALL_LISTS];
+  const isListVisible = name => !listParam().length || listParam().includes(name);
+  // Old links have the list name in the path
+  const legacyListUrl = () => {
+    const newSearchParams = new URLSearchParams(location.search);
+    newSearchParams.append("list", decodeURIComponent(params.list));
+    return `/user/${name()}/${params.type}/list?${newSearchParams}`;
   };
-  const year = () => searchParams.year || "";
-  const privateFilter = () => searchParams.private === "true";
-  const notesFilter = () => searchParams.notes === "true";
-  const rewatchedFilter = () => searchParams.repeat === "true";
-  const missingStartFilter = () => searchParams.missingStart === "true";
-  const missingScoreFilter = () => searchParams.missingScore === "true";
-  const reverse = () => searchParams.reverse === "true";
-  const sort = () => searchParams.sort || "score";
-  const userStatus = () => searchParams.userStatus || "";
-  const studio = () => searchParams.studio || "";
-  const tag = () => searchParams.tag || "";
+  const format = multiParam("format");
+  const status = multiParam("status");
+  const genre = multiParam("genre");
+  const countryOfOrigin = multiParam("countryOfOrigin");
+  const isAdult = () => searchParams.isAdult;
+  const year = multiParam("year");
+  const privateFilter = () => searchParams.private;
+  const notesFilter = () => searchParams.notes;
+  const rewatchedFilter = () => searchParams.repeat;
+  const missingStartFilter = () => searchParams.missingStart;
+  const missingEndFilter = () => searchParams.missingEnd;
+  const missingScoreFilter = () => searchParams.missingScore;
+  const sortParam = multiParam("sort");
+  const sort = () => sortParam().length ? sortParam() : ["score"];
+  const userStatus = multiParam("userStatus");
+  const studio = multiParam("studio");
+  const tag = multiParam("tag");
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
     asserts.assertTrueOLD(progressKey, "Progress key is undefined");
@@ -134,22 +136,26 @@ export function UserMediaList() {
     });
   }, 250, 2);
 
+  const postToWorker = debouncer(postObject => {
+    worker = worker instanceof Worker ? worker : new UserMediaListWorker();
+    worker.postMessage(postObject);
+    worker.onmessage = setListData;
+  });
+
   const updateListInfo = () => {
     if (window.Worker && userMediaData()) {
-      worker = worker instanceof Worker ? worker : new UserMediaListWorker();
-
       const postObject = {
         data: userMediaData()?.data.data.MediaListCollection,
         search: search(),
         format: format(),
         status: status(),
         genre: genre(),
-        reverse: reverse(),
         countryOfOrigin: countryOfOrigin(),
         missingStart: missingStartFilter(),
+        missingEnd: missingEndFilter(),
         missingScore: missingScoreFilter(),
         isAdult: isAdult(),
-        year: +year() || undefined,
+        year: year(),
         private: privateFilter(),
         notes: notesFilter(),
         repeat: rewatchedFilter(),
@@ -160,8 +166,7 @@ export function UserMediaList() {
         tag: tag(),
       };
 
-      worker.postMessage(postObject);
-      worker.onmessage = setListData;
+      postToWorker(100, postObject);
     }
   }
 
@@ -175,13 +180,22 @@ export function UserMediaList() {
     return user().id === authUserData()?.data.id;
   }
 
+  let listBody;
+  // Scroll position that puts the start of the list right below the sticky main navigation
+  const listStartY = () => listBody.getBoundingClientRect().top + window.scrollY - document.querySelector(".main-navigation").offsetHeight;
+
   return (
     <UserMediaListContext.Provider value={{ triggerProgressIncrease, isOwnProfile }}>
-      <div class="user-profile-media-list-body">
+      <Show when={params.list}>
+        <Navigate href={legacyListUrl()} />
+      </Show>
+      <div ref={elem => listBody = elem} class="user-profile-media-list-body">
         <SearchControlsScoped
           listData={listData}
+          listStartY={listStartY}
           setSearchParams={setSearchParams}
           search={search}
+          list={list}
           format={format}
           status={status}
           genre={genre}
@@ -192,8 +206,8 @@ export function UserMediaList() {
           notesFilter={notesFilter}
           rewatchedFilter={rewatchedFilter}
           missingStartFilter={missingStartFilter}
+          missingEndFilter={missingEndFilter}
           missingScoreFilter={missingScoreFilter}
-          reverse={reverse}
           sort={sort}
           userStatus={userStatus}
           studio={studio}
@@ -201,6 +215,7 @@ export function UserMediaList() {
         />
         <MediaListContainerScoped
           listData={listData}
+          isListVisible={isListVisible}
           mutateMediaListCache={mutateMediaListCache}
           updateListInfo={updateListInfo}
           timer={formatMSToString(userMediaTime())}

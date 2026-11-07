@@ -1,0 +1,240 @@
+@layer layout {
+  .search-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 1em;
+    border-radius: 100px;
+    background-color: var(--bg);
+    color: var(--text-muted);
+    cursor: text;
+
+    &:has(input:focus-visible) {
+      outline: 2px solid var(--bg-light);
+    }
+
+    svg {
+      width: 1.25em;
+      height: 1.25em;
+      flex-shrink: 0;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      border: unset;
+      padding: .6em 0;
+      color: var(--text);
+      background-color: transparent;
+      font-weight: 600;
+      outline: none;
+
+      &::placeholder {
+        color: var(--text-muted);
+        opacity: .5;
+      }
+
+      &::-webkit-search-cancel-button {
+        display: none;
+      }
+    }
+  }
+
+  .filter-groups {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 40px;
+
+    --select-width: 100%;
+    --select-max-width: none;
+
+    @media (width < 40em) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .filter-group {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+
+    &.search {
+      @media (width < 55em) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    h3 {
+      margin: 0;
+      font-size: var(--fs-300);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      opacity: .7;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+      gap: 8px;
+
+      .search-input {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  /* Mobile: search bar is fixed to the bottom of the screen, and filters are inside a modal */
+  _body:has(.bottom-bar) {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+
+  .bottom-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    background-color: color-mix(in oklab, var(--bg-dark), transparent 15%);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -4px 16px var(--shadow-light);
+
+    .search-input {
+      flex-grow: 1;
+
+      input {
+        /* Prevent iOS from zooming in to the input */
+        font-size: max(16px, 1em);
+        padding-block: .75em;
+      }
+    }
+  }
+
+  .filters-button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    aspect-ratio: 1;
+    padding: 0 .9em;
+    border: unset;
+    border-radius: 100px;
+    background-color: var(--bg);
+    color: var(--text);
+
+    svg {
+      width: 1.35em;
+      height: 1.35em;
+    }
+
+    .count {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      min-width: 1.4em;
+      height: 1.4em;
+      padding-inline: .3em;
+      display: grid;
+      place-items: center;
+      border-radius: 100px;
+      background-color: var(--light-blue-400);
+      color: var(--bg-dark);
+      font-size: var(--fs-300);
+      font-weight: 900;
+    }
+  }
+
+  .filters-modal {
+    /* Bottom sheet */
+    margin: auto auto 0;
+    padding: 0;
+    border: unset;
+    width: 100%;
+    max-width: 100%;
+    max-height: 90dvh;
+    border-radius: 16px 16px 0 0;
+    background-color: var(--bg-dark);
+    color: var(--text);
+    box-shadow: 0 -4px 24px var(--shadow);
+
+    &[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &::backdrop {
+      background-color: rgb(0 0 0 / 60%);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--bg);
+      /* Header can be dragged down to close the modal */
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: var(--fs-500);
+      }
+    }
+
+    .close-button {
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      border: unset;
+      border-radius: 100px;
+      background-color: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+
+      svg {
+        width: 1.25em;
+        height: 1.25em;
+      }
+    }
+
+    .modal-content {
+      display: grid;
+      gap: 24px;
+      padding: 16px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+
+      .filter-groups {
+        gap: 24px;
+      }
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--bg);
+
+      .show-results {
+        width: 100%;
+        padding: .75em 1em;
+        border: unset;
+        border-radius: 100px;
+        background-color: var(--light-blue-400);
+        color: var(--bg-dark);
+        font-weight: 700;
+      }
+    }
+  }
+}

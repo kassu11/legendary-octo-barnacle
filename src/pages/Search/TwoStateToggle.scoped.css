@@ -5,7 +5,7 @@
     align-items: center;
     width: var(--select-width, 200px);
     max-width: var(--select-max-width, 300px);
-    padding: .5em;
+    padding: var(--select-padding, .5em);
     border: 2px solid var(--bg-light);
     border-radius: 4px;
     background-color: var(--bg);

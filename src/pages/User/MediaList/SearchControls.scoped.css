@@ -1,11 +1,67 @@
 @layer layout {
-  .user-profile-media-list-search {
-    display: grid;
-    align-content: start;
-    gap: .25rem;
+  .user-list-filters {
+    --select-padding: .35em .5em;
+  }
 
-    select {
-      width: 100%;
+  .action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: .35em .75em;
+    border: 2px solid var(--bg-light);
+    border-radius: 4px;
+    background-color: var(--bg);
+    color: var(--text);
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: .2s border-color, .2s background-color;
+
+    &:not(:disabled):hover, &:not(:disabled):focus-visible {
+      outline: none;
+      border-color: var(--light-blue-400);
+      background-color: color-mix(in oklab, var(--bg), var(--light-blue-400) 25%);
+    }
+
+    &:disabled {
+      border: 2px dashed var(--bg);
+      background-color: color-mix(in oklab, var(--bg-dark), var(--bg) 30%);
+      color: var(--text-muted);
+      cursor: default;
+    }
+  }
+
+  .remove-filters:not(:disabled):hover, .remove-filters:not(:disabled):focus-visible {
+    border-color: var(--crimson-400);
+    background-color: color-mix(in oklab, var(--bg), var(--crimson-400) 25%);
+  }
+
+  /* Floats above the mobile bottom bar, which is the containing block */
+  .scroll-to-list-start {
+    position: absolute;
+    right: 8px;
+    bottom: calc(100% + 8px);
+    display: grid;
+    place-items: center;
+    padding: .75em;
+    border: unset;
+    border-radius: 50%;
+    background-color: var(--bg);
+    color: var(--text);
+    box-shadow: 0 2px 8px var(--shadow);
+    visibility: hidden;
+    translate: calc(100% + 8px) 0;
+    transition: .2s translate, .2s visibility;
+
+    &.visible {
+      visibility: visible;
+      translate: 0 0;
+    }
+
+    svg {
+      width: 1.35em;
+      height: 1.35em;
     }
   }
 }
