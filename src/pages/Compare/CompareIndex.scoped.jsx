@@ -13,7 +13,7 @@ import Score from "@/components/media/Score.scoped.jsx";
 import Star from "@/assets/Star.jsx";
 import { debounce } from "@solid-primitives/scheduled";
 import { queries } from "@/api/api.js";
-import { searchObjects } from "@/constants/constants.js";
+import { translateToInternalSearchParams } from "@/api/apiTranslations.js";
 import { asserts, signals, arrayUtils, numberUtils } from "@/utils/utils.js";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
@@ -709,7 +709,7 @@ function ContentPage() {
                 )}</For>
               </ol>
               <ul class="flex-bullet-separator">
-                <Show when={Object.entries(searchObjects.searchFormatsOLD.ani.media).find(([, val]) => val.api === media.format)?.[0]}>{formatApiValue => (
+                <Show when={translateToInternalSearchParams.format[media.format]}>{formatApiValue => (
                   <li>
                     <Switch>
                       <Match when={media.countryOfOrigin !== "JP"}> 

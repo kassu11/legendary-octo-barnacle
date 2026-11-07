@@ -6,7 +6,7 @@ import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
-import { AgeIcon, ArrowUpIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons.jsx";
+import { AgeIcon, ArrowUpIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatFilterIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [
@@ -162,7 +162,7 @@ export function SearchControlsScoped(props) {
           <FilterGroup title="List entry">
             <ListFilterSelect   param="userStatus"      excludable each={ userStatusOptions() } value={ props.userStatus()      } icon={ <OnListIcon />  } button="User Status" tooltip="Status of the entry on this user's list. Click once to include, twice to exclude"                                           setSearchParams={ setSearchParams } />
             <ListToggle param="notes"        value={ props.notesFilter() }        icon={ <NotesIcon />       } label="Notes"                                            tooltip="Click once to show only entries with notes, twice to hide entries with notes" />
-            <ListToggle param="repeat"       value={ props.rewatchedFilter() }    icon={ <RepeatIcon />      } label={params.type === "anime" ? "Rewatched" : "Reread"} tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
+            <ListToggle param="repeat"       value={ props.rewatchedFilter() }    icon={ <RepeatFilterIcon />      } label={params.type === "anime" ? "Rewatched" : "Reread"} tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
             <Show when={isOwnProfile()}>
               <ListToggle param="private"    value={ props.privateFilter() }      icon={ <PrivateIcon />     } label="Private"                                          tooltip="Click once to show only private entries, twice to hide private entries" />
             </Show>

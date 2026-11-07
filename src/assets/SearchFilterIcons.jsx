@@ -126,7 +126,7 @@ export const NotesIcon = props => (
   </Icon>
 );
 
-export const RepeatIcon = props => (
+export const RepeatFilterIcon = props => (
   <Icon {...props}><path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3" /></Icon>
 );
 
