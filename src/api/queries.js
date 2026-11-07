@@ -31,6 +31,7 @@ export { default as anilistUserMediaList } from "./queries/anilistUserMediaList.
 export { default as anilistCharacters } from "./queries/anilistCharacters.graphql";
 export { default as anilistStaff } from "./queries/anilistStaff.graphql";
 export { default as anilistDeleteMediaListEntry } from "./queries/anilistDeleteMediaListEntry.graphql";
+export { default as anilistDeleteActivity } from "./queries/anilistDeleteActivity.graphql";
 export { default as anilistMutateToggleFavourite } from "./queries/anilistMutateToggleFavourite.graphql";
 export { default as anilistMutateToggleLike } from "./queries/anilistMutateToggleLike.graphql";
 export { default as anilistActivity } from "./queries/anilistActivity.graphql";

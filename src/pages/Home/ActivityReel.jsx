@@ -6,6 +6,14 @@ import { signals, arrayUtils } from "@/utils/utils.js";
 import { createAnilistFetcher } from "@/api/fetcherUtils.js";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
+import { deletedActivityIds } from "@/state/globalState.js";
+
+const isNotDeleted = activity => !deletedActivityIds.has(activity.id);
+
+function removeDeletedActivities(api) {
+  if (!api.data) return;
+  api.data = api.data.map(activities => activities.filter(isNotDeleted)).filter(activities => activities.length);
+}
 
 export function HomePageActivityReel(props) {
   const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
@@ -17,8 +25,10 @@ export function HomePageActivityReel(props) {
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
     batch(() => {
-      if (data) setPagelessCacheData(data);
-      else {
+      if (data) {
+        removeDeletedActivities(data);
+        setPagelessCacheData(data);
+      } else {
         setPagelessCacheData({
           data: null,
           name: "Home Activity",
@@ -32,7 +42,9 @@ export function HomePageActivityReel(props) {
   });
 
   const updateCache = (apiResponse, pagelessFetcher) => {
-    const { pageInfo, activities } = apiResponse.data.data.Page;
+    const { pageInfo } = apiResponse.data.data.Page;
+    // Response could have been sent before the activity was deleted
+    const activities = apiResponse.data.data.Page.activities?.filter(isNotDeleted);
     if (!activities?.length || pagelessFetcher.cacheKey !== pagelessCacheData().cacheKey) {
       return;
     }
@@ -99,6 +111,14 @@ export function HomePageActivityReel(props) {
     setFetcherValueToStorage(mutate);
   };
 
+  const deleteFromCache = () => {
+    setPagelessCacheData(api => {
+      removeDeletedActivities(api);
+      setFetcherValueToStorage(api);
+      return api;
+    });
+  };
+
   const [isDebug, setIsDebug] = signals.debug();
 
   return (
@@ -107,7 +127,7 @@ export function HomePageActivityReel(props) {
         <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
       </Show>
       <HomePageActivityReelContent cache={pagelessCacheData()?.data?.[0] || []} isDebug={isDebug} updateCache={updateCache}
-                                   mutateCache={mutateCache} {...props} />
+                                   mutateCache={mutateCache} deleteFromCache={deleteFromCache} {...props} />
     </Show>
   );
 }

@@ -12,6 +12,9 @@ import { CreatedAt } from "./CreatedAt.jsx";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { addApplicationNotification } from "@/state/notifications";
 import { createAbortController } from "@/utils/abortUtils.js";
+import { authedUserId, deletedActivityIds } from "@/state/globalState.js";
+import { deleteFetcherValueFromStorage } from "@/utils/storageUtils.js";
+import TrashIcon from "@/assets/TrashIcon";
 
 export function ActivityCard(props) {
   props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, props);
@@ -31,7 +34,7 @@ export function ActivityCard(props) {
             <OldMarkdownComponent children={props.activity.text} />
           </div>
           <div class="footer">
-            <Footer mutateCache={props.mutateCache} activity={props.activity}/>
+            <Footer mutateCache={props.mutateCache} onDelete={props.onDelete} activity={props.activity}/>
           </div>
         </Dynamic>
       </Match>
@@ -60,7 +63,7 @@ export function ActivityCard(props) {
           </div>
           <div class="right">
             <CreatedAt scoped createdAt={props.activity.createdAt} />
-            <Footer mutateCache={props.mutateCache} activity={props.activity}/>
+            <Footer mutateCache={props.mutateCache} onDelete={props.onDelete} activity={props.activity}/>
           </div>
         </Dynamic>
       </Match>
@@ -155,6 +158,47 @@ function Footer(props) {
         </Show>
       </button>
       {/* <button>Reply {props.activity.replyCount}</button> */}
+      <DeleteActivityButton onDelete={props.onDelete} activity={props.activity} />
     </>
   )
+}
+
+function DeleteActivityButton(props) {
+  const [deleting, setDeleting] = createSignal(false);
+  let dialog;
+
+  const deleteActivity = async () => {
+    const { activity, onDelete } = props;
+    setDeleting(true);
+
+    const fetcher = createAnilistFetcher(queries.anilistDeleteActivity, { id: activity.id }, AbortSignal.timeout(30_000));
+    const res = await fetcherToFetch(fetcher).catch(() => null);
+    const json = res?.status === 200 ? await res.json() : null;
+
+    if (json?.data?.DeleteActivity?.deleted) {
+      deletedActivityIds.add(activity.id);
+      // Route params are strings, so the id has to be a string here for the cache keys to match
+      deleteFetcherValueFromStorage(createAnilistFetcher(queries.anilistActivityById, { id: "" + activity.id }));
+      deleteFetcherValueFromStorage(createAnilistFetcher(queries.anilistActivityRepliedById, { id: "" + activity.id, page: 1 }));
+      onDelete(activity.id);
+    } else {
+      setDeleting(false);
+      addApplicationNotification({ type: "error", message: "Deleting activity failed", duration: 30_000 });
+    }
+  };
+
+  return (
+    <Show when={props.onDelete && props.activity.user.id === authedUserId()}>
+      <button class="cp-activity-delete" title="Delete activity" aria-label="Delete activity" disabled={deleting()} onClick={() => dialog.showModal()}>
+        <TrashIcon scoped />
+      </button>
+      <dialog ref={elem => dialog = elem} class="activity-delete-dialog">
+        <p>Are you sure you want to delete this activity</p>
+        <form method="dialog">
+          <button onClick={deleteActivity}>Yes</button>
+          <button>No</button>
+        </form>
+      </dialog>
+    </Show>
+  );
 }
