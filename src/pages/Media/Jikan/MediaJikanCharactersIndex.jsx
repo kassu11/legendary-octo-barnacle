@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { useMediaInfo } from "@/state/providers.js";
 import { queries } from "@/api/api.js";
 import { localizations } from "@/constants/constants.js";
-import { signals } from "@/utils/utils.js";
+import { createLocalStorageSignal } from "@/utils/localStorageUtils.js";
 import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import { MalCharacterCard } from "@/components/Cards/Cards.scoped.jsx";
 import { createTimer } from "@/hooks/createTimer.js";
@@ -34,7 +34,7 @@ export function MediaInfoCharactersJikan() {
     });
   });
 
-  const [language, setLanguage] = signals.localStorageString(localizations.Japanese);
+  const [language, setLanguage] = createLocalStorageSignal(localizations.Japanese);
   const languages = createMemo(() => {
     const uniqueLanguages = new Set();
     const characters = jikanCharactersData()?.data.data;
