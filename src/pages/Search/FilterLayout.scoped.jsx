@@ -36,6 +36,7 @@ export function FilterSearchInput(props) {
  * @param {Object} props
  * @param {import("solid-js").JSX.Element} props.search
  * @param {number} props.filterCount Shown on top of the filters button
+ * @param {import("solid-js").JSX.Element} [props.action] Absolutely positioned against the bottom bar
  * @param {import("solid-js").JSX.Element} props.children Content of the modal
  */
 export function MobileFilters(props) {
@@ -101,6 +102,7 @@ export function MobileFilters(props) {
   return (
     <>
       <div class="bottom-bar">
+        {props.action}
         {props.search}
         <button class="filters-button" onClick={openFilters} aria-label="Open filters">
           <FiltersIcon scoped />

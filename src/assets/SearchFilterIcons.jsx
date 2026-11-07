@@ -144,6 +144,10 @@ export const XIcon = props => (
   <Icon {...props}><path d="M18 6 6 18M6 6l12 12" /></Icon>
 );
 
+export const ArrowUpIcon = props => (
+  <Icon {...props}><path d="m5 12 7-7 7 7M12 19V5" /></Icon>
+);
+
 export const ChevronLeftIcon = props => (
   <Icon {...props}><path d="m15 18-6-6 6-6" /></Icon>
 );

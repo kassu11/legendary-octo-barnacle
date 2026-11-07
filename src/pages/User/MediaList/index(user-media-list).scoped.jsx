@@ -180,14 +180,19 @@ export function UserMediaList() {
     return user().id === authUserData()?.data.id;
   }
 
+  let listBody;
+  // Scroll position that puts the start of the list right below the sticky main navigation
+  const listStartY = () => listBody.getBoundingClientRect().top + window.scrollY - document.querySelector(".main-navigation").offsetHeight;
+
   return (
     <UserMediaListContext.Provider value={{ triggerProgressIncrease, isOwnProfile }}>
       <Show when={params.list}>
         <Navigate href={legacyListUrl()} />
       </Show>
-      <div class="user-profile-media-list-body">
+      <div ref={elem => listBody = elem} class="user-profile-media-list-body">
         <SearchControlsScoped
           listData={listData}
+          listStartY={listStartY}
           setSearchParams={setSearchParams}
           search={search}
           list={list}
