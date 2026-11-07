@@ -1,12 +1,12 @@
 import { batch, createEffect, Show } from "solid-js";
 import { HomePageActivityReel } from "./ActivityReel.jsx";
-import { signals } from "@/utils/utils.js";
+import { createLocalStorageBooleanSignal, createLocalStorageJsonSignal, createLocalStorageSignal } from "@/utils/localStorageUtils.js";
 
 export function Activity() {
-  const [activityType, setActivityType] = signals.localStorageString("LOB_ACTIVITY_TYPE", undefined);
-  const [isFollowing, setIsFollowing] = signals.localStorageBoolean("LOB_ACTIVITY_IS_FOLLOWING", true);
-  const [hasReplies, setHasReplies] = signals.localStorageBoolean("LOB_ACTIVITY_HAS_REPLIES", undefined);
-  const [variables, setVariables] = signals.localStorageJSON("LOB_ACTIVITY_QUERY", {
+  const [activityType, setActivityType] = createLocalStorageSignal("LOB_ACTIVITY_TYPE", undefined);
+  const [isFollowing, setIsFollowing] = createLocalStorageBooleanSignal("LOB_ACTIVITY_IS_FOLLOWING", true);
+  const [hasReplies, setHasReplies] = createLocalStorageBooleanSignal("LOB_ACTIVITY_HAS_REPLIES", undefined);
+  const [variables, setVariables] = createLocalStorageJsonSignal("LOB_ACTIVITY_QUERY", {
     "isFollowing": true,
   });
 
