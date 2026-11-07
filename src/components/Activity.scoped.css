@@ -79,6 +79,7 @@
     padding-left: 0;
     display: flex;
     flex-direction: column;
+    gap: .25rem;
   }
 }
 
@@ -97,5 +98,20 @@
 
   button.active {
     background-color: var(--crimson-400);
+  }
+
+  .cp-activity-delete svg {
+    display: block;
+    margin-inline: auto;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .activity-delete-dialog {
+    margin: auto;
+
+    &::backdrop {
+      background-color: var(--shadow-400-old);
+    }
   }
 }

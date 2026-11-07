@@ -159,7 +159,7 @@ export function HomePageActivityReelContent(props) {
           onMount(() => intersectionObserver.observe(ref))
 
           return (
-            <ActivityCard activity={activity} mutateCache={props.mutateCache} wrapper={wrapperProps => (
+            <ActivityCard activity={activity} mutateCache={props.mutateCache} onDelete={props.deleteFromCache} wrapper={wrapperProps => (
               <li ref={elem => ref = elem} attr:data-id={activity.id} {...wrapperProps} />
             )}/>
           )

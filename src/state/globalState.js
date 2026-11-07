@@ -34,6 +34,9 @@ export const logoutUser = () => {
 
 export const [globalEditedMedia, storeGlobalEditedMedia] = createStore({});
 
+// Home activity feeds that are not currently open can still have these activities inside their cache
+export const deletedActivityIds = new Set();
+
 export const storeAccessToken = async (token, expires) => {
   setToken2(token || null);
   const fetcher = createAnilistFetcher(queries.currentUser, {});

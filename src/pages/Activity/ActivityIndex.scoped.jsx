@@ -53,16 +53,22 @@ export function ActivityPage() {
     });
   });
 
+  const [deletedId, setDeletedId] = createSignal();
+  const isDeleted = () => deletedId() === +params.id;
+
   document.title = "Activity - LOB";
 
   return (
     <div class="activity-page">
       {formatMSToString(activityTime())}
-      <Show when={activityData()}>
-        <ActivityCard activity={activityData()} mutateCache={(e) => console.log("mutate", e)} />
+      <Show when={isDeleted()}>
+        <p>This activity has been deleted</p>
+      </Show>
+      <Show when={activityData() && !isDeleted()}>
+        <ActivityCard activity={activityData()} mutateCache={(e) => console.log("mutate", e)} onDelete={setDeletedId} />
       </Show>
       {formatMSToString(repliesTime())}
-      <Show when={repliesData()}>
+      <Show when={repliesData() && !isDeleted()}>
         <For each={repliesData().activityReplies}>{reply => (
           <div class="activity-message-card">
             <div class="header">

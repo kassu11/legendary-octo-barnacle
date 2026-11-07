@@ -13,6 +13,7 @@ import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { deletedActivityIds } from "@/state/globalState.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function Overview() {
@@ -200,7 +201,9 @@ function UserActivityReel(props) {
   // Pinned activities are sorted first, so the activities are placed by their page index instead of their id
   const updateCache = (onePageRes, pagelessFetcher) => {
     if (pagelessFetcher.cacheKey !== pagelessCacheData().cacheKey) return;
-    const { pageInfo, activities } = onePageRes.data.data.Page;
+    const { pageInfo } = onePageRes.data.data.Page;
+    // Response could have been sent before the activity was deleted
+    const activities = onePageRes.data.data.Page.activities.filter(activity => !deletedActivityIds.has(activity.id));
 
     setPagelessCacheData(pagelessRes => {
       try {
@@ -244,9 +247,19 @@ function UserActivityReel(props) {
     });
   };
 
+  const deleteFromCache = id => {
+    setPagelessCacheData(pagelessRes => {
+      if (!(id in (pagelessRes.data?.indices || {}))) return pagelessRes;
+      const items = pagelessRes.data.items.filter(activity => activity.id !== id);
+      pagelessRes.data = { items, indices: updateCacheMap(0, items.length - 1, {}, items) };
+      mutateCache(pagelessRes);
+      return pagelessRes;
+    });
+  };
+
   return (
     <Show when={!pagelessCacheLoading()}>
-      <UserActivityPage cache={pagelessCacheData()?.data?.items || []} updateCache={updateCache} mutateCache={mutateCache} {...props} />
+      <UserActivityPage cache={pagelessCacheData()?.data?.items || []} updateCache={updateCache} mutateCache={mutateCache} deleteFromCache={deleteFromCache} {...props} />
     </Show>
   );
 }
@@ -346,7 +359,7 @@ function UserActivityPage(props) {
           onMount(() => intersectionObserver.observe(ref));
 
           return (
-            <ActivityCard activity={activity} mutateCache={props.mutateCache} hideProfile={true} small={true} wrapper={wrapperProps => (
+            <ActivityCard activity={activity} mutateCache={props.mutateCache} onDelete={props.deleteFromCache} hideProfile={true} small={true} wrapper={wrapperProps => (
               <div ref={elem => ref = elem} attr:data-page={Math.ceil((i() + 1) / hardcodedPageCount)} {...wrapperProps} />
             )}/>
           );

@@ -12,6 +12,12 @@ export function setFetcherValueToStorage(value) {
   }
 }
 
+export function deleteFetcherValueFromStorage(fetcher) {
+  if (!fetcher?.cacheKey) return;
+  deleteIndexDBValue("fetches", fetcher.cacheKey);
+  sessionStorage.removeItem(fetcher.cacheKey);
+}
+
 export function getFetcherValueFromStorage(fetcher, defaultValue) {
   if (!fetcher?.cacheKey) return defaultValue;
 
