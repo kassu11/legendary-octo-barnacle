@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { createEffect } from "solid-js";
 import { useUser } from "@/state/providers.js";
-import "./index(user-stats).scoped.css";
+import "./UserStatsIndex.scoped.css";
 
 export function Stats(props) {
   const { user } = useUser();

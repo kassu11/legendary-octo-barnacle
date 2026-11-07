@@ -1,6 +1,6 @@
 import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, onCleanup, Show, untrack } from "solid-js";
-import "./index(user-media-list).scoped.css";
+import "./UserMediaListIndex.scoped.css";
 import { capitalize } from "@/utils/formating.js";
 import UserMediaListWorker from "@/workers/user-media-list.js?worker";
 import { UserMediaListContext, useUser } from "@/state/providers.js";

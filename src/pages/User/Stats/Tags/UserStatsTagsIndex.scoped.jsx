@@ -2,15 +2,16 @@ import { A, useParams } from "@solidjs/router";
 import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
+import { useUser } from "@/state/providers.js";
 import { queries } from "@/api/api.js";
 import { localizations } from "@/constants/constants.js";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
-import "./Staff.scoped.css";
+import "./UserStatsTagsIndex.scoped.css";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
-export function StatsMediaStaff() {
+export function StatsMediaTags() {
   const params = useParams();
 
   const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
@@ -19,18 +20,18 @@ export function StatsMediaStaff() {
   let userStatsFetcher;
   createEffect(() => {
     const signal = userStatsController.abortAndRenew();
-
     const { type } = params;
-    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStaff, { name: params.name }, signal);
-    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaStaff, { name: params.name }, signal);
+
+    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeTags, { name: params.name }, signal);
+    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaTags, { name: params.name }, signal);
 
     sendAnilistFetcher(userStatsFetcher, {
-      name: "Anilist user stats",
+      name: "Anilist user tag stats",
       onFetch: () => userStatsController.disable(),
       onStart: startUserStatsTimer,
       onStop: stopUserStatsTimer,
       setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].staff);
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].tags);
       }
     });
   });
@@ -39,14 +40,15 @@ export function StatsMediaStaff() {
     <>
       <p>{formatMSToString(userStatsTime())}</p>
       <Show when={userStatsData()}>
-        <StatsStaff genres={userStatsData()} />
+        <StatsTags genres={userStatsData()} />
       </Show>
     </>
   )
 }
 
-function StatsStaff(props) {
+function StatsTags(props) {
   const params = useParams();
+  const { user } = useUser();
   const [mediaIds, setMediaIds] = createSignal(new Set());
   const [state, setState] = createSignal("count");
   const [store, setStore] = createStore({});
@@ -93,53 +95,54 @@ function StatsStaff(props) {
   return (
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
-        <h2>Staff</h2>
+        <h2>Tags</h2>
         <SortHeaderButtons setState={ setState } />
       </div>
-      <ol class="grid-column-auto-fill staff">
-        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.staff.name.userPreferred.localeCompare(b.staff.name.userPreferred))}>{(genre, i) => (
+      <ol class="grid-column-auto-fill">
+        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.tag.name.localeCompare(b.tag.name))}>{(genre, i) => (
           <li class="item">
-            <div class="flex-space-between staff-name-wrapper">
-              <h2>
-                <A href={"/ani/staff/" + genre.staff.id + "/" + formatTitleToUrl(genre.staff.name.userPreferred)}>
-                  {genre.staff.name.userPreferred}
-                </A>
-              </h2>
-              <p class="ranking">#{i() + 1}</p>
-            </div>
-            <div class="inline-container">
-              <div class="main-content">
-                <img class="staff-cover" src={genre.staff.image.large} alt="Staff profile cover" />
-                <ol class="flex-space-between stats">
-                  <li>
-                    <p class="value">{numberCommas(genre.count || 0)}</p>
-                    <p class="title">Count</p>
-                  </li>
-                  <li>
-                    <p class="value">{(genre.meanScore || 0)}</p>
-                    <p class="title">Mean score</p>
-                  </li>
-                  <li>
-                    <Switch>
-                      <Match when={params.type === "anime"}>
-                        <p class="value">
-                          <Show when={Math.floor(genre.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
-                          <Show when={Math.floor(genre.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
-                          <Show when={genre.minutesWatched < 60}>{genre.minutesWatched} minute{plural(genre.minutesWatched)}</Show>
-                        </p>
-                        <p class="title">Time watched</p>
-                      </Match>
-                      <Match when={params.type === "manga"}>
-                        <p class="value">{numberCommas(genre.chaptersRead)}</p>
-                        <p class="title">Chapters read</p>
-                      </Match>
-                    </Switch>
-                  </li>
-                </ol>
-                <div class="wrapper">
-                  <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
-                </div>
+            <div class="header">
+              <div class="flex-space-between">
+                <h2>
+                  <A href={"/ani/search/" + params.type + "?onList=false&theme=" + genre.tag.name}>
+                    {genre.tag.name}
+                  </A>
+                </h2>
+                <p class="ranking">#{i() + 1}</p>
               </div>
+              <ol class="flex-space-between">
+                <li>
+                  <p class="value">{numberCommas(genre.count || 0)}</p>
+                  <p class="title">Count</p>
+                </li>
+                <li>
+                  <p class="value">{(genre.meanScore || 0)}</p>
+                  <p class="title">Mean score</p>
+                </li>
+                <li>
+                  <Switch>
+                    <Match when={params.type === "anime"}>
+                      <p class="value">
+                        <Show when={Math.floor(genre.minutesWatched / 60 / 24)}>{days => <>{numberCommas(days())} day{plural(days())} </>}</Show>
+                        <Show when={Math.floor(genre.minutesWatched / 60 % 24)}>{hours => <>{numberCommas(hours())} hour{plural(hours())} </>}</Show>
+                        <Show when={genre.minutesWatched < 60}>{genre.minutesWatched} minute{plural(genre.minutesWatched)}</Show>
+                      </p>
+                      <p class="title">Time watched</p>
+                    </Match>
+                    <Match when={params.type === "manga"}>
+                      <p class="value">{numberCommas(genre.chaptersRead)}</p>
+                      <p class="title">Chapters read</p>
+                    </Match>
+                  </Switch>
+                </li>
+              </ol>
+            </div>
+            <div class="wrapper tags">
+              <div className="flex-space-between">
+                <p>User {params.type}</p>
+                <A href={"/user/" + user().name + "/" + params.type + "/list?theme=" + genre.tag.name}>Show all</A>
+              </div>
+              <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>
           </li>
         )}</For>

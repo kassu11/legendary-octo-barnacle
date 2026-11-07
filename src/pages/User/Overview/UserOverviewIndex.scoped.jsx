@@ -3,7 +3,7 @@ import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untra
 import { useUser } from "@/state/providers.js";
 import { formatTitleToUrl, mediaUrl, numberCommas } from "@/utils/formating.js";
 import { ActivityCard } from "@/components/Activity.scoped.jsx";
-import "./Overview.scoped.css";
+import "./UserOverviewIndex.scoped.css";
 import { queries } from "@/api/api.js";
 import { asserts } from "@/utils/utils.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";

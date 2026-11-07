@@ -2,16 +2,15 @@ import { A, useParams } from "@solidjs/router";
 import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { useUser } from "@/state/providers.js";
 import { queries } from "@/api/api.js";
-import { localizations } from "@/constants/constants.js";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
-import "./Tags.scoped.css";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import "./UserStatsStudiosIndex.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { useUser } from "@/state/providers.js";
 
-export function StatsMediaTags() {
+export function StatsAnimeStudios() {
   const params = useParams();
 
   const [userStatsTime, startUserStatsTimer, stopUserStatsTimer] = createTimer();
@@ -20,18 +19,16 @@ export function StatsMediaTags() {
   let userStatsFetcher;
   createEffect(() => {
     const signal = userStatsController.abortAndRenew();
-    const { type } = params;
 
-    if (type === localizations.anime) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeTags, { name: params.name }, signal);
-    if (type === localizations.manga) userStatsFetcher = createAnilistFetcher(queries.anilistGetUserMangaTags, { name: params.name }, signal);
+    userStatsFetcher = createAnilistFetcher(queries.anilistGetUserAnimeStudios, { name: params.name }, signal);
 
     sendAnilistFetcher(userStatsFetcher, {
-      name: "Anilist user tag stats",
+      name: "Anilist user studio stats",
       onFetch: () => userStatsController.disable(),
       onStart: startUserStatsTimer,
       onStop: stopUserStatsTimer,
       setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics[type].tags);
+        if (f.cacheKey === userStatsFetcher.cacheKey) setUserStatsData(res.data.data.User.statistics.anime.studios);
       }
     });
   });
@@ -40,13 +37,13 @@ export function StatsMediaTags() {
     <>
       <p>{formatMSToString(userStatsTime())}</p>
       <Show when={userStatsData()}>
-        <StatsTags genres={userStatsData()} />
+        <StatsStudios genres={userStatsData()} />
       </Show>
     </>
   )
 }
 
-function StatsTags(props) {
+function StatsStudios(props) {
   const params = useParams();
   const { user } = useUser();
   const [mediaIds, setMediaIds] = createSignal(new Set());
@@ -95,17 +92,17 @@ function StatsTags(props) {
   return (
     <section class="user-profile-stats-genres">
       <div class="flex-space-between">
-        <h2>Tags</h2>
+        <h2>Studios</h2>
         <SortHeaderButtons setState={ setState } />
       </div>
       <ol class="grid-column-auto-fill">
-        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.tag.name.localeCompare(b.tag.name))}>{(genre, i) => (
+        <For each={props.genres.sort((a, b) => b[state()] - a[state()] || a.studio.name.localeCompare(b.studio.name))}>{(genre, i) => (
           <li class="item">
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/ani/search/" + params.type + "?onList=false&theme=" + genre.tag.name}>
-                    {genre.tag.name}
+                  <A href={"/ani/studio/" + genre.studio.id + "/" + formatTitleToUrl(genre.studio.name)}>
+                    {genre.studio.name}
                   </A>
                 </h2>
                 <p class="ranking">#{i() + 1}</p>
@@ -139,8 +136,8 @@ function StatsTags(props) {
             </div>
             <div class="wrapper tags">
               <div className="flex-space-between">
-                <p>User {params.type}</p>
-                <A href={"/user/" + user().name + "/" + params.type + "/list?theme=" + genre.tag.name}>Show all</A>
+                <p>From user list</p>
+                <A href={"/user/" + user().name + "/" + params.type + "/list?studio=" + genre.studio.name}>Show all</A>
               </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>
@@ -177,6 +174,7 @@ function Cards(props) {
       }
     });
   });
+
 
   let fetchNewCards = false;
   createEffect(on(() => props.mediaIds, () => {

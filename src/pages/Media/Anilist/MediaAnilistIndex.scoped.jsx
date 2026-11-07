@@ -15,7 +15,7 @@ import { Rankings } from "@/pages/Media/Anilist/Rankings.scoped.jsx";
 import { ExtraInfo } from "@/pages/Media/Anilist/ExtraInfo.scoped.jsx";
 import { ExternalLinks } from "@/pages/Media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "@/pages/Media/Scores.scoped.jsx";
-import "./index(media-page-anilist).scoped.css";
+import "./MediaAnilistIndex.scoped.css";
 import { queries } from "@/api/api.js";
 import { formatTitleToUrl } from "@/utils/formating.js";
 import { navigationUtils } from "@/utils/utils.js";

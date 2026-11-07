@@ -3,7 +3,7 @@ import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { queries } from "@/api/api.js";
-import "./VoiceActors.scoped.css";
+import "./UserStatsVoiceActorsIndex.scoped.css";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";

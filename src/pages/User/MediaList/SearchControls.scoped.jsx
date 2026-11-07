@@ -1,7 +1,7 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/state/providers.js";
 import { createMemo, createSignal, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
-import { ALL_LISTS } from "./index(user-media-list).scoped.jsx";
+import { ALL_LISTS } from "./UserMediaListIndex.scoped.jsx";
 import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
