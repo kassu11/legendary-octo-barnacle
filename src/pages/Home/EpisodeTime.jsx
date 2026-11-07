@@ -1,6 +1,6 @@
 import { createMemo, createSignal, Show } from "solid-js";
 import { timeCollection } from "@/collections/collections";
-import { formatingUtils } from "@/utils/utils";
+import { plural } from "@/utils/formating.js";
 
 const [currentTime, setCurentTime] = createSignal(
   timeCollection.currentTimeInSeconds,
@@ -69,13 +69,13 @@ export function DurationToTime(props) {
     let returnValue = "";
 
     if (days) {
-      returnValue += ` ${days}${day}${formatingUtils.plural(days)}`;
+      returnValue += ` ${days}${day}${plural(days)}`;
     }
     if (hours) {
-      returnValue += ` ${hours}${hour}${formatingUtils.plural(hours)}`;
+      returnValue += ` ${hours}${hour}${plural(hours)}`;
     }
     if (minutes) {
-      returnValue += ` ${minutes}${minute}${formatingUtils.plural(minutes)}`;
+      returnValue += ` ${minutes}${minute}${plural(minutes)}`;
     }
 
     return returnValue.trim();

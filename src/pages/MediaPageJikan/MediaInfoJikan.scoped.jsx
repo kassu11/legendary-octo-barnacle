@@ -1,7 +1,8 @@
 import { A, useParams } from "@solidjs/router";
 import { MediaInfoContext, useMediaInfo } from "@/context/providers.js";
 import { localizations, mediaStatuses, queries } from "@/collections/collections.js";
-import { arrayUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "@/utils/utils.js";
+import { capitalize, numberCommas, plural } from "@/utils/formating.js";
+import { arrayUtils, statusUtils, urlUtils } from "@/utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scoped.css";
 import { Trailer } from "@/pages/MediaPage/Trailer.scoped.jsx";
@@ -137,11 +138,11 @@ export function MediaInfoWrapperJikan(props) {
                     <Switch>
                       <Match when={jikanData().data.data.year && jikanData().data.data.season}>
                         <A
-                          href={"/ani/search/" + params.type + "?year=" + jikanData().data.data.year + "&season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)} {jikanData().data.data.year}</A>
+                          href={"/ani/search/" + params.type + "?year=" + jikanData().data.data.year + "&season=" + jikanData().data.data.season + "&malSearch=true"}>{capitalize(jikanData().data.data.season)} {jikanData().data.data.year}</A>
                       </Match>
                       <Match when={jikanData().data.data.season}>
                         <A
-                          href={"/ani/search/" + params.type + "?season=" + jikanData().data.data.season + "&malSearch=true"}>{stringUtils.capitalize(jikanData().data.data.season)}</A>
+                          href={"/ani/search/" + params.type + "?season=" + jikanData().data.data.season + "&malSearch=true"}>{capitalize(jikanData().data.data.season)}</A>
                       </Match>
                       <Match when={jikanData().data.data.year}>
                         <A
@@ -174,11 +175,11 @@ export function MediaInfoWrapperJikan(props) {
                       </A>
                     </li>
                   </Show>
-                  <li>Members: {numberUtils.numberCommas(jikanData().data.data.members || 0) || "N/A"}</li>
+                  <li>Members: {numberCommas(jikanData().data.data.members || 0) || "N/A"}</li>
                   <li>Ranked: #{jikanData().data.data.rank || "N/A"}</li>
                   <li>Popularity: #{jikanData().data.data.popularity || "N/A"}</li>
                   <Show when={jikanData().data.data.authors?.length}>{size => (
-                    <li>Author{formatingUtils.plural(size())}:
+                    <li>Author{plural(size())}:
                       <For each={jikanData().data.data.authors}>{(author, i) => (
                         <>
                           <a href={author.url}>{author.name}</a>
@@ -262,7 +263,7 @@ export function MediaInfoHomeJikan() {
                   <li>
                     <A class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
                       <p class="name line-clamp">{entry.name}</p>
-                      <p class="type">{relation.relation} ({formatingUtils.capitalize(entry.type)})</p>
+                      <p class="type">{relation.relation} ({capitalize(entry.type)})</p>
                     </A>
                   </li>
                 )}</For>

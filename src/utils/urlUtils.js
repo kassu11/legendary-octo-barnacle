@@ -1,14 +1,15 @@
 import { useNavigate } from "@solidjs/router";
 import { isTypeInteger, isTypeString } from "@/collections/types";
-import { arrayUtils, formatingUtils } from "./utils";
+import { formatTitleToUrl } from "./formating";
+import { arrayUtils } from "./utils";
 import { isTypeFunction } from "./functionUtils";
 
 export const jikanMediaUrl= (type, card) => {
-  return "/mal/" + type + "/" + card.mal_id + "/" + formatingUtils.titleToUrl(card.title);
+  return "/mal/" + type + "/" + card.mal_id + "/" + formatTitleToUrl(card.title);
 }
 
 export const jikanCharacterUrl= character => {
-  return "/mal/character/" + character.mal_id + "/" + formatingUtils.titleToUrl(character.name);
+  return "/mal/character/" + character.mal_id + "/" + formatTitleToUrl(character.name);
 }
 
 export const anilistMediaUrl = media => {
@@ -24,7 +25,7 @@ export const anilistMediaUrl = media => {
     return base;
   }
 
-  return base + "/" + formatingUtils.titleToUrl(media.title.userPreferred);
+  return base + "/" + formatTitleToUrl(media.title.userPreferred);
 }
 
 export const anilistClientId = () => {

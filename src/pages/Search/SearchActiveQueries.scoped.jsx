@@ -4,7 +4,8 @@ import "./SearchActiveQueries.scoped.css";
 import { useParsedSearchParams } from "@/context/providers";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { useNavigateAndSearch } from "@/utils/urlUtils";
-import { arrayUtils, formatingUtils } from "@/utils/utils";
+import { capitalize } from "@/utils/formating.js";
+import { arrayUtils } from "@/utils/utils";
 import { localizeInternalSearchParams } from "@/core/apiTranslations";
 import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
@@ -90,11 +91,11 @@ export function useActiveSearchQueries() {
 
     const rawThemes = arrayUtils.wrapToArray(searchParams.theme);
     for (const v of themes) {
-      returnValue.push({ type: "themes", description: "Theme: " + formatingUtils.capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== v) } });
+      returnValue.push({ type: "themes", description: "Theme: " + capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== v) } });
     }
 
     for (const v of excludedThemes) {
-      returnValue.push({ type: "themes", description: "Theme: " + formatingUtils.capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== "-" + v) } });
+      returnValue.push({ type: "themes", description: "Theme: " + capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== "-" + v) } });
     }
 
     for (const v of age) {
@@ -113,7 +114,7 @@ export function useActiveSearchQueries() {
     if (yearLesser) returnValue.push({ type: "yearLesser", description: "Year<" + yearLesser,   query: { yearLesser: undefined } });
     if (yearGreater) returnValue.push({ type: "yearGreater", description: "Year>" + yearGreater, query: { yearGreater: undefined } });
 
-    if (season) returnValue.push({ type: "season", description: formatingUtils.capitalize(season), query: { season: undefined, year } });
+    if (season) returnValue.push({ type: "season", description: capitalize(season), query: { season: undefined, year } });
 
 
     if (progress) {

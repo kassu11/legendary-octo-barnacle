@@ -1,7 +1,7 @@
 import { ErrorBoundary, For, Show } from "solid-js";
 import "./StaffPreview.scoped.css";
 import { A } from "@solidjs/router";
-import { formatingUtils } from "@/utils/utils";
+import { formatTitleToUrl } from "@/utils/formating.js";
 
 export function StaffPreview(props) {
   return (
@@ -14,7 +14,7 @@ export function StaffPreview(props) {
           <ol class="grid-row-clamp grid-column-auto-fill">
             <For each={props.staff}>{staff => (
               <li>
-                <A href={"/ani/staff/" + staff.node.id + "/" + formatingUtils.titleToUrl(staff.node.name.userPreferred)}>
+                <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
                   <img src={staff.node.image.large} alt="Staff profile" />
                   <div>
                     <p>{staff.node.name.userPreferred}</p>
