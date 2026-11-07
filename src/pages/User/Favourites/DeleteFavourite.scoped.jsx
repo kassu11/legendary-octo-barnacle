@@ -3,7 +3,7 @@ import { useUser } from "@/context/providers.js";
 import { asserts, queries } from "@/collections/collections.js";
 import "./DeleteFavourite.scoped.css"
 import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 import { authUserData } from "@/core/globalState.js";
 
 export function DeleteFavouriteScoped(props) {

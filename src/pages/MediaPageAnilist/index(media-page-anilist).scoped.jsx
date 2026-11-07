@@ -28,8 +28,8 @@ import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createTimer } from "@/utils/timeUtils.js";
 import { MediaPageApiSwitcher } from "@/pages/MediaPageJikan/MediaPageApiSwitcher.scoped.jsx";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { mediaPageAnilistData, setMediaPageAnilistData } from "@/core/globalState";
 
-export const [mediaPageAnilistData, setMediaPageAnilistData] = createSignal(undefined, { equals: false });
 export function MediaInfoContent(props) {
   const params = useParams();
   const [searchParams] = useSearchParams();

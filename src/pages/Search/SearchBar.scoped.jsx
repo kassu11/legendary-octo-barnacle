@@ -12,7 +12,7 @@ import { MediaExternalSourcesSelect } from "./inputs/MediaExternalSourcesSelect.
 import { MediaAgeSelect } from "./inputs/MediaAgeSelect.scoped.jsx";
 import { MediaSeasonSelect } from "./inputs/MediaSeasonSelect.scoped";
 import { MediaGenresAndTagsSelect } from "./inputs/MediaGenresAndTagsSelect.scoped";
-import { TwoStateToggle } from "./TwoStateToggle.scoped";
+import { TwoStateToggle } from "@/components/filters/TwoStateToggle.scoped";
 import { MediaYearSelect } from "./inputs/MediaYearSelect.scoped";
 import { MediaProgressSelect } from "./inputs/MediaProgressSelect.scoped";
 import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
@@ -20,7 +20,7 @@ import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
 import { LicensedIcon, OnListIcon } from "@/assets/SearchFilterIcons.jsx";
-import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "./FilterLayout.scoped.jsx";
+import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { createMemo, Show } from "solid-js";
 
 export function SearchBar() {

@@ -2,7 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { createMemo, Show } from "solid-js";
 import { useParsedSearchParams, useResponsive } from "@/context/providers";
 import { Tooltip } from "@/components/Tooltip.scoped.jsx";
-import { Checkbox } from "./Checkbox.scoped";
+import { Checkbox } from "@/components/ui/Checkbox.scoped";
 import "./TwoStateToggle.scoped.css";
 
 /**

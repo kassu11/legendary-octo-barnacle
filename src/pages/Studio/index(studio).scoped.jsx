@@ -11,7 +11,7 @@ import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { MediaCard } from "@/pages/User/Relations/MediaCard.scoped";
+import { MediaCard } from "@/components/media/MediaCard.scoped";
 
 export function Studio() {
   const params = useParams();

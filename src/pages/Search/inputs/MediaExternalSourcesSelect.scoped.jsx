@@ -10,7 +10,7 @@ import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.j
 import { queries } from "@/collections/collections.js";
 import { tabTime } from "@/core/globalState.js";
 import { timeStringToMs } from "@/utils/timeUtils.js";
-import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";

@@ -13,7 +13,7 @@ import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 import { authUserData } from "@/core/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 

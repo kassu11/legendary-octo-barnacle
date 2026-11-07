@@ -7,7 +7,7 @@ import Heart from "@/assets/Heart.jsx";
 import Anilist from "@/assets/Anilist.jsx";
 import MyAnimeList from "@/assets/MyAnimeList.jsx";
 import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 
 export function FavouriteToggle(props) {
   let localChecked = null;

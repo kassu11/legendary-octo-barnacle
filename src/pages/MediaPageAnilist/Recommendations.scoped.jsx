@@ -5,7 +5,7 @@ import "./Recommendations.scoped.css";
 import { batch, createEffect, createSignal, For, Match, on, Show, Switch, untrack } from "solid-js";
 import { AnilistMediaRecommendationCard } from "@/components/Cards/Cards.scoped";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped";
+import { addApplicationNotification } from "@/core/notifications";
 import { Intersection } from "@/components/utils/Intersection.scoped";
 import { setFetcherValueToStorage } from "@/utils/storageUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";

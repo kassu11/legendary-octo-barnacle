@@ -5,7 +5,7 @@ import "./EditMediaEntriesContext.scoped.css";
 import { EditMediaEntriesContext } from "./providers.js";
 import { asserts, queries } from "@/collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 import { authUserData, storeGlobalEditedMedia } from "@/core/globalState";
 
 function formState(auth, initialData) {
