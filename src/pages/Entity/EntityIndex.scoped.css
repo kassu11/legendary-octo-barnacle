@@ -84,6 +84,12 @@
   .entity-page-grid-year-header {
     grid-column: 1/-1;
   }
+
+  .entity-page-character-role {
+    color: var(--text-muted);
+    font-size: var(--fs-300);
+  }
+
   .entity-page-character-cover {
     position: relative;
     width: 100%;
