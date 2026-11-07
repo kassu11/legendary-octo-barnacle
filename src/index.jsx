@@ -77,22 +77,6 @@ render(
               <Route path="/:type" matchFilters={{ type: ["anime", "manga"] }} component={ComparePage} />
               <Route path="*" component={() => <Navigate href="/compare" />} />
             </Route>
-            {/* <Route path="/:mode" matchFilters={{mode: ["browse", "search"]}} component={SearchBar}> */}
-            {/*   <Route path="/" matchFilters={{mode: "browse"}} component={BrowseRedirect}> */}
-            {/*     <Route path="/:type" matchFilters={{type: "media"}} component={BrowseMediaHomeScoped} /> */}
-            {/*     <Route path="/:type" matchFilters={{type: "anime"}} component={BrowseAnimeHome} /> */}
-            {/*     <Route path="/:type" matchFilters={{type: "manga"}} component={BrowseMangaHomeScoped} /> */}
-            {/*   </Route> */}
-            {/*   <Route path="/" matchFilters={{mode: "search"}} component={SearchContent}> */}
-            {/*     <Route path="/" component={() => <Navigate href="media" />} /> */}
-            {/*     <Route path="/:type" matchFilters={{ type: ["anime", "manga", "media"] }}> */}
-            {/*       <Route path="/:header?" matchFilters={animeSearch} /> */}
-            {/*       <Route path="/:header?" matchFilters={mangaSearch} /> */}
-            {/*       <Route path="/:header?" matchFilters={bothSearch} /> */}
-            {/*       <Route path="/:header?" component={RedirectSearchHeaders} /> */}
-            {/*     </Route> */}
-            {/*   </Route> */}
-            {/* </Route> */}
             <Route path="/:api/:mode/:type" matchFilters={{ api: ["ani", "mal"], mode: ["browse", "search"], type: ["anime", "manga", "media"] }} component={SearchPage}>
               <Route path="/:header?" matchFilters={animeSearch} />
               <Route path="/:header?" matchFilters={mangaSearch} />
