@@ -476,7 +476,7 @@ function UserSearch() {
 }
 
 function UserRow(props) {
-  asserts.assertTrueOLD(props.name, "Name is missing");
+  asserts.assertTruthy(props.name, "Name is missing");
   const params = useParams();
   const { storeUsers } = useCompareMediaList();
   const [searchParams, setSearchParams] = useSearchParams();

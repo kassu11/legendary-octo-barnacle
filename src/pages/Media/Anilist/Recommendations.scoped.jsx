@@ -96,7 +96,7 @@ function RecommendationsPage(props) {
 }
 
 function RecommendationCards(props)  {
-  asserts.assertTrueOLD(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
+  asserts.assertTruthy(!props.oldCards === !props.mutateOldCardsCache, "These two props needs to be used together");
 
   return (
     <For each={props.nodes}>{(node, i) => (

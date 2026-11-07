@@ -242,9 +242,9 @@ function Body(props) {
 } 
 
 function SubSection(props) {
-  asserts.assertThruthy(props.title, "title missing");
-  asserts.assertThruthy(props.title, "title missing");
-  asserts.assertThruthy(props.type, "type missing");
+  asserts.assertTruthy(props.title, "title missing");
+  asserts.assertTruthy(props.title, "title missing");
+  asserts.assertTruthy(props.type, "type missing");
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
   const [visible, setVisible] = createSignal(false);
@@ -432,8 +432,8 @@ function StaffCharacterPage(props) {
 }
 
 function StaffMediaRolePage(props) {
-  asserts.assertThruthy(props.type, "Type is missing");
-  asserts.assertThruthy(props.nestLevel, "nestLevel is missing");
+  asserts.assertTruthy(props.type, "Type is missing");
+  asserts.assertTruthy(props.nestLevel, "nestLevel is missing");
 
   const params = useParams();
   const [variables, setVariables] = createSignal(undefined);
@@ -538,8 +538,8 @@ function YearHeader(props) {
 }
 
 function CharacterAndActorCards(props) {
-  asserts.assertThruthy(props.showYears, "showYears signal is missing");
-  asserts.assertThruthy(props.language, "language signal is missing");
+  asserts.assertTruthy(props.showYears, "showYears signal is missing");
+  asserts.assertTruthy(props.language, "language signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (
@@ -587,7 +587,7 @@ function CharacterAndActorCards(props) {
 }
 
 function MediaCards(props) {
-  asserts.assertThruthy(props.showYears, "showYears signal is missing");
+  asserts.assertTruthy(props.showYears, "showYears signal is missing");
   const combine = (acc, edge) => {
     const last = acc.at(-1);
     if (last?.node.id !== edge.node.id) {
@@ -627,7 +627,7 @@ function MediaCards(props) {
 }
 
 function CharacterAndMediaCards(props) {
-  asserts.assertThruthy(props.showYears, "showYears signal is missing");
+  asserts.assertTruthy(props.showYears, "showYears signal is missing");
 
   return ( 
     <For each={props.edges}>{(edge, i) => (

@@ -53,7 +53,7 @@ function AnilistMediaCardListBody(props) {
 }
 
 function JikanMediaCardListBody(props) {
-  asserts.assertTrueOLD(props.media, "Missing media");
+  asserts.assertTruthy(props.media, "Missing media");
 
   return (
     <li class="cp-media-card inline-container">
@@ -81,8 +81,8 @@ function JikanMediaCardListBody(props) {
 }
 
 export function JikanMediaCard(props) {
-  asserts.assertTrueOLD(props.media, "Missing media");
-  asserts.isTypeStringOLD(props.type);
+  asserts.assertTruthy(props.media, "Missing media");
+  asserts.assertTypeString(props.type);
 
   return (
     <JikanMediaCardListBody {...props}>
@@ -96,7 +96,7 @@ export function JikanMediaCard(props) {
 function QuickActionItemList(props) {
   const { openEditor } = useEditMediaEntries();
 
-  asserts.assertTrueOLD(props.media, "Missing media");
+  asserts.assertTruthy(props.media, "Missing media");
 
   const handleClick = status => async e => {
     e.preventDefault();
@@ -139,11 +139,11 @@ function QuickActionItemList(props) {
 }
 
 export function AnilistMediaRecommendationCard(props) {
-  asserts.assertTrueOLD(props.node, "Missing node");
-  asserts.assertTypeFunctionOLD(props.handleRateUp, "handleRateUp");
-  asserts.assertTypeFunctionOLD(props.handleRateDown, "handleRateDown");
-  asserts.isTypeStringOLD(props.userRating, "userRating");
-  asserts.isTypeIntegerOLD(props.rating, "rating");
+  asserts.assertTruthy(props.node, "Missing node");
+  asserts.assertTypeFunction(props.handleRateUp, "handleRateUp is not type of function");
+  asserts.assertTypeFunction(props.handleRateDown, "handleRateDown is not type of function");
+  asserts.assertTypeString(props.userRating, "userRating is not type of string");
+  asserts.assertTypeInteger(props.rating, "rating is not type of integer");
 
   return (
     <AnilistMediaCardListBody media={props.node.mediaRecommendation}>
@@ -168,8 +168,8 @@ export function AnilistMediaRecommendationCard(props) {
 }
 
 export function MalCharacterCard(props) {
-  asserts.assertTrueOLD(props.character, "character");
-  asserts.isTypeStringOLD(props.role, "role");
+  asserts.assertTruthy(props.character, "character");
+  asserts.assertTypeString(props.role, "role is not type of string");
 
   return (
     <li class="cp-character-card">
@@ -195,8 +195,8 @@ export function MalCharacterCard(props) {
 }
 
 export function MalStaffCard(props) {
-  asserts.assertTrueOLD(props.staff, "staff");
-  asserts.assertTrueOLD(props.positions, "positions");
+  asserts.assertTruthy(props.staff, "staff");
+  asserts.assertTruthy(props.positions, "positions");
 
   return (
     <li class="cp-character-card">
@@ -212,7 +212,7 @@ export function MalStaffCard(props) {
 }
 
 function CharacterSection(props) {
-  asserts.isTypeStringOLD(props.alt);
+  asserts.assertTypeString(props.alt);
 
   return (
     <A className="clean-link flex" class={props.class} href={props.href}>

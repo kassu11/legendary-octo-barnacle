@@ -95,7 +95,7 @@ export function UserMediaList() {
   const tag = multiParam("tag");
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
-    asserts.assertTrueOLD(progressKey, "Progress key is undefined");
+    asserts.assertTruthy(progressKey, "Progress key is undefined");
     const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId, [progressKey]: newProgress }, AbortSignal.timeout(30_000));
     const res = await fetcherToFetch(fetcher);
     if (res.status !== 200) {
@@ -234,7 +234,7 @@ export function converStatusToListName(status, type) {
     case "REPEATING":
       return type === "anime" ? "Rewatching" : "Rereading";
     default:
-      asserts.assertTrueOLD(false, "Unkown status: " + status);
+      asserts.throwAssert("Unkown status: " + status);
   }
 }
 

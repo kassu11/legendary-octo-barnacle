@@ -35,7 +35,7 @@ export function FavouriteToggle(props) {
           return;
         }
         const type = props.idType;
-        asserts.assertTrueOLD(type === "MANGA" || type === "ANIME" || type === "STAFF" || type === "CHARACTER" || type === "STUDIO" , "Missing idType");
+        asserts.assertTruthy(type === "MANGA" || type === "ANIME" || type === "STAFF" || type === "CHARACTER" || type === "STUDIO" , "Missing idType");
 
         props.onChange(e.target.checked);
         triggerLikeToggle({[props.idType]: props.variableId}, e.target.checked);

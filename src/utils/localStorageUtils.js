@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { safeParseJson, safeStringifyJson } from "./jsonUtils";
 import { isTypeFunction } from "./functionUtils";
-import { assertThruthy, assertTypeString } from "@/utils/asserts";
+import { assertTruthy, assertTypeString } from "@/utils/asserts";
 
 export function getLocalStorageJson(key, defaultValue) {
   const data = localStorage[key];
@@ -48,7 +48,7 @@ export const createLocalStorageSignal = (key, initialValue) => {
 
 export const createLocalStorageBooleanSignal = (key, initialValue) => {
   assertTypeString(key);
-  assertThruthy(key);
+  assertTruthy(key);
   const start = localStorage.getItem(key);
   const [value, _setValue] = createSignal(start ? start === "true" : initialValue);
   const setValue = mutate => {

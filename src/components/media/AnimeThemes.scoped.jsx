@@ -57,8 +57,8 @@ function AnimeThemes() {
 }
 
 export function AnimeTheme(props) {
-  asserts.assertTrueOLD(props.video, "Missing video element for playback");
-  asserts.assertTrueOLD(props.theme, "Theme data is missing");
+  asserts.assertTruthy(props.video, "Missing video element for playback");
+  asserts.assertTruthy(props.theme, "Theme data is missing");
   let artistAndCharacter = false;
 
   return (

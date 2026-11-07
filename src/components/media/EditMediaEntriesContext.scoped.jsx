@@ -10,7 +10,7 @@ import { addApplicationNotification } from "@/state/notifications";
 import { authUserData, storeGlobalEditedMedia } from "@/state/globalState";
 
 function formState(auth, initialData) {
-  asserts.assertTrueOLD(!initialData || auth, "Should not be able to edit if not authenticated");
+  asserts.assertTruthy(!initialData || auth, "Should not be able to edit if not authenticated");
   const [score, setScore] = createSignal();
   const [advancedScores, setAdvancedScores] = createSignal();
   const [advancedScoresEnabled, setAdvancedScoresEnabled] = createSignal();
@@ -153,7 +153,7 @@ export function EditMediaEntriesProvider(props) {
       }
     }
 
-    asserts.assertTrueOLD(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
+    asserts.assertTruthy(form.status != "none" || mediaListEntry().mediaListEntry?.score == null, "Replacing current status with default none value");
 
     if (!(form.status == "none" || mediaListEntry().mediaListEntry?.status == form.status)) {
       changes.status = form.status;
@@ -209,7 +209,7 @@ export function EditMediaEntriesProvider(props) {
       if (Object.keys(changes).length > 0) {
         changes.mediaId = mediaListEntry().id;
         for (const [key, value] of Object.entries(changes)) {
-          asserts.assertTrueOLD(Number.isNaN(value) === false, `Key "${key}" is NaN`);
+          asserts.assertTruthy(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
 
         const fetcher = createAnilistFetcher(queries.anilistMutateMedia, changes, AbortSignal.timeout(30_000));
@@ -237,7 +237,7 @@ export function EditMediaEntriesProvider(props) {
    * @param {undefined|Function} mutate.deteleMedia
    */
   async function openEditor(defaultData, mutate) {
-    asserts.assertTrueOLD("id" in defaultData, "Missing editor id");
+    asserts.assertTruthy("id" in defaultData, "Missing editor id");
 
     batch(() => {
       setMediaListEntry(defaultData);
@@ -430,7 +430,7 @@ export function EditMediaEntriesProvider(props) {
                               total += v || 0;
                             });
 
-                            asserts.assertTrueOLD(scoresCounted !== 0 || total === 0, "Total is 0");
+                            asserts.assertTruthy(scoresCounted !== 0 || total === 0, "Total is 0");
 
                             if (Number.isNaN(total) === false && typeof total === "number" && scoresCounted > 0) {
                               state.setScore(() => {
@@ -446,7 +446,7 @@ export function EditMediaEntriesProvider(props) {
                                   case "POINT_3": 
                                     return Math.max(0, Math.min(Math.round(total / scoresCounted), 3));
                                   default:
-                                    asserts.assertTrueOLD(false, `Format "${state.format()}" not found`);
+                                    asserts.throwAssert(`Format "${state.format()}" not found`);
                                 }
                               });
                             }

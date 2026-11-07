@@ -3,7 +3,7 @@ import "./EmojiByScore.scoped.css";
 import { asserts } from "@/utils/utils.js";
 
 export default function EmojiByScoreScoped(props) {
-  asserts.assertTrueOLD("score" in props, "Score is missing");
+  asserts.assertTruthy("score" in props, "Score is missing");
 
   const [local, scoping] = splitProps(props, ["score"]);
 

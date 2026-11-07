@@ -9,8 +9,8 @@ import { authUserData } from "@/state/globalState.js";
 
 export function DeleteFavouriteScoped(props) {
   const { user } = useUser();
-  asserts.assertTrueOLD(props.onClick, "onClick is missing");
-  asserts.assertTrueOLD(props.mutate, "mutate is missing");
+  asserts.assertTruthy(props.onClick, "onClick is missing");
+  asserts.assertTruthy(props.mutate, "mutate is missing");
 
   return (
     <Show when={user().id === authUserData()?.data.id}>

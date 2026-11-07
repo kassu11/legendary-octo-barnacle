@@ -134,7 +134,7 @@ function Footer(props) {
     <>
       <button class="cp-activity-like" classList={{active: isLiked()}} onMouseEnter={() => likeCount() && setShowActivityLikeUserList(true)} onClick={() => {
         setIsLiked(liked => {
-          asserts.assertTrueOLD(typeof liked === "boolean");
+          asserts.assertTruthy(typeof liked === "boolean");
           const change = Number(!liked) * 2 - 1;
           setLikeCount(v => v + change);
           triggerLikeToggle(props.activity.id, !liked);

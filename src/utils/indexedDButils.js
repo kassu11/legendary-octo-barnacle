@@ -1,4 +1,4 @@
-import { assertThruthy } from "@/utils/asserts";
+import { assertTruthy } from "@/utils/asserts";
 
 const createDbStore = (db, storeName, key) => {
   if (!db.objectStoreNames.contains(storeName)) {
@@ -40,7 +40,7 @@ export const openIndexDBStore = (storeName, mode) => {
     request.onsuccess = (evt) => {
       try {
         const db = evt.target.result;
-        assertThruthy(db.objectStoreNames.contains(storeName), `Unknown store name "${storeName}"`);
+        assertTruthy(db.objectStoreNames.contains(storeName), `Unknown store name "${storeName}"`);
         const transaction = db.transaction(storeName, mode);
 
         res(transaction.objectStore(storeName));
