@@ -2,7 +2,7 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { AvailableIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./MediaExternalSourcesSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
@@ -10,10 +10,6 @@ import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js"
 import { queries } from "@/api/api.js";
 import { tabTime } from "@/state/globalState.js";
 import { timeStringToMs } from "@/utils/timeUtils.js";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
-import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 
 export const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
 
@@ -21,7 +17,6 @@ export function MediaExternalSourcesSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigateAndSearch();
 
   const externalSourcesController = createCleanUpAbortController();
   const [externalSourcesLoading, setExternalSourcesLoading] = createSignal(false);
@@ -59,89 +54,58 @@ export function MediaExternalSourcesSelect() {
     });
   });
 
-  const externalSourcesOptions = createMemo(() => {
-    const externalValues = externalSourcesData();
-    const loading = externalSourcesLoading();
-    const { type } = params;
-    if (type !== externalValues?.type && loading) return [{ id: "internal_loading", description: "Loading sources" }];
+  const isLoadingSources = () => params.type !== externalSourcesData()?.type && externalSourcesLoading();
 
-    return externalValues?.sources?.map(({ site, ...rest }) => ({ description: site, ...rest })) || [{ id: "internal_error", description: "Failed to fetch Anilist media sources" }];
+  const externalSourcesOptions = createMemo(() => {
+    if (isLoadingSources()) return [];
+
+    return externalSourcesData()?.sources?.map(({ site, id, ...rest }) => ({ description: site, id: "" + id, ...rest })) || [];
   });
 
   const externalSourcesValues = createMemo(() => {
-    return arrayUtils.wrapToArray(parsedSearchParams().externalSources).map(id => ({ id, value: true }));
+    return arrayUtils.wrapToArray(parsedSearchParams().externalSources).map(String);
   });
-
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target || e.target === "internal_loading" || e.target === "internal_error") return;
-
-    const newActiveValues = [...externalSourcesValues()];
-    const index = newActiveValues.findIndex(val => val.id == e.target);
-
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: true });
-    } else {
-      newActiveValues.splice(index, 1);
-    }
-
-    setSearchParams({ externalSources: newActiveValues.map(e => e.id) }, { replace: true });
-
-  };
 
   return (
     <Show when={params.type !== "media"}>
-      <MultiSelect tooltip={params.type === "anime" ? "Show only media available on these streaming services" : "Show only media readable on these sites"} each={externalSourcesOptions()} value={externalSourcesValues()} onChange={handleChange} icon={<AvailableIcon />} button="Available">{entry => {
-        return (
-          <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-            <Switch>
-
-              <Match when={entry.id === "internal_loading"}>
-                <div class="spinner-wrapper">
-                  <LoaderCircle scoped class="spinner" />
-                </div>
-                <p>{entry.description}</p>
-              </Match>
-
-              <Match when={entry.id === "internal_error"}>
-                <p>{entry.description}</p>
-              </Match>
-
-              <Match when={true}>
-
-                <Show when={entry.icon}>
-                  <img src={entry.icon} alt="External source icon" style={{ "background-color": entry.color }} />
-                </Show>
-                <p>
-                  {entry.description}{" "}
-                  <Show when={entry.language}>
-                    <sup>
-                      <Switch fallback={entry.language}>
-                        <Match when={entry.language === "Chinese"}>ZH</Match>
-                        <Match when={entry.language === "English"}>EN</Match>
-                        <Match when={entry.language === "French"}>FR</Match>
-                        <Match when={entry.language === "German"}>DE</Match>
-                        <Match when={entry.language === "Indonesian"}>ID</Match>
-                        <Match when={entry.language === "Japanese"}>JA</Match>
-                        <Match when={entry.language === "Korean"}>KO</Match>
-                        <Match when={entry.language === "Portuguese"}>PT</Match>
-                        <Match when={entry.language === "Spanish"}>ES</Match>
-                        <Match when={entry.language === "Thai"}>TH</Match>
-                      </Switch>
-                    </sup>
-                  </Show>
-                </p>
-
-                <Checkbox scoped checked={entry.value} class="checkbox" />
-
-              </Match>
-
-            </Switch>
-
-          </MediaSelectItem>
-        );
-      }}</MultiSelect>
+      <FilterSelect
+        param="externalSources"
+        noEscapeCancel
+        tooltip={params.type === "anime" ? "Show only media available on these streaming services" : "Show only media readable on these sites"}
+        each={externalSourcesOptions()}
+        value={externalSourcesValues()}
+        setSearchParams={query => setSearchParams(query, { replace: true })}
+        icon={<AvailableIcon />}
+        button="Available"
+        loading={isLoadingSources()}
+        emptyText={isLoadingSources() ? "Loading sources" : "Failed to fetch Anilist media sources"}
+        rowIcon={row => (
+          <Show when={row.icon}>
+            <img src={row.icon} alt="External source icon" style={{ "background-color": row.color }} />
+          </Show>
+        )}
+        rowLabel={row => (
+          <>
+            {row.description}{" "}
+            <Show when={row.language}>
+              <sup>
+                <Switch fallback={row.language}>
+                  <Match when={row.language === "Chinese"}>ZH</Match>
+                  <Match when={row.language === "English"}>EN</Match>
+                  <Match when={row.language === "French"}>FR</Match>
+                  <Match when={row.language === "German"}>DE</Match>
+                  <Match when={row.language === "Indonesian"}>ID</Match>
+                  <Match when={row.language === "Japanese"}>JA</Match>
+                  <Match when={row.language === "Korean"}>KO</Match>
+                  <Match when={row.language === "Portuguese"}>PT</Match>
+                  <Match when={row.language === "Spanish"}>ES</Match>
+                  <Match when={row.language === "Thai"}>TH</Match>
+                </Switch>
+              </sup>
+            </Show>
+          </>
+        )}
+      />
     </Show>
   );
 }

@@ -1,11 +1,9 @@
 import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { SeasonIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaSeasonSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -23,17 +21,10 @@ export function MediaSeasonSelect() {
 
   const seasonValues = createMemo(() => {
     const season = parsedSearchParams().season;
-    if (season) {
-      return [{ id: season, value: true }];
-    }
-
-    return [];
+    return season ? [season] : [];
   });
 
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
+  const handlePick = id => {
 
     const [season] = seasonValues();
     const header = params.header;
@@ -41,40 +32,33 @@ export function MediaSeasonSelect() {
     const year = parsedSearchParams().year;
 
     // 1. Selected already active season, remove all seasons
-    if (e.target === season?.id) {
+    if (id === season) {
       return navigate(path => path.replace(/\/this-season|next-season|winter-\d+|spring-\d+|summer-\d+|fall-\d+|tba/, ""), { season: undefined }, { replace: true });
     }
     // 2. Already in seasons header, update header
     else if (hasSpecialSeasonControlsOpen) {
 
-      if (e.target === "tba") return navigate(path => path.replace(header, "tba"), { season: undefined }, { replace: true });
-      if (!year) return navigate(path => path.replace(header, "this-season"), { season: e.target }, { replace: true });
-      return navigate(path => path.replace(header, `${e.target}-${year}`), { year: undefined, season: undefined }, { replace: true });
+      if (id === "tba") return navigate(path => path.replace(header, "tba"), { season: undefined }, { replace: true });
+      if (!year) return navigate(path => path.replace(header, "this-season"), { season: id }, { replace: true });
+      return navigate(path => path.replace(header, `${id}-${year}`), { year: undefined, season: undefined }, { replace: true });
 
     }
 
     // 3. User has no special headers. Lets open TBA header
-    if (!header && e.target === "tba") {
+    if (!header && id === "tba") {
       return navigate(path => path + "/tba", { year, season: undefined }, { replace: true });
     }
 
     // 4. User has no special headers, has not filtered season before, and has not selected year. Lets open current years season
     if (!header && !season && !year) {
-      return navigate(path => path + "/this-season", { season: e.target }, { replace: true });
+      return navigate(path => path + "/this-season", { season: id }, { replace: true });
     }
 
     // 5. Standard change the season params
-    else setSearchParams({ season: e.target }, { replace: true });
+    else setSearchParams({ season: id }, { replace: true });
   };
 
   return (
-    <MultiSelect tooltip="Anime airing season. Combine with year to browse a specific season" each={seasonOptions} value={seasonValues()} onChange={handleChange} icon={<SeasonIcon />} button="Season">{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox radio checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect radio param="season" noEscapeCancel tooltip="Anime airing season. Combine with year to browse a specific season" each={seasonOptions} value={seasonValues()} onPick={handlePick} onClear={() => handlePick(seasonValues()[0])} icon={<SeasonIcon />} button="Season" />
   );
 }

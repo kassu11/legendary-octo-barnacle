@@ -1,11 +1,9 @@
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { CountryIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaCountrySelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -19,36 +17,13 @@ export function MediaCountrySelect() {
   ];
 
   const countryValues = createMemo(() => {
-    return arrayUtils.wrapToArray(parsedSearchParams().country).map(id => ({ id, value: true }));
+    return [...arrayUtils.wrapToArray(parsedSearchParams().country)];
   });
 
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
-
-    const newActiveValues = [...countryValues()];
-    const index = newActiveValues.findIndex(val => val.id === e.target);
-
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: true });
-    } else {
-      newActiveValues.splice(index, 1);
-    }
-
-    // Set new country value, and remove header, if present
-    navigate(path => path.replace("/manhwa", ""), { country: newActiveValues.map(e => e.id) }, { replace: true });
-
-  };
+  // Set new country value, and remove header, if present
+  const handleChange = query => navigate(path => path.replace("/manhwa", ""), query, { replace: true });
 
   return (
-    <MultiSelect tooltip="Country of origin" each={countryOptions} value={countryValues()} onChange={handleChange} icon={<CountryIcon />} button="Country">{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect param="country" noEscapeCancel tooltip="Country of origin" each={countryOptions} value={countryValues()} setSearchParams={handleChange} icon={<CountryIcon />} button="Country" />
   );
 }

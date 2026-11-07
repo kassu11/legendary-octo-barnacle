@@ -1,21 +1,18 @@
 import { useSearchParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { UsersIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./MediaUsersSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { createLocalStorageJsonSignal } from "@/utils/localStorageUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { UserSearchIcon } from "@/assets/UserSearchIcon.jsx";
 import { addApplicationNotification } from "@/state/notifications";
 import { arrayUtils } from "@/utils/utils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export const [usersData, setUsersData] = createSignal({}, { equals: false });
 const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
@@ -23,7 +20,6 @@ const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-
 export function MediaUsersSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigateAndSearch();
   const [searchUser, setSearchUser] = createSignal(undefined);
   const [input, setInput] = createSignal("");
 
@@ -139,62 +135,44 @@ export function MediaUsersSelect() {
   });
 
   const usersValues = createMemo(() => {
-
-    const values = [];
     const { users, excludedUsers } = parsedSearchParams();
-    users        .forEach(id => values.push(({ id: id.toLowerCase(), value: "in-", include: true, original: id })));
-    excludedUsers.forEach(id => values.push(({ id: id.toLowerCase(), value: "ex-", exclude: true, original: id })));
-
-    return values;
+    return [...users.map(name => name.toLowerCase()), ...excludedUsers.map(name => "-" + name.toLowerCase())];
   });
 
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-
-    setInput(e.input || e.search || "");
-    if (!e.target) return;
-
-    const newActiveValues = [...usersValues()];
-    const index = newActiveValues.findIndex(val => val.id == e.target);
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: "in-", original: e.entry.description });
-    } else if (e.entry.value === "in-") {
-      newActiveValues[index].value = "ex-";
-    } else {
-      newActiveValues.splice(index, 1);
-    }
-
-    setSearchParams({ user: newActiveValues.map(e => e.value + e.original) }, { replace: true });
-
+  const handleUsersChange = ({ user }) => {
+    const nameOf = id => usersOptions().find(option => option.id === id)?.description ?? id;
+    setSearchParams({ user: user.map(token => token[0] === "-" ? "ex-" + nameOf(token.slice(1)) : "in-" + nameOf(token)) }, { replace: true });
   };
 
   return (
-    <MultiSelect tooltip="Filter by the lists of other users. Click once to include, twice to exclude" each={usersOptions()} value={usersValues()} onChange={handleChange} icon={<UsersIcon />} button="User List">{entry => {
-      return (
-        <MediaSelectItem scoped class="item" classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered, search: entry.internalSearch }}>
-          <Switch>
-
-            <Match when={entry.internalSearch}>
-              <UserSearchIcon scoped class="user-search" />
-              <p>Search for: {input()}</p>
-            </Match>
-
-            <Match when={true}>
-              <div class="profile-wrapper">
-                <Show when={entry.avatar} fallback={<LoaderCircle scoped class="spinner" />}>
-                  <img src={entry.avatar} alt="Profile picture" />
-                </Show>
-              </div>
-              <p>{entry.description}</p>
-
-              <Checkbox scoped class="checkbox" include={entry.include} exclude={entry.exclude} />
-
-            </Match>
-          </Switch>
-
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect
+      param="user"
+      excludable
+      noPreview
+      noEscapeCancel
+      tooltip="Filter by the lists of other users. Click once to include, twice to exclude"
+      each={usersOptions()}
+      value={usersValues()}
+      setSearchParams={handleUsersChange}
+      onQueryChange={setInput}
+      icon={<UsersIcon />}
+      button="User List"
+      emptyText="Type a username to search for it"
+      rowIcon={row => (
+        <Switch>
+          <Match when={row.internalSearch}>
+            <UserSearchIcon scoped class="user-search" />
+          </Match>
+          <Match when={true}>
+            <div class="profile-wrapper">
+              <Show when={row.avatar} fallback={<LoaderCircle scoped class="spinner" />}>
+                <img src={row.avatar} alt="Profile picture" />
+              </Show>
+            </div>
+          </Match>
+        </Switch>
+      )}
+      rowLabel={row => row.internalSearch ? `Search for: ${row.description}` : row.description}
+    />
   );
 }

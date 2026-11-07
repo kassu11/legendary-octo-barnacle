@@ -2,16 +2,12 @@ import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { AgeIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaAgeSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const navigate = useNavigateAndSearch();
 
   const ageOptions = [
     { description: "Any Rating",                               id: "any" },
@@ -24,27 +20,17 @@ export function MediaAgeSelect() {
     const firstValidAge = listOfAges.find(age => ageOptions.some(({id}) => id === age));
     const id = firstValidAge || "r";
 
-    return [{ id, value: true }];
+    return [id];
   });
 
-  const handleChange = e => {
+  const handlePick = id => {
 
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
-
-    if (e.target === "r") setSearchParams({ age: undefined }, { replace: true });
-    else setSearchParams({ age: e.target }, { replace: true });
+    if (id === "r") setSearchParams({ age: undefined }, { replace: true });
+    else setSearchParams({ age: id }, { replace: true });
 
   };
 
   return (
-    <MultiSelect tooltip="Include adult content in the results" each={ageOptions} value={ageValues()} onChange={handleChange} icon={<AgeIcon />} button="Age">{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox radio checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect radio param="age" defaultValue="r" noEscapeCancel tooltip="Include adult content in the results" each={ageOptions} value={ageValues()} onPick={handlePick} onClear={() => handlePick("r")} icon={<AgeIcon />} button="Age" />
   );
 }

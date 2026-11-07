@@ -1,18 +1,13 @@
 import { useSearchParams, useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
+import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { GenreIcon } from "@/assets/SearchFilterIcons.jsx";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
 import { tabTime } from "@/state/globalState.js";
 import { timeStringToMs } from "@/utils/timeUtils.js";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
-import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
-import "./MediaGenresAndTagsSelect.scoped.css";
 
 // Anilist doesn't provide descriptions for genres, only for tags
 const genreDescriptions = {
@@ -43,7 +38,6 @@ export function MediaGenresAndTagsSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigateAndSearch();
 
   const genresAndTagsController = createCleanUpAbortController();
   const [genresAndTagsLoading, setGenresAndTagsLoading] = createSignal(false);
@@ -81,70 +75,26 @@ export function MediaGenresAndTagsSelect() {
     });
   });
 
-  const genresAndTagsOptions = createMemo(() => {
-    const genresAndTags = anilistGenresAndTagsData();
-    const loading = genresAndTagsLoading();
-    if (!genresAndTags?.entries?.length && loading) return [{ id: "internal_loading", description: "Loading list" }];
-
-    return genresAndTags?.entries || [{ id: "internal_error", description: "Failed to fetch Anilist genres and tags" }];
-  });
-
   const genresAndTagsValues = createMemo(() => {
-    const values = [];
     const { themes, excludedThemes } = parsedSearchParams();
-    themes.forEach(id => values.push(({ id, value: "+", include: true })));
-    excludedThemes.forEach(id => values.push(({ id, value: "-", exclude: true })));
-
-    return values;
+    return [...themes, ...excludedThemes.map(id => "-" + id)];
   });
-
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target || e.target === "internal_loading" || e.target === "internal_error") return;
-
-    const newActiveValues = [...genresAndTagsValues()];
-    const index = newActiveValues.findIndex(val => val.id == e.target);
-
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: "+" });
-    } else if (newActiveValues[index].value === "+") {
-      newActiveValues[index].value = "-";
-    } else {
-      newActiveValues.splice(index, 1);
-    }
-
-    setSearchParams({ theme: newActiveValues.map(e => e.value === "+" ? e.id : "-" + e.id) }, { replace: true });
-
-  };
 
   return (
     <Show when={params.type !== "media"}>
-      <MultiSelect tooltip="Genres and tags. Click once to include, twice to exclude. Hover a theme to see its description" each={genresAndTagsOptions()} value={genresAndTagsValues()} onChange={handleChange} icon={<GenreIcon />} button="Theme">{entry => {
-        return (
-          <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }} tooltip={entry.tooltip} tooltipTitle={entry.tooltipTitle}>
-            <Switch>
-
-              <Match when={entry.id === "internal_loading"}>
-                <div class="spinner-wrapper">
-                  <LoaderCircle scoped class="spinner" />
-                </div>
-                <p>{entry.description}</p>
-              </Match>
-
-              <Match when={entry.id === "internal_error"}>
-                <p>{entry.description}</p>
-              </Match>
-
-              <Match when={true}>
-                <Checkbox include={entry.include} exclude={entry.exclude} />
-                <p>{entry.description}</p>
-              </Match>
-
-            </Switch>
-          </MediaSelectItem>
-        );
-      }}</MultiSelect>
+      <FilterSelect
+        param="theme"
+        excludable
+        noEscapeCancel
+        tooltip="Genres and tags. Click once to include, twice to exclude. Hover a theme to see its description"
+        each={anilistGenresAndTagsData()?.entries || []}
+        value={genresAndTagsValues()}
+        setSearchParams={query => setSearchParams(query, { replace: true })}
+        icon={<GenreIcon />}
+        button="Theme"
+        loading={genresAndTagsLoading()}
+        emptyText={genresAndTagsLoading() ? "Loading list" : "Failed to fetch Anilist genres and tags"}
+      />
     </Show>
   );
 }

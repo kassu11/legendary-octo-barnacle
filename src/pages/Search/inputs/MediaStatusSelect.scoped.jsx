@@ -2,11 +2,9 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { StatusIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaStatusSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -33,44 +31,25 @@ export function MediaStatusSelect() {
   });
 
   const statusValues = createMemo(() => {
-    return arrayUtils.wrapToArray(parsedSearchParams().status).map(id => ({ id, value: true }));
+    return [...arrayUtils.wrapToArray(parsedSearchParams().status)];
   });
 
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
-
-    const newActiveValues = [...statusValues()];
-    const index = newActiveValues.findIndex(val => val.id === e.target);
-
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: true });
-    } else {
-      newActiveValues.splice(index, 1);
-    }
+  const handleChange = ({ status }) => {
 
     const header = params.header || "";
     // 1. Remove a header that adds a status, but keep all other header values
     if (/\/novel|finished-manga|finished-novel/.test(header)) {
       const { sort, format } = parsedSearchParams();
-      navigate(path => path.replace("/" + header, ""), { sort, format, status: newActiveValues.map(e => e.id) }, { replace: true });
+      navigate(path => path.replace("/" + header, ""), { sort, format, status }, { replace: true });
     }
     // 2. Normal just change the status
     else {
-      setSearchParams(                                 {               status: newActiveValues.map(e => e.id) }, { replace: true });
+      setSearchParams(                                 {               status }, { replace: true });
     }
 
   };
 
   return (
-    <MultiSelect tooltip="Current release status of the media" each={statusOptions()} value={statusValues()} onChange={handleChange} icon={<StatusIcon />} button="Status">{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }} tooltip={entry.tooltip}>
-          <Checkbox checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect param="status" noEscapeCancel tooltip="Current release status of the media" each={statusOptions()} value={statusValues()} setSearchParams={handleChange} icon={<StatusIcon />} button="Status" />
   );
 }
