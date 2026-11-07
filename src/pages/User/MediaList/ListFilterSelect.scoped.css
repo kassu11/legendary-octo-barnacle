@@ -351,6 +351,8 @@
         overscroll-behavior: contain;
         /* A scrollbar that appears later would rewrap the selections and the rows */
         scrollbar-gutter: stable;
+        scrollbar-width: thin;
+        scrollbar-color: var(--bg-light) var(--bg-dark);
         touch-action: pan-y;
         user-select: none;
         -webkit-touch-callout: none;

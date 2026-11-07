@@ -4,7 +4,8 @@ import { createMemo, mapArray, Match, Show, Switch } from "solid-js";
 import { useListNavigation } from "./index(user-media-list).scoped.jsx";
 import { MediaListNames } from "./MediaListNames.jsx";
 import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";
-import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, OnListIcon, ProgressIcon as TagIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "../../../assets/SearchFilterIcons.jsx";
+import { TwoStateToggleButton } from "../../Search/TwoStateToggle.scoped.jsx";
+import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "../../../assets/SearchFilterIcons.jsx";
 import "./SearchControls.scoped.css";
 
 const formatOptions = [
@@ -34,11 +35,6 @@ const countryOptions = [
   { description: "Japan",            id: "JP" },
   { description: "South Korea",      id: "KR" },
   { description: "Taiwan",           id: "TW" },
-];
-
-const ageOptions = [
-  { description: "R-17+",            id: "false" },
-  { description: "R-18",             id: "true"  },
 ];
 
 const yearOptions = [];
@@ -94,43 +90,22 @@ export function SearchControlsScoped(props) {
       <ListFilterSelect   param="status"          excludable each={ statusOptions       } value={ props.status()          } icon={ <StatusIcon />  } button="Status"      tooltip="Current release status of the media. Click once to include, twice to exclude"                                               setSearchParams={ props.setSearchParams } />
       <ListFilterSelect   param="genre"           excludable each={ genreOptions        } value={ props.genre()           } icon={ <GenreIcon />   } button="Genre"       tooltip="Entries need to have all the included genres. Click once to include, twice to exclude"                                      setSearchParams={ props.setSearchParams } />
       <ListFilterSelect   param="countryOfOrigin" excludable each={ countryOptions      } value={ props.countryOfOrigin() } icon={ <CountryIcon /> } button="Country"     tooltip="Country of origin. Click once to include, twice to exclude"                                                                 setSearchParams={ props.setSearchParams } />
-      <ListFilterSelect   param="isAdult"                    each={ ageOptions          } value={ props.isAdult()         } icon={ <AgeIcon />     } button="Age"         tooltip="Age rating of the media"                                                                                                    setSearchParams={ props.setSearchParams } />
       <Show when={params.type === "anime"}>
         <ListFilterSelect param="studio"          excludable each={ studioOptions()     } value={ props.studio()          } icon={ <StudioIcon />  } button="Studio"      tooltip="Main studio of the media. Click once to include, twice to exclude"                                                          setSearchParams={ props.setSearchParams } />
       </Show>
       <ListFilterSelect   param="tag"             excludable each={ tagOptions()        } value={ props.tag()             } icon={ <TagIcon />     } button="Tag"         tooltip="Entries need to have all the included tags, only tags with a rank above 50% count. Click once to include, twice to exclude" setSearchParams={ props.setSearchParams } />
       <ListFilterSelect   param="year"            excludable each={ yearOptions         } value={ props.year()            } icon={ <YearIcon />    } button="Year"        tooltip="Year the media started releasing. Click once to include, twice to exclude"                                                  setSearchParams={ props.setSearchParams } />
-      <Show when={isOwnProfile()}>
-        <label htmlFor="private">
-          <input type="checkbox" name="private" id="private" checked={props.privateFilter()}
-                 onChange={e => props.setSearchParams({private: e.target.checked ? "true" : undefined})}/>
-          {" "}Private
-        </label>
+      {/* Active filter stays visible even if the list doesn't have both ratings, so it can still be turned off */}
+      <Show when={props.listData()?.data?.hasBothAgeRatings || props.isAdult()}>
+        <ListToggle param="isAdult"    value={ props.isAdult()       }      icon={ <AgeIcon />         } label="R-18"                                                     tooltip="Click once to show only R-18 media, twice to hide R-18 media" />
       </Show>
-      <label htmlFor="notes">
-        <input type="checkbox" name="notes" id="notes" checked={props.notesFilter()}
-               onChange={e => props.setSearchParams({notes: e.target.checked ? "true" : undefined})}/>
-        {" "}Notes
-      </label>
-      <label htmlFor="repeat">
-        <input type="checkbox" name="repeat" id="repeat" checked={props.rewatchedFilter()}
-               onChange={e => props.setSearchParams({repeat: e.target.checked ? "true" : undefined})}/>
-        {" "}
-        <Switch>
-          <Match when={params.type === "anime"}>Rewatched</Match>
-          <Match when={params.type === "manga"}>Reread</Match>
-        </Switch>
-      </label>
-      <label htmlFor="missingStart">
-        <input type="checkbox" name="missingStart" id="missingStart" checked={props.missingStartFilter()}
-               onChange={e => props.setSearchParams({missingStart: e.target.checked ? "true" : undefined})}/>
-        {" "}Missing start date
-      </label>
-      <label htmlFor="missingScore">
-        <input type="checkbox" name="missingScore" id="missingScore" checked={props.missingScoreFilter()}
-               onChange={e => props.setSearchParams({missingScore: e.target.checked ? "true" : undefined})}/>
-        {" "}Missing score
-      </label>
+      <Show when={isOwnProfile()}>
+        <ListToggle param="private"    value={ props.privateFilter() }      icon={ <PrivateIcon />     } label="Private"                                                  tooltip="Click once to show only private entries, twice to hide private entries" />
+      </Show>
+      <ListToggle param="notes"        value={ props.notesFilter() }        icon={ <NotesIcon />       } label="Notes"                                                    tooltip="Click once to show only entries with notes, twice to hide entries with notes" />
+      <ListToggle param="repeat"       value={ props.rewatchedFilter() }    icon={ <RepeatIcon />      } label={params.type === "anime" ? "Rewatched" : "Reread"}         tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
+      <ListToggle param="missingStart" value={ props.missingStartFilter() } icon={ <MissingDateIcon /> } label="Missing start date"                                       tooltip="Click once to show only entries without a start date, twice to show only entries with a start date" />
+      <ListToggle param="missingScore" value={ props.missingScoreFilter() } icon={ <ScoreIcon />       } label="Missing score"                                            tooltip="Click once to show only entries without a score, twice to show only entries with a score" />
       <ListFilterSelect param="sort" sort defaultValue="score" each={sortOptions()}       value={props.sort()}              icon={<SortIcon />}      button="Sort"        tooltip="Order of the list. Click a sort again to reverse it, hold Shift to sort by multiple fields"                                 setSearchParams={props.setSearchParams} />
       <Switch>
         <Match when={!isOwnProfile() && authUserData()?.data?.name}>
@@ -148,11 +123,24 @@ export function SearchControlsScoped(props) {
     </div>
   );
 
+  function ListToggle(toggleProps) {
+    return (
+      <TwoStateToggleButton
+        value={toggleProps.value}
+        icon={toggleProps.icon}
+        label={toggleProps.label}
+        tooltip={toggleProps.tooltip}
+        tooltipPlacements={["right", "bottom", "top"]}
+        onChange={value => props.setSearchParams({ [toggleProps.param]: value })}
+      />
+    );
+  }
+
   function ClearFiltersButton() {
     return (
       <Switch>
         <Match when={location.search}>
-          <button style={{background: "skyblue"}} onClick={() => {
+          <button class="remove-filters" onClick={() => {
             props.setSearchParams({
               search: undefined,
               format: undefined,
@@ -171,7 +159,9 @@ export function SearchControlsScoped(props) {
               studio: undefined,
               tag: undefined,
             });
-          }}>Remove filters
+          }}>
+            <XIcon />
+            Remove filters
           </button>
         </Match>
         <Match when={params.list}>

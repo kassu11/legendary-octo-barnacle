@@ -111,6 +111,31 @@ export const StudioIcon = props => (
   </Icon>
 );
 
+export const PrivateIcon = props => (
+  <Icon {...props}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></Icon>
+);
+
+export const NotesIcon = props => (
+  <Icon {...props}>
+    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+    <path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8" />
+  </Icon>
+);
+
+export const RepeatIcon = props => (
+  <Icon {...props}><path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3" /></Icon>
+);
+
+export const MissingDateIcon = props => (
+  <Icon {...props}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M8 2v4M16 2v4M3 10h18M14 14l-4 4M10 14l4 4" /></Icon>
+);
+
+export const ScoreIcon = props => (
+  <Icon {...props}>
+    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+  </Icon>
+);
+
 export const XIcon = props => (
   <Icon {...props}><path d="M18 6 6 18M6 6l12 12" /></Icon>
 );

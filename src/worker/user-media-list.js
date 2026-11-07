@@ -4,7 +4,7 @@ onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);
 }
 
-const tokenFilters = ["format", "status", "countryOfOrigin", "year", "isAdult", "genre", "userStatus", "studio", "tag"];
+const tokenFilters = ["format", "status", "countryOfOrigin", "year", "genre", "userStatus", "studio", "tag"];
 
 // Excluded values have a "-" prefix
 function parseTokens(tokens) {
@@ -18,6 +18,8 @@ function parseTokens(tokens) {
 
 const matchesAny = ({ include, exclude }, test) => (!include.length || include.some(test)) && !exclude.some(test);
 const matchesAll = ({ include, exclude }, test) => include.every(test) && !exclude.some(test);
+// "true" keeps the entries that match, "false" keeps the ones that don't and any other value doesn't filter
+const matchesToggle = (value, matches) => (value !== "true" && value !== "false") || matches === (value === "true");
 
 function modifyMediaListData(listData, type, options) {
   options.searchRegex = fuse(options.search);
@@ -28,12 +30,14 @@ function modifyMediaListData(listData, type, options) {
   const mediaSet = new Set();
   const tagsSet = new Set();
   const studiosSet = new Set();
+  const ageRatingsSet = new Set();
   listData.indecies = {};
   listData.lists.forEach((list, i) => {
     let tail = 0;
     list.entries.forEach((entry, j, arr) => {
       listData.indecies[entry.media.id] ??= []
       listData.indecies[entry.media.id].push([i, j]);
+      ageRatingsSet.add(!!entry.media.isAdult);
       for (const studio of entry.media.studios.edges) {
         if (studio.isMain) {
           studiosSet.add(studio.node.name);
@@ -63,6 +67,7 @@ function modifyMediaListData(listData, type, options) {
   listData.total = mediaSet.size;
   listData.studios = Array.from(studiosSet).sort();
   listData.tags = Array.from(tagsSet).sort();
+  listData.hasBothAgeRatings = ageRatingsSet.size > 1;
   const sortFunction = generateSortFunction(options.sort);
   listData.lists.forEach(list => {
     list.entries.sort(sortFunction);
@@ -137,7 +142,7 @@ function filter(entry, filterObject) {
   if (!matchesAny(filterObject.year, year => year === String(entry.media.startDate?.year))) {
     return false;
   }
-  if (!matchesAny(filterObject.isAdult, isAdult => isAdult === String(entry.media.isAdult))) {
+  if (!matchesToggle(filterObject.isAdult, !!entry.media.isAdult)) {
     return false;
   }
   // Entry needs to have all the included genres and tags, other filters match any of the included values.
@@ -148,19 +153,19 @@ function filter(entry, filterObject) {
   if (!matchesAny(filterObject.userStatus, status => status === entry.status)) {
     return false;
   }
-  if (filterObject.private && !entry.private) {
+  if (!matchesToggle(filterObject.private, !!entry.private)) {
     return false;
   }
-  if (filterObject.notes && !entry.notes) {
+  if (!matchesToggle(filterObject.notes, !!entry.notes)) {
     return false;
   }
-  if (filterObject.repeat && !(entry.repeat > 0)) {
+  if (!matchesToggle(filterObject.repeat, entry.repeat > 0)) {
     return false;
   }
-  if (filterObject.missingStart && entry.startedAt?.year) {
+  if (!matchesToggle(filterObject.missingStart, !entry.startedAt?.year)) {
     return false;
   }
-  if (filterObject.missingScore && entry.score !== 0) {
+  if (!matchesToggle(filterObject.missingScore, entry.score === 0)) {
     return false;
   }
   if (!matchesAny(filterObject.studio, name => entry.media.studios.edges.some(studio => studio.isMain && studio.node.name === name))) {

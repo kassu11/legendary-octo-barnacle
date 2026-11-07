@@ -6,5 +6,30 @@
 
     --select-width: 100%;
     --select-max-width: none;
+    --select-padding: .35em .5em;
+
+    .remove-filters {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: .35em .5em;
+      border: 2px solid var(--bg-light);
+      border-radius: 4px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-weight: 600;
+      transition: .2s border-color, .2s background-color;
+
+      &:hover, &:focus-visible {
+        border-color: var(--crimson-400);
+        background-color: color-mix(in oklab, var(--bg), var(--crimson-400) 25%);
+      }
+
+      &:focus-visible {
+        outline: none;
+      }
+    }
   }
 }
