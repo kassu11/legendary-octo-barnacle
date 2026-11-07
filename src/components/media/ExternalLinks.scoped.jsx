@@ -1,6 +1,6 @@
 import { ErrorBoundary, For, Match, Show, Switch } from "solid-js";
 import "./ExternalLinks.scoped.css";
-import { IconLink } from "../../assets/Link";
+import { IconLink } from "@/assets/Link";
 
 export function ExternalLinks(props) {
   return (

@@ -1,14 +1,14 @@
 import { A, useParams } from "@solidjs/router";
 import { createEffect, createRenderEffect, createSignal, Match, Show, Switch } from "solid-js";
-import { formatTimeToDate } from "../../utils/formating.js";
-import { UserContext, useUser } from "../../context/providers.js";
+import { formatTimeToDate } from "@/utils/formating.js";
+import { UserContext, useUser } from "@/context/providers.js";
 import "./index(user).scoped.css";
-import { queries } from "../../collections/collections.js";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
-import { authUserData } from "../../core/globalState.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { queries } from "@/collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { authUserData } from "@/core/globalState.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function User(props) {
   const params = useParams();

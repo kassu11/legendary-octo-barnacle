@@ -1,27 +1,27 @@
 import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "../../../utils/formating";
+import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "@/utils/formating";
 import "./index-(user-relations).scoped.css";
-import { DurationToTime, EpisodeTime2 } from "../../Home/EpisodeTime";
-import { formatingUtils, urlUtils } from "../../../utils/utils";
-import Star from "../../../assets/Star";
-import { setMediaPageAnilistData } from "../../MediaPageAnilist/index(media-page-anilist).scoped";
+import { DurationToTime, EpisodeTime2 } from "@/pages/Home/EpisodeTime";
+import { formatingUtils, urlUtils } from "@/utils/utils";
+import Star from "@/assets/Star";
+import { setMediaPageAnilistData } from "@/pages/MediaPageAnilist/index(media-page-anilist).scoped";
 import "./MediaCard.scoped.css";
 import { ImageLoader } from "./ImageLoader.scoped";
-import Complete from "../../../assets/Complete";
-import { RepeatIcon } from "../../../assets/RepeatIcon";
-import Planning from "../../../assets/Planning";
-import Watching from "../../../assets/Watching";
-import TrashIcon from "../../../assets/TrashIcon";
-import StopIcon from "../../../assets/StopIcon";
-import { useEditMediaEntries } from "../../../context/providers";
-import { createAnilistFetcher, fetcherToFetch } from "../../../utils/fetcherUtils";
-import { queries } from "../../../collections/collections";
-import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped";
-import { globalEditedMedia, storeGlobalEditedMedia, token2 } from "../../../core/globalState";
-import Edit from "../../../assets/Edit";
-import { createHover, HoverPortal } from "../../../hooks/createHover";
-import { Tooltip } from "../../../components/Tooltip.scoped";
+import Complete from "@/assets/Complete";
+import { RepeatIcon } from "@/assets/RepeatIcon";
+import Planning from "@/assets/Planning";
+import Watching from "@/assets/Watching";
+import TrashIcon from "@/assets/TrashIcon";
+import StopIcon from "@/assets/StopIcon";
+import { useEditMediaEntries } from "@/context/providers";
+import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils";
+import { queries } from "@/collections/collections";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped";
+import { globalEditedMedia, storeGlobalEditedMedia, token2 } from "@/core/globalState";
+import Edit from "@/assets/Edit";
+import { createHover, HoverPortal } from "@/hooks/createHover";
+import { Tooltip } from "@/components/Tooltip.scoped";
 
 
 export function MediaCard(props) {

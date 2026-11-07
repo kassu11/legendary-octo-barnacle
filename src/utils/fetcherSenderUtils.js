@@ -1,6 +1,6 @@
 import { createMemo } from "solid-js";
 import { functionUtils } from "./utils.js";
-import { asserts, localizations } from "../collections/collections.js";
+import { asserts, localizations } from "@/collections/collections.js";
 
 const createFetcherWithArguments = (fetcherCreator, args) => {
   asserts.assertTypeFunctionOLD(fetcherCreator);

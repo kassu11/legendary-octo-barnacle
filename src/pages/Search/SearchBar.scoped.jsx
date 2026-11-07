@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { useParsedSearchParams, useResponsive } from "../../context/providers";
+import { useParsedSearchParams, useResponsive } from "@/context/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
 import "./SearchBar.scoped.css";
 import { MediaSortSelect } from "./inputs/MediaSortSelect.scoped.jsx";
@@ -19,7 +19,7 @@ import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
 import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
-import { LicensedIcon, OnListIcon } from "../../assets/SearchFilterIcons.jsx";
+import { LicensedIcon, OnListIcon } from "@/assets/SearchFilterIcons.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "./FilterLayout.scoped.jsx";
 import { createMemo, Show } from "solid-js";
 

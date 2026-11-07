@@ -1,19 +1,19 @@
 import { useSearchParams, useParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { useParsedSearchParams } from "../../../context/providers.js";
-import { arrayUtils } from "../../../utils/utils.js";
+import { useParsedSearchParams } from "@/context/providers.js";
+import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import { AvailableIcon } from "../../../assets/SearchFilterIcons.jsx";
+import { AvailableIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./MediaExternalSourcesSelect.scoped.css"
-import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
-import { queries } from "../../../collections/collections.js";
-import { tabTime } from "../../../core/globalState.js";
-import { timeStringToMs } from "../../../utils/timeUtils.js";
-import { Checkbox } from "../Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { queries } from "@/collections/collections.js";
+import { tabTime } from "@/core/globalState.js";
+import { timeStringToMs } from "@/utils/timeUtils.js";
+import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
-import { LoaderCircle } from "../../../components/LoaderCircle.scoped.jsx";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 
 export const [externalSourcesData, setExternalSourcesData] = createSignal(undefined, { equals: false });
 

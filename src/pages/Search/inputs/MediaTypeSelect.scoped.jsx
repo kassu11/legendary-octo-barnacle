@@ -1,11 +1,11 @@
 import { createMemo } from "solid-js";
-import { arrayUtils } from "../../../utils/utils.js";
+import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import { TypeIcon } from "../../../assets/SearchFilterIcons.jsx";
-import { Checkbox } from "../Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { TypeIcon } from "@/assets/SearchFilterIcons.jsx";
+import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { useParams } from "@solidjs/router";
-import { useParsedSearchParams } from "../../../context/providers.js";
+import { useParsedSearchParams } from "@/context/providers.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaTypeSelect() {

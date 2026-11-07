@@ -1,15 +1,15 @@
 import { A } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
-import { useUser } from "../../../context/providers.js";
-import { formatTitleToUrl, mediaUrl, numberCommas } from "../../../utils/formating.js";
-import { ActivityCard } from "../../../components/Activity.scoped.jsx";
+import { useUser } from "@/context/providers.js";
+import { formatTitleToUrl, mediaUrl, numberCommas } from "@/utils/formating.js";
+import { ActivityCard } from "@/components/Activity.scoped.jsx";
 import "./Overview.scoped.css";
-import { asserts, queries } from "../../../collections/collections.js";
+import { asserts, queries } from "@/collections/collections.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
-import { isTypeFunction } from "../../../utils/functionUtils.js";
-import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
-import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function Overview() {
   const { user } = useUser();

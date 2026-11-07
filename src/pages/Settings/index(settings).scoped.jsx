@@ -1,11 +1,11 @@
 import { createEffect, createRenderEffect, createSignal, For, Show } from "solid-js";
-import { setSettingsShowDevBranch, settingsShowDevBranch } from "../../core/globalState";
+import { setSettingsShowDevBranch, settingsShowDevBranch } from "@/core/globalState";
 import "./index(settings).scoped.css";
 import { createStore, produce, reconcile } from "solid-js/store";
 import { useSearchParams } from "@solidjs/router";
-import { wrapToSet } from "../../utils/arrays";
-import { useResponsive } from "../../context/providers";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { wrapToSet } from "@/utils/arrays";
+import { useResponsive } from "@/context/providers";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 export function SettingsPage() {
   const [hovered, setHovered] = createSignal();

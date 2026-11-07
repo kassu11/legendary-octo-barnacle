@@ -1,10 +1,10 @@
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
-import { useParsedSearchParams } from "../../../context/providers.js";
+import { useParsedSearchParams } from "@/context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import { ProgressIcon } from "../../../assets/SearchFilterIcons.jsx";
-import { Checkbox } from "../Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { ProgressIcon } from "@/assets/SearchFilterIcons.jsx";
+import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaProgressSelect() {

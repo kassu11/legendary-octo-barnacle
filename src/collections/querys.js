@@ -1,5 +1,5 @@
-import { objectToSearchParams } from "../utils/objectUtils";
-import { arrayUtils } from "../utils/utils";
+import { objectToSearchParams } from "@/utils/objectUtils";
+import { arrayUtils } from "@/utils/utils";
 
 // Normal Grapql querys, no need to do anything fancy
 export { default as anilistMediaById } from "./queries/anilistMediaById.graphql";

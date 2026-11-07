@@ -1,11 +1,11 @@
 import { useParams } from "@solidjs/router";
-import { useMediaInfo } from "../../context/providers.js";
-import { localizations, signals, queries } from "../../collections/collections.js";
+import { useMediaInfo } from "@/context/providers.js";
+import { localizations, signals, queries } from "@/collections/collections.js";
 import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
-import { MalCharacterCard } from "../../components/Cards/Cards.scoped.jsx";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { MalCharacterCard } from "@/components/Cards/Cards.scoped.jsx";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function MediaInfoCharactersJikan() {
   const params = useParams();

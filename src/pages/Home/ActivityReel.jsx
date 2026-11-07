@@ -1,10 +1,10 @@
 import { batch, createRenderEffect, createSignal, Show } from "solid-js";
 import { HomePageActivityReelContent } from "./ActivityPage.scoped.jsx";
-import { modes, signals, queries } from "../../collections/collections.js";
-import { arrayUtils } from "../../utils/utils.js";
-import { createAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils.js";
-import { isTypeFunction } from "../../utils/functionUtils.js";
+import { modes, signals, queries } from "@/collections/collections.js";
+import { arrayUtils } from "@/utils/utils.js";
+import { createAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
 
 export function HomePageActivityReel(props) {
   const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);

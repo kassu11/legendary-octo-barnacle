@@ -1,6 +1,6 @@
-import { assertTypeInteger } from "../collections/asserts";
-import { getLocalStorageJson } from "../utils/localStorageUtils";
-import { leftJoinObjects } from "../utils/objectUtils";
+import { assertTypeInteger } from "@/collections/asserts";
+import { getLocalStorageJson } from "@/utils/localStorageUtils";
+import { leftJoinObjects } from "@/utils/objectUtils";
 
 const baseLimits = {
   "https://graphql.anilist.co": {

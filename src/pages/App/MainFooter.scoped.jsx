@@ -1,9 +1,9 @@
 import { A, useLocation } from "@solidjs/router";
 import { createMemo, createResource, createSignal, For, Show } from "solid-js";
 import "./MainFooter.scoped.css";
-import BranchIcon from "../../assets/BranchIcon";
-import { CreatedAt } from "../../components/CreatedAt.jsx";
-import { settingsShowDevBranch } from "../../core/globalState";
+import BranchIcon from "@/assets/BranchIcon";
+import { CreatedAt } from "@/components/CreatedAt.jsx";
+import { settingsShowDevBranch } from "@/core/globalState";
 
 const repositoryUrl = "https://github.com/kassu11/legendary-octo-barnacle";
 

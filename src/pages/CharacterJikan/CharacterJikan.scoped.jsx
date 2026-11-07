@@ -1,14 +1,14 @@
 import { useParams } from "@solidjs/router";
 import { Show, For, createRenderEffect, ErrorBoundary, createEffect, createSignal } from "solid-js";
-import { Markdown } from "../../components/Markdown.scoped.jsx";
-import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
-import { queries } from "../../collections/collections.js";
-import { arrayUtils } from "../../utils/utils.js";
-import { JikanMediaCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
+import { Markdown } from "@/components/Markdown.scoped.jsx";
+import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { queries } from "@/collections/collections.js";
+import { arrayUtils } from "@/utils/utils.js";
+import { JikanMediaCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
 import "./CharacterJikan.scoped.css";
-import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function CharacterJikanScoped() {
   const params = useParams();

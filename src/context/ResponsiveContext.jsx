@@ -1,4 +1,4 @@
-import useMediaQuery from "../hooks/useMediaQuery";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import { ResponsiveContext } from "./providers";
 
 export function ResponsiveProvider(props) {

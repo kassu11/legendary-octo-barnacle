@@ -1,5 +1,5 @@
 import { onMount, Show } from "solid-js";
-import { createHover, HoverPortal } from "../hooks/createHover";
+import { createHover, HoverPortal } from "@/hooks/createHover";
 import "./Tooltip.scoped.css";
 
 /**
@@ -11,7 +11,7 @@ import "./Tooltip.scoped.css";
  * </button>
  *
  * @param {Object} props
- * @param {import("../hooks/createHover").HoverPlacement[]} [props.placements]
+ * @param {import("@/hooks/createHover").HoverPlacement[]} [props.placements]
  * @param {number} [props.offset]
  * @param {number} [props.delay] Milliseconds the parent needs to be hovered before the tooltip fades in
  */

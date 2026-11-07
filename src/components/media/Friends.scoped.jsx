@@ -3,13 +3,13 @@ import Status from "./Status";
 import Score from "./Score.scoped";
 import "./Friends.scoped.css";
 import { A, useParams, useSearchParams } from "@solidjs/router";
-import { useMediaInfo } from "../../context/providers";
-import { queries } from "../../collections/collections.js";
-import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
-import { authUserData } from "../../core/globalState";
-import { createTimer, formatMSToString } from "../../utils/timeUtils";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { useMediaInfo } from "@/context/providers";
+import { queries } from "@/collections/collections.js";
+import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils";
+import { authUserData } from "@/core/globalState";
+import { createTimer, formatMSToString } from "@/utils/timeUtils";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 function Friends() {
   const params = useParams();

@@ -1,9 +1,9 @@
 import { createMemo, For, Show } from "solid-js";
-import { Tooltip } from "../../../components/Tooltip.scoped";
-import { formatTimeToDate } from "../../../utils/formating.js";
+import { Tooltip } from "@/components/Tooltip.scoped";
+import { formatTimeToDate } from "@/utils/formating.js";
 import "./ActivityHistory.scoped.css";
-import { arrayUtils, numberUtils } from "../../../utils/utils.js";
-import { timeCollection } from "../../../collections/collections.js";
+import { arrayUtils, numberUtils } from "@/utils/utils.js";
+import { timeCollection } from "@/collections/collections.js";
 
 export function ActivityHistoryScoped(props) {
   const start = createStartDate() / 1000;

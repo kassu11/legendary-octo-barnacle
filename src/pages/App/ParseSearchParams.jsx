@@ -2,11 +2,11 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { createStore, reconcile } from "solid-js/store";
-import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays";
-import { ParsedSearchParamsContext } from "../../context/providers";
-import { translateInternalApiParams } from "../../core/apiTranslations";
-import { getDates } from "../../utils/dates";
-import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "../../core/globalState";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrays";
+import { ParsedSearchParamsContext } from "@/context/providers";
+import { translateInternalApiParams } from "@/core/apiTranslations";
+import { getDates } from "@/utils/dates";
+import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "@/core/globalState";
 
 const [searchStore, setSearchStore] = createStore({});
 

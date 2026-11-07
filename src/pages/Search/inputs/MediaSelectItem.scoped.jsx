@@ -1,6 +1,6 @@
 import { Show, splitProps } from "solid-js";
-import { useResponsive } from "../../../context/providers.js";
-import { Tooltip } from "../../../components/Tooltip.scoped.jsx";
+import { useResponsive } from "@/context/providers.js";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./MediaSelectItem.scoped.css"
 
 export function MediaSelectItem(props) {

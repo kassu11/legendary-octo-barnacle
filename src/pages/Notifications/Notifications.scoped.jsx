@@ -1,17 +1,17 @@
 import { A } from "@solidjs/router";
 import { batch, createEffect, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Notifications.scoped.css";
-import { mediaUrl } from "../../utils/formating.js";
-import { CreatedAt } from "../../components/CreatedAt.jsx";
-import { arrayUtils, scheduleUtils } from "../../utils/utils.js";
-import { asserts, modes, signals, queries } from "../../collections/collections.js";
+import { mediaUrl } from "@/utils/formating.js";
+import { CreatedAt } from "@/components/CreatedAt.jsx";
+import { arrayUtils, scheduleUtils } from "@/utils/utils.js";
+import { asserts, modes, signals, queries } from "@/collections/collections.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { Tooltip } from "../../components/Tooltip.scoped";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils";
-import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
-import { isTypeFunction } from "../../utils/functionUtils";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
+import { isTypeFunction } from "@/utils/functionUtils";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 export function typeToTypes(type) {
   if (type === "airing") return [ "AIRING" ];

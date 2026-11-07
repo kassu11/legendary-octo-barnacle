@@ -1,10 +1,10 @@
 import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
-import { useParsedSearchParams } from "../../../context/providers.js";
+import { useParsedSearchParams } from "@/context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import { SeasonIcon } from "../../../assets/SearchFilterIcons.jsx";
-import { Checkbox } from "../Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { SeasonIcon } from "@/assets/SearchFilterIcons.jsx";
+import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaSeasonSelect() {

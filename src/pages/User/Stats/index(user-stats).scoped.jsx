@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { createEffect } from "solid-js";
-import { useUser } from "../../../context/providers.js";
+import { useUser } from "@/context/providers.js";
 import "./index(user-stats).scoped.css";
 
 export function Stats(props) {

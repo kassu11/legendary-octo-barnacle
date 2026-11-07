@@ -1,10 +1,10 @@
 import { createMemo } from "solid-js";
-import { useParsedSearchParams } from "../../../context/providers.js";
-import { arrayUtils } from "../../../utils/utils.js";
+import { useParsedSearchParams } from "@/context/providers.js";
+import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
-import { CountryIcon } from "../../../assets/SearchFilterIcons.jsx";
-import { Checkbox } from "../Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "../../../utils/urlUtils.js";
+import { CountryIcon } from "@/assets/SearchFilterIcons.jsx";
+import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaCountrySelect() {

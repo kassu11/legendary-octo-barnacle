@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { numberCommas, plural } from "../../../../utils/formating.js";
+import { numberCommas, plural } from "@/utils/formating.js";
 import { Match, Show, Switch } from "solid-js";
 import "./GenresCardStats.scoped.css";
 

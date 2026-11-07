@@ -1,11 +1,11 @@
 import { A, useParams } from "@solidjs/router";
 import { Match, Show, Switch } from "solid-js";
-import Anilist from "../../assets/Anilist.jsx";
-import MyAnimeList from "../../assets/MyAnimeList.jsx";
-import ExternalSource from "../../assets/ExternalSource.jsx";
-import { formatingUtils } from "../../utils/utils.js";
+import Anilist from "@/assets/Anilist.jsx";
+import MyAnimeList from "@/assets/MyAnimeList.jsx";
+import ExternalSource from "@/assets/ExternalSource.jsx";
+import { formatingUtils } from "@/utils/utils.js";
 import "./MediaPageApiSwitcher.scoped.css";
-import { localizations } from "../../collections/collections.js";
+import { localizations } from "@/collections/collections.js";
 
 export function MediaPageApiSwitcher(props) {
   const params = useParams();

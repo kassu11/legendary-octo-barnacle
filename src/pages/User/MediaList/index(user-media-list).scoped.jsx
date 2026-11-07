@@ -1,21 +1,21 @@
 import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, onCleanup, Show, untrack } from "solid-js";
 import "./index(user-media-list).scoped.css";
-import { capitalize } from "../../../utils/formating.js";
-import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
-import { UserMediaListContext, useUser } from "../../../context/providers.js";
-import { debouncer, leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
-import { asserts, queries } from "../../../collections/collections.js";
+import { capitalize } from "@/utils/formating.js";
+import UserMediaListWorker from "@/worker/user-media-list.js?worker";
+import { UserMediaListContext, useUser } from "@/context/providers.js";
+import { debouncer, leadingAndTrailingDebounce } from "@/utils/scheduled.js";
+import { asserts, queries } from "@/collections/collections.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
-import { isTypeFunction } from "../../../utils/functionUtils.js";
-import { arrayUtils } from "../../../utils/utils.js";
-import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
-import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
-import { authUserData } from "../../../core/globalState";
-import { createCleanUpAbortController } from "../../../utils/abortUtils";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
+import { arrayUtils } from "@/utils/utils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { authUserData } from "@/core/globalState";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 // Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
 export const ALL_LISTS = "";

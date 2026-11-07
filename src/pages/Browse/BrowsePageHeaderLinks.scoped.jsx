@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import ArrowRightIcon from "../../assets/ArrowRightIcon";
+import ArrowRightIcon from "@/assets/ArrowRightIcon";
 import "./BrowsePageHeaderLinks.scoped.css";
 
 export function BrowsePageHeaderLinks(props) {

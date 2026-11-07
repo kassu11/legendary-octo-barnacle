@@ -1,14 +1,14 @@
 import { A, useParams } from "@solidjs/router";
-import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
+import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { queries } from "../../../../collections/collections.js";
-import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
+import { queries } from "@/collections/collections.js";
+import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
 import "./Studio.scoped.css";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
-import { useUser } from "../../../../context/providers.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { useUser } from "@/context/providers.js";
 
 export function StatsAnimeStudios() {
   const params = useParams();

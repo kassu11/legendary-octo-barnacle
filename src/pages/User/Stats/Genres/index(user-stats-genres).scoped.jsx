@@ -1,12 +1,12 @@
 import { useParams } from "@solidjs/router";
 import { createEffect, createSignal, on, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { localizations, queries } from "../../../../collections/collections.js";
+import { localizations, queries } from "@/collections/collections.js";
 import { GenreItems } from "./GenreItems.scoped.jsx";
-import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
-import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
-import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
+import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function StatsMediaGenres() {
   const params = useParams();

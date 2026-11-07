@@ -1,14 +1,14 @@
 import { useParams } from "@solidjs/router";
-import { scheduleUtils } from "../../utils/utils";
-import { asserts, queries } from "../../collections/collections";
+import { scheduleUtils } from "@/utils/utils";
+import { asserts, queries } from "@/collections/collections";
 import "./Recommendations.scoped.css";
 import { batch, createEffect, createSignal, For, Match, on, Show, Switch, untrack } from "solid-js";
-import { AnilistMediaRecommendationCard } from "../../components/Cards/Cards.scoped";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../utils/fetcherUtils";
-import { addApplicationNotification } from "../App/ApplicationNotifications.scoped";
-import { Intersection } from "../../components/utils/Intersection.scoped";
-import { setFetcherValueToStorage } from "../../utils/storageUtils";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { AnilistMediaRecommendationCard } from "@/components/Cards/Cards.scoped";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped";
+import { Intersection } from "@/components/utils/Intersection.scoped";
+import { setFetcherValueToStorage } from "@/utils/storageUtils";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 export function Recommendations(props) {
   const params = useParams();

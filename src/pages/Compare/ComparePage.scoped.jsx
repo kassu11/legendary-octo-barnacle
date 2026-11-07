@@ -2,22 +2,22 @@ import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidj
 import { batch, createMemo, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "../../utils/arrays.js";
-import { CompareMediaListContext, useCompareMediaList } from "../../context/providers.js";
-import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { Tooltip } from "../../components/Tooltip.scoped";
-import CompareMediaListWorker from "../../worker/compare-media-list.js?worker";
-import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "../../utils/formating.js";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrays.js";
+import { CompareMediaListContext, useCompareMediaList } from "@/context/providers.js";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped";
+import CompareMediaListWorker from "@/worker/compare-media-list.js?worker";
+import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formating.js";
 import "./ComparePage.scoped.css";
-import Score from "../../components/media/Score.scoped.jsx";
-import Star from "../../assets/Star.jsx";
+import Score from "@/components/media/Score.scoped.jsx";
+import Star from "@/assets/Star.jsx";
 import { debounce } from "@solid-primitives/scheduled";
-import { asserts, queries, searchObjects, signals } from "../../collections/collections.js";
-import { arrayUtils, numberUtils } from "../../utils/utils.js";
-import { RepeatIcon } from "../../assets/RepeatIcon.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { asserts, queries, searchObjects, signals } from "@/collections/collections.js";
+import { arrayUtils, numberUtils } from "@/utils/utils.js";
+import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 const initialMediaCompareList = () => {
   const count = numberUtils.parse(sessionStorage.getItem(window.location.href), 0);

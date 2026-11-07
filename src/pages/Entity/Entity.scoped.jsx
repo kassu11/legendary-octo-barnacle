@@ -1,18 +1,18 @@
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { Switch, Match, Show, createSignal, createEffect, For, createMemo, untrack } from "solid-js";
-import { OldMarkdownComponent } from "../../components/Markdown.scoped.jsx";
+import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import "./Entity.scoped.css";
-import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "../../utils/formating.js";
-import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
+import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "@/utils/formating.js";
+import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { wrapToArray } from "../../utils/arrays.js";
-import { asserts, queries } from "../../collections/collections.js";
-import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { isTypeFunction } from "../../utils/functionUtils.js";
-import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { wrapToArray } from "@/utils/arrays.js";
+import { asserts, queries } from "@/collections/collections.js";
+import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function Character() {
   const params = useParams();

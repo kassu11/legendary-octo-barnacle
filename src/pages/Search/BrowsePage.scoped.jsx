@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { Switch, Match } from "solid-js";
-import { HorizontalCardRowScoped } from "../Browse/HorizontalCardRow.scoped";
-import { VerticalCardRowScoped } from "../Browse/VerticalCardRow.scoped";
+import { HorizontalCardRowScoped } from "@/pages/Browse/HorizontalCardRow.scoped";
+import { VerticalCardRowScoped } from "@/pages/Browse/VerticalCardRow.scoped";
 import "./BrowsePage.scoped.css";
 
 
