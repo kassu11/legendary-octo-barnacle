@@ -372,12 +372,12 @@ export function FilterSelect(props) {
     clearRange();
     setCursor(-1);
     scroller.scrollTop = 0;
-    if (e.detail === 0) input.focus({ focusVisible: false });
+    if (e.detail === 0) input.focus();
   };
 
   const handleCountKeyDown = e => {
     if (e.key !== "Escape") return;
-    input.focus({ focusVisible: false });
+    input.focus();
     handleKeyDown(e);
   };
 
@@ -389,7 +389,7 @@ export function FilterSelect(props) {
       dialog.setAttribute("autofocus", "");
       // Typing in the search while the dialog is closing opens it again
       if (!dialog.open) dialog.showModal();
-      input.focus({ focusVisible: false, preventScroll: true });
+      input.focus({ preventScroll: true });
     }
     // Panel keeps its size while searching
     if (rows().length) scroller.style.height = scroller.offsetHeight + "px";
@@ -684,7 +684,7 @@ export function FilterSelect(props) {
   const handleTriggerClearClick = e => {
     e.preventDefault();
     clearAll();
-    if (e.detail === 0) (isTouch() ? openButton : input).focus({ focusVisible: false });
+    if (e.detail === 0) (isTouch() ? openButton : input).focus();
   };
 
   const handlePanelMouseDown = e => {
