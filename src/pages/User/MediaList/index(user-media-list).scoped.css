@@ -13,9 +13,9 @@
 
 @layer resize {
   .user-profile-media-list-body {
-    @media (width < 35em) {
+    @media (width < 36em) {
       _.user-profile-media-list-grid {
-        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         font-size: .8rem;
         gap: .25rem;
 
@@ -24,6 +24,12 @@
           height: 32px;
           padding: 8px;
         }
+      }
+    }
+
+    @media (width < 25em) {
+      _.user-profile-media-list-grid {
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
       }
     }
   }

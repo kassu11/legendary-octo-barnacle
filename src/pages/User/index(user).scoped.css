@@ -5,21 +5,24 @@
   }
 
   .profile-banner-container {
-    height: 20rem;
+    --_height: 20rem;
+    height: var(--_height);
     isolation: isolate;
     display: grid;
+    @media (width < 35em) {
+      --_height: 10rem;
+    }
 
     .banner {
       position: absolute;
       width: 100%;
-      height: 20rem;
+      height: var(--_height);
       object-fit: cover;
       left: 0px;
       z-index: -1;
       background-color: var(--background-400-old);
       filter: brightness(.75);
     }
-
   }
 
   .user-profile-container {
@@ -34,12 +37,21 @@
       max-width: 10rem;
       max-height: 15rem;
       object-fit: cover;
+      @media (width < 35em) {
+        max-width: 5rem;
+      }
     }
 
-    .content a{
-      color: inherit;
-      text-decoration: none;
-      word-break: break-word;
+    .content {
+      @media (width < 35em) {
+        font-size: .75rem;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+        word-break: break-word;
+      }
     }
   }
 
@@ -60,19 +72,5 @@
     justify-content: center;
     gap: .5rem 2rem;
     padding: 1rem;
-  }
-}
-
-@layer resize {
-  @media (width < 35em) {
-    .user-profile-container {
-      .profile {
-        max-width: 5rem;
-      }
-
-      .content {
-        font-size: .75rem;
-      }
-    }
   }
 }
