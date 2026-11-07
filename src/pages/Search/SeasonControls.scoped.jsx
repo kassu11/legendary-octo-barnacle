@@ -4,7 +4,7 @@ import { useParsedSearchParams } from "@/context/providers";
 import { capitalize } from "@/utils/formating";
 import { arrayUtils } from "@/utils/utils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "./Checkbox.scoped";
+import { Checkbox } from "@/components/ui/Checkbox.scoped";
 import "./SeasonControls.scoped.css";
 
 export function SeasonControls(props) {

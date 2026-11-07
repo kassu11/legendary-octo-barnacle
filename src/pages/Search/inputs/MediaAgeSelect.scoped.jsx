@@ -4,7 +4,7 @@ import { useParsedSearchParams } from "@/context/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { AgeIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 

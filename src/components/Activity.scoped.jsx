@@ -9,7 +9,7 @@ import { Dynamic } from "solid-js/web"
 import { asserts, queries } from "@/collections/collections.js";
 import { CreatedAt } from "./CreatedAt.jsx";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 import { createAbortController } from "@/utils/abortUtils.js";
 
 export function ActivityCard(props) {

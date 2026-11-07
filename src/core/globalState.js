@@ -18,6 +18,7 @@ export const [token2, setToken2] = createOneTimeSessionStorageSignal("LOB-token"
 
 export const authedUserId = createRoot(() => createMemo(() => authUserData()?.data.id));
 export const [mainLoadingCount, setMainLoadingCount] = createSignal(0);
+export const [mediaPageAnilistData, setMediaPageAnilistData] = createSignal(undefined, { equals: false });
 
 export const [searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-seasons-by-format", true);
 export const [searchPageGroupTBAEntriesByFormat, setSearchPageGroupTBAEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-tba-by-format", false);

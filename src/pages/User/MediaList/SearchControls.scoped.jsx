@@ -3,8 +3,8 @@ import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/c
 import { createMemo, createSignal, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { ALL_LISTS } from "./index(user-media-list).scoped.jsx";
 import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";
-import { TwoStateToggleButton } from "@/pages/Search/TwoStateToggle.scoped.jsx";
-import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/pages/Search/FilterLayout.scoped.jsx";
+import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
+import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
 import { AgeIcon, ArrowUpIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./SearchControls.scoped.css";

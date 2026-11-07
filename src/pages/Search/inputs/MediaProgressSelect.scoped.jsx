@@ -3,7 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/context/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { ProgressIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 

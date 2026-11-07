@@ -5,7 +5,7 @@ import { FavouritesPageScoped } from "./FavouritesPage.scoped.jsx";
 import { asserts, queries } from "@/collections/collections.js";
 import "./FavouriteSection.scoped.css"
 import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 
 export function FavouriteSectionScoped(props) {
   asserts.assertTrueOLD(props.title, "title missing");

@@ -6,7 +6,7 @@ import SortAlphabetDescendingIcon from "@/assets/SortAlphaDown.jsx";
 import SortAlphabetAscendingIcon from "@/assets/SortAlphaUp.jsx";
 import SortNumericDescendingIcon from "@/assets/SortNumericDown.jsx";
 import SortNumericAscendingIcon from "@/assets/SortNumericUp.jsx";
-import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import "./ListFilterSelect.scoped.css";
 
 // Holding an arrow key would otherwise update the url and run the list worker around 30 times per second

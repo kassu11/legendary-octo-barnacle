@@ -13,11 +13,11 @@ import ThumbDown from "@/assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 import { mediaWithMalId, token2 } from "@/core/globalState.js";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
-import { MediaHoverCard } from "@/pages/User/Relations/MediaCard.scoped.jsx";
+import { MediaHoverCard } from "@/components/media/MediaCard.scoped.jsx";
 
 function AnilistMediaCardListBody(props) {
   const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });

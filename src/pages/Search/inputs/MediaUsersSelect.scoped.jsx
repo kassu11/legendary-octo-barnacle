@@ -7,13 +7,13 @@ import "./MediaUsersSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
 import { queries } from "@/collections/collections.js";
-import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
+import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { createLocalStorageJsonSignal } from "@/utils/localStorageUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { UserSearchIcon } from "@/assets/UserSearchIcon.jsx";
-import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { addApplicationNotification } from "@/core/notifications";
 import { arrayUtils } from "@/utils/utils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 

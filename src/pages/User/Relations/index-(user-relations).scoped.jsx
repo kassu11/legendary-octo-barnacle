@@ -12,9 +12,9 @@ import "./index-(user-relations).scoped.css";
 import { safeStringifyJson } from "@/utils/jsonUtils";
 import { hashKeyFNV32 } from "@/utils/hashUtils";
 import { createStore, reconcile } from "solid-js/store";
-import { MediaCard } from "./MediaCard.scoped";
+import { MediaCard } from "@/components/media/MediaCard.scoped";
 import { tabTime } from "@/core/globalState";
-import { useIntersectionVisible } from "./useIntersectionVisible";
+import { useIntersectionVisible } from "@/hooks/useIntersectionVisible";
 
 const mediaIds = new Set();
 const [store, setStore] = createStore({});

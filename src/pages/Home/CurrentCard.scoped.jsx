@@ -2,7 +2,7 @@ import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { leadingAndTrailingDebounce } from "@/utils/scheduled.js";
 import { A } from "@solidjs/router";
 import { mediaUrl } from "@/utils/formating.js";
-import { EpisodeTime } from "./EpisodeTime.jsx";
+import { EpisodeTime } from "@/components/media/EpisodeTime.jsx";
 import "./CurrentCard.scoped.css";
 import { queries, timeCollection } from "@/collections/collections.js";
 import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
