@@ -66,8 +66,6 @@ export const animeThemesByArtisSlug = ({ slug }) => `https://api.animethemes.moe
 
 export const myAnimeListMediaById = ({ type, id }) => `https://api.tenrai.org/v1/${type}/${id}/full`;
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.tenrai.org/v1/${type}/${id}/characters`;
-export const myAnimeListAnimeCharactersById = id => `https://api.tenrai.org/v1/anime/${id}/characters`;
-export const myAnimeListMangaCharactersById = id => `https://api.tenrai.org/v1/manga/${id}/characters`;
 export const myAnimeListCharacterById = ({ id }) => `https://api.tenrai.org/v1/characters/${id}/full`;
 export const myAnimeListAnimeStaffById = ({ id }) => `https://api.tenrai.org/v1/anime/${id}/staff`;
 export const myAnimeListMediaSearch = ({ type, ...rest }) => `https://api.tenrai.org/v1/${type}?${objectToSearchParams(rest)}`;
