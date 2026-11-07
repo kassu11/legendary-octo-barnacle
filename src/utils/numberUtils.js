@@ -1,25 +1,8 @@
-import { asserts } from "@/collections/collections";
-
-export const numberCommas = num => {
-  if (num == undefined) return;
-  return Intl.NumberFormat("ja-JP").format(num)
-}
-
 export const isNumber = num => !isNaN(num) && typeof num === "number";
 
 export const parse = (string, fallback) => {
   const num = Number(string);
   return isNumber(num) ? num : fallback;
-}
-
-export const compactNumber = num => {
-  if (num == undefined) return;
-  asserts.assertTrueOLD(typeof num === "number", "Number is not typeof number");
-
-  return Intl.NumberFormat('en-US', {
-    notation: "compact",
-    maximumFractionDigits: 1
-  }).format(num);
 }
 
 export const min = (a, b) => {

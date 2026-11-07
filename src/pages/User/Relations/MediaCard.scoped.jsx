@@ -1,9 +1,9 @@
 import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry } from "@/utils/formating";
+import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry, plural } from "@/utils/formating";
 import "./index-(user-relations).scoped.css";
 import { DurationToTime, EpisodeTime2 } from "@/pages/Home/EpisodeTime";
-import { formatingUtils, urlUtils } from "@/utils/utils";
+import { urlUtils } from "@/utils/utils";
 import Star from "@/assets/Star";
 import { setMediaPageAnilistData } from "@/pages/MediaPageAnilist/index(media-page-anilist).scoped";
 import "./MediaCard.scoped.css";
@@ -213,10 +213,10 @@ export function MediaHoverCard(props) {
               <Match when={props.media?.type === "MANGA"}>
                 <Switch>
                   <Match when={props.media?.format === "NOVEL" && props.media?.volumes}>
-                    {props.media?.volumes} Volume{formatingUtils.plural(props.media?.volumes)}
+                    {props.media?.volumes} Volume{plural(props.media?.volumes)}
                   </Match>
                   <Match when={props.media?.chapters}>
-                    {props.media?.chapters} Chapter{formatingUtils.plural(props.media?.chapters)}
+                    {props.media?.chapters} Chapter{plural(props.media?.chapters)}
                   </Match>
                   <Match when={props.media?.status}>
                     {formatMediaStatus(props.media?.status)}
@@ -229,7 +229,7 @@ export function MediaHoverCard(props) {
                     <DurationToTime time={props.media?.duration * 60} minute=" minute" hour=" hour" />
                   </Match>
                   <Match when={props.media?.format !== "MOVIE" && props.media?.episodes}>
-                    {props.media?.episodes} Episode{formatingUtils.plural(props.media?.episodes)}
+                    {props.media?.episodes} Episode{plural(props.media?.episodes)}
                   </Match>
                 </Switch>
               </Match>

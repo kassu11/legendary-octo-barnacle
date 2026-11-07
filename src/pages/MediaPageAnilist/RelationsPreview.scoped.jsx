@@ -1,5 +1,6 @@
 import { ErrorBoundary, For, Show } from "solid-js";
-import { formatingUtils, urlUtils } from "@/utils/utils";
+import { formatMediaFormat, formatMediaStatus } from "@/utils/formating.js";
+import { urlUtils } from "@/utils/utils";
 import "./RelationsPreview.scoped.css";
 import { A } from "@solidjs/router";
 
@@ -21,8 +22,8 @@ export function AnilistRelationsPreview(props) {
                     <span class="type">{relation.relationType}</span>
                     <span class="line-clamp">{relation.node.title.userPreferred}</span>
                     <p class="flex-bullet-separator">
-                      <span>{formatingUtils.mediaFormat(relation.node.format)}</span>
-                      <span>{formatingUtils.mediaStatus(relation.node.status)}</span>
+                      <span>{formatMediaFormat(relation.node.format)}</span>
+                      <span>{formatMediaStatus(relation.node.status)}</span>
                     </p>
                   </div>
                 </A>

@@ -1,10 +1,3 @@
-export const plural = num => num !== 1 ? "s" : "";
-
-export const capitalize = text => {
-  if (!text?.length) return "";
-  return text[0].toUpperCase() + text.substring(1).toLowerCase();
-}
-
 export const fuse = search => {
   if (!search) return null;
 

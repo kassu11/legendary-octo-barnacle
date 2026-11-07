@@ -1,7 +1,7 @@
 import { Match, Show, Switch } from "solid-js";
 import "./Scores.scoped.css";
 import { useMediaInfo } from "@/context/providers";
-import { numberUtils } from "@/utils/utils";
+import { numberCommas } from "@/utils/formating.js";
 
 export function MediaPageScores() {
   const { anilistData, jikanData } = useMediaInfo();
@@ -26,7 +26,7 @@ export function MediaPageScores() {
       </div>
       <p class="anilist-users">
         <Show when={anilistData()?.data.data.Media?.stats?.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0)} fallback="-">
-          {numberUtils.numberCommas(anilistData()?.data.data.Media?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0))}
+          {numberCommas(anilistData()?.data.data.Media?.stats.scoreDistribution?.reduce((acc, v) => v.amount + acc, 0))}
         </Show>
         {" "}Users
       </p>
@@ -43,7 +43,7 @@ export function MediaPageScores() {
       </div>
       <p>
         <Show when={jikanData()?.data?.data.scored_by} fallback="-">
-          {numberUtils.numberCommas(jikanData().data.data.scored_by)}
+          {numberCommas(jikanData().data.data.scored_by)}
         </Show>
         {" "}Users
       </p>

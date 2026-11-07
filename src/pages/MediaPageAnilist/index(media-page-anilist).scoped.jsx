@@ -17,7 +17,8 @@ import { ExternalLinks } from "@/components/media/ExternalLinks.scoped.jsx";
 import { MediaPageScores } from "@/components/MediaPage/Scores.scoped.jsx";
 import "./index(media-page-anilist).scoped.css";
 import { queries } from "@/collections/collections.js";
-import { formatingUtils, navigationUtils } from "@/utils/utils.js";
+import { formatTitleToUrl } from "@/utils/formating.js";
+import { navigationUtils } from "@/utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { Trailer } from "@/pages/MediaPage/Trailer.scoped.jsx";
@@ -197,7 +198,7 @@ export function MediaInfoContent(props) {
                     <ol>
                       <For each={edges()}>{edge => (
                         <li>
-                          <A href={"/ani/studio/" + edge.node.id + "/" + formatingUtils.titleToUrl(edge.node.name)}>
+                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
                             {edge.node.name}
                           </A>
                         </li>
@@ -213,7 +214,7 @@ export function MediaInfoContent(props) {
                     <ol>
                       <For each={edges()}>{edge => (
                         <li>
-                          <A href={"/ani/studio/" + edge.node.id + "/" + formatingUtils.titleToUrl(edge.node.name)}>
+                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
                             {edge.node.name}
                           </A>
                         </li>

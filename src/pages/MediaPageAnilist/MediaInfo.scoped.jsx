@@ -2,7 +2,7 @@ import "./MediaInfo.scoped.css";
 import { ErrorBoundary, Match, Show, Switch } from "solid-js";
 import { useMediaInfo } from "@/context/providers";
 import { A } from "@solidjs/router";
-import { formatingUtils, numberUtils } from "@/utils/utils";
+import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, languageFromCountry, numberCommas } from "@/utils/formating.js";
 import { formatMSToString } from "@/utils/timeUtils";
 import { translateToInternalSearchParams } from "@/core/apiTranslations";
 
@@ -31,7 +31,7 @@ export function AnilistMediaInfo(props) {
                 <Match when={anilistData()?.data.data.Media.type === "ANIME"}>
                   <Switch>
                     <Match when={anilistData()?.data.data.Media.seasonYear && anilistData()?.data.data.Media.season}>
-                      <A href={"/ani/search/anime/" + anilistData()?.data.data.Media.season.toLowerCase() + "-" + anilistData()?.data.data.Media.seasonYear}>{formatingUtils.capitalize(anilistData()?.data.data.Media.season)} {anilistData()?.data.data.Media.seasonYear}</A>
+                      <A href={"/ani/search/anime/" + anilistData()?.data.data.Media.season.toLowerCase() + "-" + anilistData()?.data.data.Media.seasonYear}>{capitalize(anilistData()?.data.data.Media.season)} {anilistData()?.data.data.Media.seasonYear}</A>
                     </Match>
                     <Match when={anilistData()?.data.data.Media.startDate?.year}>
                       <A href={"/ani/search/anime?year=" + anilistData()?.data.data.Media.startDate.year}>{anilistData()?.data.data.Media.startDate.year}</A>
@@ -48,29 +48,29 @@ export function AnilistMediaInfo(props) {
                 <Switch>
                   <Match when={anilistData()?.data.data.Media.countryOfOrigin !== "JP"}>
                     <A href={"/ani/search/" + anilistData()?.data.data.Media.type.toLowerCase() + "?format=" + translateToInternalSearchParams.format[anilistData()?.data.data.Media.format] + "&country=" + anilistData()?.data.data.Media.countryOfOrigin}>
-                      {formatingUtils.mediaFormat(anilistData()?.data.data.Media.format)} ({formatingUtils.languageFromCountry(anilistData()?.data.data.Media.countryOfOrigin)})
+                      {formatMediaFormat(anilistData()?.data.data.Media.format)} ({languageFromCountry(anilistData()?.data.data.Media.countryOfOrigin)})
                     </A>
                   </Match>
                   <Match when={anilistData()?.data.data.Media.countryOfOrigin === "JP"}>
                     <A href={"/ani/search/" + anilistData()?.data.data.Media.type.toLowerCase() + "?format=" + translateToInternalSearchParams.format[anilistData()?.data.data.Media.format]}>
-                      {formatingUtils.mediaFormat(anilistData()?.data.data.Media.format)}
+                      {formatMediaFormat(anilistData()?.data.data.Media.format)}
                     </A>
                   </Match>
                 </Switch>
               </li>
             </Show>
-            <li>{formatingUtils.mediaStatus(anilistData()?.data.data.Media.status)}</li>
+            <li>{formatMediaStatus(anilistData()?.data.data.Media.status)}</li>
           </ul>
           <ul>
             <Show when={anilistData()?.data.data.Media.source}>
               <li>Source: 
                 <A href={"/ani/search/" + anilistData()?.data.data.Media.type.toLowerCase() + "?source=" + translateToInternalSearchParams.source[anilistData()?.data.data.Media.source]}>
-                  {formatingUtils.formatMediaSource(anilistData()?.data.data.Media.source)}
+                  {formatMediaSource(anilistData()?.data.data.Media.source)}
                 </A>
               </li>
             </Show>
-            <li>Members: {numberUtils.numberCommas(anilistData()?.data.data.Media.popularity)}</li>
-            <li>Favourites: {numberUtils.numberCommas(anilistData()?.data.data.Media.favourites)}</li>
+            <li>Members: {numberCommas(anilistData()?.data.data.Media.popularity)}</li>
+            <li>Favourites: {numberCommas(anilistData()?.data.data.Media.favourites)}</li>
           </ul>
         </Show>
       </div>

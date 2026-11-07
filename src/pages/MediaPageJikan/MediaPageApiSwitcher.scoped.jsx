@@ -3,7 +3,7 @@ import { Match, Show, Switch } from "solid-js";
 import Anilist from "@/assets/Anilist.jsx";
 import MyAnimeList from "@/assets/MyAnimeList.jsx";
 import ExternalSource from "@/assets/ExternalSource.jsx";
-import { formatingUtils } from "@/utils/utils.js";
+import { formatTitleToUrl } from "@/utils/formating.js";
 import "./MediaPageApiSwitcher.scoped.css";
 import { localizations } from "@/collections/collections.js";
 
@@ -16,7 +16,7 @@ export function MediaPageApiSwitcher(props) {
         <Match when={params.api === localizations.mal}>
           <Show when={props.anilistData()?.data.data.Media?.id}>
             <A
-              href={"/ani/" + params.type + "/" + props.anilistData()?.data.data.Media?.id + "/" + formatingUtils.titleToUrl(props.anilistData()?.data.data.Media?.title.userPreferred)}>
+              href={"/ani/" + params.type + "/" + props.anilistData()?.data.data.Media?.id + "/" + formatTitleToUrl(props.anilistData()?.data.data.Media?.title.userPreferred)}>
               <span class="visually-hidden">Switch to anilist mode</span>
               <Anilist />
             </A>
