@@ -8,7 +8,8 @@ import { queries } from "@/api/api.js";
 import "./ActivityPage.scoped.css";
 import { asserts, arrayUtils, scheduleUtils } from "@/utils/utils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function HomePageActivityReelContent(props) {

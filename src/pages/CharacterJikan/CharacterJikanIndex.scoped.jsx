@@ -7,7 +7,8 @@ import { arrayUtils } from "@/utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
 import "./CharacterJikanIndex.scoped.css";
 import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function CharacterJikanScoped() {

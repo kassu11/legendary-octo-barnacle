@@ -4,7 +4,7 @@ import "./SearchActiveQueries.scoped.css";
 import { useParsedSearchParams } from "@/state/providers";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { useNavigateAndSearch } from "@/utils/urlUtils";
-import { capitalize } from "@/utils/formating.js";
+import { capitalize } from "@/utils/formatUtils.js";
 import { arrayUtils } from "@/utils/utils";
 import { localizeInternalSearchParams } from "@/api/apiTranslations";
 import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons";

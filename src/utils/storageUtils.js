@@ -1,4 +1,4 @@
-import { deleteIndexDBValue, getIndexedDBValue, setIndexedDBValue } from "./indexedDButils";
+import { deleteIndexDBValue, getIndexedDBValue, setIndexedDBValue } from "./indexedDBUtils";
 import { getSessionStorageJson, setSessionStorageJson } from "./sessionStorageUtils";
 
 export function setFetcherValueToStorage(value) {

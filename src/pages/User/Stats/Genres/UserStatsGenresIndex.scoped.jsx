@@ -5,7 +5,8 @@ import { queries } from "@/api/api.js";
 import { localizations } from "@/constants/constants.js";
 import { GenreItems } from "./GenreItems.scoped.jsx";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

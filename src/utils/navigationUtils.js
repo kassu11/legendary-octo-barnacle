@@ -1,4 +1,4 @@
-import { mediaUrl } from "./formating";
+import { mediaUrl } from "./formatUtils";
 
 export function navigateToMediaPage(navigate, media) {
   if (media) {

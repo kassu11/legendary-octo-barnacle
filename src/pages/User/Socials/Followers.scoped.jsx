@@ -3,7 +3,8 @@ import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { useUser } from "@/state/providers.js";
 import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import "./Followers.scoped.css";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

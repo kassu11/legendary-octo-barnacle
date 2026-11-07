@@ -1,12 +1,13 @@
 import { A, useParams } from "@solidjs/router";
-import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
+import { formatTitleToUrl, numberCommas, plural } from "@/utils/formatUtils.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { queries } from "@/api/api.js";
 import { localizations } from "@/constants/constants.js";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
 import "./UserStatsStaffIndex.scoped.css";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

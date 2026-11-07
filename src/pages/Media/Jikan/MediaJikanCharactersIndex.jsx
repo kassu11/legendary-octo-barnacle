@@ -5,7 +5,8 @@ import { localizations } from "@/constants/constants.js";
 import { signals } from "@/utils/utils.js";
 import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import { MalCharacterCard } from "@/components/Cards/Cards.scoped.jsx";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

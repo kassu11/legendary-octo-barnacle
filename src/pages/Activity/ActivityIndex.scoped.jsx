@@ -6,7 +6,8 @@ import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import { CreatedAt } from "@/components/CreatedAt.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 export function ActivityPage() {

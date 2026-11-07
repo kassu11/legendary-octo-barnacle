@@ -2,7 +2,7 @@ import * as asserts from "./asserts.js";
 
 const seasons = ["WINTER", "SPRING", "SUMMER", "FALL"];
 
-export const getDates = (offsetDays = 7) => {
+export const getSeasonInfo = (offsetDays = 7) => {
   const date = new Date();
   date.setDate(date.getDate() + offsetDays);
   const year = date.getFullYear();
@@ -35,6 +35,6 @@ function moveSeasonObject(season, year, move = 0) {
   }
 }
 
-export function getSeasonFromMonth(month) {
+function getSeasonFromMonth(month) {
   return seasons[Math.floor(month / 3)];
 }

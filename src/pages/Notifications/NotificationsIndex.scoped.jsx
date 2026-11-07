@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { batch, createEffect, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./NotificationsIndex.scoped.css";
-import { mediaUrl } from "@/utils/formating.js";
+import { mediaUrl } from "@/utils/formatUtils.js";
 import { CreatedAt } from "@/components/CreatedAt.jsx";
 import { asserts, signals, arrayUtils, scheduleUtils } from "@/utils/utils.js";
 import { queries } from "@/api/api.js";

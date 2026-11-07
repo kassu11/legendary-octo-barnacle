@@ -1,7 +1,7 @@
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { leadingAndTrailingDebounce } from "@/utils/scheduled.js";
+import { leadingAndTrailingDebounce } from "@/utils/scheduleUtils.js";
 import { A } from "@solidjs/router";
-import { mediaUrl } from "@/utils/formating.js";
+import { mediaUrl } from "@/utils/formatUtils.js";
 import { EpisodeTime } from "@/components/media/EpisodeTime.jsx";
 import "./CurrentCard.scoped.css";
 import { queries } from "@/api/api.js";

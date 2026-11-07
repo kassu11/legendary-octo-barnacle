@@ -1,5 +1,5 @@
 import { localizations, mediaStatuses } from "@/constants/constants";
-import { capitalize } from "./formating";
+import { capitalize } from "./formatUtils";
 
 export const anilistEnumToFlavorText = status => {
   if (!status?.length) {

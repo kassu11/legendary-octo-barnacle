@@ -2,10 +2,10 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { createStore, reconcile } from "solid-js/store";
-import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrays";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrayUtils";
 import { ParsedSearchParamsContext } from "@/state/providers";
 import { translateInternalApiParams } from "@/api/apiTranslations";
-import { getDates } from "@/utils/dates";
+import { getSeasonInfo } from "@/utils/seasonUtils";
 import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "@/state/globalState";
 
 const [searchStore, setSearchStore] = createStore({});
@@ -48,11 +48,11 @@ export function ParseSearchParams(props) {
     else if (header === "finished-novel") Object.assign(obj, { sort: ["end_date_desc_plus"], status: "complete", format: "light_novel" });
 
     else if (header === "this-season") {
-      const dates = getDates();
-      Object.assign(obj, { year: dates.seasonYear, season: dates.season.toLowerCase(), seasonPage: true });
+      const seasonInfo = getSeasonInfo();
+      Object.assign(obj, { year: seasonInfo.seasonYear, season: seasonInfo.season.toLowerCase(), seasonPage: true });
     } else if (header === "next-season") {
-      const dates = getDates();
-      Object.assign(obj, { year: dates.nextYear, season: dates.nextSeason.toLowerCase(), seasonPage: true });
+      const seasonInfo = getSeasonInfo();
+      Object.assign(obj, { year: seasonInfo.nextYear, season: seasonInfo.nextSeason.toLowerCase(), seasonPage: true });
     } else if (header === "tba") {
       Object.assign(obj, { season: "tba", seasonPage: true });
     } else if (/winter|spring|summer|fall/.test(header)) {
