@@ -23,6 +23,8 @@ const SORT_REVERSE_SUFFIX = "_reverse";
 
 const sameIds = (a, b) => a.length === b.length && a.every((id, i) => id === b[i]);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+// Cmd is the same key on macOS, where Ctrl click opens the context menu
+const isAdditive = e => e.ctrlKey || e.metaKey;
 // Numbers are high to low by default and text is A to Z
 const isDescendingSort = (type, reversed) => (type === "alphabetic") === reversed;
 
@@ -38,7 +40,7 @@ function SortDirection(props) {
 }
 
 /**
- * Values are written to the url as tokens. Filters use "id" and "-id" (excluded), sort uses "id" and "id_reverse"
+ * Values are written to the url as tokens. Filters use "id" and "-id" (excluded), sort uses "id" and "id_reverse", radio uses "id"
  *
  * Keyboard:
  * - Arrows, PageUp/Down, Home/End move the cursor, and the row under it filters the list right away (preview)
@@ -46,10 +48,13 @@ function SortDirection(props) {
  * - Shift + arrows copy the state of the row under the cursor to every row they pass
  * - Delete removes the row under the cursor, Backspace removes the last selection
  * - Esc closes and drops the preview
- * - Sort: Enter reverses the row, Shift + arrows only move the cursor and Shift + Enter adds the row to the sort
+ * - Sort and radio: arrows select the row, Ctrl + arrows only move the cursor, Ctrl + Enter adds the row and Shift + arrows or Shift + Enter fill from the previous selection
+ * - Sort: Enter reverses the row
+ * - Radio: Enter closes
  *
  * Mouse: click to cycle, shift click for a range, or drag over the rows to paint the same state to all of them.
- * Sort: click to sort by the row or reverse it, shift click to add it to the sort
+ * Sort: click to sort by the row or reverse it, ctrl click to add it to the sort, shift click to add every row from the previous click
+ * Radio: click to select only the row, ctrl click to add or remove it, shift click or drag to add every row from the previous click
  *
  * Range from a drag, shift click or Shift + arrows stays marked until the cursor moves without Shift or a row is clicked.
  * While it is marked, Enter cycles and Delete removes all of its rows
@@ -57,7 +62,7 @@ function SortDirection(props) {
  * Clicking the selected count moves the current selections to the top of the list
  *
  * Touch: opens as a bottom sheet, drag its header down to close it. Tap works like a click, hold a row and drag to paint (scrolling near the edges).
- * Sort: hold a row to add it to the sort, and drag to add more
+ * Sort and radio: hold a row to add it to the selection, and drag to add more
  *
  * @param {Object} props
  * @param {string} props.param Search param name
@@ -67,7 +72,9 @@ function SortDirection(props) {
  * @param {(params: Object) => void} props.setSearchParams
  * @param {boolean} [props.excludable] Rows can also be excluded
  * @param {boolean} [props.sort] Rows are sort fields, at least one is always selected
- * @param {string} [props.defaultValue] Value that is left out of the url
+ * @param {boolean} [props.radio] Click selects only one row, but more can be added to it. At least one is always selected
+ * @param {string} [props.defaultValue] Value that is left out of the url. With radio this row can't be selected together with other rows
+ * @param {(id: string) => number} [props.countOf] Number shown at the end of the row
  */
 export function ListFilterSelect(props) {
   const { isTouch } = useResponsive();
@@ -87,7 +94,11 @@ export function ListFilterSelect(props) {
   // Url is updated with a delay, so this is the source of truth while the user is interacting with the select
   const [selected, setSelected] = createSignal(props.value, { equals: sameIds });
 
+  // Row selects itself instead of cycling its state, and the selection is never empty
+  const isSingle = () => props.sort || props.radio;
+
   const parseToken = token => {
+    if (props.radio) return { id: token, alt: false };
     if (props.sort) {
       const reversed = token.endsWith(SORT_REVERSE_SUFFIX);
       return { id: reversed ? token.slice(0, -SORT_REVERSE_SUFFIX.length) : token, alt: reversed };
@@ -95,7 +106,7 @@ export function ListFilterSelect(props) {
     return token[0] === "-" ? { id: token.slice(1), alt: true } : { id: token, alt: false };
   };
   const toToken = (id, alt) => {
-    if (!alt) return id;
+    if (!alt || props.radio) return id;
     return props.sort ? id + SORT_REVERSE_SUFFIX : "-" + id;
   };
 
@@ -150,7 +161,8 @@ export function ListFilterSelect(props) {
   };
 
   const updateSelected = tokens => {
-    setSelected(props.sort && !tokens.length ? [props.defaultValue] : tokens);
+    if (props.radio && tokens.length > 1) tokens = tokens.filter(token => token !== props.defaultValue);
+    setSelected(isSingle() && !tokens.length ? [props.defaultValue] : tokens);
     hasPendingWrite = true;
     if (writeTimer === undefined) flushWrite();
   };
@@ -163,8 +175,8 @@ export function ListFilterSelect(props) {
   // Keeps the position of the token, so changing a state doesn't change the order of the selections
   const setToken = (tokens, id, token) => {
     const index = tokens.findIndex(val => parseToken(val).id === id);
-    if (index === -1) return token ? [...tokens, token] : tokens;
-    return token ? tokens.map((val, i) => i === index ? token : val) : tokens.filter((_, i) => i !== index);
+    if (token === null) return index === -1 ? tokens : tokens.filter((_, i) => i !== index);
+    return index === -1 ? [...tokens, token] : tokens.map((val, i) => i === index ? token : val);
   };
 
   // Paint is the state a row gets from a drag or a range: null removes, false includes, true excludes
@@ -174,7 +186,11 @@ export function ListFilterSelect(props) {
     return props.excludable && !paint ? true : null;
   };
 
-  const toggleSort = (id, additive) => {
+  const toggleSingle = (id, additive) => {
+    if (props.radio) {
+      updateSelected(additive && id !== props.defaultValue ? setToken(selected(), id, entries().has(id) ? null : id) : [id]);
+      return;
+    }
     const token = toToken(id, entries().has(id) && !entries().get(id).alt);
     updateSelected(additive ? setToken(selected(), id, token) : [token]);
   };
@@ -190,10 +206,10 @@ export function ListFilterSelect(props) {
   const paintRange = () => {
     const { ids, paint, base } = range;
     setPreview(null);
-    setMarked(new Set(ids.length > 1 && !props.sort ? ids : []));
+    setMarked(new Set(ids.length > 1 && !isSingle() ? ids : []));
     updateSelected(ids.reduce((tokens, id) => {
       // Sort fields keep their direction when a drag passes them
-      if (props.sort && base.some(token => parseToken(token).id === id)) return tokens;
+      if (isSingle() && base.some(token => parseToken(token).id === id)) return tokens;
       return setToken(tokens, id, paint === null ? null : toToken(id, paint));
     }, base));
   };
@@ -201,6 +217,12 @@ export function ListFilterSelect(props) {
   const startRange = (id, paint) => {
     range = { anchorId: id, ids: [id], paint, base: setToken(selected(), preview(), null) };
     paintRange();
+  };
+
+  // Next shift click or drag fills from this row, without changing the selections yet
+  const setAnchor = id => {
+    range = { anchorId: id, ids: [id], paint: false, base: selected() };
+    setMarked(new Set());
   };
 
   // Row is already filtering the list, so selecting it means keeping it
@@ -242,7 +264,7 @@ export function ListFilterSelect(props) {
 
     setIsMouseClosed(false);
     snapshot = selected();
-    setCursor(props.sort ? rows().findIndex(row => row.id === parseToken(selected()[0] ?? "").id) : -1);
+    setCursor(isSingle() ? rows().findIndex(row => row.id === parseToken(selected()[0] ?? "").id) : -1);
     setIsOpen(true);
     setIsClosing(false);
 
@@ -286,7 +308,7 @@ export function ListFilterSelect(props) {
   const cancel = () => {
     if (!isOpen()) return;
 
-    if (props.sort || isTouch()) updateSelected(snapshot);
+    if (isSingle() || isTouch()) updateSelected(snapshot);
     else if (preview()) remove(preview());
     close();
   };
@@ -337,7 +359,7 @@ export function ListFilterSelect(props) {
     scrollToCursor();
   }));
 
-  const moveCursor = (delta, extend) => {
+  const moveCursor = (delta, e) => {
     open();
 
     const from = cursor();
@@ -348,16 +370,18 @@ export function ListFilterSelect(props) {
     setCursor(to);
     scrollToCursor();
 
-    if (props.sort) {
-      if (!extend) updateSelected([toToken(target.id, entries().get(target.id)?.alt)]);
-      return;
-    }
-    if (extend) {
+    if (isSingle() && isAdditive(e) && !e.shiftKey) return;
+    if (e.shiftKey) {
       if (!range) {
         const anchorId = rows()[from === -1 ? to : from].id;
-        startRange(anchorId, paintOf(anchorId) ?? false);
+        startRange(anchorId, isSingle() ? false : paintOf(anchorId) ?? false);
       }
       return extendRange(to);
+    }
+
+    if (isSingle()) {
+      updateSelected([toToken(target.id, entries().get(target.id)?.alt)]);
+      return setAnchor(target.id);
     }
 
     clearRange();
@@ -370,18 +394,18 @@ export function ListFilterSelect(props) {
   const handleKeyDown = e => {
     setIsMouseClosed(false);
     switch (e.key) {
-      case "ArrowDown": e.preventDefault(); return moveCursor(1, e.shiftKey);
-      case "ArrowUp":   e.preventDefault(); return moveCursor(-1, e.shiftKey);
-      case "PageDown":  e.preventDefault(); return moveCursor(PAGE_JUMP, e.shiftKey);
-      case "PageUp":    e.preventDefault(); return moveCursor(-PAGE_JUMP, e.shiftKey);
+      case "ArrowDown": e.preventDefault(); return moveCursor(1, e);
+      case "ArrowUp":   e.preventDefault(); return moveCursor(-1, e);
+      case "PageDown":  e.preventDefault(); return moveCursor(PAGE_JUMP, e);
+      case "PageUp":    e.preventDefault(); return moveCursor(-PAGE_JUMP, e);
       case "Home":
         if (query()) return;
         e.preventDefault();
-        return moveCursor(-Infinity, e.shiftKey);
+        return moveCursor(-Infinity, e);
       case "End":
         if (query()) return;
         e.preventDefault();
-        return moveCursor(Infinity, e.shiftKey);
+        return moveCursor(Infinity, e);
       case " ":
         if (query()) return; // Multi word searches, like "slice of life"
         e.preventDefault();
@@ -396,7 +420,12 @@ export function ListFilterSelect(props) {
           return;
         }
 
-        if (props.sort) toggleSort(row.id, e.shiftKey);
+        if (props.radio && !e.shiftKey && !isAdditive(e)) {
+          if (!entries().has(row.id)) toggleSingle(row.id, false);
+          return close();
+        }
+
+        if (isSingle()) selectRow(row, e);
         else if (range) repaintRange(nextPaint(range.paint));
         else startRangeWithNextState(row.id);
         // Next Enter still cycles the same row, and typing replaces the search
@@ -419,7 +448,10 @@ export function ListFilterSelect(props) {
         if (!row) return;
 
         e.preventDefault();
-        if (props.sort) return remove(row.id);
+        if (isSingle()) {
+          clearRange();
+          return remove(row.id);
+        }
         if (!range) startRange(row.id, null);
         else repaintRange(null);
         return;
@@ -495,21 +527,23 @@ export function ListFilterSelect(props) {
     drag = null;
   }
 
-  const selectRow = (row, shiftKey) => {
+  const selectRow = (row, e) => {
     const index = rows().indexOf(row);
+    const previousRow = rows()[cursor()];
     setCursor(index);
 
-    if (props.sort) {
-      toggleSort(row.id, shiftKey);
-      return false;
-    }
-
-    if (shiftKey && range) {
+    if (e.shiftKey && (range || (isSingle() && previousRow))) {
+      if (!range) setAnchor(previousRow.id);
       extendRange(index);
       return false;
     }
 
-    startRangeWithNextState(row.id);
+    if (isSingle()) {
+      toggleSingle(row.id, isAdditive(e));
+      setAnchor(row.id);
+    } else {
+      startRangeWithNextState(row.id);
+    }
     return true;
   };
 
@@ -518,7 +552,7 @@ export function ListFilterSelect(props) {
   const handleRowPointerDown = (e, row) => {
     handledByMouse = !props.sort && e.pointerType === "mouse";
     if (!handledByMouse || e.button !== 0) return;
-    if (!selectRow(row, e.shiftKey)) return;
+    if (!selectRow(row, e)) return;
 
     startDrag(row, e.clientY, DRAG_SCROLL_ZONE);
     drag.controller = new AbortController();
@@ -543,8 +577,8 @@ export function ListFilterSelect(props) {
     navigator.vibrate?.(10);
     setCursor(rows().indexOf(row));
 
-    if (props.sort) {
-      toggleSort(row.id, true);
+    if (isSingle()) {
+      toggleSingle(row.id, true);
       startRange(row.id, false);
     } else {
       startRangeWithNextState(row.id);
@@ -592,7 +626,7 @@ export function ListFilterSelect(props) {
       ignoreNextClick = false;
       return;
     }
-    selectRow(row, e.shiftKey);
+    selectRow(row, e);
   };
 
   const handleTriggerClearClick = e => {
@@ -661,7 +695,7 @@ export function ListFilterSelect(props) {
   );
 
   const triggerCount = () => (
-    <Show when={props.sort ? selected().length > 1 : selected().length}>
+    <Show when={isSingle() ? selected().length > 1 : selected().length}>
       <span class="count">{selected().length}</span>
     </Show>
   );
@@ -675,7 +709,7 @@ export function ListFilterSelect(props) {
   // Touch can't hover to reveal the X, so there the count is rendered next to the button
   const triggerClear = () => (
     <Show when={canClear()}>
-      <button class="trigger-clear" aria-label={`${props.sort ? "Reset" : "Clear"} ${props.button}`} onMouseDown={e => e.preventDefault()} onClick={handleTriggerClearClick}>
+      <button class="trigger-clear" aria-label={`${isSingle() ? "Reset" : "Clear"} ${props.button}`} onMouseDown={e => e.preventDefault()} onClick={handleTriggerClearClick}>
         <Show when={!isTouch()}>{triggerCount()}</Show>
         <span class="clear-icon"><XIcon /></span>
       </button>
@@ -695,7 +729,7 @@ export function ListFilterSelect(props) {
         <button class="selected-count" title="Show selected first" aria-pressed={!!pinned()} disabled={!selectedIdsWithoutPreview().length} onClick={togglePinned} onKeyDown={handleCountKeyDown}>
           {props.sort ? "Sorted by" : "Selected"} {selected().length}
         </button>
-        <button class="clear" tabindex="-1" disabled={!canClear()} onClick={clearAll}>{props.sort ? "Reset" : "Clear all"}</button>
+        <button class="clear" tabindex="-1" disabled={!canClear()} onClick={clearAll}>{isSingle() ? "Reset" : "Clear all"}</button>
       </div>
       <div class="scroller" tabindex="-1" ref={scrollerRef} onScroll={cancelHold}>
         <div class="items" id={listboxId} role="listbox" aria-multiselectable={true} ref={elem => list = elem} onContextMenu={e => (drag || hold) && e.preventDefault()}>
@@ -705,13 +739,13 @@ export function ListFilterSelect(props) {
               id={`${listboxId}-${index()}`}
               role="option"
               aria-selected={isSelected(row.id)}
-              classList={{ selected: isSelected(row.id), excluded: !props.sort && isAlt(row.id), preview: isPreview(row.id), cursor: isCursor(row.id), marked: isMarked(row.id), "pinned-end": index() === pinnedRows().length - 1 }}
+              classList={{ selected: isSelected(row.id), excluded: !props.sort && isAlt(row.id), preview: isPreview(row.id), cursor: isCursor(row.id), marked: isMarked(row.id) }}
               onPointerDown={e => handleRowPointerDown(e, row)}
               onClick={e => handleRowClick(e, row)}
             >
               <Show when={props.sort} fallback={
                 <span class="check">
-                  <Checkbox checked={!props.excludable && isSelected(row.id)} include={props.excludable && isSelected(row.id) && !isAlt(row.id)} exclude={isAlt(row.id)} />
+                  <Checkbox radio={props.radio} checked={!props.excludable && isSelected(row.id)} include={props.excludable && isSelected(row.id) && !isAlt(row.id)} exclude={isAlt(row.id)} />
                 </span>
               }>
                 <span class="sort-direction">
@@ -721,6 +755,9 @@ export function ListFilterSelect(props) {
                 </span>
               </Show>
               <p>{row.description}</p>
+              <Show when={props.countOf}>
+                <span class="row-count">{props.countOf(row.id)}</span>
+              </Show>
               <Show when={props.sort && entries().size > 1 && entries().get(row.id)?.order}>{order => (
                 <span class="order">{order()}</span>
               )}</Show>
@@ -746,7 +783,7 @@ export function ListFilterSelect(props) {
           {searchInput()}
           {triggerClear()}
           <Show when={props.tooltip && !isOpen() && !isMouseClosed()}>
-            <Tooltip placements={["right", "bottom", "top"]} delay={600}>{props.tooltip}</Tooltip>
+            <Tooltip placements={["bottom", "top"]} delay={600}>{props.tooltip}</Tooltip>
           </Show>
         </label>
       }>

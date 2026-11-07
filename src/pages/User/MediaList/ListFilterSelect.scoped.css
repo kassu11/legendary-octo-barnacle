@@ -408,10 +408,6 @@
               box-shadow: inset 3px 0 0 var(--text);
             }
 
-            &.pinned-end {
-              border-bottom: 2px solid var(--bg);
-            }
-
             &.preview .check {
               opacity: .6;
             }
@@ -437,6 +433,13 @@
             p {
               flex-grow: 1;
               margin: 0;
+            }
+
+            .row-count {
+              flex-shrink: 0;
+              color: var(--text-muted);
+              font-size: var(--fs-300);
+              font-variant-numeric: tabular-nums;
             }
 
             .order {

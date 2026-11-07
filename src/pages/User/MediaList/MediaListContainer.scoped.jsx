@@ -43,11 +43,11 @@ export function MediaListContainerScoped(props) {
   return (
     <div>
       <p>{props.timer}</p>
-      <Show when={props.listData()?.data} fallback={<CardsLoading />}>
+      <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} />}>
         <For each={props.listData().data.lists}>{list => {
           storeCardsVisibility(list.name, {});
           return (
-            <Show when={list.entries.length && (!params.list || decodeURIComponent(params.list) === list.name)}>
+            <Show when={list.entries.length && props.isListVisible(list.name)}>
               <h2>{list.name}</h2>
               <ol class="user-profile-media-list-grid">
                 <For each={list.entries}>{(entry, i) => {
@@ -165,13 +165,13 @@ export function MediaListContainerScoped(props) {
 }
 
 const localListCounts = {};
-function CardsLoading() {
+function CardsLoading(props) {
   const params = useParams();
   const lists = createMemo(() => localListCounts[params.name] ?? []);
 
   return (
     <For each={lists()}>{list => (
-      <Show when={list.entries.length && (!params.list || decodeURIComponent(params.list) === list.name)}>
+      <Show when={list.entries.length && props.isListVisible(list.name)}>
         <h2>{list.name}</h2>
         <ol class="user-profile-media-list-grid">
           <For each={list.entries}>{() => (

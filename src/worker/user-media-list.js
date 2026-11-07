@@ -30,14 +30,12 @@ function modifyMediaListData(listData, type, options) {
   const mediaSet = new Set();
   const tagsSet = new Set();
   const studiosSet = new Set();
-  const ageRatingsSet = new Set();
   listData.indecies = {};
   listData.lists.forEach((list, i) => {
     let tail = 0;
     list.entries.forEach((entry, j, arr) => {
       listData.indecies[entry.media.id] ??= []
       listData.indecies[entry.media.id].push([i, j]);
-      ageRatingsSet.add(!!entry.media.isAdult);
       for (const studio of entry.media.studios.edges) {
         if (studio.isMain) {
           studiosSet.add(studio.node.name);
@@ -67,15 +65,14 @@ function modifyMediaListData(listData, type, options) {
   listData.total = mediaSet.size;
   listData.studios = Array.from(studiosSet).sort();
   listData.tags = Array.from(tagsSet).sort();
-  listData.hasBothAgeRatings = ageRatingsSet.size > 1;
   const sortFunction = generateSortFunction(options.sort);
   listData.lists.forEach(list => {
     list.entries.sort(sortFunction);
   });
 
   const sectionOrder = listData.user.mediaListOptions[type === "anime" ? "animeList" : "mangaList"].sectionOrder;
-  const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key + 1])));
-  listData.lists.sort((a, b) => sectionSortOrder[a.name] - sectionSortOrder[b.name]);
+  const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key])));
+  listData.lists.sort((a, b) => (sectionSortOrder[a.name] ?? sectionOrder.length) - (sectionSortOrder[b.name] ?? sectionOrder.length));
 
   postMessage(listData);
 }
@@ -163,6 +160,9 @@ function filter(entry, filterObject) {
     return false;
   }
   if (!matchesToggle(filterObject.missingStart, !entry.startedAt?.year)) {
+    return false;
+  }
+  if (!matchesToggle(filterObject.missingEnd, !entry.completedAt?.year)) {
     return false;
   }
   if (!matchesToggle(filterObject.missingScore, entry.score === 0)) {

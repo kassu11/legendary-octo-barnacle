@@ -17,6 +17,7 @@
         img {
           aspect-ratio: 5.5/8;
           object-fit: cover;
+          width: 100%;
         }
 
         .card-header {

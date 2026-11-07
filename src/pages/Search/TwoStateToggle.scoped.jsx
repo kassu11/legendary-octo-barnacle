@@ -10,7 +10,6 @@ import "./TwoStateToggle.scoped.css";
  * @param {string} [props.value] "true" is included, "false" is excluded and everything else is unchecked
  * @param {(value: "true" | "false" | undefined) => void} props.onChange
  * @param {string} props.label
- * @param {string[]} [props.tooltipPlacements]
  */
 export function TwoStateToggleButton(props) {
   const { isTouch } = useResponsive();
@@ -30,7 +29,7 @@ export function TwoStateToggleButton(props) {
       <p>{props.label}</p>
       <Checkbox scoped class="checkbox" include={props.value === "true"} exclude={props.value === "false"} />
       <Show when={props.tooltip && !isTouch()}>
-        <Tooltip placements={props.tooltipPlacements ?? ["bottom", "top"]} delay={600}>{props.tooltip}</Tooltip>
+        <Tooltip placements={["bottom", "top"]} delay={600}>{props.tooltip}</Tooltip>
       </Show>
     </button>
   );

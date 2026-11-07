@@ -16,6 +16,10 @@ export const FiltersIcon = props => (
   <Icon {...props}><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" /></Icon>
 );
 
+export const ListIcon = props => (
+  <Icon {...props}><path d="M3 6h.01M3 12h.01M3 18h.01M8 6h13M8 12h13M8 18h13" /></Icon>
+);
+
 export const SortIcon = props => (
   <Icon {...props}><path d="m21 16-4 4-4-4M17 20V4M3 8l4-4 4 4M7 4v16" /></Icon>
 );

@@ -1,5 +1,5 @@
-import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
+import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { createEffect, createMemo, createSignal, onCleanup, Show, untrack } from "solid-js";
 import "./index(user-media-list).scoped.css";
 import { capitalize } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
@@ -17,19 +17,13 @@ import { addApplicationNotification } from "../../App/ApplicationNotifications.s
 import { authUserData } from "../../../core/globalState";
 import { createCleanUpAbortController } from "../../../utils/abortUtils";
 
-export const useListNavigation = () => {
-  const navigate = useNavigate();
-  const { user } = useUser();
-  const params = useParams();
-
-  return listName => {
-    navigate(`/user/${user().name}/${params.type}/list${listName ? "/" + listName : ""}${location.search}`, { replace: true });
-  }
-}
+// Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
+export const ALL_LISTS = "";
 
 export function UserMediaList() {
   const { user } = useUser();
   const params = useParams();
+  const location = useLocation();
   const name = createMemo(() => user().name);
   const [userMediaTime, startUserMediaTimer, stopUserMediaTimer] = createTimer();
   const [userMediaData, setUserMediaData] = createSignal(undefined, { equals: false });
@@ -73,6 +67,15 @@ export function UserMediaList() {
   }
   const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
   const search = () => searchParams.search || "";
+  const listParam = multiParam("list");
+  const list = () => listParam().length ? listParam() : [ALL_LISTS];
+  const isListVisible = name => !listParam().length || listParam().includes(name);
+  // Old links have the list name in the path
+  const legacyListUrl = () => {
+    const newSearchParams = new URLSearchParams(location.search);
+    newSearchParams.append("list", decodeURIComponent(params.list));
+    return `/user/${name()}/${params.type}/list?${newSearchParams}`;
+  };
   const format = multiParam("format");
   const status = multiParam("status");
   const genre = multiParam("genre");
@@ -83,6 +86,7 @@ export function UserMediaList() {
   const notesFilter = () => searchParams.notes;
   const rewatchedFilter = () => searchParams.repeat;
   const missingStartFilter = () => searchParams.missingStart;
+  const missingEndFilter = () => searchParams.missingEnd;
   const missingScoreFilter = () => searchParams.missingScore;
   const sortParam = multiParam("sort");
   const sort = () => sortParam().length ? sortParam() : ["score"];
@@ -144,6 +148,7 @@ export function UserMediaList() {
         genre: genre(),
         countryOfOrigin: countryOfOrigin(),
         missingStart: missingStartFilter(),
+        missingEnd: missingEndFilter(),
         missingScore: missingScoreFilter(),
         isAdult: isAdult(),
         year: year(),
@@ -174,11 +179,15 @@ export function UserMediaList() {
 
   return (
     <UserMediaListContext.Provider value={{ triggerProgressIncrease, isOwnProfile }}>
+      <Show when={params.list}>
+        <Navigate href={legacyListUrl()} />
+      </Show>
       <div class="user-profile-media-list-body">
         <SearchControlsScoped
           listData={listData}
           setSearchParams={setSearchParams}
           search={search}
+          list={list}
           format={format}
           status={status}
           genre={genre}
@@ -189,6 +198,7 @@ export function UserMediaList() {
           notesFilter={notesFilter}
           rewatchedFilter={rewatchedFilter}
           missingStartFilter={missingStartFilter}
+          missingEndFilter={missingEndFilter}
           missingScoreFilter={missingScoreFilter}
           sort={sort}
           userStatus={userStatus}
@@ -197,6 +207,7 @@ export function UserMediaList() {
         />
         <MediaListContainerScoped
           listData={listData}
+          isListVisible={isListVisible}
           mutateMediaListCache={mutateMediaListCache}
           updateListInfo={updateListInfo}
           timer={formatMSToString(userMediaTime())}
