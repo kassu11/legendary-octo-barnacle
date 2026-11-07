@@ -1,11 +1,12 @@
 import { useParams, useSearchParams } from "@solidjs/router";
 import { useParsedSearchParams, useUser } from "@/state/providers";
 import { createEffect, createMemo, createRenderEffect, createSignal, For, onCleanup, Show } from "solid-js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils";
+import { createTimer } from "@/hooks/createTimer";
+import { formatMSToString } from "@/utils/timeUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
 import { queries } from "@/api/api";
-import { capitalize  } from "@/utils/formating";
+import { capitalize  } from "@/utils/formatUtils";
 import UserMediaRelationsWorker from "@/workers/user-media-relations.js?worker";
 import { debounce } from "@solid-primitives/scheduled";
 import "./UserRelationsIndex.scoped.css";

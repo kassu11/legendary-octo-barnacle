@@ -1,6 +1,6 @@
 import { Navigate, useLocation, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
-import { getDates } from "@/utils/dates";
+import { getSeasonInfo } from "@/utils/seasonUtils";
 import { queries } from "@/api/api";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/api/fetcherUtils";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
@@ -11,8 +11,8 @@ import { useParsedSearchParams } from "@/state/providers";
 import { assertTruthy } from "@/utils/asserts";
 import { translateInternalApiParams } from "@/api/apiTranslations";
 import { concatMergeObjects } from "@/utils/objectUtils";
-import { isTypeArray } from "@/utils/arrays";
-import { capitalize, formatMediaFormat } from "@/utils/formating";
+import { isTypeArray } from "@/utils/arrayUtils";
+import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
@@ -311,8 +311,8 @@ export function SearchPage() {
     const { mode, type } = params;
     const groupEntriesByFormat = parsedSearchParams().groupEntriesByFormat;
     if (mode === "browse") {
-      const dates = getDates();
-      if (type === "anime") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...dates }, signal)
+      const seasonInfo = getSeasonInfo();
+      if (type === "anime") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...seasonInfo }, signal)
       else if (type === "manga") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseManga, {}, signal);
       else if (type === "media") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {}, signal);
       else return;

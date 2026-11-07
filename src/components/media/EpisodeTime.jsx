@@ -1,6 +1,6 @@
 import { createMemo, createSignal, Show } from "solid-js";
 import { timeCollection } from "@/constants/constants";
-import { plural } from "@/utils/formating.js";
+import { plural } from "@/utils/formatUtils.js";
 
 const [currentTime, setCurentTime] = createSignal(
   timeCollection.currentTimeInSeconds,

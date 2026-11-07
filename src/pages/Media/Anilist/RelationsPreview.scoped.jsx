@@ -1,5 +1,5 @@
 import { ErrorBoundary, For, Show } from "solid-js";
-import { formatMediaFormat, formatMediaStatus } from "@/utils/formating.js";
+import { formatMediaFormat, formatMediaStatus } from "@/utils/formatUtils.js";
 import { urlUtils } from "@/utils/utils";
 import "./RelationsPreview.scoped.css";
 import { A } from "@solidjs/router";

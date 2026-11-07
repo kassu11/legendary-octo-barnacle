@@ -1,9 +1,8 @@
-export * as arrayUtils from "./arrays.js";
+export * as arrayUtils from "./arrayUtils.js";
 export * as navigationUtils from "./navigationUtils.js";
 export * as objectUtils from "./objectUtils.js";
 export * as functionUtils from "./functionUtils.js";
-export * as scheduleUtils from "./scheduled.js";
-export * as dateUtils from "./dateUtils.js";
+export * as scheduleUtils from "./scheduleUtils.js";
 export * as numberUtils from "./numberUtils.js";
 export * as stringUtils from "./stringUtils.js";
 export * as statusUtils from "./statusUtils.js";

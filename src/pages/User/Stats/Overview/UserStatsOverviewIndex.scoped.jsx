@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { numberCommas } from "@/utils/formating.js";
+import { numberCommas } from "@/utils/formatUtils.js";
 import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { useUser } from "@/state/providers.js";
 import "./UserStatsOverviewIndex.scoped.css";
@@ -10,7 +10,8 @@ import { StatsYearLineChartsScoped } from "./StatsYearLineCharts.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
 import { localizations } from "@/constants/constants.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function StatsMediaOverview() {

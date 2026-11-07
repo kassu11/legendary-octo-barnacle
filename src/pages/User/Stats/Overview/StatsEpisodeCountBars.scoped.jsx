@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { DraggableScrollContainerScoped2 } from "./DraggableScrollContainer.scoped.jsx";
-import { numberCommas } from "@/utils/formating.js";
+import { numberCommas } from "@/utils/formatUtils.js";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
 import "./StatsEpisodeCountBars.scoped.css";
 

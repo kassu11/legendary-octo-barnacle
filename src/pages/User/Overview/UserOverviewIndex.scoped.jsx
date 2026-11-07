@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import { useUser } from "@/state/providers.js";
-import { formatTitleToUrl, mediaUrl, numberCommas } from "@/utils/formating.js";
+import { formatTitleToUrl, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
 import { ActivityCard } from "@/components/Activity.scoped.jsx";
 import "./UserOverviewIndex.scoped.css";
 import { queries } from "@/api/api.js";

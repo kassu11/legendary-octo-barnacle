@@ -10,7 +10,8 @@ import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
 

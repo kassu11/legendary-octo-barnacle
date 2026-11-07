@@ -2,12 +2,12 @@ import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidj
 import { batch, createMemo, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createEffect } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrays.js";
+import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrayUtils.js";
 import { CompareMediaListContext, useCompareMediaList } from "@/state/providers.js";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
 import CompareMediaListWorker from "@/workers/compare-media-list.js?worker";
-import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formating.js";
+import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formatUtils.js";
 import "./CompareIndex.scoped.css";
 import Score from "@/components/media/Score.scoped.jsx";
 import Star from "@/assets/Star.jsx";
@@ -17,7 +17,8 @@ import { translateToInternalSearchParams } from "@/api/apiTranslations.js";
 import { asserts, signals, arrayUtils, numberUtils } from "@/utils/utils.js";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 const initialMediaCompareList = () => {

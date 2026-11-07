@@ -1,6 +1,6 @@
-import { leadingAndTrailingDebounce } from "@/utils/scheduled.js";
+import { leadingAndTrailingDebounce } from "@/utils/scheduleUtils.js";
 import "./FavouriteToggle.scoped.css";
-import { compactNumber } from "@/utils/formating.js";
+import { compactNumber } from "@/utils/formatUtils.js";
 import { queries } from "@/api/api.js";
 import { asserts } from "@/utils/utils.js";
 import { Match, Show, Switch, untrack } from "solid-js";

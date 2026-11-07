@@ -2,7 +2,7 @@ import "./MediaInfo.scoped.css";
 import { ErrorBoundary, Match, Show, Switch } from "solid-js";
 import { useMediaInfo } from "@/state/providers";
 import { A } from "@solidjs/router";
-import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, languageFromCountry, numberCommas } from "@/utils/formating.js";
+import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, languageFromCountry, numberCommas } from "@/utils/formatUtils.js";
 import { formatMSToString } from "@/utils/timeUtils";
 import { translateToInternalSearchParams } from "@/api/apiTranslations";
 

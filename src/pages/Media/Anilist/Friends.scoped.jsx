@@ -8,7 +8,8 @@ import { queries } from "@/api/api.js";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
 import { authUserData } from "@/state/globalState";
-import { createTimer, formatMSToString } from "@/utils/timeUtils";
+import { createTimer } from "@/hooks/createTimer";
+import { formatMSToString } from "@/utils/timeUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 function Friends() {

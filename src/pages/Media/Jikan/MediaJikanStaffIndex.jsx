@@ -4,7 +4,8 @@ import { queries } from "@/api/api.js";
 import { MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
 import { createEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
-import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createTimer } from "@/hooks/createTimer.js";
+import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function MediaInfoStaffJikan() {

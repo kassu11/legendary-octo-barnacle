@@ -1,6 +1,6 @@
 import { batch, createMemo, createRoot, createSignal, untrack } from "solid-js";
 import { createLocalStorageBooleanSignal, createLocalStorageJsonSignal } from "@/utils/localStorageUtils";
-import { deleteIndexDBValue, setIndexedDBValue } from "@/utils/indexedDButils";
+import { deleteIndexDBValue, setIndexedDBValue } from "@/utils/indexedDBUtils";
 import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal, getOrInsertSessionStorageInt } from "@/utils/sessionStorageUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
 import { queries } from "@/api/api";

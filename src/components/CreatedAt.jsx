@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, Match, Switch, splitProps } from "solid-js";
-import { plural } from "@/utils/formating.js";
+import { plural } from "@/utils/formatUtils.js";
 
 export function CreatedAt(props) {
   const [local, scoping] = splitProps(props, ["createdAt"]);

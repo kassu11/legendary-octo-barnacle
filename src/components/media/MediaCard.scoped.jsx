@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry, plural } from "@/utils/formating";
+import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry, plural } from "@/utils/formatUtils";
 import { DurationToTime, EpisodeTime2 } from "@/components/media/EpisodeTime";
 import { urlUtils } from "@/utils/utils";
 import Star from "@/assets/Star";

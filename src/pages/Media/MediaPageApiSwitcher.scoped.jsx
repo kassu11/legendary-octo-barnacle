@@ -3,7 +3,7 @@ import { Match, Show, Switch } from "solid-js";
 import Anilist from "@/assets/Anilist.jsx";
 import MyAnimeList from "@/assets/MyAnimeList.jsx";
 import ExternalSource from "@/assets/ExternalSource.jsx";
-import { formatTitleToUrl } from "@/utils/formating.js";
+import { formatTitleToUrl } from "@/utils/formatUtils.js";
 import "./MediaPageApiSwitcher.scoped.css";
 import { localizations } from "@/constants/constants.js";
 

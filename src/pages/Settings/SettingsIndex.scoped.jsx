@@ -3,7 +3,7 @@ import { setSettingsShowDevBranch, settingsShowDevBranch } from "@/state/globalS
 import "./SettingsIndex.scoped.css";
 import { createStore, produce, reconcile } from "solid-js/store";
 import { useSearchParams } from "@solidjs/router";
-import { wrapToSet } from "@/utils/arrays";
+import { wrapToSet } from "@/utils/arrayUtils";
 import { useResponsive } from "@/state/providers";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 
