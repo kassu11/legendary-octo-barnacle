@@ -51,10 +51,8 @@ export default defineConfig({
         "./src/context",
         "./src/hooks",
         "./src/pages/**",
-        "./src/libs",
         "./src/collections/collections.js",
         "./src/utils/utils.js",
-        "./src/utils/api-OLD.js",
       ],
     })
   ],
