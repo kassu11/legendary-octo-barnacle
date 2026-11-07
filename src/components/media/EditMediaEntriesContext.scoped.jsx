@@ -212,13 +212,27 @@ export function EditMediaEntriesProvider(props) {
           asserts.assertTruthy(Number.isNaN(value) === false, `Key "${key}" is NaN`);
         }
 
-        const fetcher = createAnilistFetcher(queries.anilistMutateMedia, changes, AbortSignal.timeout(30_000));
+        // Anilist doesn't create activity from private entries, so the entry is made public only after the update
+        const silent = e.submitter.value === "silent" && form.private !== "on";
+        const variables = silent ? { ...changes, private: true } : changes;
+        const fetcher = createAnilistFetcher(queries.anilistMutateMedia, variables, AbortSignal.timeout(30_000));
         const res = await fetcherToFetch(fetcher);
         if (res.status === 200) {
           const json = await res.json();
+          let entry = json.data.SaveMediaListEntry;
+          if (silent) {
+            const publicFetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: changes.mediaId, private: false }, AbortSignal.timeout(30_000));
+            const publicRes = await fetcherToFetch(publicFetcher);
+            if (publicRes?.status === 200) {
+              const publicJson = await publicRes.json();
+              entry = publicJson.data.SaveMediaListEntry;
+            } else {
+              addApplicationNotification({ type: "error", message: "Media updates were saved, but the entry was left private", duration: 30_000 });
+            }
+          }
           batch(() => {
-            mutates()?.mutateMedia?.(json.data.SaveMediaListEntry);
-            storeGlobalEditedMedia(json.data.SaveMediaListEntry.mediaId, json.data.SaveMediaListEntry);
+            mutates()?.mutateMedia?.(entry);
+            storeGlobalEditedMedia(entry.mediaId, entry);
           });
         } else {
           addApplicationNotification({ type: "error", message: "Failed to save media updates", duration: 30_000 });
@@ -284,6 +298,7 @@ export function EditMediaEntriesProvider(props) {
                     mutates()?.setIsFavourite?.(isFavourite, variables);
                   }} />
                 <button type="submit">Save</button>
+                <button type="submit" value="silent" title="Save without creating an activity post">Save silently</button>
               </div>
             </header>
             <div class="media-editor-body">
