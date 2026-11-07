@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
-import "./Entities.scoped.css";
+import "./EntitiesIndex.scoped.css";
 import { capitalize, languageFromCountry } from "@/utils/formating.js";
 import { queries } from "@/api/api.js";
 import { modes } from "@/constants/constants.js";

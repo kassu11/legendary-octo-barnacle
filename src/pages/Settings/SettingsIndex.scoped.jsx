@@ -1,6 +1,6 @@
 import { createEffect, createRenderEffect, createSignal, For, Show } from "solid-js";
 import { setSettingsShowDevBranch, settingsShowDevBranch } from "@/state/globalState";
-import "./index(settings).scoped.css";
+import "./SettingsIndex.scoped.css";
 import { createStore, produce, reconcile } from "solid-js/store";
 import { useSearchParams } from "@solidjs/router";
 import { wrapToSet } from "@/utils/arrays";

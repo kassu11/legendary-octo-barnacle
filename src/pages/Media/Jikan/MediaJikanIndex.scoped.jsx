@@ -5,7 +5,7 @@ import { localizations, mediaStatuses } from "@/constants/constants.js";
 import { capitalize, numberCommas, plural } from "@/utils/formating.js";
 import { arrayUtils, statusUtils, urlUtils } from "@/utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
-import "./MediaInfoJikan.scoped.css";
+import "./MediaJikanIndex.scoped.css";
 import { Trailer } from "@/pages/Media/Trailer.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { Markdown } from "@/components/Markdown.scoped.jsx";

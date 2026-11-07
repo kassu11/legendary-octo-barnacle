@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { numberCommas } from "@/utils/formating.js";
 import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { useUser } from "@/state/providers.js";
-import "./index(user-stats-overview).scoped.css";
+import "./UserStatsOverviewIndex.scoped.css";
 import { StatsDistributionListsScoped } from "./StatsDistributionLists.scoped.jsx";
 import { StatsScoreDistributionBarsScoped } from "./StatsScoreDistributionBars.scoped.jsx";
 import { StatsEpisodeCountBarsScoped } from "./StatsEpisodeCountBars.scoped.jsx";

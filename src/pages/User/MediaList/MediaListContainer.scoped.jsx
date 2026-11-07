@@ -9,7 +9,7 @@ import Edit from "@/assets/Edit.jsx";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import "./MediaListContainer.scoped.css";
 import { objectUtils } from "@/utils/utils.js";
-import { converStatusToListName } from "./index(user-media-list).scoped.jsx";
+import { converStatusToListName } from "./UserMediaListIndex.scoped.jsx";
 
 export function MediaListContainerScoped(props) {
   const [grid, setGrid] = createSignal(lastGrid);

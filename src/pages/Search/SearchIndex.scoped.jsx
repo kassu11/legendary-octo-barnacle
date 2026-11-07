@@ -4,7 +4,7 @@ import { getDates } from "@/utils/dates";
 import { queries } from "@/api/api";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/api/fetcherUtils";
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
-import "./index(search2).scoped.css";
+import "./SearchIndex.scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
 import { setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
 import { useParsedSearchParams } from "@/state/providers";

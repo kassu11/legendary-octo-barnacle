@@ -2,38 +2,38 @@ import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
 import App from "./app/App.scoped.jsx"
-import { Home } from "./pages/Home/index(home).scoped.jsx"
-import Authentication from "./pages/Authentication/Authentication.jsx";
+import { Home } from "./pages/Home/HomeIndex.scoped.jsx"
+import Authentication from "./pages/Authentication/AuthenticationIndex.jsx";
 import { AuthenticationProvider } from "./state/AuthenticationContext.jsx";
 import { ResponsiveProvider } from "./state/ResponsiveContext";
-import { User } from "./pages/User/index(user).scoped.jsx";
-import { StatsMediaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
-import { StatsMediaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
-import { StatsMediaTags } from "./pages/User/Stats/Tags/Tags.scoped.jsx";
-import { StatsAnimeStudios } from "./pages/User/Stats/Studios/Studio.scoped.jsx";
-import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/VoiceActors.scoped.jsx";
-import { StatsMediaStaff } from "./pages/User/Stats/Staff/Staff.scoped.jsx";
-import Artist from "./pages/Artist/Artist.scoped.jsx";
-import Notifications from "./pages/Notifications/Notifications.scoped.jsx";
-import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/Entities.scoped.jsx";
-import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.scoped.jsx";
-import { Studio as AnilistStudio } from "./pages/Studio/index(studio).scoped.jsx";
-import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
+import { User } from "./pages/User/UserIndex.scoped.jsx";
+import { StatsMediaOverview } from "./pages/User/Stats/Overview/UserStatsOverviewIndex.scoped.jsx";
+import { StatsMediaGenres } from "./pages/User/Stats/Genres/UserStatsGenresIndex.scoped.jsx";
+import { StatsMediaTags } from "./pages/User/Stats/Tags/UserStatsTagsIndex.scoped.jsx";
+import { StatsAnimeStudios } from "./pages/User/Stats/Studios/UserStatsStudiosIndex.scoped.jsx";
+import { StatsAnimeVoiceActors } from "./pages/User/Stats/VoiceActors/UserStatsVoiceActorsIndex.scoped.jsx";
+import { StatsMediaStaff } from "./pages/User/Stats/Staff/UserStatsStaffIndex.scoped.jsx";
+import Artist from "./pages/Artist/ArtistIndex.scoped.jsx";
+import Notifications from "./pages/Notifications/NotificationsIndex.scoped.jsx";
+import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/EntitiesIndex.scoped.jsx";
+import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/EntityIndex.scoped.jsx";
+import { Studio as AnilistStudio } from "./pages/Studio/StudioIndex.scoped.jsx";
+import { ActivityPage } from "./pages/Activity/ActivityIndex.scoped.jsx";
 import { EditMediaEntriesProvider } from "./components/media/EditMediaEntriesContext.scoped.jsx";
-import ComparePage from "./pages/Compare/ComparePage.scoped.jsx";
-import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/Media/Jikan/MediaInfoJikan.scoped.jsx";
-import { MediaInfoCharactersJikan } from "./pages/Media/Jikan/MediaInfoCharactersJikan.jsx";
-import { MediaInfoStaffJikan } from "./pages/Media/Jikan/MediaInfoStaffJikan.jsx";
-import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikan.scoped.jsx";
-import { Overview } from "./pages/User/Overview/Overview.scoped.jsx";
-import { UserMediaList } from "./pages/User/MediaList/index(user-media-list).scoped.jsx";
-import { IndexFavouriteScoped } from "./pages/User/Favourites/index(favourite).scoped.jsx";
-import { Stats } from "./pages/User/Stats/index(user-stats).scoped.jsx";
-import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/Media/Anilist/index(media-page-anilist).scoped.jsx";
-import { Socials } from "./pages/User/Socials/Socials.scoped.jsx";
-import { SettingsPage } from "./pages/Settings/index(settings).scoped";
-import { SearchPage } from "./pages/Search/index(search2).scoped";
-import { UserRelations } from "./pages/User/Relations/index-(user-relations).scoped";
+import ComparePage from "./pages/Compare/CompareIndex.scoped.jsx";
+import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/Media/Jikan/MediaJikanIndex.scoped.jsx";
+import { MediaInfoCharactersJikan } from "./pages/Media/Jikan/MediaJikanCharactersIndex.jsx";
+import { MediaInfoStaffJikan } from "./pages/Media/Jikan/MediaJikanStaffIndex.jsx";
+import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikanIndex.scoped.jsx";
+import { Overview } from "./pages/User/Overview/UserOverviewIndex.scoped.jsx";
+import { UserMediaList } from "./pages/User/MediaList/UserMediaListIndex.scoped.jsx";
+import { IndexFavouriteScoped } from "./pages/User/Favourites/UserFavouritesIndex.scoped.jsx";
+import { Stats } from "./pages/User/Stats/UserStatsIndex.scoped.jsx";
+import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/Media/Anilist/MediaAnilistIndex.scoped.jsx";
+import { Socials } from "./pages/User/Socials/UserSocialsIndex.scoped.jsx";
+import { SettingsPage } from "./pages/Settings/SettingsIndex.scoped";
+import { SearchPage } from "./pages/Search/SearchIndex.scoped";
+import { UserRelations } from "./pages/User/Relations/UserRelationsIndex.scoped";
 
 const root = document.getElementById("root")
 

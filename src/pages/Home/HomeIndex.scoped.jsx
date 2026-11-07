@@ -1,5 +1,5 @@
 import { Show } from "solid-js";
-import "./index(home).scoped.css";
+import "./HomeIndex.scoped.css";
 import { useAuthentication } from "@/state/providers.js";
 import { CurrentWatchingMediaScoped } from "./CurrentWatchingMedia.scoped.jsx";
 import { Activity } from "./Activity.jsx";

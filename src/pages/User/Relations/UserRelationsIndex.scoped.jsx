@@ -8,7 +8,7 @@ import { queries } from "@/api/api";
 import { capitalize  } from "@/utils/formating";
 import UserMediaRelationsWorker from "@/workers/user-media-relations.js?worker";
 import { debounce } from "@solid-primitives/scheduled";
-import "./index-(user-relations).scoped.css";
+import "./UserRelationsIndex.scoped.css";
 import { safeStringifyJson } from "@/utils/jsonUtils";
 import { hashKeyFNV32 } from "@/utils/hashUtils";
 import { createStore, reconcile } from "solid-js/store";

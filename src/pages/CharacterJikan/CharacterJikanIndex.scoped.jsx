@@ -5,7 +5,7 @@ import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
-import "./CharacterJikan.scoped.css";
+import "./CharacterJikanIndex.scoped.css";
 import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";

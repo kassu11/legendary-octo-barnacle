@@ -8,7 +8,7 @@ import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
 import CompareMediaListWorker from "@/workers/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formating.js";
-import "./ComparePage.scoped.css";
+import "./CompareIndex.scoped.css";
 import Score from "@/components/media/Score.scoped.jsx";
 import Star from "@/assets/Star.jsx";
 import { debounce } from "@solid-primitives/scheduled";

@@ -2,7 +2,7 @@ import { A, useParams } from "@solidjs/router";
 import { createEffect, createRenderEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { formatTimeToDate } from "@/utils/formating.js";
 import { UserContext, useUser } from "@/state/providers.js";
-import "./index(user).scoped.css";
+import "./UserIndex.scoped.css";
 import { queries } from "@/api/api.js";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
