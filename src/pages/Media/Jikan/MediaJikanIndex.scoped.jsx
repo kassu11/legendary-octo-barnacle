@@ -184,7 +184,7 @@ export function MediaInfoWrapperJikan(props) {
                     <li>Author{plural(size())}:
                       <For each={jikanData().data.data.authors}>{(author, i) => (
                         <>
-                          <a href={author.url}>{author.name}</a>
+                          <A href={urlUtils.jikanStaffUrl(author)}>{author.name}</A>
                           <Show when={i() < size() - 1}> & </Show>
                         </>
                       )}</For>

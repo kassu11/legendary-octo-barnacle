@@ -182,7 +182,7 @@ export function MalCharacterCard(props) {
       />
       <Show when={props.voiceActor}>
         <CharacterSection
-          href={props.voiceActor.person.url}
+          href={urlUtils.jikanStaffUrl(props.voiceActor.person)}
           src={props.voiceActor.person.images.jpg.image_url}
           name={props.voiceActor.person.name}
           extra={props.voiceActor.language}
@@ -201,11 +201,54 @@ export function MalStaffCard(props) {
   return (
     <li class="cp-character-card">
       <CharacterSection
-        href={props.staff.url}
+        href={urlUtils.jikanStaffUrl(props.staff)}
         src={props.staff.images.jpg.image_url}
         name={props.staff.name}
         extra={props.positions.join(", ")}
         alt="Staff."
+      />
+    </li>
+  );
+}
+
+export function MalStaffMediaCard(props) {
+  asserts.assertTruthy(props.media, "Missing media");
+  asserts.assertTypeString(props.type);
+  asserts.assertTypeString(props.position, "position is not type of string");
+
+  return (
+    <li class="cp-character-card">
+      <CharacterSection
+        href={urlUtils.jikanMediaUrl(props.type, props.media)}
+        src={props.media.images.webp.image_url}
+        name={props.media.title}
+        extra={props.position}
+        alt="Cover."
+      />
+    </li>
+  );
+}
+
+export function MalVoiceRoleCard(props) {
+  asserts.assertTruthy(props.character, "character");
+  asserts.assertTruthy(props.anime, "anime");
+  asserts.assertTypeString(props.role, "role is not type of string");
+
+  return (
+    <li class="cp-character-card">
+      <CharacterSection
+        href={urlUtils.jikanCharacterUrl(props.character)}
+        src={props.character.images.webp.image_url}
+        name={props.character.name}
+        extra={props.role}
+        alt="Character."
+      />
+      <CharacterSection
+        href={urlUtils.jikanMediaUrl("anime", props.anime)}
+        src={props.anime.images.webp.image_url}
+        name={props.anime.title}
+        alt="Cover."
+        class="dir-rtl"
       />
     </li>
   );
@@ -216,7 +259,7 @@ function CharacterSection(props) {
 
   return (
     <A className="clean-link flex" class={props.class} href={props.href}>
-      <img src={props.src} alt={props.alt} />
+      <img loading="lazy" src={props.src} alt={props.alt} />
       <div class="grid">
         <span>{props.name}</span>
         <span>{props.extra}</span>
