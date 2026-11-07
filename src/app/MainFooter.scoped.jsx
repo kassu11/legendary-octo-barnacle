@@ -87,9 +87,11 @@ function DeploymentDetails(props) {
 
 function DevBranchSwitcher(props) {
   const [open, setOpen] = createSignal(false);
+  const random = createMemo(prev => (prev || new Date().getTime()) + open()); // Make sure the list is always fresh
+
   return (
     <div class="dev-branch-switcher" classList={{ open: open() }}>
-      <ContextMenu />
+      <ContextMenu fileHash={random()} />
       <button onClick={() => setOpen(s => !s)}>
         <BranchIcon /> {props.name}
       </button>
@@ -97,10 +99,9 @@ function DevBranchSwitcher(props) {
   );
 }
 
-function ContextMenu() {
-  console.log("??");
-  const [branches] = createResource(async () => {
-    const res = await fetch(__BASE__ + "/branches.json");
+function ContextMenu(props) {
+  const [branches] = createResource(() => props.fileHash, async (hash) => {
+    const res = await fetch(__BASE__ + "/branches.json?" + hash);
     const text = await res.text();
     // In coding enviroment we don't have branches.json file, so the fetch returns HTML
     // This is just quick check if the returned file is json or not
