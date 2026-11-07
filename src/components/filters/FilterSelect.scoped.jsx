@@ -1,15 +1,17 @@
 import { createEffect, createMemo, createSelector, createSignal, createUniqueId, For, Match, on, onCleanup, Show, Switch } from "solid-js";
+import { useLocation, useNavigate } from "@solidjs/router";
 import { useResponsive } from "@/state/providers.js";
 import { Tooltip } from "@/components/Tooltip.scoped.jsx";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { XIcon } from "@/assets/SearchFilterIcons.jsx";
 import SortAlphabetDescendingIcon from "@/assets/SortAlphaDown.jsx";
 import SortAlphabetAscendingIcon from "@/assets/SortAlphaUp.jsx";
 import SortNumericDescendingIcon from "@/assets/SortNumericDown.jsx";
 import SortNumericAscendingIcon from "@/assets/SortNumericUp.jsx";
 import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import "./ListFilterSelect.scoped.css";
+import "./FilterSelect.scoped.css";
 
-// Holding an arrow key would otherwise update the url and run the list worker around 30 times per second
+// Holding an arrow key would otherwise update the url and run the filtering around 30 times per second
 const WRITE_THROTTLE_MS = 100;
 const PAGE_JUMP = 10;
 const DRAG_SCROLL_ZONE = 20;
@@ -19,7 +21,7 @@ const DRAG_START_DISTANCE = 5;
 const TOUCH_HOLD_MS = 300;
 const TOUCH_HOLD_MOVE_LIMIT = 8;
 const SHEET_CLOSE_DISTANCE = 100;
-const SORT_REVERSE_SUFFIX = "_reverse";
+export const SORT_REVERSE_SUFFIX = "_reverse";
 
 const sameIds = (a, b) => a.length === b.length && a.every((id, i) => id === b[i]);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -48,6 +50,8 @@ function SortDirection(props) {
  * - Shift + arrows copy the state of the row under the cursor to every row they pass
  * - Delete removes the row under the cursor, Backspace removes the last selection
  * - Esc closes and drops the preview
+ * - With noPreview the arrows only move the cursor
+ * - With onPick the arrows only move the cursor, Enter picks the row and Delete and Backspace clear the selection
  * - Sort and radio: arrows select the row, Ctrl + arrows only move the cursor, Ctrl + Enter adds the row and Shift + arrows or Shift + Enter fill from the previous selection
  * - Sort: Enter reverses the row
  * - Radio: Enter closes
@@ -64,10 +68,12 @@ function SortDirection(props) {
  * Touch: opens as a bottom sheet, drag its header down to close it. Tap works like a click, hold a row and drag to paint (scrolling near the edges).
  * Sort and radio: hold a row to add it to the selection, and drag to add more
  *
+ * Cancelling restores the whole url, because setSearchParams can also change the path
+ *
  * @param {Object} props
  * @param {string} props.param Search param name
  * @param {string} props.button Label, also used as the placeholder of the input
- * @param {{ id: string, description: string, type?: "numeric" | "alphabetic" }[]} props.each
+ * @param {{ id: string, description: string, type?: "numeric" | "alphabetic", toast?: string, tooltip?: string, tooltipTitle?: string }[]} props.each Toast replaces the description in the trigger
  * @param {string[]} props.value
  * @param {(params: Object) => void} props.setSearchParams
  * @param {boolean} [props.excludable] Rows can also be excluded
@@ -75,9 +81,20 @@ function SortDirection(props) {
  * @param {boolean} [props.radio] Click selects only one row, but more can be added to it. At least one is always selected
  * @param {string} [props.defaultValue] Value that is left out of the url. With radio this row can't be selected together with other rows
  * @param {(id: string) => number} [props.countOf] Number shown at the end of the row
+ * @param {(id: string) => void} [props.onPick] Use with radio. Row only calls this and props.value decides what is selected, for selections that tokens can't express, like ranges
+ * @param {() => void} [props.onClear] Clears the selection of onPick, without this it can't be cleared
+ * @param {string} [props.valueLabel] Replaces the selections in the trigger
+ * @param {boolean} [props.noPreview] Moving the cursor doesn't filter, for rows that are expensive to select
+ * @param {boolean} [props.loading] Shows a spinner when there are no rows
+ * @param {string} [props.emptyText] Shown instead of "No results" when there are no rows and no search
+ * @param {(query: string) => void} [props.onQueryChange]
+ * @param {(row: Object) => import("solid-js").JSX.Element} [props.rowIcon] Rendered before the label of the row
+ * @param {(row: Object) => import("solid-js").JSX.Element} [props.rowLabel] Replaces the description in the row
  */
-export function ListFilterSelect(props) {
+export function FilterSelect(props) {
   const { isTouch } = useResponsive();
+  const location = useLocation();
+  const navigate = useNavigate();
   const listboxId = createUniqueId();
 
   const [isOpen, setIsOpen] = createSignal(false);
@@ -120,7 +137,10 @@ export function ListFilterSelect(props) {
   const isMarked = createSelector(marked, (id, ids) => ids.has(id));
 
   const optionById = createMemo(() => new Map(props.each?.map(option => [option.id, option])));
-  const labelOf = id => optionById().get(id)?.description ?? id;
+  const labelOf = id => {
+    const option = optionById().get(id);
+    return option?.toast ?? option?.description ?? id;
+  };
 
   const matchingRows = createMemo(() => {
     const q = query().toLowerCase();
@@ -136,14 +156,14 @@ export function ListFilterSelect(props) {
   });
   const isCursor = createSelector(() => rows()[cursor()]?.id);
 
-  const canClear = () => selected().length > 0 && !sameIds(selected(), [props.defaultValue]);
+  const canClear = () => (!props.onPick || props.onClear) && selected().length > 0 && !sameIds(selected(), [props.defaultValue]);
 
   const tokenLabel = token => {
     const { id, alt } = parseToken(token);
     if (props.sort) return `${labelOf(id)} ${isDescendingSort(optionById().get(id)?.type, alt) ? "↓" : "↑"}`;
     return (alt ? "−" : "") + labelOf(id);
   };
-  const triggerLabel = () => selected().length ? `${props.button}: ${selected().map(tokenLabel).join(", ")}` : props.button;
+  const triggerLabel = () => selected().length ? `${props.button}: ${props.valueLabel ?? selected().map(tokenLabel).join(", ")}` : props.button;
 
   let root, input, openButton, panelRoot, scroller, list, dialog;
 
@@ -171,6 +191,8 @@ export function ListFilterSelect(props) {
     const value = props.value;
     if (!hasPendingWrite) setSelected(value);
   });
+
+  createEffect(() => props.onQueryChange?.(query()));
 
   // Keeps the position of the token, so changing a state doesn't change the order of the selections
   const setToken = (tokens, id, token) => {
@@ -251,6 +273,7 @@ export function ListFilterSelect(props) {
   const scrollToCursor = () => list?.children[cursor()]?.scrollIntoView({ block: "nearest" });
 
   let snapshot = [];
+  let snapshotUrl;
   let outsideController;
   onCleanup(() => {
     clearTimeout(writeTimer);
@@ -264,6 +287,7 @@ export function ListFilterSelect(props) {
 
     setIsMouseClosed(false);
     snapshot = selected();
+    snapshotUrl = location.pathname + location.search;
     setCursor(isSingle() ? rows().findIndex(row => row.id === parseToken(selected()[0] ?? "").id) : -1);
     setIsOpen(true);
     setIsClosing(false);
@@ -308,7 +332,11 @@ export function ListFilterSelect(props) {
   const cancel = () => {
     if (!isOpen()) return;
 
-    if (isSingle() || isTouch()) updateSelected(snapshot);
+    if (isSingle() || isTouch()) {
+      hasPendingWrite = false;
+      setSelected(snapshot);
+      navigate(snapshotUrl, { replace: true, scroll: false, resolve: false });
+    }
     else if (preview()) remove(preview());
     close();
   };
@@ -323,7 +351,8 @@ export function ListFilterSelect(props) {
     clearRange();
     setPreview(null);
     setPinned(null);
-    updateSelected([]);
+    if (props.onPick) props.onClear?.();
+    else updateSelected([]);
   };
 
   const selectedIdsWithoutPreview = () => selected().map(token => parseToken(token).id).filter(id => id !== preview());
@@ -370,6 +399,7 @@ export function ListFilterSelect(props) {
     setCursor(to);
     scrollToCursor();
 
+    if (props.onPick) return;
     if (isSingle() && isAdditive(e) && !e.shiftKey) return;
     if (e.shiftKey) {
       if (!range) {
@@ -385,6 +415,7 @@ export function ListFilterSelect(props) {
     }
 
     clearRange();
+    if (props.noPreview) return;
     const withoutPreview = setToken(selected(), preview(), null);
     const hasTarget = withoutPreview.some(token => parseToken(token).id === target.id);
     setPreview(hasTarget ? null : target.id);
@@ -420,6 +451,12 @@ export function ListFilterSelect(props) {
           return;
         }
 
+        if (props.onPick) {
+          props.onPick(row.id);
+          input.select();
+          return;
+        }
+
         if (props.radio && !e.shiftKey && !isAdditive(e)) {
           if (!entries().has(row.id)) toggleSingle(row.id, false);
           return close();
@@ -438,6 +475,7 @@ export function ListFilterSelect(props) {
         return cancel();
       case "Backspace":
         if (query() || !selected().length) return;
+        if (props.onPick) return clearAll();
         clearRange();
         return remove(parseToken(selected().at(-1)).id);
       case "Delete": {
@@ -448,6 +486,7 @@ export function ListFilterSelect(props) {
         if (!row) return;
 
         e.preventDefault();
+        if (props.onPick) return clearAll();
         if (isSingle()) {
           clearRange();
           return remove(row.id);
@@ -532,6 +571,11 @@ export function ListFilterSelect(props) {
     const previousRow = rows()[cursor()];
     setCursor(index);
 
+    if (props.onPick) {
+      props.onPick(row.id);
+      return false;
+    }
+
     if (e.shiftKey && (range || (isSingle() && previousRow))) {
       if (!range) setAnchor(previousRow.id);
       extendRange(index);
@@ -591,7 +635,7 @@ export function ListFilterSelect(props) {
     cancelHold();
 
     const row = rows()[Array.prototype.indexOf.call(list.children, e.target.closest?.("[role=option]"))];
-    if (!row || e.touches.length > 1) return;
+    if (!row || e.touches.length > 1 || props.onPick) return;
 
     const { clientX, clientY } = e.touches[0];
     hold = { x: clientX, y: clientY, timer: setTimeout(() => startHold(row, clientY), TOUCH_HOLD_MS) };
@@ -695,7 +739,7 @@ export function ListFilterSelect(props) {
   );
 
   const triggerCount = () => (
-    <Show when={isSingle() ? selected().length > 1 : selected().length}>
+    <Show when={!props.onPick && (isSingle() ? selected().length > 1 : selected().length)}>
       <span class="count">{selected().length}</span>
     </Show>
   );
@@ -733,7 +777,14 @@ export function ListFilterSelect(props) {
       </div>
       <div class="scroller" tabindex="-1" ref={scrollerRef} onScroll={cancelHold}>
         <div class="items" id={listboxId} role="listbox" aria-multiselectable={true} ref={elem => list = elem} onContextMenu={e => (drag || hold) && e.preventDefault()}>
-          <For each={rows()} fallback={<p class="empty">No results</p>}>{(row, index) => (
+          <For each={rows()} fallback={
+            <p class="empty">
+              <Show when={props.loading && !query()}>
+                <LoaderCircle scoped class="spinner" />
+              </Show>
+              {query() ? "No results" : props.emptyText ?? "No results"}
+            </p>
+          }>{(row, index) => (
             <div
               class="row"
               id={`${listboxId}-${index()}`}
@@ -754,13 +805,23 @@ export function ListFilterSelect(props) {
                   </Show>
                 </span>
               </Show>
-              <p>{row.description}</p>
+              {props.rowIcon?.(row)}
+              <p>{props.rowLabel ? props.rowLabel(row) : row.description}</p>
               <Show when={props.countOf}>
                 <span class="row-count">{props.countOf(row.id)}</span>
               </Show>
               <Show when={props.sort && entries().size > 1 && entries().get(row.id)?.order}>{order => (
                 <span class="order">{order()}</span>
               )}</Show>
+              {/* Touch selects are modals in the top layer, so the tooltip would be rendered under them */}
+              <Show when={row.tooltip && !isTouch()}>
+                <Tooltip placements={["right", "left", "bottom"]} offset={12}>
+                  <Show when={row.tooltipTitle}>
+                    <span class="tooltip-title">{row.tooltipTitle}</span>
+                  </Show>
+                  {row.tooltip}
+                </Tooltip>
+              </Show>
             </div>
           )}</For>
         </div>
@@ -776,7 +837,7 @@ export function ListFilterSelect(props) {
   );
 
   return (
-    <div class="list-filter-select" classList={{ open: isOpen(), closing: isClosing(), "mouse-closed": isMouseClosed(), "has-selection": selected().length > 0 }} ref={elem => root = elem} onFocusOut={handleFocusOut}>
+    <div class="filter-select" classList={{ open: isOpen(), closing: isClosing(), "mouse-closed": isMouseClosed(), "has-selection": selected().length > 0 }} ref={elem => root = elem} onFocusOut={handleFocusOut}>
       <Show when={isTouch()} fallback={
         <label class="trigger">
           {triggerIcon()}

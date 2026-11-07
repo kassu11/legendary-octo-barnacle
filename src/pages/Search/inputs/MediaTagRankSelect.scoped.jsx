@@ -1,23 +1,19 @@
 import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TagRankIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaTagRankSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const navigate = useNavigateAndSearch();
   const startTagRank = 1;
   const endTagRank = 100;
 
   const tagRankOptions = createMemo(() => {
     const options = [];
     for (let i = endTagRank; i >= startTagRank; i--) {
-      options.push({ description: "" + i, id: i });
+      options.push({ description: i + "%", id: "" + i });
     }
 
     return options;
@@ -27,17 +23,17 @@ export function MediaTagRankSelect() {
   const tagRankValues = createMemo(() => {
     const { rank } = parsedSearchParams();
 
-    if (rank) return [...Array(Math.max(endTagRank - rank + 1, 0))].map((_, i) => ({ id: endTagRank - i, value: true, toast: `>${rank - 1}`}));
+    if (rank) return [...Array(Math.max(endTagRank - rank + 1, 0))].map((_, i) => "" + (endTagRank - i));
+    return [];
   });
 
-  const handleChange = e => {
+  const valueLabel = () => parsedSearchParams().rank ? `>${parsedSearchParams().rank - 1}` : undefined;
 
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
+  const handlePick = id => {
 
     let { rank } = parsedSearchParams();
-    if (rank != e.target) {
-      setSearchParams({ rank: e.target }, { replace: true });
+    if (rank != id) {
+      setSearchParams({ rank: id }, { replace: true });
     } else {
       setSearchParams({ rank: undefined }, { replace: true });
     }
@@ -45,13 +41,6 @@ export function MediaTagRankSelect() {
   };
 
   return (
-    <MultiSelect tooltip="Minimum tag relevance percentage. Higher values only match media where the selected tags are a major part of the story" each={tagRankOptions()} value={tagRankValues()} onChange={handleChange} icon={<TagRankIcon />} button="Tag Rank" hideCount>{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox radio={!entry.value} checked={entry.value} />
-          <p>{entry.description}%</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect radio param="rank" tooltip="Minimum tag relevance percentage. Higher values only match media where the selected tags are a major part of the story" each={tagRankOptions()} value={tagRankValues()} valueLabel={valueLabel()} onPick={handlePick} onClear={() => setSearchParams({ rank: undefined }, { replace: true })} icon={<TagRankIcon />} button="Tag Rank" />
   );
 }

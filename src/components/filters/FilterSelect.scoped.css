@@ -1,5 +1,12 @@
 @layer component {
-  .list-filter-select {
+  .tooltip-title {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .filter-select {
     position: relative;
     min-width: 0;
 
@@ -7,7 +14,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: .35em .5em;
+      padding: var(--select-padding, .5em);
       border: 2px dashed var(--bg);
       border-radius: 4px;
       background-color: color-mix(in oklab, var(--bg-dark), var(--bg) 30%);
@@ -17,7 +24,7 @@
       transition: .2s border-color, .2s background-color, .2s filter;
 
 
-      .list-filter-select:not(.mouse-closed) & {
+      .filter-select:not(.mouse-closed) & {
         &:hover {
           filter: brightness(1.1);
         }
@@ -34,7 +41,7 @@
       }
 
       /* Sunken field that blends into the panel, so it reads as something to type in */
-      .list-filter-select:not(.mouse-closed) &:has(input:focus) {
+      .filter-select:not(.mouse-closed) &:has(input:focus) {
         background-color: var(--bg-dark);
       }
 
@@ -67,7 +74,7 @@
         text-overflow: ellipsis;
         cursor: inherit;
 
-        .list-filter-select:not(.mouse-closed) &:focus {
+        .filter-select:not(.mouse-closed) &:focus {
           cursor: text;
         }
 
@@ -84,7 +91,7 @@
           color: var(--text);
         }
 
-        .list-filter-select:not(.mouse-closed) &:focus::placeholder {
+        .filter-select:not(.mouse-closed) &:focus::placeholder {
           color: var(--text-muted);
           opacity: .55;
         }
@@ -373,9 +380,20 @@
           }
 
           .empty {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             margin: 0;
             padding: 2px 6px;
             color: var(--text-muted);
+
+            .spinner {
+              position: relative;
+              flex-shrink: 0;
+              width: 1.5em;
+              height: 1.5em;
+              --loader-border-size: 4px;
+            }
           }
 
           .row {
@@ -386,6 +404,11 @@
             font-weight: 400;
             word-break: break-word;
             cursor: pointer;
+
+            .panel.mobile & {
+              font-size: 18px;
+              padding: 4px 6px;
+            }
 
             &:hover, &.cursor {
               background-color: var(--bg);

@@ -1,24 +1,20 @@
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { ProgressIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaProgressSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigateAndSearch();
   const startProgress = 1;
   const endProgress = 220;
 
   const progressOptions = createMemo(() => {
     const options = [];
     for (let i = startProgress; i <= endProgress; i++) {
-      options.push({ description: "" + i, id: i });
+      options.push({ description: "" + i, id: "" + i });
     }
 
     return options;
@@ -32,13 +28,12 @@ export function MediaProgressSelect() {
     if (progressLesser && progressGreater) return [...Array(Math.max(progressLesser - progressGreater - 1, 0))].map((_, i) => ({ id: progressLesser - i - 1, value: true, toast: `${progressGreater + 1}-${progressLesser - 1}` }));
     if (progressLesser)                    return [...Array(Math.max(progressLesser - startProgress, 0))].map((_, i) => (      { id: startProgress + i,      value: true, toast: `<${progressLesser}`                           }));
     if (progressGreater)                   return [...Array(Math.max(endProgress - progressGreater, 0))].map((_, i) => (       { id: endProgress - i,        value: true, toast: `>${progressGreater}`                          }));
+    return [];
   });
 
   let lastProgressSelection = null;
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
+  const handlePick = id => {
+    const target = +id;
 
     let { progress, progressLesser, progressGreater } = parsedSearchParams();
 
@@ -46,32 +41,32 @@ export function MediaProgressSelect() {
     if (lastProgressSelection != progressGreater && lastProgressSelection != progressLesser) lastProgressSelection = null;
 
     // 1. Radio selection, select progress, clear all other progress filters, and keep season state, but remove season headers (these headers add progress filtering)
-    if (progress != e.target && !progressGreater && !progressLesser || e.target <= progressGreater || e.target >= progressLesser) {
-      setSearchParams({ progress: e.target, progressLesser: undefined, progressGreater: undefined }, { replace: true });
+    if (progress != target && !progressGreater && !progressLesser || target <= progressGreater || target >= progressLesser) {
+      setSearchParams({ progress: target, progressLesser: undefined, progressGreater: undefined }, { replace: true });
     }
     // 2. Clicked again at the same progress selection, change selection to lesser - 1
-    else if (progress == e.target) {
-      setSearchParams({ progress: undefined, progressLesser: e.target + 1, progressGreater: undefined }, { replace: true });
+    else if (progress == target) {
+      setSearchParams({ progress: undefined, progressLesser: target + 1, progressGreater: undefined }, { replace: true });
     }
     // 3. Clicked again at the same progress selection, change selection to greater - 1
-    else if (progressLesser == e.target + 1 && !progressGreater) {
-      setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: e.target - 1 }, { replace: true });
+    else if (progressLesser == target + 1 && !progressGreater) {
+      setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: target - 1 }, { replace: true });
     }
     // 4. Clicked again at the same progress selection, remove all progress filters
-    else if (progressGreater == e.target - 1 || progressLesser == e.target + 1) {
+    else if (progressGreater == target - 1 || progressLesser == target + 1) {
       setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: undefined }, { replace: true });
     }
     // 5. User clicked inside the progress range, lets make the selection smaller
     else {
       // Last clicked missing, fallback to something
       const last = lastProgressSelection || progressGreater || progressLesser;
-      if (e.target > last) {
-        setSearchParams({ progress: undefined, progressLesser: e.target + 1, progressGreater: last }, { replace: true });
-        lastProgressSelection = e.target + 1;
+      if (target > last) {
+        setSearchParams({ progress: undefined, progressLesser: target + 1, progressGreater: last }, { replace: true });
+        lastProgressSelection = target + 1;
       }
       else {
-        setSearchParams({ progress: undefined, progressLesser: last, progressGreater: e.target - 1 }, { replace: true });
-        lastProgressSelection = e.target - 1;
+        setSearchParams({ progress: undefined, progressLesser: last, progressGreater: target - 1 }, { replace: true });
+        lastProgressSelection = target - 1;
       }
     }
 
@@ -84,13 +79,6 @@ export function MediaProgressSelect() {
   };
 
   return (
-    <MultiSelect tooltip="Filter by episode or chapter count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={progressOptions()} value={progressValues()} onChange={handleChange} icon={<ProgressIcon />} button={text()} hideCount>{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox radio={!entry.value} checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect radio param="progress" tooltip="Filter by episode or chapter count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={progressOptions()} value={progressValues().map(value => "" + value.id)} valueLabel={progressValues()[0]?.toast} onPick={handlePick} onClear={() => setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: undefined }, { replace: true })} icon={<ProgressIcon />} button={text()} />
   );
 }

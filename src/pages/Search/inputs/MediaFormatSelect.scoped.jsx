@@ -2,11 +2,9 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { FormatIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaFormatSelect() {
   const parsedSearchParams = useParsedSearchParams();
@@ -39,44 +37,25 @@ export function MediaFormatSelect() {
   });
 
   const formatValues = createMemo(() => {
-    return arrayUtils.wrapToArray(parsedSearchParams().format).map(id => ({ id, value: true }));
+    return [...arrayUtils.wrapToArray(parsedSearchParams().format)];
   });
 
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
-
-    const newActiveValues = [...formatValues()];
-    const index = newActiveValues.findIndex(val => val.id === e.target);
-
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: true });
-    } else {
-      newActiveValues.splice(index, 1);
-    }
+  const handleChange = ({ format }) => {
 
     const header = params.header || "";
     // 1. Remove a header that adds a format, but keep all other header values
     if (/\/novel|finished-manga|finished-novel/.test(header)) {
       const { sort, status } = parsedSearchParams();
-      navigate(path => path.replace("/" + header, ""), { sort, status, format: newActiveValues.map(e => e.id) }, { replace: true });
+      navigate(path => path.replace("/" + header, ""), { sort, status, format }, { replace: true });
     }
     // 2. Normal just change the format
     else {
-      setSearchParams(                                 {               format: newActiveValues.map(e => e.id) }, { replace: true });
+      setSearchParams(                                 {               format }, { replace: true });
     }
 
   };
 
   return (
-    <MultiSelect tooltip="How the media was released, e.g. TV series, movie, manga or light novel" each={formatOptions()} value={formatValues()} onChange={handleChange} icon={<FormatIcon />} button="Format">{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }} tooltip={entry.tooltip}>
-          <Checkbox checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect param="format" tooltip="How the media was released, e.g. TV series, movie, manga or light novel" each={formatOptions()} value={formatValues()} setSearchParams={handleChange} icon={<FormatIcon />} button="Format" />
   );
 }

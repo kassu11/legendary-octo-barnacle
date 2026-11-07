@@ -2,16 +2,12 @@ import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
-import { MultiSelect } from "./MultiSelect.scoped.jsx";
+import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { SourceIcon } from "@/assets/SearchFilterIcons.jsx";
-import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
-import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaSourceSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const navigate = useNavigateAndSearch();
 
   const sourceOptions = [
     { description: "Anime",              id: "anime"              },
@@ -32,36 +28,10 @@ export function MediaSourceSelect() {
   ];
 
   const sourceValues = createMemo(() => {
-    return arrayUtils.wrapToArray(parsedSearchParams().source).map(id => ({ id, value: true }));
+    return [...arrayUtils.wrapToArray(parsedSearchParams().source)];
   });
 
-  const handleChange = e => {
-
-    if (e.oldUrl) return navigate(e.oldUrl);
-    if (!e.target) return;
-
-    const newActiveValues = [...sourceValues()];
-    const index = newActiveValues.findIndex(val => val.id === e.target);
-
-    if (index == -1) {
-      newActiveValues.push({ id: e.target, value: true });
-    } else {
-      newActiveValues.splice(index, 1);
-    }
-
-    setSearchParams({ source: newActiveValues.map(e => e.id) }, { replace: true });
-
-  };
-
   return (
-    <MultiSelect tooltip="The original material the media was adapted from" each={sourceOptions} value={sourceValues()} onChange={handleChange} icon={<SourceIcon />} button="Source">{entry => {
-      return (
-        <MediaSelectItem classList={{ active: !!entry.value, hidden: entry.hidden, hovered: entry.hovered }}>
-          <Checkbox checked={entry.value} />
-          <p>{entry.description}</p>
-        </MediaSelectItem>
-      );
-    }}</MultiSelect>
+    <FilterSelect param="source" tooltip="The original material the media was adapted from" each={sourceOptions} value={sourceValues()} setSearchParams={query => setSearchParams(query, { replace: true })} icon={<SourceIcon />} button="Source" />
   );
 }
-
