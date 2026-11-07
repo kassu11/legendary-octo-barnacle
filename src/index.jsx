@@ -1,11 +1,11 @@
 import { render } from "solid-js/web"
 import { Router, Route, Navigate } from "@solidjs/router";
 import "./index.css"
-import App from "./App.scoped.jsx"
+import App from "./app/App.scoped.jsx"
 import { Home } from "./pages/Home/index(home).scoped.jsx"
 import Authentication from "./pages/Authentication/Authentication.jsx";
-import { AuthenticationProvider } from "./context/AuthenticationContext.jsx";
-import { ResponsiveProvider } from "./context/ResponsiveContext";
+import { AuthenticationProvider } from "./state/AuthenticationContext.jsx";
+import { ResponsiveProvider } from "./state/ResponsiveContext";
 import { User } from "./pages/User/index(user).scoped.jsx";
 import { StatsMediaOverview } from "./pages/User/Stats/Overview/index(user-stats-overview).scoped.jsx";
 import { StatsMediaGenres } from "./pages/User/Stats/Genres/index(user-stats-genres).scoped.jsx";
@@ -19,7 +19,7 @@ import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./page
 import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/Entity.scoped.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio/index(studio).scoped.jsx";
 import { ActivityPage } from "./pages/Activity/index(activity).scoped.jsx";
-import { EditMediaEntriesProvider } from "./context/EditMediaEntriesContext.scoped.jsx";
+import { EditMediaEntriesProvider } from "./components/media/EditMediaEntriesContext.scoped.jsx";
 import ComparePage from "./pages/Compare/ComparePage.scoped.jsx";
 import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/Media/Jikan/MediaInfoJikan.scoped.jsx";
 import { MediaInfoCharactersJikan } from "./pages/Media/Jikan/MediaInfoCharactersJikan.jsx";

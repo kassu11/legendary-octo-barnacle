@@ -1,4 +1,4 @@
-import { asserts } from "@/collections/collections.js";
+import * as asserts from "./asserts.js";
 
 export const plural = num => num !== 1 ? "s" : "";
 

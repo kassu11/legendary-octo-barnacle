@@ -1,9 +1,9 @@
 import { useParams } from "@solidjs/router";
-import { useMediaInfo } from "@/context/providers.js";
-import {  queries } from "@/collections/collections.js";
+import { useMediaInfo } from "@/state/providers.js";
+import { queries } from "@/api/api.js";
 import { MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
 import { createEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
-import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

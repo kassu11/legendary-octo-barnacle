@@ -1,4 +1,4 @@
-import { asserts } from "@/collections/collections";
+import * as asserts from "./asserts.js";
 
 export const isTypeArray = value => Array.isArray(value);
 

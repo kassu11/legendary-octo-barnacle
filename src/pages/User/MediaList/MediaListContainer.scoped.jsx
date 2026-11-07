@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import { useEditMediaEntries, useUser, useUserMediaList } from "@/context/providers.js";
+import { useEditMediaEntries, useUser, useUserMediaList } from "@/state/providers.js";
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { mediaUrl } from "@/utils/formating.js";
 import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";

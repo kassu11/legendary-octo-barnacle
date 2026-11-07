@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { isTypeInteger, isTypeString } from "@/collections/types";
+import { isTypeInteger, isTypeString } from "@/utils/types";
 import { formatTitleToUrl } from "./formating";
 import { arrayUtils } from "./utils";
 import { isTypeFunction } from "./functionUtils";

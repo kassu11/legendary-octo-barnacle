@@ -1,5 +1,5 @@
 import { createEffect, on } from "solid-js";
-import { useUser } from "@/context/providers.js";
+import { useUser } from "@/state/providers.js";
 import { FavouriteSectionScoped } from "./FavouriteSection.scoped.jsx";
 import "./index(favourite).scoped.css"
 

@@ -1,5 +1,5 @@
 import { createSignal, createEffect, on, Show } from "solid-js";
-import { useUserMediaList } from "@/context/providers";
+import { useUserMediaList } from "@/state/providers";
 import "./MediaCardProgressInfo.scoped.css";
 
 export function MediaCardProgressInfo(props) {

@@ -4,8 +4,8 @@ import "./index(activity).scoped.css";
 import { ActivityCard } from "@/components/Activity.scoped.jsx";
 import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import { CreatedAt } from "@/components/CreatedAt.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { queries } from "@/collections/collections.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { queries } from "@/api/api.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 

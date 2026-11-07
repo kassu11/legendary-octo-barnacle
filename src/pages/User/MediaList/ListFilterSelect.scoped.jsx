@@ -1,5 +1,5 @@
 import { createEffect, createMemo, createSelector, createSignal, createUniqueId, For, Match, on, onCleanup, Show, Switch } from "solid-js";
-import { useResponsive } from "@/context/providers.js";
+import { useResponsive } from "@/state/providers.js";
 import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import { XIcon } from "@/assets/SearchFilterIcons.jsx";
 import SortAlphabetDescendingIcon from "@/assets/SortAlphaDown.jsx";

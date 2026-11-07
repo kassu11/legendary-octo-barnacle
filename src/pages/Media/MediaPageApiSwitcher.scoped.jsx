@@ -5,7 +5,7 @@ import MyAnimeList from "@/assets/MyAnimeList.jsx";
 import ExternalSource from "@/assets/ExternalSource.jsx";
 import { formatTitleToUrl } from "@/utils/formating.js";
 import "./MediaPageApiSwitcher.scoped.css";
-import { localizations } from "@/collections/collections.js";
+import { localizations } from "@/constants/constants.js";
 
 export function MediaPageApiSwitcher(props) {
   const params = useParams();

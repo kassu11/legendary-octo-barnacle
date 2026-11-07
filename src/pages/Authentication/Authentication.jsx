@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "@solidjs/router";
-import { storeAccessToken } from "@/core/globalState.js";
+import { storeAccessToken } from "@/state/globalState.js";
 
 function Authentication() {
   const location = useLocation();

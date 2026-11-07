@@ -2,13 +2,13 @@ import { A, useParams } from "@solidjs/router";
 import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
 import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
 import "./Studio.scoped.css";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
-import { useUser } from "@/context/providers.js";
+import { useUser } from "@/state/providers.js";
 
 export function StatsAnimeStudios() {
   const params = useParams();

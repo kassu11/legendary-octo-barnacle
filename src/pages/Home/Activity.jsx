@@ -1,6 +1,6 @@
 import { batch, createEffect, Show } from "solid-js";
 import { HomePageActivityReel } from "./ActivityReel.jsx";
-import { signals } from "@/collections/collections.js";
+import { signals } from "@/utils/utils.js";
 
 export function Activity() {
   const [activityType, setActivityType] = signals.localStorageString("LOB_ACTIVITY_TYPE", undefined);

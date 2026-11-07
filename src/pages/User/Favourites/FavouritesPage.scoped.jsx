@@ -1,9 +1,9 @@
 import { createEffect, createSignal, For, Show, untrack, on, createMemo } from "solid-js";
-import { useUser, useFavourites } from "@/context/providers.js";
+import { useUser, useFavourites } from "@/state/providers.js";
 import { FavouritePageItemScoped } from "./FavouritePageItem.scoped.jsx";
 import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { queries } from "@/collections/collections.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { queries } from "@/api/api.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

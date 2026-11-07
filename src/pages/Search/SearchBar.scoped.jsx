@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { useParsedSearchParams, useResponsive } from "@/context/providers";
+import { useParsedSearchParams, useResponsive } from "@/state/providers";
 import { SEARCH_DEBOUNCE } from "./index(search2).scoped";
 import "./SearchBar.scoped.css";
 import { MediaSortSelect } from "./inputs/MediaSortSelect.scoped.jsx";

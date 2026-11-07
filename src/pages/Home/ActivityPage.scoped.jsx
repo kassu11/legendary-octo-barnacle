@@ -4,10 +4,10 @@ import { untrack } from "solid-js/web";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
 import { ActivityCard } from "@/components/Activity.scoped.jsx";
-import { asserts, queries } from "@/collections/collections.js";
+import { queries } from "@/api/api.js";
 import "./ActivityPage.scoped.css";
-import { arrayUtils, scheduleUtils } from "@/utils/utils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { asserts, arrayUtils, scheduleUtils } from "@/utils/utils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 

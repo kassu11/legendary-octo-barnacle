@@ -1,6 +1,6 @@
 import { Show, untrack } from "solid-js";
 import { AuthenticationContext } from "./providers";
-import { authUserData, logoutUser, authedUserId, token2, allActiveTokens, setToken2, setAllActiveTokens } from "@/core/globalState.js";
+import { authUserData, logoutUser, authedUserId, token2, allActiveTokens, setToken2, setAllActiveTokens } from "@/state/globalState.js";
 import { getAllIndexedDBValues } from "@/utils/indexedDButils.js";
 
 export function AuthenticationProvider(props) {

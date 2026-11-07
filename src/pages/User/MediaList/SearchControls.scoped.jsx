@@ -1,5 +1,5 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/context/providers.js";
+import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/state/providers.js";
 import { createMemo, createSignal, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { ALL_LISTS } from "./index(user-media-list).scoped.jsx";
 import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";

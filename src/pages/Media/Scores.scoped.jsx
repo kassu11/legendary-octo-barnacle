@@ -1,6 +1,6 @@
 import { Match, Show, Switch } from "solid-js";
 import "./Scores.scoped.css";
-import { useMediaInfo } from "@/context/providers";
+import { useMediaInfo } from "@/state/providers";
 import { numberCommas } from "@/utils/formating.js";
 
 export function MediaPageScores() {

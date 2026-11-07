@@ -1,6 +1,6 @@
 import { ErrorBoundary, For, Show } from "solid-js";
 import { formatAnilistDate } from "@/utils/formating";
-import { useAuthentication } from "@/context/providers";
+import { useAuthentication } from "@/state/providers";
 import "./ExtraInfo.scoped.css";
 
 export const ExtraInfo = (props) => {

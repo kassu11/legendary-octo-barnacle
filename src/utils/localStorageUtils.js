@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { safeParseJson, safeStringifyJson } from "./jsonUtils";
 import { isTypeFunction } from "./functionUtils";
-import { assertThruthy, assertTypeString } from "@/collections/asserts";
+import { assertThruthy, assertTypeString } from "@/utils/asserts";
 
 export function getLocalStorageJson(key, defaultValue) {
   const data = localStorage[key];

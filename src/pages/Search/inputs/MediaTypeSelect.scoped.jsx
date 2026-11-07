@@ -5,7 +5,7 @@ import { TypeIcon } from "@/assets/SearchFilterIcons.jsx";
 import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { useParams } from "@solidjs/router";
-import { useParsedSearchParams } from "@/context/providers.js";
+import { useParsedSearchParams } from "@/state/providers.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 
 export function MediaTypeSelect() {

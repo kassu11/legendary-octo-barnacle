@@ -1,19 +1,19 @@
 import { useSearchParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { useParsedSearchParams } from "@/context/providers.js";
+import { useParsedSearchParams } from "@/state/providers.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { UsersIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./MediaUsersSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
-import { queries } from "@/collections/collections.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { queries } from "@/api/api.js";
 import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { createLocalStorageJsonSignal } from "@/utils/localStorageUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { UserSearchIcon } from "@/assets/UserSearchIcon.jsx";
-import { addApplicationNotification } from "@/core/notifications";
+import { addApplicationNotification } from "@/state/notifications";
 import { arrayUtils } from "@/utils/utils.js";
 import { MediaSelectItem } from "./MediaSelectItem.scoped.jsx";
 

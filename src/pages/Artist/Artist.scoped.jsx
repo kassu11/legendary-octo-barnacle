@@ -3,8 +3,8 @@ import { createEffect, createSignal, For, Show } from "solid-js";
 import { AnimeTheme } from "@/components/media/AnimeThemes.scoped.jsx";
 import "./Artist.scoped.css";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
-import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
-import { queries } from "@/collections/collections.js";
+import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
+import { queries } from "@/api/api.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 function Artist() {

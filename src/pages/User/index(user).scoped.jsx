@@ -1,13 +1,13 @@
 import { A, useParams } from "@solidjs/router";
 import { createEffect, createRenderEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { formatTimeToDate } from "@/utils/formating.js";
-import { UserContext, useUser } from "@/context/providers.js";
+import { UserContext, useUser } from "@/state/providers.js";
 import "./index(user).scoped.css";
-import { queries } from "@/collections/collections.js";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { queries } from "@/api/api.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { authUserData } from "@/core/globalState.js";
+import { authUserData } from "@/state/globalState.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function User(props) {

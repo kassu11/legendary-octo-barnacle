@@ -3,10 +3,10 @@ import { createMemo } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrays";
-import { ParsedSearchParamsContext } from "@/context/providers";
-import { translateInternalApiParams } from "@/core/apiTranslations";
+import { ParsedSearchParamsContext } from "@/state/providers";
+import { translateInternalApiParams } from "@/api/apiTranslations";
 import { getDates } from "@/utils/dates";
-import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "@/core/globalState";
+import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "@/state/globalState";
 
 const [searchStore, setSearchStore] = createStore({});
 

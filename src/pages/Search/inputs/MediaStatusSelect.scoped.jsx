@@ -1,6 +1,6 @@
 import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
-import { useParsedSearchParams } from "@/context/providers.js";
+import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { MultiSelect } from "./MultiSelect.scoped.jsx";
 import { StatusIcon } from "@/assets/SearchFilterIcons.jsx";

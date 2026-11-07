@@ -3,12 +3,13 @@ import { batch, createEffect, createRenderEffect, createSignal, For, Match, onCl
 import "./Notifications.scoped.css";
 import { mediaUrl } from "@/utils/formating.js";
 import { CreatedAt } from "@/components/CreatedAt.jsx";
-import { arrayUtils, scheduleUtils } from "@/utils/utils.js";
-import { asserts, modes, signals, queries } from "@/collections/collections.js";
+import { asserts, signals, arrayUtils, scheduleUtils } from "@/utils/utils.js";
+import { queries } from "@/api/api.js";
+import { modes } from "@/constants/constants.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
 import { isTypeFunction } from "@/utils/functionUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";

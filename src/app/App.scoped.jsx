@@ -1,14 +1,14 @@
 import "./App.scoped.css"
-import { InstallPWAInfoPanel } from "./components/InstallPWAInfoPanel.scoped.jsx";
+import { InstallPWAInfoPanel } from "@/components/InstallPWAInfoPanel.scoped.jsx";
 import { createEffect, Show } from "solid-js";
-import { localizations } from "./collections/collections";
-import { MainNavigation } from "./pages/App/MainNavigation.scoped.jsx";
-import { MainFooter } from "./pages/App/MainFooter.scoped.jsx";
-import { MainLoadingBar } from "./pages/App/MainLoadingBar.scoped";
-import { ApplicationNotifications } from "./pages/App/ApplicationNotifications.scoped";
-import { ParseSearchParams } from "./pages/App/ParseSearchParams";
-import { settingsShowDevBranch } from "./core/globalState";
-import { createCleanUpAbortController } from "./utils/abortUtils";
+import { localizations } from "@/constants/constants";
+import { MainNavigation } from "./MainNavigation.scoped.jsx";
+import { MainFooter } from "./MainFooter.scoped.jsx";
+import { MainLoadingBar } from "./MainLoadingBar.scoped";
+import { ApplicationNotifications } from "./ApplicationNotifications.scoped";
+import { ParseSearchParams } from "./ParseSearchParams";
+import { settingsShowDevBranch } from "@/state/globalState";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
