@@ -1,9 +1,52 @@
 import { A, useLocation, useParams } from "@solidjs/router";
 import { useAuthentication, useUser, useUserMediaList } from "../../../context/providers.js";
-import { For, Match, Show, Switch } from "solid-js";
+import { createMemo, mapArray, Match, Show, Switch } from "solid-js";
 import { useListNavigation } from "./index(user-media-list).scoped.jsx";
 import { MediaListNames } from "./MediaListNames.jsx";
+import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";
+import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, OnListIcon, ProgressIcon as TagIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "../../../assets/SearchFilterIcons.jsx";
 import "./SearchControls.scoped.css";
+
+const formatOptions = [
+  { description: "Movie",            id: "MOVIE"    },
+  { description: "Music",            id: "MUSIC"    },
+  { description: "ONA",              id: "ONA"      },
+  { description: "OVA",              id: "OVA"      },
+  { description: "Special",          id: "SPECIAL"  },
+  { description: "TV",               id: "TV"       },
+  { description: "TV Short",         id: "TV_SHORT" },
+];
+
+const statusOptions = [
+  { description: "Releasing",        id: "RELEASING"        },
+  { description: "Finished",         id: "FINISHED"         },
+  { description: "Not Yet Released", id: "NOT_YET_RELEASED" },
+  { description: "Cancelled",        id: "CANCELLED"        },
+];
+
+const genreOptions = [
+  "Action", "Adventure", "Comedy", "Drama", "Ecchi", "Fantasy", "Hentai", "Horror", "Mahou Shoujo", "Mecha",
+  "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller",
+].map(toOption);
+
+const countryOptions = [
+  { description: "China",            id: "CN" },
+  { description: "Japan",            id: "JP" },
+  { description: "South Korea",      id: "KR" },
+  { description: "Taiwan",           id: "TW" },
+];
+
+const ageOptions = [
+  { description: "R-17+",            id: "false" },
+  { description: "R-18",             id: "true"  },
+];
+
+const yearOptions = [];
+for (let year = new Date().getFullYear() + 2; year >= 1930; year--) yearOptions.push(toOption("" + year));
+
+function toOption(name) {
+  return { description: name, id: name };
+}
 
 export function SearchControlsScoped(props) {
   const navigate = useListNavigation();
@@ -13,129 +56,50 @@ export function SearchControlsScoped(props) {
   const {user} = useUser();
   const params = useParams();
 
+  const userStatusOptions = createMemo(() => [
+    { description: "Completed",                                          id: "COMPLETED" },
+    { description: params.type === "anime" ? "Watching" : "Reading",     id: "CURRENT"   },
+    { description: "Dropped",                                            id: "DROPPED"   },
+    { description: "Paused",                                             id: "PAUSED"    },
+    { description: "Planning",                                           id: "PLANNING"  },
+    { description: params.type === "anime" ? "Rewatching" : "Rereading", id: "REPEATING" },
+  ]);
+
+  const sortOptions = createMemo(() => [
+    { description: "Score",                                           id: "score",        type: "numeric"    },
+    { description: "Title",                                           id: "title",        type: "alphabetic" },
+    { description: "Progress",                                        id: "progress",     type: "numeric"    },
+    { description: "Last Updated",                                    id: "updatedAt",    type: "numeric"    },
+    { description: "Start Date",                                      id: "startedAt",    type: "numeric"    },
+    { description: "Completed Date",                                  id: "completedAt",  type: "numeric"    },
+    { description: "Release Date",                                    id: "releaseDate",  type: "numeric"    },
+    { description: "Average Score",                                   id: "averageScore", type: "numeric"    },
+    { description: "Popularity",                                      id: "popularity",   type: "numeric"    },
+    { description: params.type === "anime" ? "Rewatches" : "Rereads", id: "repeat",       type: "numeric"    },
+  ]);
+
+  // The worker sends new arrays after every filter change. mapArray keeps the same option objects
+  // for the same names, so the open select doesn't rerender its items and lose the scroll position
+  const studioOptions = createMemo(mapArray(() => props.listData()?.data?.studios, toOption));
+  const tagOptions = createMemo(mapArray(() => props.listData()?.data?.tags, toOption));
+
   return (
     <div class="user-profile-media-list-search">
-      <input type="text" placeholder="Search"
-             onInput={e => props.setSearchParams({search: e.target.value || undefined})} value={props.search()}/>
+      <input type="text" placeholder="Search" onInput={e => props.setSearchParams({search: e.target.value || undefined})} value={props.search()}/>
+
       <MediaListNames listData={props.listData}/>
-      <select name="format" onChange={e => props.setSearchParams({format: e.target.value || undefined})}
-              value={props.format() || ""}>
-        <option value="" hidden>Format</option>
-        <Show when={props.format()}>
-          <option value="">All formats</option>
-        </Show>
-        <option value="MOVIE">Movie</option>
-        <option value="MUSIC">Music</option>
-        <option value="ONA">Ona</option>
-        <option value="OVA">Ova</option>
-        <option value="SPECIAL">Special</option>
-        <option value="TV">TV</option>
-        <option value="TV_SHORT">TV short</option>
-      </select>
-      <select name="userStatus" onChange={e => props.setSearchParams({userStatus: e.target.value || undefined})}
-              value={props.userStatus() || ""}>
-        <option value="" hidden>User Status</option>
-        <Show when={props.userStatus()}>
-          <option value="">Any User Status</option>
-        </Show>
-        <option value="COMPLETED">Completed</option>
-        <option value="CURRENT">
-          <Switch>
-            <Match when={params.type === "anime"}>Watching</Match>
-            <Match when={params.type === "manga"}>Reading</Match>
-          </Switch>
-        </option>
-        <option value="DROPPED">Dropped</option>
-        <option value="PAUSED">Paused</option>
-        <option value="PLANNING">Planning</option>
-        <option value="REPEATING">
-          <Switch>
-            <Match when={params.type === "anime"}>Rewatching</Match>
-            <Match when={params.type === "manga"}>Rereading</Match>
-          </Switch>
-        </option>
-      </select>
-      <select name="status" onChange={e => props.setSearchParams({status: e.target.value || undefined})}
-              value={props.status() || ""}>
-        <option value="" hidden>Status</option>
-        <Show when={props.status()}>
-          <option value="">Any Status</option>
-        </Show>
-        <option value="RELEASING">Releasing</option>
-        <option value="FINISHED">Finished</option>
-        <option value="NOT_YET_RELEASED">Not Yet Released</option>
-        <option value="CANCELLED">Cancelled</option>
-      </select>
-      <select name="genre" onChange={e => props.setSearchParams({genre: e.target.value || undefined})}
-              value={props.genre()}>
-        <option value="" hidden>Genre</option>
-        <Show when={props.genre()}>
-          <option value="">All genres</option>
-        </Show>
-        <option value="Action">Action</option>
-        <option value="Adventure">Adventure</option>
-        <option value="Comedy">Comedy</option>
-        <option value="Drama">Drama</option>
-        <option value="Ecchi">Ecchi</option>
-        <option value="Fantasy">Fantasy</option>
-        <option value="Hentai">Hentai</option>
-        <option value="Horror">Horror</option>
-        <option value="Mahou Shoujo">Mahou Shoujo</option>
-        <option value="Mecha">Mecha</option>
-        <option value="Music">Music</option>
-        <option value="Mystery">Mystery</option>
-        <option value="Psychological">Psychological</option>
-        <option value="Romance">Romance</option>
-        <option value="Sci-Fi">Sci-Fi</option>
-        <option value="Slice of Life">Slice of Life</option>
-        <option value="Sports">Sports</option>
-        <option value="Supernatural">Supernatural</option>
-        <option value="Thriller">Thriller</option>
-      </select>
-      <select name="countryOfOrigin"
-              onChange={e => props.setSearchParams({countryOfOrigin: e.target.value || undefined})}
-              value={props.countryOfOrigin() || ""}>
-        <option value="" hidden>Country</option>
-        <Show when={props.countryOfOrigin()}>
-          <option value="">All countries</option>
-        </Show>
-        <option value="CN">China</option>
-        <option value="JP">Japan</option>
-        <option value="KR">South Korea</option>
-        <option value="TW">Taiwan</option>
-      </select>
-      <select name="isAdult" onChange={e => props.setSearchParams({isAdult: e.target.value || undefined})}
-              value={props.isAdult() === undefined ? "" : String(props.isAdult())}>
-        <option value="" hidden>Age rating</option>
-        <Show when={props.isAdult() !== undefined}>
-          <option value="">All ratings</option>
-        </Show>
-        <option value="false">R-17+</option>
-        <option value="true">R-18</option>
-      </select>
+
+      <ListFilterSelect   param="format"          excludable each={ formatOptions       } value={ props.format()          } icon={ <FormatIcon />  } button="Format"      tooltip="How the media was released, e.g. TV series or movie. Click once to include, twice to exclude"                               setSearchParams={ props.setSearchParams } />
+      <ListFilterSelect   param="userStatus"      excludable each={ userStatusOptions() } value={ props.userStatus()      } icon={ <OnListIcon />  } button="User Status" tooltip="Status of the entry on this user's list. Click once to include, twice to exclude"                                           setSearchParams={ props.setSearchParams } />
+      <ListFilterSelect   param="status"          excludable each={ statusOptions       } value={ props.status()          } icon={ <StatusIcon />  } button="Status"      tooltip="Current release status of the media. Click once to include, twice to exclude"                                               setSearchParams={ props.setSearchParams } />
+      <ListFilterSelect   param="genre"           excludable each={ genreOptions        } value={ props.genre()           } icon={ <GenreIcon />   } button="Genre"       tooltip="Entries need to have all the included genres. Click once to include, twice to exclude"                                      setSearchParams={ props.setSearchParams } />
+      <ListFilterSelect   param="countryOfOrigin" excludable each={ countryOptions      } value={ props.countryOfOrigin() } icon={ <CountryIcon /> } button="Country"     tooltip="Country of origin. Click once to include, twice to exclude"                                                                 setSearchParams={ props.setSearchParams } />
+      <ListFilterSelect   param="isAdult"                    each={ ageOptions          } value={ props.isAdult()         } icon={ <AgeIcon />     } button="Age"         tooltip="Age rating of the media"                                                                                                    setSearchParams={ props.setSearchParams } />
       <Show when={params.type === "anime"}>
-        <select name="studio" onChange={e => props.setSearchParams({studio: e.target.value || undefined})}
-                value={props.studio()}>
-          <option value="" hidden>Studio</option>
-          <Show when={props.studio()}>
-            <option value="">All studios</option>
-          </Show>
-          <For each={props.listData()?.data?.studios}>{studio => (
-            <option value={studio} selected={studio == props.studio()}>{studio}</option>
-          )}</For>
-        </select>
+        <ListFilterSelect param="studio"          excludable each={ studioOptions()     } value={ props.studio()          } icon={ <StudioIcon />  } button="Studio"      tooltip="Main studio of the media. Click once to include, twice to exclude"                                                          setSearchParams={ props.setSearchParams } />
       </Show>
-      <select name="tag" onChange={e => props.setSearchParams({tag: e.target.value || undefined})} value={props.tag()}>
-        <option value="" hidden>Tag</option>
-        <Show when={props.tag()}>
-          <option value="">All tags</option>
-        </Show>
-        <For each={props.listData()?.data?.tags}>{tag => (
-          <option value={tag} selected={tag == props.tag()}>{tag}</option>
-        )}</For>
-      </select>
-      <input type="number" placeholder="Release year" max="9999" min="0" value={props.year()}
-             onInput={e => props.setSearchParams({year: e.target.value || undefined})}/>
+      <ListFilterSelect   param="tag"             excludable each={ tagOptions()        } value={ props.tag()             } icon={ <TagIcon />     } button="Tag"         tooltip="Entries need to have all the included tags, only tags with a rank above 50% count. Click once to include, twice to exclude" setSearchParams={ props.setSearchParams } />
+      <ListFilterSelect   param="year"            excludable each={ yearOptions         } value={ props.year()            } icon={ <YearIcon />    } button="Year"        tooltip="Year the media started releasing. Click once to include, twice to exclude"                                                  setSearchParams={ props.setSearchParams } />
       <Show when={isOwnProfile()}>
         <label htmlFor="private">
           <input type="checkbox" name="private" id="private" checked={props.privateFilter()}
@@ -167,29 +131,7 @@ export function SearchControlsScoped(props) {
                onChange={e => props.setSearchParams({missingScore: e.target.checked ? "true" : undefined})}/>
         {" "}Missing score
       </label>
-      <label htmlFor="reverse">
-        <input type="checkbox" name="reverse" id="reverse" checked={props.reverse()}
-               onChange={e => props.setSearchParams({reverse: e.target.checked ? "true" : undefined})}/>
-        {" "}Reverse order
-      </label>
-      <select name="sort" value={props.sort()}
-              onChange={e => props.setSearchParams({sort: e.target.value === "score" ? undefined : e.target.value})}>
-        <option value="score">Score</option>
-        <option value="title">Title</option>
-        <option value="progress">Progress</option>
-        <option value="updatedAt">Last Updated</option>
-        <option value="startedAt">Start Date</option>
-        <option value="completedAt">Completed Date</option>
-        <option value="releaseDate">Release Date</option>
-        <option value="averageScore">Average Score</option>
-        <option value="popularity">Popularity</option>
-        <option value="repeat">
-          <Switch>
-            <Match when={params.type === "anime"}>Rewatches</Match>
-            <Match when={params.type === "manga"}>Rereads</Match>
-          </Switch>
-        </option>
-      </select>
+      <ListFilterSelect param="sort" sort defaultValue="score" each={sortOptions()}       value={props.sort()}              icon={<SortIcon />}      button="Sort"        tooltip="Order of the list. Click a sort again to reverse it, hold Shift to sort by multiple fields"                                 setSearchParams={props.setSearchParams} />
       <Switch>
         <Match when={!isOwnProfile() && authUserData()?.data?.name}>
           <A href={"/compare/" + params.type + "?user=" + user().name + "&user=" + authUserData().data.name}>

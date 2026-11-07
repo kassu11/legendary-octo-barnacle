@@ -11,6 +11,7 @@ import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
 import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
 import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
 import { isTypeFunction } from "../../../utils/functionUtils.js";
+import { arrayUtils } from "../../../utils/utils.js";
 import { setFetcherValueToStorage } from "../../../utils/storageUtils.js";
 import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
 import { authUserData } from "../../../core/globalState";
@@ -70,27 +71,24 @@ export function UserMediaList() {
   const setSearchParams = (options) => {
     _setSearchParams(options, { replace: true });
   }
+  const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
   const search = () => searchParams.search || "";
-  const format = () => searchParams.format || "";
-  const status = () => searchParams.status || "";
-  const genre = () => searchParams.genre || "";
-  const countryOfOrigin = () => searchParams.countryOfOrigin || "";
-  const isAdult = () => {
-    if (searchParams.isAdult === "true") return true;
-    if (searchParams.isAdult === "false") return false;
-    return undefined;
-  };
-  const year = () => searchParams.year || "";
+  const format = multiParam("format");
+  const status = multiParam("status");
+  const genre = multiParam("genre");
+  const countryOfOrigin = multiParam("countryOfOrigin");
+  const isAdult = multiParam("isAdult");
+  const year = multiParam("year");
   const privateFilter = () => searchParams.private === "true";
   const notesFilter = () => searchParams.notes === "true";
   const rewatchedFilter = () => searchParams.repeat === "true";
   const missingStartFilter = () => searchParams.missingStart === "true";
   const missingScoreFilter = () => searchParams.missingScore === "true";
-  const reverse = () => searchParams.reverse === "true";
-  const sort = () => searchParams.sort || "score";
-  const userStatus = () => searchParams.userStatus || "";
-  const studio = () => searchParams.studio || "";
-  const tag = () => searchParams.tag || "";
+  const sortParam = multiParam("sort");
+  const sort = () => sortParam().length ? sortParam() : ["score"];
+  const userStatus = multiParam("userStatus");
+  const studio = multiParam("studio");
+  const tag = multiParam("tag");
 
   const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
     asserts.assertTrueOLD(progressKey, "Progress key is undefined");
@@ -144,12 +142,11 @@ export function UserMediaList() {
         format: format(),
         status: status(),
         genre: genre(),
-        reverse: reverse(),
         countryOfOrigin: countryOfOrigin(),
         missingStart: missingStartFilter(),
         missingScore: missingScoreFilter(),
         isAdult: isAdult(),
-        year: +year() || undefined,
+        year: year(),
         private: privateFilter(),
         notes: notesFilter(),
         repeat: rewatchedFilter(),
@@ -193,7 +190,6 @@ export function UserMediaList() {
           rewatchedFilter={rewatchedFilter}
           missingStartFilter={missingStartFilter}
           missingScoreFilter={missingScoreFilter}
-          reverse={reverse}
           sort={sort}
           userStatus={userStatus}
           studio={studio}

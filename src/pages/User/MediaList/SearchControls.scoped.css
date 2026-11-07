@@ -4,8 +4,7 @@
     align-content: start;
     gap: .25rem;
 
-    select {
-      width: 100%;
-    }
+    --select-width: 100%;
+    --select-max-width: none;
   }
 }
