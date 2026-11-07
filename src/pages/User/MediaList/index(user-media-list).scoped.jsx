@@ -4,7 +4,7 @@ import "./index(user-media-list).scoped.css";
 import { capitalize } from "../../../utils/formating.js";
 import UserMediaListWorker from "../../../worker/user-media-list.js?worker";
 import { UserMediaListContext, useUser } from "../../../context/providers.js";
-import { leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
+import { debouncer, leadingAndTrailingDebounce } from "../../../utils/scheduled.js";
 import { asserts, queries } from "../../../collections/collections.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
@@ -136,10 +136,14 @@ export function UserMediaList() {
     });
   }, 250, 2);
 
+  const postToWorker = debouncer(postObject => {
+    worker = worker instanceof Worker ? worker : new UserMediaListWorker();
+    worker.postMessage(postObject);
+    worker.onmessage = setListData;
+  });
+
   const updateListInfo = () => {
     if (window.Worker && userMediaData()) {
-      worker = worker instanceof Worker ? worker : new UserMediaListWorker();
-
       const postObject = {
         data: userMediaData()?.data.data.MediaListCollection,
         search: search(),
@@ -162,8 +166,7 @@ export function UserMediaList() {
         tag: tag(),
       };
 
-      worker.postMessage(postObject);
-      worker.onmessage = setListData;
+      postToWorker(100, postObject);
     }
   }
 
