@@ -4,7 +4,7 @@ onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);
 }
 
-const tokenFilters = ["format", "status", "countryOfOrigin", "year", "genre", "userStatus", "studio", "tag"];
+const tokenFilters = ["format", "status", "countryOfOrigin", "year", "startedYear", "completedYear", "genre", "userStatus", "studio", "tag"];
 
 // Excluded values have a "-" prefix
 function parseTokens(tokens) {
@@ -148,6 +148,12 @@ function filter(entry, filterObject) {
     return false;
   }
   if (!matchesAny(filterObject.userStatus, status => status === entry.status)) {
+    return false;
+  }
+  if (!matchesAny(filterObject.startedYear, year => year === String(entry.startedAt?.year))) {
+    return false;
+  }
+  if (!matchesAny(filterObject.completedYear, year => year === String(entry.completedAt?.year))) {
     return false;
   }
   if (!matchesToggle(filterObject.private, !!entry.private)) {

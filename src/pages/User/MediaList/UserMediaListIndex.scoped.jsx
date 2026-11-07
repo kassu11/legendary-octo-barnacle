@@ -83,6 +83,8 @@ export function UserMediaList() {
   const countryOfOrigin = multiParam("countryOfOrigin");
   const isAdult = () => searchParams.isAdult;
   const year = multiParam("year");
+  const startedYear = multiParam("startedYear");
+  const completedYear = multiParam("completedYear");
   const privateFilter = () => searchParams.private;
   const notesFilter = () => searchParams.notes;
   const rewatchedFilter = () => searchParams.repeat;
@@ -157,6 +159,8 @@ export function UserMediaList() {
         missingScore: missingScoreFilter(),
         isAdult: isAdult(),
         year: year(),
+        startedYear: startedYear(),
+        completedYear: completedYear(),
         private: privateFilter(),
         notes: notesFilter(),
         repeat: rewatchedFilter(),
@@ -203,6 +207,8 @@ export function UserMediaList() {
           countryOfOrigin={countryOfOrigin}
           isAdult={isAdult}
           year={year}
+          startedYear={startedYear}
+          completedYear={completedYear}
           privateFilter={privateFilter}
           notesFilter={notesFilter}
           rewatchedFilter={rewatchedFilter}

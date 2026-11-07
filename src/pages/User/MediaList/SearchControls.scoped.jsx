@@ -54,7 +54,7 @@ function toOption(name) {
 const toListOption = name => ({ description: name || "All", id: name });
 
 // Every search param that the remove filters button clears, except search these are also counted as active filters
-const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
+const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
 
 export function SearchControlsScoped(props) {
   const location = useLocation();
@@ -161,7 +161,9 @@ export function SearchControlsScoped(props) {
           </FilterGroup>
           <FilterGroup title="List entry">
             <ListFilterSelect   param="userStatus"      excludable each={ userStatusOptions() } value={ props.userStatus()      } icon={ <OnListIcon />  } button="User Status" tooltip="Status of the entry on this user's list. Click once to include, twice to exclude"                                           setSearchParams={ setSearchParams } />
-            <ListToggle param="notes"        value={ props.notesFilter() }        icon={ <NotesIcon />       } label="Notes"                                            tooltip="Click once to show only entries with notes, twice to hide entries with notes" />
+            <ListFilterSelect   param="startedYear"     excludable each={ yearOptions         } value={ props.startedYear()     } icon={ <YearIcon />    } button="Start Year"  tooltip="Year the user started the entry. Click once to include, twice to exclude"                                                  setSearchParams={ setSearchParams } />
+            <ListFilterSelect   param="completedYear"   excludable each={ yearOptions         } value={ props.completedYear()   } icon={ <YearIcon />    } button="End Year"    tooltip="Year the user completed the entry. Click once to include, twice to exclude"                                                setSearchParams={ setSearchParams } />
+            <ListToggle param="notes"        value={ props.notesFilter() }       icon={ <NotesIcon />       } label="Notes"                                            tooltip="Click once to show only entries with notes, twice to hide entries with notes" />
             <ListToggle param="repeat"       value={ props.rewatchedFilter() }    icon={ <RepeatFilterIcon />      } label={params.type === "anime" ? "Rewatched" : "Reread"} tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
             <Show when={isOwnProfile()}>
               <ListToggle param="private"    value={ props.privateFilter() }      icon={ <PrivateIcon />     } label="Private"                                          tooltip="Click once to show only private entries, twice to hide private entries" />
