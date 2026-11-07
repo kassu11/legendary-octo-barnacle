@@ -1,11 +1,10 @@
 import { useParams } from "@solidjs/router";
 import { Show, For, createRenderEffect, ErrorBoundary, createEffect, createSignal } from "solid-js";
 import { Markdown } from "@/components/Markdown.scoped.jsx";
-import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { JikanEntityHeader, SummarySection } from "@/components/JikanEntity.scoped.jsx";
 import { queries } from "@/api/api.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { JikanMediaCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
-import "./CharacterJikanIndex.scoped.css";
 import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
@@ -45,20 +44,16 @@ export function CharacterJikanScoped() {
     <ErrorBoundary fallback="Jikan character error">
       <Show when={characterData()}>
         <div class="page-normal pg-jikan-character">
-          <div class="header">
-            <img src={characterData().data.data.images.webp.image_url} alt="Character profile." />
-            <div class="grid">
-              <div>
-                <p>{formatMSToString(charTime())}</p>
-                <h1>{characterData().data.data.name}</h1>
-                <p>{arrayUtils.from(characterData().data.data.name_kanji, characterData().data.data.nicknames).join(", ")}</p>
-              </div>
-              <FavouriteToggle jikanValue={characterData().data.data.favorites} />
-            </div>
-            <div>
-              <Markdown text={characterData().data.data.about} singleLineBreaks={true} />
-            </div>
-          </div>
+          <JikanEntityHeader
+            image={characterData().data.data.images.webp.image_url}
+            alt="Character profile."
+            time={formatMSToString(charTime())}
+            name={characterData().data.data.name}
+            alternativeNames={arrayUtils.from(characterData().data.data.name_kanji, characterData().data.data.nicknames)}
+            favorites={characterData().data.data.favorites}
+          >
+            <Markdown text={characterData().data.data.about} singleLineBreaks={true} />
+          </JikanEntityHeader>
           <SummarySection title="Anime">
             <ol class="grid-column-auto-fill card">
               <For each={characterData().data.data.anime}>{entry => (
@@ -83,16 +78,5 @@ export function CharacterJikanScoped() {
         </div>
       </Show>
     </ErrorBoundary>
-  );
-}
-
-function SummarySection(props) {
-  return (
-    <details open>
-      <summary>
-        <h2>{props.title}</h2>
-      </summary>
-      {props.children}
-    </details>
   );
 }

@@ -12,6 +12,10 @@ export const jikanCharacterUrl= character => {
   return "/mal/character/" + character.mal_id + "/" + formatTitleToUrl(character.name);
 }
 
+export const jikanStaffUrl = staff => {
+  return "/mal/staff/" + staff.mal_id + "/" + formatTitleToUrl(staff.name);
+}
+
 export const anilistMediaUrl = media => {
   let base;
 

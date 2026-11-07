@@ -68,6 +68,7 @@ export const myAnimeListMediaById = ({ type, id }) => `https://api.tenrai.org/v1
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.tenrai.org/v1/${type}/${id}/characters`;
 export const myAnimeListCharacterById = ({ id }) => `https://api.tenrai.org/v1/characters/${id}/full`;
 export const myAnimeListAnimeStaffById = ({ id }) => `https://api.tenrai.org/v1/anime/${id}/staff`;
+export const myAnimeListStaffById = ({ id }) => `https://api.tenrai.org/v1/people/${id}/full`;
 export const myAnimeListMediaSearch = ({ type, ...rest }) => `https://api.tenrai.org/v1/${type}?${objectToSearchParams(rest)}`;
 
 

@@ -25,6 +25,7 @@ import { MediaInfoHomeJikan, MediaInfoWrapperJikan } from "./pages/Media/Jikan/M
 import { MediaInfoCharactersJikan } from "./pages/Media/Jikan/MediaJikanCharactersIndex.jsx";
 import { MediaInfoStaffJikan } from "./pages/Media/Jikan/MediaJikanStaffIndex.jsx";
 import { CharacterJikanScoped } from "./pages/CharacterJikan/CharacterJikanIndex.scoped.jsx";
+import { StaffJikan } from "./pages/StaffJikan/StaffJikanIndex.jsx";
 import { Overview } from "./pages/User/Overview/UserOverviewIndex.scoped.jsx";
 import { UserMediaList } from "./pages/User/MediaList/UserMediaListIndex.scoped.jsx";
 import { IndexFavouriteScoped } from "./pages/User/Favourites/UserFavouritesIndex.scoped.jsx";
@@ -91,7 +92,7 @@ render(
               </Route>
               <Route path="/:sub/:id/:name?" matchFilters={{ api: "mal" }}>
                 <Route path="/" matchFilters={{ ...idFilter, sub: "character" }} component={CharacterJikanScoped} />
-                {/* <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={Staff} /> */}
+                <Route path="/" matchFilters={{ ...idFilter, sub: "staff" }} component={StaffJikan} />
                 {/* <Route path="/" matchFilters={{ ...idFilter, sub: "studio" }} component={Studio} /> */}
               </Route>
             </Route>

@@ -1,7 +1,7 @@
 @layer layout {
   .header {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto 1fr;
     gap: 16px;
     max-width: calc(192px + 75ch);
     margin-inline: auto;
