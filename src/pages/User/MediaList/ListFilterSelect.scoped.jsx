@@ -1,12 +1,12 @@
 import { createEffect, createMemo, createSelector, createSignal, createUniqueId, For, Match, on, onCleanup, Show, Switch } from "solid-js";
-import { useResponsive } from "../../../context/providers.js";
-import { Tooltip } from "../../../components/Tooltip.scoped.jsx";
-import { XIcon } from "../../../assets/SearchFilterIcons.jsx";
-import SortAlphabetDescendingIcon from "../../../assets/SortAlphaDown.jsx";
-import SortAlphabetAscendingIcon from "../../../assets/SortAlphaUp.jsx";
-import SortNumericDescendingIcon from "../../../assets/SortNumericDown.jsx";
-import SortNumericAscendingIcon from "../../../assets/SortNumericUp.jsx";
-import { Checkbox } from "../../Search/Checkbox.scoped.jsx";
+import { useResponsive } from "@/context/providers.js";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
+import { XIcon } from "@/assets/SearchFilterIcons.jsx";
+import SortAlphabetDescendingIcon from "@/assets/SortAlphaDown.jsx";
+import SortAlphabetAscendingIcon from "@/assets/SortAlphaUp.jsx";
+import SortNumericDescendingIcon from "@/assets/SortNumericDown.jsx";
+import SortNumericAscendingIcon from "@/assets/SortNumericUp.jsx";
+import { Checkbox } from "@/pages/Search/Checkbox.scoped.jsx";
 import "./ListFilterSelect.scoped.css";
 
 // Holding an arrow key would otherwise update the url and run the list worker around 30 times per second

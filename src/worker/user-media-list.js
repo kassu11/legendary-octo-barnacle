@@ -1,4 +1,4 @@
-import { fuse } from "../utils/stringUtils.js";
+import { fuse } from "@/utils/stringUtils.js";
 
 onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);

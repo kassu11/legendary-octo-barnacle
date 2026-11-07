@@ -1,14 +1,14 @@
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { leadingAndTrailingDebounce } from "../../utils/scheduled.js";
+import { leadingAndTrailingDebounce } from "@/utils/scheduled.js";
 import { A } from "@solidjs/router";
-import { mediaUrl } from "../../utils/formating.js";
+import { mediaUrl } from "@/utils/formating.js";
 import { EpisodeTime } from "./EpisodeTime.jsx";
 import "./CurrentCard.scoped.css";
-import { queries, timeCollection } from "../../collections/collections.js";
-import { createAnilistFetcher, fetcherToFetch } from "../../utils/fetcherUtils.js";
-import { assertTypeInteger } from "../../collections/asserts.js";
-import { mergeObjects } from "../../utils/objectUtils.js";
-import { createHover, HoverPortal, placeFirstFit } from "../../hooks/createHover";
+import { queries, timeCollection } from "@/collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
+import { assertTypeInteger } from "@/collections/asserts.js";
+import { mergeObjects } from "@/utils/objectUtils.js";
+import { createHover, HoverPortal, placeFirstFit } from "@/hooks/createHover";
 
 const placeCardHover = placeFirstFit({ placements: ["right-start", "left-start", "bottom"] });
 

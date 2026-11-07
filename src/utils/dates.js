@@ -1,4 +1,4 @@
-import { asserts } from "../collections/collections.js";
+import { asserts } from "@/collections/collections.js";
 
 const seasons = ["WINTER", "SPRING", "SUMMER", "FALL"];
 

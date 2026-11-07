@@ -1,9 +1,9 @@
 import { createEffect, createMemo, createSignal, For, on, Show } from "solid-js";
 import { useWidth } from "./UseWidth.jsx";
 import { DraggableScrollContainerScoped } from "./DraggableScrollContainer.scoped.jsx";
-import { numberCommas } from "../../../../utils/formating.js";
-import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
-import { numberUtils } from "../../../../utils/utils.js";
+import { numberCommas } from "@/utils/formating.js";
+import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
+import { numberUtils } from "@/utils/utils.js";
 import "./StatsYearLineCharts.scoped.css";
 
 export function StatsYearLineChartsScoped(props) {

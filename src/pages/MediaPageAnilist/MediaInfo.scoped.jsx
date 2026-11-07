@@ -1,10 +1,10 @@
 import "./MediaInfo.scoped.css";
 import { ErrorBoundary, Match, Show, Switch } from "solid-js";
-import { useMediaInfo } from "../../context/providers";
+import { useMediaInfo } from "@/context/providers";
 import { A } from "@solidjs/router";
-import { formatingUtils, numberUtils } from "../../utils/utils";
-import { formatMSToString } from "../../utils/timeUtils";
-import { translateToInternalSearchParams } from "../../core/apiTranslations";
+import { formatingUtils, numberUtils } from "@/utils/utils";
+import { formatMSToString } from "@/utils/timeUtils";
+import { translateToInternalSearchParams } from "@/core/apiTranslations";
 
 export function AnilistMediaInfo(props) {
   const { anilistData } = useMediaInfo();

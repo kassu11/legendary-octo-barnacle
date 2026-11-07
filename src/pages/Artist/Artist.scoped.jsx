@@ -1,11 +1,11 @@
 import { useParams } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
-import { AnimeTheme } from "../../components/MediaPage/AnimeThemes.scoped.jsx";
+import { AnimeTheme } from "@/components/MediaPage/AnimeThemes.scoped.jsx";
 import "./Artist.scoped.css";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
-import { queries } from "../../collections/collections.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { queries } from "@/collections/collections.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 function Artist() {
   const params = useParams();

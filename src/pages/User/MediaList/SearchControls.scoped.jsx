@@ -1,12 +1,12 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { useAuthentication, useResponsive, useUser, useUserMediaList } from "../../../context/providers.js";
+import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/context/providers.js";
 import { createMemo, createSignal, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { ALL_LISTS } from "./index(user-media-list).scoped.jsx";
 import { ListFilterSelect } from "./ListFilterSelect.scoped.jsx";
-import { TwoStateToggleButton } from "../../Search/TwoStateToggle.scoped.jsx";
-import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "../../Search/FilterLayout.scoped.jsx";
-import { arrayUtils } from "../../../utils/utils.js";
-import { AgeIcon, ArrowUpIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "../../../assets/SearchFilterIcons.jsx";
+import { TwoStateToggleButton } from "@/pages/Search/TwoStateToggle.scoped.jsx";
+import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/pages/Search/FilterLayout.scoped.jsx";
+import { arrayUtils } from "@/utils/utils.js";
+import { AgeIcon, ArrowUpIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "@/assets/SearchFilterIcons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [

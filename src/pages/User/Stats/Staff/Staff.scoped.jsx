@@ -1,13 +1,13 @@
 import { A, useParams } from "@solidjs/router";
-import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
+import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { localizations, queries } from "../../../../collections/collections.js";
-import { SortHeaderButtons } from "../SortHeaderButtons.scoped.jsx";
+import { localizations, queries } from "@/collections/collections.js";
+import { SortHeaderButtons } from "@/pages/User/Stats/SortHeaderButtons.scoped.jsx";
 import "./Staff.scoped.css";
-import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
-import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function StatsMediaStaff() {
   const params = useParams();

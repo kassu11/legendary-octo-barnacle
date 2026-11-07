@@ -1,8 +1,8 @@
-import Star from "../../assets/Star";
+import Star from "@/assets/Star";
 import { Switch, Match, mergeProps, splitProps, Show, For } from "solid-js";
 import "./ScoreInput.scoped.css";
-import EmojiByScoreScoped from "../EmojiByScore.scoped.jsx";
-import { asserts } from "../../collections/collections.js";
+import EmojiByScoreScoped from "@/components/EmojiByScore.scoped.jsx";
+import { asserts } from "@/collections/collections.js";
 
 function ScoreInput(props) {
   asserts.assertTrueOLD(props.format, "Score format is missing");

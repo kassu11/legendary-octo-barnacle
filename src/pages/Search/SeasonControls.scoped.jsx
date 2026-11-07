@@ -1,9 +1,9 @@
 import { useParams, useLocation, A } from "@solidjs/router";
 import { createMemo, For, Show } from "solid-js";
-import { useParsedSearchParams } from "../../context/providers";
-import { capitalize } from "../../utils/formating";
-import { arrayUtils } from "../../utils/utils";
-import { ChevronLeftIcon, ChevronRightIcon } from "../../assets/SearchFilterIcons.jsx";
+import { useParsedSearchParams } from "@/context/providers";
+import { capitalize } from "@/utils/formating";
+import { arrayUtils } from "@/utils/utils";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/SearchFilterIcons.jsx";
 import { Checkbox } from "./Checkbox.scoped";
 import "./SeasonControls.scoped.css";
 

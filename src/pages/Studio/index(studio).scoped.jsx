@@ -1,17 +1,17 @@
 import {  useParams, useSearchParams } from "@solidjs/router";
 import { Switch, Match, Show, createSignal, createEffect, For, untrack } from "solid-js";
 import "./index(studio).scoped.css";
-import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
+import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { asserts, queries } from "../../collections/collections.js";
-import { MediaCardContainerScoped } from "../../components/Cards/MediaCardContainer.scoped.jsx";
-import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { isTypeFunction } from "../../utils/functionUtils.js";
-import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
-import { MediaCard } from "../User/Relations/MediaCard.scoped";
+import { asserts, queries } from "@/collections/collections.js";
+import { MediaCardContainerScoped } from "@/components/Cards/MediaCardContainer.scoped.jsx";
+import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
+import { MediaCard } from "@/pages/User/Relations/MediaCard.scoped";
 
 export function Studio() {
   const params = useParams();

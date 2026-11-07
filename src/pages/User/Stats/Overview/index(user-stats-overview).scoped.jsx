@@ -1,16 +1,16 @@
 import { useParams } from "@solidjs/router";
-import { numberCommas } from "../../../../utils/formating.js";
+import { numberCommas } from "@/utils/formating.js";
 import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
-import { useUser } from "../../../../context/providers.js";
+import { useUser } from "@/context/providers.js";
 import "./index(user-stats-overview).scoped.css";
 import { StatsDistributionListsScoped } from "./StatsDistributionLists.scoped.jsx";
 import { StatsScoreDistributionBarsScoped } from "./StatsScoreDistributionBars.scoped.jsx";
 import { StatsEpisodeCountBarsScoped } from "./StatsEpisodeCountBars.scoped.jsx";
 import { StatsYearLineChartsScoped } from "./StatsYearLineCharts.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
-import { localizations, queries } from "../../../../collections/collections.js";
-import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { localizations, queries } from "@/collections/collections.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function StatsMediaOverview() {
   const params = useParams();

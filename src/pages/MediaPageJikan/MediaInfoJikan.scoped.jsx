@@ -1,21 +1,21 @@
 import { A, useParams } from "@solidjs/router";
-import { MediaInfoContext, useMediaInfo } from "../../context/providers.js";
-import { localizations, mediaStatuses, queries } from "../../collections/collections.js";
-import { arrayUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "../../utils/utils.js";
+import { MediaInfoContext, useMediaInfo } from "@/context/providers.js";
+import { localizations, mediaStatuses, queries } from "@/collections/collections.js";
+import { arrayUtils, formatingUtils, numberUtils, statusUtils, stringUtils, urlUtils } from "@/utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaInfoJikan.scoped.css";
-import { Trailer } from "../MediaPage/Trailer.scoped.jsx";
-import { FavouriteToggle } from "../../components/FavouriteToggle.scoped.jsx";
-import { Markdown } from "../../components/Markdown.scoped.jsx";
-import { MalCharacterCard, MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
-import { MediaPageScores } from "../../components/MediaPage/Scores.scoped.jsx";
-import { ExternalLinks } from "../../components/media/ExternalLinks.scoped.jsx";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
-import { isTypeFunction } from "../../utils/functionUtils.js";
-import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
+import { Trailer } from "@/pages/MediaPage/Trailer.scoped.jsx";
+import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { Markdown } from "@/components/Markdown.scoped.jsx";
+import { MalCharacterCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
+import { MediaPageScores } from "@/components/MediaPage/Scores.scoped.jsx";
+import { ExternalLinks } from "@/components/media/ExternalLinks.scoped.jsx";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { MediaPageApiSwitcher } from "./MediaPageApiSwitcher.scoped.jsx";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function MediaInfoWrapperJikan(props) {
   const params = useParams();

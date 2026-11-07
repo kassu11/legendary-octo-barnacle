@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { createSignal, Match, Switch } from "solid-js";
-import { formatTitleToUrl, mediaUrl } from "../../../utils/formating.js";
-import { useFavourites } from "../../../context/providers.js";
+import { formatTitleToUrl, mediaUrl } from "@/utils/formating.js";
+import { useFavourites } from "@/context/providers.js";
 import { DeleteFavouriteScoped } from "./DeleteFavourite.scoped.jsx";
 import "./FavouritePageItem.scoped.css"
 

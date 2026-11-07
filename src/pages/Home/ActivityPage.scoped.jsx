@@ -1,15 +1,15 @@
 import { createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { untrack } from "solid-js/web";
-import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { Tooltip } from "../../components/Tooltip.scoped";
-import { ActivityCard } from "../../components/Activity.scoped.jsx";
-import { asserts, queries } from "../../collections/collections.js";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped";
+import { ActivityCard } from "@/components/Activity.scoped.jsx";
+import { asserts, queries } from "@/collections/collections.js";
 import "./ActivityPage.scoped.css";
-import { arrayUtils, scheduleUtils } from "../../utils/utils.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { arrayUtils, scheduleUtils } from "@/utils/utils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function HomePageActivityReelContent(props) {
   const [loading, setLoading] = createSignal(false);

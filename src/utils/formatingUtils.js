@@ -1,4 +1,4 @@
-import { asserts } from "../collections/collections";
+import { asserts } from "@/collections/collections";
 import { formatTitleToUrl } from "./formating";
 
 export const titleToUrl = (title) => {

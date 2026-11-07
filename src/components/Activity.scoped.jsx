@@ -1,16 +1,16 @@
 import { Switch, Show, Match, createSignal, mergeProps, For, createEffect } from "solid-js";
 import { OldMarkdownComponent } from "./Markdown.scoped.jsx";
 import "./Activity.scoped.css";
-import { leadingAndTrailingDebounce } from "../utils/scheduled.js";
-import { capitalize, mediaUrl } from "../utils/formating.js";
+import { leadingAndTrailingDebounce } from "@/utils/scheduled.js";
+import { capitalize, mediaUrl } from "@/utils/formating.js";
 import { A } from "@solidjs/router";
 import { Tooltip } from "./Tooltip.scoped";
 import { Dynamic } from "solid-js/web"
-import { asserts, queries } from "../collections/collections.js";
+import { asserts, queries } from "@/collections/collections.js";
 import { CreatedAt } from "./CreatedAt.jsx";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "../utils/fetcherUtils.js";
-import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
-import { createAbortController } from "../utils/abortUtils.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { createAbortController } from "@/utils/abortUtils.js";
 
 export function ActivityCard(props) {
   props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, props);

@@ -1,4 +1,4 @@
-import { asserts } from "../collections/collections";
+import { asserts } from "@/collections/collections";
 import "./Buttons.scoped.css";
 import { Tooltip } from "./Tooltip.scoped";
 

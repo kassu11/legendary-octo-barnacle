@@ -1,8 +1,8 @@
 import { For, onCleanup, onMount } from "solid-js";
 import "./HorizontalCardRow.scoped.css";
-import { asserts } from "../../collections/collections.js";
+import { asserts } from "@/collections/collections.js";
 import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
-import { MediaCard } from "../User/Relations/MediaCard.scoped.jsx";
+import { MediaCard } from "@/pages/User/Relations/MediaCard.scoped.jsx";
 
 export function HorizontalCardRowScoped(props) {
   asserts.assertTrueOLD("href" in props, "Link is missing");

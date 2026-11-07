@@ -1,8 +1,8 @@
 import { createEffect, createMemo, createSignal } from "solid-js";
 import "./MainLoadingBar.scoped.css";
-import { mainLoadingCount } from "../../core/globalState";
+import { mainLoadingCount } from "@/core/globalState";
 import { Portal } from "solid-js/web";
-import { assertNonNanNumber } from "../../collections/asserts";
+import { assertNonNanNumber } from "@/collections/asserts";
 
 const [topElements, setTopElements] = createSignal([document.body]);
 

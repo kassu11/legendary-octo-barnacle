@@ -1,10 +1,10 @@
 import { Show } from "solid-js";
-import { useUser } from "../../../context/providers.js";
-import { asserts, queries } from "../../../collections/collections.js";
+import { useUser } from "@/context/providers.js";
+import { asserts, queries } from "@/collections/collections.js";
 import "./DeleteFavourite.scoped.css"
-import { createAnilistFetcher, fetcherToFetch } from "../../../utils/fetcherUtils.js";
-import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
-import { authUserData } from "../../../core/globalState.js";
+import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { authUserData } from "@/core/globalState.js";
 
 export function DeleteFavouriteScoped(props) {
   const { user } = useUser();

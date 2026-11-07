@@ -1,4 +1,4 @@
-import { assertFalsy } from "../collections/asserts";
+import { assertFalsy } from "@/collections/asserts";
 import { isTypeArray } from "./arrays";
 
 export const isTypeObject = value => typeof value === "object" && value && !Array.isArray(value);

@@ -1,7 +1,7 @@
 import { createEffect, createSignal, ErrorBoundary, For, mergeProps, Show } from "solid-js";
 import "./Characters.scoped.css";
 import { A } from "@solidjs/router";
-import { formatTitleToUrl, languageFromCountry } from "../../utils/formating";
+import { formatTitleToUrl, languageFromCountry } from "@/utils/formating";
 
 const countryOfOriginToLanguage = (characters, country) => {
   const language = languageFromCountry(country);

@@ -1,12 +1,12 @@
 import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
-import ScoreInput from "../components/media/ScoreInput.scoped";
-import { FavouriteToggle } from "../components/FavouriteToggle.scoped.jsx";
+import ScoreInput from "@/components/media/ScoreInput.scoped";
+import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import "./EditMediaEntriesContext.scoped.css";
 import { EditMediaEntriesContext } from "./providers.js";
-import { asserts, queries } from "../collections/collections.js";
-import { createAnilistFetcher, fetcherToFetch } from "../utils/fetcherUtils.js";
-import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped.jsx";
-import { authUserData, storeGlobalEditedMedia } from "../core/globalState";
+import { asserts, queries } from "@/collections/collections.js";
+import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
+import { authUserData, storeGlobalEditedMedia } from "@/core/globalState";
 
 function formState(auth, initialData) {
   asserts.assertTrueOLD(!initialData || auth, "Should not be able to edit if not authenticated");

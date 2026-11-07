@@ -1,10 +1,10 @@
 import { createSignal, For, Match, Switch, untrack } from "solid-js";
 import "./ApplicationNotifications.scoped.css";
-import CloseIcon from "../../assets/CloseIcon";
-import ErrorIcon from "../../assets/ErrorIcon";
-import SuccessIcon from "../../assets/SuccessIcon";
-import InfoIcon from "../../assets/InfoIcon";
-import WarningIcon from "../../assets/WarningIcon";
+import CloseIcon from "@/assets/CloseIcon";
+import ErrorIcon from "@/assets/ErrorIcon";
+import SuccessIcon from "@/assets/SuccessIcon";
+import InfoIcon from "@/assets/InfoIcon";
+import WarningIcon from "@/assets/WarningIcon";
 
 const [notifications, setNotifications] = createSignal([]);
 

@@ -1,8 +1,8 @@
-import { assertTypeArray, assertTypeString } from "../collections/asserts";
-import { localizations, modes } from "../collections/collections";
-import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "../core/fetchRateLimits";
-import { allActiveTokens, logoutUser, setMainLoadingCount, token2 } from "../core/globalState";
-import { addApplicationNotification } from "../pages/App/ApplicationNotifications.scoped";
+import { assertTypeArray, assertTypeString } from "@/collections/asserts";
+import { localizations, modes } from "@/collections/collections";
+import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "@/core/fetchRateLimits";
+import { allActiveTokens, logoutUser, setMainLoadingCount, token2 } from "@/core/globalState";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped";
 import { isTypeFunction } from "./functionUtils";
 import { hashKeyFNV32 } from "./hashUtils";
 import { safeStringifyJson } from "./jsonUtils";

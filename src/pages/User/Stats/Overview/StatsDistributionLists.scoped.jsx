@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 import { A, useParams } from "@solidjs/router";
-import { useUser } from "../../../../context/providers.js";
-import { capitalize, countryNameFromCountryCode, formatMediaFormat, numberCommas } from "../../../../utils/formating.js";
+import { useUser } from "@/context/providers.js";
+import { capitalize, countryNameFromCountryCode, formatMediaFormat, numberCommas } from "@/utils/formating.js";
 import { DistributionFooterScoped } from "./DistributionFooter.scoped.jsx";
 import "./StatsDistributionLists.scoped.css";
 

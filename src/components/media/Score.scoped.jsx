@@ -1,7 +1,7 @@
-import Star from "../../assets/Star";
+import Star from "@/assets/Star";
 import { Show, Switch, Match, splitProps } from "solid-js";
 import "./Score.scoped.css";
-import EmojiByScoreScoped from "../EmojiByScore.scoped.jsx";
+import EmojiByScoreScoped from "@/components/EmojiByScore.scoped.jsx";
 
 function Score(props) {
 

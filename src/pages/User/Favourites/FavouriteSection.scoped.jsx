@@ -1,11 +1,11 @@
 import { Show, Switch, Match, createSignal } from "solid-js";
-import { useAuthentication, useUser } from "../../../context/providers.js";
-import { FavouritesContext } from "../../../context/providers.js";
+import { useAuthentication, useUser } from "@/context/providers.js";
+import { FavouritesContext } from "@/context/providers.js";
 import { FavouritesPageScoped } from "./FavouritesPage.scoped.jsx";
-import { asserts, queries } from "../../../collections/collections.js";
+import { asserts, queries } from "@/collections/collections.js";
 import "./FavouriteSection.scoped.css"
-import { createAnilistFetcher, fetcherToFetch } from "../../../utils/fetcherUtils.js";
-import { addApplicationNotification } from "../../App/ApplicationNotifications.scoped.jsx";
+import { createAnilistFetcher, fetcherToFetch } from "@/utils/fetcherUtils.js";
+import { addApplicationNotification } from "@/pages/App/ApplicationNotifications.scoped.jsx";
 
 export function FavouriteSectionScoped(props) {
   asserts.assertTrueOLD(props.title, "title missing");

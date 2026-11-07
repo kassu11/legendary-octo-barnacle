@@ -1,14 +1,14 @@
 import { createEffect, createSignal, For } from "solid-js";
 import { CurrentCardsScoped } from "./CurrentCards.scoped.jsx";
 import "./CurrentWatchingMedia.scoped.css";
-import { queries } from "../../collections/collections.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { authedUserId, token2 } from "../../core/globalState.js";
-import { isTypeFunction } from "../../utils/functionUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { setFetcherValueToStorage } from "../../utils/storageUtils.js";
-import { weekInSeconds } from "../../collections/time.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { queries } from "@/collections/collections.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { authedUserId, token2 } from "@/core/globalState.js";
+import { isTypeFunction } from "@/utils/functionUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { weekInSeconds } from "@/collections/time.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function CurrentWatchingMediaScoped() {
   const [data, setData] = createSignal();

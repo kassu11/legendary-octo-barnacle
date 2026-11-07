@@ -1,4 +1,4 @@
-import { assertThruthy } from "../collections/asserts";
+import { assertThruthy } from "@/collections/asserts";
 
 const createDbStore = (db, storeName, key) => {
   if (!db.objectStoreNames.contains(storeName)) {

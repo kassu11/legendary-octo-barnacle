@@ -1,13 +1,13 @@
 import { A, useParams } from "@solidjs/router";
 import {  createEffect, createSignal, For, Show, } from "solid-js";
 import "./index(activity).scoped.css";
-import { ActivityCard } from "../../components/Activity.scoped.jsx";
-import { OldMarkdownComponent } from "../../components/Markdown.scoped.jsx";
-import { CreatedAt } from "../../components/CreatedAt.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { queries } from "../../collections/collections.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { ActivityCard } from "@/components/Activity.scoped.jsx";
+import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
+import { CreatedAt } from "@/components/CreatedAt.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { queries } from "@/collections/collections.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 export function ActivityPage() {
   const params = useParams();

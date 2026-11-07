@@ -1,5 +1,5 @@
 import { ErrorBoundary, For, Show } from "solid-js";
-import { formatingUtils, urlUtils } from "../../utils/utils";
+import { formatingUtils, urlUtils } from "@/utils/utils";
 import "./RelationsPreview.scoped.css";
 import { A } from "@solidjs/router";
 

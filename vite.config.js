@@ -6,6 +6,7 @@ import checker from 'vite-plugin-checker';
 import AutoImport from "unplugin-auto-import/vite"
 import grapqlMinimizer from "./vite-plugins/graphql-minimize";
 import openInEditor from "./vite-plugins/open-in-editor";
+import { fileURLToPath } from "node:url";
 
 const __PORT__ = 5173;
 const __DEBUG_PORT__ = 5174;
@@ -56,6 +57,11 @@ export default defineConfig({
       ],
     })
   ],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   base: __BASE__ + (branch !== "main" ? "/branches/" + branch : ""),
   build: {
     chunkSizeWarningLimit: 1000,

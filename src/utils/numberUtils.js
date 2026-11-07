@@ -1,4 +1,4 @@
-import { asserts } from "../collections/collections";
+import { asserts } from "@/collections/collections";
 
 export const numberCommas = num => {
   if (num == undefined) return;

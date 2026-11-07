@@ -1,12 +1,12 @@
 import { A, useParams } from "@solidjs/router";
-import { formatTitleToUrl, numberCommas, plural } from "../../../../utils/formating.js";
+import { formatTitleToUrl, numberCommas, plural } from "@/utils/formating.js";
 import { createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { queries } from "../../../../collections/collections.js";
+import { queries } from "@/collections/collections.js";
 import "./VoiceActors.scoped.css";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../../../utils/abortUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();

@@ -1,11 +1,11 @@
 import { A } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
-import { useUser } from "../../../context/providers.js";
-import { queries } from "../../../collections/collections.js";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../../utils/timeUtils.js";
+import { useUser } from "@/context/providers.js";
+import { queries } from "@/collections/collections.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
 import "./Followers.scoped.css";
-import { createCleanUpAbortController } from "../../../utils/abortUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function Followers(props) {
   const { user } = useUser();

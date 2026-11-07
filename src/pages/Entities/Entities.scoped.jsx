@@ -1,17 +1,17 @@
 import { A, useParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createRenderEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import "./Entities.scoped.css";
-import { capitalize, languageFromCountry } from "../../utils/formating.js";
-import { asserts, modes, signals, queries } from "../../collections/collections.js";
-import { arrayUtils } from "../../utils/utils.js";
+import { capitalize, languageFromCountry } from "@/utils/formating.js";
+import { asserts, modes, signals, queries } from "@/collections/collections.js";
+import { arrayUtils } from "@/utils/utils.js";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
-import { LoaderCircle } from "../../components/LoaderCircle.scoped.jsx";
-import { Tooltip } from "../../components/Tooltip.scoped";
-import { Intersection } from "../../components/utils/Intersection.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "../../utils/fetcherUtils.js";
-import { getFetcherValueFromStorage, setFetcherValueToStorage } from "../../utils/storageUtils";
-import { isTypeFunction } from "../../utils/functionUtils";
-import { createCleanUpAbortController } from "../../utils/abortUtils";
+import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped";
+import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/utils/fetcherUtils.js";
+import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
+import { isTypeFunction } from "@/utils/functionUtils";
+import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 export function AnimeCharacters() {
   return (

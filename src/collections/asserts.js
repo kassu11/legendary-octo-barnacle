@@ -1,4 +1,4 @@
-import { isTypeObject } from "../utils/objectUtils";
+import { isTypeObject } from "@/utils/objectUtils";
 
 export const assertTrueOLD = (condition, message = "Not true") => {
   if (!condition) {

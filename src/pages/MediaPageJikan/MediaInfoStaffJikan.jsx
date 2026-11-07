@@ -1,11 +1,11 @@
 import { useParams } from "@solidjs/router";
-import { useMediaInfo } from "../../context/providers.js";
-import {  queries } from "../../collections/collections.js";
-import { MalStaffCard } from "../../components/Cards/Cards.scoped.jsx";
+import { useMediaInfo } from "@/context/providers.js";
+import {  queries } from "@/collections/collections.js";
+import { MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
 import { createEffect, createSignal, ErrorBoundary, For, Show } from "solid-js";
-import { createJsonGetFetcher, sendFetcher } from "../../utils/fetcherUtils.js";
-import { createTimer, formatMSToString } from "../../utils/timeUtils.js";
-import { createCleanUpAbortController } from "../../utils/abortUtils.js";
+import { createJsonGetFetcher, sendFetcher } from "@/utils/fetcherUtils.js";
+import { createTimer, formatMSToString } from "@/utils/timeUtils.js";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 export function MediaInfoStaffJikan() {
   const params = useParams();
