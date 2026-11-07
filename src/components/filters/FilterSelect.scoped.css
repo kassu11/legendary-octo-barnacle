@@ -10,6 +10,11 @@
     position: relative;
     min-width: 0;
 
+    &:not(.open):not(.mouse-closed):not(:active):has(input:focus-visible) {
+      border-radius: 4px;
+      outline: 2px solid currentColor;
+    }
+
     .trigger {
       display: flex;
       align-items: center;
