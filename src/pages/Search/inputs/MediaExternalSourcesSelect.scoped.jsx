@@ -70,6 +70,7 @@ export function MediaExternalSourcesSelect() {
     <Show when={params.type !== "media"}>
       <FilterSelect
         param="externalSources"
+        noEscapeCancel
         tooltip={params.type === "anime" ? "Show only media available on these streaming services" : "Show only media readable on these sites"}
         each={externalSourcesOptions()}
         value={externalSourcesValues()}

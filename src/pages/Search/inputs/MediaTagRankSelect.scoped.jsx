@@ -41,6 +41,6 @@ export function MediaTagRankSelect() {
   };
 
   return (
-    <FilterSelect radio param="rank" tooltip="Minimum tag relevance percentage. Higher values only match media where the selected tags are a major part of the story" each={tagRankOptions()} value={tagRankValues()} valueLabel={valueLabel()} onPick={handlePick} onClear={() => setSearchParams({ rank: undefined }, { replace: true })} icon={<TagRankIcon />} button="Tag Rank" />
+    <FilterSelect radio param="rank" noEscapeCancel tooltip="Minimum tag relevance percentage. Higher values only match media where the selected tags are a major part of the story" each={tagRankOptions()} value={tagRankValues()} valueLabel={valueLabel()} onPick={handlePick} onClear={() => setSearchParams({ rank: undefined }, { replace: true })} icon={<TagRankIcon />} button="Tag Rank" />
   );
 }

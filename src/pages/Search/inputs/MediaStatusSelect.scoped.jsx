@@ -50,6 +50,6 @@ export function MediaStatusSelect() {
   };
 
   return (
-    <FilterSelect param="status" tooltip="Current release status of the media" each={statusOptions()} value={statusValues()} setSearchParams={handleChange} icon={<StatusIcon />} button="Status" />
+    <FilterSelect param="status" noEscapeCancel tooltip="Current release status of the media" each={statusOptions()} value={statusValues()} setSearchParams={handleChange} icon={<StatusIcon />} button="Status" />
   );
 }

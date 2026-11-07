@@ -83,6 +83,6 @@ export function MediaSortSelect() {
   };
 
   return (
-    <FilterSelect param="sort" sort defaultValue={DEFAULT_SORT_ID} tooltip="Order the results. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" each={sortOptions()} value={sortValues()} setSearchParams={handleChange} icon={<SortIcon />} button="Sort" />
+    <FilterSelect param="sort" sort defaultValue={DEFAULT_SORT_ID} noEscapeCancel tooltip="Order the results. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" each={sortOptions()} value={sortValues()} setSearchParams={handleChange} icon={<SortIcon />} button="Sort" />
   );
 }

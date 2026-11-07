@@ -85,6 +85,7 @@ function SortDirection(props) {
  * @param {() => void} [props.onClear] Clears the selection of onPick, without this it can't be cleared
  * @param {string} [props.valueLabel] Replaces the selections in the trigger
  * @param {boolean} [props.noPreview] Moving the cursor doesn't filter, for rows that are expensive to select
+ * @param {boolean} [props.noEscapeCancel] Esc closes without restoring the selections from when the select was opened, only the preview is dropped
  * @param {boolean} [props.loading] Shows a spinner when there are no rows
  * @param {string} [props.emptyText] Shown instead of "No results" when there are no rows and no search
  * @param {(query: string) => void} [props.onQueryChange]
@@ -341,6 +342,13 @@ export function FilterSelect(props) {
     close();
   };
 
+  const handleEscape = () => {
+    if (!props.noEscapeCancel) return cancel();
+
+    if (preview()) remove(preview());
+    close();
+  };
+
   createEffect(on(isTouch, () => {
     close();
     finishClosing();
@@ -364,12 +372,12 @@ export function FilterSelect(props) {
     clearRange();
     setCursor(-1);
     scroller.scrollTop = 0;
-    if (e.detail === 0) input.focus();
+    if (e.detail === 0) input.focus({ focusVisible: false });
   };
 
   const handleCountKeyDown = e => {
     if (e.key !== "Escape") return;
-    input.focus();
+    input.focus({ focusVisible: false });
     handleKeyDown(e);
   };
 
@@ -381,7 +389,7 @@ export function FilterSelect(props) {
       dialog.setAttribute("autofocus", "");
       // Typing in the search while the dialog is closing opens it again
       if (!dialog.open) dialog.showModal();
-      input.focus({ preventScroll: true });
+      input.focus({ focusVisible: false, preventScroll: true });
     }
     // Panel keeps its size while searching
     if (rows().length) scroller.style.height = scroller.offsetHeight + "px";
@@ -472,7 +480,7 @@ export function FilterSelect(props) {
       case "Escape":
         if (!isOpen()) return setIsMouseClosed(true);
         e.preventDefault();
-        return cancel();
+        return handleEscape();
       case "Backspace":
         if (query() || !selected().length) return;
         if (props.onPick) return clearAll();
@@ -676,7 +684,7 @@ export function FilterSelect(props) {
   const handleTriggerClearClick = e => {
     e.preventDefault();
     clearAll();
-    if (e.detail === 0) (isTouch() ? openButton : input).focus();
+    if (e.detail === 0) (isTouch() ? openButton : input).focus({ focusVisible: false });
   };
 
   const handlePanelMouseDown = e => {
@@ -864,7 +872,7 @@ export function FilterSelect(props) {
             ref={elem => dialog = elem}
             aria-label={props.button}
             onClick={handleDialogClick}
-            onCancel={e => { e.preventDefault(); cancel(); }}
+            onCancel={e => { e.preventDefault(); handleEscape(); }}
           >
             {panel()}
           </dialog>

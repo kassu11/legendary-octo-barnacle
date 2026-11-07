@@ -149,6 +149,7 @@ export function MediaUsersSelect() {
       param="user"
       excludable
       noPreview
+      noEscapeCancel
       tooltip="Filter by the lists of other users. Click once to include, twice to exclude"
       each={usersOptions()}
       value={usersValues()}

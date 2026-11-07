@@ -32,6 +32,6 @@ export function MediaSourceSelect() {
   });
 
   return (
-    <FilterSelect param="source" tooltip="The original material the media was adapted from" each={sourceOptions} value={sourceValues()} setSearchParams={query => setSearchParams(query, { replace: true })} icon={<SourceIcon />} button="Source" />
+    <FilterSelect param="source" noEscapeCancel tooltip="The original material the media was adapted from" each={sourceOptions} value={sourceValues()} setSearchParams={query => setSearchParams(query, { replace: true })} icon={<SourceIcon />} button="Source" />
   );
 }

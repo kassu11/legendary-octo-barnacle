@@ -93,6 +93,6 @@ export function MediaYearSelect() {
   };
 
   return (
-    <FilterSelect radio param="year" tooltip="Year the media started releasing" each={yearOptions()} value={yearValues().map(value => "" + value.id)} valueLabel={yearValues()[0]?.toast} onPick={handlePick} onClear={clearYear} icon={<YearIcon />} button="Year" />
+    <FilterSelect radio param="year" noEscapeCancel tooltip="Year the media started releasing" each={yearOptions()} value={yearValues().map(value => "" + value.id)} valueLabel={yearValues()[0]?.toast} onPick={handlePick} onClear={clearYear} icon={<YearIcon />} button="Year" />
   );
 }

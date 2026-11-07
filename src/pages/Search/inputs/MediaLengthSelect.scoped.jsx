@@ -79,6 +79,6 @@ export function MediaLengthSelect() {
   };
 
   return (
-    <FilterSelect radio param="length" tooltip="Filter by episode length in minutes or by volume count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={lengthOptions()} value={lengthValues().map(value => "" + value.id)} valueLabel={lengthValues()[0]?.toast} onPick={handlePick} onClear={() => setSearchParams({ length: undefined, lengthLesser: undefined, lengthGreater: undefined }, { replace: true })} icon={<LengthIcon />} button={text()} />
+    <FilterSelect radio param="length" noEscapeCancel tooltip="Filter by episode length in minutes or by volume count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={lengthOptions()} value={lengthValues().map(value => "" + value.id)} valueLabel={lengthValues()[0]?.toast} onPick={handlePick} onClear={() => setSearchParams({ length: undefined, lengthLesser: undefined, lengthGreater: undefined }, { replace: true })} icon={<LengthIcon />} button={text()} />
   );
 }

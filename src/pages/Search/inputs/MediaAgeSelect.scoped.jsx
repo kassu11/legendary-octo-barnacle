@@ -31,6 +31,6 @@ export function MediaAgeSelect() {
   };
 
   return (
-    <FilterSelect radio param="age" defaultValue="r" tooltip="Include adult content in the results" each={ageOptions} value={ageValues()} onPick={handlePick} onClear={() => handlePick("r")} icon={<AgeIcon />} button="Age" />
+    <FilterSelect radio param="age" defaultValue="r" noEscapeCancel tooltip="Include adult content in the results" each={ageOptions} value={ageValues()} onPick={handlePick} onClear={() => handlePick("r")} icon={<AgeIcon />} button="Age" />
   );
 }

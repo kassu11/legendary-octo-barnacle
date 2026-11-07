@@ -79,6 +79,6 @@ export function MediaProgressSelect() {
   };
 
   return (
-    <FilterSelect radio param="progress" tooltip="Filter by episode or chapter count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={progressOptions()} value={progressValues().map(value => "" + value.id)} valueLabel={progressValues()[0]?.toast} onPick={handlePick} onClear={() => setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: undefined }, { replace: true })} icon={<ProgressIcon />} button={text()} />
+    <FilterSelect radio param="progress" noEscapeCancel tooltip="Filter by episode or chapter count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={progressOptions()} value={progressValues().map(value => "" + value.id)} valueLabel={progressValues()[0]?.toast} onPick={handlePick} onClear={() => setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: undefined }, { replace: true })} icon={<ProgressIcon />} button={text()} />
   );
 }

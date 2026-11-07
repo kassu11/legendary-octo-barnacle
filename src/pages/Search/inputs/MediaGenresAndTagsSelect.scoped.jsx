@@ -85,6 +85,7 @@ export function MediaGenresAndTagsSelect() {
       <FilterSelect
         param="theme"
         excludable
+        noEscapeCancel
         tooltip="Genres and tags. Click once to include, twice to exclude. Hover a theme to see its description"
         each={anilistGenresAndTagsData()?.entries || []}
         value={genresAndTagsValues()}

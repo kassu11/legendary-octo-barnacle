@@ -39,6 +39,6 @@ export function MediaTypeSelect() {
   };
 
   return (
-    <FilterSelect radio param="type" tooltip="Search anime, manga or both at the same time" each={typeOptions} value={typeValues()} onPick={handlePick} icon={<TypeIcon />} button="Type" />
+    <FilterSelect radio param="type" noEscapeCancel tooltip="Search anime, manga or both at the same time" each={typeOptions} value={typeValues()} onPick={handlePick} icon={<TypeIcon />} button="Type" />
   );
 }

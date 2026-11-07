@@ -56,6 +56,6 @@ export function MediaFormatSelect() {
   };
 
   return (
-    <FilterSelect param="format" tooltip="How the media was released, e.g. TV series, movie, manga or light novel" each={formatOptions()} value={formatValues()} setSearchParams={handleChange} icon={<FormatIcon />} button="Format" />
+    <FilterSelect param="format" noEscapeCancel tooltip="How the media was released, e.g. TV series, movie, manga or light novel" each={formatOptions()} value={formatValues()} setSearchParams={handleChange} icon={<FormatIcon />} button="Format" />
   );
 }

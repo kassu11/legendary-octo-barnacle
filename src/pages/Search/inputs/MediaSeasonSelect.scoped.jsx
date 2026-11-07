@@ -59,6 +59,6 @@ export function MediaSeasonSelect() {
   };
 
   return (
-    <FilterSelect radio param="season" tooltip="Anime airing season. Combine with year to browse a specific season" each={seasonOptions} value={seasonValues()} onPick={handlePick} onClear={() => handlePick(seasonValues()[0])} icon={<SeasonIcon />} button="Season" />
+    <FilterSelect radio param="season" noEscapeCancel tooltip="Anime airing season. Combine with year to browse a specific season" each={seasonOptions} value={seasonValues()} onPick={handlePick} onClear={() => handlePick(seasonValues()[0])} icon={<SeasonIcon />} button="Season" />
   );
 }

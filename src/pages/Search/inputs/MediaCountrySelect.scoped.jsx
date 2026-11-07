@@ -24,6 +24,6 @@ export function MediaCountrySelect() {
   const handleChange = query => navigate(path => path.replace("/manhwa", ""), query, { replace: true });
 
   return (
-    <FilterSelect param="country" tooltip="Country of origin" each={countryOptions} value={countryValues()} setSearchParams={handleChange} icon={<CountryIcon />} button="Country" />
+    <FilterSelect param="country" noEscapeCancel tooltip="Country of origin" each={countryOptions} value={countryValues()} setSearchParams={handleChange} icon={<CountryIcon />} button="Country" />
   );
 }
