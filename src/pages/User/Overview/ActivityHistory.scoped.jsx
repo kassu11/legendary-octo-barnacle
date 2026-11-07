@@ -4,15 +4,19 @@ import { formatTimeToDate } from "@/utils/formatUtils.js";
 import "./ActivityHistory.scoped.css";
 import { arrayUtils, numberUtils } from "@/utils/utils.js";
 import { timeCollection } from "@/constants/constants.js";
+import { wrapToArray } from "@/utils/arrayUtils";
 
 export function ActivityHistoryScoped(props) {
   const start = createStartDate() / 1000;
+
+  // Anilist doesn't guarantee the order of the activity history
+  const history = createMemo(() => wrapToArray(props.history).toSorted((a, b) => a.date - b.date));
 
   const days = createMemo(() => {
     const end = new Date() / 1000;
     const parsedHistory = [];
 
-    props.history?.forEach((cur, i, arr) => {
+    history().forEach((cur, i, arr) => {
       const delta = cur.date - numberUtils.max(arr[i - 1]?.date, start - timeCollection.dayAsSeconds);
       // Date is out of range skip iteration
       if (cur.date < start || cur.date > end + timeCollection.dayAsSeconds) {
@@ -28,7 +32,7 @@ export function ActivityHistoryScoped(props) {
     });
 
     // Add missing empty dates at the end
-    const lastDate = props.history?.at(-1)?.date;
+    const lastDate = history().at(-1)?.date;
     const rightPadding = Math.floor((end - lastDate) / timeCollection.dayAsSeconds);
     for (let i = 1; i < rightPadding; i++) {
       parsedHistory.push({date: lastDate + timeCollection.dayAsSeconds * i});
@@ -40,7 +44,7 @@ export function ActivityHistoryScoped(props) {
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <Show when={props.history?.at(-1)?.date > start}>
+    <Show when={history().at(-1)?.date > start}>
       <div>
         <h3>Activity</h3>
         <div class="activity-history-container">
