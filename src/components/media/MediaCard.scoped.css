@@ -93,6 +93,39 @@
       }
     }
 
+    .rank {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      display: grid;
+      place-items: center;
+      min-width: 2.25rem;
+      height: 2.25rem;
+      padding-inline: 6px;
+      border-radius: 999px;
+      background-color: color-mix(var(--media-background-color, orange), white 50%);
+      color: rgb(0 0 0 / 70%);
+      font-size: var(--fs-300);
+      font-weight: 700;
+      box-shadow: 0 1px 4px #0000009e;
+      transition: .2s translate, .2s filter, opacity .2s;
+
+      @media (width < 40em) {
+        top: -4px;
+        left: -4px;
+      }
+
+      .media-card.loading & {
+        filter: grayscale(.5);
+        opacity: .8;
+      }
+
+      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+        translate: -4px -4px;
+        filter: brightness(1.07);
+      }
+    }
+
     .score {
       position: absolute;
       top: 8px;

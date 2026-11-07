@@ -25,7 +25,7 @@ import { Tooltip } from "@/components/Tooltip.scoped";
 export function MediaCard(props) {
 
   // We don't want this to be reactive, because if they switch between animation, the animation will stop
-  const [local, scoping] = splitProps(props, ["media", "coverFadeIn", "loading", "cardZoomIn"]);
+  const [local, scoping] = splitProps(props, ["media", "coverFadeIn", "loading", "cardZoomIn", "rank"]);
   const { cardZoomIn } = local;
 
   const handleClick = () => {
@@ -48,6 +48,9 @@ export function MediaCard(props) {
   return (
     <A scoped {...scoping} ref={hover.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
+      <Show when={local.media && local.rank}>
+        <div class="rank">#{local.rank}</div>
+      </Show>
       <Show when={local.media?.averageScore}>
         <div class="score">
           <Star scoped /> {(local.media.averageScore / 10)}

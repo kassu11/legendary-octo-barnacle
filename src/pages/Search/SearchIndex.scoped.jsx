@@ -157,6 +157,8 @@ const LOADER = 0;
 // In there cases, we add the padding media, to make sure every page is the full expected page size
 // These elements are never to be rendered
 const MEDIA_PADDING_SPACE = 1;
+// Only high to low orders are ranked, because a "#1" on the lowest scored media would read as the best one
+const RANKED_SORTS = new Set(["popularity_desc", "score_desc", "score_desc_plus"]);
 
 export function SearchPage() {
   const params = useParams();
@@ -438,6 +440,19 @@ export function SearchPage() {
 
   const preventZoomIn = new Set();
 
+  const mediaRanks = createMemo(() => {
+    const { sort, sortBySearchMatch } = parsedSearchParams();
+    const data = pagelessCacheData?.data;
+
+    // The sort param is not the real order when results come from search match or from the jikan fallback
+    // Grouping by format is also left out here, because then the first sort is "format"
+    if (!data || sortBySearchMatch || data.fallback || !(params.header === "top" || params.header === "popular") || !RANKED_SORTS.has(sort?.[0])) return [];
+
+    // Padding media are not real results, so they can't use up a rank. Loaders are counted because they hold the place of a real media
+    let rank = 0;
+    return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
+  });
+
   return (
     <ErrorBoundary fallback="Search page has crashed">
       <SearchBar />
@@ -533,7 +548,7 @@ export function SearchPage() {
                     </Show>
                     <div class="wrapper" ref={handleVisibilityRef}>
                       <Show when={isVisible()}>
-                        <MediaCard scoped className="search-card" cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} />
+                        <MediaCard scoped className="search-card" cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[i()]} />
                         { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
                         {preventZoomIn.add(media.id) && true}
                         <Show when={(media?.tabTime < tabTime || media === LOADER)}>
