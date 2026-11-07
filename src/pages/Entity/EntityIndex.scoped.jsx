@@ -556,12 +556,12 @@ function CharacterAndActorCards(props) {
                 <Show when={edge.node.mediaListEntry?.status}>
                   <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
                 </Show>
-                {edge.node.title.userPreferred} 
-                <Show when={edge.characterRole}>
-                  <span class="role"> {capitalize(edge.characterRole)}</span>
-                </Show>
+                {edge.node.title.userPreferred}
               </p>
             </A>
+            <Show when={edge.characterRole}>
+              <p class="entity-page-character-role">{capitalize(edge.characterRole)}</p>
+            </Show>
             <Show when={roles().length}>
               <ol>
                 <For each={roles()}>{role => (
@@ -646,8 +646,10 @@ function CharacterAndMediaCards(props) {
             </div>
             <A scoped href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
               <span>{character.name.userPreferred}</span>
-              <span class="role"> {capitalize(edge.characterRole)}</span>
             </A>
+            <Show when={edge.characterRole}>
+              <p class="entity-page-character-role">{capitalize(edge.characterRole)}</p>
+            </Show>
             <A scoped href={mediaUrl(edge.node)}>
               <p>
                 <Show when={edge.node.mediaListEntry?.status}>
