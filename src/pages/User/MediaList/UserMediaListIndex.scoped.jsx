@@ -17,6 +17,7 @@ import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { addApplicationNotification } from "@/state/notifications";
 import { authUserData } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
+import { mergeObjects } from "@/utils/objectUtils.js";
 
 // Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
 export const ALL_LISTS = "";
@@ -109,6 +110,11 @@ export function UserMediaList() {
     const json = await res.json();
 
     mutateMediaListCache(res => {
+      // Mutation response only has a subset of the media fields (no studios, tags, genres...), so merge it into the cached entry
+      const [cachedListIndex, cachedEntryIndex] = listData().data.indecies[mediaId][0];
+      const cachedEntry = res.data.data.MediaListCollection.lists[cachedListIndex].entries[cachedEntryIndex];
+      const responseEntry = mergeObjects(cachedEntry, json.data.SaveMediaListEntry);
+
       function pushEntryToList(name, isCustomList) {
         const listIndex = res.data.data.MediaListCollection.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
         if (listIndex === -1) {
@@ -116,7 +122,7 @@ export function UserMediaList() {
         }
 
         const list = res.data.data.MediaListCollection.lists.at(listIndex);
-        list.entries.push(json.data.SaveMediaListEntry);
+        list.entries.push(responseEntry);
         listData().data.indecies[mediaId].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
       }
 
@@ -125,12 +131,12 @@ export function UserMediaList() {
       });
       listData().data.indecies[mediaId] = [];
 
-      if (!json.data.SaveMediaListEntry.hiddenFromStatusLists) {
-        const name = converStatusToListName(json.data.SaveMediaListEntry.status, params.type);
+      if (!responseEntry.hiddenFromStatusLists) {
+        const name = converStatusToListName(responseEntry.status, params.type);
         pushEntryToList(name, false);
       }
 
-      for (const [listName, enabled] of Object.entries(json.data.SaveMediaListEntry.customLists ?? {})) {
+      for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
         if (enabled) {
           pushEntryToList(listName, true);
         }
