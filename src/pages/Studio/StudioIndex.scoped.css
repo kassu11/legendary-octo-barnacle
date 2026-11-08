@@ -4,8 +4,6 @@
     margin-inline: auto;
     background-color: var(--background-400-old);
 
-    --grid-column-width: 11rem;
-
     @media (width < 40rem) {
       --grid-column-width: 8rem;
     }
@@ -17,9 +15,20 @@
       gap: 0 1rem;
     }
 
-    .grid-column-auto-fill {
-      @media (width < 26em) {
-        --grid-column-width: 6rem;
+    .cards {
+      display: grid;
+      list-style: none;
+      gap: 16px 32px;
+      padding: 0;
+      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+
+      @media (width < 50em) {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+      }
+
+      .media-card {
+        margin-bottom: 5rem;
       }
     }
 

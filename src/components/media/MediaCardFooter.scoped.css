@@ -1,0 +1,15 @@
+@layer component {
+  .media-card-footer {
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    color: var(--text-muted);
+    background-color: color-mix(var(--bg-dark), transparent 15%);
+    box-shadow: 0 20px 0px 20px color-mix(var(--bg-dark), transparent 15%);
+
+    button {
+      margin-left: 8px;
+    }
+  }
+}

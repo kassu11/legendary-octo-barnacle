@@ -1,270 +1,120 @@
 import { A } from "@solidjs/router";
-import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry, plural } from "@/utils/formatUtils";
-import { DurationToTime, EpisodeTime2 } from "@/components/media/EpisodeTime";
+import { createMemo, Show, splitProps } from "solid-js";
 import { urlUtils } from "@/utils/utils";
-import Star from "@/assets/Star";
 import "./MediaCard.scoped.css";
 import { ImageLoader } from "./ImageLoader.scoped";
-import Complete from "@/assets/Complete";
-import { RepeatIcon } from "@/assets/RepeatIcon";
-import Planning from "@/assets/Planning";
-import Watching from "@/assets/Watching";
-import TrashIcon from "@/assets/TrashIcon";
-import StopIcon from "@/assets/StopIcon";
-import { useEditMediaEntries } from "@/state/providers";
-import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils";
-import { queries } from "@/api/api";
-import { addApplicationNotification } from "@/state/notifications";
-import { globalEditedMedia, setMediaPageAnilistData, storeGlobalEditedMedia, token2 } from "@/state/globalState";
-import Edit from "@/assets/Edit";
+import { globalEditedMedia, setMediaPageAnilistData } from "@/state/globalState";
 import { createHover, HoverPortal } from "@/hooks/createHover";
-import { Tooltip } from "@/components/Tooltip.scoped";
+import { MediaHoverCard } from "./MediaHoverCard.scoped";
+import { MediaQuickActions } from "./MediaQuickActions.scoped";
+import { MediaStatusIcon } from "./MediaStatusIcon.scoped";
+import { MediaBadges } from "./MediaBadges.scoped";
+import { MediaCardFooter } from "./MediaCardFooter.scoped";
 
-
+/**
+ * Base media cover card. Every extra feature is opt-in and off by default.
+ *
+ * @param {Object} props
+ * @param {Object} [props.media] Anilist media, card renders as an empty skeleton without it
+ * @param {Object} [props.mediaListEntry] List entry to show, overrides the session edits and media.mediaListEntry
+ * @param {boolean} [props.loading] Grays out the card while new data is being fetched
+ * @param {number} [props.rank] Rank badge shown in the top left corner
+ * @param {boolean} [props.cardZoomIn] Zoom in animation when the card is mounted (not reactive)
+ * @param {boolean} [props.coverFadeIn] Fade in the cover image when it has loaded
+ * @param {boolean} [props.showScore] Global average score badge in the top right corner
+ * @param {boolean} [props.showStatus] Users list status icon next to the title
+ * @param {boolean} [props.quickActions] Edit and list status buttons when hovering the card
+ * @param {boolean} [props.showFooter] Users list progress and score at the bottom of the cover
+ * @param {string} [props.scoreFormat] Score format used by the footer, defaults to POINT_10_DECIMAL
+ * @param {boolean} [props.progressIncrement] "+" buttons in the footer to increase the progress
+ * @param {Function} [props.afterProgressMutation] Called with the saved list entry after the progress has been increased through the footer
+ * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
+ * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
+ * @param {boolean} [props.hoverCard] Media info popup when hovering the card
+ * @param {boolean} [props.showAdult] 18+ badge for adult media
+ * @param {boolean} [props.showRepeats] Users rewatch / reread count badge
+ * @param {boolean} [props.showNotes] Users notes badge
+ * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
+ */
 export function MediaCard(props) {
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "afterProgressMutation", "quickActions", "afterMutation", "afterDelete", "hoverCard", "children"]);
 
-  // We don't want this to be reactive, because if they switch between animation, the animation will stop
-  const [local, scoping] = splitProps(props, ["media", "coverFadeIn", "loading", "cardZoomIn", "rank"]);
+  // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
 
   const handleClick = () => {
     setMediaPageAnilistData({ data: { data: { Media: local.media } } });
   };
 
-  const status = createMemo(() => {
-
+  // A given entry can belong to another user, so session edits only override it when they are for the same entry
+  const mediaListEntry = createMemo(() => {
     const entry = globalEditedMedia[local.media?.id];
-    if (entry === undefined) {
-      return local.media?.mediaListEntry?.status;
+    if (local.mediaListEntry !== undefined) {
+      if (entry && entry.id === local.mediaListEntry?.id) {
+        return { ...local.mediaListEntry, ...entry };
+      }
+
+      return local.mediaListEntry;
     }
 
-    return entry?.status
+    if (entry === undefined) {
+      return local.media?.mediaListEntry;
+    }
 
+    return entry;
   });
 
-  const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
+  const status = createMemo(() => {
+    if (!local.showStatus && !local.quickActions) {
+      return undefined;
+    }
+
+    return mediaListEntry()?.status;
+  });
+
+  // Hover tracking polls every frame, so only create it when something uses it
+  const hover = (local.hoverCard || local.quickActions) && createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
 
   return (
-    <A scoped {...scoping} ref={hover.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
+    <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
+      <Show when={local.media}>
+        {/* Score is its own badge group, so it stays in the top right while the other badges wrap next to it */}
+        <div class="top">
+          <MediaBadges {...badges} scoped class="badges" media={local.media} entry={mediaListEntry()} />
+          <MediaBadges scoped class="score" media={local.media} showScore={local.showScore} />
+        </div>
+      </Show>
       <Show when={local.media && local.rank}>
         <div class="rank">#{local.rank}</div>
       </Show>
-      <Show when={local.media?.averageScore}>
-        <div class="score">
-          <Star scoped /> {(local.media.averageScore / 10)}
-        </div>
-      </Show>
       <Show when={local.media?.title?.userPreferred}>
         <p class="line-clamp">
-          <StatusIcon status={status()} />
+          <Show when={local.showStatus}>
+            <MediaStatusIcon scoped class="status-icon" status={status()} />
+          </Show>
           {local.media.title.userPreferred}
         </p>
       </Show>
-      <Show when={hover.isOpen() && local.media}>
-        <QuickActionItemList {...local} status={status()} />
-        <HoverPortal>
-          <MediaHoverCard {...local} ref={hover.floatingRef} />
-        </HoverPortal>
+      {/* Quick actions and footer share one column, so the quick actions stack on top of the footer instead of overlapping it */}
+      <Show when={local.media && (local.showFooter || local.quickActions)}>
+        <div class="bottom">
+          <Show when={local.quickActions && hover.isOpen()}>
+            <MediaQuickActions scoped class="quick-actions" media={local.media} mediaListEntry={mediaListEntry()} status={status()} afterMutation={local.afterMutation} afterDelete={local.afterDelete} />
+          </Show>
+          <Show when={local.showFooter && mediaListEntry()}>
+            <MediaCardFooter scoped class="footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} afterProgressMutation={local.afterProgressMutation} />
+          </Show>
+        </div>
+      </Show>
+      {local.children}
+      <Show when={hover?.isOpen() && local.media}>
+        <Show when={local.hoverCard}>
+          <HoverPortal>
+            <MediaHoverCard media={local.media} loading={local.loading} ref={hover.floatingRef} />
+          </HoverPortal>
+        </Show>
       </Show>
     </A>
   )
-}
-
-function QuickActionItemList(props) {
-  const { openEditor } = useEditMediaEntries();
-
-  const handleClick = status => async e => {
-    e.preventDefault();
-
-    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId: props.media.id, status }, AbortSignal.timeout(30_000));
-    const res = await fetcherToFetch(fetcher);
-    if (res.status === 200) {
-      const json = await res.json();
-      storeGlobalEditedMedia(json.data.SaveMediaListEntry.mediaId, json.data.SaveMediaListEntry);
-    } else {
-      addApplicationNotification({ type: "error", message: "Failed to update media status", duration: 30_000 });
-    }
-  };
-
-  const hover = createHover();
-
-  return (
-    <Show when={token2()}>
-      <div class="quick-action-wrapper" ref={hover.triggerRef}>
-
-        <QuickActionButton label="Edit media" onClick={e => {
-          e.preventDefault();
-          openEditor(props.media);
-        }}>
-          <Edit scoped />
-        </QuickActionButton>
-
-        <Show when={hover.isOpen()}>
-
-          <QuickActionButton active={props.status === "PLANNING"} onClick={handleClick("PLANNING")} label="Set to planning">
-            <Planning scoped />
-          </QuickActionButton>
-
-          <QuickActionButton active={props.status === "CURRENT"} onClick={handleClick("CURRENT")} label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")}>
-            <Watching scoped />
-          </QuickActionButton>
-
-          <QuickActionButton active={props.status === "COMPLETED"} onClick={handleClick("COMPLETED")} label="Set to completed">
-            <Complete scoped />
-          </QuickActionButton>
-
-          <QuickActionButton active={props.status === "REPEATING"} onClick={handleClick("REPEATING")} label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")}>
-            <RepeatIcon scoped />
-          </QuickActionButton>
-
-        </Show>
-
-      </div>
-    </Show>
-  );
-}
-
-function QuickActionButton(props) {
-  return (
-    <button class="action-button" classList={{ active: props.active }} onClick={props.onClick}>
-      {props.children}
-      <Tooltip placements={["left", "right", "bottom"]} offset={16}>{props.label}</Tooltip>
-    </button>
-  );
-}
-
-function StatusIcon(props) {
-  return (
-    <Show when={props.status}>
-      <div class="list-status2">
-        <Switch>
-          <Match when={props.status === "COMPLETED"}>
-            <Complete scoped />
-          </Match>
-          <Match when={props.status === "REPEATING"}>
-            <RepeatIcon scoped />
-          </Match>
-          <Match when={props.status === "PLANNING"}>
-            <Planning scoped />
-          </Match>
-          <Match when={props.status === "CURRENT"}>
-            <Watching scoped />
-          </Match>
-          <Match when={props.status === "DROPPED"}>
-            <TrashIcon scoped />
-          </Match>
-          <Match when={props.status === "PAUSED"}>
-            <StopIcon scoped />
-          </Match>
-        </Switch>
-      </div>
-    </Show>
-  )
-}
-
-export function MediaHoverCard(props) {
-  return (
-    <div class="hover-card" classList={{ loading: props.loading }} style={{ "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>
-      <ImageLoader scoped class="banner" waitBeforeFade={300} fadeIn src={props.media?.bannerImage} />
-      <p class="line-clamp header shadow">{props.media?.title.userPreferred}</p>
-      <Show when={props.media?.nextAiringEpisode?.episode && props.media?.nextAiringEpisode?.airingAt}>
-        <p class="episodes">
-          <Show when={props.media?.format !== "MOVIE"} fallback="Movie ">
-            Ep {props.media?.nextAiringEpisode.episode}{" "}
-          </Show>
-          <EpisodeTime2 airingAt={props.media?.nextAiringEpisode.airingAt} flavorText="airing in " day=" day" hour=" hour" fallback={
-            <EpisodeTime2 airingAt={props.media?.nextAiringEpisode.airingAt} flavorText="airing in " minute=" minute" fallback="has aired" />
-          } />
-        </p>
-      </Show>
-      <div class="body">
-        <Show when={props.media?.studios?.edges.length}>
-          <div class="studios shadow">
-            <For each={props.media?.studios?.edges}>{edge => (
-              <p>{edge.node.name}</p>
-            )}</For>
-          </div>
-        </Show>
-        <Show when={props.media?.genres?.length}>
-          <div class="genres">
-            <For each={props.media?.genres}>{genre => (
-              <p>{genre}</p>
-            )}</For>
-          </div>
-        </Show>
-      </div>
-      <div class="type-and-season">
-        <div class="flex-bullet-separator">
-          <Show when={props.media?.format} fallback="Format TBA">
-            <span>
-              <Switch>
-                <Match when={!props.media?.countryOfOrigin || props.media.countryOfOrigin === "JP"}>
-                  {formatMediaFormat(props.media?.format)}
-                </Match>
-                <Match when={props.media?.countryOfOrigin !== "JP"}>
-                  {formatMediaFormat(props.media?.format)} ({languageFromCountry(props.media?.countryOfOrigin)})
-                </Match>
-              </Switch>
-            </span>
-          </Show>
-          <span>
-            <Switch>
-              <Match when={props.media?.type === "MANGA"}>
-                <Switch>
-                  <Match when={props.media?.format === "NOVEL" && props.media?.volumes}>
-                    {props.media?.volumes} Volume{plural(props.media?.volumes)}
-                  </Match>
-                  <Match when={props.media?.chapters}>
-                    {props.media?.chapters} Chapter{plural(props.media?.chapters)}
-                  </Match>
-                  <Match when={props.media?.status}>
-                    {formatMediaStatus(props.media?.status)}
-                  </Match>
-                </Switch>
-              </Match>
-              <Match when={props.media?.type === "ANIME"}>
-                <Switch>
-                  <Match when={props.media?.format === "MOVIE" && props.media?.duration}>
-                    <DurationToTime time={props.media?.duration * 60} minute=" minute" hour=" hour" />
-                  </Match>
-                  <Match when={props.media?.format !== "MOVIE" && props.media?.episodes}>
-                    {props.media?.episodes} Episode{plural(props.media?.episodes)}
-                  </Match>
-                </Switch>
-              </Match>
-            </Switch>
-          </span>
-        </div>
-        <span class="season">
-          <Switch>
-            <Match when={props.media?.type === "MANGA"}>
-              <Switch>
-                <Match when={props.media?.startDate?.year}>
-                  {props.media?.startDate.year}
-                </Match>
-                <Match when={props.media?.startDate?.year == null}>
-                  TBA
-                </Match>
-              </Switch>
-            </Match>
-            <Match when={props.media?.type === "ANIME"}>
-              <Switch>
-                <Match when={props.media?.seasonYear && props.media?.season}>
-                  {capitalize(props.media?.season)} {props.media?.seasonYear}
-                </Match>
-                <Match when={props.media?.startDate?.year}>
-                  {props.media?.startDate.year}
-                </Match>
-                <Match when={props.media?.startDate?.year == null}>
-                  TBA
-                </Match>
-              </Switch>
-            </Match>
-          </Switch>
-        </span>
-      </div>
-    </div>
-  );
 }

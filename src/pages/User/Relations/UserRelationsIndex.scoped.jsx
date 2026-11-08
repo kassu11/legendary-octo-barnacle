@@ -186,7 +186,7 @@ export function UserRelations() {
           return (
             <div class="wrapper" ref={handleVisibilityRef}>
               <Show when={isVisible()}>
-                <MediaCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
+                <MediaCard showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
                 { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */ }
                 {preventZoomIn.add(media.id) && true} 
               </Show>

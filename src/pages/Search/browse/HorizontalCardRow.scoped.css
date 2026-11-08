@@ -1,6 +1,7 @@
 @layer layout {
   .grid-reel-auto-fill {
     padding-block: 16px;
+    padding-bottom: 5rem;
     --spill-ratio: 1;
     --padding: 64px;
     --spill-ration-correction-padding: 0px;
