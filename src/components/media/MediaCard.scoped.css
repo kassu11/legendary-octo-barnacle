@@ -179,6 +179,12 @@
       position: absolute;
       bottom: 0px;
       width: 100%;
+      transition: translate .2s, color .2s;
+
+      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+        translate: 0px 4px;
+        color: var(--text);
+      }
     }
 
     .quick-actions {
@@ -197,6 +203,7 @@
       top: calc(100% - 8px);
       padding-top: 16px;
       transition: .2s transform, .2s color, .2s text-shadow, .18s opacity;
+      z-index: 1;
 
       .media-card.loading & {
         opacity: .5;
