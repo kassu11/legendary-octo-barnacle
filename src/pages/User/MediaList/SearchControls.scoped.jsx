@@ -99,6 +99,8 @@ export function SearchControlsScoped(props) {
   // for the same names, so the open select doesn't rerender its items and lose the scroll position
   const studioOptions = createMemo(mapArray(() => props.listData()?.data?.studios, toOption));
   const tagOptions = createMemo(mapArray(() => props.listData()?.data?.tags, toOption));
+  const startedYearOptions = createMemo(mapArray(() => props.listData()?.data?.startedYears, toOption));
+  const completedYearOptions = createMemo(mapArray(() => props.listData()?.data?.completedYears, toOption));
   const listOptions = createMemo(mapArray(() => [ALL_LISTS, ...(props.listData()?.data?.lists.map(list => list.name) ?? [])], toListOption));
   const listCounts = createMemo(() => {
     const data = props.listData()?.data;
@@ -161,8 +163,8 @@ export function SearchControlsScoped(props) {
           </FilterGroup>
           <FilterGroup title="List entry">
             <FilterSelect   param="userStatus"      excludable each={ userStatusOptions() } value={ props.userStatus()      } icon={ <OnListIcon />  } button="User Status" tooltip="Status of the entry on this user's list. Click once to include, twice to exclude"                                           setSearchParams={ setSearchParams } />
-            <FilterSelect   param="startedYear"     excludable each={ yearOptions         } value={ props.startedYear()     } icon={ <YearIcon />    } button="Start Year"  tooltip="Year the user started the entry. Click once to include, twice to exclude"                                                  setSearchParams={ setSearchParams } />
-            <FilterSelect   param="completedYear"   excludable each={ yearOptions         } value={ props.completedYear()   } icon={ <YearIcon />    } button="End Year"    tooltip="Year the user completed the entry. Click once to include, twice to exclude"                                                setSearchParams={ setSearchParams } />
+            <FilterSelect   param="startedYear"     excludable each={ startedYearOptions()  } value={ props.startedYear()     } icon={ <YearIcon />    } button="Start Year"  tooltip="Year the user started the entry. Click once to include, twice to exclude"                                                  setSearchParams={ setSearchParams } />
+            <FilterSelect   param="completedYear"   excludable each={ completedYearOptions()} value={ props.completedYear()   } icon={ <YearIcon />    } button="End Year"    tooltip="Year the user completed the entry. Click once to include, twice to exclude"                                                setSearchParams={ setSearchParams } />
             <ListToggle param="notes"        value={ props.notesFilter() }       icon={ <NotesIcon />       } label="Notes"                                            tooltip="Click once to show only entries with notes, twice to hide entries with notes" />
             <ListToggle param="repeat"       value={ props.rewatchedFilter() }    icon={ <RepeatFilterIcon />      } label={params.type === "anime" ? "Rewatched" : "Reread"} tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
             <Show when={isOwnProfile()}>

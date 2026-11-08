@@ -30,10 +30,14 @@ function modifyMediaListData(listData, type, options) {
   const mediaSet = new Set();
   const tagsSet = new Set();
   const studiosSet = new Set();
+  const startedYears = new Set();
+  const completedYears = new Set();
   listData.indecies = {};
   listData.lists.forEach((list, i) => {
     let tail = 0;
     list.entries.forEach((entry, j, arr) => {
+      if (entry.startedAt?.year) startedYears.add(entry.startedAt.year);
+      if (entry.completedAt?.year) completedYears.add(entry.completedAt.year);
       listData.indecies[entry.media.id] ??= []
       listData.indecies[entry.media.id].push([i, j]);
       for (const studio of entry.media.studios.edges) {
@@ -65,6 +69,8 @@ function modifyMediaListData(listData, type, options) {
   listData.total = mediaSet.size;
   listData.studios = Array.from(studiosSet).sort();
   listData.tags = Array.from(tagsSet).sort();
+  listData.startedYears = Array.from(startedYears).sort((a, b) => b - a).map(String);
+  listData.completedYears = Array.from(completedYears).sort((a, b) => b - a).map(String);
   const sortFunction = generateSortFunction(options.sort);
   listData.lists.forEach(list => {
     list.entries.sort(sortFunction);
