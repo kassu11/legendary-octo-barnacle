@@ -84,17 +84,15 @@ export function MediaListContainerScoped(props) {
   });
 
   return (
-    <div>
+    <div class="list-content">
       <p>{props.timer}</p>
-      <ol ref={elem => gridProbe = elem} class="user-profile-media-list-grid" style={{height: "0", margin: "0", visibility: "hidden"}} aria-hidden="true" />
+      <div ref={elem => gridProbe = elem} class="user-profile-media-list-grid" style={{height: "0", margin: "0", visibility: "hidden"}} aria-hidden="true" />
       <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} grid={grid} />}>
         <For each={props.listData().data.lists}>{list => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>
             <h2>{list.name}</h2>
             <VirtualGrid each={list.entries} grid={grid}>{entry => (
-              <li class="card">
-                <MediaCard scoped showScore hoverCard showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
-              </li>
+              <MediaCard scoped class="card" showScore hoverCard showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
             )}</VirtualGrid>
           </Show>
         )}</For>
@@ -137,12 +135,12 @@ function VirtualGrid(props) {
   });
 
   return (
-    <ol ref={elem => ref = elem} class="user-profile-media-list-grid" style={{
+    <div ref={elem => ref = elem} class="user-profile-media-list-grid" style={{
       "padding-top": `${firstRow() * props.grid().rowHeight}px`,
       "padding-bottom": `${(rowCount() - lastRow()) * props.grid().rowHeight}px`,
     }}>
       <For each={visibleEntries()}>{props.children}</For>
-    </ol>
+    </div>
   );
 }
 
@@ -156,9 +154,7 @@ function CardsLoading(props) {
       <Show when={list.entries.length && props.isListVisible(list.name)}>
         <h2>{list.name}</h2>
         <VirtualGrid each={list.entries} grid={props.grid}>{() => (
-          <li class="card">
-            <MediaCard scoped />
-          </li>
+          <MediaCard scoped class="card" />
         )}</VirtualGrid>
       </Show>
     )}</For>

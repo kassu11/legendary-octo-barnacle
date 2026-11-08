@@ -1,4 +1,14 @@
 @layer layout {
+  .list-content {
+    display: grid;
+  }
+
+  h2 {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    display: flow-root;
+  }
+
   .user-profile-media-list-grid {
     list-style: none;
     padding: 0;
@@ -15,22 +25,12 @@
 
     @media (width < 40em) {
       grid-template-columns: repeat(3, 1fr);
-      gap: 4.5rem 8px;
+      gap: 4.5rem 32px;
     }
 
     @media (width < 30em) {
-      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-    }
-
-    .card {
-      aspect-ratio: 5.5 / 8;
-      position: relative;
-
-      /* Keep the card out of the flow, so its title doesn't change the row height used by the virtual grid */
-      > .media-card {
-        position: absolute;
-        width: 100%;
-      }
+      grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+      gap: 3.5rem 32px;
     }
   }
 }
