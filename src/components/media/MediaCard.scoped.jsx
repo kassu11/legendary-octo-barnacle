@@ -23,9 +23,10 @@ import { MediaStatusIcon } from "./MediaStatusIcon.scoped";
  * @param {boolean} [props.showStatus] Users list status icon next to the title (not reactive)
  * @param {boolean} [props.quickActions] Edit and list status buttons when hovering the card (not reactive)
  * @param {boolean} [props.hoverCard] Media info popup when hovering the card (not reactive)
+ * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "quickActions", "hoverCard"]);
+  const [local, scoping] = splitProps(props, ["media", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "quickActions", "hoverCard", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   // and features shouldn't appear or disappear after the card has been created
@@ -70,6 +71,7 @@ export function MediaCard(props) {
           {local.media.title.userPreferred}
         </p>
       </Show>
+      {local.children}
       <Show when={hover?.isOpen() && local.media}>
         <Show when={quickActions}>
           <MediaQuickActions scoped class="quick-actions" media={local.media} status={status()} />
