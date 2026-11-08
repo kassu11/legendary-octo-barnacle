@@ -12,7 +12,7 @@ export const transform = (src, id) => {
   if (id.endsWith(".scoped.jsx")) {
     const hash = localHashFromFilePath(id);
     const attribute = localDataAttributeFromHash(hash);
-    return src.replace(/(<[^>=+< /"'$]+)|(\$createComponent\([^{]+\{[^}{]*)scoped:\s?true/g, (_, tag, createComponent) => {
+    return scopeCssVariables(src, hash).replace(/(<[^>=+< /"'$]+)|(\$createComponent\([^{]+\{[^}{]*)scoped:\s?true/g, (_, tag, createComponent) => {
       if (tag) {
         return `${tag} ${attribute}`
       } else {
@@ -277,10 +277,13 @@ export const transform = (src, id) => {
       });
     });
 
-
-    return returnQuery;
+    return scopeCssVariables(returnQuery, hash);
   }
 };
+
+// Replace the "--scoped" prefix of css variable names with the file hash
+// --scoped-color becomes --9f86d081-color
+const scopeCssVariables = (src, hash) => src.replace(/(?<![\w-])--scoped/g, `--${hash}`);
 
 const equalsBackwards = (string, string2, index) => {
   return equalsforwards(string, string2, index - (string.length - 1));
