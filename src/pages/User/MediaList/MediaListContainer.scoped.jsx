@@ -1,8 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { useUser, useUserMediaList } from "@/state/providers.js";
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js";
-import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";
-import Score from "@/components/media/Score.scoped.jsx";
 import "./MediaListContainer.scoped.css";
 import { objectUtils } from "@/utils/utils.js";
 import { converStatusToListName } from "./UserMediaListIndex.scoped.jsx";
@@ -27,7 +25,8 @@ export function MediaListContainerScoped(props) {
   });
 
   // Moves the edited entry to the lists matching its new status and custom lists
-  function mutateEntry(entry, responseEntry) {
+  // Without refreshing, the visible lists stay the same until the next refresh
+  function mutateEntry(entry, responseEntry, refreshList = true) {
     responseEntry = objectUtils.mergeObjects(entry, responseEntry);
     props.mutateMediaListCache(res => {
       function pushEntryToList(name, isCustomList) {
@@ -62,7 +61,7 @@ export function MediaListContainerScoped(props) {
         }
       }
       return res;
-    }, props.updateListInfo);
+    }, refreshList ? props.updateListInfo : undefined);
   }
 
   function deleteEntry(entry) {
@@ -94,12 +93,7 @@ export function MediaListContainerScoped(props) {
             <h2>{list.name}</h2>
             <VirtualGrid each={list.entries} grid={grid}>{entry => (
               <li class="card">
-                <MediaCard scoped hoverCard showAdult showRepeats showNotes quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)}>
-                  <div class="card-footer">
-                    <MediaCardEpisodes entry={entry} />
-                    <Score score={entry.score} format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
-                  </div>
-                </MediaCard>
+                <MediaCard scoped hoverCard showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
               </li>
             )}</VirtualGrid>
           </Show>

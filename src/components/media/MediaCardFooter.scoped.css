@@ -1,0 +1,15 @@
+@layer component {
+  .media-card-footer {
+    padding: 1.5rem .5rem .5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    color: var(--text);
+    border-radius: 0 0 8px 8px;
+    background: linear-gradient(transparent, var(--shadow-450-old) 40%);
+
+    button {
+      margin-left: 8px;
+    }
+  }
+}

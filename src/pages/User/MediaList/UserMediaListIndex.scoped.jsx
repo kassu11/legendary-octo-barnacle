@@ -4,20 +4,18 @@ import "./UserMediaListIndex.scoped.css";
 import { capitalize } from "@/utils/formatUtils.js";
 import UserMediaListWorker from "@/workers/user-media-list.js?worker";
 import { UserMediaListContext, useUser } from "@/state/providers.js";
-import { debouncer, leadingAndTrailingDebounce } from "@/utils/scheduleUtils.js";
+import { debouncer } from "@/utils/scheduleUtils.js";
 import { queries } from "@/api/api.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
-import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { asserts, arrayUtils } from "@/utils/utils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { addApplicationNotification } from "@/state/notifications";
 import { authUserData } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { mergeObjects } from "@/utils/objectUtils.js";
 
 // Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
 export const ALL_LISTS = "";
@@ -98,53 +96,6 @@ export function UserMediaList() {
   const studio = multiParam("studio");
   const tag = multiParam("tag");
 
-  const triggerProgressIncrease = leadingAndTrailingDebounce(async (mediaId, newProgress, progressKey) => {
-    asserts.assertTruthy(progressKey, "Progress key is undefined");
-    const fetcher = createAnilistFetcher(queries.anilistMutateMedia, { mediaId, [progressKey]: newProgress }, AbortSignal.timeout(30_000));
-    const res = await fetcherToFetch(fetcher);
-    if (res.status !== 200) {
-      addApplicationNotification({ type: "error", message: "Failed to save media changes", duration: 30_000 });
-      return;
-    }
-
-    const json = await res.json();
-
-    mutateMediaListCache(res => {
-      // Mutation response only has a subset of the media fields (no studios, tags, genres...), so merge it into the cached entry
-      const [cachedListIndex, cachedEntryIndex] = listData().data.indecies[mediaId][0];
-      const cachedEntry = res.data.data.MediaListCollection.lists[cachedListIndex].entries[cachedEntryIndex];
-      const responseEntry = mergeObjects(cachedEntry, json.data.SaveMediaListEntry);
-
-      function pushEntryToList(name, isCustomList) {
-        const listIndex = res.data.data.MediaListCollection.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
-        if (listIndex === -1) {
-          res.data.data.MediaListCollection.lists.push({ name, isCustomList: false, isCompletedList: false, entries: [] });
-        }
-
-        const list = res.data.data.MediaListCollection.lists.at(listIndex);
-        list.entries.push(responseEntry);
-        listData().data.indecies[mediaId].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
-      }
-
-      listData().data.indecies[mediaId].forEach(([listIndex, entryIndex]) => {
-        res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
-      });
-      listData().data.indecies[mediaId] = [];
-
-      if (!responseEntry.hiddenFromStatusLists) {
-        const name = converStatusToListName(responseEntry.status, params.type);
-        pushEntryToList(name, false);
-      }
-
-      for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
-        if (enabled) {
-          pushEntryToList(listName, true);
-        }
-      }
-      return res;
-    });
-  }, 250, 2);
-
   const postToWorker = debouncer(postObject => {
     worker = worker instanceof Worker ? worker : new UserMediaListWorker();
     worker.postMessage(postObject);
@@ -196,7 +147,7 @@ export function UserMediaList() {
   const listStartY = () => listBody.getBoundingClientRect().top + window.scrollY - document.querySelector(".main-navigation").offsetHeight;
 
   return (
-    <UserMediaListContext.Provider value={{ triggerProgressIncrease, isOwnProfile }}>
+    <UserMediaListContext.Provider value={{ isOwnProfile }}>
       <Show when={params.list}>
         <Navigate href={legacyListUrl()} />
       </Show>
