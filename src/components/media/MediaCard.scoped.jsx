@@ -21,19 +21,19 @@ import { MediaBadges } from "./MediaBadges.scoped";
  * @param {number} [props.rank] Rank badge shown in the top left corner
  * @param {boolean} [props.cardZoomIn] Zoom in animation when the card is mounted (not reactive)
  * @param {boolean} [props.coverFadeIn] Fade in the cover image when it has loaded
- * @param {boolean} [props.showScore] Global average score badge in the top right corner (not reactive)
- * @param {boolean} [props.showStatus] Users list status icon next to the title (not reactive)
- * @param {boolean} [props.quickActions] Edit and list status buttons when hovering the card (not reactive)
+ * @param {boolean} [props.showScore] Global average score badge in the top right corner
+ * @param {boolean} [props.showStatus] Users list status icon next to the title
+ * @param {boolean} [props.quickActions] Edit and list status buttons when hovering the card
  * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
  * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
- * @param {boolean} [props.hoverCard] Media info popup when hovering the card (not reactive)
- * @param {boolean} [props.showAdult] 18+ badge for adult media (not reactive)
- * @param {boolean} [props.showRepeats] Users rewatch / reread count badge (not reactive)
- * @param {boolean} [props.showNotes] Users notes badge (not reactive)
+ * @param {boolean} [props.hoverCard] Media info popup when hovering the card
+ * @param {boolean} [props.showAdult] 18+ badge for adult media
+ * @param {boolean} [props.showRepeats] Users rewatch / reread count badge
+ * @param {boolean} [props.showNotes] Users notes badge
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "quickActions", "afterMutation", "afterDelete", "hoverCard", "showAdult", "showRepeats", "showNotes", "children"]);
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "quickActions", "afterMutation", "afterDelete", "hoverCard", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
@@ -71,7 +71,7 @@ export function MediaCard(props) {
     <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media}>
-        <MediaBadges {...local} scoped class="badges" entry={mediaListEntry()} />
+        <MediaBadges {...badges} scoped class="badges" entry={mediaListEntry()} />
       </Show>
       <Show when={local.media && local.rank}>
         <div class="rank">#{local.rank}</div>
