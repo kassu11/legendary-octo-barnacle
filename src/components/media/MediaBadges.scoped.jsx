@@ -1,7 +1,6 @@
 import { Show, splitProps } from "solid-js";
 import "./MediaBadges.scoped.css";
-import { RepeatIcon } from "@/assets/RepeatIcon";
-import NotesIcon from "@/assets/NotesIcon";
+import { NotesIcon, RepeatFilterIcon } from "@/assets/SearchFilterIcons.jsx";;
 import Star from "@/assets/Star";
 import { Tooltip } from "@/components/Tooltip.scoped";
 
@@ -27,7 +26,7 @@ export function MediaBadges(props) {
       <Show when={local.showRepeats && local.entry?.repeat}>
         <div class="badge">
           {local.entry.repeat}
-          <RepeatIcon scoped />
+          <RepeatFilterIcon scoped />
           <Tooltip placements={["top", "bottom"]}>
             {(local.media?.type === "MANGA" ? "Reread " : "Rewatched ") + local.entry.repeat + (local.entry.repeat === 1 ? " time" : " times")}
           </Tooltip>

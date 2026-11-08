@@ -11,6 +11,7 @@
     .badge {
       display: flex;
       gap: .5rem;
+      min-height: 29px;
       align-items: center;
       padding: 4px 8px;
       border-radius: 8px;
