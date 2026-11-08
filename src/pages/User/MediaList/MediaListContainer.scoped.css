@@ -44,19 +44,6 @@
         border-radius: 0 0 8px 8px;
         background: linear-gradient(transparent, var(--shadow-450-old) 40%);
       }
-
-      _.cp-media-action-item {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        opacity: 0;
-      }
-
-      .media-card:where(_:hover, _:focus-visible, _:has(_:focus-visible)) {
-        _.cp-media-action-item {
-          opacity: 1;
-        }
-      }
     }
   }
 }

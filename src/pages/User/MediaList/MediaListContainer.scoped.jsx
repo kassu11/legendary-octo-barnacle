@@ -1,10 +1,8 @@
 import { useParams } from "@solidjs/router";
-import { useEditMediaEntries, useUser, useUserMediaList } from "@/state/providers.js";
+import { useUser, useUserMediaList } from "@/state/providers.js";
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { MediaCardEpisodes } from "./MediaCardEpisodes.jsx";
 import Score from "@/components/media/Score.scoped.jsx";
-import { QuickActionButton } from "@/components/Buttons.scoped.jsx";
-import Edit from "@/assets/Edit.jsx";
 import "./MediaListContainer.scoped.css";
 import { objectUtils } from "@/utils/utils.js";
 import { converStatusToListName } from "./UserMediaListIndex.scoped.jsx";
@@ -14,7 +12,6 @@ export function MediaListContainerScoped(props) {
   const [grid, setGrid] = createSignal(lastGrid);
   const params = useParams();
   const {user} = useUser();
-  const {openEditor} = useEditMediaEntries();
   const {isOwnProfile} = useUserMediaList();
 
   let gridProbe;
@@ -28,6 +25,54 @@ export function MediaListContainerScoped(props) {
     observer.observe(gridProbe);
     onCleanup(() => observer.disconnect());
   });
+
+  // Moves the edited entry to the lists matching its new status and custom lists
+  function mutateEntry(entry, responseEntry) {
+    responseEntry = objectUtils.mergeObjects(entry, responseEntry);
+    props.mutateMediaListCache(res => {
+      function pushEntryToList(name, isCustomList) {
+        const listIndex = res.data.data.MediaListCollection.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
+        if (listIndex === -1) {
+          res.data.data.MediaListCollection.lists.push({
+            name,
+            isCustomList: false,
+            isCompletedList: false,
+            entries: []
+          });
+        }
+
+        const list = res.data.data.MediaListCollection.lists.at(listIndex);
+        list.entries.push(responseEntry);
+        props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
+      }
+
+      props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+        res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
+      });
+      props.listData().data.indecies[entry.media.id] = [];
+
+      if (!responseEntry.hiddenFromStatusLists) {
+        const name = converStatusToListName(responseEntry.status, params.type);
+        pushEntryToList(name, false);
+      }
+
+      for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
+        if (enabled) {
+          pushEntryToList(listName, true);
+        }
+      }
+      return res;
+    }, props.updateListInfo);
+  }
+
+  function deleteEntry(entry) {
+    props.mutateMediaListCache(res => {
+      props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
+        res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
+      });
+      return res;
+    }, props.updateListInfo);
+  }
 
   // Keep track of the entries sizes
   // This is used to keep the scroll position same when navigating back
@@ -49,68 +94,11 @@ export function MediaListContainerScoped(props) {
             <h2>{list.name}</h2>
             <VirtualGrid each={list.entries} grid={grid}>{entry => (
               <li class="card">
-                <MediaCard scoped hoverCard showAdult showRepeats showNotes media={entry.media} mediaListEntry={entry}>
+                <MediaCard scoped hoverCard showAdult showRepeats showNotes quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)}>
                   <div class="card-footer">
                     <MediaCardEpisodes entry={entry} />
                     <Score score={entry.score} format={user().mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
                   </div>
-                  <Show when={isOwnProfile()}>
-                    <QuickActionButton
-                      big
-                      label="Edit media"
-                      onClick={e => {
-                        e.preventDefault();
-                        openEditor({...entry.media, mediaListEntry: entry}, {
-                          mutateMedia: responseEntry => {
-                            responseEntry = objectUtils.mergeObjects(entry, responseEntry);
-                            props.mutateMediaListCache(res => {
-                              function pushEntryToList(name, isCustomList) {
-                                const listIndex = res.data.data.MediaListCollection.lists.findIndex(list => list.name === name && list.isCustomList === isCustomList);
-                                if (listIndex === -1) {
-                                  res.data.data.MediaListCollection.lists.push({
-                                    name,
-                                    isCustomList: false,
-                                    isCompletedList: false,
-                                    entries: []
-                                  });
-                                }
-
-                                const list = res.data.data.MediaListCollection.lists.at(listIndex);
-                                list.entries.push(responseEntry);
-                                props.listData().data.indecies[entry.media.id].push([listIndex === -1 ? res.data.data.MediaListCollection.lists.length - 1 : listIndex, list.entries.length - 1]);
-                              }
-
-                              props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
-                              });
-                              props.listData().data.indecies[entry.media.id] = [];
-
-                              if (!responseEntry.hiddenFromStatusLists) {
-                                const name = converStatusToListName(responseEntry.status, params.type);
-                                pushEntryToList(name, false);
-                              }
-
-                              for (const [listName, enabled] of Object.entries(responseEntry.customLists ?? {})) {
-                                if (enabled) {
-                                  pushEntryToList(listName, true);
-                                }
-                              }
-                              return res;
-                            }, props.updateListInfo);
-                          },
-                          deleteMedia: () => {
-                            props.mutateMediaListCache(res => {
-                              props.listData().data.indecies[entry.media.id].forEach(([listIndex, entryIndex]) => {
-                                res.data.data.MediaListCollection.lists[listIndex].entries.splice(entryIndex, 1);
-                              });
-                              return res;
-                            }, props.updateListInfo);
-                          }
-                        });
-                      }}>
-                      <Edit/>
-                    </QuickActionButton>
-                  </Show>
                 </MediaCard>
               </li>
             )}</VirtualGrid>

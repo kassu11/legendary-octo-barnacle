@@ -16,7 +16,7 @@ import { MediaBadges } from "./MediaBadges.scoped";
  *
  * @param {Object} props
  * @param {Object} [props.media] Anilist media, card renders as an empty skeleton without it
- * @param {Object} [props.mediaListEntry] Users list entry, defaults to media.mediaListEntry
+ * @param {Object} [props.mediaListEntry] List entry to show, overrides the session edits and media.mediaListEntry
  * @param {boolean} [props.loading] Grays out the card while new data is being fetched
  * @param {number} [props.rank] Rank badge shown in the top left corner
  * @param {boolean} [props.cardZoomIn] Zoom in animation when the card is mounted (not reactive)
@@ -24,6 +24,8 @@ import { MediaBadges } from "./MediaBadges.scoped";
  * @param {boolean} [props.showScore] Global average score badge in the top right corner (not reactive)
  * @param {boolean} [props.showStatus] Users list status icon next to the title (not reactive)
  * @param {boolean} [props.quickActions] Edit and list status buttons when hovering the card (not reactive)
+ * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
+ * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
  * @param {boolean} [props.hoverCard] Media info popup when hovering the card (not reactive)
  * @param {boolean} [props.showAdult] 18+ badge for adult media (not reactive)
  * @param {boolean} [props.showRepeats] Users rewatch / reread count badge (not reactive)
@@ -31,7 +33,7 @@ import { MediaBadges } from "./MediaBadges.scoped";
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "quickActions", "hoverCard", "showAdult", "showRepeats", "showNotes", "children"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "quickActions", "afterMutation", "afterDelete", "hoverCard", "showAdult", "showRepeats", "showNotes", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
@@ -40,11 +42,15 @@ export function MediaCard(props) {
     setMediaPageAnilistData({ data: { data: { Media: local.media } } });
   };
 
-  // Edits made during this session are newer than the entry the card was given
+  // A given entry can belong to another user, so session edits only override the media's own entry
   const mediaListEntry = createMemo(() => {
+    if (local.mediaListEntry !== undefined) {
+      return local.mediaListEntry;
+    }
+
     const entry = globalEditedMedia[local.media?.id];
     if (entry === undefined) {
-      return local.mediaListEntry ?? local.media?.mediaListEntry;
+      return local.media?.mediaListEntry;
     }
 
     return entry;
@@ -86,7 +92,7 @@ export function MediaCard(props) {
       {local.children}
       <Show when={hover?.isOpen() && local.media}>
         <Show when={local.quickActions}>
-          <MediaQuickActions scoped class="quick-actions" media={local.media} status={status()} />
+          <MediaQuickActions scoped class="quick-actions" media={local.media} mediaListEntry={mediaListEntry()} status={status()} afterMutation={local.afterMutation} afterDelete={local.afterDelete} />
         </Show>
         <Show when={local.hoverCard}>
           <HoverPortal>
