@@ -548,7 +548,7 @@ export function SearchPage() {
                     </Show>
                     <div class="wrapper" ref={handleVisibilityRef}>
                       <Show when={isVisible()}>
-                        <MediaCard scoped className="search-card" cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[i()]} />
+                        <MediaCard scoped className="search-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[i()]} />
                         { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
                         {preventZoomIn.add(media.id) && true}
                         <Show when={(media?.tabTime < tabTime || media === LOADER)}>

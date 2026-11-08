@@ -17,7 +17,7 @@ import { addApplicationNotification } from "@/state/notifications";
 import { mediaWithMalId, token2 } from "@/state/globalState.js";
 import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
-import { MediaHoverCard } from "@/components/media/MediaCard.scoped.jsx";
+import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
 
 function AnilistMediaCardListBody(props) {
   const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });

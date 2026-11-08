@@ -1,0 +1,38 @@
+@layer component {
+  .quick-action-wrapper {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 999px;
+    transition: background .2s;
+
+    .action-button {
+      padding: 10px;
+      border-radius: 50%;
+      background-color: var(--bg);
+      border: none;
+      transition: scale .2s, filter .2s, background .2s, box-shadow .3s;
+      box-shadow: 0 0 2px 0 var(--shadow-dark), 0 0 5px 0 var(--shadow-light);
+
+      &.active {
+        background-color: color-mix(var(--bg), var(--status-color, purple) 80%);
+        color: black;
+      }
+
+      @starting-style {
+        scale: 0;
+      }
+
+      &:hover, &:focus-visible {
+        filter: brightness(1.5);
+        box-shadow: 0 0 5px 0 var(--shadow-dark), 0 0 10px 0 var(--shadow-light);
+      }
+
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+}

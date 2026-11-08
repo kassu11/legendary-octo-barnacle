@@ -240,7 +240,7 @@ function MediaCards(props) {
     <For each={props.edges.reduce(merge, [])}>{(edge, i) => (
       <>
         <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
-        <MediaCard cardZoomIn coverFadeIn media={edge.node} />
+        <MediaCard cardZoomIn coverFadeIn showScore showStatus quickActions hoverCard media={edge.node} />
       </>
     )}</For>
   );
