@@ -56,7 +56,7 @@ export function UserMediaList() {
   const mutateMediaListCache = (mutate, afterCallBack) => {
     if (isTypeFunction(mutate)) mutate = mutate(untrack(userMediaData));
     setFetcherValueToStorage(mutate);
-    afterCallBack();
+    afterCallBack?.();
   }
 
   const [searchParams, _setSearchParams] = useSearchParams();
