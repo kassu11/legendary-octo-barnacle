@@ -1,0 +1,23 @@
+[
+  {
+    "name": "main",
+    "path": "main",
+    "commit": "2796e8144cfef6d86ef0b529a6878764ebe3ae84",
+    "dirty": true,
+    "updatedAt": "2026-11-08T14:19:46.763Z"
+  },
+  {
+    "name": "WIP",
+    "path": "WIP",
+    "commit": "857bcaef226fb9b8c59d9dab939bf0298a5ea011",
+    "dirty": false,
+    "updatedAt": "2026-11-08T19:09:07.402Z"
+  },
+  {
+    "name": "rework/make-media-cards-more-generic",
+    "path": "rework-make-media-cards-more-generic",
+    "commit": "857bcaef226fb9b8c59d9dab939bf0298a5ea011",
+    "dirty": false,
+    "updatedAt": "2026-11-08T19:17:56.898Z"
+  }
+]
