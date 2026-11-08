@@ -32,48 +32,6 @@
         width: 100%;
       }
 
-      .card-header {
-        position: absolute;
-        top: 0px;
-        padding: .5rem;
-        display: flex;
-        gap: .5rem;
-        color: var(--text);
-
-        .badge {
-          background: black;
-          display: flex;
-          gap: .5rem;
-          padding: .25rem;
-          border-radius: .25rem;
-          align-items: center;
-          font-size: var(--fs-300);
-
-          &.adult-warning {
-            background-color: red;
-            font-weight: 600;
-          }
-
-          _svg {
-            height: 1.25rem;
-          }
-
-          &:hover::before {
-            left: -50%;
-            bottom: 100%;
-            max-width: 20em;
-            position: absolute;
-            content: attr(label);
-            background-color: black;
-            width: max-content;
-            font-weight: 600;
-            padding: .5em;
-            border-radius: .25em;
-            z-index: 1;
-          }
-        }
-      }
-
       .card-footer {
         position: absolute;
         bottom: 0px;

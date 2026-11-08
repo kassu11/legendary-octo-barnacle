@@ -23,7 +23,9 @@ export function MediaHoverCard(props) {
         <Show when={props.media?.studios?.edges.length}>
           <div class="studios shadow">
             <For each={props.media?.studios?.edges}>{edge => (
-              <p>{edge.node.name}</p>
+              <Show when={edge.isMain}>
+                <p>{edge.node.name}</p>
+              </Show>
             )}</For>
           </div>
         </Show>

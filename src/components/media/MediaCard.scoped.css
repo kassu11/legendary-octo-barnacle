@@ -93,6 +93,24 @@
       }
     }
 
+    .badges {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      flex-wrap: wrap;
+      transition: .2s translate, .2s filter, opacity .2s;
+
+      .media-card.loading & {
+        filter: grayscale(.5);
+        opacity: .8;
+      }
+
+      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+        translate: -4px -4px;
+        filter: brightness(1.07);
+      }
+    }
+
     .rank {
       position: absolute;
       top: -8px;

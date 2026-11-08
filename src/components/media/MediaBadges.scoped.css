@@ -1,0 +1,33 @@
+@layer component {
+  .media-badges {
+    display: flex;
+    gap: 4px;
+
+    &:empty {
+      display: none;
+    }
+
+    .badge {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background-color: color-mix(var(--bg-dark), transparent 15%);
+      color: var(--text-muted);
+      font-size: var(--fs-300);
+      font-weight: 500;
+
+      &.adult {
+        background-color: color-mix(var(--red-400), transparent 15%);
+        color: white;
+        font-weight: 700;
+      }
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  }
+}
