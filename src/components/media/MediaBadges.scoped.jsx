@@ -2,6 +2,7 @@ import { Show, splitProps } from "solid-js";
 import "./MediaBadges.scoped.css";
 import { RepeatIcon } from "@/assets/RepeatIcon";
 import NotesIcon from "@/assets/NotesIcon";
+import Star from "@/assets/Star";
 import { Tooltip } from "@/components/Tooltip.scoped";
 
 /**
@@ -13,9 +14,10 @@ import { Tooltip } from "@/components/Tooltip.scoped";
  * @param {boolean} [props.showAdult] 18+ badge for adult media
  * @param {boolean} [props.showRepeats] Rewatch / reread count
  * @param {boolean} [props.showNotes] Users notes, the note text is shown as a tooltip
+ * @param {boolean} [props.showScore] Global average score
  */
 export function MediaBadges(props) {
-  const [local, scoping] = splitProps(props, ["media", "entry", "showAdult", "showRepeats", "showNotes"]);
+  const [local, scoping] = splitProps(props, ["media", "entry", "showAdult", "showRepeats", "showNotes", "showScore"]);
 
   return (
     <div {...scoping} classList={{ "media-badges": true, [props.class]: !!props.class }}>
@@ -35,6 +37,12 @@ export function MediaBadges(props) {
         <div class="badge">
           <NotesIcon scoped />
           <Tooltip placements={["top", "bottom"]}>{local.entry.notes}</Tooltip>
+        </div>
+      </Show>
+      <Show when={local.showScore && local.media?.averageScore}>
+        <div class="badge score">
+          <Star scoped />
+          {local.media.averageScore / 10}
         </div>
       </Show>
     </div>

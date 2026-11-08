@@ -93,11 +93,17 @@
       }
     }
 
-    .badges {
+    .top {
       position: absolute;
       top: 8px;
       left: 8px;
-      flex-wrap: wrap;
+      right: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .badges, .score {
       transition: .2s translate, .2s filter, opacity .2s;
 
       .media-card.loading & {
@@ -108,6 +114,20 @@
       .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
         translate: -4px -4px;
         filter: brightness(1.07);
+      }
+    }
+
+    .badges {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .score {
+      margin-left: auto;
+      flex-shrink: 0;
+
+      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+        translate: 4px -4px;
       }
     }
 
@@ -144,41 +164,17 @@
       }
     }
 
-    .score {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      display: flex;
-      width: max-content;
-      gap: 0.5rem;
-      align-items: center;
-      background-color: color-mix(var(--bg-dark), transparent 15%);
-      font-weight: 500;
-      padding: 4px 8px;
-      border-radius: 8px;
-      transition: .2s translate, .2s filter, opacity .2s;
-
-      .media-card.loading & {
-        filter: grayscale(.5);
-        opacity: .8;
-      }
-
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
-        translate: 4px -4px;
-        filter: brightness(1.07);
-      }
-
-      svg {
-        width: 1rem;
-        height: 1rem;
-        color: var(--gold-400);
-      }
-    }
-
-    .footer {
+    .bottom {
       position: absolute;
       bottom: 0px;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .footer {
+      align-self: stretch;
       transition: translate .2s, color .2s;
 
       .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
@@ -188,10 +184,6 @@
     }
 
     .quick-actions {
-      position: absolute;
-      bottom: 0px;
-      right: 0px;
-
       .media-card:not(_.loading) &:where(_:hover, _:has(_:focus-visible)) {
         background-color: var(--shadow-light);
       }

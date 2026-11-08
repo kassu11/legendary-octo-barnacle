@@ -1,7 +1,6 @@
 import { A } from "@solidjs/router";
 import { createMemo, Show, splitProps } from "solid-js";
 import { urlUtils } from "@/utils/utils";
-import Star from "@/assets/Star";
 import "./MediaCard.scoped.css";
 import { ImageLoader } from "./ImageLoader.scoped";
 import { globalEditedMedia, setMediaPageAnilistData } from "@/state/globalState";
@@ -80,15 +79,14 @@ export function MediaCard(props) {
     <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} class="media-card" classList={{ "zoom-in": cardZoomIn, "loading": local.loading }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media}>
-        <MediaBadges {...badges} scoped class="badges" entry={mediaListEntry()} />
+        {/* Score is its own badge group, so it stays in the top right while the other badges wrap next to it */}
+        <div class="top">
+          <MediaBadges {...badges} scoped class="badges" media={local.media} entry={mediaListEntry()} />
+          <MediaBadges scoped class="score" media={local.media} showScore={local.showScore} />
+        </div>
       </Show>
       <Show when={local.media && local.rank}>
         <div class="rank">#{local.rank}</div>
-      </Show>
-      <Show when={local.showScore && local.media?.averageScore}>
-        <div class="score">
-          <Star scoped /> {(local.media.averageScore / 10)}
-        </div>
       </Show>
       <Show when={local.media?.title?.userPreferred}>
         <p class="line-clamp">
@@ -98,14 +96,19 @@ export function MediaCard(props) {
           {local.media.title.userPreferred}
         </p>
       </Show>
-      <Show when={local.showFooter && local.media && mediaListEntry()}>
-        <MediaCardFooter scoped class="footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} afterProgressMutation={local.afterProgressMutation} />
+      {/* Quick actions and footer share one column, so the quick actions stack on top of the footer instead of overlapping it */}
+      <Show when={local.media && (local.showFooter || local.quickActions)}>
+        <div class="bottom">
+          <Show when={local.quickActions && hover.isOpen()}>
+            <MediaQuickActions scoped class="quick-actions" media={local.media} mediaListEntry={mediaListEntry()} status={status()} afterMutation={local.afterMutation} afterDelete={local.afterDelete} />
+          </Show>
+          <Show when={local.showFooter && mediaListEntry()}>
+            <MediaCardFooter scoped class="footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} afterProgressMutation={local.afterProgressMutation} />
+          </Show>
+        </div>
       </Show>
       {local.children}
       <Show when={hover?.isOpen() && local.media}>
-        <Show when={local.quickActions}>
-          <MediaQuickActions scoped class="quick-actions" media={local.media} mediaListEntry={mediaListEntry()} status={status()} afterMutation={local.afterMutation} afterDelete={local.afterDelete} />
-        </Show>
         <Show when={local.hoverCard}>
           <HoverPortal>
             <MediaHoverCard media={local.media} loading={local.loading} ref={hover.floatingRef} />
