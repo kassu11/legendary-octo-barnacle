@@ -82,12 +82,10 @@
         }
         &::before {
           transition: 0s 0s background, filter .4s, scale .4s;
-          filter: blur(5px);
-          scale: 1.05;
+          filter: blur(3px);
         }
         &::after {
           transition: 0s 0s background, filter .2s, scale .2s;
-          scale: 1.03;
         }
       }
     }
@@ -100,6 +98,12 @@
       display: flex;
       align-items: flex-start;
       gap: 4px;
+
+      @media (width < 40em) {
+        top: 4px;
+        left: 4px;
+        right: 4px;
+      }
     }
 
     .badges, .score {
@@ -111,7 +115,6 @@
       }
 
       .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
-        translate: -4px -4px;
         filter: brightness(1.07);
       }
     }
@@ -124,10 +127,6 @@
     .score {
       margin-left: auto;
       flex-shrink: 0;
-
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
-        translate: 4px -4px;
-      }
     }
 
     .rank {
@@ -158,7 +157,7 @@
       }
 
       .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
-        translate: -4px -4px;
+        /* translate: -4px -4px; */
         filter: brightness(1.07);
       }
     }
@@ -177,7 +176,6 @@
       transition: translate .2s, color .2s;
 
       .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
-        translate: 0px 4px;
         color: var(--text);
       }
     }
@@ -201,7 +199,6 @@
       }
 
       .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
-        transform: translateY(5px);
         color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
         text-shadow: 0 0 2px black;
       }

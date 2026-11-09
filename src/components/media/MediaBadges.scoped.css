@@ -4,20 +4,28 @@
     flex-wrap: wrap;
     gap: 4px;
 
+    @media (width < 40em) {
+      font-size: 0.75rem;
+    }
+
     &:empty {
       display: none;
     }
 
     .badge {
       display: flex;
-      gap: .5rem;
-      min-height: 29px;
+      gap: 4px;
       align-items: center;
       padding: 4px 8px;
       border-radius: 8px;
       background-color: color-mix(var(--bg-dark), transparent 15%);
       color: var(--text-muted);
       font-weight: 500;
+
+      @media (width < 40em) {
+        padding: 3px 7px;
+        border-radius: 6px;
+      }
 
       &.adult {
         background-color: color-mix(var(--red-400), transparent 15%);
@@ -30,8 +38,8 @@
       }
 
       svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1em;
+        height: 1lh;
       }
     }
   }
