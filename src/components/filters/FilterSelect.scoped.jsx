@@ -27,8 +27,8 @@ const sameIds = (a, b) => a.length === b.length && a.every((id, i) => id === b[i
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 // Cmd is the same key on macOS, where Ctrl click opens the context menu
 const isAdditive = e => e.ctrlKey || e.metaKey;
-// Numbers are high to low by default and text is A to Z
-const isDescendingSort = (type, reversed) => (type === "alphabetic") === reversed;
+// Numbers are high to low by default, text is A to Z and order is first to last
+const isDescendingSort = (type, reversed) => (type === "alphabetic" || type === "order") === reversed;
 
 function SortDirection(props) {
   return (
@@ -73,7 +73,7 @@ function SortDirection(props) {
  * @param {Object} props
  * @param {string} props.param Search param name
  * @param {string} props.button Label, also used as the placeholder of the input
- * @param {{ id: string, description: string, type?: "numeric" | "alphabetic", toast?: string, tooltip?: string, tooltipTitle?: string }[]} props.each Toast replaces the description in the trigger
+ * @param {{ id: string, description: string, type?: "numeric" | "alphabetic" | "order", toast?: string, tooltip?: string, tooltipTitle?: string }[]} props.each Toast replaces the description in the trigger
  * @param {string[]} props.value
  * @param {(params: Object) => void} props.setSearchParams
  * @param {boolean} [props.excludable] Rows can also be excluded

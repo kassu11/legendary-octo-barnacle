@@ -101,6 +101,7 @@ export function SearchControlsScoped(props) {
     { description: "Average Score",                                   id: "averageScore", type: "numeric"    },
     { description: "Popularity",                                      id: "popularity",   type: "numeric"    },
     { description: params.type === "anime" ? "Rewatches" : "Rereads", id: "repeat",       type: "numeric"    },
+    { description: "List Order",                                      id: "list",         type: "order",     tooltip: "Order of the lists in the \"All\" view, only changes the combined list" },
   ]);
 
   // The worker sends new arrays after every filter change. mapArray keeps the same option objects
