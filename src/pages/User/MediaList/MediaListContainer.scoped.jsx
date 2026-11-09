@@ -5,6 +5,7 @@ import "./MediaListContainer.scoped.css";
 import { objectUtils } from "@/utils/utils.js";
 import { converStatusToListName } from "./UserMediaListIndex.scoped.jsx";
 import { MediaCard } from "@/components/media/MediaCard.scoped.jsx";
+import { listTitle } from "./SearchControls.scoped.jsx";
 
 export function MediaListContainerScoped(props) {
   const [grid, setGrid] = createSignal(lastGrid);
@@ -90,7 +91,7 @@ export function MediaListContainerScoped(props) {
       <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} grid={grid} />}>
         <For each={props.listData().data.lists}>{list => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>
-            <h2>{list.name}</h2>
+            <h2>{listTitle(list.name)}</h2>
             <VirtualGrid each={list.entries} grid={grid}>{entry => (
               <MediaCard scoped class="card" showScore hoverCard showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
             )}</VirtualGrid>
@@ -152,7 +153,7 @@ function CardsLoading(props) {
   return (
     <For each={lists()}>{list => (
       <Show when={list.entries.length && props.isListVisible(list.name)}>
-        <h2>{list.name}</h2>
+        <h2>{listTitle(list.name)}</h2>
         <VirtualGrid each={list.entries} grid={props.grid}>{() => (
           <MediaCard scoped class="card" />
         )}</VirtualGrid>

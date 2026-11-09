@@ -1,4 +1,5 @@
 import { fuse } from "@/utils/stringUtils.js";
+import { COMBINED_LIST } from "@/constants/mediaLists.js";
 
 onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);
@@ -66,6 +67,15 @@ function modifyMediaListData(listData, type, options) {
 
     list.entries.length = tail;
   });
+  // Added after the indecies, they point to the lists of the cached response that the edits mutate
+  const combinedEntries = new Map();
+  for (const list of listData.lists) {
+    for (const entry of list.entries) {
+      if (!combinedEntries.has(entry.media.id)) combinedEntries.set(entry.media.id, entry);
+    }
+  }
+  listData.lists.push({ name: COMBINED_LIST, isCustomList: false, isCompletedList: false, entries: Array.from(combinedEntries.values()) });
+
   listData.total = mediaSet.size;
   listData.studios = Array.from(studiosSet).sort();
   listData.tags = Array.from(tagsSet).sort();
@@ -77,7 +87,7 @@ function modifyMediaListData(listData, type, options) {
   });
 
   const sectionOrder = listData.user.mediaListOptions[type === "anime" ? "animeList" : "mangaList"].sectionOrder;
-  const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key])));
+  const sectionSortOrder = { ...Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key]))), [COMBINED_LIST]: -1 };
   listData.lists.sort((a, b) => (sectionSortOrder[a.name] ?? sectionOrder.length) - (sectionSortOrder[b.name] ?? sectionOrder.length));
 
   postMessage(listData);
