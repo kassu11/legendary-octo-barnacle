@@ -411,7 +411,6 @@
             cursor: pointer;
 
             .panel.mobile & {
-              font-size: 18px;
               padding: 4px 6px;
             }
 
