@@ -1,7 +1,7 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/state/providers.js";
 import { createMemo, createSignal, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
-import { ALL_LISTS } from "./UserMediaListIndex.scoped.jsx";
+import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
@@ -51,7 +51,15 @@ function toOption(name) {
   return { description: name, id: name };
 }
 
-const toListOption = name => ({ description: name || "All", id: name });
+const toListOption = name => {
+  switch (name) {
+    case ALL_LISTS: return { description: "All", id: name, tooltip: "Every list separately" };
+    case COMBINED_LIST: return { description: listTitle(name), id: name, tooltip: "Every list as one list, entries that are in many lists are shown once" };
+    default: return { description: name, id: name };
+  }
+};
+
+export const listTitle = name => name === COMBINED_LIST ? "Combined" : name;
 
 // Every search param that the remove filters button clears, except search these are also counted as active filters
 const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
@@ -93,6 +101,7 @@ export function SearchControlsScoped(props) {
     { description: "Average Score",                                   id: "averageScore", type: "numeric"    },
     { description: "Popularity",                                      id: "popularity",   type: "numeric"    },
     { description: params.type === "anime" ? "Rewatches" : "Rereads", id: "repeat",       type: "numeric"    },
+    { description: "List Order",                                      id: "list",         type: "order",     tooltip: "Order of the lists in the \"All\" view, only changes the combined list" },
   ]);
 
   // The worker sends new arrays after every filter change. mapArray keeps the same option objects

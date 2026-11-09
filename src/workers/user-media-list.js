@@ -1,4 +1,5 @@
 import { fuse } from "@/utils/stringUtils.js";
+import { COMBINED_LIST } from "@/constants/mediaLists.js";
 
 onmessage = ({ data: { data, type, ...filtering } }) => {
   modifyMediaListData(data, type, filtering);
@@ -71,14 +72,30 @@ function modifyMediaListData(listData, type, options) {
   listData.tags = Array.from(tagsSet).sort();
   listData.startedYears = Array.from(startedYears).sort((a, b) => b - a).map(String);
   listData.completedYears = Array.from(completedYears).sort((a, b) => b - a).map(String);
+
   const sortFunction = generateSortFunction(options.sort);
   listData.lists.forEach(list => {
     list.entries.sort(sortFunction);
   });
 
+  // Sorting the lists doesn't break the indecies, they point to the lists of the cached response that the edits mutate
   const sectionOrder = listData.user.mediaListOptions[type === "anime" ? "animeList" : "mangaList"].sectionOrder;
   const sectionSortOrder = Object.fromEntries(Object.entries(sectionOrder).map(([key, val]) => ([val, +key])));
   listData.lists.sort((a, b) => (sectionSortOrder[a.name] ?? sectionOrder.length) - (sectionSortOrder[b.name] ?? sectionOrder.length));
+
+  // With the list order sort first, the sorted lists are already in the right order
+  const [firstSort] = options.sort;
+  const seenMedia = new Set();
+  const combinedList = { name: COMBINED_LIST, isCustomList: false, isCompletedList: false, entries: [] };
+  for (const list of firstSort === "list_reverse" ? listData.lists.toReversed() : listData.lists) {
+    for (const entry of list.entries) {
+      if (seenMedia.has(entry.media.id)) continue;
+      seenMedia.add(entry.media.id);
+      combinedList.entries.push(entry);
+    }
+  }
+  if (firstSort !== "list" && firstSort !== "list_reverse") combinedList.entries.sort(sortFunction);
+  listData.lists.unshift(combinedList);
 
   postMessage(listData);
 }

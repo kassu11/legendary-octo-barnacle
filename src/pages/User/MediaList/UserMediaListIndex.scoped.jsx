@@ -16,9 +16,7 @@ import { asserts, arrayUtils } from "@/utils/utils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { authUserData } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-
-// Value of the "All" row in the list filter. Lists can have any name, but they can't be empty
-export const ALL_LISTS = "";
+import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
 
 export function UserMediaList() {
   const { user } = useUser();
@@ -69,7 +67,8 @@ export function UserMediaList() {
   const search = () => searchParams.search || "";
   const listParam = multiParam("list");
   const list = () => listParam().length ? listParam() : [ALL_LISTS];
-  const isListVisible = name => !listParam().length || listParam().includes(name);
+  // Combined list has the same entries as the other lists, so it is only shown when it is selected
+  const isListVisible = name => listParam().length ? listParam().includes(name) : name !== COMBINED_LIST;
   // Old links have the list name in the path
   const legacyListUrl = () => {
     const newSearchParams = new URLSearchParams(location.search);
