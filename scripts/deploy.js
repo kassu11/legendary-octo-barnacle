@@ -2,7 +2,9 @@
 //
 //   pnpm run deploy [name]         Build the current checkout and publish it. Defaults to the
 //                                  branch name, or the commit message on a detached HEAD.
+//   pnpm run deploy [name] --clean Same as above, and remove every other published preview.
 //   pnpm run deploy:remove <name>  Remove a published preview.
+//   pnpm run deploy:clean          Remove every published preview, leaving only main.
 //
 // The name "main" is published to the site root, all others to branches/<name>/.
 import { execFileSync, execSync } from "node:child_process";
@@ -43,6 +45,22 @@ function preparePagesWorktree(root) {
   pagesGit(worktree, "reset", "--hard", `origin/${PAGES_BRANCH}`);
   pagesGit(worktree, "clean", "-fdx");
   return worktree;
+}
+
+// Removes every preview except the given one, and returns the names of the removed previews
+function removePreviews(worktree, keep) {
+  const branchesDir = join(worktree, "branches");
+  if (!existsSync(branchesDir)) return [];
+
+  const removed = readdirSync(branchesDir, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && entry.name !== keep)
+    .map(entry => entry.name);
+  for (const name of removed) rmSync(join(branchesDir, name), { recursive: true, force: true });
+  return removed;
+}
+
+function logRemoved(removed) {
+  if (removed.length) console.log(`Removed previews: ${removed.join(", ")}`);
 }
 
 function publishFiles(dist, worktree, slug) {
@@ -86,7 +104,7 @@ function commitAndPush(worktree, message) {
   pagesGit(worktree, "push", "origin", PAGES_BRANCH);
 }
 
-function deploy(root, customName) {
+function deploy(root, customName, clean) {
   const name = customName || git(root, "branch", "--show-current") || git(root, "log", "-1", "--format=%s");
   const slug = toSlug(name);
   const dirty = git(root, "status", "--porcelain") !== "";
@@ -104,10 +122,13 @@ function deploy(root, customName) {
   execSync("pnpm run build", { ...shell, env: { ...process.env, SAFE_BRANCH_NAME: slug, DEPLOYMENT_INFO: JSON.stringify(deployment) } });
 
   const worktree = preparePagesWorktree(root);
+  const removed = clean ? removePreviews(worktree, slug) : [];
   publishFiles(join(root, "dist"), worktree, slug);
   writeManifest(worktree, deployment);
 
-  commitAndPush(worktree, `Deploy ${slug} to Pages (${commit})`);
+  const cleanNote = removed.length ? `, remove ${removed.length} other preview${removed.length === 1 ? "" : "s"}` : "";
+  commitAndPush(worktree, `Deploy ${slug} to Pages (${commit})${cleanNote}`);
+  logRemoved(removed);
   console.log("\nDeployed, Pages usually updates in 1-2 minutes:");
   console.log(slug === "main" ? SITE_URL : `${SITE_URL}?dev-branch=${slug}`);
 }
@@ -127,15 +148,34 @@ function remove(root, name) {
   console.log(`\nRemoved ${slug}`);
 }
 
+function clean(root) {
+  const worktree = preparePagesWorktree(root);
+  const removed = removePreviews(worktree);
+  if (!removed.length) return console.log("No previews to remove, only main is published");
+
+  writeManifest(worktree);
+  commitAndPush(worktree, `Remove all previews from Pages (${removed.length})`);
+  logRemoved(removed);
+}
+
 try {
   const args = process.argv.slice(2).filter(arg => arg !== "--");
-  const isRemove = args[0] === "--remove";
-  const [name, ...extra] = isRemove ? args.slice(1) : args;
+  const flags = new Set(args.filter(arg => arg.startsWith("--")));
+  const [name, ...extra] = args.filter(arg => !arg.startsWith("--"));
+  const unknown = [...flags].filter(flag => !["--remove", "--clean", "--clean-only"].includes(flag));
+  if (unknown.length) throw new Error(`Unknown option: ${unknown.join(" ")}`);
   if (extra.length) throw new Error(`Expected one name, got: ${[name, ...extra].join(" ")}`);
 
   const root = git(process.cwd(), "rev-parse", "--show-toplevel");
-  if (isRemove) remove(root, name);
-  else deploy(root, name);
+  if (flags.has("--clean-only")) {
+    if (name || flags.size > 1) throw new Error("Usage: pnpm run deploy:clean");
+    clean(root);
+  } else if (flags.has("--remove")) {
+    if (flags.has("--clean")) throw new Error("--clean can't be combined with deploy:remove, use deploy:clean instead");
+    remove(root, name);
+  } else {
+    deploy(root, name, flags.has("--clean"));
+  }
 } catch (error) {
   console.error(`\nDeployment failed: ${error.message}`);
   process.exit(1);

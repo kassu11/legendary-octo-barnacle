@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "node scripts/deploy.js",
-    "deploy:remove": "node scripts/deploy.js --remove"
+    "deploy:remove": "node scripts/deploy.js --remove",
+    "deploy:clean": "node scripts/deploy.js --clean-only"
   },
   "dependencies": {
     "@solid-primitives/scheduled": "^1.5.0",

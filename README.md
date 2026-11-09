@@ -47,4 +47,12 @@ The name defaults to the current branch, or to the commit message on a detached 
 
 Removes a published preview from `gh-pages`, for example after its branch has been merged.
 
+### `pnpm run deploy [name] --clean`
+
+Deploys like `pnpm run deploy [name]`, and removes every other published preview in the same commit. Only `main` and the deployed name are left.
+
+### `pnpm run deploy:clean`
+
+Removes every published preview from `gh-pages` without deploying anything, leaving only `main`.
+
 Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
