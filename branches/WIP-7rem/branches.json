@@ -1,0 +1,23 @@
+[
+  {
+    "name": "main",
+    "path": "main",
+    "commit": "7bccc56b0ad58da13b664c5b32d5f05b510e7186",
+    "dirty": false,
+    "updatedAt": "2026-11-08T19:50:10.674Z"
+  },
+  {
+    "name": "WIP",
+    "path": "WIP",
+    "commit": "0abe4bce4733c72ee61403cdf6fb658f621b2a50",
+    "dirty": false,
+    "updatedAt": "2026-11-09T09:06:07.806Z"
+  },
+  {
+    "name": "WIP-7rem",
+    "path": "WIP-7rem",
+    "commit": "0abe4bce4733c72ee61403cdf6fb658f621b2a50",
+    "dirty": true,
+    "updatedAt": "2026-11-09T09:31:24.830Z"
+  }
+]
