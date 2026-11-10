@@ -453,6 +453,18 @@ export function SearchPage() {
     return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
   });
 
+  const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData() || [];
+
+  // Each section starts from the first media or from a media that has a custom section (format group header)
+  // Sections are keyed by their start index, so the section elements stay the same when more pages are loaded
+  const mediaSectionStarts = createMemo(() => {
+    const starts = [];
+    searchMedia().forEach((media, i) => {
+      if (i === 0 || media?.customSection) starts.push(i);
+    });
+    return starts;
+  });
+
   return (
     <ErrorBoundary fallback="Search page has crashed">
       <SearchBar />
@@ -536,28 +548,41 @@ export function SearchPage() {
               </Match>
             </Switch>
 
-            <div class="cards">
-              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
-
-                const [handleVisibilityRef, isVisible] = generateVisibilityRef();
+            <div class="search-results">
+              <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
+                const end = () => mediaSectionStarts()[sectionIndex() + 1] ?? searchMedia().length;
+                const firstMedia = () => searchMedia()[start];
 
                 return (
-                  <Show when={media != MEDIA_PADDING_SPACE}>
-                    <Show when={media?.customSection || (media === LOADER && i() === 0 && parsedSearchParams().groupEntriesByFormat)}>
-                      <h2>{formatMediaFormat(media.customSection || "Loading")}</h2>
+                  <section>
+                    <Show when={firstMedia()?.customSection || (firstMedia() === LOADER && start === 0 && parsedSearchParams().groupEntriesByFormat)} fallback={document.createComment("<h2 />")}>
+                      <h2>{formatMediaFormat(firstMedia().customSection || "Loading")}</h2>
                     </Show>
-                    <div class="wrapper" ref={handleVisibilityRef}>
-                      <Show when={isVisible()}>
-                        <MediaCard scoped class="search-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[i()]} />
-                        { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
-                        {preventZoomIn.add(media.id) && true}
-                        <Show when={(media?.tabTime < tabTime || media === LOADER)}>
-                          <DataElement class="fetch-trigger" data={i} />
-                        </Show>
-                      </Show>
+                    <div class="cards">
+                      <For each={searchMedia().slice(start, end())}>{(media, i) => {
+
+                        const [handleVisibilityRef, isVisible] = generateVisibilityRef();
+                        // Index in the whole search result list, not just inside this section
+                        const index = () => start + i();
+
+                        return (
+                          <Show when={media != MEDIA_PADDING_SPACE}>
+                            <div class="wrapper" ref={handleVisibilityRef}>
+                              <Show when={isVisible()}>
+                                <MediaCard scoped class="search-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} />
+                                { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
+                                {preventZoomIn.add(media.id) && true}
+                                <Show when={(media?.tabTime < tabTime || media === LOADER)}>
+                                  <DataElement class="fetch-trigger" data={index} />
+                                </Show>
+                              </Show>
+                            </div>
+                          </Show>
+                        )
+                      }}</For>
                     </div>
-                  </Show>
-                )
+                  </section>
+                );
               }}</For>
             </div>
 
