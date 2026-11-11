@@ -1,5 +1,5 @@
 import { Match, splitProps, Switch } from "solid-js";
-import { CheckMarkIcon, MinusIcon, PlusIcon } from "@/assets/icons.jsx";
+import { CheckIcon, MinusIcon, PlusIcon } from "@/assets/icons.jsx";
 import "./Checkbox.scoped.css";
 
 export function Checkbox(props) {
@@ -16,7 +16,7 @@ export function Checkbox(props) {
           <PlusIcon scoped {...scoping} />
         </Match>
         <Match when={local.checked}>
-          <CheckMarkIcon scoped {...scoping} />
+          <CheckIcon scoped {...scoping} />
         </Match>
       </Switch>
     </div>
