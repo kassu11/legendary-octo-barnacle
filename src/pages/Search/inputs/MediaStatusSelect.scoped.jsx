@@ -3,7 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { StatusIcon } from "@/assets/SearchFilterIcons.jsx";
+import { StatusIcon } from "@/assets/icons.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 
 export function MediaStatusSelect() {

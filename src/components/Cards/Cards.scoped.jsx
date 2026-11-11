@@ -1,21 +1,14 @@
 import { A } from "@solidjs/router";
 import { queries } from "@/api/api.js";
 import { asserts, urlUtils } from "@/utils/utils.js";
-import Edit from "@/assets/Edit.jsx";
-import Planning from "@/assets/Planning.jsx";
-import Watching from "@/assets/Watching.jsx";
-import Complete from "@/assets/Complete.jsx";
+import { CalendarIcon, CheckIcon, EditIcon, PlayIcon, RepeatIcon, StarIcon, ThumbDownIcon, ThumbUpIcon } from "@/assets/icons.jsx";
 import { useEditMediaEntries } from "@/state/providers.js";
-import Star from "@/assets/Star.jsx";
 import { QuickActionListButton } from "@/components/Buttons.scoped.jsx";
-import ThumbUp from "@/assets/ThumbUp.jsx";
-import ThumbDown from "@/assets/ThumbDown.jsx";
 import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils.js";
 import { addApplicationNotification } from "@/state/notifications";
 import { mediaWithMalId, token2 } from "@/state/globalState.js";
-import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
 
@@ -30,7 +23,7 @@ function AnilistMediaCardListBody(props) {
             <img class="absolute-inset" src={props.media.coverImage.extraLarge || props.media.coverImage.large} alt="Cover." />
             <Show when={props.media.averageScore}>
               <div class="score">
-                <Star /> {(props.media.averageScore / 10)}
+                <StarIcon /> {(props.media.averageScore / 10)}
               </div>
             </Show>
             {props.children}
@@ -62,7 +55,7 @@ function JikanMediaCardListBody(props) {
           <img class="absolute-inset" src={props.media.images.webp.large_image_url} alt="Cover." />
           <Show when={props.media.score}>
             <div class="score">
-              <Star /> {(props.media.score)}
+              <StarIcon /> {(props.media.score)}
             </div>
           </Show>
           {props.children}
@@ -119,16 +112,16 @@ function QuickActionItemList(props) {
           e.preventDefault();
           openEditor(props.media);
         }}>
-          <Edit />
+          <EditIcon />
         </QuickActionListButton>
         <QuickActionListButton label="Set to planning" onClick={handleClick("PLANNING")}>
-          <Planning />
+          <CalendarIcon />
         </QuickActionListButton>
         <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={handleClick("CURRENT")}>
-          <Watching />
+          <PlayIcon />
         </QuickActionListButton>
         <QuickActionListButton label="Set to completed" onClick={handleClick("COMPLETED")}>
-          <Complete />
+          <CheckIcon />
         </QuickActionListButton>
         <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEATING")}>
           <RepeatIcon />
@@ -151,10 +144,10 @@ export function AnilistMediaRecommendationCard(props) {
         <div class="flex-space-between">
           <div>
             <button classList={{active: props.userRating === "RATE_UP"}} style={{"--color": "lime"}} onClick={props.handleRateUp}>
-              <ThumbUp />
+              <ThumbUpIcon />
             </button>
             <button classList={{active: props.userRating === "RATE_DOWN"}} style={{"--color": "crimson"}} onClick={props.handleRateDown}>
-              <ThumbDown />
+              <ThumbDownIcon />
             </button>
           </div>
           <span>

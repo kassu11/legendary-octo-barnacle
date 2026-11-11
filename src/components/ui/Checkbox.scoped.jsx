@@ -1,8 +1,6 @@
 import { Match, splitProps, Switch } from "solid-js";
-import { CheckMarkIcon } from "@/assets/CheckMarkIcon";
+import { CheckMarkIcon, MinusIcon, PlusIcon } from "@/assets/icons.jsx";
 import "./Checkbox.scoped.css";
-import { MinusIcon } from "@/assets/MinusIcon";
-import { PlusIcon } from "@/assets/PlusIcon";
 
 export function Checkbox(props) {
 

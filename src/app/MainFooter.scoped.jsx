@@ -1,7 +1,7 @@
 import { A, useLocation } from "@solidjs/router";
 import { createMemo, createResource, createSignal, For, Show } from "solid-js";
 import "./MainFooter.scoped.css";
-import BranchIcon from "@/assets/BranchIcon";
+import { GitBranchIcon } from "@/assets/icons.jsx";
 import { CreatedAt } from "@/components/CreatedAt.jsx";
 import { settingsShowDevBranch } from "@/state/globalState";
 
@@ -93,7 +93,7 @@ function DevBranchSwitcher(props) {
     <div class="dev-branch-switcher" classList={{ open: open() }}>
       <ContextMenu fileHash={random()} />
       <button onClick={() => setOpen(s => !s)}>
-        <BranchIcon /> {props.name}
+        <GitBranchIcon /> {props.name}
       </button>
     </div>
   );
@@ -117,7 +117,7 @@ function ContextMenu(props) {
     <div class="context-menu">
       <For each={branches()} fallback="No dev branches available">{branch => (
         <a href={location.pathname + search() + "dev-branch=" + branch.path} onClick={handleClick}>
-          <BranchIcon />
+          <GitBranchIcon />
           <span class="branch">
             <span>{branch.name}</span>
             <DeploymentDetails branch={branch} />

@@ -1,8 +1,6 @@
 import { Show, splitProps } from "solid-js";
 import "./MediaBadges.scoped.css";
-import { RepeatIcon } from "@/assets/RepeatIcon";
-import NotesIcon from "@/assets/NotesIcon";
-import Star from "@/assets/Star";
+import { CommentIcon, RepeatIcon, StarIcon } from "@/assets/icons.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
 
 /**
@@ -35,13 +33,13 @@ export function MediaBadges(props) {
       </Show>
       <Show when={local.showNotes && local.entry?.notes}>
         <div class="badge">
-          <NotesIcon scoped />
+          <CommentIcon scoped />
           <Tooltip placements={["top", "bottom"]}>{local.entry.notes}</Tooltip>
         </div>
       </Show>
       <Show when={local.showScore && local.media?.averageScore}>
         <div class="badge score">
-          <Star scoped />
+          <StarIcon scoped />
           {local.media.averageScore / 10}
         </div>
       </Show>

@@ -2,7 +2,7 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { SeasonIcon } from "@/assets/SearchFilterIcons.jsx";
+import { SeasonIcon } from "@/assets/icons.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 
 export function MediaSeasonSelect() {

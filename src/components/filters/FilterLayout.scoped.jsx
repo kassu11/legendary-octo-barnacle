@@ -1,5 +1,5 @@
 import { Show } from "solid-js";
-import { FiltersIcon, SearchIcon, XIcon } from "@/assets/SearchFilterIcons.jsx";
+import { FiltersIcon, SearchIcon, XIcon } from "@/assets/icons.jsx";
 import "./FilterLayout.scoped.css";
 
 export function FilterGroups(props) {

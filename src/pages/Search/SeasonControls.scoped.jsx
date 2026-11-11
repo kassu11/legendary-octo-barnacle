@@ -3,7 +3,7 @@ import { createMemo, For, Show } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers";
 import { capitalize } from "@/utils/formatUtils";
 import { arrayUtils } from "@/utils/utils";
-import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/SearchFilterIcons.jsx";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/icons.jsx";
 import { Checkbox } from "@/components/ui/Checkbox.scoped";
 import "./SeasonControls.scoped.css";
 

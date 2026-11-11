@@ -2,7 +2,7 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { ProgressIcon } from "@/assets/SearchFilterIcons.jsx";
+import { ProgressIcon } from "@/assets/icons.jsx";
 
 export function MediaProgressSelect() {
   const parsedSearchParams = useParsedSearchParams();

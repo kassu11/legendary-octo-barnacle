@@ -3,7 +3,7 @@ import { createEffect, createMemo, createSignal, Match, Show, Switch } from "sol
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { AvailableIcon } from "@/assets/SearchFilterIcons.jsx";
+import { AvailableIcon } from "@/assets/icons.jsx";
 import "./MediaExternalSourcesSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";

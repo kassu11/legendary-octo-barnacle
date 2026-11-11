@@ -3,7 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { SourceIcon } from "@/assets/SearchFilterIcons.jsx";
+import { SourceIcon } from "@/assets/icons.jsx";
 
 export function MediaSourceSelect() {
   const parsedSearchParams = useParsedSearchParams();

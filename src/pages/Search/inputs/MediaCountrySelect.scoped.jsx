@@ -2,7 +2,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { CountryIcon } from "@/assets/SearchFilterIcons.jsx";
+import { CountryIcon } from "@/assets/icons.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 
 export function MediaCountrySelect() {

@@ -3,11 +3,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useResponsive } from "@/state/providers.js";
 import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
-import { XIcon } from "@/assets/SearchFilterIcons.jsx";
-import SortAlphabetDescendingIcon from "@/assets/SortAlphaDown.jsx";
-import SortAlphabetAscendingIcon from "@/assets/SortAlphaUp.jsx";
-import SortNumericDescendingIcon from "@/assets/SortNumericDown.jsx";
-import SortNumericAscendingIcon from "@/assets/SortNumericUp.jsx";
+import { SortAlphabetAscendingIcon, SortAlphabetDescendingIcon, SortNumericAscendingIcon, SortNumericDescendingIcon, XIcon } from "@/assets/icons.jsx";
 import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import "./FilterSelect.scoped.css";
 
