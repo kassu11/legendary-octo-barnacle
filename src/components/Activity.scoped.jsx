@@ -14,7 +14,7 @@ import { addApplicationNotification } from "@/state/notifications";
 import { createAbortController } from "@/utils/abortUtils.js";
 import { authedUserId, deletedActivityIds } from "@/state/globalState.js";
 import { deleteFetcherValueFromStorage } from "@/utils/storageUtils.js";
-import TrashIcon from "@/assets/TrashIcon";
+import { TrashIcon } from "@/assets/icons.jsx";
 
 export function ActivityCard(props) {
   props = mergeProps({ hideProfile: false, small: false, wrapper: (p) => <div {...p} /> }, props);

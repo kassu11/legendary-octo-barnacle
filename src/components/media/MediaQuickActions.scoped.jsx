@@ -1,10 +1,6 @@
 import { batch, Show, splitProps } from "solid-js";
 import "./MediaQuickActions.scoped.css";
-import Complete from "@/assets/Complete";
-import { RepeatIcon } from "@/assets/RepeatIcon";
-import Planning from "@/assets/Planning";
-import Watching from "@/assets/Watching";
-import Edit from "@/assets/Edit";
+import { CalendarIcon, CheckIcon, EditIcon, PlayIcon, RepeatIcon } from "@/assets/icons.jsx";
 import { useEditMediaEntries } from "@/state/providers";
 import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils";
 import { queries } from "@/api/api";
@@ -55,21 +51,21 @@ export function MediaQuickActions(props) {
             deleteMedia: local.afterDelete,
           });
         }}>
-          <Edit scoped />
+          <EditIcon scoped />
         </QuickActionButton>
 
         <Show when={hover.isOpen()}>
 
           <QuickActionButton active={local.status === "PLANNING"} onClick={handleClick("PLANNING")} label="Set to planning">
-            <Planning scoped />
+            <CalendarIcon scoped />
           </QuickActionButton>
 
           <QuickActionButton active={local.status === "CURRENT"} onClick={handleClick("CURRENT")} label={"Set to " + (local.media.type === "ANIME" ? "watching" : "reading")}>
-            <Watching scoped />
+            <PlayIcon scoped />
           </QuickActionButton>
 
           <QuickActionButton active={local.status === "COMPLETED"} onClick={handleClick("COMPLETED")} label="Set to completed">
-            <Complete scoped />
+            <CheckIcon scoped />
           </QuickActionButton>
 
           <QuickActionButton active={local.status === "REPEATING"} onClick={handleClick("REPEATING")} label={"Set to " + (local.media.type === "ANIME" ? "rewatching" : "rereading")}>

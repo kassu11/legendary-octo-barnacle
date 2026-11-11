@@ -2,7 +2,7 @@ import { useSearchParams, useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
-import { SortIcon } from "@/assets/SearchFilterIcons.jsx";
+import { SortIcon } from "@/assets/icons.jsx";
 
 const DEFAULT_SORT_ID = "popularity";
 const DEFAULT_SORT_VALUE = "popularity_desc";

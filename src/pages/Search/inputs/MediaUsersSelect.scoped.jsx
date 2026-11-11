@@ -2,7 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { batch, createEffect, createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { UsersIcon } from "@/assets/SearchFilterIcons.jsx";
+import { UserSearchIcon, UsersIcon } from "@/assets/icons.jsx";
 import "./MediaUsersSelect.scoped.css"
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
@@ -10,7 +10,6 @@ import { queries } from "@/api/api.js";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { createLocalStorageJsonSignal } from "@/utils/localStorageUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { UserSearchIcon } from "@/assets/UserSearchIcon.jsx";
 import { addApplicationNotification } from "@/state/notifications";
 import { arrayUtils } from "@/utils/utils.js";
 

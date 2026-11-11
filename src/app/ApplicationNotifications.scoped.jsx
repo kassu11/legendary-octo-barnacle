@@ -1,10 +1,6 @@
 import { For, Match, Switch } from "solid-js";
 import "./ApplicationNotifications.scoped.css";
-import CloseIcon from "@/assets/CloseIcon";
-import ErrorIcon from "@/assets/ErrorIcon";
-import SuccessIcon from "@/assets/SuccessIcon";
-import InfoIcon from "@/assets/InfoIcon";
-import WarningIcon from "@/assets/WarningIcon";
+import { CloseIcon, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from "@/assets/icons.jsx";
 import { notifications, startNotificationInterval, stopNotificationInterval } from "@/state/notifications";
 
 export function ApplicationNotifications() {

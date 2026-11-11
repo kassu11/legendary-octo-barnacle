@@ -4,9 +4,7 @@ import { compactNumber } from "@/utils/formatUtils.js";
 import { queries } from "@/api/api.js";
 import { asserts } from "@/utils/utils.js";
 import { Match, Show, Switch, untrack } from "solid-js";
-import Heart from "@/assets/Heart.jsx";
-import Anilist from "@/assets/Anilist.jsx";
-import MyAnimeList from "@/assets/MyAnimeList.jsx";
+import { AnilistIcon, HeartIcon, MyAnimeListIcon } from "@/assets/icons.jsx";
 import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils.js";
 import { addApplicationNotification } from "@/state/notifications";
 
@@ -40,7 +38,7 @@ export function FavouriteToggle(props) {
         props.onChange(e.target.checked);
         triggerLikeToggle({[props.idType]: props.variableId}, e.target.checked);
       }}/>
-      <Heart scoped />
+      <HeartIcon scoped class="svg-heart" />
       <Scores />
     </label>
   );
@@ -55,7 +53,7 @@ export function FavouriteToggle(props) {
           <Show when={anilist()}>
             <div class="grid-center">
               <span class="visually-hidden">Anilist favourites: </span>
-              <Anilist scoped />
+              <AnilistIcon scoped />
               <Switch>
                 <Match when={props.anilistLoading}>...</Match>
                 <Match when={props.anilistValue != null}>{compactNumber(props.anilistValue)}</Match>
@@ -66,7 +64,7 @@ export function FavouriteToggle(props) {
           <Show when={jikan()}>
             <div class="grid-center">
               <span class="visually-hidden">MyAnimeList favourites: </span>
-              <MyAnimeList scoped />
+              <MyAnimeListIcon scoped />
               <Switch>
                 <Match when={props.jikanLoading}>...</Match>
                 <Match when={props.jikanValue != null}>{compactNumber(props.jikanValue)}</Match>

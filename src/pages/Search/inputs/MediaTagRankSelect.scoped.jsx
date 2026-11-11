@@ -2,7 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { TagRankIcon } from "@/assets/SearchFilterIcons.jsx";
+import { TagRankIcon } from "@/assets/icons.jsx";
 
 export function MediaTagRankSelect() {
   const parsedSearchParams = useParsedSearchParams();

@@ -1,7 +1,7 @@
 import { createMemo } from "solid-js";
 import { arrayUtils } from "@/utils/utils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { TypeIcon } from "@/assets/SearchFilterIcons.jsx";
+import { TypeIcon } from "@/assets/icons.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { useParams } from "@solidjs/router";
 import { useParsedSearchParams } from "@/state/providers.js";

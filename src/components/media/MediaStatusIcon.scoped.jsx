@@ -1,11 +1,6 @@
 import { Match, Show, splitProps, Switch } from "solid-js";
 import "./MediaStatusIcon.scoped.css";
-import Complete from "@/assets/Complete";
-import { RepeatIcon } from "@/assets/RepeatIcon";
-import Planning from "@/assets/Planning";
-import Watching from "@/assets/Watching";
-import TrashIcon from "@/assets/TrashIcon";
-import StopIcon from "@/assets/StopIcon";
+import { CalendarIcon, CheckIcon, PauseIcon, PlayIcon, RepeatIcon, TrashIcon } from "@/assets/icons.jsx";
 
 export function MediaStatusIcon(props) {
   const [local, scoping] = splitProps(props, ["status"]);
@@ -15,22 +10,22 @@ export function MediaStatusIcon(props) {
       <div {...scoping} classList={{ "list-status-icon": true, [scoping.class]: !!scoping.class }} data-status={local.status}>
         <Switch>
           <Match when={local.status === "COMPLETED"}>
-            <Complete scoped />
+            <CheckIcon scoped />
           </Match>
           <Match when={local.status === "REPEATING"}>
             <RepeatIcon scoped />
           </Match>
           <Match when={local.status === "PLANNING"}>
-            <Planning scoped />
+            <CalendarIcon scoped />
           </Match>
           <Match when={local.status === "CURRENT"}>
-            <Watching scoped />
+            <PlayIcon scoped />
           </Match>
           <Match when={local.status === "DROPPED"}>
             <TrashIcon scoped />
           </Match>
           <Match when={local.status === "PAUSED"}>
-            <StopIcon scoped />
+            <PauseIcon scoped />
           </Match>
         </Switch>
       </div>

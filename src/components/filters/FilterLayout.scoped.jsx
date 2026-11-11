@@ -1,5 +1,5 @@
 import { Show } from "solid-js";
-import { FiltersIcon, SearchIcon, XIcon } from "@/assets/SearchFilterIcons.jsx";
+import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import "./FilterLayout.scoped.css";
 
 export function FilterGroups(props) {
@@ -115,7 +115,7 @@ export function MobileFilters(props) {
         <div class="modal-header" onPointerDown={handleDragStart} onPointerMove={handleDragMove} onPointerUp={handleDragEnd} onPointerCancel={handleDragEnd}>
           <h2>Filters</h2>
           <button class="close-button" onClick={closeFilters} aria-label="Close filters">
-            <XIcon scoped />
+            <CloseIcon scoped />
           </button>
         </div>
         <div class="modal-content">

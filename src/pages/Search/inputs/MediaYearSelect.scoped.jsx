@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { YearIcon } from "@/assets/SearchFilterIcons.jsx";
+import { YearIcon } from "@/assets/icons.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 
 export function MediaYearSelect() {

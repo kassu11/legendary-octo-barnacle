@@ -1,4 +1,4 @@
-import Star from "@/assets/Star";
+import { StarIcon } from "@/assets/icons.jsx";
 import { Switch, Match, mergeProps, splitProps, Show, For } from "solid-js";
 import "./ScoreInput.scoped.css";
 import EmojiByScoreScoped from "@/components/EmojiByScore.scoped.jsx";
@@ -82,7 +82,7 @@ function StarRadioRange(props) {
             }
           }}
           name={props.name} id={props.id} value={i} checked={props.value == i}/>
-        <Star scoped class="score-star" />
+        <StarIcon scoped class="score-star" />
       </label>
     )}</For>
   );

@@ -10,12 +10,11 @@ import CompareMediaListWorker from "@/workers/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formatUtils.js";
 import "./CompareIndex.scoped.css";
 import Score from "@/components/media/Score.scoped.jsx";
-import Star from "@/assets/Star.jsx";
+import { RepeatIcon, StarIcon } from "@/assets/icons.jsx";
 import { debounce } from "@solid-primitives/scheduled";
 import { queries } from "@/api/api.js";
 import { translateToInternalSearchParams } from "@/api/apiTranslations.js";
 import { asserts, signals, arrayUtils, numberUtils } from "@/utils/utils.js";
-import { RepeatIcon } from "@/assets/RepeatIcon.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
@@ -658,7 +657,7 @@ function ContentPage() {
                 </Show>
                 <div class="score">
                   <Tooltip placements={["right", "left", "bottom"]}>Global average score</Tooltip>
-                  <Star scoped /> {(media.averageScore / 10) || "N/A"}
+                  <StarIcon scoped /> {(media.averageScore / 10) || "N/A"}
                 </div>
               </div>
               <A scoped class="cover-link" href={mediaUrl(media)}>
