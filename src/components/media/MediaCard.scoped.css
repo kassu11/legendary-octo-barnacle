@@ -189,7 +189,7 @@
     .line-clamp {
       font-weight: 500;
       position: absolute;
-      top: calc(100% - 8px);
+      top: calc(100% - 12px);
       padding-top: 16px;
       transition: .2s transform, .2s color, .2s text-shadow, .18s opacity;
       z-index: 1;

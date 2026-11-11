@@ -1,29 +1,17 @@
 import { useParams } from "@solidjs/router";
 import { useUser, useUserMediaList } from "@/state/providers.js";
-import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { createEffect, createMemo, For, Show } from "solid-js";
 import "./MediaListContainer.scoped.css";
 import { objectUtils } from "@/utils/utils.js";
 import { converStatusToListName } from "./UserMediaListIndex.scoped.jsx";
 import { MediaCard } from "@/components/media/MediaCard.scoped.jsx";
 import { listTitle } from "./SearchControls.scoped.jsx";
+import { VirtualGrid } from "@/components/VirtualGrid.scoped.jsx";
 
 export function MediaListContainerScoped(props) {
-  const [grid, setGrid] = createSignal(lastGrid);
   const params = useParams();
   const {user} = useUser();
   const {isOwnProfile} = useUserMediaList();
-
-  let gridProbe;
-  onMount(() => {
-    const observer = new ResizeObserver(() => {
-      const style = getComputedStyle(gridProbe);
-      const tracks = style.gridTemplateColumns.split(" ");
-      lastGrid = {columns: tracks.length, rowHeight: parseFloat(tracks[0]) * 8 / 5.5 + parseFloat(style.rowGap)};
-      setGrid(lastGrid);
-    });
-    observer.observe(gridProbe);
-    onCleanup(() => observer.disconnect());
-  });
 
   // Moves the edited entry to the lists matching its new status and custom lists
   // Without refreshing, the visible lists stay the same until the next refresh
@@ -87,60 +75,16 @@ export function MediaListContainerScoped(props) {
   return (
     <div class="list-content">
       <p>{props.timer}</p>
-      <div ref={elem => gridProbe = elem} class="user-profile-media-list-grid" style={{height: "0", margin: "0", visibility: "hidden"}} aria-hidden="true" />
-      <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} grid={grid} />}>
+      <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} />}>
         <For each={props.listData().data.lists}>{list => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>
             <h2>{listTitle(list.name)}</h2>
-            <VirtualGrid each={list.entries} grid={grid}>{entry => (
+            <VirtualGrid each={list.entries}>{entry => (
               <MediaCard scoped class="card" showScore hoverCard showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
             )}</VirtualGrid>
           </Show>
         )}</For>
       </Show>
-    </div>
-  );
-}
-
-// Last measured grid size. Like localListCounts, this gives the lists their full height on the first render
-let lastGrid = {columns: 1, rowHeight: 0};
-const OVERSCAN_PX = 500;
-
-// Only renders the rows near the viewport, the height of the other rows is filled with padding
-function VirtualGrid(props) {
-  let ref;
-  const [viewport, setViewport] = createSignal({ top: 0, bottom: 0 });
-  const rowCount = () => Math.ceil(props.each.length / props.grid().columns);
-  const rowAt = y => Math.max(y / (props.grid().rowHeight || Infinity), 0);
-  // At least one row is always rendered, so that the last row gap doesn't change the list height
-  const firstRow = createMemo(() => Math.min(Math.floor(rowAt(viewport().top)), rowCount() - 1));
-  const lastRow = createMemo(() => Math.max(Math.min(Math.ceil(rowAt(viewport().bottom)), rowCount()), firstRow() + 1));
-  const visibleEntries = createMemo(() => props.each.slice(firstRow() * props.grid().columns, lastRow() * props.grid().columns));
-
-  const updateViewport = () => {
-    const { top } = ref.getBoundingClientRect();
-    setViewport({ top: -top - OVERSCAN_PX, bottom: window.innerHeight - top + OVERSCAN_PX });
-  };
-
-  onMount(() => {
-    // The body size changes also when something above the list changes its height
-    const observer = new ResizeObserver(updateViewport);
-    observer.observe(document.body);
-    window.addEventListener("scroll", updateViewport, { passive: true });
-    window.addEventListener("resize", updateViewport);
-    onCleanup(() => {
-      observer.disconnect();
-      window.removeEventListener("scroll", updateViewport);
-      window.removeEventListener("resize", updateViewport);
-    });
-  });
-
-  return (
-    <div ref={elem => ref = elem} class="user-profile-media-list-grid" style={{
-      "padding-top": `${firstRow() * props.grid().rowHeight}px`,
-      "padding-bottom": `${(rowCount() - lastRow()) * props.grid().rowHeight}px`,
-    }}>
-      <For each={visibleEntries()}>{props.children}</For>
     </div>
   );
 }
@@ -154,7 +98,7 @@ function CardsLoading(props) {
     <For each={lists()}>{list => (
       <Show when={list.entries.length && props.isListVisible(list.name)}>
         <h2>{listTitle(list.name)}</h2>
-        <VirtualGrid each={list.entries} grid={props.grid}>{() => (
+        <VirtualGrid each={list.entries}>{() => (
           <MediaCard scoped class="card" />
         )}</VirtualGrid>
       </Show>

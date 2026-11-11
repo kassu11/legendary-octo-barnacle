@@ -16,13 +16,13 @@ import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { useIntersectionVisible } from "@/hooks/useIntersectionVisible";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
+import { VirtualGrid } from "@/components/VirtualGrid.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -405,7 +405,6 @@ export function SearchPage() {
     });
   });
 
-  const generateVisibilityRef = useIntersectionVisible();
   const [pageIndexKey, DataElement] = useDataElement();
 
   const { signal } = createCleanUpAbortController();
@@ -451,6 +450,18 @@ export function SearchPage() {
     // Padding media are not real results, so they can't use up a rank. Loaders are counted because they hold the place of a real media
     let rank = 0;
     return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
+  });
+
+  const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData() || [];
+
+  // Each section starts from the first media or from a media that has a custom section (format group header)
+  // Sections are keyed by their start index, so the section elements stay the same when more pages are loaded
+  const mediaSectionStarts = createMemo(() => {
+    const starts = [];
+    searchMedia().forEach((media, i) => {
+      if (i === 0 || media?.customSection) starts.push(i);
+    });
+    return starts;
   });
 
   return (
@@ -536,28 +547,43 @@ export function SearchPage() {
               </Match>
             </Switch>
 
-            <div class="cards">
-              <For each={(!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()}>{(media, i) => {
-
-                const [handleVisibilityRef, isVisible] = generateVisibilityRef();
+            <div class="search-results">
+              <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
+                const end = () => mediaSectionStarts()[sectionIndex() + 1] ?? searchMedia().length;
+                const firstMedia = () => searchMedia()[start];
+                // Padding media are never rendered, so they are left out of the grid
+                // Their indices are kept, because the index in the whole search result list is used to calculate the page to fetch
+                const mediaIndices = createMemo(() => {
+                  const indices = [];
+                  for (let i = start; i < end(); i++) {
+                    if (searchMedia()[i] !== MEDIA_PADDING_SPACE) indices.push(i);
+                  }
+                  return indices;
+                });
+                const sectionMedia = createMemo(() => mediaIndices().map(i => searchMedia()[i]));
 
                 return (
-                  <Show when={media != MEDIA_PADDING_SPACE}>
-                    <Show when={media?.customSection || (media === LOADER && i() === 0 && parsedSearchParams().groupEntriesByFormat)}>
-                      <h2>{formatMediaFormat(media.customSection || "Loading")}</h2>
+                  <section>
+                    <Show when={firstMedia()?.customSection || (firstMedia() === LOADER && start === 0 && parsedSearchParams().groupEntriesByFormat)} fallback={document.createComment("<h2 />")}>
+                      <h2>{formatMediaFormat(firstMedia().customSection || "Loading")}</h2>
                     </Show>
-                    <div class="wrapper" ref={handleVisibilityRef}>
-                      <Show when={isVisible()}>
-                        <MediaCard scoped class="search-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[i()]} />
-                        { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
-                        {preventZoomIn.add(media.id) && true}
-                        <Show when={(media?.tabTime < tabTime || media === LOADER)}>
-                          <DataElement class="fetch-trigger" data={i} />
-                        </Show>
-                      </Show>
-                    </div>
-                  </Show>
-                )
+                    <VirtualGrid scoped class="cards" each={sectionMedia()}>{(media, i) => {
+                      // Index in the whole search result list, not just inside this section
+                      const index = () => mediaIndices()[i()];
+
+                      return (
+                        <div class="wrapper">
+                          <MediaCard scoped class="search-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} />
+                          { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
+                          {preventZoomIn.add(media.id) && true}
+                          <Show when={(media?.tabTime < tabTime || media === LOADER)}>
+                            <DataElement class="fetch-trigger" data={index} />
+                          </Show>
+                        </div>
+                      );
+                    }}</VirtualGrid>
+                  </section>
+                );
               }}</For>
             </div>
 
