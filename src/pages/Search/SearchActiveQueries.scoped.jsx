@@ -7,7 +7,7 @@ import { useNavigateAndSearch } from "@/utils/urlUtils";
 import { capitalize } from "@/utils/formatUtils.js";
 import { arrayUtils } from "@/utils/utils";
 import { localizeInternalSearchParams } from "@/api/apiTranslations";
-import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, XIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 
@@ -219,7 +219,7 @@ export function SearchActiveQueries(props) {
                 </Show>
               </span>
               <span>{entry.description}</span>
-              <XIcon scoped />
+              <CloseIcon scoped />
             </button>
           </li>
         )}</For>

@@ -226,13 +226,6 @@ export const SortNumericDescendingIcon = props => (
 
 // ---------- Notifications ----------
 
-export const CloseIcon = props => (
-  <Svg width="1em" height="1em" viewBox="0 0 12 12" {...props}>
-    <path d="M0 0h12v12H0z" fill="none" />
-    <path fill="currentColor" fill-rule="evenodd" d="M4.28 3.22a.75.75 0 0 0-1.06 1.06L4.94 6L3.22 7.72a.75.75 0 0 0 1.06 1.06L6 7.06l1.72 1.72a.75.75 0 0 0 1.06-1.06L7.06 6l1.72-1.72a.75.75 0 0 0-1.06-1.06L6 4.94z" clip-rule="evenodd" />
-  </Svg>
-);
-
 export const SuccessIcon = props => (
   <Svg width="1em" height="1em" viewBox="0 0 48 48" {...props}>
     <path d="M0 0h48v48H0z" fill="none" />
@@ -465,7 +458,7 @@ export const ScoreIcon = props => (
   </OutlineSvg>
 );
 
-export const XIcon = props => (
+export const CloseIcon = props => (
   <OutlineSvg {...props}><path d="M18 6 6 18M6 6l12 12" /></OutlineSvg>
 );
 

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useResponsive } from "@/state/providers.js";
 import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
-import { SortAlphabetAscendingIcon, SortAlphabetDescendingIcon, SortNumericAscendingIcon, SortNumericDescendingIcon, XIcon } from "@/assets/icons.jsx";
+import { CloseIcon, SortAlphabetAscendingIcon, SortAlphabetDescendingIcon, SortNumericAscendingIcon, SortNumericDescendingIcon } from "@/assets/icons.jsx";
 import { Checkbox } from "@/components/ui/Checkbox.scoped.jsx";
 import "./FilterSelect.scoped.css";
 
@@ -759,7 +759,7 @@ export function FilterSelect(props) {
     <Show when={canClear()}>
       <button class="trigger-clear" aria-label={`${isSingle() ? "Reset" : "Clear"} ${props.button}`} onMouseDown={e => e.preventDefault()} onClick={handleTriggerClearClick}>
         <Show when={!isTouch()}>{triggerCount()}</Show>
-        <span class="clear-icon"><XIcon /></span>
+        <span class="clear-icon"><CloseIcon /></span>
       </button>
     </Show>
   );

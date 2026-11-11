@@ -6,7 +6,7 @@ import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
-import { AgeIcon, ArrowUpIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, XIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, ArrowUpIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "@/assets/icons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [
@@ -151,7 +151,7 @@ export function SearchControlsScoped(props) {
               </Match>
             </Switch>
             <button class="action remove-filters" disabled={!location.search} onClick={() => setSearchParams(Object.fromEntries(["search", ...filterParams].map(name => [name, undefined])))}>
-              <XIcon />
+              <CloseIcon />
               Remove filters
             </button>
           </FilterGroup>
