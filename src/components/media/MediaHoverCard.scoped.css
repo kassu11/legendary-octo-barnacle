@@ -82,6 +82,13 @@
       justify-content: space-between;
     }
 
+    .dates {
+      margin-top: -10px;
+      font-size: var(--fs-300);
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
     .shadow {
       text-shadow: 0 0 3px black;
     }

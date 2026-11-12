@@ -1,5 +1,5 @@
 import { For, Match, Show, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, formatMediaStatus, languageFromCountry, plural } from "@/utils/formatUtils";
+import { capitalize, formatAnilistDate, formatAnilistDateDelta, formatMediaFormat, formatMediaStatus, languageFromCountry, plural } from "@/utils/formatUtils";
 import { DurationToTime, EpisodeTime2 } from "@/components/media/EpisodeTime";
 import "./MediaHoverCard.scoped.css";
 import { ImageLoader } from "./ImageLoader.scoped";
@@ -107,6 +107,19 @@ export function MediaHoverCard(props) {
           </Switch>
         </span>
       </div>
+      <Show when={props.showDates && (formatAnilistDate(props.entry?.startedAt) || formatAnilistDate(props.entry?.completedAt))}>
+        <div class="dates flex-bullet-separator">
+          <Show when={formatAnilistDate(props.entry?.startedAt)}>{date => (
+            <span>{date()}</span>
+          )}</Show>
+          <Show when={formatAnilistDate(props.entry?.completedAt)}>{date => (
+            <span>{date()}</span>
+          )}</Show>
+          <Show when={formatAnilistDateDelta(props.entry?.startedAt, props.entry?.completedAt)}>{delta => (
+            <span>{delta()}</span>
+          )}</Show>
+        </div>
+      </Show>
     </div>
   );
 }
