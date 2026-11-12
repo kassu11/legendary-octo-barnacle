@@ -1,9 +1,10 @@
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
 import importX, { createNodeResolver } from "eslint-plugin-import-x";
+import scopedComponentClass from "./eslint-rules/scoped-component-class.js";
 
 // Allowed import direction: app -> pages -> components -> state/hooks/api -> utils/constants
 const layerZones = [
@@ -24,6 +25,10 @@ const pageZones = readdirSync(new URL("./src/pages", import.meta.url)).map(page 
   message: "Pages can't import from other pages.",
 }));
 
+// Svg icons are exempt from the scoped component class rule, selecting "svg" is more readable than "check-icon"
+const iconComponents = [...readFileSync(new URL("./src/assets/icons.jsx", import.meta.url), "utf-8")
+  .matchAll(/^export (?:const|function) (\w+)/gm)].map(([, name]) => name);
+
 export default [
   js.configs.recommended,
   {
@@ -31,6 +36,7 @@ export default [
     ignores: ["!**/node_modules/"],
     plugins: {
       "import-x": importX,
+      "local": { rules: { "scoped-component-class": scopedComponentClass } },
     },
     settings: {
       "import-x/resolver-next": [
@@ -45,6 +51,7 @@ export default [
       "no-unused-vars": ["error", {"args": "after-used"}],   // Helps clean up imports you don't need anymore
       "import-x/no-unresolved": ["error", { ignore: ["\\?worker$"] }],   // This catches broken import paths
       "import-x/no-restricted-paths": ["error", { zones: [...layerZones, ...pageZones] }],
+      "local/scoped-component-class": ["warn", { ignore: ["A", "Dynamic", ...iconComponents] }],
     },
     languageOptions: {
       globals: {
@@ -63,6 +70,12 @@ export default [
       },
       ecmaVersion: "latest",
       sourceType: "module",
+    },
+  },
+  {
+    files: ["src/assets/icons.jsx"],
+    rules: {
+      "local/scoped-component-class": "off",
     },
   },
 ];
