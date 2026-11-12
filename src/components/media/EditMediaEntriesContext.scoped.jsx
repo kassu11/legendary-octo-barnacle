@@ -342,7 +342,7 @@ export function EditMediaEntriesProvider(props) {
                   </select>
                 </div>
                 <div class="media-editor-input score">
-                  <ScoreInput scoped value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
+                  <ScoreInput scoped class="score-input" value={state.score()} label="Score" onChange={state.setScore} format={state.format()} />
                 </div>
                 <div class="media-editor-input progress">
                   <label htmlFor="progress">
@@ -428,7 +428,7 @@ export function EditMediaEntriesProvider(props) {
                   <p class="advanced-scoring-header">Advanced scoring</p>
                   <For each={state.advancedScoring()}>{(scoreFieldName, i) => ( 
                     <div class="media-editor-input advanced-score">
-                      <ScoreInput 
+                      <ScoreInput scoped class="score-input"
                         value={state.advancedScores()[scoreFieldName] ?? ""} 
                         id={"advanced-score-" + i()} 
                         name={"advanced-scores-" + i()}

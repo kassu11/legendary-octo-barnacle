@@ -14,11 +14,6 @@
   &.done {
     opacity: 0;
   }
-
-  /* SolidJS portal will always add this unscopable div */
-  _div:has(> &) {
-    display: contents;
-  }
 }
 
 @keyframes loading-bar-pulse {

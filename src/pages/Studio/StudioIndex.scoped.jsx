@@ -5,7 +5,6 @@ import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { queries } from "@/api/api.js";
 import { asserts } from "@/utils/utils.js";
-import { MediaCardContainerScoped } from "@/components/Cards/MediaCardContainer.scoped.jsx";
 import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
@@ -137,11 +136,9 @@ export function Studio() {
             <option value="UPDATED_AT_DESC">UPDATED_AT_DESC</option>
           </select>
         </form>
-        <MediaCardContainerScoped>
-          <ol class="cards">
-            <CharacterMediaPage variables={variables()} showYears={showYears} nestLevel={1} />
-          </ol>
-        </MediaCardContainerScoped>
+        <ol class="cards">
+          <CharacterMediaPage variables={variables()} showYears={showYears} nestLevel={1} />
+        </ol>
       </Show>
     </div>
   )

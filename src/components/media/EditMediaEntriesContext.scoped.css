@@ -84,7 +84,7 @@
         order: 1;
         gap: .25rem;
 
-        > _:is(_input, _select, _textarea) {
+        > :is(input, select, textarea) {
           padding: 1rem;
           border: unset;
           field-sizing: content;

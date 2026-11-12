@@ -41,7 +41,7 @@ export function MainNavigation() {
             <Show when={authUserData()}>
               <li><A href="/notifications">Notifications ({authUserData().data.unreadNotificationCount})</A></li>
               <li class="profile">
-                <A href={"/user/" + authUserData().data.name}>
+                <A scoped href={"/user/" + authUserData().data.name}>
                   {authUserData().data.name}
                   <img src={authUserData().data.avatar.large} alt="Profile avatar" />
                 </A>

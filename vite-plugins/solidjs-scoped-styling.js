@@ -253,9 +253,13 @@ export const transform = (src, id, warn = console.warn) => {
         }
         // Selector is prefixed with "_" don't scope the selector
         else if (hasSelector === false && src[i] === "_") {
+          // Unscoping is a code smell (like !important), so warn about it
+          // Unscoped user action pseudo classes (_:hover, :has(_:focus-visible)) are fine, the element can come from any component
           const line = lineNumber(src, i);
-          if (!unscopedLines.has(line)) warn(`${id}:${line} "_" unscoping is deprecated, scope the selector instead`);
-          unscopedLines.add(line);
+          if (!unscopedLines.has(line) && !userActionPseudoClass.test(src.substring(i + 1, i + 20))) {
+            warn(`${id}:${line} "_" unscoping is a code smell, scope the selector if possible`);
+            unscopedLines.add(line);
+          }
           scopeCurrentSelector = false;
         }
         // Position should have ".", "#", and rest of UTF-8 characters
@@ -295,6 +299,8 @@ export const transform = (src, id, warn = console.warn) => {
 // Replace the "--scoped" prefix of css variable names with the file hash
 // --scoped-color becomes --9f86d081-color
 const scopeCssVariables = (src, hash) => src.replace(/(?<![\w-])--scoped/g, `--${hash}`);
+
+const userActionPseudoClass = /^:(hover|active|focus|focus-visible|focus-within)(?![\w-])/;
 
 const lineNumber = (src, index) => src.substring(0, index).split("\n").length;
 

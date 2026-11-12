@@ -143,7 +143,7 @@
           filter: brightness(1.07);
         }
 
-        _svg {
+        svg {
           width: 1rem;
           height: 1rem;
           color: var(--gold-400);
@@ -162,24 +162,35 @@
         transition: .2s opacity, .2s scale;
         pointer-events: none;
 
-        &:hover, _li:nth-child(1) {
+        &:hover {
           pointer-events: all;
         }
 
-        _li:nth-child(n + 2) {
-          transition: .2s opacity, .2s scale;
-        }
-
-        &:not(_:hover, _:has(_:focus-visible), _:has(_:hover)) _li:nth-child(n + 2) {
+        &:not(_:hover, :has(_:focus-visible), :has(_:hover)) li:nth-child(n + 2) {
           pointer-events: none;
           opacity: 0;
           scale: 0;
         }
 
-        .wrapper:not(_:has(_:hover), _:has(_:focus-visible)) & {
+        .wrapper:not(:has(_:hover), :has(_:focus-visible)) & {
           pointer-events: none;
           opacity: 0;
           scale: 0;
+        }
+
+        li {
+          &:nth-child(1) {
+            pointer-events: all;
+          }
+
+          &:nth-child(n + 2) {
+            transition: .2s opacity, .2s scale;
+          }
+
+          svg {
+            width: 100%;
+            height: 100%;
+          }
         }
       }
     }
@@ -208,7 +219,7 @@
       align-items: end;
       padding: 8px;
 
-      .cp-media-card:not(:hover, _:has(_:focus-visible)) & {
+      .cp-media-card:not(:hover, :has(_:focus-visible)) & {
         opacity: 0;
       }
 
@@ -243,7 +254,7 @@
 
       }
 
-      _svg {
+      svg {
         width: 16px;
         height: 16px;
       }
