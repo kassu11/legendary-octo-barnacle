@@ -76,7 +76,7 @@
         transition: 0s 1s background allow-discrete, filter .4s, scale .4s;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         &::after, &::before {
           background: inherit;
         }
@@ -114,7 +114,7 @@
         opacity: .8;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         filter: brightness(1.07);
       }
     }
@@ -156,7 +156,7 @@
         opacity: .8;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         /* translate: -4px -4px; */
         filter: brightness(1.07);
       }
@@ -175,13 +175,13 @@
       align-self: stretch;
       transition: translate .2s, color .2s;
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         color: var(--text);
       }
     }
 
     .quick-actions {
-      .media-card:not(_.loading) &:where(_:hover, _:has(_:focus-visible)) {
+      .media-card:not(.loading) &:where(_:hover, :has(_:focus-visible)) {
         background-color: var(--shadow-light);
       }
     }
@@ -198,7 +198,7 @@
         opacity: .5;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
         text-shadow: 0 0 2px black;
       }
@@ -210,7 +210,7 @@
         opacity: .75;
         transition: opacity .2s;
 
-        .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+        .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
           opacity: .9;
         }
       }

@@ -3,7 +3,7 @@ import { queries } from "@/api/api.js";
 import { asserts, urlUtils } from "@/utils/utils.js";
 import { CalendarIcon, CheckIcon, EditIcon, PlayIcon, RepeatIcon, StarIcon, ThumbDownIcon, ThumbUpIcon } from "@/assets/icons.jsx";
 import { useEditMediaEntries } from "@/state/providers.js";
-import { QuickActionListButton } from "@/components/Buttons.scoped.jsx";
+import { QuickActionButton } from "@/components/Buttons.scoped.jsx";
 import "./Cards.scoped.css";
 import { Match, Show, Switch } from "solid-js";
 import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils.js";
@@ -23,7 +23,7 @@ function AnilistMediaCardListBody(props) {
             <img class="absolute-inset" src={props.media.coverImage.extraLarge || props.media.coverImage.large} alt="Cover." />
             <Show when={props.media.averageScore}>
               <div class="score">
-                <StarIcon /> {(props.media.averageScore / 10)}
+                <StarIcon scoped /> {(props.media.averageScore / 10)}
               </div>
             </Show>
             {props.children}
@@ -55,7 +55,7 @@ function JikanMediaCardListBody(props) {
           <img class="absolute-inset" src={props.media.images.webp.large_image_url} alt="Cover." />
           <Show when={props.media.score}>
             <div class="score">
-              <StarIcon /> {(props.media.score)}
+              <StarIcon scoped /> {(props.media.score)}
             </div>
           </Show>
           {props.children}
@@ -108,24 +108,34 @@ function QuickActionItemList(props) {
   return (
     <Show when={token2()}>
       <ul class="cp-media-card-quick-action-items">
-        <QuickActionListButton label="Edit media" onClick={e => {
-          e.preventDefault();
-          openEditor(props.media);
-        }}>
-          <EditIcon />
-        </QuickActionListButton>
-        <QuickActionListButton label="Set to planning" onClick={handleClick("PLANNING")}>
-          <CalendarIcon />
-        </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={handleClick("CURRENT")}>
-          <PlayIcon />
-        </QuickActionListButton>
-        <QuickActionListButton label="Set to completed" onClick={handleClick("COMPLETED")}>
-          <CheckIcon />
-        </QuickActionListButton>
-        <QuickActionListButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEATING")}>
-          <RepeatIcon />
-        </QuickActionListButton>
+        <li>
+          <QuickActionButton label="Edit media" onClick={e => {
+            e.preventDefault();
+            openEditor(props.media);
+          }}>
+            <EditIcon scoped />
+          </QuickActionButton>
+        </li>
+        <li>
+          <QuickActionButton label="Set to planning" onClick={handleClick("PLANNING")}>
+            <CalendarIcon scoped />
+          </QuickActionButton>
+        </li>
+        <li>
+          <QuickActionButton label={"Set to " + (props.media.type === "ANIME" ? "watching" : "reading")} onClick={handleClick("CURRENT")}>
+            <PlayIcon scoped />
+          </QuickActionButton>
+        </li>
+        <li>
+          <QuickActionButton label="Set to completed" onClick={handleClick("COMPLETED")}>
+            <CheckIcon scoped />
+          </QuickActionButton>
+        </li>
+        <li>
+          <QuickActionButton label={"Set to " + (props.media.type === "ANIME" ? "rewatching" : "rereading")} onClick={handleClick("REPEATING")}>
+            <RepeatIcon scoped />
+          </QuickActionButton>
+        </li>
       </ul>
     </Show>
   );
@@ -144,10 +154,10 @@ export function AnilistMediaRecommendationCard(props) {
         <div class="flex-space-between">
           <div>
             <button classList={{active: props.userRating === "RATE_UP"}} style={{"--color": "lime"}} onClick={props.handleRateUp}>
-              <ThumbUpIcon />
+              <ThumbUpIcon scoped />
             </button>
             <button classList={{active: props.userRating === "RATE_DOWN"}} style={{"--color": "crimson"}} onClick={props.handleRateDown}>
-              <ThumbDownIcon />
+              <ThumbDownIcon scoped />
             </button>
           </div>
           <span>

@@ -122,7 +122,8 @@ export function MainLoadingBar() {
   return (
     // Dialog will go over loading bar, so we want to always portal to the top element layer.
     // But this will always replay animations, so we HAVE TO make the animations using javascripts :c
-    <Portal mount={topElements().at(-1)}>
+    // Portal wraps the content in a div that the scoped CSS can't select
+    <Portal mount={topElements().at(-1)} ref={container => container.style.display = "contents"}>
       <div ref={elem => ref = elem} class="loading-bar" classList={{ done: done() }}></div>
     </Portal>
   );

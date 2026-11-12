@@ -34,19 +34,19 @@ function ScoreInput(props) {
       </Show>
       <Switch>
         <Match when={local.format === "POINT_10"}>
-          <input type="number" inputMode="numeric" min="0" max="10" {...info} {...updateValue} onChange={e => {
+          <input {...scoping} class="score-input" type="number" inputMode="numeric" min="0" max="10" {...info} {...updateValue} onChange={e => {
             const num = Math.floor(Number(e.target.value) || 0);
             local.onChange(Math.max(0, Math.min(num, 10)));
           }} />
         </Match>
         <Match when={local.format === "POINT_100"}>
-          <input type="number" inputMode="numeric" min="0" max="100" {...info} {...updateValue} onChange={e => {
+          <input {...scoping} class="score-input" type="number" inputMode="numeric" min="0" max="100" {...info} {...updateValue} onChange={e => {
             const num = Math.floor(Number(e.target.value) || 0);
             local.onChange(Math.max(0, Math.min(num, 100)));
           }} />
         </Match>
         <Match when={local.format === "POINT_10_DECIMAL"}>
-          <input type="number" inputMode="decimal" min="0" max="10" step=".1" {...info} {...updateValue} onChange={e => {
+          <input {...scoping} class="score-input" type="number" inputMode="decimal" min="0" max="10" step=".1" {...info} {...updateValue} onChange={e => {
             const num = Number((Number(e.target.value) || 0).toFixed(1));
             local.onChange(Math.max(0, Math.min(num, 10)));
           }} />

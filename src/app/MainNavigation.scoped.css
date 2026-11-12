@@ -24,7 +24,7 @@
       .profile {
         height: 32px;
 
-        _a {
+        a {
           display: flex;
           gap: 16px;
           align-items: center;

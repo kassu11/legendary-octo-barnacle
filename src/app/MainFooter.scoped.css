@@ -98,7 +98,7 @@
         filter: brightness(1.25);
       }
 
-      > _* {
+      > * {
           flex-shrink: 0;
       }
     }

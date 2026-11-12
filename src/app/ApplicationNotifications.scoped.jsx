@@ -11,22 +11,22 @@ export function ApplicationNotifications() {
           <div class="icon-wrapper">
             <Switch>
               <Match when={val.type === "error"}>
-                <ErrorIcon />
+                <ErrorIcon scoped />
               </Match>
               <Match when={val.type === "info"}>
-                <InfoIcon />
+                <InfoIcon scoped />
               </Match>
               <Match when={val.type === "warning"}>
-                <WarningIcon />
+                <WarningIcon scoped />
               </Match>
               <Match when={val.type === "success"}>
-                <SuccessIcon />
+                <SuccessIcon scoped />
               </Match>
             </Switch>
           </div>
           <p>{val.message}</p>
           <button onClick={() => val.setHidden(true)}>
-            <CloseIcon />
+            <CloseIcon scoped />
           </button>
         </div>
       )}</For>
