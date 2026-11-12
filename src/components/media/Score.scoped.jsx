@@ -5,7 +5,7 @@ import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 
 function Score(props) {
 
-  const [local, scoping] = splitProps(props, ["score", "format"]);
+  const [local, scoping] = splitProps(props, ["score", "format", "children"]);
 
   return (
     <Show when={local.score !== 0}>
@@ -23,6 +23,7 @@ function Score(props) {
             </Switch>
           </Match>
         </Switch>
+        {local.children}
       </div>
     </Show>
   );
