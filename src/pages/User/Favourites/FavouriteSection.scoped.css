@@ -30,6 +30,10 @@
       padding: 0;
       gap: 16px;
 
+      @media (width < 35em) {
+        gap: 8px;
+      }
+
       &.reorder {
         touch-action: none;
 
@@ -76,19 +80,11 @@
         _li {
           padding: 16px;
           background-color: var(--background-500-old);
+
+          @media (width < 35em) {
+            padding: 8px;
+          }
         }
-      }
-    }
-  }
-}
-
-@layer resize {
-  @media (width < 35em) {
-    ol {
-      gap: 8px;
-
-      &.flex _li {
-        padding: 8px;
       }
     }
   }
