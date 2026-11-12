@@ -1,5 +1,5 @@
 @layer layout {
-  li _a {
+  li a {
     background-color: var(--background-400-old);
     display: grid;
     grid-template-columns: 5.5rem 1fr;

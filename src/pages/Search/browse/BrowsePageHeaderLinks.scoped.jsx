@@ -8,9 +8,9 @@ export function BrowsePageHeaderLinks(props) {
       <h2>
         <A href={props.href} class="link">{props.title}</A>
       </h2>
-      <A href={props.href} class="view-all">
+      <A scoped href={props.href} class="view-all">
         <span>View all</span>
-        <ArrowRightIcon />
+        <ArrowRightIcon scoped />
       </A>
     </div>
   );

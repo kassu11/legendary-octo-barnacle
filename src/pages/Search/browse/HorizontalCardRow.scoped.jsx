@@ -65,7 +65,7 @@ export function HorizontalCardRowScoped(props) {
       <BrowsePageHeaderLinks {...props} />
       <ol ref={handleRef} class="grid-reel-auto-fill">
         <For each={props.data || Array(6).fill(null)}>{media => (
-          <MediaCard media={media} loading={props.loading} cardZoomIn coverFadeIn showScore showStatus quickActions hoverCard />
+          <MediaCard scoped class="media-card" media={media} loading={props.loading} cardZoomIn coverFadeIn showScore showStatus quickActions hoverCard />
         )}</For>
       </ol>
     </section>

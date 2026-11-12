@@ -11,7 +11,7 @@
       padding: .25rem;
       height: max-content;
 
-      _img,_svg {
+      img, svg {
         aspect-ratio: 1/1;
         width: 1.25rem;
         color: white;

@@ -71,11 +71,11 @@
             gap: 8px;
           }
 
-          &:has(img:hover, _.title:hover, _.title:focus-visible) {
+          &:has(img:hover, .title:hover, .title:focus-visible) {
             filter: brightness(1.1);
           }
 
-          > _a.cover-container {
+          > a.cover-container {
             @container vertical-search-cards (width < 42em) {
               grid-row: span 2;
             }
@@ -98,7 +98,7 @@
             gap: 8px;
             font-weight: 500;
 
-            _.title {
+            .title {
               text-decoration: none;
               color: var(--text-muted);
               transition: .2s color;
@@ -131,11 +131,11 @@
                 background-color: var(--media-background-color, orange);
                 transition: .2s filter;
 
-                &:hover, &:has(_a:focus-visible) {
+                &:hover, &:has(a:focus-visible) {
                   filter: brightness(1.2);
                 }
 
-                _a {
+                a {
                   text-decoration: none;
                   color: rgb(0 0 0 / 90%);
                 }

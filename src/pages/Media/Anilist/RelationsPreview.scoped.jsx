@@ -14,6 +14,7 @@ export function AnilistRelationsPreview(props) {
             <For each={props.relations.edges}>{relation => (
               <li>
                 <A
+                  scoped
                   href={urlUtils.anilistMediaUrl(relation.node)}
                   class="media-page-relation"
                 >

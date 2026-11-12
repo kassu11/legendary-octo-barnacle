@@ -37,26 +37,7 @@
       &.reorder {
         touch-action: none;
 
-        _li {
-          cursor: grab;
-
-          _.cp-delete-favourite {
-            display: none;
-          }
-
-          _* {
-            pointer-events: none;
-            user-select: none;
-          }
-
-          &.dragging {
-            pointer-events: none;
-            user-select: none;
-            z-index: 1;
-          }
-        }
-
-        &:has(_.dragging) {
+        &.dragging {
           cursor: grabbing;
         }
       }
@@ -76,15 +57,6 @@
         display: flex;
         flex-wrap: wrap;
         font-size: 16px;
-
-        _li {
-          padding: 16px;
-          background-color: var(--background-500-old);
-
-          @media (width < 35em) {
-            padding: 8px;
-          }
-        }
       }
     }
   }

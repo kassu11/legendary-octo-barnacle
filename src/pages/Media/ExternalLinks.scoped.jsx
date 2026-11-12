@@ -18,7 +18,7 @@ export function ExternalLinks(props) {
               <li class="cp-external-link">
                 <div class="icon" style={{background: link.color}}>
                   <Show when={link.icon} fallback={
-                    <LinkIcon />
+                    <LinkIcon scoped />
                   }>
                     <img src={link.icon} alt="Site favicon." />
                   </Show>
