@@ -31,13 +31,14 @@ import { MediaCardFooter } from "./MediaCardFooter.scoped";
  * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
  * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
  * @param {boolean} [props.hoverCard] Media info popup when hovering the card
+ * @param {boolean} [props.showDates] Users start and completion dates at the bottom of the hover card
  * @param {boolean} [props.showAdult] 18+ badge for adult media
  * @param {boolean} [props.showRepeats] Users rewatch / reread count badge
  * @param {boolean} [props.showNotes] Users notes badge
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "afterProgressMutation", "quickActions", "afterMutation", "afterDelete", "hoverCard", "children"]);
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "afterProgressMutation", "quickActions", "afterMutation", "afterDelete", "hoverCard", "showDates", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
@@ -111,7 +112,7 @@ export function MediaCard(props) {
       <Show when={hover?.isOpen() && local.media}>
         <Show when={local.hoverCard}>
           <HoverPortal>
-            <MediaHoverCard media={local.media} loading={local.loading} ref={hover.floatingRef} />
+            <MediaHoverCard media={local.media} entry={mediaListEntry()} showDates={local.showDates} loading={local.loading} ref={hover.floatingRef} />
           </HoverPortal>
         </Show>
       </Show>
