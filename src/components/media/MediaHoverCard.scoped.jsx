@@ -108,17 +108,15 @@ export function MediaHoverCard(props) {
         </span>
       </div>
       <Show when={props.showDates && (formatAnilistDate(props.entry?.startedAt) || formatAnilistDate(props.entry?.completedAt))}>
-        <div class="dates">
+        <div class="dates flex-bullet-separator">
           <Show when={formatAnilistDate(props.entry?.startedAt)}>{date => (
-            <p>Started: {date()}</p>
+            <span>{date()}</span>
           )}</Show>
           <Show when={formatAnilistDate(props.entry?.completedAt)}>{date => (
-            <div class="completed">
-              <p>Completed: {date()}</p>
-              <Show when={formatAnilistDateDelta(props.entry?.startedAt, props.entry?.completedAt)}>{delta => (
-                <p>{delta()}</p>
-              )}</Show>
-            </div>
+            <span>{date()}</span>
+          )}</Show>
+          <Show when={formatAnilistDateDelta(props.entry?.startedAt, props.entry?.completedAt)}>{delta => (
+            <span>{delta()}</span>
           )}</Show>
         </div>
       </Show>

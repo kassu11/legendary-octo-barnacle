@@ -83,18 +83,10 @@
     }
 
     .dates {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      margin-top: -10px;
+      font-size: var(--fs-300);
       font-weight: 500;
       color: var(--text-muted);
-
-      .completed {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 0 8px;
-      }
     }
 
     .shadow {
