@@ -9,7 +9,7 @@
       padding-inline: 16px;
     }
 
-    > * {
+    h2 {
       /* Firefox will line wrap h2, if this is not given idk why */
       flex-grow: 1;
     }
