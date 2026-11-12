@@ -7,16 +7,16 @@ export function Checkbox(props) {
   const [local, scoping] = splitProps(props, ["checked", "radio", "exclude", "include"]);
 
   return (
-    <div {...scoping} classList={{ ...local, [props.class]: !!props.class }}>
+    <div {...scoping} classList={{ checkbox: true, ...local, [props.class]: !!props.class }}>
       <Switch>
         <Match when={local.exclude}>
-          <MinusIcon scoped {...scoping} />
+          <MinusIcon scoped />
         </Match>
         <Match when={local.include}>
-          <PlusIcon scoped {...scoping} />
+          <PlusIcon scoped />
         </Match>
         <Match when={local.checked}>
-          <CheckIcon scoped {...scoping} />
+          <CheckIcon scoped />
         </Match>
       </Switch>
     </div>

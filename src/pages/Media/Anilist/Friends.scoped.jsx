@@ -82,7 +82,7 @@ function Friend(props) {
       <A scoped class="friend" href={"/user/" + props.friend.user.name}>
         <img src={props.friend.user.avatar.large} alt="User profile" />
         <p>{props.friend.user.name}</p>
-        <Status scoped class="friend-list-status" friend={props.friend} media={anilistData()?.data.data.Media} type={anilistData()?.data.data.Media.type} />
+        <Status scoped class="status" friend={props.friend} media={anilistData()?.data.data.Media} type={anilistData()?.data.data.Media.type} />
         <Show when={props.friend.repeat}>
           <div class="friend-repeat">
             {props.friend.repeat}

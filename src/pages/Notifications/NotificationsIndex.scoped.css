@@ -7,7 +7,7 @@
     justify-content: left;
   }
 
-  .spinner {
+  .loader-circle {
     left: 50%;
     transform: translateX(-50%);
 
@@ -57,7 +57,7 @@
     color: inherit;
   }
 
-  .cp-created-at {
+  .created-at {
     place-self: start;
   }
 }

@@ -567,13 +567,13 @@ export function SearchPage() {
                     <Show when={firstMedia()?.customSection || (firstMedia() === LOADER && start === 0 && parsedSearchParams().groupEntriesByFormat)} fallback={document.createComment("<h2 />")}>
                       <h2>{formatMediaFormat(firstMedia().customSection || "Loading")}</h2>
                     </Show>
-                    <VirtualGrid scoped class="cards" each={sectionMedia()}>{(media, i) => {
+                    <VirtualGrid scoped class="virtual-grid" each={sectionMedia()}>{(media, i) => {
                       // Index in the whole search result list, not just inside this section
                       const index = () => mediaIndices()[i()];
 
                       return (
                         <div class="wrapper">
-                          <MediaCard scoped class="search-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} />
+                          <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} />
                           { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
                           {preventZoomIn.add(media.id) && true}
                           <Show when={(media?.tabTime < tabTime || media === LOADER)}>

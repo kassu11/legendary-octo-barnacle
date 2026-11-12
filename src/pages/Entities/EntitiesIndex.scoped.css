@@ -3,7 +3,7 @@
   background-color: var(--background-400-old);
   gap: 1rem;
 
-  .spinner {
+  .loader-circle {
     left: 50%;
     transform: translateX(-50%);
   }

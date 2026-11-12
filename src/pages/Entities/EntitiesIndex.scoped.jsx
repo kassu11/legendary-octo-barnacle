@@ -308,7 +308,7 @@ function CharactersPage(props) {
         )}</For>
       </ol>
       <Show when={anilistCharactersLoading() &&  page() > Math.ceil(props.cache.length / hardcodedPageCount) && props.cache.length}>
-        <LoaderCircle scoped class="spinner">
+        <LoaderCircle scoped class="loader-circle">
           <Tooltip placements={["bottom", "top"]}>Loading characters</Tooltip>
         </LoaderCircle>
       </Show>

@@ -1,4 +1,4 @@
-.cp-score-star-input, .cp-score-emoji-input {
+.score-input:is(.stars, .emojis) {
   display: flex;
   background-color: var(--background-500-old);
   gap: .25rem;
@@ -11,7 +11,7 @@
 }
 
 .selected {
-  .cp-score-star-input & {
+  .score-input.stars & {
     color: var(--gold-400);
   }
 }
@@ -31,7 +31,7 @@
   width: 2rem;
 }
 
-.cp-score-emoji-input {
+.score-input.emojis {
   svg {
     height: 2.5rem;
     transition: .2s color;

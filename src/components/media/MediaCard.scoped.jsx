@@ -77,12 +77,12 @@ export function MediaCard(props) {
 
   return (
     <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
-      <ImageLoader scoped class="bg" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
+      <ImageLoader scoped class="image-loader" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media}>
         {/* Score is its own badge group, so it stays in the top right while the other badges wrap next to it */}
         <div class="top">
-          <MediaBadges {...badges} scoped class="badges" media={local.media} entry={mediaListEntry()} />
-          <MediaBadges scoped class="score" media={local.media} showScore={local.showScore} />
+          <MediaBadges {...badges} scoped class="media-badges" media={local.media} entry={mediaListEntry()} />
+          <MediaBadges scoped class="media-badges score" media={local.media} showScore={local.showScore} />
         </div>
       </Show>
       <Show when={local.media && local.rank}>
@@ -91,7 +91,7 @@ export function MediaCard(props) {
       <Show when={local.media?.title?.userPreferred}>
         <p class="line-clamp">
           <Show when={local.showStatus}>
-            <MediaStatusIcon scoped class="status-icon" status={status()} />
+            <MediaStatusIcon scoped class="media-status-icon" status={status()} />
           </Show>
           {local.media.title.userPreferred}
         </p>
@@ -100,10 +100,10 @@ export function MediaCard(props) {
       <Show when={local.media && (local.showFooter || local.quickActions)}>
         <div class="bottom">
           <Show when={local.quickActions && hover.isOpen()}>
-            <MediaQuickActions scoped class="quick-actions" media={local.media} mediaListEntry={mediaListEntry()} status={status()} afterMutation={local.afterMutation} afterDelete={local.afterDelete} />
+            <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={mediaListEntry()} status={status()} afterMutation={local.afterMutation} afterDelete={local.afterDelete} />
           </Show>
           <Show when={local.showFooter && mediaListEntry()}>
-            <MediaCardFooter scoped class="footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} afterProgressMutation={local.afterProgressMutation} />
+            <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} afterProgressMutation={local.afterProgressMutation} />
           </Show>
         </div>
       </Show>
