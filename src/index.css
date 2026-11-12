@@ -1,4 +1,4 @@
-@layer reset, base, utility, component, layout, resize;
+@layer reset, base, utility, component, layout;
 
 @layer reset {
   *, *::before, *::after {
