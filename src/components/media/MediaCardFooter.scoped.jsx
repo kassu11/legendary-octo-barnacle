@@ -16,7 +16,7 @@ import { Tooltip } from "@/components/Tooltip.scoped";
  * @param {Object} props.entry Users media list entry
  * @param {string} [props.scoreFormat] Score format of the entry owner, defaults to POINT_10_DECIMAL
  * @param {boolean} [props.progressIncrement] "+" buttons to increase the progress
- * @param {boolean} [props.showAdvancedScores] Users advanced scores as a tooltip when hovering the score
+ * @param {boolean} [props.showAdvancedScores] Users advanced scores as a tooltip when hovering the score, shown in the same score format
  * @param {Function} [props.afterProgressMutation] Called with the saved list entry after the progress has been increased
  */
 export function MediaCardFooter(props) {
@@ -46,7 +46,10 @@ export function MediaCardFooter(props) {
         <Show when={local.showAdvancedScores && advancedScores().length}>
           <Tooltip placements={["top", "bottom"]}>
             <For each={advancedScores()}>{([name, score]) => (
-              <div>{name}: {score}</div>
+              <div class="advanced-score">
+                {name}:
+                <Score score={score} format={local.scoreFormat || "POINT_10_DECIMAL"} />
+              </div>
             )}</For>
           </Tooltip>
         </Show>
