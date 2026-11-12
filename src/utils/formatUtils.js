@@ -189,6 +189,30 @@ export const formatAnilistDate = (dateObject) => {
   return event.toLocaleDateString("us-US", options);
 }
 
+// Time between two Anilist dates, both dates need a year, month and day to be accurate
+export const formatAnilistDateDelta = (startDate, endDate) => {
+  if (!startDate?.year || !startDate.month || !startDate.day) return "";
+  if (!endDate?.year || !endDate.month || !endDate.day) return "";
+
+  const start = Date.UTC(startDate.year, startDate.month - 1, startDate.day);
+  const end = Date.UTC(endDate.year, endDate.month - 1, endDate.day);
+  const days = Math.round((end - start) / 86_400_000);
+
+  if (days < 0) return "";
+  if (days === 0) return "Same day";
+  if (days < 31) return `${days} day${plural(days)}`;
+
+  let months = (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  if (endDate.day < startDate.day) months--;
+
+  const years = Math.floor(months / 12);
+  months %= 12;
+
+  if (years === 0) return `${months} month${plural(months)}`;
+  if (months === 0) return `${years} year${plural(years)}`;
+  return `${years} year${plural(years)} ${months} month${plural(months)}`;
+}
+
 export const formatTimeToDate = (time) => {
   const date = new Date(time);
   const options = { "year" : "numeric", "month" : "short", "day" : "numeric" };
