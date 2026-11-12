@@ -28,6 +28,7 @@ import { MediaCardFooter } from "./MediaCardFooter.scoped";
  * @param {boolean} [props.showFooter] Users list progress and score at the bottom of the cover
  * @param {string} [props.scoreFormat] Score format used by the footer, defaults to POINT_10_DECIMAL
  * @param {boolean} [props.progressIncrement] "+" buttons in the footer to increase the progress
+ * @param {boolean} [props.showAdvancedScores] Users advanced scores as a tooltip when hovering the footer score
  * @param {Function} [props.afterProgressMutation] Called with the saved list entry after the progress has been increased through the footer
  * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
  * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
@@ -39,7 +40,7 @@ import { MediaCardFooter } from "./MediaCardFooter.scoped";
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "children"]);
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
@@ -114,7 +115,7 @@ export function MediaCard(props) {
             <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={local.otherUsersEntry ? undefined : local.afterMutation} afterDelete={local.otherUsersEntry ? undefined : local.afterDelete} />
           </Show>
           <Show when={local.showFooter && mediaListEntry()}>
-            <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} afterProgressMutation={local.afterProgressMutation} />
+            <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} showAdvancedScores={local.showAdvancedScores} afterProgressMutation={local.afterProgressMutation} />
           </Show>
         </div>
       </Show>

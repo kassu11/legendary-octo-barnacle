@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, Match, on, Show, splitProps, Switch } from "solid-js";
+import { batch, createEffect, createSignal, For, Match, on, Show, splitProps, Switch } from "solid-js";
 import "./MediaCardFooter.scoped.css";
 import Score from "@/components/media/Score.scoped.jsx";
 import { createAnilistFetcher, fetcherToFetch } from "@/api/fetcherUtils";
@@ -6,6 +6,7 @@ import { queries } from "@/api/api";
 import { addApplicationNotification } from "@/state/notifications";
 import { storeGlobalEditedMedia } from "@/state/globalState";
 import { leadingAndTrailingDebounce } from "@/utils/scheduleUtils";
+import { Tooltip } from "@/components/Tooltip.scoped";
 
 /**
  * Users list progress and score for the bottom of the media cover.
@@ -15,10 +16,14 @@ import { leadingAndTrailingDebounce } from "@/utils/scheduleUtils";
  * @param {Object} props.entry Users media list entry
  * @param {string} [props.scoreFormat] Score format of the entry owner, defaults to POINT_10_DECIMAL
  * @param {boolean} [props.progressIncrement] "+" buttons to increase the progress
+ * @param {boolean} [props.showAdvancedScores] Users advanced scores as a tooltip when hovering the score, shown in the same score format
  * @param {Function} [props.afterProgressMutation] Called with the saved list entry after the progress has been increased
  */
 export function MediaCardFooter(props) {
-  const [local, scoping] = splitProps(props, ["media", "entry", "scoreFormat", "progressIncrement", "afterProgressMutation"]);
+  const [local, scoping] = splitProps(props, ["media", "entry", "scoreFormat", "progressIncrement", "afterProgressMutation", "showAdvancedScores"]);
+
+  // Unscored advanced score categories are stored as 0, so they are left out
+  const advancedScores = () => Object.entries(local.entry.advancedScores || {}).filter(([, score]) => score);
 
   return (
     <div {...scoping} classList={{ "media-card-footer": true, [props.class]: !!props.class }}>
@@ -37,7 +42,18 @@ export function MediaCardFooter(props) {
           </Match>
         </Switch>
       </p>
-      <Score score={local.entry.score} format={local.scoreFormat || "POINT_10_DECIMAL"} />
+      <Score score={local.entry.score} format={local.scoreFormat || "POINT_10_DECIMAL"}>
+        <Show when={local.showAdvancedScores && advancedScores().length}>
+          <Tooltip placements={["top", "bottom"]}>
+            <For each={advancedScores()}>{([name, score]) => (
+              <div class="advanced-score">
+                {name}:
+                <Score score={score} format={local.scoreFormat || "POINT_10_DECIMAL"} />
+              </div>
+            )}</For>
+          </Tooltip>
+        </Show>
+      </Score>
     </div>
   );
 }
