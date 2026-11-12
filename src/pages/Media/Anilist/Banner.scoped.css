@@ -1,5 +1,5 @@
 @layer layout {
-  .pg-media-banner {
+  .media-banner {
     background-color: var(--background-200-old);
 
     &.loading {

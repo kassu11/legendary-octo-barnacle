@@ -158,7 +158,7 @@ export function MediaInfoContent(props) {
   return (
     <ErrorBoundary fallback="Media page error">
       <MediaInfoContext.Provider value={{ anilistData: mediaPageAnilistData, mutateBothAnilistData, jikanData }}>
-        <MediaBanner src={mediaPageAnilistData()?.data.data.Media?.bannerImage} loading={loading()} />
+        <MediaBanner scoped class="media-banner" src={mediaPageAnilistData()?.data.data.Media?.bannerImage} loading={loading()} />
         <div class="media-page-content" classList={{loading: loading()}}>
           <aside class="media-page-left-aside">
             <Show when={mediaPageAnilistData()}>
@@ -231,7 +231,7 @@ export function MediaInfoContent(props) {
             </Show>
           </aside>
           <section class="media-page-main">
-            <AnilistMediaInfo time={time} />
+            <AnilistMediaInfo scoped class="anilist-media-info" time={time} />
             {props.children}
           </section>
         </div>

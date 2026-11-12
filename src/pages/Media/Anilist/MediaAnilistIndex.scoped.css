@@ -3,6 +3,7 @@
     @media (width < 50em) {
       --media-page-banner-height: max(min(15.5rem, 35vw), 8rem);
       --media-page-cover-padding: .5rem;
+      --media-page-cover-width: calc((var(--media-page-banner-height) - var(--media-page-cover-padding) * 2) * 5.5 / 8);
     }
   }
 
@@ -16,12 +17,13 @@
     margin-inline: auto;
 
     @media (width < 50em) {
-      grid-template-columns: calc((var(--media-page-banner-height) - var(--media-page-cover-padding) * 2) * 5.5 / 8) 1fr;
+      /* Cover and info share the first row, everything else flows below them */
+      grid-template-columns: 1fr;
       gap: .5rem;
       background-color: unset;
     }
 
-    _.pg-media-banner + & {
+    .media-banner + & {
       @media (width < 50em) {
         margin-top: calc(var(--media-page-banner-height) * -1 + var(--media-page-cover-padding));
         margin-inline: var(--media-page-cover-padding);
@@ -89,15 +91,8 @@
       display: contents;
     }
 
-    _.pg-media-banner + .media-page-content & {
+    .media-banner + .media-page-content & {
       margin-top: -8rem;
-    }
-
-    > _* {
-      @media (width < 50em) {
-        order: 10;
-        grid-column: 1/-1;
-      }
     }
 
     > div {
@@ -111,8 +106,8 @@
       border-radius: .25rem;
 
       @media (width < 50em) {
-        grid-column: 1;
-        order: 0;
+        grid-area: 1 / 1;
+        width: var(--media-page-cover-width);
       }
     }
   }
@@ -126,35 +121,17 @@
       display: contents;
     }
 
-    > _* {
+    .anilist-media-info {
       @media (width < 50em) {
-        order: 10;
-        grid-column: 1/-1;
-      }
-    }
-
-    _.pg-ani-media-info {
-      @media (width < 50em) {
-        order: 0;
-        grid-column: 2;
-      }
-
-      _* {
-        @media (width < 50em) {
-          text-shadow: 0 0 2px #000000, 0 0 4px #000000;
-        }
-      }
-
-      _h1 {
-        @media (width < 50em) {
-          font-size: 1.2rem;
-        }
+        grid-area: 1 / 1;
+        margin-left: calc(var(--media-page-cover-width) + .5rem);
+        text-shadow: 0 0 2px #000000, 0 0 4px #000000;
       }
     }
 
     .media-page-description {
       @media (width < 50em) {
-        order: 0;
+        order: -1;
       }
     }
   }

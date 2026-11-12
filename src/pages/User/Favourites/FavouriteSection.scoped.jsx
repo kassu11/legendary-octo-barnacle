@@ -39,6 +39,7 @@ export function FavouriteSectionScoped(props) {
     }
 
     dragged.classList.add("dragging");
+    ol.classList.add("dragging");
     const rect = dragged.getBoundingClientRect();
     if (e.type === "touchstart") {
       const touch = e.touches[0];
@@ -96,6 +97,7 @@ export function FavouriteSectionScoped(props) {
     if (dragging) {
       dragging.style.transform = null;
       dragging.classList.remove("dragging");
+      ol.classList.remove("dragging");
     }
     dragging = null;
   }
@@ -140,7 +142,7 @@ export function FavouriteSectionScoped(props) {
         </Show>
       </summary>
       <ol ref={el => ol = el} classList={{reorder: reorder(), grid: props.type !== "studios", flex: props.type === "studios"}} onMouseMove={dragMove} onTouchMove={dragMove} onTouchEnd={dragEnd} onMouseDown={dragStart} onTouchStart={dragStart} >
-        <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges}}>
+        <FavouritesContext.Provider value={{ type: props.type, setAllEdges, allEdges, reorder }}>
           <Show when={user().id} keyed>
             <FavouritesPageScoped page={1} setVisible={setVisible} />
           </Show>

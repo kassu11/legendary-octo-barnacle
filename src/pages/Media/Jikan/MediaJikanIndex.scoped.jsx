@@ -263,7 +263,7 @@ export function MediaInfoHomeJikan() {
               <For each={jikanData().data.data.relations}>{relation => (
                 <For each={relation.entry}>{entry => (
                   <li>
-                    <A class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
+                    <A scoped class="item" href={urlUtils.jikanMediaUrl(entry.type, { mal_id: entry.mal_id, title: entry.name })}>
                       <p class="name line-clamp">{entry.name}</p>
                       <p class="type">{relation.relation} ({capitalize(entry.type)})</p>
                     </A>

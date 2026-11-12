@@ -2,7 +2,7 @@
   display: flex;
   gap: .5rem;
 
-  _a {
+  a {
     display: flex;
     width: 100%;
     justify-content: center;
@@ -18,11 +18,11 @@
     }
   }
 
-  _svg {
+  svg {
     height: 1.5rem;
   }
 
-  _.svg-external-source {
+  .svg-external-source {
     color: var(--text-200-old);
   }
 }

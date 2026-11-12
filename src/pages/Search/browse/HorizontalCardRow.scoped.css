@@ -14,7 +14,7 @@
       scroll-behavior: unset;
     }
 
-    &.scrollable, &.scrollable _a {
+    &.scrollable, &.scrollable .media-card {
       cursor: grab;
       user-select: none;
 
