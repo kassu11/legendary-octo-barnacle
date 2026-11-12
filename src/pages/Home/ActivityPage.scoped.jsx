@@ -144,7 +144,7 @@ export function HomePageActivityReelContent(props) {
   return (
     <>
       <Show when={loading() && page() === 1}>
-        <LoaderCircle scoped class="spinner refresh">
+        <LoaderCircle scoped class="loader-circle refresh">
           <Tooltip placements={["bottom", "top"]}>
             <Show when={props.cache.length === 0} fallback="Fetching fresh activities">
               Loading activities
@@ -167,7 +167,7 @@ export function HomePageActivityReelContent(props) {
       </ol>
       <Switch>
         <Match when={loading() && page() > maxPage && props.cache.length}>
-          <LoaderCircle scoped class="spinner new">
+          <LoaderCircle scoped class="loader-circle new">
             <Tooltip placements={["bottom", "top"]}>Loading activities</Tooltip>
           </LoaderCircle>
         </Match>

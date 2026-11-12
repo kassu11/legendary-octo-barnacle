@@ -1,7 +1,7 @@
 import { StarIcon } from "@/assets/icons.jsx";
 import { Switch, Match, mergeProps, splitProps, Show, For } from "solid-js";
 import "./ScoreInput.scoped.css";
-import EmojiByScoreScoped from "@/components/EmojiByScore.scoped.jsx";
+import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 import { asserts } from "@/utils/utils.js";
 
 function ScoreInput(props) {
@@ -52,12 +52,12 @@ function ScoreInput(props) {
           }} />
         </Match>
         <Match when={local.format === "POINT_5"}>
-          <div {...scoping} class="cp-score-star-input">
+          <div {...scoping} class="score-input stars">
             <StarRadioRange {...info} onChange={local.onChange} />
           </div>
         </Match>
         <Match when={local.format === "POINT_3"}>
-          <div {...scoping} class="cp-score-emoji-input">
+          <div {...scoping} class="score-input emojis">
             <EmojiRadioRange {...info} onChange={local.onChange} />
           </div>
         </Match>
@@ -101,7 +101,7 @@ function EmojiRadioRange(props) {
             props.onChange(+e.target.value);
           }
         }} />
-        <EmojiByScoreScoped scoped score={values[i]} />
+        <EmojiByScore scoped class="emoji-by-score" score={values[i]} />
       </label>
     )}</For>
   );

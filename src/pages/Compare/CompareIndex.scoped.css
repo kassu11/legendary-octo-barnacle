@@ -115,12 +115,12 @@
     --grid-column-width: 32rem;
 
     &:not(.loading) {
-      .spinner {
+      .loader-circle {
         opacity: 0;
         visibility: hidden;
       }
     }
-    .spinner {
+    .loader-circle {
       position: absolute;
       z-index: 1;
       justify-self: center;
@@ -132,7 +132,7 @@
     }
 
     &.loading {
-      .spinner {
+      .loader-circle {
         transition-delay: .2s;
       }
 
@@ -249,7 +249,7 @@
       padding: .5rem;
     }
 
-    .score {
+    .average-score {
       display: flex;
       gap: .5rem;
       align-items: center;
@@ -373,7 +373,7 @@
       grid-column: 3;
     }
 
-    .score-component {
+    .score {
       grid-column: 4;
       justify-self: end;
     }

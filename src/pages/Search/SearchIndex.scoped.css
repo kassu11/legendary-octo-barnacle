@@ -29,7 +29,7 @@
       }
     }
 
-    .cards {
+    .virtual-grid {
       position: relative;
 
       .wrapper {
@@ -41,7 +41,7 @@
         /* but we still have loading skeleton cards (these are the cards at the end of search page) */
         /* This is just a visual thing, but hide the loading skeleton cards, if we have loading cached cards */
         /* Its possible that the cache has already all the cards, and its stupid to visually show more loading cards, that don't exist */
-        .search-results:has(.search-card.loading:not(:empty)) &:has(.search-card:empty) {
+        .search-results:has(.media-card.loading:not(:empty)) &:has(.media-card:empty) {
           position: absolute;
           visibility: hidden;
           left: 0;
@@ -49,7 +49,7 @@
           width: 0;
         }
 
-        > .search-card {
+        > .media-card {
           position: absolute;
           width: 100%;
         }

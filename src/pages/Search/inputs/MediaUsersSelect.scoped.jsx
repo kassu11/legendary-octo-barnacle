@@ -164,7 +164,7 @@ export function MediaUsersSelect() {
           </Match>
           <Match when={true}>
             <div class="profile-wrapper">
-              <Show when={row.avatar} fallback={<LoaderCircle scoped class="spinner" />}>
+              <Show when={row.avatar} fallback={<LoaderCircle scoped class="loader-circle" />}>
                 <img src={row.avatar} alt="Profile picture" />
               </Show>
             </div>

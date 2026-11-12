@@ -7,7 +7,7 @@ export function MediaStatusIcon(props) {
 
   return (
     <Show when={local.status}>
-      <div {...scoping} classList={{ "list-status-icon": true, [scoping.class]: !!scoping.class }} data-status={local.status}>
+      <div {...scoping} classList={{ "media-status-icon": true, [scoping.class]: !!scoping.class }} data-status={local.status}>
         <Switch>
           <Match when={local.status === "COMPLETED"}>
             <CheckIcon scoped />

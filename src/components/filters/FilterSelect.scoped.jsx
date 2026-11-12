@@ -784,7 +784,7 @@ export function FilterSelect(props) {
           <For each={rows()} fallback={
             <p class="empty">
               <Show when={props.loading && !query()}>
-                <LoaderCircle scoped class="spinner" />
+                <LoaderCircle scoped class="loader-circle" />
               </Show>
               {query() ? "No results" : props.emptyText ?? "No results"}
             </p>

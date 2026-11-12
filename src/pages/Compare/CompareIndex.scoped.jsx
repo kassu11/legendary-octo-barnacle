@@ -540,7 +540,7 @@ function UserRow(props) {
       <Switch>
         <Match when={anilistUserMediaData() || anilistUserMediaLoading()}>
           <Show when={anilistUserMediaData()} fallback={
-            <LoaderCircle scoped class="spinner">
+            <LoaderCircle scoped class="loader-circle">
               <Tooltip placements={["right", "left", "bottom"]}>
                 <p>Loading user data</p>
               </Tooltip>
@@ -596,7 +596,7 @@ function CompareMediaListContent() {
     <>
       <h1>Total {params.type} {compareMediaList().length}</h1>
       <ol class="pg-compare-content grid-column-auto-fill" classList={{loading: loading()}}>
-        <LoaderCircle scoped class="spinner" />
+        <LoaderCircle scoped class="loader-circle" />
         <Show when={compareMediaList()} keyed>
           <ContentPage />
         </Show>
@@ -655,7 +655,7 @@ function ContentPage() {
                     <RepeatIcon scoped />
                   </div>
                 </Show>
-                <div class="score">
+                <div class="average-score">
                   <Tooltip placements={["right", "left", "bottom"]}>Global average score</Tooltip>
                   <StarIcon scoped /> {(media.averageScore / 10) || "N/A"}
                 </div>
@@ -703,7 +703,7 @@ function ContentPage() {
                         <RepeatIcon scoped />
                       </div>
                     </Show>
-                    <Score scoped class="score-component" score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
+                    <Score scoped class="score" score={user.score} format={users[user.name].mediaListOptions.scoreFormat || "POINT_10_DECIMAL"} />
                   </li>
                 )}</For>
               </ol>

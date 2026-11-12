@@ -366,7 +366,7 @@ function UserActivityPage(props) {
         }}</For>
       </div>
       <Show when={anilistActivityLoading() && page() > Math.ceil(props.cache.length / hardcodedPageCount)}>
-        <LoaderCircle scoped class="spinner">
+        <LoaderCircle scoped class="loader-circle">
           <Tooltip placements={["bottom", "top"]}>Loading activities</Tooltip>
         </LoaderCircle>
       </Show>
