@@ -3,12 +3,14 @@ import { createHash } from "crypto";
 export default function solidJsScopedStyling() {
   return {
     name: "vite-solidjs-scoped-styling",
-    transform,
+    transform(src, id) {
+      return transform(src, id, message => this.warn(message));
+    },
   };
 }
 
 // Export for the testing script
-export const transform = (src, id) => {
+export const transform = (src, id, warn = console.warn) => {
   if (id.endsWith(".scoped.jsx")) {
     const hash = localHashFromFilePath(id);
     const attribute = localDataAttributeFromHash(hash);
@@ -24,6 +26,12 @@ export const transform = (src, id) => {
     const hash = localHashFromFilePath(id);
     const attribute = localDataAttributeFromHash(hash);
     const scopingSelector = "[" + attribute + "]";
+
+    // Deprecated syntax, these should be refactored away
+    for (const match of src.matchAll(/@layer\s+resize\b/g)) {
+      warn(`${id}:${lineNumber(src, match.index)} @layer resize is deprecated, nest the media/container query inside the selector it affects`);
+    }
+    const unscopedLines = new Set();
 
     let returnQuery = "";
     let isCommend = false;
@@ -245,6 +253,9 @@ export const transform = (src, id) => {
         }
         // Selector is prefixed with "_" don't scope the selector
         else if (hasSelector === false && src[i] === "_") {
+          const line = lineNumber(src, i);
+          if (!unscopedLines.has(line)) warn(`${id}:${line} "_" unscoping is deprecated, scope the selector instead`);
+          unscopedLines.add(line);
           scopeCurrentSelector = false;
         }
         // Position should have ".", "#", and rest of UTF-8 characters
@@ -284,6 +295,8 @@ export const transform = (src, id) => {
 // Replace the "--scoped" prefix of css variable names with the file hash
 // --scoped-color becomes --9f86d081-color
 const scopeCssVariables = (src, hash) => src.replace(/(?<![\w-])--scoped/g, `--${hash}`);
+
+const lineNumber = (src, index) => src.substring(0, index).split("\n").length;
 
 const equalsBackwards = (string, string2, index) => {
   return equalsforwards(string, string2, index - (string.length - 1));
