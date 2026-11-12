@@ -81,7 +81,7 @@ export function MediaListContainerScoped(props) {
           <Show when={list.entries.length && props.isListVisible(list.name)}>
             <h2>{listTitle(list.name)}</h2>
             <VirtualGrid each={list.entries}>{entry => (
-              <MediaCard scoped class="media-card" showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
+              <MediaCard scoped class="media-card" showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
             )}</VirtualGrid>
           </Show>
         )}</For>
