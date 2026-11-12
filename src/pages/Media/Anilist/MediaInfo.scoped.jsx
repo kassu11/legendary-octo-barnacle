@@ -1,5 +1,5 @@
 import "./MediaInfo.scoped.css";
-import { ErrorBoundary, Match, Show, Switch } from "solid-js";
+import { ErrorBoundary, Match, Show, splitProps, Switch } from "solid-js";
 import { useMediaInfo } from "@/state/providers";
 import { A } from "@solidjs/router";
 import { capitalize, formatMediaFormat, formatMediaSource, formatMediaStatus, languageFromCountry, numberCommas } from "@/utils/formatUtils.js";
@@ -7,13 +7,14 @@ import { formatMSToString } from "@/utils/timeUtils";
 import { translateToInternalSearchParams } from "@/api/apiTranslations";
 
 export function AnilistMediaInfo(props) {
+  const [local, scoping] = splitProps(props, ["time"]);
   const { anilistData } = useMediaInfo();
 
   return (
     <ErrorBoundary fallback="Anilist media page info error">
-      <div class="pg-ani-media-info">
+      <div {...scoping} class="anilist-media-info">
         <Show when={anilistData()}>
-          <p class="time">{formatMSToString(props.time())}</p>
+          <p class="time">{formatMSToString(local.time())}</p>
           <h1>{anilistData()?.data.data.Media.title.userPreferred}</h1>
           <ul class="flex-bullet-separator">
             <li>

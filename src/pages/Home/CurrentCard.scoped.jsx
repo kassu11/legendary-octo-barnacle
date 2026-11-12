@@ -101,7 +101,7 @@ export function CurrentCardScoped(props) {
   });
 
   return (
-    <A href={mediaUrl(props.data.media)} ref={hover.triggerRef} class="cp-current-card">
+    <A scoped href={mediaUrl(props.data.media)} ref={hover.triggerRef} class="cp-current-card">
       <img src={props.data.media.coverImage.large} alt="Cover." />
       <Show when={props.data.media.nextAiringEpisode?.airingAt}>
         <div class="cp-current-card-info">

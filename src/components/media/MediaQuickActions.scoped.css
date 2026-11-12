@@ -1,5 +1,5 @@
 @layer component {
-  .quick-action-wrapper {
+  .media-quick-actions {
     display: flex;
     flex-direction: column-reverse;
     gap: 4px;

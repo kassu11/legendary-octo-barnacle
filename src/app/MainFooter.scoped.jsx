@@ -93,7 +93,7 @@ function DevBranchSwitcher(props) {
     <div class="dev-branch-switcher" classList={{ open: open() }}>
       <ContextMenu fileHash={random()} />
       <button onClick={() => setOpen(s => !s)}>
-        <GitBranchIcon /> {props.name}
+        <GitBranchIcon scoped /> {props.name}
       </button>
     </div>
   );
@@ -117,7 +117,7 @@ function ContextMenu(props) {
     <div class="context-menu">
       <For each={branches()} fallback="No dev branches available">{branch => (
         <a href={location.pathname + search() + "dev-branch=" + branch.path} onClick={handleClick}>
-          <GitBranchIcon />
+          <GitBranchIcon scoped />
           <span class="branch">
             <span>{branch.name}</span>
             <DeploymentDetails branch={branch} />

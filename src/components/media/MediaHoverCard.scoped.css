@@ -23,7 +23,7 @@
       opacity: 0;
     }
 
-    .banner {
+    .image-loader {
       z-index: -1;
       border-radius: inherit;
       opacity: 70%;

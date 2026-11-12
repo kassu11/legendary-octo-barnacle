@@ -14,29 +14,30 @@ export function MediaPageApiSwitcher(props) {
         <Match when={params.api === localizations.mal}>
           <Show when={props.anilistData()?.data.data.Media?.id}>
             <A
+              scoped
               href={"/ani/" + params.type + "/" + props.anilistData()?.data.data.Media?.id + "/" + formatTitleToUrl(props.anilistData()?.data.data.Media?.title.userPreferred)}>
               <span class="visually-hidden">Switch to anilist mode</span>
-              <AnilistIcon />
+              <AnilistIcon scoped />
             </A>
           </Show>
           <a href={props.jikanData()?.data.data.url} class="active" target="_black">
             <span class="visually-hidden">Go to MyAnimeList</span>
-            <MyAnimeListIcon />
-            <ExternalLinkIcon class="svg-external-source" />
+            <MyAnimeListIcon scoped />
+            <ExternalLinkIcon scoped class="svg-external-source" />
           </a>
         </Match>
         <Match when={params.api === localizations.ani}>
           <Show when={props.anilistData()?.data.data.Media?.id}>
             <a href={"https://anilist.co/" + params.type + "/" + (props.anilistData()?.data.data.Media.id ?? params.id)} target="_black" class="active">
               <span class="visually-hidden">Go to Anilist</span>
-              <AnilistIcon />
-              <ExternalLinkIcon class="svg-external-source" />
+              <AnilistIcon scoped />
+              <ExternalLinkIcon scoped class="svg-external-source" />
             </a>
           </Show>
           <Show when={props.anilistData()?.data.data.Media.idMal}>
-            <A href={"/mal/" + params.type + "/" + props.anilistData()?.data.data.Media.idMal + "/" + params.name}>
+            <A scoped href={"/mal/" + params.type + "/" + props.anilistData()?.data.data.Media.idMal + "/" + params.name}>
               <span class="visually-hidden">Switch to MyAnimeList mode</span>
-              <MyAnimeListIcon />
+              <MyAnimeListIcon scoped />
             </A>
           </Show>
         </Match>

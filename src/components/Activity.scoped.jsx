@@ -28,7 +28,7 @@ export function ActivityCard(props) {
               <img class="profile" src={props.activity.user.avatar.large} alt="Profile" />
               {props.activity.user.name}
             </A>
-            <CreatedAt scoped createdAt={props.activity.createdAt} />
+            <CreatedAt scoped class="created-at" createdAt={props.activity.createdAt} />
           </div>
           <div class="content">
             <OldMarkdownComponent children={props.activity.text} />
@@ -62,7 +62,7 @@ export function ActivityCard(props) {
             </Switch>
           </div>
           <div class="right">
-            <CreatedAt scoped createdAt={props.activity.createdAt} />
+            <CreatedAt scoped class="created-at" createdAt={props.activity.createdAt} />
             <Footer mutateCache={props.mutateCache} onDelete={props.onDelete} activity={props.activity}/>
           </div>
         </Dynamic>

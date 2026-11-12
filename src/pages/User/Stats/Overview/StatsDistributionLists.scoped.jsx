@@ -23,7 +23,7 @@ export function StatsDistributionListsScoped(props) {
             <li>
               <div>
                 <div class="container">
-                  <A class="title"
+                  <A scoped class="title"
                      href={"/user/" + user().name + "/" + params.type + "/list?format=" + format.format}>{formatMediaFormat(format.format)}</A>
                   <p>{format.meanScore || ""}</p>
                 </div>
@@ -45,7 +45,7 @@ export function StatsDistributionListsScoped(props) {
             <li>
               <div>
                 <div class="container">
-                  <A class="title" href={"/user/" + user().name + "/" + params.type + "/list?userStatus=" + status.status}>
+                  <A scoped class="title" href={"/user/" + user().name + "/" + params.type + "/list?userStatus=" + status.status}>
                     <Switch fallback={capitalize(status.status)}>
                       <Match when={status.status === "CURRENT"}>
                         <Switch>
@@ -81,7 +81,7 @@ export function StatsDistributionListsScoped(props) {
             <li>
               <div>
                 <div class="container">
-                  <A class="title"
+                  <A scoped class="title"
                      href={"/user/" + user().name + "/" + params.type + "/list?countryOfOrigin=" + country.country}>{countryNameFromCountryCode(country.country)}</A>
                   <p>{country.meanScore || ""}</p>
                 </div>

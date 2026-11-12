@@ -68,7 +68,7 @@ export function ImageLoader(props) {
 
   return (
     <Show when={loaderSrc() === local.src && local.src}>
-      <div {...scoping} classList={{ "fade-in": fadeIn() }} style={{ "background-image": `url("${local.src}")` }} />
+      <div {...scoping} classList={{ "image-loader": true, "fade-in": fadeIn(), [props.class]: !!props.class }} style={{ "background-image": `url("${local.src}")` }} />
     </Show>
   );
 }

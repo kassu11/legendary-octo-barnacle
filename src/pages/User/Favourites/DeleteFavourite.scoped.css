@@ -1,5 +1,5 @@
 @layer layout {
-  button {
+  .delete-favourite {
     position: absolute;
     right: 0px;
     top: 0px;

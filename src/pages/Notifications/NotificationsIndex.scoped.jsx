@@ -272,7 +272,7 @@ function NotificationsPage(props) {
   return (
     <>
       <Show when={anilistNotificationsLoading() && page() === 1}>
-        <LoaderCircle scoped class="spinner refresh">
+        <LoaderCircle scoped class="loader-circle refresh">
           <Tooltip placements={["bottom", "top"]}>
             <Show when={props.cache.length === 0} fallback="Fetching fresh notifications">
               Loading notifications
@@ -299,7 +299,7 @@ function NotificationsPage(props) {
                       </A>
                       {notification.context}
                     </p>
-                    <CreatedAt scoped createdAt={notification.createdAt} />
+                    <CreatedAt scoped class="created-at" createdAt={notification.createdAt} />
                   </div>
                 </Match>
                 <Match when={notification.type === "AIRING"}>
@@ -316,7 +316,7 @@ function NotificationsPage(props) {
                       </A>
                       {notification.contexts[2]}
                     </p>
-                    <CreatedAt scoped createdAt={notification.createdAt} />
+                    <CreatedAt scoped class="created-at" createdAt={notification.createdAt} />
                   </div>
                 </Match>
                 <Match when={notification.type === "ACTIVITY_REPLY_LIKE" || notification.type === "ACTIVITY_LIKE" || notification.type === "ACTIVITY_REPLY"}>
@@ -328,7 +328,7 @@ function NotificationsPage(props) {
                       {notification.user.name}
                       {notification.context}
                     </A>
-                    <CreatedAt scoped createdAt={notification.createdAt} />
+                    <CreatedAt scoped class="created-at" createdAt={notification.createdAt} />
                   </div>
                 </Match>
                 <Match when={notification.type === "FOLLOWING"}>
@@ -342,7 +342,7 @@ function NotificationsPage(props) {
                       </A>
                       {notification.context}
                     </p>
-                    <CreatedAt scoped createdAt={notification.createdAt} />
+                    <CreatedAt scoped class="created-at" createdAt={notification.createdAt} />
                   </div>
                 </Match>
               </Switch>
@@ -352,7 +352,7 @@ function NotificationsPage(props) {
       </ol>
       <Switch>
         <Match when={anilistNotificationsLoading() && page() > maxPage && props.cache.length}>
-          <LoaderCircle scoped class="spinner new">
+          <LoaderCircle scoped class="loader-circle new">
             <Tooltip placements={["bottom", "top"]}>Loading notifications</Tooltip>
           </LoaderCircle>
         </Match>

@@ -28,7 +28,7 @@
     }
 
     /* Performance optimization to stop gradient animation */
-    &:not(.loading, :empty):has(.bg) {
+    &:not(.loading, :empty):has(.image-loader) {
       &::before, &::after {
         animation: move-gradient 2s infinite, stop-gradient .5s forwards;
       }
@@ -54,7 +54,7 @@
       }
     }
 
-    .bg {
+    .image-loader {
       isolation: isolate;
       border-radius: inherit;
       transition: filter .3s;
@@ -76,7 +76,7 @@
         transition: 0s 1s background allow-discrete, filter .4s, scale .4s;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         &::after, &::before {
           background: inherit;
         }
@@ -106,7 +106,9 @@
       }
     }
 
-    .badges, .score {
+    .media-badges {
+      flex: 1;
+      min-width: 0;
       transition: .2s translate, .2s filter, opacity .2s;
 
       .media-card.loading & {
@@ -114,19 +116,14 @@
         opacity: .8;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         filter: brightness(1.07);
       }
-    }
 
-    .badges {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .score {
-      margin-left: auto;
-      flex-shrink: 0;
+      &.score {
+        flex: none;
+        margin-left: auto;
+      }
     }
 
     .rank {
@@ -156,7 +153,7 @@
         opacity: .8;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         /* translate: -4px -4px; */
         filter: brightness(1.07);
       }
@@ -171,17 +168,17 @@
       align-items: flex-end;
     }
 
-    .footer {
+    .media-card-footer {
       align-self: stretch;
       transition: translate .2s, color .2s;
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         color: var(--text);
       }
     }
 
-    .quick-actions {
-      .media-card:not(_.loading) &:where(_:hover, _:has(_:focus-visible)) {
+    .media-quick-actions {
+      .media-card:not(.loading) &:where(_:hover, :has(_:focus-visible)) {
         background-color: var(--shadow-light);
       }
     }
@@ -198,19 +195,19 @@
         opacity: .5;
       }
 
-      .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+      .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
         color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
         text-shadow: 0 0 2px black;
       }
 
-      .status-icon {
+      .media-status-icon {
         margin-right: .5em;
         margin-top: .2em;
         float: left;
         opacity: .75;
         transition: opacity .2s;
 
-        .media-card:not(_.loading):where(_:hover, _:focus-visible, _:has(_:focus-visible)) & {
+        .media-card:not(.loading):where(_:hover, _:focus-visible, :has(_:focus-visible)) & {
           opacity: .9;
         }
       }

@@ -62,7 +62,7 @@ export function Following(props) {
         <Show when={followingData()}>
           <For each={followingData().data.data.Page.following}>{follower => (
             <li>
-              <A href={"/user/" + follower.name}>
+              <A scoped href={"/user/" + follower.name}>
                 <img src={follower.avatar.large} alt="User profile" />
                 <p>{follower.name}</p>
                 <Show when={user().id === authUserData()?.data.id}>

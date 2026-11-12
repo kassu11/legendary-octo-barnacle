@@ -7,7 +7,7 @@ import { ImageLoader } from "./ImageLoader.scoped";
 export function MediaHoverCard(props) {
   return (
     <div class="hover-card" classList={{ loading: props.loading }} style={{ "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>
-      <ImageLoader scoped class="banner" waitBeforeFade={300} fadeIn src={props.media?.bannerImage} />
+      <ImageLoader scoped class="image-loader" waitBeforeFade={300} fadeIn src={props.media?.bannerImage} />
       <p class="line-clamp header shadow">{props.media?.title.userPreferred}</p>
       <Show when={props.media?.nextAiringEpisode?.episode && props.media?.nextAiringEpisode?.airingAt}>
         <p class="episodes">

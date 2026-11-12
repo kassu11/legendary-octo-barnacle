@@ -16,7 +16,7 @@ export function CreatedAt(props) {
   return (
     <time
       {...scoping}
-      class="cp-created-at"
+      class="created-at"
       dateTime={(new Date(local.createdAt * 1000)).toISOString()}
       title={(new Date(local.createdAt * 1000)).toLocaleString()}>
       <Switch>

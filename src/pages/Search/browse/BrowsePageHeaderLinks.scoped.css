@@ -9,12 +9,12 @@
       padding-inline: 16px;
     }
 
-    > * {
+    h2 {
       /* Firefox will line wrap h2, if this is not given idk why */
       flex-grow: 1;
     }
 
-    _.view-all {
+    .view-all {
       color: var(--text-muted);
       font-weight: 500;
       text-decoration: none;
@@ -30,12 +30,12 @@
         background-color: var(--bg-light);
         color: var(--text);
 
-        _svg {
+        svg {
           translate: 4px 1px;
         }
       }
 
-      _svg {
+      svg {
         translate: 0 1px;
         transition: .2s translate;
         height: 100%;

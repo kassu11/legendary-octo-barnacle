@@ -1,4 +1,12 @@
 @layer layout {
+  :root {
+    @media (width < 50em) {
+      --media-page-banner-height: max(min(15.5rem, 35vw), 8rem);
+      --media-page-cover-padding: .5rem;
+      --media-page-cover-width: calc((var(--media-page-banner-height) - var(--media-page-cover-padding) * 2) * 5.5 / 8);
+    }
+  }
+
   .media-page-content {
     position: relative;
     max-width: 80rem;
@@ -7,6 +15,20 @@
     gap: 1rem;
     margin-top: 1rem;
     margin-inline: auto;
+
+    @media (width < 50em) {
+      /* Cover and info share the first row, everything else flows below them */
+      grid-template-columns: 1fr;
+      gap: .5rem;
+      background-color: unset;
+    }
+
+    .media-banner + & {
+      @media (width < 50em) {
+        margin-top: calc(var(--media-page-banner-height) * -1 + var(--media-page-cover-padding));
+        margin-inline: var(--media-page-cover-padding);
+      }
+    }
 
     &.loading {
       opacity: .6;
@@ -65,28 +87,53 @@
     height: fit-content;
     gap: 1rem;
 
-    _.pg-media-banner + .media-page-content & {
+    @media (width < 50em) {
+      display: contents;
+    }
+
+    .media-banner + .media-page-content & {
       margin-top: -8rem;
     }
 
     > div {
       background-color: var(--background-400-old);
     }
+
+    .media-page-cover {
+      width: 100%;
+      aspect-ratio: 5.5/8;
+      object-fit: cover;
+      border-radius: .25rem;
+
+      @media (width < 50em) {
+        grid-area: 1 / 1;
+        width: var(--media-page-cover-width);
+      }
+    }
   }
-
-
-  .media-page-cover {
-    width: 100%;
-    aspect-ratio: 5.5/8;
-    object-fit: cover;
-    border-radius: .25rem;
-  }
-
 
   .media-page-main {
     display: grid;
     gap: 1rem;
     height: fit-content;
+
+    @media (width < 50em) {
+      display: contents;
+    }
+
+    .anilist-media-info {
+      @media (width < 50em) {
+        grid-area: 1 / 1;
+        margin-left: calc(var(--media-page-cover-width) + .5rem);
+        text-shadow: 0 0 2px #000000, 0 0 4px #000000;
+      }
+    }
+
+    .media-page-description {
+      @media (width < 50em) {
+        order: -1;
+      }
+    }
   }
 
   h1 {
@@ -115,59 +162,6 @@
       transform: translateY(-50%) translateX(calc(var(--gap, 1rem) / -2 + -50%));
       border-radius: 100%;
       background-color: var(--text-200-old);
-    }
-  }
-
-
-}
-
-@layer resize {
-  @media (width < 50em) {
-    :root {
-      --media-page-banner-height: max(min(15.5rem, 35vw), 8rem);
-      --media-page-cover-padding: .5rem;
-    }
-    _.pg-media-banner _img {
-      opacity: .4;
-    }
-
-    _.pg-media-banner + .media-page-content {
-      margin-top: calc(var(--media-page-banner-height) * -1 + var(--media-page-cover-padding));
-      margin-inline: var(--media-page-cover-padding);
-    }
-    .media-page-content {
-      grid-template-columns: calc((var(--media-page-banner-height) - var(--media-page-cover-padding) * 2) * 5.5 / 8) 1fr;
-      gap: .5rem;
-      background-color: unset;
-    }
-    :where(.media-page-main, .media-page-left-aside) {
-      display: contents;
-      > _* {
-        order: 10;
-        grid-column: 1/-1;
-      }
-    }
-
-    .media-page-cover {
-      grid-column: 1;
-      order: 0;
-    }
-
-    _.pg-ani-media-info {
-      order: 0;
-      grid-column: 2;
-
-      _* {
-        text-shadow: 0 0 2px #000000, 0 0 4px #000000;
-      }
-
-      _h1 {
-        font-size: 1.2rem;
-      }
-    }
-
-    .media-page-description {
-      order: 0;
     }
   }
 }

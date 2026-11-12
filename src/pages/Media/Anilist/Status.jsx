@@ -5,7 +5,7 @@ function Status(props) {
   const [local, scoping] = splitProps(props, ["friend", "type", "media"]);
 
   return (
-    <p {...scoping}>
+    <p {...scoping} classList={{ status: true, [props.class]: !!props.class }}>
       <Switch fallback={local.friend.status}>
         <Match when={local.friend.status === "COMPLETED"}>Completed</Match>
         <Match when={local.friend.status === "CURRENT"}>

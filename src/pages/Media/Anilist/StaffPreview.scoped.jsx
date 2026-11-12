@@ -14,7 +14,7 @@ export function StaffPreview(props) {
           <ol class="grid-row-clamp grid-column-auto-fill">
             <For each={props.staff}>{staff => (
               <li>
-                <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
+                <A scoped href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
                   <img src={staff.node.image.large} alt="Staff profile" />
                   <div>
                     <p>{staff.node.name.userPreferred}</p>

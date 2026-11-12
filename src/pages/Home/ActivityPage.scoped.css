@@ -14,7 +14,7 @@
   }
 }
 
-.spinner {
+.loader-circle {
   left: 50%;
   transform: translateX(-50%);
 

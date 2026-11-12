@@ -42,7 +42,7 @@ export function MediaQuickActions(props) {
 
   return (
     <Show when={token2()}>
-      <div {...scoping} class={"quick-action-wrapper " + (scoping.class ?? "")} ref={hover.triggerRef}>
+      <div {...scoping} classList={{ "media-quick-actions": true, [scoping.class]: !!scoping.class }} ref={hover.triggerRef}>
 
         <QuickActionButton label="Edit media" onClick={e => {
           e.preventDefault();

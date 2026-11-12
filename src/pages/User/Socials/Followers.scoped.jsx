@@ -52,7 +52,7 @@ export function Followers(props) {
         <Show when={followersData()}>
           <For each={followersData().followers}>{follower => (
             <li>
-              <A href={"/user/" + follower.name}>
+              <A scoped href={"/user/" + follower.name}>
                 <img src={follower.avatar.large} alt="User profile" />
                 <p>{follower.name}</p>
               </A>

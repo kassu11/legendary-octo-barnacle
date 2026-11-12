@@ -84,7 +84,7 @@
         order: 1;
         gap: .25rem;
 
-        > _:is(_input, _select, _textarea) {
+        > :is(input, select, textarea) {
           padding: 1rem;
           border: unset;
           field-sizing: content;
@@ -140,7 +140,7 @@
         order: 3;
       }
 
-      .cp-score-star-input, .cp-score-emoji-input {
+      .score-input:is(.stars, .emojis) {
         height: 100%;
         padding-block: .75rem;
       }

@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { For, Match, Show, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
-import EmojiByScoreScoped from "@/components/EmojiByScore.scoped.jsx";
+import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 import "./VerticalCardRow.scoped.css";
 import { asserts } from "@/utils/utils.js";
 import { formatSecondsToLongString } from "@/utils/timeUtils.js";
@@ -23,24 +23,24 @@ export function VerticalCardRowScoped(props) {
                 <span>{i() + 1}</span>
               </p>
               <div class="vertical-search-card-body">
-                <A class="cover-container" tabindex="-1" href={mediaUrl(card)}>
+                <A scoped class="cover-container" tabindex="-1" href={mediaUrl(card)}>
                   <img src={card.coverImage.large} class="cover" alt="Cover."/>
                 </A>
                 <div class="vertical-search-card-content clamp">
-                  <A href={mediaUrl(card)} class="title">
+                  <A scoped href={mediaUrl(card)} class="title">
                     {card.title.userPreferred}
                   </A>
                   <ol class="vertical-search-card-genre-list">
                     <For each={card.genres}>{genre => (
                       <li class="vertical-search-card-genre">
-                        <A href={`/ani/search${props.type ? ("/" + props.type) : ""}?genre=` + genre}>{genre}</A>
+                        <A scoped href={`/ani/search${props.type ? ("/" + props.type) : ""}?genre=` + genre}>{genre}</A>
                       </li>
                     )}</For>
                   </ol>
                 </div>
                 <div class="vertical-search-card-info">
                   <div class="vertical-search-card-score">
-                    <EmojiByScoreScoped score={card.averageScore}/>
+                    <EmojiByScore score={card.averageScore}/>
                     <div class="clamp">
                       <p>{card.averageScore}%</p>
                       <p>{numberCommas(card.popularity)} users</p>
