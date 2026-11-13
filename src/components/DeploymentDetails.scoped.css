@@ -1,0 +1,12 @@
+@layer layout {
+  .deployment-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-weight: 400;
+  }
+
+  .hash {
+    font-family: monospace;
+  }
+}

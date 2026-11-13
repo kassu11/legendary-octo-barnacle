@@ -1,0 +1,95 @@
+@layer layout {
+  .dev-branch-switcher {
+    position: relative;
+    min-width: 0;
+    max-width: 100%;
+
+    button, a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      max-width: 100%;
+      padding: 4px 8px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      background: var(--bg-light);
+      color: var(--text-muted);
+      transition: .2s background, .2s filter;
+      text-align: left;
+
+      &:hover {
+        filter: brightness(1.25);
+      }
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
+    .name {
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    button {
+      border: unset;
+      background-color: var(--shadow-light);
+
+      &:hover, .open & {
+        background-color: var(--bg-light);
+      }
+    }
+
+    a[aria-current] {
+      color: var(--text);
+      outline: 1px solid currentColor;
+      outline-offset: -1px;
+    }
+
+    .branch {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .empty {
+      padding: 4px 8px;
+    }
+
+    .context-menu {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      z-index: 10;
+      width: max-content;
+      /* Footer has 16px of space on both sides on mobile, so this keeps the menu inside the screen */
+      max-width: min(100vw - 32px, 24rem);
+      max-height: min(100dvh - 64px, 35rem);
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 4px;
+      overflow: auto;
+      display: none;
+      opacity: 0;
+      translate: 0 20px;
+      transition: .2s opacity, .2s translate, display allow-discrete .2s;
+
+      .open & {
+        background: var(--bg);
+        display: flex;
+        opacity: 1;
+        translate: 0 0;
+
+        @starting-style {
+          opacity: 0;
+          translate: 0 20px;
+        }
+      }
+    }
+  }
+}
