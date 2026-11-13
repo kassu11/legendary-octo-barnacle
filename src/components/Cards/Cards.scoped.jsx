@@ -13,7 +13,7 @@ import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
 
 function AnilistMediaCardListBody(props) {
-  const hover = createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
+  const hover = createHover({ placements: ["right-start", "right-end", "left-start", "left-end", "bottom", "top"], offset: 25, alignOffset: 25 });
 
   return (
     <li class="cp-media-card inline-container" data-index={props["data-index"]} classList={{ skeleton: props.skeleton, loading: props.loading, "loading-end": !props.loading }} style={{ "--card-cover-url": `url("${props.media?.coverImage?.large}")`, "--media-background-color": props.media?.coverImage?.color }} ref={props.ref}>

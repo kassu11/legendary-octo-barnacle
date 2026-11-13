@@ -194,23 +194,30 @@ export function placeFirstFit({ placements, offset = 0, alignOffset = 0 }) {
     };
     const size = { width: floating.offsetWidth, height: floating.offsetHeight };
     const maxX = container.clientWidth - size.width;
+    // Visible area of the viewport in container coordinates
+    const viewportTop = -containerRect.top;
+    const viewportBottom = viewportTop + document.documentElement.clientHeight;
 
-    let position, index;
-    for (index = 0; index < parsed.length; index++) {
-      const placement = parsed[index];
-      position = computePosition(rect, size, placement, offset, alignOffset);
-
+    const positions = parsed.map(placement => {
+      const position = computePosition(rect, size, placement, offset, alignOffset);
       // Top and bottom placements are clamped horizontally, so they always fit sideways
       if (placement.side === "top" || placement.side === "bottom") {
         position.x = clamp(position.x, 0, maxX);
       }
+      return position;
+    });
 
-      if (position.x >= 0 && position.x <= maxX && position.y >= 0) {
-        break;
-      }
-    }
+    const fitsHorizontally = position => position.x >= 0 && position.x <= maxX && position.y >= 0;
+    const fitsViewport = position => fitsHorizontally(position) && position.y >= viewportTop && position.y + size.height <= viewportBottom;
 
-    const placement = placements[Math.min(index, placements.length - 1)];
+    // Prefer placements that are fully visible, e.g. "right-start" near the bottom of the viewport swaps to "right-end".
+    // If none of them are, fall back to the first one that fits sideways.
+    let index = positions.findIndex(fitsViewport);
+    if (index === -1) index = positions.findIndex(fitsHorizontally);
+    if (index === -1) index = placements.length - 1;
+
+    const placement = placements[index];
+    const position = positions[index];
     floating.style.left = position.x + "px";
     floating.style.top = position.y + "px";
     if (floating.dataset.placement !== placement) {
