@@ -1,0 +1,65 @@
+@layer layout {
+  .nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding-inline: 12px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-decoration: none;
+    transition: .15s background-color, .15s color;
+
+    @media (width < 640px) {
+      padding-inline: 10px;
+    }
+
+    &:hover {
+      color: var(--text);
+      background-color: color-mix(in oklab, var(--text) 8%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--red-400);
+      outline-offset: -2px;
+    }
+
+    &.active {
+      color: var(--text);
+    }
+
+    /* Active route indicator */
+    &::after {
+      content: "";
+      position: absolute;
+      inset-inline: 12px;
+      bottom: -6px;
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+      background: var(--nav-accent);
+      scale: 0 1;
+      transition: .2s scale;
+
+      @media (width < 640px) {
+        inset-inline: 8px;
+      }
+    }
+
+    &.active::after {
+      scale: 1 1;
+    }
+
+    svg {
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+
+    .label {
+      @media (width < 640px) {
+        display: none;
+      }
+    }
+  }
+}

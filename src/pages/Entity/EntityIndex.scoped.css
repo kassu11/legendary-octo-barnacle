@@ -99,6 +99,10 @@
     }
   }
 
+  .entity-page-details.hidden {
+    display: none;
+  }
+
   .entity-page-details .grid-column-auto-fill {
     --grid-column-width: 12rem;
     gap: 1rem;

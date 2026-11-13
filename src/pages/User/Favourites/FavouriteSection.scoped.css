@@ -1,5 +1,9 @@
 @layer layout {
   details {
+    &.hidden {
+      display: none;
+    }
+
     &:not([open]) {
       summary {
         background-color: var(--background-300-old);

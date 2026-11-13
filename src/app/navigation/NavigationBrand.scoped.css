@@ -1,0 +1,40 @@
+@layer layout {
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--red-400);
+      outline-offset: 4px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      height: 32px;
+      padding-inline: 8px;
+      border-radius: 8px;
+      background: var(--nav-accent);
+      color: #fff;
+      font-size: var(--fs-300);
+      font-weight: 800;
+      letter-spacing: .06em;
+    }
+
+    .name {
+      font-size: var(--fs-400);
+      letter-spacing: -.01em;
+      white-space: nowrap;
+
+      @media (width < 900px) {
+        display: none;
+      }
+    }
+  }
+}

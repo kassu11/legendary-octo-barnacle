@@ -1,0 +1,26 @@
+@layer layout {
+  .icon-button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    transition: .15s background-color, .15s color;
+
+    &:hover, &.active {
+      color: var(--text);
+      background-color: color-mix(in oklab, var(--text) 8%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--red-400);
+      outline-offset: -2px;
+    }
+
+    svg {
+      font-size: 18px;
+    }
+  }
+}

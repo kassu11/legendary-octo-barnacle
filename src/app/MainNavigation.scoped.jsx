@@ -1,16 +1,26 @@
-import { A } from "@solidjs/router";
-import { createEffect, Match, Show, Switch } from "solid-js";
+import { createEffect, createSignal, Match, onCleanup, Switch } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { queries } from "@/api/api";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
-import { anilistClientId } from "@/utils/urlUtils";
-import { useAuthentication } from "@/state/providers";
 import { authUserData, setAuthUserData, token2 } from "@/state/globalState";
-
-const loginUrl = `https://anilist.co/api/v2/oauth/authorize?client_id=${anilistClientId()}&response_type=token`;
+import { BookOutlineIcon, HomeIcon, SearchIcon, SettingsIcon, TvOutlineIcon } from "@/assets/icons.jsx";
+import { NavigationBrand } from "./navigation/NavigationBrand.scoped.jsx";
+import { NavigationLink } from "./navigation/NavigationLink.scoped.jsx";
+import { NavigationIconButton } from "./navigation/NavigationIconButton.scoped.jsx";
+import { NotificationsLink } from "./navigation/NotificationsLink.scoped.jsx";
+import { ProfileMenu } from "./navigation/ProfileMenu.scoped.jsx";
+import { LoginButton } from "./navigation/LoginButton.scoped.jsx";
 
 export function MainNavigation() {
-  const { logoutUser } = useAuthentication();
+  const [hidden, setHidden] = createSignal(false);
+  let lastScrollY = window.scrollY;
+
+  const onScroll = () => {
+    setHidden(window.scrollY > 200 && window.scrollY > lastScrollY);
+    lastScrollY = window.scrollY;
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onCleanup(() => window.removeEventListener("scroll", onScroll));
 
   createEffect(() => {
     const t = token2();
@@ -25,34 +35,36 @@ export function MainNavigation() {
     });
   });
 
-
   return (
-    <nav class="main-navigation">
-      <ul>
-        <li><A href="/">Home</A></li>
-        <li><A href="/ani/browse/anime">Anime</A></li>
-        <li><A href="/ani/browse/manga">Manga</A></li>
-        <li><A href="/ani/browse/media">Search</A></li>
-        <Switch>
-          <Match when={token2()}>
-            <li>
-              <button onClick={() => logoutUser()}>Logout</button>
-            </li>
-            <Show when={authUserData()}>
-              <li><A href="/notifications">Notifications ({authUserData().data.unreadNotificationCount})</A></li>
-              <li class="profile">
-                <A scoped href={"/user/" + authUserData().data.name}>
-                  {authUserData().data.name}
-                  <img src={authUserData().data.avatar.large} alt="Profile avatar" />
-                </A>
-              </li>
-            </Show>
-          </Match>
-          <Match when={!token2()}>
-            <li><a href={loginUrl}>Login with AniList</a></li>
-          </Match>
-        </Switch>
-      </ul>
+    <nav class="main-navigation" classList={{ hidden: hidden() }} aria-label="Main">
+      <div class="bar">
+        <NavigationBrand />
+
+        <ul class="primary">
+          <li><NavigationLink href="/" end icon={HomeIcon}>Home</NavigationLink></li>
+          <li><NavigationLink href="/ani/browse/anime" icon={TvOutlineIcon}>Anime</NavigationLink></li>
+          <li><NavigationLink href="/ani/browse/manga" icon={BookOutlineIcon}>Manga</NavigationLink></li>
+        </ul>
+
+        <div class="actions">
+          <NavigationIconButton href="/ani/browse/media" label="Search" icon={SearchIcon} />
+          <Switch>
+            <Match when={token2() && authUserData()}>{userData => (
+              <>
+                <NotificationsLink count={userData().data.unreadNotificationCount} />
+                <ProfileMenu user={userData().data} />
+              </>
+            )}</Match>
+            <Match when={token2()}>
+              <span class="avatar-placeholder" aria-hidden="true" />
+            </Match>
+            <Match when={!token2()}>
+              <NavigationIconButton href="/settings" label="Settings" icon={SettingsIcon} />
+              <LoginButton />
+            </Match>
+          </Switch>
+        </div>
+      </div>
     </nav>
   );
 }
