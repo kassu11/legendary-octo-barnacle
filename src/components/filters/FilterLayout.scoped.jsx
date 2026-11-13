@@ -1,5 +1,6 @@
 import { Show } from "solid-js";
 import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
+import { useResponsive } from "@/state/providers.js";
 import "./FilterLayout.scoped.css";
 
 export function FilterGroups(props) {
@@ -22,10 +23,32 @@ export function FilterGroup(props) {
 }
 
 export function FilterSearchInput(props) {
+  const { isTouch } = useResponsive();
+  let input;
+  const handleKeyDown = e => {
+    // Close the mobile keyboard when search is pressed
+    if (e.key === "Enter" && isTouch()) input.blur();
+  };
+  // Pointerdown fires before the focus moves, so it can tell whether the input was focused
+  let inputWasFocused = false;
+  const handleClearPointerDown = () => inputWasFocused = document.activeElement === input;
+  const clearSearch = () => {
+    input.value = "";
+    // Dispatch an input event so the search is cleared the same way as typing would
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    if (inputWasFocused) input.focus();
+    inputWasFocused = false;
+  };
+
   return (
     <label class="search-input">
       <SearchIcon scoped />
-      <input type="search" placeholder="Search..." onInput={props.onInput} value={props.value} enterkeyhint="search" />
+      <input type="search" placeholder="Search..." ref={elem => input = elem} onInput={props.onInput} onKeyDown={handleKeyDown} value={props.value} enterkeyhint="search" />
+      <Show when={props.value}>
+        <button type="button" class="clear-button" onPointerDown={handleClearPointerDown} onMouseDown={e => e.preventDefault()} onClick={clearSearch} aria-label="Clear search">
+          <CloseIcon scoped />
+        </button>
+      </Show>
     </label>
   );
 }
