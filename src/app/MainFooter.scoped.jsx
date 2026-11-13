@@ -1,8 +1,8 @@
-import { A, useLocation } from "@solidjs/router";
-import { createMemo, createResource, createSignal, For, Show } from "solid-js";
+import { A } from "@solidjs/router";
+import { Show } from "solid-js";
 import "./MainFooter.scoped.css";
-import { GitBranchIcon } from "@/assets/icons.jsx";
-import { CreatedAt } from "@/components/CreatedAt.jsx";
+import { DeploymentDetails } from "@/components/DeploymentDetails.scoped.jsx";
+import { DevBranchSwitcher } from "@/components/DevBranchSwitcher.scoped.jsx";
 import { settingsShowDevBranch } from "@/state/globalState";
 
 const repositoryUrl = "https://github.com/kassu11/legendary-octo-barnacle";
@@ -72,58 +72,4 @@ function BuildInfo() {
       </Show>
     </div>
   );
-}
-
-function DeploymentDetails(props) {
-  return (
-    <span class="deployment-details">
-      <span class="hash" title={props.branch.commit}>
-        {props.branch.commit.slice(0, 7)}{props.branch.dirty ? "-dirty" : ""}
-      </span>
-      <CreatedAt createdAt={Date.parse(props.branch.updatedAt) / 1000} />
-    </span>
-  );
-}
-
-function DevBranchSwitcher(props) {
-  const [open, setOpen] = createSignal(false);
-  const random = createMemo(prev => (prev || new Date().getTime()) + open()); // Make sure the list is always fresh
-
-  return (
-    <div class="dev-branch-switcher" classList={{ open: open() }}>
-      <ContextMenu fileHash={random()} />
-      <button onClick={() => setOpen(s => !s)}>
-        <GitBranchIcon scoped /> {props.name}
-      </button>
-    </div>
-  );
-}
-
-function ContextMenu(props) {
-  const [branches] = createResource(() => props.fileHash, async (hash) => {
-    const res = await fetch(__BASE__ + "/branches.json?" + hash);
-    const text = await res.text();
-    // In coding enviroment we don't have branches.json file, so the fetch returns HTML
-    // This is just quick check if the returned file is json or not
-    if (text?.startsWith("[")) return JSON.parse(text);
-    else return [];
-  });
-
-  const location = useLocation();
-  const search = createMemo(() => location.search.length < 2 ? "?" : location.search + "&");
-  const handleClick = e => window.location.href = e.currentTarget.href;
-
-  return (
-    <div class="context-menu">
-      <For each={branches()} fallback="No dev branches available">{branch => (
-        <a href={location.pathname + search() + "dev-branch=" + branch.path} onClick={handleClick}>
-          <GitBranchIcon scoped />
-          <span class="branch">
-            <span>{branch.name}</span>
-            <DeploymentDetails branch={branch} />
-          </span>
-        </a>
-      )}</For>
-    </div>
-  )
 }
