@@ -1,0 +1,155 @@
+@layer layout {
+  .profile-menu {
+    position: relative;
+
+    .avatar-button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 40px;
+      padding: 4px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      transition: .15s background-color, .15s color;
+
+      &:hover, &[aria-expanded="true"] {
+        color: var(--text);
+        background-color: color-mix(in oklab, var(--text) 8%, transparent);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--red-400);
+        outline-offset: -2px;
+      }
+
+      img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 0 2px color-mix(in oklab, var(--text) 15%, transparent);
+      }
+
+      svg {
+        margin-right: 2px;
+        font-size: 14px;
+        transition: .2s rotate;
+
+        @media (width < 640px) {
+          display: none;
+        }
+      }
+
+      &[aria-expanded="true"] svg {
+        rotate: 180deg;
+      }
+    }
+
+    .dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      display: none;
+      flex-direction: column;
+      width: max-content;
+      min-width: 220px;
+      max-width: calc(100vw - 16px);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid color-mix(in oklab, var(--text) 10%, transparent);
+      background-color: var(--bg-dark);
+      box-shadow: 0 12px 32px -8px var(--shadow-dark);
+      opacity: 0;
+      translate: 0 -8px;
+      transition: .15s opacity, .15s translate, display allow-discrete .15s;
+
+      &.open {
+        display: flex;
+        opacity: 1;
+        translate: 0 0;
+
+        @starting-style {
+          opacity: 0;
+          translate: 0 -8px;
+        }
+      }
+
+      .dropdown-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px;
+        border-radius: 8px;
+        color: var(--text);
+        text-decoration: none;
+
+        &:hover, &:focus-visible {
+          background-color: color-mix(in oklab, var(--text) 8%, transparent);
+          outline: none;
+        }
+
+        img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .user {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+
+          .name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 700;
+          }
+
+          .hint {
+            color: var(--text-muted);
+            font-size: var(--fs-300);
+          }
+        }
+      }
+
+      hr {
+        margin: 6px 4px;
+        border: none;
+        border-top: 1px solid color-mix(in oklab, var(--text) 10%, transparent);
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 8px 10px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: var(--fs-400);
+        text-align: left;
+        text-decoration: none;
+
+        &:hover, &:focus-visible {
+          color: var(--text);
+          background-color: color-mix(in oklab, var(--text) 8%, transparent);
+          outline: none;
+        }
+
+        &.logout:hover, &.logout:focus-visible {
+          color: var(--red-400);
+        }
+
+        svg {
+          flex-shrink: 0;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}

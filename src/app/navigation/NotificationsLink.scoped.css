@@ -1,0 +1,20 @@
+@layer layout {
+  /* Positioned against the NavigationIconButton it's rendered inside */
+  .badge {
+    position: absolute;
+    top: 3px;
+    right: 1px;
+    display: grid;
+    place-items: center;
+    min-width: 17px;
+    height: 17px;
+    padding-inline: 4px;
+    border-radius: 999px;
+    background: var(--nav-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 0 0 2px var(--bg-dark);
+  }
+}

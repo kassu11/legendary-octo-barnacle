@@ -1,0 +1,30 @@
+@layer layout {
+  .login {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding-inline: 14px;
+    border-radius: 999px;
+    background: var(--nav-accent);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: .15s filter, .15s box-shadow;
+
+    &:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 2px 16px -2px color-mix(in oklab, var(--red-400) 70%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
+    }
+
+    svg {
+      font-size: 14px;
+    }
+  }
+}
