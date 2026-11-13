@@ -38,6 +38,29 @@
         display: none;
       }
     }
+
+    .clear-button {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      /* Larger tap target without growing the input */
+      padding: .4em;
+      margin-right: -.4em;
+      border: unset;
+      border-radius: 100px;
+      background-color: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+
+      &:hover, &:focus-visible {
+        color: var(--text);
+      }
+
+      svg {
+        width: 1.1em;
+        height: 1.1em;
+      }
+    }
   }
 
   .filter-groups {
