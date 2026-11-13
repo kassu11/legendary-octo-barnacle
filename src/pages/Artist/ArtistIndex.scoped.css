@@ -1,8 +1,69 @@
-.themes {
-  display: grid;
-  gap: .5rem;
-}
+@layer layout {
+  .artist-cover-image {
+    aspect-ratio: 5.5/8;
+    max-width: 10rem;
+    object-fit: cover;
+  }
+  .animes {
+    display: grid;
+    gap: 1rem;
 
-.episode {
+    .anime {
+      display: grid;
+      gap: .5rem;
 
+      .anime-header {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+
+        .cover {
+          width: 3.5rem;
+          aspect-ratio: 2 / 3;
+          object-fit: cover;
+          border-radius: 4px;
+          background-color: var(--background-400-old);
+          flex-shrink: 0;
+        }
+
+        .info {
+          display: grid;
+          gap: .125rem;
+
+          h2 {
+            font-size: var(--fs-500);
+          }
+
+          .english-title,
+          .details {
+            font-size: var(--fs-300);
+            color: var(--neutral-color-50-old);
+          }
+        }
+      }
+
+      .themes {
+        display: grid;
+        gap: .5rem;
+
+        .credits {
+          display: flex;
+          flex-wrap: wrap;
+          gap: .5rem;
+          font-size: var(--fs-300);
+
+          .group,
+          .credit {
+            padding-inline: .375rem;
+            border-radius: 4px;
+            background-color: var(--background-600-old);
+          }
+
+          .character {
+            font-style: italic;
+          }
+        }
+      }
+    }
+  }
 }

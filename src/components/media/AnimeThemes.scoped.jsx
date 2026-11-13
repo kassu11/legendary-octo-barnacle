@@ -84,6 +84,7 @@ export function AnimeTheme(props) {
               )}</For>
             </p>
           </Show>
+          {props.children}
         </div>
         <For each={props.theme.entries}>{row => (
           <div class="details">

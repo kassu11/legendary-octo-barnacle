@@ -12,12 +12,38 @@ query ($slug: String!) {
     }
     songStaff {
       role
+      as
+      alias
       song {
         id
         themes {
           slug
+          type
+          sequence
+          group {
+            name
+          }
           anime {
             slug
+            title {
+              romaji
+              english
+            }
+            year
+            season
+            format
+            images {
+              nodes {
+                link
+                facet
+              }
+            }
+            resources {
+              nodes {
+                site
+                externalId
+              }
+            }
           }
           song {
             title {
