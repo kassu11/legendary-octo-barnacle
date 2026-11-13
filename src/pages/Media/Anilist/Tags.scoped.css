@@ -6,6 +6,10 @@
     padding: 0px;
 
     li {
+      &.hidden {
+        display: none;
+      }
+
       &.spoiler {
         background-color: var(--red-400);
         color: var(--red-100);

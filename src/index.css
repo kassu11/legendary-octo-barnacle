@@ -190,10 +190,6 @@
     position: absolute;
   }
 
-  .hidden {
-    display: none;
-  }
-
   .line-clamp {
     -webkit-box-orient: vertical;
     line-clamp: var(--line-clamp, 3);

@@ -11,6 +11,11 @@
     backdrop-filter: blur(16px) saturate(1.6);
     border-bottom: 1px solid color-mix(in oklab, var(--text) 8%, transparent);
     box-shadow: 0 4px 24px -12px var(--shadow);
+    transition: translate .25s ease;
+
+    &.hidden {
+      translate: 0 -100%;
+    }
 
     .bar {
       display: flex;

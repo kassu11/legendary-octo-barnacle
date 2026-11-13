@@ -1,4 +1,4 @@
-import { createEffect, Match, Switch } from "solid-js";
+import { createEffect, createSignal, Match, onCleanup, Switch } from "solid-js";
 import "./MainNavigation.scoped.css";
 import { queries } from "@/api/api";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
@@ -12,6 +12,16 @@ import { ProfileMenu } from "./navigation/ProfileMenu.scoped.jsx";
 import { LoginButton } from "./navigation/LoginButton.scoped.jsx";
 
 export function MainNavigation() {
+  const [hidden, setHidden] = createSignal(false);
+  let lastScrollY = window.scrollY;
+
+  const onScroll = () => {
+    setHidden(window.scrollY > 200 && window.scrollY > lastScrollY);
+    lastScrollY = window.scrollY;
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onCleanup(() => window.removeEventListener("scroll", onScroll));
+
   createEffect(() => {
     const t = token2();
     if (!t) return;
@@ -26,7 +36,7 @@ export function MainNavigation() {
   });
 
   return (
-    <nav class="main-navigation" aria-label="Main">
+    <nav class="main-navigation" classList={{ hidden: hidden() }} aria-label="Main">
       <div class="bar">
         <NavigationBrand />
 
