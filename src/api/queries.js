@@ -51,6 +51,8 @@ export { default as mediaListEntry } from "./queries/mediaListEntry.graphql";
 export { default as getUserByName } from "./queries/getUserByName.graphql";
 export { default as profileActivity } from "./queries/profileActivity.graphql";
 export { default as currentUser } from "./queries/currentUser.graphql";
+export { default as animeThemesByExternalSite } from "./queries/animeThemesByExternalSite.graphql";
+export { default as animeThemesArtistBySlug } from "./queries/animeThemesArtistBySlug.graphql";
 
 // Basically normal grapql querys, but we want to dynamicly add pages so we can fetch over 50 entries with one query
 // For example 250 entries are split into 5 pages, but they are all inside one query
@@ -60,11 +62,7 @@ export const anilistGetMediasWithIds = multiPageFetchQueryGenerator(anilistGetMe
 import { default as anilistGetCharacterIdsRaw } from "./queries/anilistGetCharacterIds.graphql";
 export const anilistGetCharacterIds = multiPageFetchQueryGenerator(anilistGetCharacterIdsRaw);
 
-// Generic Jikan and AnimeThemes post request urls
-export const animeThemesByAnilistId = ({ id }) => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=AniList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
-export const animeThemesByMyAnimeListId = ({ id }) => `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=MyAnimeList&filter[external_id]=${id}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`;
-export const animeThemesByArtisSlug = ({ slug }) => `https://api.animethemes.moe/artist/${slug}?include=songs.animethemes.anime,songs.animethemes.animethemeentries.videos.audio,songs.animethemes.song.artists,resources,images`;
-
+// Generic Jikan post request urls
 export const myAnimeListMediaById = ({ type, id }) => `https://api.tenrai.org/v1/${type}/${id}/full`;
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.tenrai.org/v1/${type}/${id}/characters`;
 export const myAnimeListCharacterById = ({ id }) => `https://api.tenrai.org/v1/characters/${id}/full`;

@@ -1,0 +1,36 @@
+query ($site: ResourceSite!, $id: [Int!]) {
+  filterAnimeByExternalSite(site: $site, id: $id) {
+    slug
+    themes {
+      slug
+      song {
+        title {
+          romaji
+        }
+        staff {
+          role
+          artist {
+            slug
+            name {
+              main
+            }
+          }
+        }
+      }
+      entries {
+        version
+        episodes
+        spoiler
+        videos {
+          nodes {
+            link
+            resolution
+            source
+            nc
+            tags
+          }
+        }
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { AnimeTheme } from "@/components/media/AnimeThemes.scoped.jsx";
 import "./ArtistIndex.scoped.css";
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
-import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils.js";
+import { createAnimeThemesFetcher, sendAnimeThemesFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
@@ -19,18 +19,29 @@ function Artist() {
   createEffect(() => {
     const signal = artistController.abortAndRenew();
 
-    artistFetcher = createJsonGetFetcher(queries.animeThemesByArtisSlug, { slug: params.name }, signal);
+    artistFetcher = createAnimeThemesFetcher(queries.animeThemesArtistBySlug, { slug: params.name }, signal);
 
-    sendFetcher(artistFetcher, {
+    sendAnimeThemesFetcher(artistFetcher, {
       name: "AnimeThemes artist",
       onFetch: () => artistController.disable(),
       onStart: startArtistTimer,
       onStop: stopArtistTimer,
       setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === artistFetcher.cacheKey) setArtistData(res);
+        if (f.cacheKey === artistFetcher.cacheKey) setArtistData(res.data.data.artist);
       }
     });
   });
+
+  // The artist can have multiple roles in the same song, so only list each song once
+  const songs = () => {
+    const songs = new Map();
+    for (const { song } of artistData().songStaff) songs.set(song.id, song);
+    return [...songs.values()];
+  };
+  const image = () => {
+    const images = artistData().images.nodes;
+    return images.find(image => image.facet === "LARGE_COVER") ?? images[0];
+  };
 
   const video = <video src="" controls autoPlay />;
   document.title = "Artist - LOB";
@@ -40,15 +51,15 @@ function Artist() {
       <p>{formatMSToString(artistTime())}</p>
       <h1>Artist</h1>
       <Show when={artistData()}>
-        <p>{artistData().data.artist.name}</p>
-        <Show when={artistData().data.artist.images.length} fallback={<img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg" alt="Artist missing" />}>
-          <img src={artistData().data.artist.images[0].link} alt="Artist" />
+        <p>{artistData().name.main}</p>
+        <Show when={image()} fallback={<img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg" alt="Artist missing" />}>
+          <img src={image().link} alt="Artist" />
         </Show>
         <div class="themes">
-          <For each={artistData().data.artist.songs}>{theme => (
+          <For each={songs()}>{song => (
             <div class="episode">
-              <For each={theme.animethemes}>{theme => (
-                <AnimeTheme theme={theme} video={video} mainArtist={params.name} />
+              <For each={song.themes}>{theme => (
+                <AnimeTheme href={"https://animethemes.moe/anime/" + theme.anime.slug + "/" + theme.slug} theme={theme} video={video} mainArtist={params.name} />
               )}</For>
             </div>
           )}</For>

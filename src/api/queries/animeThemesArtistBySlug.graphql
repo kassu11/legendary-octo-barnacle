@@ -1,0 +1,54 @@
+query ($slug: String!) {
+  artist(slug: $slug) {
+    slug
+    name {
+      main
+    }
+    images {
+      nodes {
+        link
+        facet
+      }
+    }
+    songStaff {
+      role
+      song {
+        id
+        themes {
+          slug
+          anime {
+            slug
+          }
+          song {
+            title {
+              romaji
+            }
+            staff {
+              role
+              artist {
+                slug
+                name {
+                  main
+                }
+              }
+            }
+          }
+          entries {
+            version
+            episodes
+            spoiler
+            videos {
+              nodes {
+                link
+                resolution
+                source
+                nc
+                tags
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
