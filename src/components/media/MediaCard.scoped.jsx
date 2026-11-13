@@ -85,7 +85,7 @@ export function MediaCard(props) {
   });
 
   // Hover tracking polls every frame, so only create it when something uses it
-  const hover = (local.hoverCard || local.quickActions) && createHover({ placements: ["right-start", "left-start", "bottom"], offset: 25, alignOffset: 25 });
+  const hover = (local.hoverCard || local.quickActions) && createHover({ placements: ["right-start", "right-end", "left-start", "left-end", "bottom", "top"], offset: 25, alignOffset: 25 });
 
   return (
     <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
