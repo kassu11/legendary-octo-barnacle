@@ -6,7 +6,7 @@
     height: 36px;
     padding-inline: 14px;
     border-radius: 999px;
-    background: var(--nav-accent);
+    background: var(--bg-light);
     color: #fff;
     font-weight: 700;
     text-decoration: none;
@@ -15,7 +15,6 @@
 
     &:hover {
       filter: brightness(1.1);
-      box-shadow: 0 2px 16px -2px color-mix(in oklab, var(--red-400) 70%, transparent);
     }
 
     &:focus-visible {
@@ -24,7 +23,9 @@
     }
 
     svg {
-      font-size: 14px;
+      flex-shrink: 0;
+      width: 1rem;
+      height: 1rem;
     }
   }
 }
