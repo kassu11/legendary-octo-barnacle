@@ -10,8 +10,6 @@
     box-shadow: 0 3px 8px #0000009e;
     outline-offset: 16px;
     isolation: isolate;
-    /* Long press starts drag hovering, so iOS link previews are disabled */
-    -webkit-touch-callout: none;
 
     &.zoom-in {
       animation: .3s linear load-card-in;

@@ -199,6 +199,8 @@ function setTrigger(entry, elem) {
   if (elem) {
     if (!entriesByTrigger.has(elem)) {
       entriesByTrigger.set(elem, new Set());
+      // Long press starts drag hovering, and iOS doesn't fire contextmenu for its link and image previews, so they can only be disabled with CSS
+      elem.style.setProperty("-webkit-touch-callout", "none");
     }
     entriesByTrigger.get(elem).add(entry);
   }
@@ -209,6 +211,7 @@ function removeTrigger(entry) {
   entries?.delete(entry);
   if (entries?.size === 0) {
     entriesByTrigger.delete(entry.trigger);
+    entry.trigger.style.removeProperty("-webkit-touch-callout");
   }
 }
 

@@ -1,8 +1,6 @@
 @layer layout {
   .cp-media-card {
     position: relative;
-    /* Long press starts drag hovering, so iOS link previews are disabled */
-    -webkit-touch-callout: none;
     margin-bottom: 4.5rem;
     transition: .3s scale, .18s opacity, .3s filter;
     &:where(.loading):not(.skeleton) {
