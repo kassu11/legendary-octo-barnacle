@@ -50,15 +50,24 @@ let touchInput = false;
 let touchTarget;
 /** @type {{ id: number, x: number, y: number, target: Element, onTrigger: boolean, dragging: boolean, timer?: number } | undefined} */
 let touch;
-let edgeScrollFrame;
-let edgeScrollTime;
-let edgeScrollRemainder = 0;
+/** @type {{ x: number, y: number, frame: number, time?: number, remainder: number } | undefined} */
+let edgeScroll;
+
+// Touch events are always dispatched to the element the touch started on.
+// Virtualized lists can remove that element while edge scrolling, and then the events no longer reach window,
+// so these are listened to on the element itself for the duration of the touch.
+const touchTargetListeners = [
+  ["touchmove", handleTouchMove, { passive: false }],
+  ["touchend", handleTouchEnd, { passive: false }],
+  ["touchcancel", handleTouchCancel, { passive: true }],
+];
 
 // Holding a finger still on a trigger starts drag hovering.
 // While dragging, the page doesn't scroll and the hovers follow the element under the finger,
 // so multiple hovers can be checked in one press. The last one stays open after lifting the finger.
-// Holding the finger near the top or bottom edge scrolls the page.
+// Holding the finger near the top or bottom edge scrolls the page. Lifting it there keeps scrolling until the next tap.
 function handleTouchStart(e) {
+  stopEdgeScroll();
   cancelTouch();
   if (e.touches.length !== 1) {
     return;
@@ -70,41 +79,15 @@ function handleTouchStart(e) {
   if (onTrigger) {
     touch.timer = setTimeout(startTouchDrag, LONG_PRESS_DELAY);
   }
+  for (const [type, listener, options] of touchTargetListeners) {
+    touch.target.addEventListener(type, listener, options);
+  }
 }
 
 function startTouchDrag() {
   touch.dragging = true;
   touchTarget = touch.target;
-  edgeScrollTime = undefined;
-  edgeScrollRemainder = 0;
-  edgeScrollFrame = requestAnimationFrame(edgeScroll);
-}
-
-function edgeScroll(time) {
-  // Long frames are capped, so the page doesn't jump after the tab was in the background
-  const elapsed = Math.min(time - (edgeScrollTime ?? time), 50);
-  edgeScrollTime = time;
-
-  const viewportHeight = window.innerHeight;
-  const size = Math.min(EDGE_SCROLL_SIZE, viewportHeight / 4);
-  const topDepth = size - touch.y;
-  const bottomDepth = touch.y - (viewportHeight - size);
-  const depth = Math.max(topDepth, bottomDepth);
-  if (depth > 0) {
-    // Speed eases in, so the scrolling starts slow at the inner edge of the zone
-    const speed = Math.min(depth / size, 1) ** 2 * EDGE_SCROLL_MAX_SPEED;
-    // Sub-pixel amounts are carried over, because scrollBy can round them away
-    edgeScrollRemainder += (topDepth > 0 ? -1 : 1) * speed * elapsed;
-    const amount = Math.trunc(edgeScrollRemainder);
-    if (amount) {
-      edgeScrollRemainder -= amount;
-      window.scrollBy({ top: amount, behavior: "instant" });
-      // The page moved under the finger
-      touchTarget = document.elementFromPoint(touch.x, touch.y);
-    }
-  }
-
-  edgeScrollFrame = requestAnimationFrame(edgeScroll);
+  edgeScroll = { x: touch.x, y: touch.y, remainder: 0, frame: requestAnimationFrame(updateEdgeScroll) };
 }
 
 function handleTouchMove(e) {
@@ -117,11 +100,10 @@ function handleTouchMove(e) {
     if (e.cancelable) {
       e.preventDefault();
     }
-    // The start position isn't needed after dragging starts, so it's replaced with the finger position for edge scrolling
-    touch.x = point.clientX;
-    touch.y = point.clientY;
+    edgeScroll.x = point.clientX;
+    edgeScroll.y = point.clientY;
     // Floating elements in #hovers have pointer-events: none, so they are skipped
-    touchTarget = document.elementFromPoint(touch.x, touch.y);
+    touchTarget = document.elementFromPoint(point.clientX, point.clientY);
   } else if (Math.hypot(point.clientX - touch.x, point.clientY - touch.y) > TOUCH_MOVE_TOLERANCE) {
     // Scrolling closes the touch hovers
     cancelTouch();
@@ -139,6 +121,10 @@ function handleTouchEnd(e) {
     if (e.cancelable) {
       e.preventDefault();
     }
+    // Lifting the finger inside an edge zone keeps the page scrolling
+    if (!edgeScrollSpeed(edgeScroll.y)) {
+      stopEdgeScroll();
+    }
   } else {
     // A tap moves the hover like :hover does
     touchTarget = touch.target;
@@ -146,10 +132,67 @@ function handleTouchEnd(e) {
   cancelTouch();
 }
 
+function handleTouchCancel() {
+  stopEdgeScroll();
+  cancelTouch();
+}
+
 function cancelTouch() {
-  clearTimeout(touch?.timer);
-  cancelAnimationFrame(edgeScrollFrame);
+  if (!touch) {
+    return;
+  }
+
+  clearTimeout(touch.timer);
+  for (const [type, listener, options] of touchTargetListeners) {
+    touch.target.removeEventListener(type, listener, options);
+  }
   touch = undefined;
+}
+
+function updateEdgeScroll(time) {
+  // Long frames are capped, so the page doesn't jump after the tab was in the background
+  const elapsed = Math.min(time - (edgeScroll.time ?? time), 50);
+  edgeScroll.time = time;
+
+  // Sub-pixel amounts are carried over, because scrollBy can round them away
+  edgeScroll.remainder += edgeScrollSpeed(edgeScroll.y) * elapsed;
+  const amount = Math.trunc(edgeScroll.remainder);
+  if (amount) {
+    edgeScroll.remainder -= amount;
+    window.scrollBy({ top: amount, behavior: "instant" });
+    // The page moved under the finger. After the finger is lifted, the page only keeps scrolling
+    if (touch?.dragging) {
+      touchTarget = document.elementFromPoint(edgeScroll.x, edgeScroll.y);
+    }
+  }
+
+  edgeScroll.frame = requestAnimationFrame(updateEdgeScroll);
+}
+
+function stopEdgeScroll() {
+  if (edgeScroll) {
+    cancelAnimationFrame(edgeScroll.frame);
+    edgeScroll = undefined;
+  }
+}
+
+/**
+ * @param {number} y Finger position in the viewport
+ * @returns {number} Scroll speed in pixels per millisecond, negative scrolls up and 0 is outside the edge zones
+ */
+function edgeScrollSpeed(y) {
+  const viewportHeight = window.innerHeight;
+  const size = Math.min(EDGE_SCROLL_SIZE, viewportHeight / 4);
+  const topDepth = size - y;
+  const bottomDepth = y - (viewportHeight - size);
+  const depth = Math.max(topDepth, bottomDepth);
+  if (depth <= 0) {
+    return 0;
+  }
+
+  // Speed eases in, so the scrolling starts slow at the inner edge of the zone
+  const speed = Math.min(depth / size, 1) ** 2 * EDGE_SCROLL_MAX_SPEED;
+  return topDepth > 0 ? -speed : speed;
 }
 
 // Long pressing a trigger shouldn't open the browser's context menu, select text or start dragging a link
@@ -178,10 +221,9 @@ const listeners = [
     touchInput = e.pointerType === "touch";
   }, { passive: true }],
   ["touchstart", handleTouchStart, { passive: true }],
-  // Not passive, so drag hovering can stop the page from scrolling
-  ["touchmove", handleTouchMove, { passive: false }],
-  ["touchend", handleTouchEnd, { passive: false }],
-  ["touchcancel", cancelTouch, { passive: true }],
+  // Does nothing, the touch target listeners handle touchmove. Browsers decide whether touchmove can be prevented
+  // when the touch starts, before those are added, so this non-passive listener lets drag hovering stop the page from scrolling.
+  ["touchmove", () => {}, { passive: false }],
   ["contextmenu", preventTouchDefault, {}],
   ["selectstart", preventTouchDefault, {}],
   ["dragstart", preventTouchDefault, {}],
@@ -271,6 +313,7 @@ function unregister(entry) {
 
 import.meta.hot?.dispose(() => {
   cancelAnimationFrame(frame);
+  stopEdgeScroll();
   cancelTouch();
   for (const [type, listener] of listeners) {
     window.removeEventListener(type, listener, { capture: true });
