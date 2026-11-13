@@ -59,9 +59,12 @@
 
     .build {
       display: flex;
+      flex: 1 1 auto;
       flex-wrap: wrap;
       align-items: center;
-      gap: 16px;
+      justify-content: flex-end;
+      gap: 8px 16px;
+      min-width: 0;
     }
 
     .deployment-details {
@@ -78,11 +81,15 @@
 
   .dev-branch-switcher {
     position: relative;
+    min-width: 0;
+    max-width: 100%;
 
     button, a {
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0;
+      max-width: 100%;
       padding: 4px 8px;
       font-weight: 600;
       border-radius: 4px;
@@ -91,21 +98,23 @@
       background: var(--bg-light);
       color: var(--text-muted);
       transition: .2s background, .2s filter;
-      word-break: break-all;
       text-align: left;
 
       &:hover {
         filter: brightness(1.25);
       }
 
-      > * {
-          flex-shrink: 0;
+      svg {
+        flex-shrink: 0;
       }
     }
 
+    .branch-name {
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
     button {
-      width: fit-content;
-      background-color: unset;
       border: unset;
       background-color: var(--shadow-light);
 
@@ -114,10 +123,21 @@
       }
     }
 
+    a[aria-current] {
+      color: var(--text);
+      outline: 1px solid currentColor;
+      outline-offset: -1px;
+    }
+
     .branch {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0;
+    }
+
+    .empty {
+      padding: 4px 8px;
     }
 
     .context-menu {
@@ -126,8 +146,9 @@
       bottom: calc(100% + 8px);
       z-index: 10;
       width: max-content;
-      max-width: min(100vw - 16px, 20rem);
-      max-height: min(100vh - 64px, 35rem);
+      /* Footer has 16px of space on both sides on mobile, so this keeps the menu inside the screen */
+      max-width: min(100vw - 32px, 24rem);
+      max-height: min(100dvh - 64px, 35rem);
       flex-direction: column;
       gap: 8px;
       padding: 8px;

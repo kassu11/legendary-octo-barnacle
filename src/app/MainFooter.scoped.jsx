@@ -1,5 +1,5 @@
 import { A, useLocation } from "@solidjs/router";
-import { createMemo, createResource, createSignal, For, Show } from "solid-js";
+import { createMemo, createResource, createSignal, For, onCleanup, Show } from "solid-js";
 import "./MainFooter.scoped.css";
 import { GitBranchIcon } from "@/assets/icons.jsx";
 import { CreatedAt } from "@/components/CreatedAt.jsx";
@@ -88,12 +88,23 @@ function DeploymentDetails(props) {
 function DevBranchSwitcher(props) {
   const [open, setOpen] = createSignal(false);
   const random = createMemo(prev => (prev || new Date().getTime()) + open()); // Make sure the list is always fresh
+  let ref;
+
+  const closeOnOutsideClick = e => open() && !ref.contains(e.target) && setOpen(false);
+  const closeOnEscape = e => e.key === "Escape" && setOpen(false);
+  window.addEventListener("pointerdown", closeOnOutsideClick);
+  window.addEventListener("keydown", closeOnEscape);
+  onCleanup(() => {
+    window.removeEventListener("pointerdown", closeOnOutsideClick);
+    window.removeEventListener("keydown", closeOnEscape);
+  });
 
   return (
-    <div class="dev-branch-switcher" classList={{ open: open() }}>
-      <ContextMenu fileHash={random()} />
-      <button onClick={() => setOpen(s => !s)}>
-        <GitBranchIcon scoped /> {props.name}
+    <div ref={elem => ref = elem} class="dev-branch-switcher" classList={{ open: open() }}>
+      <ContextMenu fileHash={random()} current={props.name} />
+      <button onClick={() => setOpen(s => !s)} aria-expanded={open()}>
+        <GitBranchIcon scoped />
+        <span class="branch-name">{props.name}</span>
       </button>
     </div>
   );
@@ -115,11 +126,15 @@ function ContextMenu(props) {
 
   return (
     <div class="context-menu">
-      <For each={branches()} fallback="No dev branches available">{branch => (
-        <a href={location.pathname + search() + "dev-branch=" + branch.path} onClick={handleClick}>
+      <For each={branches()} fallback={<span class="empty">No dev branches available</span>}>{branch => (
+        <a
+          href={location.pathname + search() + "dev-branch=" + branch.path}
+          onClick={handleClick}
+          aria-current={branch.name === props.current ? "true" : undefined}
+        >
           <GitBranchIcon scoped />
           <span class="branch">
-            <span>{branch.name}</span>
+            <span class="branch-name">{branch.name}</span>
             <DeploymentDetails branch={branch} />
           </span>
         </a>
