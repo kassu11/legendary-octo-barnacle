@@ -53,6 +53,20 @@ export function createAnilistFetcher(query, variables, signal) {
   }, removeTokenFromEncode);
 }
 
+export function createAnimeThemesFetcher(query, variables, signal) {
+  assertTypeString(query);
+
+  return createFetcher("https://rs.animethemes.moe/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal,
+    body: {
+      query: query,
+      variables
+    },
+  });
+}
+
 function baseEncoding(url, params) {
   const { method, headers, body } = params;
   const paramsAsString = safeStringifyJson({ method, headers, body }, "missing");
@@ -194,7 +208,7 @@ async function retryDelay(fetcher, response, iteration) {
 const requestQueue = [
   { url: "https://graphql.anilist.co", queue: [], timeout: null },
   { url: "https://api.tenrai.org/v1", queue: [], timeout: null },
-  { url: "https://api.animethemes.moe", queue: [], timeout: null },
+  { url: "https://rs.animethemes.moe/graphql", queue: [], timeout: null },
 ]
 
 // const response = await fetch("/legendary-octo-barnacle/offline.json");
@@ -407,6 +421,38 @@ export function sendAnilistFetcher(fetcher, settings = anilistBaseFetcherSetting
     const { cache, ...rest } = anilistBaseFetcherSettings;
     settings = mergeObjects({ ...rest, cache: { ...cache } }, settings);
   }
+  sendFetcher(fetcher, settings);
+}
+
+const animeThemesBaseFetcherSettings = {
+  name: "AnimeThemes fetch",
+  // GraphQL errors (too deep, too complex, etc.) are returned with status 200, so don't cache them
+  parse: async res => {
+    const data = await res.json();
+    if (!data?.errors?.length) return data;
+    res.json = () => data; // The body has already been read, so onError needs this to read the errors
+    throw res;
+  },
+  onError: async res => {
+    if (!res) return;
+    if (Error.isError(res)) {
+      console.error(res);
+      return;
+    }
+    try {
+      const { errors } = await res.json();
+      for (const { message } of errors) {
+        addApplicationNotification({ type: "error", message: `AnimeThemes errored with a status code: ${res.status}. ${message}`, duration: 10_000 });
+      }
+    } catch (err) {
+      console.error(err);
+      addApplicationNotification({ type: "error", message: `AnimeThemes errored with a status code: ${res.status || "404"}.`, duration: 10_000 });
+    }
+  },
+};
+
+export function sendAnimeThemesFetcher(fetcher, settings = animeThemesBaseFetcherSettings) {
+  if (settings) settings = mergeObjects({ ...animeThemesBaseFetcherSettings }, settings);
   sendFetcher(fetcher, settings);
 }
 

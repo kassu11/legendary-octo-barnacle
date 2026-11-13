@@ -40,14 +40,14 @@ const baseLimits = {
       return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
     }
   },
-  "https://api.animethemes.moe": {
-    limit: 60,
-    remaining: 60,
+  "https://rs.animethemes.moe/graphql": {
+    limit: 90,
+    remaining: 90,
     resetTime: 0,
     requests: [],
     timeToWait: self => {
       const now = new Date().getTime();
-      // Anilist internal rate limit has been hit, resume only after reset time has passed
+      // AnimeThemes internal rate limit has been hit, resume only after reset time has passed
       if (self.resetTime > now) return self.resetTime - now;
 
       // Only allow 4 request back to back if the requests are from new session.

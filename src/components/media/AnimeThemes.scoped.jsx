@@ -5,14 +5,15 @@ import { asserts } from "@/utils/utils.js";
 import { localizations } from "@/constants/constants.js";
 import { createEffect, createSignal, ErrorBoundary, For, Match, Show, Switch } from "solid-js";
 import { useMediaInfo } from "@/state/providers.js";
-import { createJsonGetFetcher, sendFetcher } from "@/api/fetcherUtils";
+import { createAnimeThemesFetcher, sendAnimeThemesFetcher } from "@/api/fetcherUtils";
+import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
 function AnimeThemes() {
   const params = useParams();
   const [searchParams] = useSearchParams();
   const { anilistData } = useMediaInfo();
   const videoPlayer = <video src="" controls autoPlay />;
-  const [themeData, setThemeData] = createSignal();
+  const [themeData, setThemeData] = createSignal(undefined, { equals: false });
 
   createEffect(() => {
     params.id;
@@ -21,23 +22,23 @@ function AnimeThemes() {
     videoPlayer.src = "";
   });
 
-  let sessionId = 0;
+  const controller = createCleanUpAbortController();
+  let fetcher;
   createEffect(() => {
     if (params.type !== localizations.anime) return;
 
     const api = searchParams.isMalId != null ? localizations.mal : params.api;
+    const site = api === localizations.mal ? "MAL" : "ANILIST";
 
-    let query;
-    if (api === localizations.ani) query = queries.animeThemesByAnilistId;
-    else if (api === localizations.mal) query = queries.animeThemesByMyAnimeListId;
-
-    let curId = ++sessionId;
-    const fetcher = createJsonGetFetcher(query, { id: params.id });
-    sendFetcher(fetcher, {
+    const signal = controller.abortAndRenew();
+    fetcher = createAnimeThemesFetcher(queries.animeThemesByExternalSite, { site, id: [Number(params.id)] }, signal);
+    sendAnimeThemesFetcher(fetcher, {
       name: "Themes",
-      setValue: res => {
-        if (curId === sessionId) setThemeData(res);
-      }
+      onFetch: () => controller.disable(),
+      setValue: (res, { fetcher: f }) => {
+        // Ignore responses from fetchers that have since been replaced
+        if (f.cacheKey === fetcher.cacheKey) setThemeData(res.data.data.filterAnimeByExternalSite[0]);
+      },
     });
   });
 
@@ -46,8 +47,8 @@ function AnimeThemes() {
       <Show when={themeData() && anilistData()?.data.data.Media?.type === localizations.ANIME}>
         <div>
           <h2>Themes</h2>
-          <For each={themeData()?.data?.anime?.[0]?.animethemes}>{theme => (
-            <AnimeTheme href={"https://animethemes.moe/anime/" + themeData()?.data?.anime?.[0]?.slug + "/" + theme.slug} theme={theme} video={videoPlayer} />
+          <For each={themeData().themes}>{theme => (
+            <AnimeTheme href={"https://animethemes.moe/anime/" + themeData().slug + "/" + theme.slug} theme={theme} video={videoPlayer} />
           )}</For>
           {videoPlayer}
         </div>
@@ -60,6 +61,7 @@ export function AnimeTheme(props) {
   asserts.assertTruthy(props.video, "Missing video element for playback");
   asserts.assertTruthy(props.theme, "Theme data is missing");
   let artistAndCharacter = false;
+  const artists = () => props.theme.song?.staff.filter(staff => staff.role === "Performance").map(staff => staff.artist);
 
   return (
     <ErrorBoundary fallback="AnimeThemes row error">
@@ -67,29 +69,29 @@ export function AnimeTheme(props) {
         <div class="header">
           <p>{props.theme.slug}</p>
           <Show when={props.theme.song}>
-            <p>{props.theme.song.title}
+            <p>{props.theme.song.title.romaji}
               <Switch>
                 <Match when={props.mainArtist}>
-                  <Show when={props.theme.song.artists?.length > 1}> feat </Show>
+                  <Show when={artists().length > 1}> feat </Show>
                 </Match>
-                <Match when={props.theme.song.artists?.length}> by </Match>
+                <Match when={artists().length}> by </Match>
               </Switch>
-              <For each={props.theme.song.artists}>{artist => (
+              <For each={artists()}>{artist => (
                 <Show when={!props.mainArtist || artist.slug !== props.mainArtist}>
                   <Show when={artistAndCharacter} fallback={artistAndCharacter = true}> & </Show>
-                  <A href={"/artist/" + artist.slug}>{artist.name}</A>
+                  <A href={"/artist/" + artist.slug}>{artist.name.main}</A>
                 </Show>
               )}</For>
             </p>
           </Show>
         </div>
-        <For each={props.theme.animethemeentries}>{row => (
+        <For each={props.theme.entries}>{row => (
           <div class="details">
             <p>v{row.version || 1}</p>
             <p>Ep: {row.episodes || "-"}</p>
             <Show when={row.spoiler}><p class="spoiler">Spoilers</p></Show>
             <div class="play-button-container">
-              <For each={row.videos}>{video => (
+              <For each={row.videos.nodes}>{video => (
                 <div class="play-button">
                   <button onClick={() => props.video.src = video.link}>play</button>
                   <a target="_blank" href={props.href + (row.version > 1 ? "v" + row.version : "") + (video.tags ? "-" + video.tags : "")}>open</a>
