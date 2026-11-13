@@ -19,6 +19,11 @@ import { Portal } from "solid-js/web";
  */
 
 const HOVER_SELECTOR = ":hover, :focus-visible, :has(:focus-visible)";
+const FOCUS_SELECTOR = ":focus-visible, :has(:focus-visible)";
+// How long a touch has to stay still on a trigger before it starts drag hovering
+const LONG_PRESS_DELAY = 300;
+// How far the finger can move before the touch counts as scrolling
+const TOUCH_MOVE_TOLERANCE = 10;
 
 /**
  * @typedef {Object} HoverEntry
@@ -36,9 +41,112 @@ const openEntries = new Set();
 let entryCount = 0;
 let frame;
 let pointerTarget;
+// Touch devices keep :hover stuck on the last tapped element, so touch input opens hovers based on touchTarget instead
+let touchInput = false;
+let touchTarget;
+/** @type {{ id: number, x: number, y: number, target: Element, onTrigger: boolean, dragging: boolean, timer?: number } | undefined} */
+let touch;
 
-const handlePointerOver = e => pointerTarget = e.target;
-window.addEventListener("pointerover", handlePointerOver, { passive: true, capture: true });
+// Holding a finger still on a trigger starts drag hovering.
+// While dragging, the page doesn't scroll and the hovers follow the element under the finger,
+// so multiple hovers can be checked in one press. The last one stays open after lifting the finger.
+function handleTouchStart(e) {
+  cancelTouch();
+  if (e.touches.length !== 1) {
+    return;
+  }
+
+  const { identifier, clientX, clientY } = e.touches[0];
+  const onTrigger = isInsideTrigger(e.target);
+  touch = { id: identifier, x: clientX, y: clientY, target: e.target, onTrigger, dragging: false };
+  if (onTrigger) {
+    touch.timer = setTimeout(startTouchDrag, LONG_PRESS_DELAY);
+  }
+}
+
+function startTouchDrag() {
+  touch.dragging = true;
+  touchTarget = touch.target;
+}
+
+function handleTouchMove(e) {
+  const point = touch && findTouch(e.changedTouches, touch.id);
+  if (!point) {
+    return;
+  }
+
+  if (touch.dragging) {
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+    // Floating elements in #hovers have pointer-events: none, so they are skipped
+    touchTarget = document.elementFromPoint(point.clientX, point.clientY);
+  } else if (Math.hypot(point.clientX - touch.x, point.clientY - touch.y) > TOUCH_MOVE_TOLERANCE) {
+    // Scrolling closes the touch hovers
+    cancelTouch();
+    touchTarget = undefined;
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!touch || !findTouch(e.changedTouches, touch.id)) {
+    return;
+  }
+
+  if (touch.dragging) {
+    // Lifting the finger shouldn't click the element under it
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+  } else {
+    // A tap moves the hover like :hover does
+    touchTarget = touch.target;
+  }
+  cancelTouch();
+}
+
+function cancelTouch() {
+  clearTimeout(touch?.timer);
+  touch = undefined;
+}
+
+// Long pressing a trigger shouldn't open the browser's context menu, select text or start dragging a link
+function preventTouchDefault(e) {
+  if (touch?.onTrigger) {
+    e.preventDefault();
+  }
+}
+
+function findTouch(touches, id) {
+  return Array.prototype.find.call(touches, t => t.identifier === id);
+}
+
+function isInsideTrigger(elem) {
+  for (; elem; elem = elem.parentElement) {
+    if (entriesByTrigger.has(elem)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const listeners = [
+  ["pointerover", e => {
+    pointerTarget = e.target;
+    touchInput = e.pointerType === "touch";
+  }, { passive: true }],
+  ["touchstart", handleTouchStart, { passive: true }],
+  // Not passive, so drag hovering can stop the page from scrolling
+  ["touchmove", handleTouchMove, { passive: false }],
+  ["touchend", handleTouchEnd, { passive: false }],
+  ["touchcancel", cancelTouch, { passive: true }],
+  ["contextmenu", preventTouchDefault, {}],
+  ["selectstart", preventTouchDefault, {}],
+  ["dragstart", preventTouchDefault, {}],
+];
+for (const [type, listener, options] of listeners) {
+  window.addEventListener(type, listener, { ...options, capture: true });
+}
 
 // Hover state is polled every frame instead of using pointer events,
 // because pointerleave is not reliable when elements move or get removed under the cursor.
@@ -47,6 +155,7 @@ window.addEventListener("pointerover", handlePointerOver, { passive: true, captu
 function tick() {
   const candidates = new Set(openEntries);
   addAncestorEntries(candidates, pointerTarget);
+  addAncestorEntries(candidates, touchTarget);
   addAncestorEntries(candidates, document.activeElement);
 
   for (const entry of candidates) {
@@ -55,7 +164,9 @@ function tick() {
       continue;
     }
 
-    const open = !!entry.trigger?.isConnected && entry.trigger.matches(HOVER_SELECTOR);
+    const open = !!entry.trigger?.isConnected && (touchInput
+      ? entry.trigger.contains(touchTarget) || entry.trigger.matches(FOCUS_SELECTOR)
+      : entry.trigger.matches(HOVER_SELECTOR));
     // setOpen renders the floating element synchronously, so it can be placed in the same frame
     entry.setOpen(open);
 
@@ -115,7 +226,10 @@ function unregister(entry) {
 
 import.meta.hot?.dispose(() => {
   cancelAnimationFrame(frame);
-  window.removeEventListener("pointerover", handlePointerOver, { capture: true });
+  cancelTouch();
+  for (const [type, listener] of listeners) {
+    window.removeEventListener(type, listener, { capture: true });
+  }
   entryCount = 0;
   openEntries.clear();
 });
