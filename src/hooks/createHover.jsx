@@ -210,10 +210,13 @@ export function placeFirstFit({ placements, offset = 0, alignOffset = 0 }) {
     const fitsHorizontally = position => position.x >= 0 && position.x <= maxX && position.y >= 0;
     const fitsViewport = position => fitsHorizontally(position) && position.y >= viewportTop && position.y + size.height <= viewportBottom;
 
-    // Prefer placements that are fully visible, e.g. "right-start" near the bottom of the viewport swaps to "right-end".
+    // The current placement is kept while it still fits, so the floating element doesn't jump back while scrolling.
+    // Otherwise prefer placements that are fully visible, e.g. "right-start" near the bottom of the viewport swaps to "right-end".
     // If none of them are, fall back to the first one that fits sideways.
-    let index = positions.findIndex(fitsViewport);
-    if (index === -1) index = positions.findIndex(fitsHorizontally);
+    const current = placements.indexOf(floating.dataset.placement);
+    const findFit = fits => current !== -1 && fits(positions[current]) ? current : positions.findIndex(fits);
+    let index = findFit(fitsViewport);
+    if (index === -1) index = findFit(fitsHorizontally);
     if (index === -1) index = placements.length - 1;
 
     const placement = placements[index];
