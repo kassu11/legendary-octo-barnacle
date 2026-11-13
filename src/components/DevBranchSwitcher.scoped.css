@@ -15,7 +15,7 @@
       border-radius: 4px;
       cursor: pointer;
       text-decoration: none;
-      background: var(--bg-light);
+      background: var(--bg);
       color: var(--text-muted);
       transition: .2s background, .2s filter;
       text-align: left;
@@ -39,14 +39,15 @@
       background-color: var(--shadow-light);
 
       &:hover, .open & {
-        background-color: var(--bg-light);
+        background-color: var(--bg);
       }
     }
 
     a[aria-current] {
       color: var(--text);
-      outline: 1px solid currentColor;
+      outline: 1px solid var(--bg-light);
       outline-offset: -1px;
+      filter: brightness(1.25);
     }
 
     .branch {
@@ -80,10 +81,11 @@
       transition: .2s opacity, .2s translate, display allow-discrete .2s;
 
       .open & {
-        background: var(--bg);
+        background: var(--bg-dark);
         display: flex;
         opacity: 1;
         translate: 0 0;
+        box-shadow: 0 0 10px 0px var(--shadow-light);
 
         @starting-style {
           opacity: 0;
