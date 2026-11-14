@@ -78,12 +78,6 @@ export default [
     },
   },
   {
-    files: ["src/assets/icons.jsx"],
-    rules: {
-      "local/scoped-component-class": "off",
-    },
-  },
-  {
     files: ["src/**/*.scoped.css"],
     language: "css/css",
     languageOptions: {
