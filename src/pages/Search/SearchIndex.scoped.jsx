@@ -485,7 +485,7 @@ export function SearchPage() {
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
-      <SearchBar />
+      <SearchBar cardStyleToggle={!isMobilLarge() && !pageTitle()} />
       <Switch>
         <Match when={error()?.errors}>
           <h2>Bad request error: </h2>
@@ -506,18 +506,18 @@ export function SearchPage() {
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
-            <div class="page-header">
-              <Show when={pageTitle()}>
+            <Show when={pageTitle()}>
+              <div class="page-header">
                 <h1>{pageTitle()}</h1>
-              </Show>
-              <div class="toolbar">
-                <CardStyleToggle />
+                <div class="toolbar">
+                  <CardStyleToggle />
+                </div>
               </div>
-            </div>
+            </Show>
 
             <Show when={isMobilLarge()}>
               <div class="mobile-active-queries">
-                <SearchActiveQueries singleRow />
+                <SearchActiveQueries singleRow cardStyleToggle={!pageTitle()} />
               </div>
             </Show>
 

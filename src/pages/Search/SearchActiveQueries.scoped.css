@@ -1,4 +1,35 @@
 @layer layout {
+  .active-queries-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .active-queries {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toolbar {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    /* Queries fade out under the toolbar instead of being cut off at the gap */
+    &.single-row {
+      gap: 0;
+
+      .active-queries {
+        padding-right: 16px;
+      }
+
+      .toolbar {
+        position: relative;
+        box-shadow: -16px 0 16px var(--bg-dark);
+        clip-path: inset(0 0 0 -32px);
+      }
+    }
+  }
+
   .active-queries {
     display: flex;
     flex-wrap: wrap;
