@@ -3,7 +3,6 @@ import "./VirtualGrid.scoped.css";
 
 // Last measured grid size. This gives new grids their full height on the first render, so the scroll position is kept when navigating back
 let lastGrid = {columns: 1, rowHeight: 0};
-const OVERSCAN_PX = 800;
 
 // Only renders the rows near the viewport, the height of the other rows is filled with padding
 // Children get the entry and its index in the whole each list
@@ -30,7 +29,8 @@ export function VirtualGrid(props) {
 
   const updateViewport = () => {
     const { top } = ref.getBoundingClientRect();
-    setViewport({ top: -top - OVERSCAN_PX, bottom: window.innerHeight - top + OVERSCAN_PX });
+    const overScan = props.overScan ?? 800;
+    setViewport({ top: -top - overScan, bottom: window.innerHeight - top + overScan });
   };
 
   onMount(() => {
