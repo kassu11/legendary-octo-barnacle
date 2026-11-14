@@ -36,32 +36,4 @@
     border-color: var(--crimson-400);
     background-color: color-mix(in oklab, var(--bg), var(--crimson-400) 25%);
   }
-
-  /* Floats above the mobile bottom bar, which is the containing block */
-  .scroll-to-list-start {
-    position: absolute;
-    right: 8px;
-    bottom: calc(100% + 8px);
-    display: grid;
-    place-items: center;
-    padding: .75em;
-    border: unset;
-    border-radius: 50%;
-    background-color: var(--bg);
-    color: var(--text);
-    box-shadow: 0 2px 8px var(--shadow);
-    visibility: hidden;
-    translate: calc(100% + 8px) 0;
-    transition: .2s translate, .2s visibility;
-
-    &.visible {
-      visibility: visible;
-      translate: 0 0;
-    }
-
-    svg {
-      width: 1.35em;
-      height: 1.35em;
-    }
-  }
 }

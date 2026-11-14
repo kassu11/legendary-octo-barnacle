@@ -21,9 +21,10 @@ import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
 import { LicensedIcon, OnListIcon } from "@/assets/icons.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
+import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { createMemo, Show } from "solid-js";
 
-export function SearchBar() {
+export function SearchBar(props) {
   const { isMobilLarge } = useResponsive();
   const activeQueries = useActiveSearchQueries();
   const activeFilterCount = createMemo(() => activeQueries().filter(entry => entry.type !== "01.search").length);
@@ -41,7 +42,7 @@ export function SearchBar() {
     }>
       <div class="search-bar mobile">
         <SearchActiveQueries singleRow />
-        <MobileFilters search={<SearchInput />} filterCount={activeFilterCount()}>
+        <MobileFilters search={<SearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.resultsStartY} />}>
           <SearchActiveQueries />
           <SearchFilters />
         </MobileFilters>

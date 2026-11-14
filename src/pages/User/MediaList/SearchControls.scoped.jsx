@@ -1,12 +1,13 @@
 import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/state/providers.js";
-import { createMemo, createSignal, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import { createMemo, mapArray, Match, Show, Switch } from "solid-js";
 import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
+import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
-import { AgeIcon, ArrowUpIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "@/assets/icons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [
@@ -201,30 +202,4 @@ export function SearchControlsScoped(props) {
       />
     );
   }
-}
-
-const SCROLL_BACK_UP_DISTANCE = 200;
-
-function ScrollToListStartButton(props) {
-  const [isVisible, setIsVisible] = createSignal(false);
-  let previousY = window.scrollY;
-  let scrollUpStartY = previousY;
-
-  const updateVisibility = () => {
-    const y = window.scrollY;
-    if (y > previousY) scrollUpStartY = y;
-    previousY = y;
-    setIsVisible(y > props.listStartY() + window.innerHeight && scrollUpStartY - y >= SCROLL_BACK_UP_DISTANCE);
-  };
-
-  onMount(() => {
-    window.addEventListener("scroll", updateVisibility, { passive: true });
-    onCleanup(() => window.removeEventListener("scroll", updateVisibility));
-  });
-
-  return (
-    <button class="scroll-to-list-start" classList={{ visible: isVisible() }} onClick={() => window.scrollTo({ top: props.listStartY(), behavior: "smooth" })} aria-label="Scroll to the start of the list">
-      <ArrowUpIcon scoped />
-    </button>
-  );
 }

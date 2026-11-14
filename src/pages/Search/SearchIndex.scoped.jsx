@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useParams } from "@solidjs/router";
-import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, onCleanup, Show, Switch, untrack } from "solid-js";
 import { getSeasonInfo } from "@/utils/seasonUtils";
 import { queries } from "@/api/api";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/api/fetcherUtils";
@@ -439,6 +439,32 @@ export function SearchPage() {
 
   const preventZoomIn = new Set();
 
+  let searchPage;
+  // Results start right under the navigation bar
+  const resultsStartY = () => searchPage?.isConnected ? Math.max(0, searchPage.getBoundingClientRect().top + window.scrollY - document.querySelector(".main-navigation").offsetHeight) : 0;
+
+  // Scroll back up to the results when the search changes, so the new results are not off the screen.
+  // Going back or forward in history keeps the restored scroll position. The flag is cleared by the next user interaction,
+  // because a popstate that doesn't change the search never consumes it
+  let isHistoryNavigation = false;
+  window.addEventListener("popstate", () => isHistoryNavigation = true, { signal, capture: true });
+  for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => isHistoryNavigation = false, { signal, capture: true, passive: true });
+
+  const searchKey = createMemo(() => {
+    const variables = anilistVariables();
+    return variables && JSON.stringify(variables);
+  });
+  let previousSearchKey;
+  createEffect(on(searchKey, key => {
+    // Variables are null while the search is loading genres or users, so those are not counted as changes
+    if (!key) return;
+    const isChanged = previousSearchKey !== undefined && previousSearchKey !== key;
+    previousSearchKey = key;
+    if (!isChanged) return;
+    if (isHistoryNavigation) return isHistoryNavigation = false;
+    if (window.scrollY > resultsStartY()) window.scrollTo(0, resultsStartY());
+  }));
+
   const mediaRanks = createMemo(() => {
     const { sort, sortBySearchMatch } = parsedSearchParams();
     const data = pagelessCacheData?.data;
@@ -466,7 +492,7 @@ export function SearchPage() {
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
-      <SearchBar />
+      <SearchBar resultsStartY={resultsStartY} />
       <Switch>
         <Match when={error()?.errors}>
           <h2>Bad request error: </h2>
@@ -486,7 +512,7 @@ export function SearchPage() {
           <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} />
         </Match>
         <Match when={params.mode === "search"}>
-          <div class="search-page">
+          <div class="search-page" ref={elem => searchPage = elem}>
             <Switch>
               <Match when={params.header === "top"}>
                 <Switch>
