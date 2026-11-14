@@ -50,6 +50,10 @@
           width: 0;
         }
       }
+    }
+
+    .virtual-list {
+      position: relative;
 
       /* Same as with the media cards above */
       .row-card {

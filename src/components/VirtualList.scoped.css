@@ -1,0 +1,11 @@
+@layer layout {
+  .virtual-list {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 5rem;
+
+    @media (width < 40em) {
+      gap: 12px;
+    }
+  }
+}

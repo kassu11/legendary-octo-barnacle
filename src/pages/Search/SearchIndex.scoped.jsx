@@ -24,6 +24,7 @@ import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 import { VirtualGrid } from "@/components/VirtualGrid.scoped";
+import { VirtualList } from "@/components/VirtualList.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -593,13 +594,13 @@ export function SearchPage() {
                         );
                       }}</VirtualGrid>
                     }>
-                      <VirtualGrid scoped class="virtual-grid" rows overScan={100} each={sectionMedia()}>{(media, i) => {
+                      <VirtualList scoped class="virtual-list" overScan={100} each={sectionMedia()}>{(media, i) => {
                         const index = () => mediaIndices()[i()];
 
                         return (
                           <MediaRowCard scoped class="row-card" type={params.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                         );
-                      }}</VirtualGrid>
+                      }}</VirtualList>
                     </Show>
                   </section>
                 );
