@@ -102,7 +102,7 @@
             .title {
               text-decoration: none;
               color: var(--text-muted);
-              transition: .2s color;
+              transition: .2s color, .2s text-shadow;
 
               /* Stretch the link over the whole card, so the whole card is clickable */
               &::after {
@@ -112,8 +112,9 @@
                 border-radius: inherit;
               }
 
-              .vertical-search-card-body:hover & {
-                color: var(--text);
+              .vertical-search-card-body:where(:hover, :has(.title:focus-visible)) & {
+                color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
+                text-shadow: 0 0 2px black;
               }
             }
 
