@@ -238,9 +238,11 @@ export function SearchActiveQueries(props) {
     <Show when={props.cardStyleToggle} fallback={queryList()}>
       <div class="active-queries-row" classList={{ "single-row": props.singleRow }}>
         {queryList()}
-        <div class="toolbar">
-          <CardStyleToggle />
-        </div>
+        <Show when={params.mode === "search"}>
+          <div class="toolbar">
+            <CardStyleToggle />
+          </div>
+        </Show>
       </div>
     </Show>
   );
