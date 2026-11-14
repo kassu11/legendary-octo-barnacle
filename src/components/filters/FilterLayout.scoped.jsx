@@ -1,6 +1,9 @@
 import { Show } from "solid-js";
 import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import { useResponsive } from "@/state/providers.js";
+import { useSearchParams } from "@solidjs/router";
+import { SEARCH_DEBOUNCE } from "@/constants/time.js";
+import { arrayUtils } from "@/utils/utils.js";
 import "./FilterLayout.scoped.css";
 
 export function FilterGroups(props) {
@@ -22,9 +25,30 @@ export function FilterGroup(props) {
   );
 }
 
+/**
+ * Search input bound to the "q" search param
+ *
+ * @param {Object} props
+ * @param {() => number} [props.listStartY] Scroll position of the list start. Searching scrolls back up to it, if the page is scrolled past it
+ */
 export function FilterSearchInput(props) {
   const { isTouch } = useResponsive();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const value = () => decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
   let input;
+
+  // The first input of a search adds a history entry, the rest of the typing replaces it
+  let replace = false, timeout;
+  const handleInput = e => {
+    setSearchParams({ q: encodeURIComponent(e.target.value) || undefined, skipSortByMatch: undefined }, { replace });
+    replace = true;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
+    // The results could be off the screen, for example when using the mobile search bar
+    // Only searching scrolls, so going back and forward in history keeps the scroll position
+    const listStartY = props.listStartY?.();
+    if (listStartY !== undefined && window.scrollY > listStartY) window.scrollTo(0, listStartY);
+  };
   const handleKeyDown = e => {
     // Close the mobile keyboard when search is pressed
     if (e.key === "Enter" && isTouch()) input.blur();
@@ -43,8 +67,8 @@ export function FilterSearchInput(props) {
   return (
     <label class="search-input">
       <SearchIcon scoped />
-      <input type="search" placeholder="Search..." ref={elem => input = elem} onInput={props.onInput} onKeyDown={handleKeyDown} value={props.value} enterkeyhint="search" />
-      <Show when={props.value}>
+      <input type="search" placeholder="Search..." ref={elem => input = elem} onInput={handleInput} onKeyDown={handleKeyDown} value={value()} enterkeyhint="search" />
+      <Show when={value()}>
         <button type="button" class="clear-button" onPointerDown={handleClearPointerDown} onMouseDown={e => e.preventDefault()} onClick={clearSearch} aria-label="Clear search">
           <CloseIcon scoped />
         </button>

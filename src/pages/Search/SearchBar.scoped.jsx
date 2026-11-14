@@ -1,6 +1,5 @@
-import { useParams, useSearchParams } from "@solidjs/router";
-import { useParsedSearchParams, useResponsive } from "@/state/providers";
-import { SEARCH_DEBOUNCE } from "./SearchIndex.scoped";
+import { useParams } from "@solidjs/router";
+import { useResponsive } from "@/state/providers";
 import "./SearchBar.scoped.css";
 import { MediaSortSelect } from "./inputs/MediaSortSelect.scoped.jsx";
 import { SearchActiveQueries, useActiveSearchQueries } from "./SearchActiveQueries.scoped";
@@ -34,7 +33,7 @@ export function SearchBar(props) {
       <div class="search-bar">
         <SearchFilters>
           <FilterGroup title="Search" class="search">
-            <SearchInput />
+            <FilterSearchInput listStartY={props.resultsStartY} />
           </FilterGroup>
         </SearchFilters>
         <SearchActiveQueries />
@@ -42,28 +41,13 @@ export function SearchBar(props) {
     }>
       <div class="search-bar mobile">
         <SearchActiveQueries singleRow />
-        <MobileFilters search={<SearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.resultsStartY} />}>
+        <MobileFilters search={<FilterSearchInput listStartY={props.resultsStartY} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.resultsStartY} />}>
           <SearchActiveQueries />
           <SearchFilters />
         </MobileFilters>
       </div>
     </Show>
   );
-}
-
-function SearchInput() {
-  const parsedSearchParams = useParsedSearchParams();
-  const [, setSearchParams] = useSearchParams();
-
-  let replace = false, timeout;
-  const handleInput = e => {
-    setSearchParams({ q: encodeURIComponent(e.target.value) || undefined, skipSortByMatch: undefined }, { replace });
-    replace = true;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
-  };
-
-  return <FilterSearchInput onInput={handleInput} value={parsedSearchParams().q || ""} />;
 }
 
 function SearchFilters(props) {

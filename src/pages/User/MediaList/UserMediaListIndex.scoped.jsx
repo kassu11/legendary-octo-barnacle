@@ -64,7 +64,7 @@ export function UserMediaList() {
     _setSearchParams(options, { replace: true });
   }
   const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
-  const search = () => searchParams.search || "";
+  const search = () => decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
   const listParam = multiParam("list");
   const list = () => listParam().length ? listParam() : [ALL_LISTS];
   // Combined list has the same entries as the other lists, so it is only shown when it is selected
@@ -155,7 +155,6 @@ export function UserMediaList() {
           listData={listData}
           listStartY={listStartY}
           setSearchParams={setSearchParams}
-          search={search}
           list={list}
           format={format}
           status={status}

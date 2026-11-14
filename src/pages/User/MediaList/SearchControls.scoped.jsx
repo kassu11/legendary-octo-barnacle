@@ -62,7 +62,7 @@ const toListOption = name => {
 
 export const listTitle = name => name === COMBINED_LIST ? "Combined" : name;
 
-// Every search param that the remove filters button clears, except search these are also counted as active filters
+// Every search param that the remove filters button clears, except q these are also counted as active filters
 const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
 
 export function SearchControlsScoped(props) {
@@ -121,19 +121,15 @@ export function SearchControlsScoped(props) {
     <Show when={isMobilLarge()} fallback={
       <Filters>
         <FilterGroup title="Search" class="search">
-          <SearchInput />
+          <FilterSearchInput listStartY={props.listStartY} />
         </FilterGroup>
       </Filters>
     }>
-      <MobileFilters search={<SearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.listStartY} />}>
+      <MobileFilters search={<FilterSearchInput listStartY={props.listStartY} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.listStartY} />}>
         <Filters />
       </MobileFilters>
     </Show>
   );
-
-  function SearchInput() {
-    return <FilterSearchInput onInput={e => setSearchParams({search: e.target.value || undefined})} value={props.search()} />;
-  }
 
   function Filters(filtersProps) {
     return (
@@ -151,7 +147,7 @@ export function SearchControlsScoped(props) {
                 <A scoped class="action" href={"/compare/" + params.type + "?user=" + user().name}>Open in compare page</A>
               </Match>
             </Switch>
-            <button class="action remove-filters" disabled={!location.search} onClick={() => setSearchParams(Object.fromEntries(["search", ...filterParams].map(name => [name, undefined])))}>
+            <button class="action remove-filters" disabled={!location.search} onClick={() => setSearchParams(Object.fromEntries(["q", ...filterParams].map(name => [name, undefined])))}>
               <CloseIcon />
               Remove filters
             </button>
