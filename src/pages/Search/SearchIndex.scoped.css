@@ -12,10 +12,6 @@
       width: min(100% - 16px, 90rem);
     }
 
-    @media (width < 40em) {
-      width: min(100% - 8px, 90rem);
-    }
-
     h1 {
       margin-bottom: 2rem;
     }

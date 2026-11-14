@@ -123,8 +123,9 @@
     gap: 8px;
     padding: 8px;
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    background-color: color-mix(in oklab, var(--bg-dark), transparent 15%);
-    backdrop-filter: blur(8px);
+    background-color: color-mix(in oklab, var(--bg-dark), transparent 10%);
+    border-top: 1px solid color-mix(in oklab, var(--text) 8%, transparent);
+    backdrop-filter: blur(16px);
     box-shadow: 0 -4px 16px var(--shadow-light);
 
     .search-input {
