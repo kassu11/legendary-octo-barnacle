@@ -4,6 +4,7 @@
     justify-content: space-between;
     align-items: flex-end;
     padding-inline: 64px;
+    gap: 8px;
 
     @media (width < 40em) {
       padding-inline: 16px;
@@ -12,6 +13,7 @@
     h2 {
       /* Firefox will line wrap h2, if this is not given idk why */
       flex-grow: 1;
+      font-size: var(--fs-600);
     }
 
     .view-all {
@@ -25,6 +27,7 @@
       place-items: center;
       gap: 8px;
       transition: .2s all;
+      white-space: nowrap;
 
       &:hover {
         background-color: var(--bg-light);
