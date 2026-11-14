@@ -68,7 +68,7 @@ export function MediaCard(props) {
   });
 
   const status = createMemo(() => {
-    if (!local.showStatus && !local.quickActions) {
+    if (!local.showStatus) {
       return undefined;
     }
 
@@ -93,7 +93,7 @@ export function MediaCard(props) {
   const hover = (local.hoverCard || local.quickActions) && createHover({ placements: ["right-start", "right-end", "left-start", "left-end", "bottom", "top"], offset: 25, alignOffset: 25 });
 
   return (
-    <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
+    <A scoped {...scoping} ref={hover?.triggerRef} href={urlUtils.anilistMediaUrl(local.media)} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }} onClick={handleClick}>
       <ImageLoader scoped class="image-loader" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media}>
         {/* Score is its own badge group, so it stays in the top right while the other badges wrap next to it */}
@@ -106,7 +106,7 @@ export function MediaCard(props) {
         <div class="rank">#{local.rank}</div>
       </Show>
       <Show when={local.media?.title?.userPreferred}>
-        <p class="line-clamp">
+        <p class="line-clamp" data-status={status()}>
           <Show when={local.showStatus}>
             <MediaStatusIcon scoped class="media-status-icon" status={status()} />
           </Show>

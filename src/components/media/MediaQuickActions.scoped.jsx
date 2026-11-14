@@ -45,7 +45,7 @@ export function MediaQuickActions(props) {
 
   return (
     <Show when={token2()}>
-      <div {...scoping} classList={{ "media-quick-actions": true, horizontal: local.horizontal, [scoping.class]: !!scoping.class }} ref={hover.triggerRef}>
+      <div {...scoping} data-status={local.status} classList={{ "media-quick-actions": true, horizontal: local.horizontal, [scoping.class]: !!scoping.class }} ref={hover.triggerRef}>
 
         <QuickActionButton label="Edit media" placements={tooltipPlacements()} onClick={e => {
           e.preventDefault();
