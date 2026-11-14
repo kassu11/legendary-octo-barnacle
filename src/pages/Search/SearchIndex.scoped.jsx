@@ -585,7 +585,7 @@ export function SearchPage() {
                       <h2>{formatMediaFormat(title())}</h2>
                     </Show>
                     <Show when={searchPageCardStyle() === "rows"} fallback={
-                      <VirtualGrid scoped class="virtual-grid" overScan={100} each={sectionMedia()}>{(media, i) => {
+                      <VirtualGrid scoped class="virtual-grid" each={sectionMedia()}>{(media, i) => {
                         // Index in the whole search result list, not just inside this section
                         const index = () => mediaIndices()[i()];
                         // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
@@ -597,7 +597,7 @@ export function SearchPage() {
                         );
                       }}</VirtualGrid>
                     }>
-                      <VirtualList scoped class="virtual-list" overScan={100} cacheKey={rowListCacheKey() && `${rowListCacheKey()}-${start}`} each={sectionMedia()}>{(media, i) => {
+                      <VirtualList scoped class="virtual-list" cacheKey={rowListCacheKey() && `${rowListCacheKey()}-${start}`} each={sectionMedia()}>{(media, i) => {
                         const index = () => mediaIndices()[i()];
 
                         return (
