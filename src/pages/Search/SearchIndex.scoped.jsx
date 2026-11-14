@@ -179,6 +179,9 @@ export function SearchPage() {
   const [previousHistoryDummyData, setPreviousHistoryDummyData] = createSignal();
   const [pagelessCacheData, setPagelessCacheData] = createStore({});
   const pagelessCacheKey = createMemo(() => pagelessCacheData?.cacheKey);
+  // Pageless data is loaded asynchronously, so this key is known before it, already on the first render.
+  // Row lists use it to keep their item heights, so their height is right when navigating back
+  const rowListCacheKey = createMemo(() => anilistVariables() && createAnilistFetcher(queries.searchMedia, { ...anilistVariables(), page: "pageless3" }).cacheKey);
 
   let highestPageMutated = 0;
   let pagelessFetcher;
@@ -594,7 +597,7 @@ export function SearchPage() {
                         );
                       }}</VirtualGrid>
                     }>
-                      <VirtualList scoped class="virtual-list" overScan={100} each={sectionMedia()}>{(media, i) => {
+                      <VirtualList scoped class="virtual-list" overScan={100} cacheKey={rowListCacheKey() && `${rowListCacheKey()}-${start}`} each={sectionMedia()}>{(media, i) => {
                         const index = () => mediaIndices()[i()];
 
                         return (

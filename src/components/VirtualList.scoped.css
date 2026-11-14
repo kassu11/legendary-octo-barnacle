@@ -7,5 +7,10 @@
     @media (width < 40em) {
       gap: 12px;
     }
+
+    /* Spacers change their height while scrolling, so they can't be used as the scroll anchor */
+    .spacer {
+      overflow-anchor: none;
+    }
   }
 }
