@@ -79,10 +79,12 @@ export function MediaListContainerScoped(props) {
       <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} />}>
         <For each={props.listData().data.lists}>{list => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>
-            <h2>{listTitle(list.name)}</h2>
-            <VirtualGrid each={list.entries}>{entry => (
-              <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
-            )}</VirtualGrid>
+            <section>
+              <h2>{listTitle(list.name)}</h2>
+              <VirtualGrid each={list.entries}>{entry => (
+                <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions={isOwnProfile()} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
+              )}</VirtualGrid>
+            </section>
           </Show>
         )}</For>
       </Show>
@@ -98,10 +100,12 @@ function CardsLoading(props) {
   return (
     <For each={lists()}>{list => (
       <Show when={list.entries.length && props.isListVisible(list.name)}>
-        <h2>{listTitle(list.name)}</h2>
-        <VirtualGrid each={list.entries}>{() => (
-          <MediaCard />
-        )}</VirtualGrid>
+        <section>
+          <h2>{listTitle(list.name)}</h2>
+          <VirtualGrid each={list.entries}>{() => (
+            <MediaCard />
+          )}</VirtualGrid>
+        </section>
       </Show>
     )}</For>
   );

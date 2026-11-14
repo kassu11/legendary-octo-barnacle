@@ -144,10 +144,10 @@ function mergeValue(api, key, to, value) {
 }
 
 const cachedResults = new Set();
-// Keeps track of how many cards search results contained.
-// This is used when we go back in history, so we can prerender the right amount of skeleton cards.
-// This prevent the browser from scrolling back to the top of the page
-const searchPageSizes = {};
+// Keeps track of the cards and format group headers the search results contained.
+// This is used when we go back in history, so we can prerender the right amount of skeleton cards under the right headers.
+// This prevent the browser from scrolling back to the top of the page, or to a wrong position
+const searchPageLayouts = {};
 
 const LOADER = 0;
 // Sometimes anilist or jikan can return a page that has a next page, but the current page is not "full"
@@ -187,7 +187,7 @@ export function SearchPage() {
     setPage(1);
 
     pagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless3"});
-    if (untrack(previousHistoryDummyData) === undefined) setPreviousHistoryDummyData(Array(searchPageSizes[pagelessFetcher.cacheKey] || 20).fill(LOADER));
+    if (untrack(previousHistoryDummyData) === undefined) setPreviousHistoryDummyData(searchPageLayouts[pagelessFetcher.cacheKey] || { media: Array(20).fill(LOADER), sectionTitles: {} });
     let curKey = pagelessFetcher.cacheKey;
     const data = await getFetcherValueFromStorage(pagelessFetcher);
 
@@ -408,7 +408,13 @@ export function SearchPage() {
   window.addEventListener("scroll", handleScroll, { signal, passive: true });
 
   onCleanup(() => {
-    searchPageSizes[pagelessCacheData?.cacheKey] = pagelessCacheData?.data?.media.length || 0;
+    const media = pagelessCacheData?.data?.media;
+    if (!media?.length) return;
+    // Padding media are kept, because they are not rendered
+    searchPageLayouts[pagelessCacheData.cacheKey] = {
+      media: media.map(m => m === MEDIA_PADDING_SPACE ? m : LOADER),
+      sectionTitles: getSectionTitles(media),
+    };
   });
 
   function handleScroll() {
@@ -448,16 +454,21 @@ export function SearchPage() {
     return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
   });
 
-  const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData() || [];
+  const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()?.media || [];
+
+  // Format group header titles by the index of the media that starts the group
+  // The dummy history data has only loaders, so its titles were saved when leaving the page
+  const sectionTitles = createMemo(() => {
+    const media = searchMedia();
+    if (media === previousHistoryDummyData()?.media) return previousHistoryDummyData().sectionTitles;
+    return getSectionTitles(media);
+  });
 
   // Each section starts from the first media or from a media that has a custom section (format group header)
   // Sections are keyed by their start index, so the section elements stay the same when more pages are loaded
   const mediaSectionStarts = createMemo(() => {
-    const starts = [];
-    searchMedia().forEach((media, i) => {
-      if (i === 0 || media?.customSection) starts.push(i);
-    });
-    return starts;
+    if (!searchMedia().length) return [];
+    return [0, ...Object.keys(sectionTitles()).map(Number).filter(i => i > 0).sort((a, b) => a - b)];
   });
 
   return (
@@ -546,7 +557,7 @@ export function SearchPage() {
             <div class="search-results">
               <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
                 const end = () => mediaSectionStarts()[sectionIndex() + 1] ?? searchMedia().length;
-                const firstMedia = () => searchMedia()[start];
+                const title = () => sectionTitles()[start] || (start === 0 && searchMedia()[0] === LOADER && parsedSearchParams().groupEntriesByFormat && "Loading");
                 // Padding media are never rendered, so they are left out of the grid
                 // Their indices are kept, because the index in the whole search result list is used to calculate the page to fetch
                 const mediaIndices = createMemo(() => {
@@ -560,8 +571,8 @@ export function SearchPage() {
 
                 return (
                   <section>
-                    <Show when={firstMedia()?.customSection || (firstMedia() === LOADER && start === 0 && parsedSearchParams().groupEntriesByFormat)} fallback={document.createComment("<h2 />")}>
-                      <h2>{formatMediaFormat(firstMedia().customSection || "Loading")}</h2>
+                    <Show when={title()}>
+                      <h2>{formatMediaFormat(title())}</h2>
                     </Show>
                     <VirtualGrid scoped class="virtual-grid" overScan={100} each={sectionMedia()}>{(media, i) => {
                       // Index in the whole search result list, not just inside this section
@@ -584,6 +595,14 @@ export function SearchPage() {
       </Switch>
     </ErrorBoundary>
   );
+}
+
+function getSectionTitles(media) {
+  const titles = {};
+  media.forEach((m, i) => {
+    if (m?.customSection) titles[i] = m.customSection;
+  });
+  return titles;
 }
 
 function jikanPagenationToPageInfo(pagination) {
