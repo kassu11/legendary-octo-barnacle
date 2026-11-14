@@ -84,6 +84,11 @@ export function MediaCard(props) {
     return globalEditedMedia[local.media?.id];
   });
 
+  // Plain accessors instead of inline ternaries, because the compiler wraps prop ternaries in a memo,
+  // which would be created without an owner when the callbacks are read inside event handlers
+  const quickActionsAfterMutation = () => local.otherUsersEntry ? undefined : local.afterMutation;
+  const quickActionsAfterDelete = () => local.otherUsersEntry ? undefined : local.afterDelete;
+
   // Hover tracking polls every frame, so only create it when something uses it
   const hover = (local.hoverCard || local.quickActions) && createHover({ placements: ["right-start", "right-end", "left-start", "left-end", "bottom", "top"], offset: 25, alignOffset: 25 });
 
@@ -112,7 +117,7 @@ export function MediaCard(props) {
       <Show when={local.media && (local.showFooter || local.quickActions)}>
         <div class="bottom">
           <Show when={local.quickActions && hover.isOpen()}>
-            <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={local.otherUsersEntry ? undefined : local.afterMutation} afterDelete={local.otherUsersEntry ? undefined : local.afterDelete} />
+            <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
           </Show>
           <Show when={local.showFooter && mediaListEntry()}>
             <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} showAdvancedScores={local.showAdvancedScores} afterProgressMutation={local.afterProgressMutation} />
