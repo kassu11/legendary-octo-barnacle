@@ -16,7 +16,7 @@
       height: calc(4rem * 8 / 5.5 + 16px);
       border-radius: 8px;
       background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
-      background-size: 900px;
+      background-size: calc(100px / sin(45deg));
       box-shadow: 0 3px 4px 0px #00000042;
       animation: move-gradient 2s infinite;
       pointer-events: none;
