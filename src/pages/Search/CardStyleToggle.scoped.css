@@ -1,0 +1,35 @@
+@layer component {
+  .card-style-toggle {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 8px;
+    background-color: var(--bg);
+
+    button {
+      display: grid;
+      place-items: center;
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      background-color: transparent;
+      color: var(--text-muted);
+      transition: .2s background-color, .2s color;
+
+      &:hover {
+        background-color: color-mix(in oklab, var(--bg), var(--bg-light) 50%);
+        color: var(--text);
+      }
+
+      &.selected {
+        background-color: var(--bg-light);
+        color: var(--text);
+      }
+
+      svg {
+        width: 1.25em;
+        height: 1.25em;
+      }
+    }
+  }
+}

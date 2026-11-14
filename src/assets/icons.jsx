@@ -331,6 +331,23 @@ export const ListIcon = props => (
   <OutlineSvg {...props}><path d="M3 6h.01M3 12h.01M3 18h.01M8 6h13M8 12h13M8 18h13" /></OutlineSvg>
 );
 
+export const LayoutGridIcon = props => (
+  <OutlineSvg {...props}>
+    <rect width="7" height="7" x="3" y="3" rx="1" />
+    <rect width="7" height="7" x="14" y="3" rx="1" />
+    <rect width="7" height="7" x="14" y="14" rx="1" />
+    <rect width="7" height="7" x="3" y="14" rx="1" />
+  </OutlineSvg>
+);
+
+export const LayoutListIcon = props => (
+  <OutlineSvg {...props}>
+    <rect width="7" height="7" x="3" y="3" rx="1" />
+    <rect width="7" height="7" x="3" y="14" rx="1" />
+    <path d="M14 4h7M14 9h7M14 15h7M14 20h7" />
+  </OutlineSvg>
+);
+
 export const SortIcon = props => (
   <OutlineSvg {...props}><path d="m21 16-4 4-4-4M17 20V4M3 8l4-4 4 4M7 4v16" /></OutlineSvg>
 );

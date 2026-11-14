@@ -6,7 +6,7 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./SearchIndex.scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
-import { setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
+import { searchPageCardStyle, setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
 import { useParsedSearchParams } from "@/state/providers";
 import { assertTruthy } from "@/utils/asserts";
 import { translateInternalApiParams } from "@/api/apiTranslations";
@@ -15,8 +15,10 @@ import { isTypeArray } from "@/utils/arrayUtils";
 import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
 import { SearchBar } from "./SearchBar.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
+import { CardStyleToggle } from "./CardStyleToggle.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
+import { MediaRowCard } from "@/components/media/MediaRowCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
@@ -554,6 +556,10 @@ export function SearchPage() {
               </Match>
             </Switch>
 
+            <div class="results-toolbar">
+              <CardStyleToggle />
+            </div>
+
             <div class="search-results">
               <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
                 const end = () => mediaSectionStarts()[sectionIndex() + 1] ?? searchMedia().length;
@@ -574,17 +580,27 @@ export function SearchPage() {
                     <Show when={title()}>
                       <h2>{formatMediaFormat(title())}</h2>
                     </Show>
-                    <VirtualGrid scoped class="virtual-grid" overScan={100} each={sectionMedia()}>{(media, i) => {
-                      // Index in the whole search result list, not just inside this section
-                      const index = () => mediaIndices()[i()];
-                      // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
-                      const animate = !preventZoomIn.has(media.id);
-                      preventZoomIn.add(media.id);
+                    <Show when={searchPageCardStyle() === "rows"} fallback={
+                      <VirtualGrid scoped class="virtual-grid" overScan={100} each={sectionMedia()}>{(media, i) => {
+                        // Index in the whole search result list, not just inside this section
+                        const index = () => mediaIndices()[i()];
+                        // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
+                        const animate = !preventZoomIn.has(media.id);
+                        preventZoomIn.add(media.id);
 
-                      return (
-                        <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
-                      );
-                    }}</VirtualGrid>
+                        return (
+                          <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                        );
+                      }}</VirtualGrid>
+                    }>
+                      <VirtualGrid scoped class="virtual-grid" rows overScan={100} each={sectionMedia()}>{(media, i) => {
+                        const index = () => mediaIndices()[i()];
+
+                        return (
+                          <MediaRowCard scoped class="row-card" type={params.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                        );
+                      }}</VirtualGrid>
+                    </Show>
                   </section>
                 );
               }}</For>
