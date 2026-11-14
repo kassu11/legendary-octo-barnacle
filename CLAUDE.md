@@ -12,7 +12,7 @@ A SolidJS single-page app that combines the AniList (GraphQL) and MyAnimeList (v
 pnpm i                              # install
 pnpm run dev                        # dev server on http://localhost:5173, opens a browser (runs ESLint through vite-plugin-checker)
 pnpm run build                      # production build into dist/
-npx eslint "./src/**/*.{js,jsx}"    # lint (same command the dev checker uses)
+npx eslint "./src/**/*.{js,jsx}" "./src/**/*.scoped.css"   # lint (same command the dev checker uses)
 ```
 
 There is no test suite. Verify changes with lint and `pnpm run build`. Lint errors fail the dev overlay; `local/scoped-component-class` is only a warning, but fix those too.

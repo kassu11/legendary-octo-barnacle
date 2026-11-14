@@ -25,7 +25,7 @@ export default defineConfig({
     solid(),
     checker({
       eslint: {
-        lintCommand: 'eslint "./src/**/*.{js,jsx}"', // Fail on Lint errors
+        lintCommand: 'eslint "./src/**/*.{js,jsx}" "./src/**/*.scoped.css"', // Fail on Lint errors
       },
     }),
     AutoImport({

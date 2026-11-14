@@ -4,7 +4,9 @@ import js from "@eslint/js";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
 import importX, { createNodeResolver } from "eslint-plugin-import-x";
+import css from "@eslint/css";
 import scopedComponentClass from "./eslint-rules/scoped-component-class.js";
+import noUnscopedSelector from "./eslint-rules/no-unscoped-selector.js";
 
 // Allowed import direction: app -> pages -> components -> state/hooks/api -> utils/constants
 const layerZones = [
@@ -30,7 +32,10 @@ const iconComponents = [...readFileSync(new URL("./src/assets/icons.jsx", import
   .matchAll(/^export (?:const|function) (\w+)/gm)].map(([, name]) => name);
 
 export default [
-  js.configs.recommended,
+  {
+    files: ["**/*.{js,jsx}"],
+    ...js.configs.recommended,
+  },
   {
     files: ["**/*.{js,jsx}"],
     ignores: ["!**/node_modules/"],
@@ -76,6 +81,20 @@ export default [
     files: ["src/assets/icons.jsx"],
     rules: {
       "local/scoped-component-class": "off",
+    },
+  },
+  {
+    files: ["src/**/*.scoped.css"],
+    language: "css/css",
+    languageOptions: {
+      tolerant: true,     // Accept syntax csstree doesn't know, the build is what validates the CSS
+    },
+    plugins: {
+      css,
+      "local-css": { rules: { "no-unscoped-selector": noUnscopedSelector } },
+    },
+    rules: {
+      "local-css/no-unscoped-selector": "error",
     },
   },
 ];
