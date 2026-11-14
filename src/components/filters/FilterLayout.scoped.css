@@ -109,6 +109,7 @@
   }
 
   /* Mobile: search bar is fixed to the bottom of the screen, and filters are inside a modal */
+  /* eslint-disable-next-line local-css/no-unscoped-selector */
   _body:has(.bottom-bar) {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }

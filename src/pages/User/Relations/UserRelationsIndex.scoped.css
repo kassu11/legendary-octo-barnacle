@@ -33,9 +33,11 @@
     }
 
     /* TODO: Remove this hack */
+    /* eslint-disable-next-line local-css/no-unscoped-selector */
     _body:has(&)  {
       background-color: var(--bg-dark);
 
+      /* eslint-disable-next-line local-css/no-unscoped-selector */
       _.cp-profile-navigation _ul {
         background-color: var(--bg);
       }

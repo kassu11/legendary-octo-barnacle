@@ -269,6 +269,7 @@
     word-break: break-word;
     background-color: var(--bg-old);
 
+    /* eslint-disable-next-line local-css/no-unscoped-selector */
     _.grid-column-auto-fill:has(> &) {
       --grid-column-width: 25rem;
       &.manga {

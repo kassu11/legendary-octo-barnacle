@@ -1,5 +1,6 @@
 @layer layout {
   /* Remove this background hack when styling refactoring is done */
+  /* eslint-disable-next-line local-css/no-unscoped-selector */
   _body:has(*) {
     background: var(--bg-dark);
   }

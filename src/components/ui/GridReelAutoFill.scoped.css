@@ -36,6 +36,7 @@
     background-color: inherit;
 
     /* The children come from the caller, so they don't have this file's scope */
+    /* eslint-disable-next-line local-css/no-unscoped-selector */
     > _* {
       scroll-snap-align: start;
     }
