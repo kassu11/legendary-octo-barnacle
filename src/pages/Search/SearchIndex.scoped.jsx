@@ -479,7 +479,8 @@ export function SearchPage() {
     return [0, ...Object.keys(sectionTitles()).map(Number).filter(i => i > 0).sort((a, b) => a - b)];
   });
 
-  const isSeasonHeader = () => /winter|spring|summer|fall|this-season|next-season|tba/.test(params.header);
+  const isSeasonHeader = () => isSeasonPageHeader(params.header);
+  const pageTitle = createMemo(() => getSearchPageTitle(params.header, params.type, parsedSearchParams()));
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
@@ -505,56 +506,9 @@ export function SearchPage() {
         <Match when={params.mode === "search"}>
           <div class="search-page">
             <div class="page-header">
-              <Switch>
-                <Match when={params.header === "top"}>
-                  <Switch>
-                    <Match when={parsedSearchParams().sort?.[0] === "score_desc"}>
-                      <h1>Top {capitalize(params.type)}</h1>
-                    </Match>
-                    <Match when={parsedSearchParams().sort?.[0] === "score_plus"}>
-                      <h1>Worst {capitalize(params.type)}</h1>
-                    </Match>
-                  </Switch>
-                </Match>
-                <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
-                  <h1>Trending {capitalize(params.type)}</h1>
-                </Match>
-                <Match when={params.header === "finished" && parsedSearchParams().sort?.[0] === "end_date_desc_plus"}>
-                  <h1>Recently Finished {capitalize(params.type)}</h1>
-                </Match>
-                <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
-                  <h1>Recently Finished Mangas</h1>
-                </Match>
-                <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
-                  <h1>Recently Finished Light Novels</h1>
-                </Match>
-                <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>
-                  <h1>Newly Added {capitalize(params.type)}</h1>
-                </Match>
-                <Match when={isSeasonHeader()}>
-                  <Switch>
-                    <Match when={parsedSearchParams().season === "tba"}>
-                      <h1>TBA {capitalize(params.type)}</h1>
-                    </Match>
-                    <Match when={parsedSearchParams().season}>
-                      <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
-                    </Match>
-                  </Switch>
-                </Match>
-                <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
-                  <Switch>
-                    <Match when={params.header == "popular"}>
-                      <h1>All Time Popular {capitalize(params.type)}</h1>
-                    </Match>
-                    <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
-                      <h1>All Time Popular Light Novels</h1>
-                    </Match>
-                    <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
-                      <h1>All Time Popular Manhwa</h1>
-                    </Match>
-                  </Switch>
-                </Match>
-              </Switch>
+              <Show when={pageTitle()}>
+                <h1>{pageTitle()}</h1>
+              </Show>
               <div class="toolbar">
                 <CardStyleToggle />
               </div>
@@ -627,6 +581,57 @@ export function SearchPage() {
       </Switch>
     </ErrorBoundary>
   );
+}
+
+function isSeasonPageHeader(header) {
+  return /winter|spring|summer|fall|this-season|next-season|tba/.test(header);
+}
+
+// The title is only shown while the search params still match the header,
+// so it doesn't describe the results wrong after the user has changed the filters
+function getSearchPageTitle(header, type, searchParams) {
+  const { sort, season, year, status, format, country } = searchParams;
+  const typeName = capitalize(type);
+  const mainSort = sort?.[0];
+  const isOnly = (values, value) => values?.length === 1 && values[0] === value;
+  const isFinished = mainSort === "end_date_desc_plus" && status?.includes("complete");
+
+  if (isSeasonPageHeader(header)) {
+    if (season === "tba") return `TBA ${typeName}`;
+    if (season) return `${capitalize(season)} ${year} Anime`;
+    return;
+  }
+
+  switch (header) {
+    case "top":
+      if (mainSort === "score_desc") return `Top ${typeName}`;
+      if (mainSort === "score_plus") return `Worst ${typeName}`;
+      return;
+    case "trending":
+      if (mainSort === "trending_desc") return `Trending ${typeName}`;
+      return;
+    case "finished":
+      if (mainSort === "end_date_desc_plus") return `Recently Finished ${typeName}`;
+      return;
+    case "finished-manga":
+      if (isFinished && format?.includes("manga")) return "Recently Finished Mangas";
+      return;
+    case "finished-novel":
+      if (isFinished && format?.includes("light_novel")) return "Recently Finished Light Novels";
+      return;
+    case "new":
+      if (mainSort === "id_desc") return `Newly Added ${typeName}`;
+      return;
+    case "popular":
+      if (mainSort === "popularity_desc") return `All Time Popular ${typeName}`;
+      return;
+    case "novel":
+      if (mainSort === "popularity_desc" && isOnly(format, "light_novel")) return "All Time Popular Light Novels";
+      return;
+    case "manhwa":
+      if (mainSort === "popularity_desc" && isOnly(country, "KR")) return "All Time Popular Manhwa";
+      return;
+  }
 }
 
 function getSectionTitles(media) {
