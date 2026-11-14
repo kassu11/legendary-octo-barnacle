@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { For, Match, Show, Switch } from "solid-js";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
 import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 import "./VerticalCardRow.scoped.css";
@@ -8,6 +8,8 @@ import { formatSecondsToLongString } from "@/utils/timeUtils.js";
 import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
+import { MediaQuickActions } from "@/components/media/MediaQuickActions.scoped.jsx";
+import { globalEditedMedia } from "@/state/globalState.js";
 
 export function VerticalCardRowScoped(props) {
   asserts.assertTruthy("href" in props, "Link is missing");
@@ -20,9 +22,11 @@ export function VerticalCardRowScoped(props) {
         <For each={props.data}>
           {(card, i) => {
             const hover = createHover({ placements: ["left-center", "bottom", "top"], offset: 25, alignOffset: 25 });
+            // Session edits override the entry from the response, same as in MediaCard
+            const mediaListEntry = createMemo(() => globalEditedMedia[card.id] === undefined ? card.mediaListEntry : globalEditedMedia[card.id]);
 
             return (
-              <li class="vertical-search-card" style={{"--media-background-color": card.coverImage.color}}>
+              <li class="vertical-search-card" data-status={mediaListEntry()?.status} style={{"--media-background-color": card.coverImage.color}}>
                 <p class="ranking">
                   #
                   <span>{i() + 1}</span>
@@ -32,7 +36,7 @@ export function VerticalCardRowScoped(props) {
                     <img src={card.coverImage.large} class="cover" alt="Cover."/>
                   </div>
                   <div class="vertical-search-card-content clamp">
-                    <A scoped href={mediaUrl(card)} class="title">
+                    <A scoped href={mediaUrl(card)} class="title line-clamp">
                       {card.title.userPreferred}
                     </A>
                     <ol class="vertical-search-card-genre-list">
@@ -97,6 +101,11 @@ export function VerticalCardRowScoped(props) {
                       </Switch>
                     </div>
                   </div>
+                  <Show when={hover.isOpen()}>
+                    <div class="quick-actions">
+                      <MediaQuickActions horizontal media={card} mediaListEntry={mediaListEntry()} status={mediaListEntry()?.status} />
+                    </div>
+                  </Show>
                 </div>
                 <Show when={hover.isOpen()}>
                   <HoverPortal>

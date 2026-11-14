@@ -76,6 +76,20 @@
             filter: brightness(1.1);
           }
 
+          /* Above the stretched title link, so the buttons can be clicked */
+          .quick-actions {
+            position: absolute;
+            right: 4px;
+            bottom: 4px;
+            z-index: 1;
+            border-radius: 999px;
+            transition: background .2s;
+
+            &:where(:hover, :has(:focus-visible)) {
+              background-color: var(--shadow-light);
+            }
+          }
+
           > .cover-container {
             @container vertical-search-cards (width < 42em) {
               grid-row: span 2;
@@ -103,6 +117,7 @@
               text-decoration: none;
               color: var(--text-muted);
               transition: .2s color, .2s text-shadow;
+              --line-clamp: 2;
 
               /* Stretch the link over the whole card, so the whole card is clickable */
               &::after {

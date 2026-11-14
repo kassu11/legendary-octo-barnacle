@@ -7,6 +7,10 @@
     border-radius: 999px;
     transition: background .2s;
 
+    &.horizontal {
+      flex-direction: row-reverse;
+    }
+
     .action-button {
       padding: 10px;
       border-radius: 50%;
