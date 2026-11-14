@@ -5,7 +5,7 @@
     padding-bottom: 1rem;
     background-color: var(--background-350-old);
 
-    li {
+    > div {
       width: 100%;
       aspect-ratio: 5.5/8;
     }

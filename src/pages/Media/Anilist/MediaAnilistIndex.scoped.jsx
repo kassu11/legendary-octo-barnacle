@@ -29,6 +29,7 @@ import { createTimer } from "@/hooks/createTimer.js";
 import { MediaPageApiSwitcher } from "@/pages/Media/MediaPageApiSwitcher.scoped.jsx";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { mediaPageAnilistData, setMediaPageAnilistData } from "@/state/globalState";
+import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
 
 export function MediaInfoContent(props) {
   const params = useParams();
@@ -288,9 +289,9 @@ function StreamingEpisodes(props) {
     <Show when={props.streamingEpisodes?.length}>
       <div class="no-overflow media-page-watch-episodes">
         <h2>Watch</h2>
-        <ol class="grid-reel-auto-fill">
+        <GridReelAutoFill scoped class="grid-reel-auto-fill">
           <For each={props.streamingEpisodes}>{episode => (
-            <li>
+            <div>
               <Switch>
                 <Match when={episode.site === "Crunchyroll"}>
                   <a href={episode.url} target="_black">
@@ -301,9 +302,9 @@ function StreamingEpisodes(props) {
                   </a>
                 </Match>
               </Switch>
-            </li>
+            </div>
           )}</For>
-        </ol>
+        </GridReelAutoFill>
       </div>
     </Show>
   );

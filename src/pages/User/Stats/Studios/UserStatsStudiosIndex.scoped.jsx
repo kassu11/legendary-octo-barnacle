@@ -10,6 +10,7 @@ import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { useUser } from "@/state/providers.js";
+import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
 
 export function StatsAnimeStudios() {
   const params = useParams();
@@ -184,7 +185,7 @@ function Cards(props) {
 
   return (
     <div class="inline-container">
-      <ol class="grid-reel-auto-fill" onScroll={() => {
+      <GridReelAutoFill scoped class="grid-reel-auto-fill" onScroll={() => {
         if (!fetchNewCards) {
           return;
         }
@@ -196,15 +197,15 @@ function Cards(props) {
         setMediaIds(newFetchData);
       }}>
         <For each={props.mediaIds}>{mediaId => (
-          <li>
+          <div>
             <A href={"/ani/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.store[mediaId]?.title.userPreferred || "")}>
               <Show when={props.store[mediaId]} fallback={<div class="cover-image"> </div>}>
                 <img class="cover-image" src={props.store[mediaId].coverImage.large} alt="Media cover" />
               </Show>
             </A>
-          </li>
+          </div>
         )}</For>
-      </ol>
+      </GridReelAutoFill>
     </div>
   );
 }

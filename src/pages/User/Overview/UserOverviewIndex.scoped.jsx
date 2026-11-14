@@ -15,6 +15,7 @@ import { isTypeFunction } from "@/utils/functionUtils.js";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { deletedActivityIds } from "@/state/globalState.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
 
 export function Overview() {
   const { user } = useUser();
@@ -38,57 +39,57 @@ export function Overview() {
         <Show when={user().favourites.anime.edges.length}>
           <div class="user-favourites">
             <h3>Favourite animes</h3>
-            <ol class="grid-reel-auto-fill">
+            <GridReelAutoFill scoped class="grid-reel-auto-fill">
               <For each={user().favourites.anime.edges}>{anime => (
-                <li class="item">
+                <div class="item">
                   <A href={mediaUrl(anime.node)}>
                     <img src={anime.node.coverImage.large} alt="Cover" />
                   </A>
-                </li>
+                </div>
               )}</For>
-            </ol>
+            </GridReelAutoFill>
           </div>
         </Show>
         <Show when={user().favourites.manga.edges.length}>
           <div class="user-favourites">
             <h3>Favourite manga</h3>
-            <ol class="grid-reel-auto-fill">
+            <GridReelAutoFill scoped class="grid-reel-auto-fill">
               <For each={user().favourites.manga.edges}>{manga => (
-                <li class="item">
+                <div class="item">
                   <A href={mediaUrl(manga.node)}>
                     <img src={manga.node.coverImage.large} alt="Cover" />
                   </A>
-                </li>
+                </div>
               )}</For>
-            </ol>
+            </GridReelAutoFill>
           </div>
         </Show>
         <Show when={user().favourites.characters.edges.length}>
           <div class="user-favourites">
             <h3>Favourite characters</h3>
-            <ol class="grid-reel-auto-fill">
+            <GridReelAutoFill scoped class="grid-reel-auto-fill">
               <For each={user().favourites.characters.edges}>{character => (
-                <li class="item">
+                <div class="item">
                   <A href={"/ani/character/" + character.node.id + "/" + formatTitleToUrl(character.node.name.userPreferred)}>
                     <img src={character.node.image.large} alt="Cover" />
                   </A>
-                </li>
+                </div>
               )}</For>
-            </ol>
+            </GridReelAutoFill>
           </div>
         </Show>
         <Show when={user().favourites.staff.edges.length}>
           <div class="user-favourites">
             <h3>Favourite staff</h3>
-            <ol class="grid-reel-auto-fill">
+            <GridReelAutoFill scoped class="grid-reel-auto-fill">
               <For each={user().favourites.staff.edges}>{staff => (
-                <li class="item">
+                <div class="item">
                   <A href={"/ani/staff/" + staff.node.id + "/" + formatTitleToUrl(staff.node.name.userPreferred)}>
                     <img src={staff.node.image.large} alt="Cover" />
                   </A>
-                </li>
+                </div>
               )}</For>
-            </ol>
+            </GridReelAutoFill>
           </div>
         </Show>
         <Show when={user().favourites.studios.edges.length}>

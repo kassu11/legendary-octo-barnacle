@@ -8,6 +8,7 @@ import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js"
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
 
 export function StatsAnimeVoiceActors() {
   const params = useParams();
@@ -271,7 +272,7 @@ function Cards(props) {
 
   return (
     <div class="inline-container">
-      <ol class="grid-reel-auto-fill" ref={elem => gridReel = elem} onScroll={() => {
+      <GridReelAutoFill scoped class="grid-reel-auto-fill" ref={elem => gridReel = elem} onScroll={() => {
         if (!fetchNewCards) {
           return;
         }
@@ -296,28 +297,28 @@ function Cards(props) {
         <Switch>
           <Match when={props.pageType === "media"}>
             <For each={props.mediaIds}>{mediaId => (
-              <li>
+              <div>
                 <A href={"/ani/" + params.type + "/" + mediaId + "/" + formatTitleToUrl(props.mediaStore[mediaId]?.title.userPreferred || "")}>
                   <Show when={props.mediaStore[mediaId]} fallback={<div class="cover-image"> </div>}>
                     <img class="cover-image" src={props.mediaStore[mediaId].coverImage.large} alt="Media cover" />
                   </Show>
                 </A>
-              </li>
+              </div>
             )}</For>
           </Match>
           <Match when={props.pageType === "characters"}>
             <For each={props.characterIds}>{characterId => (
-              <li>
+              <div>
                 <A href={"/ani/character/" + characterId + "/" + formatTitleToUrl(props.characterStore[characterId]?.name.userPreferred || "")}>
                   <Show when={props.characterStore[characterId]} fallback={<div class="cover-image"> </div>}>
                     <img class="cover-image" src={props.characterStore[characterId].image.large} alt="Character cover" />
                   </Show>
                 </A>
-              </li>
+              </div>
             )}</For>
           </Match>
         </Switch>
-      </ol>
+      </GridReelAutoFill>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import "./HorizontalCardRow.scoped.css";
 import { asserts } from "@/utils/utils.js";
 import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 import { MediaCard } from "@/components/media/MediaCard.scoped.jsx";
+import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
 
 export function HorizontalCardRowScoped(props) {
   asserts.assertTruthy("href" in props, "Link is missing");
@@ -63,11 +64,11 @@ export function HorizontalCardRowScoped(props) {
   return (
     <section>
       <BrowsePageHeaderLinks {...props} />
-      <ol ref={handleRef} class="grid-reel-auto-fill">
+      <GridReelAutoFill scoped class="grid-reel-auto-fill" ref={handleRef}>
         <For each={props.data || Array(6).fill(null)}>{media => (
           <MediaCard scoped class="media-card" media={media} loading={props.loading} cardZoomIn coverFadeIn showScore showStatus quickActions hoverCard />
         )}</For>
-      </ol>
+      </GridReelAutoFill>
     </section>
   );
 }

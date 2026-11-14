@@ -44,10 +44,10 @@
     .grid-reel-auto-fill {
       /* Setting background color to the same as background because otherwise the scroll snapping will break ¯\_(ツ)_/¯ */
       background-color: var(--background-200-old);
-    }
 
-    li {
-      position: relative;
+      > div {
+        position: relative;
+      }
     }
 
     a {
