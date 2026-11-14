@@ -10,6 +10,7 @@ import { localizeInternalSearchParams } from "@/api/apiTranslations";
 import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
+import { CardStyleToggle } from "./CardStyleToggle.scoped";
 
 const invalidateHeader = [
   { header: "finished",                          params: ["status"] },
@@ -114,7 +115,7 @@ export function useActiveSearchQueries() {
     if (yearLesser) returnValue.push({ type: "yearLesser", description: "Year<" + yearLesser,   query: { yearLesser: undefined } });
     if (yearGreater) returnValue.push({ type: "yearGreater", description: "Year>" + yearGreater, query: { yearGreater: undefined } });
 
-    if (season) returnValue.push({ type: "season", description: capitalize(season), query: { season: undefined, year } });
+    if (season) returnValue.push({ type: "season", description: season === "tba" ? "TBA" : capitalize(season), query: { season: undefined, year } });
 
 
     if (progress) {
@@ -207,7 +208,7 @@ export function SearchActiveQueries(props) {
     removeQuery(query);
   };
 
-  return (
+  const queryList = () => (
     <Show when={queryButtons().length}>
       <ul class="active-queries" classList={{ "single-row": props.singleRow }}>
         <For each={queryButtons()}>{entry => (
@@ -229,6 +230,20 @@ export function SearchActiveQueries(props) {
           </li>
         </Show>
       </ul>
+    </Show>
+  );
+
+  // The card style toggle is shown on the same row as the active queries, when the search page doesn't have a header
+  return (
+    <Show when={props.cardStyleToggle} fallback={queryList()}>
+      <div class="active-queries-row" classList={{ "single-row": props.singleRow }}>
+        {queryList()}
+        <Show when={params.mode === "search"}>
+          <div class="toolbar">
+            <CardStyleToggle />
+          </div>
+        </Show>
+      </div>
     </Show>
   );
 }

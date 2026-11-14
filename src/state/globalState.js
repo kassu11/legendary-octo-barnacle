@@ -1,5 +1,5 @@
 import { batch, createMemo, createRoot, createSignal, untrack } from "solid-js";
-import { createLocalStorageBooleanSignal, createLocalStorageJsonSignal } from "@/utils/localStorageUtils";
+import { createLocalStorageBooleanSignal, createLocalStorageJsonSignal, createLocalStorageSignal } from "@/utils/localStorageUtils";
 import { deleteIndexDBValue, setIndexedDBValue } from "@/utils/indexedDBUtils";
 import { createOneTimeSessionStorageJsonSignal, createOneTimeSessionStorageSignal, getOrInsertSessionStorageInt } from "@/utils/sessionStorageUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
@@ -22,6 +22,8 @@ export const [mediaPageAnilistData, setMediaPageAnilistData] = createSignal(unde
 
 export const [searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-seasons-by-format", true);
 export const [searchPageGroupTBAEntriesByFormat, setSearchPageGroupTBAEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-tba-by-format", false);
+// "cards" or "rows"
+export const [searchPageCardStyle, setSearchPageCardStyle] = createLocalStorageSignal("LOB-search-card-style", "cards");
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 
 export const logoutUser = () => {

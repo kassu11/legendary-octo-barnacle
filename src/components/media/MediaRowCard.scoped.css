@@ -1,0 +1,271 @@
+@layer component {
+  .media-row-card {
+    /* Layout switches to the narrow layout by the nearest container */
+    container-type: inline-size;
+
+    /* A container would block the parent grid columns from being sized by the card, so the parent has to be the container */
+    &.subgrid {
+      container-type: normal;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-column: 1 / -1;
+    }
+
+    /* Card can only be empty, when no media data was passed, so this is empty skeleton card */
+    &:empty {
+      height: calc(4rem * 8 / 5.5 + 16px);
+      border-radius: 8px;
+      background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
+      background-size: calc(100px / sin(45deg));
+      box-shadow: 0 3px 4px 0px #00000042;
+      animation: move-gradient 2s infinite;
+      pointer-events: none;
+    }
+
+    .row {
+      display: grid;
+      /* Fixed info columns keep the columns lined up between cards that don't share a grid */
+      grid-template-columns: 4rem 1fr 10rem 8rem 9rem;
+      gap: 16px;
+      align-items: center;
+      justify-items: end;
+
+      &.ranked {
+        grid-template-columns: auto 4rem 1fr 10rem 8rem 9rem;
+      }
+
+      .media-row-card.subgrid & {
+        grid-template-columns: subgrid;
+        grid-column: 1 / -1;
+      }
+
+      @container (width < 42em) {
+        position: relative;
+        justify-items: unset;
+        display: block;
+      }
+
+      .ranking {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        justify-self: baseline;
+        z-index: 1;
+
+        @container (width < 42em) {
+          position: absolute;
+          transform: translate(-10%, -10%);
+          width: max-content;
+          min-width: 2em;
+          height: auto;
+          aspect-ratio: 1/1;
+          background-color: var(--media-background-color, orange);
+          padding: .25em;
+          border-radius: 100%;
+          display: grid;
+          align-items: center;
+          justify-content: center;
+          grid-template-columns: auto auto;
+          font-size: 1.25rem;
+          pointer-events: none;
+          color: var(--shadow-300-old)
+        }
+      }
+
+      .body {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: span 5;
+        position: relative;
+        padding: 8px;
+        background-color: var(--bg);
+        border-radius: 8px;
+        box-shadow: inset 0 4px 2px -3px var(--bg-light), inset 0 -3px 2px -3px #000000, 0 3px 4px 0px #00000042;
+        transition: .2s filter;
+
+        @container (width < 42em) {
+          grid-template-columns: 4rem 1fr;
+          gap: 8px;
+        }
+
+        &:hover, &:has(.title:focus-visible) {
+          filter: brightness(1.1);
+        }
+
+        .media-row-card.loading & {
+          filter: grayscale(.6);
+
+          /* Same moving gradient as the skeleton card, faintly over the content */
+          &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            border-radius: inherit;
+            background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
+            background-size: calc(100px / sin(45deg));
+            animation: move-gradient 2s infinite;
+            opacity: .35;
+            pointer-events: none;
+          }
+        }
+
+        /* Above the stretched title link, so the buttons can be clicked */
+        .quick-actions {
+          position: absolute;
+          right: 4px;
+          bottom: 4px;
+          z-index: 1;
+          border-radius: 999px;
+          transition: background .2s;
+
+          &:where(:hover, :has(:focus-visible)) {
+            background-color: var(--shadow-light);
+          }
+        }
+
+        > .cover-container {
+          @container (width < 42em) {
+            grid-row: span 2;
+          }
+
+          img {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 5.5/8;
+            object-fit: cover;
+            border-radius: 4px;
+            transition: filter .3s;
+
+            .media-row-card.loading & {
+              filter: grayscale(.8) opacity(.15);
+            }
+          }
+        }
+
+        .clamp {
+          display: grid;
+          align-content: center;
+        }
+
+        .content {
+          gap: 8px;
+          font-weight: 500;
+
+          .title {
+            text-decoration: none;
+            color: var(--text-muted);
+            transition: .2s color, .2s text-shadow;
+            --line-clamp: 2;
+
+            /* Stretch the link over the whole card, so the whole card is clickable */
+            &::after {
+              content: "";
+              position: absolute;
+              inset: 0;
+              border-radius: inherit;
+            }
+
+            .body:where(:hover, :has(.title:focus-visible)) & {
+              color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
+              text-shadow: 0 0 2px black;
+            }
+
+            .status-icon {
+              float: left;
+              margin-right: .5em;
+              margin-top: .2em;
+              opacity: .8;
+              transition: opacity .2s;
+
+              .body:where(:hover, :has(.title:focus-visible)) & {
+                opacity: 1;
+              }
+            }
+          }
+
+          .genre-list {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0;
+            gap: 8px;
+            font-size: var(--fs-300);
+            height: 1.75em;
+            overflow: hidden;
+
+            .genre {
+              /* Keep the genre links above the stretched title link */
+              position: relative;
+              z-index: 1;
+              list-style: none;
+              padding: 2px 8px;
+              border-radius: 2em;
+              height: 100%;
+              display: grid;
+              place-items: center;
+              background-color: var(--media-background-color, orange);
+              transition: .2s filter;
+
+              &:hover, &:has(a:focus-visible) {
+                filter: brightness(1.2);
+              }
+
+              a {
+                text-decoration: none;
+                color: rgb(0 0 0 / 90%);
+              }
+            }
+          }
+        }
+
+        .info {
+          display: grid;
+          grid-template-columns: subgrid;
+          grid-column: span 3;
+
+          @container (width < 42em) {
+            display: flex;
+            flex-wrap: wrap;
+            grid-column: 2;
+            gap: 0 16px;
+            align-items: center;
+          }
+
+          * {
+            @container (width < 42em) {
+              white-space: nowrap;
+            }
+          }
+
+          .score {
+            display: grid;
+            grid-template-columns: 2rem auto;
+            gap: .5rem;
+            align-items: center;
+
+            @container (width < 42em) {
+              grid-template-columns: 1.1em auto;
+              gap: 8px;
+            }
+          }
+
+          .clamp {
+            @container (width < 42em) {
+              display: flex;
+              gap: 16px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @keyframes move-gradient {
+    0% {
+      background-position-x: var(--offset, 0px);
+    }
+    80%, 100% {
+      background-position-x: calc(-800px * sin(45deg) + var(--offset, 0px));
+    }
+  }
+}

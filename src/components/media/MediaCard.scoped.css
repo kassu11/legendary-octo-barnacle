@@ -20,7 +20,7 @@
       animation: move-gradient 2s infinite;
       --offset: 0px;
       background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
-      background-size: 900px;
+      background-size: calc(100px / sin(45deg));
       position: absolute;
       inset: 0;
       border-radius: inherit;

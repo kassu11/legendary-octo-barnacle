@@ -6,22 +6,27 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./SearchIndex.scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
-import { setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
-import { useParsedSearchParams } from "@/state/providers";
+import { searchPageCardStyle, setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
+import { useParsedSearchParams, useResponsive } from "@/state/providers";
 import { assertTruthy } from "@/utils/asserts";
 import { translateInternalApiParams } from "@/api/apiTranslations";
 import { concatMergeObjects } from "@/utils/objectUtils";
 import { isTypeArray } from "@/utils/arrayUtils";
 import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
+import { getSearchHeaderTitle, isSeasonPageHeader } from "@/utils/searchHeaderUtils";
 import { SearchBar } from "./SearchBar.scoped";
+import { SearchActiveQueries } from "./SearchActiveQueries.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
+import { CardStyleToggle } from "./CardStyleToggle.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
+import { MediaRowCard } from "@/components/media/MediaRowCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
 import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 import { VirtualGrid } from "@/components/VirtualGrid.scoped";
+import { VirtualList } from "@/components/VirtualList.scoped";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -162,6 +167,7 @@ export function SearchPage() {
   const params = useParams();
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
+  const { isMobilLarge } = useResponsive();
 
   createEffect(() => {
     document.title = `${capitalize(params.type)} search - LOB`;
@@ -176,6 +182,9 @@ export function SearchPage() {
   const [previousHistoryDummyData, setPreviousHistoryDummyData] = createSignal();
   const [pagelessCacheData, setPagelessCacheData] = createStore({});
   const pagelessCacheKey = createMemo(() => pagelessCacheData?.cacheKey);
+  // Pageless data is loaded asynchronously, so this key is known before it, already on the first render.
+  // Row lists use it to keep their item heights, so their height is right when navigating back
+  const rowListCacheKey = createMemo(() => anilistVariables() && createAnilistFetcher(queries.searchMedia, { ...anilistVariables(), page: "pageless3" }).cacheKey);
 
   let highestPageMutated = 0;
   let pagelessFetcher;
@@ -471,9 +480,12 @@ export function SearchPage() {
     return [0, ...Object.keys(sectionTitles()).map(Number).filter(i => i > 0).sort((a, b) => a - b)];
   });
 
+  const isSeasonHeader = () => isSeasonPageHeader(params.header);
+  const pageTitle = createMemo(() => getSearchHeaderTitle(params.header, params.type, parsedSearchParams()));
+
   return (
     <ErrorBoundary fallback="Search page has crashed">
-      <SearchBar />
+      <SearchBar cardStyleToggle={!isMobilLarge() && !pageTitle()} />
       <Switch>
         <Match when={error()?.errors}>
           <h2>Bad request error: </h2>
@@ -494,65 +506,30 @@ export function SearchPage() {
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
-            <Switch>
-              <Match when={params.header === "top"}>
-                <Switch>
-                  <Match when={parsedSearchParams().sort?.[0] === "score_desc"}>
-                    <h1>Top {capitalize(params.type)}</h1>
-                  </Match>
-                  <Match when={parsedSearchParams().sort?.[0] === "score_plus"}>
-                    <h1>Worst {capitalize(params.type)}</h1>
-                  </Match>
-                </Switch>
-              </Match>
-              <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
-                <h1>Trending {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={params.header === "finished" && parsedSearchParams().sort?.[0] === "end_date_desc_plus"}>
-                <h1>Recently Finished {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
-                <h1>Recently Finished Mangas</h1>
-              </Match>
-              <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
-                <h1>Recently Finished Light Novels</h1>
-              </Match>
-              <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>
-                <h1>Newly Added {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
-                <Switch>
-                  <Match when={parsedSearchParams().season === "tba"}>
-                    <h1>TBA {capitalize(params.type)}</h1>
-                  </Match>
-                  <Match when={parsedSearchParams().season}>
-                    <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
-                  </Match>
-                </Switch>
+            <Show when={pageTitle()}>
+              <div class="page-header">
+                <h1>{pageTitle()}</h1>
+                <div class="toolbar">
+                  <CardStyleToggle />
+                </div>
+              </div>
+            </Show>
 
-                <SeasonControls
-                  groupByFormat={parsedSearchParams().groupEntriesByFormat}
-                  onGroupByFormatChange={() => {
-                    if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
-                    else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
-                  }}
-                />
+            <Show when={isMobilLarge()}>
+              <div class="mobile-active-queries">
+                <SearchActiveQueries singleRow cardStyleToggle={!pageTitle()} />
+              </div>
+            </Show>
 
-              </Match>
-              <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
-                <Switch>
-                  <Match when={params.header == "popular"}>
-                    <h1>All Time Popular {capitalize(params.type)}</h1>
-                  </Match>
-                  <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
-                    <h1>All Time Popular Light Novels</h1>
-                  </Match>
-                  <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
-                    <h1>All Time Popular Manhwa</h1>
-                  </Match>
-                </Switch>
-              </Match>
-            </Switch>
+            <Show when={isSeasonHeader()}>
+              <SeasonControls
+                groupByFormat={parsedSearchParams().groupEntriesByFormat}
+                onGroupByFormatChange={() => {
+                  if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
+                  else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
+                }}
+              />
+            </Show>
 
             <div class="search-results">
               <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
@@ -574,17 +551,27 @@ export function SearchPage() {
                     <Show when={title()}>
                       <h2>{formatMediaFormat(title())}</h2>
                     </Show>
-                    <VirtualGrid scoped class="virtual-grid" overScan={100} each={sectionMedia()}>{(media, i) => {
-                      // Index in the whole search result list, not just inside this section
-                      const index = () => mediaIndices()[i()];
-                      // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
-                      const animate = !preventZoomIn.has(media.id);
-                      preventZoomIn.add(media.id);
+                    <Show when={searchPageCardStyle() === "rows"} fallback={
+                      <VirtualGrid scoped class="virtual-grid" each={sectionMedia()}>{(media, i) => {
+                        // Index in the whole search result list, not just inside this section
+                        const index = () => mediaIndices()[i()];
+                        // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
+                        const animate = !preventZoomIn.has(media.id);
+                        preventZoomIn.add(media.id);
 
-                      return (
-                        <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
-                      );
-                    }}</VirtualGrid>
+                        return (
+                          <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                        );
+                      }}</VirtualGrid>
+                    }>
+                      <VirtualList scoped class="virtual-list" cacheKey={rowListCacheKey() && `${rowListCacheKey()}-${start}`} each={sectionMedia()}>{(media, i) => {
+                        const index = () => mediaIndices()[i()];
+
+                        return (
+                          <MediaRowCard scoped class="row-card" type={params.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                        );
+                      }}</VirtualList>
+                    </Show>
                   </section>
                 );
               }}</For>

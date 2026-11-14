@@ -35,31 +35,17 @@ import { Socials } from "./pages/User/Socials/UserSocialsIndex.scoped.jsx";
 import { SettingsPage } from "./pages/Settings/SettingsIndex.scoped";
 import { SearchPage } from "./pages/Search/SearchIndex.scoped";
 import { UserRelations } from "./pages/User/Relations/UserRelationsIndex.scoped";
+import { isSearchHeaderForType } from "./utils/searchHeaderUtils";
 
 const root = document.getElementById("root")
 
 const idFilter = {
   id: /^\d+$/,
 }
-const animeSearch = {
-  type: "anime",
-  header: (string) => {
-    if (/^(summer|fall|spring|winter)-\d+$/.test(string)) {
-      return true;
-    }
-
-    return ["finished", "this-season", "new", "tba", "next-season", "trending", "popular", "top"].includes(string);
-  }
-}
-const mangaSearch = {
-  type: "manga",
-  header: ["finished", "finished-manga", "tba", "finished-novel", "novel", "new", "manhwa", "trending", "popular", "top"],
-}
-
-const bothSearch = {
-  type: "media",
-  header: ["finished", "trending", "popular", "top", "tba"],
-}
+const searchFilter = type => ({
+  type,
+  header: header => isSearchHeaderForType(header, type),
+});
 
 render(
   () => (
@@ -79,9 +65,9 @@ render(
               <Route path="*" component={() => <Navigate href="/compare" />} />
             </Route>
             <Route path="/:api/:mode/:type" matchFilters={{ api: ["ani", "mal"], mode: ["browse", "search"], type: ["anime", "manga", "media"] }} component={SearchPage}>
-              <Route path="/:header?" matchFilters={animeSearch} />
-              <Route path="/:header?" matchFilters={mangaSearch} />
-              <Route path="/:header?" matchFilters={bothSearch} />
+              <Route path="/:header?" matchFilters={searchFilter("anime")} />
+              <Route path="/:header?" matchFilters={searchFilter("manga")} />
+              <Route path="/:header?" matchFilters={searchFilter("media")} />
             </Route>
             <Route path="/artist/:name" component={Artist} />
             <Route path="/:api">

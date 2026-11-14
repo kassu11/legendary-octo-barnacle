@@ -13,8 +13,25 @@
       width: min(100% - 16px, 90rem);
     }
 
-    h1 {
-      margin-bottom: 2rem;
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 1rem;
+
+      .toolbar {
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+    }
+
+    .mobile-active-queries {
+      margin-bottom: 1rem;
+
+      &:empty {
+        display: none;
+      }
     }
 
     .search-results {
@@ -37,6 +54,21 @@
         /* This is just a visual thing, but hide the loading skeleton cards, if we have loading cached cards */
         /* Its possible that the cache has already all the cards, and its stupid to visually show more loading cards, that don't exist */
         .search-results:has(.media-card.loading:not(:empty)) &:empty {
+          position: absolute;
+          visibility: hidden;
+          left: 0;
+          bottom: 0;
+          width: 0;
+        }
+      }
+    }
+
+    .virtual-list {
+      position: relative;
+
+      /* Same as with the media cards above */
+      .row-card {
+        .search-results:has(.row-card.loading:not(:empty)) &:empty {
           position: absolute;
           visibility: hidden;
           left: 0;

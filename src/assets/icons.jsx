@@ -61,8 +61,8 @@ export const CheckIcon = props => (
 );
 
 export const PlayIcon = props => (
-  // Small offset to optically center the triangle.
-  <Svg style="translate: 0.5px"viewBox="0 0.03 447.99 512.02" {...props}>
+  // Square viewBox with the extra width on the left, so the triangle sits 1/16 right of center to look optically centered.
+  <Svg viewBox="-64 0 512 512" {...props}>
     <path fill="currentColor" d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z" />
   </Svg>
 );
@@ -329,6 +329,23 @@ export const FiltersIcon = props => (
 
 export const ListIcon = props => (
   <OutlineSvg {...props}><path d="M3 6h.01M3 12h.01M3 18h.01M8 6h13M8 12h13M8 18h13" /></OutlineSvg>
+);
+
+export const LayoutGridIcon = props => (
+  <OutlineSvg {...props}>
+    <rect width="7" height="7" x="3" y="3" rx="1" />
+    <rect width="7" height="7" x="14" y="3" rx="1" />
+    <rect width="7" height="7" x="14" y="14" rx="1" />
+    <rect width="7" height="7" x="3" y="14" rx="1" />
+  </OutlineSvg>
+);
+
+export const LayoutListIcon = props => (
+  <OutlineSvg {...props}>
+    <rect width="7" height="7" x="3" y="3" rx="1" />
+    <rect width="7" height="7" x="3" y="14" rx="1" />
+    <path d="M14 4h7M14 9h7M14 15h7M14 20h7" />
+  </OutlineSvg>
 );
 
 export const SortIcon = props => (
