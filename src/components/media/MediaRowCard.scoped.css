@@ -92,6 +92,24 @@
           filter: brightness(1.1);
         }
 
+        .media-row-card.loading & {
+          filter: grayscale(.6);
+
+          /* Same moving gradient as the skeleton card, faintly over the content */
+          &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            border-radius: inherit;
+            background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
+            background-size: calc(100px / sin(45deg));
+            animation: move-gradient 2s infinite;
+            opacity: .35;
+            pointer-events: none;
+          }
+        }
+
         /* Above the stretched title link, so the buttons can be clicked */
         .quick-actions {
           position: absolute;
