@@ -9,6 +9,7 @@ import { BrowsePageHeaderLinks } from "./BrowsePageHeaderLinks.scoped.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
 import { MediaQuickActions } from "@/components/media/MediaQuickActions.scoped.jsx";
+import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped.jsx";
 import { globalEditedMedia } from "@/state/globalState.js";
 
 export function VerticalCardRowScoped(props) {
@@ -37,6 +38,11 @@ export function VerticalCardRowScoped(props) {
                   </div>
                   <div class="vertical-search-card-content clamp">
                     <A scoped href={mediaUrl(card)} class="title line-clamp">
+                      <Show when={mediaListEntry()?.status}>
+                        <span class="status-icon">
+                          <MediaStatusIcon status={mediaListEntry().status} />
+                        </span>
+                      </Show>
                       {card.title.userPreferred}
                     </A>
                     <ol class="vertical-search-card-genre-list">

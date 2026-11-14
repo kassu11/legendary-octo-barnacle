@@ -131,6 +131,18 @@
                 color: color-mix(var(--media-background-color, var(--text)), var(--text) 70%);
                 text-shadow: 0 0 2px black;
               }
+
+              .status-icon {
+                float: left;
+                margin-right: .5em;
+                margin-top: .2em;
+                opacity: .8;
+                transition: opacity .2s;
+
+                .vertical-search-card-body:where(:hover, :has(.title:focus-visible)) & {
+                  opacity: 1;
+                }
+              }
             }
 
             .vertical-search-card-genre-list {
