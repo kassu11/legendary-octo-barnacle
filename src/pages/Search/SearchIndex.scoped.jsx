@@ -18,7 +18,6 @@ import { SeasonControls } from "./SeasonControls.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
 import { debounce } from "@solid-primitives/scheduled";
-import { useDataElement } from "./useDataElement";
 import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
@@ -404,8 +403,6 @@ export function SearchPage() {
     });
   });
 
-  const [pageIndexKey, DataElement] = useDataElement();
-
   const { signal } = createCleanUpAbortController();
   let lastScolledElement, fetchPageTimeout;
   window.addEventListener("scroll", handleScroll, { signal, passive: true });
@@ -417,7 +414,7 @@ export function SearchPage() {
   function handleScroll() {
     const perPage = pagelessCacheData?.data?.perPage;
     if (!perPage) return;
-    const targets = document.querySelectorAll(".fetch-trigger");
+    const targets = document.querySelectorAll("[data-fetch-index]");
 
     if (!targets.length) return;
     if (lastScolledElement == targets[targets.length - 1]) {
@@ -426,7 +423,7 @@ export function SearchPage() {
       return;
     }
     lastScolledElement = targets[targets.length - 1];
-    const index = lastScolledElement[pageIndexKey]?.();
+    const index = Number(lastScolledElement.dataset.fetchIndex);
 
     const page = Math.floor(index / perPage) + 1;
     // After the debounce retrigger page fetch, this should stop when no fetch triggers are left
@@ -569,16 +566,12 @@ export function SearchPage() {
                     <VirtualGrid scoped class="virtual-grid" each={sectionMedia()}>{(media, i) => {
                       // Index in the whole search result list, not just inside this section
                       const index = () => mediaIndices()[i()];
+                      // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
+                      const animate = !preventZoomIn.has(media.id);
+                      preventZoomIn.add(media.id);
 
                       return (
-                        <div class="wrapper">
-                          <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} />
-                          { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */}
-                          {preventZoomIn.add(media.id) && true}
-                          <Show when={(media?.tabTime < tabTime || media === LOADER)}>
-                            <DataElement class="fetch-trigger" data={index} />
-                          </Show>
-                        </div>
+                        <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                       );
                     }}</VirtualGrid>
                   </section>
