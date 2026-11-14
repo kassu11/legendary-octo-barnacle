@@ -4,6 +4,3 @@ export const dayAsSeconds = 24 * 60 * 60;
 
 export const dayAsMilliSeconds = 24 * 60 * 60 * 1000;
 export const currentTimeInSeconds = new Date() / 1000;
-
-// Typing within this time replaces the history entry and delays the search fetch
-export const SEARCH_DEBOUNCE = 400;

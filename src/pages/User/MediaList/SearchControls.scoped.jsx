@@ -7,6 +7,7 @@ import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
+import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
 import { AgeIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "@/assets/icons.jsx";
 import "./SearchControls.scoped.css";
 
@@ -77,7 +78,7 @@ export function SearchControlsScoped(props) {
   const setSearchParams = options => {
     props.setSearchParams(options);
     // The mobile search and filters are reachable from anywhere on the page, so the results could be off the screen
-    if (isMobilLarge()) window.scrollTo(0, props.listStartY());
+    if (isMobilLarge()) window.scrollTo(0, scrollYBelowNavigation(props.scrollTarget));
   };
 
   const activeFilterCount = createMemo(() => filterParams.reduce((count, name) => count + arrayUtils.wrapToArray(searchParams[name]).filter(Boolean).length, 0));
@@ -121,11 +122,11 @@ export function SearchControlsScoped(props) {
     <Show when={isMobilLarge()} fallback={
       <Filters>
         <FilterGroup title="Search" class="search">
-          <FilterSearchInput listStartY={props.listStartY} />
+          <FilterSearchInput scrollTarget={props.scrollTarget} />
         </FilterGroup>
       </Filters>
     }>
-      <MobileFilters search={<FilterSearchInput listStartY={props.listStartY} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.listStartY} />}>
+      <MobileFilters search={<FilterSearchInput scrollTarget={props.scrollTarget} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton scrollTarget={props.scrollTarget} />}>
         <Filters />
       </MobileFilters>
     </Show>

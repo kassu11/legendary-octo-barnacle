@@ -23,7 +23,7 @@ import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/c
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { createMemo, Show } from "solid-js";
 
-export function SearchBar(props) {
+export function SearchBar() {
   const { isMobilLarge } = useResponsive();
   const activeQueries = useActiveSearchQueries();
   const activeFilterCount = createMemo(() => activeQueries().filter(entry => entry.type !== "01.search").length);
@@ -33,7 +33,7 @@ export function SearchBar(props) {
       <div class="search-bar">
         <SearchFilters>
           <FilterGroup title="Search" class="search">
-            <FilterSearchInput listStartY={props.resultsStartY} />
+            <FilterSearchInput />
           </FilterGroup>
         </SearchFilters>
         <SearchActiveQueries />
@@ -41,7 +41,7 @@ export function SearchBar(props) {
     }>
       <div class="search-bar mobile">
         <SearchActiveQueries singleRow />
-        <MobileFilters search={<FilterSearchInput listStartY={props.resultsStartY} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton listStartY={props.resultsStartY} />}>
+        <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
           <SearchFilters />
         </MobileFilters>

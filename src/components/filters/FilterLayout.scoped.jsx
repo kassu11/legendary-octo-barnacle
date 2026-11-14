@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import { useResponsive } from "@/state/providers.js";
 import { useSearchParams } from "@solidjs/router";
-import { SEARCH_DEBOUNCE } from "@/constants/time.js";
+import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
 import { arrayUtils } from "@/utils/utils.js";
 import "./FilterLayout.scoped.css";
 
@@ -29,7 +29,8 @@ export function FilterGroup(props) {
  * Search input bound to the "q" search param
  *
  * @param {Object} props
- * @param {() => number} [props.listStartY] Scroll position of the list start. Searching scrolls back up to it, if the page is scrolled past it
+ * @param {HTMLElement} [props.scrollTarget] Searching scrolls back up to this element, if the page is scrolled past it. Without it scrolls to the top of the page
+ * @param {number} [props.debounce=400] Typing within this many milliseconds replaces the history entry
  */
 export function FilterSearchInput(props) {
   const { isTouch } = useResponsive();
@@ -43,11 +44,11 @@ export function FilterSearchInput(props) {
     setSearchParams({ q: encodeURIComponent(e.target.value) || undefined, skipSortByMatch: undefined }, { replace });
     replace = true;
     clearTimeout(timeout);
-    timeout = setTimeout(() => replace = false, SEARCH_DEBOUNCE);
+    timeout = setTimeout(() => replace = false, props.debounce ?? 400);
     // The results could be off the screen, for example when using the mobile search bar
     // Only searching scrolls, so going back and forward in history keeps the scroll position
-    const listStartY = props.listStartY?.();
-    if (listStartY !== undefined && window.scrollY > listStartY) window.scrollTo(0, listStartY);
+    const targetY = scrollYBelowNavigation(props.scrollTarget);
+    if (window.scrollY > targetY) window.scrollTo(0, targetY);
   };
   const handleKeyDown = e => {
     // Close the mobile keyboard when search is pressed

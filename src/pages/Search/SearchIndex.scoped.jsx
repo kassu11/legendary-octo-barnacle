@@ -23,7 +23,6 @@ import { BrowsePage } from "./browse/BrowsePage.scoped";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 import { VirtualGrid } from "@/components/VirtualGrid.scoped";
-import { SEARCH_DEBOUNCE } from "@/constants/time.js";
 
 function createAnilistMediaQueryVariables() {
   const parsedSearchParams = useParsedSearchParams();
@@ -308,7 +307,7 @@ export function SearchPage() {
   createEffect(() => {
     const signal = anilistSearchController.abortAndRenew();
     let aniVariables, jiVariables;
-    let debounce = SEARCH_DEBOUNCE, currentPage;
+    let debounce = 400, currentPage;
 
     const { mode, type } = params;
     const groupEntriesByFormat = parsedSearchParams().groupEntriesByFormat;
@@ -439,10 +438,6 @@ export function SearchPage() {
 
   const preventZoomIn = new Set();
 
-  let searchPage;
-  // Results start right under the navigation bar
-  const resultsStartY = () => searchPage?.isConnected ? Math.max(0, searchPage.getBoundingClientRect().top + window.scrollY - document.querySelector(".main-navigation").offsetHeight) : 0;
-
   const mediaRanks = createMemo(() => {
     const { sort, sortBySearchMatch } = parsedSearchParams();
     const data = pagelessCacheData?.data;
@@ -470,7 +465,7 @@ export function SearchPage() {
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
-      <SearchBar resultsStartY={resultsStartY} />
+      <SearchBar />
       <Switch>
         <Match when={error()?.errors}>
           <h2>Bad request error: </h2>
@@ -490,7 +485,7 @@ export function SearchPage() {
           <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} />
         </Match>
         <Match when={params.mode === "search"}>
-          <div class="search-page" ref={elem => searchPage = elem}>
+          <div class="search-page">
             <Switch>
               <Match when={params.header === "top"}>
                 <Switch>
