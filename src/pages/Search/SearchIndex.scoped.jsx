@@ -7,13 +7,14 @@ import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./SearchIndex.scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
 import { searchPageCardStyle, setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
-import { useParsedSearchParams } from "@/state/providers";
+import { useParsedSearchParams, useResponsive } from "@/state/providers";
 import { assertTruthy } from "@/utils/asserts";
 import { translateInternalApiParams } from "@/api/apiTranslations";
 import { concatMergeObjects } from "@/utils/objectUtils";
 import { isTypeArray } from "@/utils/arrayUtils";
 import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
 import { SearchBar } from "./SearchBar.scoped";
+import { SearchActiveQueries } from "./SearchActiveQueries.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
 import { CardStyleToggle } from "./CardStyleToggle.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
@@ -165,6 +166,7 @@ export function SearchPage() {
   const params = useParams();
   const location = useLocation();
   const parsedSearchParams = useParsedSearchParams();
+  const { isMobilLarge } = useResponsive();
 
   createEffect(() => {
     document.title = `${capitalize(params.type)} search - LOB`;
@@ -477,6 +479,8 @@ export function SearchPage() {
     return [0, ...Object.keys(sectionTitles()).map(Number).filter(i => i > 0).sort((a, b) => a - b)];
   });
 
+  const isSeasonHeader = () => /winter|spring|summer|fall|this-season|next-season|tba/.test(params.header);
+
   return (
     <ErrorBoundary fallback="Search page has crashed">
       <SearchBar />
@@ -500,69 +504,77 @@ export function SearchPage() {
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
-            <Switch>
-              <Match when={params.header === "top"}>
-                <Switch>
-                  <Match when={parsedSearchParams().sort?.[0] === "score_desc"}>
-                    <h1>Top {capitalize(params.type)}</h1>
-                  </Match>
-                  <Match when={parsedSearchParams().sort?.[0] === "score_plus"}>
-                    <h1>Worst {capitalize(params.type)}</h1>
-                  </Match>
-                </Switch>
-              </Match>
-              <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
-                <h1>Trending {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={params.header === "finished" && parsedSearchParams().sort?.[0] === "end_date_desc_plus"}>
-                <h1>Recently Finished {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
-                <h1>Recently Finished Mangas</h1>
-              </Match>
-              <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
-                <h1>Recently Finished Light Novels</h1>
-              </Match>
-              <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>
-                <h1>Newly Added {capitalize(params.type)}</h1>
-              </Match>
-              <Match when={/winter|spring|summer|fall|this-season|next-season|tba/.test(params.header)}>
-                <Switch>
-                  <Match when={parsedSearchParams().season === "tba"}>
-                    <h1>TBA {capitalize(params.type)}</h1>
-                  </Match>
-                  <Match when={parsedSearchParams().season}>
-                    <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
-                  </Match>
-                </Switch>
-
-                <SeasonControls
-                  groupByFormat={parsedSearchParams().groupEntriesByFormat}
-                  onGroupByFormatChange={() => {
-                    if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
-                    else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
-                  }}
-                />
-
-              </Match>
-              <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
-                <Switch>
-                  <Match when={params.header == "popular"}>
-                    <h1>All Time Popular {capitalize(params.type)}</h1>
-                  </Match>
-                  <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
-                    <h1>All Time Popular Light Novels</h1>
-                  </Match>
-                  <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
-                    <h1>All Time Popular Manhwa</h1>
-                  </Match>
-                </Switch>
-              </Match>
-            </Switch>
-
-            <div class="results-toolbar">
-              <CardStyleToggle />
+            <div class="page-header">
+              <Switch>
+                <Match when={params.header === "top"}>
+                  <Switch>
+                    <Match when={parsedSearchParams().sort?.[0] === "score_desc"}>
+                      <h1>Top {capitalize(params.type)}</h1>
+                    </Match>
+                    <Match when={parsedSearchParams().sort?.[0] === "score_plus"}>
+                      <h1>Worst {capitalize(params.type)}</h1>
+                    </Match>
+                  </Switch>
+                </Match>
+                <Match when={params.header === "trending" && parsedSearchParams().sort?.[0] === "trending_desc"}>
+                  <h1>Trending {capitalize(params.type)}</h1>
+                </Match>
+                <Match when={params.header === "finished" && parsedSearchParams().sort?.[0] === "end_date_desc_plus"}>
+                  <h1>Recently Finished {capitalize(params.type)}</h1>
+                </Match>
+                <Match when={params.header === "finished-manga" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("manga")}>
+                  <h1>Recently Finished Mangas</h1>
+                </Match>
+                <Match when={params.header === "finished-novel" && parsedSearchParams().sort?.[0] === "end_date_desc_plus" && parsedSearchParams().status?.includes("complete") &&  parsedSearchParams().format?.includes("light_novel")}>
+                  <h1>Recently Finished Light Novels</h1>
+                </Match>
+                <Match when={params.header === "new" && parsedSearchParams().sort?.[0] === "id_desc"}>
+                  <h1>Newly Added {capitalize(params.type)}</h1>
+                </Match>
+                <Match when={isSeasonHeader()}>
+                  <Switch>
+                    <Match when={parsedSearchParams().season === "tba"}>
+                      <h1>TBA {capitalize(params.type)}</h1>
+                    </Match>
+                    <Match when={parsedSearchParams().season}>
+                      <h1>{capitalize(parsedSearchParams().season)} {parsedSearchParams().year} Anime</h1>
+                    </Match>
+                  </Switch>
+                </Match>
+                <Match when={parsedSearchParams().sort?.[0] === "popularity_desc"}>
+                  <Switch>
+                    <Match when={params.header == "popular"}>
+                      <h1>All Time Popular {capitalize(params.type)}</h1>
+                    </Match>
+                    <Match when={params.header == "novel" && parsedSearchParams().format?.length == 1 && parsedSearchParams().format[0] == "light_novel"}>
+                      <h1>All Time Popular Light Novels</h1>
+                    </Match>
+                    <Match when={params.header == "manhwa" && parsedSearchParams().country?.length == 1 && parsedSearchParams().country[0] == "KR"}>
+                      <h1>All Time Popular Manhwa</h1>
+                    </Match>
+                  </Switch>
+                </Match>
+              </Switch>
+              <div class="toolbar">
+                <CardStyleToggle />
+              </div>
             </div>
+
+            <Show when={isMobilLarge()}>
+              <div class="mobile-active-queries">
+                <SearchActiveQueries singleRow />
+              </div>
+            </Show>
+
+            <Show when={isSeasonHeader()}>
+              <SeasonControls
+                groupByFormat={parsedSearchParams().groupEntriesByFormat}
+                onGroupByFormatChange={() => {
+                  if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
+                  else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
+                }}
+              />
+            </Show>
 
             <div class="search-results">
               <For each={mediaSectionStarts()}>{(start, sectionIndex) => {

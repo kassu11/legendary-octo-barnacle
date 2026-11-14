@@ -40,7 +40,6 @@ export function SearchBar() {
       </div>
     }>
       <div class="search-bar mobile">
-        <SearchActiveQueries singleRow />
         <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
           <SearchFilters />

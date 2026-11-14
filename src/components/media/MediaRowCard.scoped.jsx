@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
-import { capitalize, formatMediaFormat, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
+import { capitalize, formatMediaFormat, formatMediaStatus, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
 import { formatSecondsToLongString } from "@/utils/timeUtils.js";
 import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
@@ -67,11 +67,13 @@ function MediaRowCardContent(props) {
         </div>
         <div class="info">
           <div class="score">
-            <EmojiByScore score={props.media.averageScore} />
-            <div class="clamp">
-              <p>{props.media.averageScore}%</p>
-              <p>{numberCommas(props.media.popularity)} users</p>
-            </div>
+            <Show when={props.media.averageScore}>
+              <EmojiByScore score={props.media.averageScore} />
+              <div class="clamp">
+                <p>{props.media.averageScore}%</p>
+                <p>{numberCommas(props.media.popularity)} users</p>
+              </div>
+            </Show>
           </div>
           <div class="clamp">
             <p>{formatMediaFormat(props.media.format) || "TBA"}</p>
@@ -107,7 +109,7 @@ function MediaRowCardContent(props) {
                 <p>{capitalize(props.media.season)} {props.media.seasonYear}</p>
               </Match>
             </Switch>
-            <p>{capitalize(props.media.status)}</p>
+            <p>{formatMediaStatus(props.media.status)}</p>
           </div>
         </div>
         <Show when={hover.isOpen()}>

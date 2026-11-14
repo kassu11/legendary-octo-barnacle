@@ -13,14 +13,25 @@
       width: min(100% - 16px, 90rem);
     }
 
-    h1 {
-      margin-bottom: 2rem;
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 1rem;
+
+      .toolbar {
+        margin-left: auto;
+        flex-shrink: 0;
+      }
     }
 
-    .results-toolbar {
-      display: flex;
-      justify-content: flex-end;
+    .mobile-active-queries {
       margin-bottom: 1rem;
+
+      &:empty {
+        display: none;
+      }
     }
 
     .search-results {
