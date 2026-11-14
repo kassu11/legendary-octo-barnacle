@@ -59,6 +59,7 @@
           display: grid;
           grid-template-columns: subgrid;
           grid-column: 2 / -1;
+          position: relative;
           padding: 8px;
           background-color: var(--bg);
           border-radius: 8px;
@@ -71,11 +72,11 @@
             gap: 8px;
           }
 
-          &:has(img:hover, .title:hover, .title:focus-visible) {
+          &:hover, &:has(.title:focus-visible) {
             filter: brightness(1.1);
           }
 
-          > a.cover-container {
+          > .cover-container {
             @container vertical-search-cards (width < 42em) {
               grid-row: span 2;
             }
@@ -103,11 +104,15 @@
               color: var(--text-muted);
               transition: .2s color;
 
-              &:hover {
-                color: var(--text);
+              /* Stretch the link over the whole card, so the whole card is clickable */
+              &::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
               }
 
-              .vertical-search-card-body:has(img:hover) & {
+              .vertical-search-card-body:hover & {
                 color: var(--text);
               }
             }
@@ -122,6 +127,9 @@
               overflow: hidden;
 
               .vertical-search-card-genre {
+                /* Keep the genre links above the stretched title link */
+                position: relative;
+                z-index: 1;
                 list-style: none;
                 padding: 2px 8px;
                 border-radius: 2em;
