@@ -13,6 +13,7 @@ import { translateInternalApiParams } from "@/api/apiTranslations";
 import { concatMergeObjects } from "@/utils/objectUtils";
 import { isTypeArray } from "@/utils/arrayUtils";
 import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
+import { getSearchHeaderTitle, isSeasonPageHeader } from "@/utils/searchHeaderUtils";
 import { SearchBar } from "./SearchBar.scoped";
 import { SearchActiveQueries } from "./SearchActiveQueries.scoped";
 import { SeasonControls } from "./SeasonControls.scoped";
@@ -480,7 +481,7 @@ export function SearchPage() {
   });
 
   const isSeasonHeader = () => isSeasonPageHeader(params.header);
-  const pageTitle = createMemo(() => getSearchPageTitle(params.header, params.type, parsedSearchParams()));
+  const pageTitle = createMemo(() => getSearchHeaderTitle(params.header, params.type, parsedSearchParams()));
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
@@ -581,57 +582,6 @@ export function SearchPage() {
       </Switch>
     </ErrorBoundary>
   );
-}
-
-function isSeasonPageHeader(header) {
-  return /winter|spring|summer|fall|this-season|next-season|tba/.test(header);
-}
-
-// The title is only shown while the search params still match the header,
-// so it doesn't describe the results wrong after the user has changed the filters
-function getSearchPageTitle(header, type, searchParams) {
-  const { sort, season, year, status, format, country } = searchParams;
-  const typeName = capitalize(type);
-  const mainSort = sort?.[0];
-  const isOnly = (values, value) => values?.length === 1 && values[0] === value;
-  const isFinished = mainSort === "end_date_desc_plus" && status?.includes("complete");
-
-  if (isSeasonPageHeader(header)) {
-    if (season === "tba") return `TBA ${typeName}`;
-    if (season) return `${capitalize(season)} ${year} Anime`;
-    return;
-  }
-
-  switch (header) {
-    case "top":
-      if (mainSort === "score_desc") return `Top ${typeName}`;
-      if (mainSort === "score_plus") return `Worst ${typeName}`;
-      return;
-    case "trending":
-      if (mainSort === "trending_desc") return `Trending ${typeName}`;
-      return;
-    case "finished":
-      if (mainSort === "end_date_desc_plus") return `Recently Finished ${typeName}`;
-      return;
-    case "finished-manga":
-      if (isFinished && format?.includes("manga")) return "Recently Finished Mangas";
-      return;
-    case "finished-novel":
-      if (isFinished && format?.includes("light_novel")) return "Recently Finished Light Novels";
-      return;
-    case "new":
-      if (mainSort === "id_desc") return `Newly Added ${typeName}`;
-      return;
-    case "popular":
-      if (mainSort === "popularity_desc") return `All Time Popular ${typeName}`;
-      return;
-    case "novel":
-      if (mainSort === "popularity_desc" && isOnly(format, "light_novel")) return "All Time Popular Light Novels";
-      return;
-    case "manhwa":
-      if (mainSort === "popularity_desc" && isOnly(country, "KR")) return "All Time Popular Manhwa";
-      return;
-  }
 }
 
 function getSectionTitles(media) {
