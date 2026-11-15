@@ -12,9 +12,10 @@ export function VerticalCardRowScoped(props) {
     <section>
       <BrowsePageHeaderLinks {...props} />
       <ol class="vertical-search-card-row">
-        <For each={props.data}>{(card, i) => (
+        {/* Empty row cards are skeletons until the data has loaded */}
+        <For each={props.data || Array(10).fill(null)}>{(card, i) => (
           <li class="vertical-search-card">
-            <MediaRowCard subgrid media={card} rank={i() + 1} type={props.type} />
+            <MediaRowCard subgrid media={card} rank={i() + 1} type={props.type} loading={props.loading} />
           </li>
         )}</For>
       </ol>

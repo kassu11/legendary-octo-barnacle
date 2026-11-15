@@ -203,7 +203,7 @@
               height: 100%;
               display: grid;
               place-items: center;
-              background-color: var(--media-background-color, orange);
+              background-color: color-mix(var(--media-background-color, orange), white 50%);
               transition: .2s filter;
 
               &:hover, &:has(a:focus-visible) {

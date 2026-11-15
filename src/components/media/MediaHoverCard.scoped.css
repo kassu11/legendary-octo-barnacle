@@ -68,6 +68,7 @@
           transition: .2s filter;
           text-decoration: none;
           color: rgb(0 0 0 / 90%);
+          font-weight: 600;
         }
       }
     }

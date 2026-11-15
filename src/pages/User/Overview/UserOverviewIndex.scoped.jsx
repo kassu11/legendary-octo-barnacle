@@ -388,7 +388,7 @@ function GenrePreview(props) {
         <ol>
           <For each={props.genres}>{genre => (
             <li class="item">
-              <A href={"/user/" + user().name + "/" + props.type + "/list?genre=" + genre.genre}>
+              <A href={"/user/" + user().name + "/" + props.type + "/list?genre=" + encodeURIComponent(genre.genre)}>
                 {genre.genre} <span>{Math.round(genre.count / props.total * 100)}%</span>
               </A>
             </li>

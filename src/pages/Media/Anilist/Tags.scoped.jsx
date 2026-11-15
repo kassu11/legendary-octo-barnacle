@@ -16,7 +16,7 @@ export const Tags = (props) => {
         break;
       }
       if (showSpoilers() || (!tag.isMediaSpoiler && !tag.isGeneralSpoiler)) {
-        tags.push(`theme=${tag.name}`);
+        tags.push(`theme=${encodeURIComponent(tag.name)}`);
       }
     }
     return tags;
@@ -45,7 +45,7 @@ export const Tags = (props) => {
                 }} 
                 title={tag.description}
               >
-                <A href={ "/ani/search/" + props.type.toLowerCase() + "?theme=" + tag.name + "&rank=" + tag.rank}>{tag.name} <span>{tag.rank}%</span></A>
+                <A href={ "/ani/search/" + props.type.toLowerCase() + "?theme=" + encodeURIComponent(tag.name) + "&rank=" + tag.rank}>{tag.name} <span>{tag.rank}%</span></A>
               </li>
             )}</For>
           </ol>

@@ -1,30 +1,30 @@
 query {
-  trending: Page(page: 1, perPage: 6) {
+  trending: Page(page: 1, perPage: 7) {
     media(sort: TRENDING_DESC, type: MANGA, isAdult: false) {
       ...media
     }
   }
-  popular: Page(page: 1, perPage: 6) {
+  popular: Page(page: 1, perPage: 7) {
     media(sort: POPULARITY_DESC, type: MANGA, isAdult: false) {
       ...media
     }
   }
-  finishedManga: Page(page: 1, perPage: 6) {
+  finishedManga: Page(page: 1, perPage: 7) {
     media(sort: END_DATE_DESC, type: MANGA, isAdult: false, status: FINISHED, format: MANGA) {
       ...media
     }
   }
-  finishedNovel: Page(page: 1, perPage: 6) {
+  finishedNovel: Page(page: 1, perPage: 7) {
     media(sort: END_DATE_DESC, type: MANGA, isAdult: false, status: FINISHED, format: NOVEL) {
       ...media
     }
   }
-  manhwa: Page(page: 1, perPage: 6) {
+  manhwa: Page(page: 1, perPage: 7) {
     media(sort: POPULARITY_DESC type: MANGA countryOfOrigin: KR isAdult: false) {
       ...media
     }
   }
-  novel: Page(page: 1, perPage: 6) {
+  novel: Page(page: 1, perPage: 7) {
     media(sort: POPULARITY_DESC type: MANGA isAdult: false format: NOVEL) {
       ...media
     }

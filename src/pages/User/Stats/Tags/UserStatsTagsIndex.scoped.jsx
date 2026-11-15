@@ -106,7 +106,7 @@ function StatsTags(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/ani/search/" + params.type + "?onList=false&theme=" + genre.tag.name}>
+                  <A href={"/ani/search/" + params.type + "?onList=false&theme=" + encodeURIComponent(genre.tag.name)}>
                     {genre.tag.name}
                   </A>
                 </h2>
@@ -142,7 +142,7 @@ function StatsTags(props) {
             <div class="wrapper tags">
               <div className="flex-space-between">
                 <p>User {params.type}</p>
-                <A href={"/user/" + user().name + "/" + params.type + "/list?theme=" + genre.tag.name}>Show all</A>
+                <A href={"/user/" + user().name + "/" + params.type + "/list?tag=" + encodeURIComponent(genre.tag.name)}>Show all</A>
               </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>

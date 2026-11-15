@@ -4,12 +4,12 @@ query (
   $nextSeason: MediaSeason
   $nextYear: Int
 ) {
-  trending: Page(page: 1, perPage: 6) {
+  trending: Page(page: 1, perPage: 7) {
     media(sort: TRENDING_DESC, type: ANIME, isAdult: false) {
       ...media
     }
   }
-  season: Page(page: 1, perPage: 6) {
+  season: Page(page: 1, perPage: 7) {
     media(
       season: $season
       seasonYear: $seasonYear
@@ -20,7 +20,7 @@ query (
       ...media
     }
   }
-  nextSeason: Page(page: 1, perPage: 6) {
+  nextSeason: Page(page: 1, perPage: 7) {
     media(
       season: $nextSeason
       seasonYear: $nextYear
@@ -31,12 +31,12 @@ query (
       ...media
     }
   }
-  finished: Page(page: 1, perPage: 6) {
+  finished: Page(page: 1, perPage: 7) {
     media(sort: END_DATE_DESC, type: ANIME, isAdult: false, status: FINISHED) {
       ...media
     }
   }
-  popular: Page(page: 1, perPage: 6) {
+  popular: Page(page: 1, perPage: 7) {
     media(sort: POPULARITY_DESC, type: ANIME, isAdult: false) {
       ...media
     }

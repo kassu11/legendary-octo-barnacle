@@ -15,7 +15,7 @@ import "./MediaRowCard.scoped.css";
  * @param {Object} props
  * @param {Object} [props.media] Anilist media, card renders as an empty skeleton without it
  * @param {number} [props.rank] Rank shown on the left side of the card
- * @param {string} [props.type] Media type used in the genre links
+ * @param {string} [props.type] Search page type (anime, manga or media) used in the genre links, defaults to the media type
  * @param {boolean} [props.loading] Grays out the card while new data is being fetched
  * @param {boolean} [props.subgrid] Columns come from the parent grid, so they line up with the other row cards. The parent grid has to be a size container
  */
@@ -60,7 +60,7 @@ function MediaRowCardContent(props) {
           <ol class="genre-list">
             <For each={props.media.genres}>{genre => (
               <li class="genre">
-                <A scoped href={`/ani/search${props.type ? ("/" + props.type) : ""}?genre=` + genre}>{genre}</A>
+                <A scoped href={`/ani/search/${(props.type || props.media.type || "media").toLowerCase()}?theme=${encodeURIComponent(genre)}`}>{genre}</A>
               </li>
             )}</For>
           </ol>
