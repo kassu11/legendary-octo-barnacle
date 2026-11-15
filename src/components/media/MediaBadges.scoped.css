@@ -4,10 +4,6 @@
     flex-wrap: wrap;
     gap: 4px;
 
-    @media (width < 40em) {
-      font-size: 0.75rem;
-    }
-
     &:empty {
       display: none;
     }

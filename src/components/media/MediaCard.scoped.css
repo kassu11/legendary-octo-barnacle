@@ -11,6 +11,10 @@
     outline-offset: 16px;
     isolation: isolate;
 
+    @media (width < 40em) {
+      font-size: var(--fs-300);
+    }
+
     &.zoom-in {
       animation: .3s linear load-card-in;
     }
