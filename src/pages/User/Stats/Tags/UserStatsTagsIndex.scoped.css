@@ -24,8 +24,9 @@
     }
 
     .grid-reel-auto-fill {
-      --grid-max-column-count: 5.5;
-      --grid-column-width: 9rem;
+      --max-column-count: 5.3;
+      --column-width: 5.25rem;
+      --spill-ratio: .3;
       padding-bottom: 1rem;
       background-color: var(--background-350-old);
 

@@ -2,11 +2,10 @@
   .grid-reel-auto-fill {
     padding-block: 16px;
     padding-bottom: 5rem;
-    --spill-ratio: 1;
+    --spill-ratio: 0;
     /* Fits 7 columns at the full browse page width */
-    --grid-column-width: 16rem;
-    --padding: 64px;
-    --spill-ration-correction-padding: 0px;
+    --column-width: 10rem;
+    --padding-inline: 64px;
     --gap: 32px;
     --line-clamp: 2;
     overflow-y: clip;
@@ -26,8 +25,9 @@
     }
 
     @media (width < 40em) {
-      --padding: 16px;
+      --padding-inline: 16px;
       --gap: 8px;
+      --column-width: 6.5rem;
     }
   }
 }

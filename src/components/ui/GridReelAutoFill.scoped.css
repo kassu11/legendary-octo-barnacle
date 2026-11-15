@@ -1,37 +1,31 @@
 @layer component {
   div {
-    --scoped-100: 100% + var(--spill-ration-correction-padding, var(--padding, 1rem));
-    --scoped-round-distance: round(up, var(--scoped-100), var(--grid-column-width, 20rem));
+    --column-width: 20rem;
+    --max-column-count: 999;
+    --spill-ratio: 0.5;
+    --gap: 8px;
+    --padding-inline: 16px;
+    --padding-left: var(--padding-inline);
+    --padding-right: var(--padding-inline);
+
+    /* The columns fill the content box: count columns with gaps between them, then the spilled part of the next column. */
+    /* The gap before the spilled column only exists when there is a spill, so a spill of 0 ends on the padding border */
+    --scoped-gap-count: (var(--scoped-count) - 1 + sign(var(--spill-ratio)));
+    /* Whole columns that fit at --column-width or wider, solved from: count * (width + gap) - gap + spill gap + spill * width <= 100% */
+    --scoped-fit-count: calc(round(down, 100% + var(--gap) * (1 - sign(var(--spill-ratio))) - var(--spill-ratio) * var(--column-width), var(--column-width) + var(--gap)) / (var(--column-width) + var(--gap)));
+    /* --max-column-count is the visible count including the spilled column */
+    --scoped-count: clamp(1, var(--scoped-fit-count), var(--max-column-count) - var(--spill-ratio));
+
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: calc(
-      min(
-        /* This part calculates the column size using: (100% - gap * (n-1)) / n */
-                                                                              /* This variables makes it possible to cap column count, default 99 (uncapped) */
-                                                                                                                                                                                           /* This part will add a very large number if the container width is too small or big */
-                                                                                                                                                                                           /* This will invalidate the whole row, because we are inside min function (2*size > width >= size) */
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 0), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 1), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 1) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 1)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 1), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 2), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 2) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 2)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 2), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 3), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 3) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 3)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 3), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 4), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 4) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 4)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 4), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 5), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 5) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 5)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 5), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 6), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 6) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 6)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 6), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 7), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 7) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 7)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 7), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 8), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 8) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 8)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 8), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 9), var(--grid-max-column-count, 99))  + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 9) * 9999 , (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 9)  * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 9), var(--grid-max-column-count, 99))))  / min((var(--spill-ratio, .5) + 10), var(--grid-max-column-count, 99)) + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 10) * 9999, (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 10) * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 10), var(--grid-max-column-count, 99)))) / min((var(--spill-ratio, .5) + 11), var(--grid-max-column-count, 99)) + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 11) * 9999, (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 11) * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 11), var(--grid-max-column-count, 99)))) / min((var(--spill-ratio, .5) + 12), var(--grid-max-column-count, 99)) + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 12) * 9999, (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 12) * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 12), var(--grid-max-column-count, 99)))) / min((var(--spill-ratio, .5) + 13), var(--grid-max-column-count, 99)) + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 13) * 9999, (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 13) * -9999),
-        ((var(--scoped-100)) - (var(--gap, .5rem) * min((var(--spill-ratio, .5) + 13), var(--grid-max-column-count, 99)))) / min((var(--spill-ratio, .5) + 14), var(--grid-max-column-count, 99)) + max((var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 14) * 9999, (var(--scoped-round-distance) - var(--grid-column-width, 20rem) * 14) * -9999),
-        var(--grid-column-width, 20rem) * 2
-      )
-    );
+    grid-auto-columns: calc((100% - var(--gap) * var(--scoped-gap-count)) / (var(--scoped-count) + var(--spill-ratio)));
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding-inline: var(--padding, 1rem);
-    scroll-padding: var(--padding, 1rem);
-    gap: var(--gap, .5rem);
+    padding-left: var(--padding-left);
+    padding-right: var(--padding-right);
+    scroll-padding-left: var(--padding-left);
+    scroll-padding-right: var(--padding-right);
+    gap: var(--gap);
     /* Don't ask, but background color fixes the scrollbar for Chromium: 136.0.7103.93 */
     background-color: inherit;
 

@@ -30,7 +30,8 @@
         container-name: user-favourites;
 
         .grid-reel-auto-fill {
-          --grid-column-width: 10rem;
+          --column-width: 6.25rem;
+          --spill-ratio: .3;
           @media (width >= 55em) {
             grid-template-columns: repeat(5, 1fr);
             grid-auto-flow: row;
