@@ -336,6 +336,7 @@ export function SearchPage() {
       var key = pagelessCacheKey();
       var currentPagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...aniVariables, page: "pageless3"});
       if (currentPagelessFetcher.cacheKey !== key) return; // Pageless fetcher might load slower, so cancel fetcher if pagelessCacheKey is missing/different
+      if (!anilistSearchFetcher) debounce = 0; // Dont debounce the first initial page load
 
       anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, { ...aniVariables, page: currentPage }, signal);
     }
