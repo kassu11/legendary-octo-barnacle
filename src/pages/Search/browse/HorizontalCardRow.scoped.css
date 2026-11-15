@@ -10,19 +10,6 @@
     --line-clamp: 2;
     overflow-y: clip;
     scrollbar-width: none;
-    scroll-behavior: smooth;
-    &.dragging {
-      scroll-behavior: unset;
-    }
-
-    &.scrollable, &.scrollable .media-card {
-      cursor: grab;
-      user-select: none;
-
-      &:active {
-        cursor: grabbing;
-      }
-    }
 
     @media (width < 40em) {
       --padding-inline: 16px;

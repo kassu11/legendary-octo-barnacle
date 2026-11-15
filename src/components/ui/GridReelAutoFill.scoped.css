@@ -34,5 +34,26 @@
     > _* {
       scroll-snap-align: start;
     }
+
+    &.scrollable {
+      cursor: grab;
+      user-select: none;
+
+      /* eslint-disable-next-line local-css/no-unscoped-selector */
+      _* {
+        cursor: grab;
+      }
+    }
+
+    &.dragging {
+      scroll-snap-type: none;
+      scroll-behavior: auto;
+      cursor: grabbing;
+
+      /* eslint-disable-next-line local-css/no-unscoped-selector */
+      _* {
+        cursor: grabbing;
+      }
+    }
   }
 }
