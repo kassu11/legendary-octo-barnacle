@@ -20,7 +20,10 @@
     grid-auto-flow: column;
     grid-auto-columns: calc((100% - var(--gap) * var(--scoped-gap-count)) / (var(--scoped-count) + var(--spill-ratio)));
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    /* Snapping and momentum are done in JS. Horizontal touch drags are handled by the JS, vertical ones scroll the page */
+    touch-action: pan-y pinch-zoom;
+    overscroll-behavior-x: contain;
+    scroll-behavior: auto;
     padding-left: var(--padding-left);
     padding-right: var(--padding-right);
     scroll-padding-left: var(--padding-left);
@@ -29,16 +32,11 @@
     /* Don't ask, but background color fixes the scrollbar for Chromium: 136.0.7103.93 */
     background-color: inherit;
 
-    /* The children come from the caller, so they don't have this file's scope */
-    /* eslint-disable-next-line local-css/no-unscoped-selector */
-    > _* {
-      scroll-snap-align: start;
-    }
-
     &.scrollable {
       cursor: grab;
       user-select: none;
 
+      /* The children come from the caller, so they don't have this file's scope */
       /* eslint-disable-next-line local-css/no-unscoped-selector */
       _* {
         cursor: grab;
@@ -46,8 +44,6 @@
     }
 
     &.dragging {
-      scroll-snap-type: none;
-      scroll-behavior: auto;
       cursor: grabbing;
 
       /* eslint-disable-next-line local-css/no-unscoped-selector */
