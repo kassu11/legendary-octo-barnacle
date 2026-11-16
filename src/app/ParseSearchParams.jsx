@@ -6,7 +6,7 @@ import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/
 import { ParsedSearchParamsContext } from "@/state/providers";
 import { translateInternalApiParams } from "@/api/apiTranslations";
 import { getSearchHeaderParams } from "@/utils/searchHeaderUtils";
-import { searchPageGroupSeasonalEntriesByFormat, searchPageGroupTBAEntriesByFormat } from "@/state/globalState";
+import { searchPageGroupEntriesByFormat, searchPageGroupSeasonalEntriesByFormat,searchPageGroupTBAEntriesByFormat } from "@/state/globalState";
 
 const [searchStore, setSearchStore] = createStore({});
 
@@ -34,7 +34,8 @@ export function ParseSearchParams(props) {
     const filteredAge = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.age).filter(val => translateInternalApiParams.age[val])).sort();
     const filteredSeason = wrapToArray(searchParams.season).findLast(val => val in translateInternalApiParams.season);
 
-    const groupSeasonalEntriesByFormat = searchPageGroupSeasonalEntriesByFormat();
+    const groupEntriesByFormat = searchPageGroupEntriesByFormat();
+    const groupSeasonalEntriesByFormat =searchPageGroupSeasonalEntriesByFormat();
     const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
 
     Object.assign(obj, getSearchHeaderParams(header));
@@ -79,9 +80,10 @@ export function ParseSearchParams(props) {
     if (searchParams.lengthGreater) obj.lengthGreater = +wrapToArray(searchParams.lengthGreater).at(-1);
     if (searchParams.length && !obj.lengthLesser && !obj.lengthGreater) obj.length = +wrapToArray(searchParams.length).at(-1);
 
-    if (obj.seasonPage) {
-      obj.groupEntriesByFormat = header === "tba" ? groupTBAEntriesByFormat : groupSeasonalEntriesByFormat;
-    }
+    // Seasonal and TBA pages remember their own group by format choice, other pages share one
+    if (header === "tba") obj.groupEntriesByFormat = groupTBAEntriesByFormat;
+    else if (obj.seasonPage) obj.groupEntriesByFormat = groupSeasonalEntriesByFormat;
+    else obj.groupEntriesByFormat = groupEntriesByFormat;
 
     if (obj.groupEntriesByFormat) obj.sort = ["format", ...obj.sort];
 

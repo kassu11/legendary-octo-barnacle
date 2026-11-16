@@ -35,6 +35,34 @@ export function TwoStateToggleButton(props) {
   );
 }
 
+/**
+ * @param {Object} props
+ * @param {boolean} props.checked
+ * @param {() => void} props.onChange
+ * @param {string} props.label
+ */
+export function ToggleButton(props) {
+  const { isTouch } = useResponsive();
+
+  const handleClick = e => {
+    e.preventDefault();
+    props.onChange();
+  };
+
+  return (
+    <button onClick={handleClick} classList={{ active: !!props.checked }} aria-pressed={!!props.checked}>
+      <Show when={props.icon}>
+        <span class="icon">{props.icon}</span>
+      </Show>
+      <p>{props.label}</p>
+      <Checkbox scoped class="checkbox" checked={props.checked} />
+      <Show when={props.tooltip && !isTouch()}>
+        <Tooltip placements={["bottom", "top"]} delay={600}>{props.tooltip}</Tooltip>
+      </Show>
+    </button>
+  );
+}
+
 export function TwoStateToggle(props) {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();

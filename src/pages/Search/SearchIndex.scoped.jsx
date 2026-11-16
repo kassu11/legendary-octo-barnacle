@@ -6,7 +6,7 @@ import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFet
 import { createStore, produce, reconcile, unwrap } from "solid-js/store";
 import "./SearchIndex.scoped.css";
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
-import { searchPageCardStyle, setSearchPageGroupSeasonalEntriesByFormat, setSearchPageGroupTBAEntriesByFormat, tabTime } from "@/state/globalState";
+import { searchPageCardStyle, tabTime } from "@/state/globalState";
 import { useParsedSearchParams, useResponsive } from "@/state/providers";
 import { assertTruthy } from "@/utils/asserts";
 import { translateInternalApiParams } from "@/api/apiTranslations";
@@ -59,7 +59,8 @@ function createAnilistMediaQueryVariables() {
   obj.genres = themes.filter(g => genresObject.validGenres.has(g));
   obj.tags   = themes.filter(t => genresObject.validTags  .has(t));
 
-  if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: ["search_match"] });
+  // Grouping by format needs the format sort first, even when sorting by search match
+  if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: rest.groupEntriesByFormat ? ["format", "search_match"] : ["search_match"] });
   else mergeVariables(api, "sort", obj, rest);
 
   mergeVariables(api, "endDateGreater", obj, rest);
@@ -523,13 +524,7 @@ export function SearchPage() {
             </Show>
 
             <Show when={isSeasonHeader()}>
-              <SeasonControls
-                groupByFormat={parsedSearchParams().groupEntriesByFormat}
-                onGroupByFormatChange={() => {
-                  if (params.header === "tba") setSearchPageGroupTBAEntriesByFormat(v => !v);
-                  else setSearchPageGroupSeasonalEntriesByFormat(v => !v);
-                }}
-              />
+              <SeasonControls />
             </Show>
 
             <div class="search-results">
