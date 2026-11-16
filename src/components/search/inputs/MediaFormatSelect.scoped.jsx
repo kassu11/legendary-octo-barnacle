@@ -13,7 +13,7 @@ export function MediaFormatSelect() {
   const navigate = useNavigateAndSearch();
 
   const formatOptions = createMemo(() => {
-    const { type } = params;
+    const { type } = parsedSearchParams();
 
     const options = [];
 
