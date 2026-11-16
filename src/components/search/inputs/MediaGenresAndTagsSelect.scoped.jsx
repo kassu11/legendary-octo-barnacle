@@ -81,7 +81,7 @@ export function MediaGenresAndTagsSelect() {
   });
 
   return (
-    <Show when={params.type !== "media"}>
+    <Show when={parsedSearchParams().type !== "media"}>
       <FilterSelect
         param="theme"
         excludable

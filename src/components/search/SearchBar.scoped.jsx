@@ -1,5 +1,4 @@
-import { useParams } from "@solidjs/router";
-import { useResponsive } from "@/state/providers";
+import { useParsedSearchParams, useResponsive } from "@/state/providers";
 import "./SearchBar.scoped.css";
 import { MediaSortSelect } from "./inputs/MediaSortSelect.scoped.jsx";
 import { SearchActiveQueries, useActiveSearchQueries } from "./SearchActiveQueries.scoped";
@@ -18,7 +17,7 @@ import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
 import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
-import { MediaGroupByFormatToggle } from "./inputs/MediaGroupByFormatToggle";
+import { MediaGroupBySelect } from "./inputs/MediaGroupBySelect";
 import { LicensedIcon, OnListIcon } from "@/assets/icons.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
@@ -32,7 +31,7 @@ export function SearchBar(props) {
   return (
     <Show when={isMobilLarge()} fallback={
       <div class="search-bar">
-        <SearchFilters>
+        <SearchFilters typeSelect={props.typeSelect}>
           <FilterGroup title="Search" class="search">
             <FilterSearchInput />
           </FilterGroup>
@@ -43,7 +42,7 @@ export function SearchBar(props) {
       <div class="search-bar mobile">
         <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
-          <SearchFilters />
+          <SearchFilters typeSelect={props.typeSelect} />
         </MobileFilters>
       </div>
     </Show>
@@ -51,20 +50,22 @@ export function SearchBar(props) {
 }
 
 function SearchFilters(props) {
-  const params = useParams();
+  const parsedSearchParams = useParsedSearchParams();
 
   return (
     <FilterGroups>
       {props.children}
       <FilterGroup title="General">
         <MediaSortSelect />
-        <MediaTypeSelect />
+        <Show when={props.typeSelect}>
+          <MediaTypeSelect />
+        </Show>
         <MediaFormatSelect />
         <MediaStatusSelect />
-        <MediaGroupByFormatToggle />
+        <MediaGroupBySelect />
       </FilterGroup>
       <FilterGroup title="Release">
-        <Show when={params.type === "anime"}>
+        <Show when={parsedSearchParams().type === "anime"}>
           <MediaSeasonSelect />
         </Show>
         <MediaYearSelect />

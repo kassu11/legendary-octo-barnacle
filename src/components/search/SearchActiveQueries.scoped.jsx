@@ -57,7 +57,6 @@ const typeIcons = {
 export function useActiveSearchQueries() {
   const parsedSearchParams = useParsedSearchParams();
   const [searchParams] = useSearchParams();
-  const params = useParams();
 
   return createMemo(() => {
 
@@ -119,38 +118,38 @@ export function useActiveSearchQueries() {
 
 
     if (progress) {
-      if      (params.type === "anime") returnValue.push({ type: "progress", description: "Episodes: " + progress, query: { progress: undefined } });
-      else if (params.type === "manga") returnValue.push({ type: "progress", description: "Chapters: " + progress, query: { progress: undefined } });
+      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "progress", description: "Episodes: " + progress, query: { progress: undefined } });
+      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "progress", description: "Chapters: " + progress, query: { progress: undefined } });
       else                              returnValue.push({ type: "progress", description: "Ep/Ch: " +    progress, query: { progress: undefined } });
     }
 
     if (progressLesser) {
-      if      (params.type === "anime") returnValue.push({ type: "progressLesser", description: "Episodes<" + progressLesser, query: { progressLesser: undefined } });
-      else if (params.type === "manga") returnValue.push({ type: "progressLesser", description: "Chapters<" + progressLesser, query: { progressLesser: undefined } });
+      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "progressLesser", description: "Episodes<" + progressLesser, query: { progressLesser: undefined } });
+      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "progressLesser", description: "Chapters<" + progressLesser, query: { progressLesser: undefined } });
       else                              returnValue.push({ type: "progressLesser", description: "Ep/Ch<" +    progressLesser, query: { progressLesser: undefined } });
     }
 
     if (progressGreater) {
-      if      (params.type === "anime") returnValue.push({ type: "progressGreater", description: "Episodes>" + progressGreater, query: { progressGreater: undefined } });
-      else if (params.type === "manga") returnValue.push({ type: "progressGreater", description: "Chapters>" + progressGreater, query: { progressGreater: undefined } });
+      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "progressGreater", description: "Episodes>" + progressGreater, query: { progressGreater: undefined } });
+      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "progressGreater", description: "Chapters>" + progressGreater, query: { progressGreater: undefined } });
       else                              returnValue.push({ type: "progressGreater", description: "Ep/Ch>" +    progressGreater, query: { progressGreater: undefined } });
     }
 
     if (length) {
-      if      (params.type === "anime") returnValue.push({ type: "length", description: "Duration: " + length, query: { length: undefined } });
-      else if (params.type === "manga") returnValue.push({ type: "length", description: "Volumes: " + length, query: { length: undefined } });
+      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "length", description: "Duration: " + length, query: { length: undefined } });
+      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "length", description: "Volumes: " + length, query: { length: undefined } });
       else                              returnValue.push({ type: "length", description: "Duration / Volumes: " +    length, query: { length: undefined } });
     }
 
     if (lengthLesser) {
-      if      (params.type === "anime") returnValue.push({ type: "lengthLesser", description: "Duration<" + lengthLesser, query: { lengthLesser: undefined } });
-      else if (params.type === "manga") returnValue.push({ type: "lengthLesser", description: "Volumes<" + lengthLesser, query: { lengthLesser: undefined } });
+      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "lengthLesser", description: "Duration<" + lengthLesser, query: { lengthLesser: undefined } });
+      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "lengthLesser", description: "Volumes<" + lengthLesser, query: { lengthLesser: undefined } });
       else                              returnValue.push({ type: "lengthLesser", description: "Duration / Volumes<" +    lengthLesser, query: { lengthLesser: undefined } });
     }
 
     if (lengthGreater) {
-      if      (params.type === "anime") returnValue.push({ type: "lengthGreater", description: "Duration>" + lengthGreater, query: { lengthGreater: undefined } });
-      else if (params.type === "manga") returnValue.push({ type: "lengthGreater", description: "Volumes>" + lengthGreater, query: { lengthGreater: undefined } });
+      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "lengthGreater", description: "Duration>" + lengthGreater, query: { lengthGreater: undefined } });
+      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "lengthGreater", description: "Volumes>" + lengthGreater, query: { lengthGreater: undefined } });
       else                              returnValue.push({ type: "lengthGreater", description: "Duration / Volumes>" +    lengthGreater, query: { lengthGreater: undefined } });
     }
 

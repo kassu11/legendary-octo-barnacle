@@ -1,0 +1,20 @@
+query ($id: Int) {
+  Studio(id: $id) {
+    id
+    name
+    isAnimationStudio
+    favourites
+    isFavourite
+    @1: media(page: @2, perPage: 25) {
+      pageInfo {
+        perPage
+        lastPage
+        hasNextPage
+      }
+      nodes {
+        id
+      }
+    }
+    @3
+  }
+}

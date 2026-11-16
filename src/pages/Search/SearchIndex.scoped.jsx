@@ -1,168 +1,21 @@
 import { Navigate, useLocation, useParams } from "@solidjs/router";
-import { batch, createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { createEffect, createMemo, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import { getSeasonInfo } from "@/utils/seasonUtils";
 import { queries } from "@/api/api";
-import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/api/fetcherUtils";
-import { createStore, produce, reconcile, unwrap } from "solid-js/store";
+import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
+import { createStore, reconcile } from "solid-js/store";
 import "./SearchIndex.scoped.css";
-import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
-import { searchPageCardStyle, tabTime } from "@/state/globalState";
 import { useParsedSearchParams, useResponsive } from "@/state/providers";
-import { assertTruthy } from "@/utils/asserts";
-import { translateInternalApiParams } from "@/api/apiTranslations";
-import { concatMergeObjects } from "@/utils/objectUtils";
-import { isTypeArray } from "@/utils/arrayUtils";
-import { capitalize, formatMediaFormat } from "@/utils/formatUtils";
+import { capitalize } from "@/utils/formatUtils";
 import { getSearchHeaderTitle, isSeasonPageHeader } from "@/utils/searchHeaderUtils";
-import { SearchBar } from "./SearchBar.scoped";
-import { SearchActiveQueries } from "./SearchActiveQueries.scoped";
+import { SearchBar } from "@/components/search/SearchBar.scoped";
+import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
+import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
+import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
+import { createAnilistMediaQueryVariables, createJikanMediaQueryVariables } from "@/components/search/mediaSearchVariables";
 import { SeasonControls } from "./SeasonControls.scoped";
-import { CardStyleToggle } from "./CardStyleToggle.scoped";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { MediaCard } from "@/components/media/MediaCard.scoped";
-import { MediaRowCard } from "@/components/media/MediaRowCard.scoped";
-import { debounce } from "@solid-primitives/scheduled";
 import { BrowsePage } from "./browse/BrowsePage.scoped";
-import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
-import { usersData } from "./inputs/MediaUsersSelect.scoped";
-import { VirtualGrid } from "@/components/VirtualGrid.scoped";
-import { VirtualList } from "@/components/VirtualList.scoped";
-
-function createAnilistMediaQueryVariables() {
-  const parsedSearchParams = useParsedSearchParams();
-  const params = useParams();
-  const api = "ani";
-  const { type, mode } = params;
-
-  if (mode === "browse") return null;
-
-  const { q, year, rank, themes, users, excludedUsers, excludedThemes, sortBySearchMatch, externalSources, ...rest } = parsedSearchParams();
-
-  const obj = {
-    sort: [],
-    format: [],
-    sourceIn: [],
-    countryOfOriginIn: [],
-    licensedBy: [...externalSources],    // Anilist will work with invalid licenseIDs, so no need to validate
-    statusIn: [],
-    minimumTagRank: rank,
-    excludedThemes: [...excludedThemes], // Anilist will work with invalid exclusions, so no need to validate
-    search: q?.toLowerCase().trim() || undefined,
-    type: type === "media" ? undefined : type.toUpperCase(),
-    isAdult: false,
-  };
-
-  // Validate genres and tags
-  const genresObject    = themes.length ? anilistGenresAndTagsData() : null;
-  if (themes.length && !genresObject) return null;
-
-  obj.genres = themes.filter(g => genresObject.validGenres.has(g));
-  obj.tags   = themes.filter(t => genresObject.validTags  .has(t));
-
-  // Grouping by format needs the format sort first, even when sorting by search match
-  if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: rest.groupEntriesByFormat ? ["format", "search_match"] : ["search_match"] });
-  else mergeVariables(api, "sort", obj, rest);
-
-  mergeVariables(api, "endDateGreater", obj, rest);
-  mergeVariables(api, "status", obj, rest);
-  mergeVariables(api, "season", obj, rest);
-  mergeVariables(api, "format", obj, rest);
-  mergeVariables(api, "country", obj, rest);
-  mergeVariables(api, "onList", obj, rest);
-  mergeVariables(api, "licensed", obj, rest);
-  mergeVariables(api, "source", obj, rest);
-  mergeVariables(api, "age", obj, rest);
-  mergeVariables(api, "yearLesser", obj, rest);
-  mergeVariables(api, "yearGreater", obj, rest);
-  mergeVariables(api, "progressLesser", obj, rest);
-  mergeVariables(api, "progressGreater", obj, rest);
-  mergeVariables(api, "progress", obj, rest);
-  mergeVariables(api, "lengthLesser", obj, rest);
-  mergeVariables(api, "lengthGreater", obj, rest);
-  mergeVariables(api, "length", obj, rest);
-
-  const userMediaIds = (users?.length || excludedUsers?.length) && usersData();
-  let idNotIn = new Set();
-  for (let name of excludedUsers) {
-    name = name.toLowerCase();
-    if (!userMediaIds[name]) return null;
-    if (type === "anime" || type === "media") idNotIn = idNotIn.union(userMediaIds[name].anime);
-    if (type === "manga" || type === "media") idNotIn = idNotIn.union(userMediaIds[name].manga);
-  }
-
-  if (idNotIn.size) obj.idNotIn = [...idNotIn].sort((a, b) => a - b);
-
-  let idIn = new Set();
-  for (let name of users) {
-    name = name.toLowerCase();
-    if (!userMediaIds[name]) return null;
-    if (type === "anime" || type === "media") idIn = idIn.union(userMediaIds[name].anime);
-    if (type === "manga" || type === "media") idIn = idIn.union(userMediaIds[name].manga);
-  }
-
-  if (idIn.size) obj.idIn = [...idIn.difference(idNotIn)].sort((a, b) => a - b);
-
-
-  if (year) {
-    if (obj.season) obj.seasonYear = year;
-    else obj.year = year + "%";
-  }
-
-  for (const key in obj) {
-    if (obj[key] === undefined || obj[key]?.length === 0) delete obj[key];
-  }
-
-  return obj;
-}
-
-function createJikanMediaQueryVariables() {
-  const parsedSearchParams = useParsedSearchParams();
-  const params = useParams();
-  const { type, mode } = params;
-
-  if (mode === "browse" || type === "media") return null;
-
-  const { q, sfw = true } = parsedSearchParams();
-
-  const obj = {
-    q: q?.toLowerCase().trim() || undefined,
-    type,
-    sfw,
-  };
-
-  return obj;
-}
-
-function mergeVariables(api, key, to, from) {
-  if (isTypeArray(from[key])) {
-    from[key].forEach(value => mergeValue(api, key, to, value));
-  } else {
-    mergeValue(api, key, to, from[key]);
-  }
-}
-
-function mergeValue(api, key, to, value) {
-  let val;
-  if (!(value in translateInternalApiParams[key])) val = translateInternalApiParams[key]._default?.(api, value);
-  else val = translateInternalApiParams[key][value]?.[api];
-
-  concatMergeObjects(to, val);
-}
-
-const cachedResults = new Set();
-// Keeps track of the cards and format group headers the search results contained.
-// This is used when we go back in history, so we can prerender the right amount of skeleton cards under the right headers.
-// This prevent the browser from scrolling back to the top of the page, or to a wrong position
-const searchPageLayouts = {};
-
-const LOADER = 0;
-// Sometimes anilist or jikan can return a page that has a next page, but the current page is not "full"
-// The page can have 1 or 2 missing entries, and if these add up, they will make the index to page ratio broken
-// In there cases, we add the padding media, to make sure every page is the full expected page size
-// These elements are never to be rendered
-const MEDIA_PADDING_SPACE = 1;
-// Only high to low orders are ranked, because a "#1" on the lowest scored media would read as the best one
-const RANKED_SORTS = new Set(["popularity_desc", "score_desc", "score_desc_plus"]);
 
 export function SearchPage() {
   const params = useParams();
@@ -174,312 +27,52 @@ export function SearchPage() {
     document.title = `${capitalize(params.type)} search - LOB`;
   });
 
-  const anilistVariables = createMemo(createAnilistMediaQueryVariables);
-  const jikanVariables = createMemo(createJikanMediaQueryVariables);
-  const [page, setPage] = createSignal(1);
-  const setDebouncePage = debounce(setPage, 300);
+  const anilistVariables = createMemo(() => params.mode === "search" ? createAnilistMediaQueryVariables(parsedSearchParams()) : null);
+  const jikanVariables = createMemo(() => params.mode === "search" ? createJikanMediaQueryVariables(parsedSearchParams()) : null);
+
+  // Typing to the search bar on the browse page opens the search page, so the first letter is debounced like the rest of them
+  let cameFromBrowse = false;
+  createRenderEffect(on(() => params.mode, (_, previousMode) => cameFromBrowse = previousMode === "browse"));
+
   const [error, setError] = createSignal();
-  const [pagelessCacheLoading, setPagelessCacheLoading] = createSignal(false);
-  const [previousHistoryDummyData, setPreviousHistoryDummyData] = createSignal();
-  const [pagelessCacheData, setPagelessCacheData] = createStore({});
-  const pagelessCacheKey = createMemo(() => pagelessCacheData?.cacheKey);
-  // Pageless data is loaded asynchronously, so this key is known before it, already on the first render.
-  // Row lists use it to keep their item heights, so their height is right when navigating back
-  const rowListCacheKey = createMemo(() => anilistVariables() && createAnilistFetcher(queries.searchMedia, { ...anilistVariables(), page: "pageless3" }).cacheKey);
-
-  let highestPageMutated = 0;
-  let pagelessFetcher;
-  createRenderEffect(async () => {
-    const variables = anilistVariables();
-    if (!variables) return;
-
-    setPagelessCacheLoading(true);
-    setPage(1);
-
-    pagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...variables, page: "pageless3"});
-    if (untrack(previousHistoryDummyData) === undefined) setPreviousHistoryDummyData(searchPageLayouts[pagelessFetcher.cacheKey] || { media: Array(20).fill(LOADER), sectionTitles: {} });
-    let curKey = pagelessFetcher.cacheKey;
-    const data = await getFetcherValueFromStorage(pagelessFetcher);
-
-
-    if (curKey !== pagelessFetcher.cacheKey) return;
-    if (data?.data.fallback) fallbackPagelessCacheKey = curKey;
-
-    preventZoomIn.clear();
-
-    // TODO: Make a function to check when we can use long time cache
-    // For example when results are smaller than page size or when searching using years etc.
-    highestPageMutated = 0;
-    if (data) setPagelessCacheData(reconcile(data));
-    else {
-      setPagelessCacheData(reconcile({
-        data: { perPage: null, media: Array(20).fill(LOADER) },
-        name: "Anilist media pageless",
-        // Keep cache for a week and on rare cases we will keep the cache for longer
-        expires: new Date().setHours(24 * 7),
-        modified: new Date(),
-        cacheKey: pagelessFetcher.cacheKey
-      }));
-    }
-  });
-
-  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, groupEntriesByFormat, isFallbackSearch) => {
-    const start = (currentPage - 1) * perPage;
-    assertTruthy(start <= pagelessCacheData.data.media.length);
-    assertTruthy(media.length <= perPage);
-
-    media.forEach((m, i) => {
-      m.customSection = groupEntriesByFormat && pagelessCacheData.data.media[start + i - 1]?.format !== m.format ? m.format || "Format TBA" : false;
-      if (m.id === pagelessCacheData.data.media[start + i]?.id) setPagelessCacheData("data", "media", start + i, m); // fine grained update
-      else setPagelessCacheData("data", "media", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
-    });
-
-    if (hasNextPage && media.length < perPage) setPagelessCacheData("data", "media", { from: start + media.length, to: start + perPage }, MEDIA_PADDING_SPACE);
-
-    if (!hasNextPage) setPagelessCacheData("data", "media", produce(data => data.splice(start + media.length))); // Delete old and null elements
-    else if (currentPage > highestPageMutated && pagelessCacheData.data.media.at(-1) != LOADER) setPagelessCacheData("data", "media", produce(data => data.push(...Array(4).fill(LOADER)))); // Insert loading elements
-
-    setPagelessCacheData("data", "perPage", perPage);
-    setPagelessCacheData("data", "fallback", isFallbackSearch);
-
-    setFetcherValueToStorage(unwrap(pagelessCacheData));
-
-    // This is dump, but anilist will sometimes say we have another page, when we don't. In these very specific and rare cases, the user can first fetch page 3
-    // page 3 return 0 data, and tells nextPage is false
-    // Then user then fetches page 2, return 50 entries, and tells there is nextPage
-    // This will add loaders at the end, and because page 3 has already been fetched, the loaders will stay for ever
-    highestPageMutated = Math.max(highestPageMutated, currentPage);
-  };
-
-  // This is only used when the anilist search returns no values
-  // At least currently in 2026 AniList search is quite bad and for example when searching "shoshimi" you get no results
-  // Jikan will find "shoshimin" without problems, so if anilist does not give results try to search with jikan
-  // and convert the results to anilist results
-  function jikanFallbackSearch(variables, cacheKey, debounce) {
-    const signal = fallbackSearchController.abortAndRenew();
-    fallbackPagelessCacheKey = cacheKey;
-
-    const jiFetcher = createJsonGetFetcher(queries.myAnimeListMediaSearch, variables, signal);
-    sendFetcher(jiFetcher, {
-      name: "Jikan fallback search",
-      delay: debounce,
-      // debug: false,
-      onFetch: () => fallbackSearchController.disable(),
-      setValue: (jikanRes) => {
-        if (fallbackPagelessCacheKey !== cacheKey) return;
-        const signal = fallbackSearchAnilistController.abortAndRenew();
-
-        const pageInfo = jikanPagenationToPageInfo(jikanRes.data.pagination);
-        if (!jikanRes.data.data.length) {
-          mutatePageless([], pageInfo, false, true);
-          return;
-        }
-
-        const idMal_in = jikanRes.data.data.map(media => media.mal_id);
-        const aniFetcher = createAnilistFetcher(queries.anilistGetMediasWithIds(idMal_in.length), { idMal_in, type: variables.type.toUpperCase() }, signal);
-        sendFetcher(aniFetcher, {
-          name: "Anilist fallback search with mal ids",
-          onFetch: () => fallbackSearchAnilistController.disable(),
-          setValue: (aniRes, { settings }) => {
-            if (fallbackPagelessCacheKey !== cacheKey) return;
-            const key = untrack(pagelessCacheKey);
-            if (key !== cacheKey) return
-
-            const order = Object.fromEntries(idMal_in.map((v, i) => ([v, i])))
-            aniRes.data.data.page1.media.sort((a, b) => order[a.idMal] - order[b.idMal]);
-
-            if (aniRes.modified < tabTime && !settings.debug) return;
-            if (cachedResults.has(jikanRes.cacheKey)) return;
-            cachedResults.add(jikanRes.cacheKey);
-
-            aniRes.data.data.page1.media.forEach(media => {
-              // we don't want the debug enviroment to always fetchs, so we pretend like the data is always fresh
-              media.tabTime = settings.debug ? tabTime : aniRes.modified;
-              // media.tabTime = res.modified;
-            });
-
-            mutatePageless(aniRes.data.data.page1.media, pageInfo, false, true);
-          }
-        });
-      }
-    });
-  }
-
-  const [anilistSearchLoading, setAnilistSearchLoading] = createSignal(false);
+  const [anilistBrowseLoading, setAnilistBrowseLoading] = createSignal(false);
   const [anilistBrowseData, setAnilistBrowseData] = createStore({});
 
-  const anilistSearchController = createCleanUpAbortController();
-  const fallbackSearchController = createCleanUpAbortController(anilistSearchController);
-  const fallbackSearchAnilistController = createCleanUpAbortController(fallbackSearchController);
-  let anilistSearchFetcher, fallbackPagelessCacheKey;
-  let previousMode = null;
+  const anilistBrowseController = createCleanUpAbortController();
+  let anilistBrowseFetcher;
   createEffect(() => {
-    const signal = anilistSearchController.abortAndRenew();
-    let aniVariables, jiVariables;
-    let debounce = 400, currentPage;
+    const signal = anilistBrowseController.abortAndRenew();
 
     const { mode, type } = params;
-    const groupEntriesByFormat = parsedSearchParams().groupEntriesByFormat;
-    if (mode === "browse") {
-      const seasonInfo = getSeasonInfo();
-      if (type === "anime") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...seasonInfo }, signal)
-      else if (type === "manga") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseManga, {}, signal);
-      else if (type === "media") anilistSearchFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {}, signal);
-      else return;
-    }
+    if (mode !== "browse") return;
 
-    else if (mode === "search") {
-      aniVariables = anilistVariables();
-      jiVariables = jikanVariables();
-      currentPage = page();
-      if (!aniVariables) return;
-
-      var key = pagelessCacheKey();
-      var currentPagelessFetcher = createAnilistFetcher(queries.searchMedia, { ...aniVariables, page: "pageless3"});
-      if (currentPagelessFetcher.cacheKey !== key) return; // Pageless fetcher might load slower, so cancel fetcher if pagelessCacheKey is missing/different
-      if (!anilistSearchFetcher) debounce = 0; // Dont debounce the first initial page load
-
-      anilistSearchFetcher = createAnilistFetcher(queries.searchMedia, { ...aniVariables, page: currentPage }, signal);
-    }
-
-    if (mode === "browse") debounce = 0; // We don't debounce browse page
-    else if (previousMode === "browse" && aniVariables?.search?.length !== 1) debounce = 0; // We just jumped from browse to search, without typing to search bar
-    else if (cachedResults.has(anilistSearchFetcher.cacheKey)) debounce = 0; // We have already fetched this, so we don't need to debounce
-
-    if (mode === "search" && fallbackPagelessCacheKey === key && currentPage > 1) {
-      jikanFallbackSearch({ ...jiVariables, page: currentPage }, key, debounce);
-      return
-    }
+    const seasonInfo = getSeasonInfo();
+    if (type === "anime") anilistBrowseFetcher = createAnilistFetcher(queries.anilistBrowseAnime, { ...seasonInfo }, signal)
+    else if (type === "manga") anilistBrowseFetcher = createAnilistFetcher(queries.anilistBrowseManga, {}, signal);
+    else if (type === "media") anilistBrowseFetcher = createAnilistFetcher(queries.anilistBrowseMedia, {}, signal);
+    else return;
 
     setError(null);
-    previousMode = mode;
 
-    const expires = mode === "search" ? new Date().setHours(24 * 7) : undefined; // 1 week
-
-    sendAnilistFetcher(anilistSearchFetcher, {
-      name: "Anilist media search",
-      delay: debounce,
-      // debug: false,
-      expires,
+    sendAnilistFetcher(anilistBrowseFetcher, {
+      name: "Anilist media browse",
       onFetch: (_, { fetcher: f }) => {
-        if (f.cacheKey !== anilistSearchFetcher.cacheKey) return;
-        anilistSearchController.disable()
-        if (mode === "search") setPagelessCacheLoading(false);
+        if (f.cacheKey === anilistBrowseFetcher.cacheKey) anilistBrowseController.disable();
       },
-      onStart: () => setAnilistSearchLoading(true),
-      onStop: () => batch(() => {
-        setPreviousHistoryDummyData(null); // This value is used only ones the page load, then its cleared
-        setAnilistSearchLoading(false);
-      }),
+      onStart: () => setAnilistBrowseLoading(true),
+      onStop: () => setAnilistBrowseLoading(false),
       onError: async (response, { fetcher: f }) => {
-        if (f.cacheKey !== anilistSearchFetcher.cacheKey || response?.status !== 400) return;
+        if (f.cacheKey !== anilistBrowseFetcher.cacheKey || response?.status !== 400) return;
         try {
           var json = await response.json();
         } finally {
           setError(json || response); // Returns anilists own error list
         }
       },
-      setValue: (res, { fetcher: f, settings }) => {
-        // TODO: There is a slight bug, where tabTime can be fooled, by using another tab
-        // This updated the modified time inside cache, and simple tabTime check would seems like this data was fetched in this instant
-        if (f.cacheKey !== anilistSearchFetcher.cacheKey) return;
-
-        if (mode === "browse") {
-          setAnilistBrowseData(reconcile(res.data.data));
-        } else if (mode === "search") {
-          if (currentPagelessFetcher.cacheKey === untrack(pagelessCacheKey)) setPagelessCacheLoading(false);
-
-          if (res.data.data.Page.media.length === 0 && currentPage === 1 && aniVariables.search?.length) {
-            return jikanFallbackSearch({ ...jiVariables, page: 1 }, currentPagelessFetcher.cacheKey, 0);
-          }
-          // TODO: Make a function to check when we can use long time cache
-          // For example when results are smaller than page size or when searching using years etc.
-          // Now we will only allow fetches one time per tab
-          if (res.modified < tabTime && !settings.debug) return;
-          if (cachedResults.has(res.cacheKey)) return;
-          cachedResults.add(res.cacheKey);
-
-          const pageInfo = res.data.data.Page.pageInfo;
-          res.data.data.Page.media.forEach(media => {
-            // we don't want the debug enviroment to always fetchs, so we pretend like the data is always fresh
-            media.tabTime = settings.debug ? tabTime : res.modified;
-            // media.tabTime = res.modified;
-          });
-
-          const key = untrack(pagelessCacheKey);
-          if (key !== currentPagelessFetcher.cacheKey) return
-          mutatePageless(res.data.data.Page.media, pageInfo, groupEntriesByFormat, false);
-        }
+      setValue: (res, { fetcher: f }) => {
+        if (f.cacheKey === anilistBrowseFetcher.cacheKey) setAnilistBrowseData(reconcile(res.data.data));
       }
     });
-  });
-
-  const { signal } = createCleanUpAbortController();
-  let lastScolledElement, fetchPageTimeout;
-  window.addEventListener("scroll", handleScroll, { signal, passive: true });
-
-  onCleanup(() => {
-    const media = pagelessCacheData?.data?.media;
-    if (!media?.length) return;
-    // Padding media are kept, because they are not rendered
-    searchPageLayouts[pagelessCacheData.cacheKey] = {
-      media: media.map(m => m === MEDIA_PADDING_SPACE ? m : LOADER),
-      sectionTitles: getSectionTitles(media),
-    };
-  });
-
-  function handleScroll() {
-    const perPage = pagelessCacheData?.data?.perPage;
-    if (!perPage) return;
-    const targets = document.querySelectorAll("[data-fetch-index]");
-
-    if (!targets.length) return;
-    if (lastScolledElement == targets[targets.length - 1]) {
-      clearTimeout(fetchPageTimeout);
-      fetchPageTimeout = setTimeout(handleScroll, 500);
-      return;
-    }
-    lastScolledElement = targets[targets.length - 1];
-    const index = Number(lastScolledElement.dataset.fetchIndex);
-
-    const page = Math.floor(index / perPage) + 1;
-    // After the debounce retrigger page fetch, this should stop when no fetch triggers are left
-    setDebouncePage(() => {
-      handleScroll();
-      return page;
-    });
-  }
-
-  const preventZoomIn = new Set();
-
-  const mediaRanks = createMemo(() => {
-    const { sort, sortBySearchMatch } = parsedSearchParams();
-    const data = pagelessCacheData?.data;
-
-    // The sort param is not the real order when results come from search match or from the jikan fallback
-    // Grouping by format is also left out here, because then the first sort is "format"
-    if (!data || sortBySearchMatch || data.fallback || !(params.header === "top" || params.header === "popular") || !RANKED_SORTS.has(sort?.[0])) return [];
-
-    // Padding media are not real results, so they can't use up a rank. Loaders are counted because they hold the place of a real media
-    let rank = 0;
-    return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
-  });
-
-  const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()?.media || [];
-
-  // Format group header titles by the index of the media that starts the group
-  // The dummy history data has only loaders, so its titles were saved when leaving the page
-  const sectionTitles = createMemo(() => {
-    const media = searchMedia();
-    if (media === previousHistoryDummyData()?.media) return previousHistoryDummyData().sectionTitles;
-    return getSectionTitles(media);
-  });
-
-  // Each section starts from the first media or from a media that has a custom section (format group header)
-  // Sections are keyed by their start index, so the section elements stay the same when more pages are loaded
-  const mediaSectionStarts = createMemo(() => {
-    if (!searchMedia().length) return [];
-    return [0, ...Object.keys(sectionTitles()).map(Number).filter(i => i > 0).sort((a, b) => a - b)];
   });
 
   const isSeasonHeader = () => isSeasonPageHeader(params.header);
@@ -487,15 +80,15 @@ export function SearchPage() {
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
-      <SearchBar cardStyleToggle={!isMobilLarge() && !pageTitle()} />
+      <SearchBar typeSelect cardStyleToggle={!isMobilLarge() && !pageTitle()} />
       <Switch>
-        <Match when={error()?.errors}>
+        <Match when={params.mode === "browse" && error()?.errors}>
           <h2>Bad request error: </h2>
           <For each={error().errors}>{({ message }) => (
             <p>{message}</p>
           )}</For>
         </Match>
-        <Match when={error()}>
+        <Match when={params.mode === "browse" && error()}>
           <h2>Internal error</h2>
           <p>{error()}</p>
         </Match>
@@ -504,7 +97,7 @@ export function SearchPage() {
           <Show when={location.search || params.header}>
             <Navigate href={"/" + params.api + "/search/" + params.type + (params.header ? ("/" + params.header) : "") +  location.search} />
           </Show>
-          <BrowsePage cards={anilistBrowseData} loading={anilistSearchLoading()} />
+          <BrowsePage cards={anilistBrowseData} loading={anilistBrowseLoading()} />
         </Match>
         <Match when={params.mode === "search"}>
           <div class="search-page">
@@ -527,68 +120,16 @@ export function SearchPage() {
               <SeasonControls />
             </Show>
 
-            <div class="search-results">
-              <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
-                const end = () => mediaSectionStarts()[sectionIndex() + 1] ?? searchMedia().length;
-                const title = () => sectionTitles()[start] || (start === 0 && searchMedia()[0] === LOADER && parsedSearchParams().groupEntriesByFormat && "Loading");
-                // Padding media are never rendered, so they are left out of the grid
-                // Their indices are kept, because the index in the whole search result list is used to calculate the page to fetch
-                const mediaIndices = createMemo(() => {
-                  const indices = [];
-                  for (let i = start; i < end(); i++) {
-                    if (searchMedia()[i] !== MEDIA_PADDING_SPACE) indices.push(i);
-                  }
-                  return indices;
-                });
-                const sectionMedia = createMemo(() => mediaIndices().map(i => searchMedia()[i]));
-
-                return (
-                  <section>
-                    <Show when={title()}>
-                      <h2>{formatMediaFormat(title())}</h2>
-                    </Show>
-                    <Show when={searchPageCardStyle() === "rows"} fallback={
-                      <VirtualGrid scoped class="virtual-grid" each={sectionMedia()}>{(media, i) => {
-                        // Index in the whole search result list, not just inside this section
-                        const index = () => mediaIndices()[i()];
-                        // Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again
-                        const animate = !preventZoomIn.has(media.id);
-                        preventZoomIn.add(media.id);
-
-                        return (
-                          <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
-                        );
-                      }}</VirtualGrid>
-                    }>
-                      <VirtualList scoped class="virtual-list" cacheKey={rowListCacheKey() && `${rowListCacheKey()}-${start}`} each={sectionMedia()}>{(media, i) => {
-                        const index = () => mediaIndices()[i()];
-
-                        return (
-                          <MediaRowCard scoped class="row-card" type={params.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
-                        );
-                      }}</VirtualList>
-                    </Show>
-                  </section>
-                );
-              }}</For>
-            </div>
-
+            <MediaSearchResults
+              variables={anilistVariables()}
+              jikanVariables={jikanVariables()}
+              type={params.type}
+              ranked={params.header === "top" || params.header === "popular"}
+              debounceInitialFetch={cameFromBrowse && parsedSearchParams().q?.length === 1}
+            />
           </div>
         </Match>
       </Switch>
     </ErrorBoundary>
   );
-}
-
-function getSectionTitles(media) {
-  const titles = {};
-  media.forEach((m, i) => {
-    if (m?.customSection) titles[i] = m.customSection;
-  });
-  return titles;
-}
-
-function jikanPagenationToPageInfo(pagination) {
-  const { current_page, has_next_page, items: { per_page } } = pagination;
-  return { currentPage: current_page, hasNextPage: has_next_page, perPage: per_page };
 }

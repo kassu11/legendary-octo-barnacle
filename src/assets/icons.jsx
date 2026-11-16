@@ -374,6 +374,14 @@ export const SeasonIcon = props => (
   </OutlineSvg>
 );
 
+export const GroupIcon = props => (
+  <OutlineSvg {...props}>
+    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+    <path d="m2 12 9.17 4.16a2 2 0 0 0 1.66 0L22 12" />
+    <path d="m2 17 9.17 4.16a2 2 0 0 0 1.66 0L22 17" />
+  </OutlineSvg>
+);
+
 export const YearIcon = props => (
   <OutlineSvg {...props}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M8 2v4M16 2v4M3 10h18" /></OutlineSvg>
 );

@@ -20,9 +20,10 @@ export const authedUserId = createRoot(() => createMemo(() => authUserData()?.da
 export const [mainLoadingCount, setMainLoadingCount] = createSignal(0);
 export const [mediaPageAnilistData, setMediaPageAnilistData] = createSignal(undefined, { equals: false });
 
-export const [searchPageGroupEntriesByFormat, setSearchPageGroupEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-by-format", false);
-export const [searchPageGroupSeasonalEntriesByFormat, setSearchPageGroupSeasonalEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-seasons-by-format", true);
-export const [searchPageGroupTBAEntriesByFormat, setSearchPageGroupTBAEntriesByFormat] = createLocalStorageBooleanSignal("LOB-group-tba-by-format", false);
+// "none", "format", "season" or "year"
+export const [searchPageGroupBy, setSearchPageGroupBy] = createLocalStorageSignal("LOB-group-by", "none");
+export const [searchPageGroupSeasonalBy, setSearchPageGroupSeasonalBy] = createLocalStorageSignal("LOB-group-seasons-by", "format");
+export const [searchPageGroupTBABy, setSearchPageGroupTBABy] = createLocalStorageSignal("LOB-group-tba-by", "none");
 // "cards" or "rows"
 export const [searchPageCardStyle, setSearchPageCardStyle] = createLocalStorageSignal("LOB-search-card-style", "cards");
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
