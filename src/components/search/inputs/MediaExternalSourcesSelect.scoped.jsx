@@ -24,7 +24,8 @@ export function MediaExternalSourcesSelect() {
   createEffect(() => {
     const signal = externalSourcesController.abortAndRenew();
 
-    const { type, api } = params;
+    const { api } = params;
+    const { type } = parsedSearchParams();
     if (api === "mal" || type === "media") return;
 
     externalSourcesFetcher = createAnilistFetcher(queries.anilistExternalSources, { type: type.toUpperCase() }, signal);
@@ -54,7 +55,7 @@ export function MediaExternalSourcesSelect() {
     });
   });
 
-  const isLoadingSources = () => params.type !== externalSourcesData()?.type && externalSourcesLoading();
+  const isLoadingSources = () => parsedSearchParams().type !== externalSourcesData()?.type && externalSourcesLoading();
 
   const externalSourcesOptions = createMemo(() => {
     if (isLoadingSources()) return [];
@@ -67,11 +68,11 @@ export function MediaExternalSourcesSelect() {
   });
 
   return (
-    <Show when={params.type !== "media"}>
+    <Show when={parsedSearchParams().type !== "media"}>
       <FilterSelect
         param="externalSources"
         noEscapeCancel
-        tooltip={params.type === "anime" ? "Show only media available on these streaming services" : "Show only media readable on these sites"}
+        tooltip={parsedSearchParams().type === "anime" ? "Show only media available on these streaming services" : "Show only media readable on these sites"}
         each={externalSourcesOptions()}
         value={externalSourcesValues()}
         setSearchParams={query => setSearchParams(query, { replace: true })}

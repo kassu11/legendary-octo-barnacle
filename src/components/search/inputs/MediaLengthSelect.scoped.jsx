@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
@@ -7,7 +7,6 @@ import { LengthIcon } from "@/assets/icons.jsx";
 export function MediaLengthSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const params = useParams();
   const startLength = 1;
   const endLength = 220;
 
@@ -73,9 +72,9 @@ export function MediaLengthSelect() {
   };
 
   const text = () => {
-    if (params.type === "media") return "Duration / Volumes";
-    if (params.type === "anime") return "Duration";
-    if (params.type === "manga") return "Volumes";
+    if (parsedSearchParams().type === "media") return "Duration / Volumes";
+    if (parsedSearchParams().type === "anime") return "Duration";
+    if (parsedSearchParams().type === "manga") return "Volumes";
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
@@ -7,7 +7,6 @@ import { ProgressIcon } from "@/assets/icons.jsx";
 export function MediaProgressSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
-  const params = useParams();
   const startProgress = 1;
   const endProgress = 220;
 
@@ -73,9 +72,9 @@ export function MediaProgressSelect() {
   };
 
   const text = () => {
-    if (params.type === "media") return "Chapter / Episodes";
-    if (params.type === "anime") return "Episodes";
-    if (params.type === "manga") return "Chapters";
+    if (parsedSearchParams().type === "media") return "Chapter / Episodes";
+    if (parsedSearchParams().type === "anime") return "Episodes";
+    if (parsedSearchParams().type === "manga") return "Chapters";
   };
 
   return (

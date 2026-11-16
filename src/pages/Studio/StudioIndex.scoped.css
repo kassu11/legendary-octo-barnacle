@@ -1,36 +1,40 @@
 @layer layout {
+  /* Remove this background hack when styling refactoring is done */
+  /* eslint-disable-next-line local-css/no-unscoped-selector */
+  _body:has(*) {
+    background: var(--bg-dark);
+  }
+
   .studio-page {
-    width: min(85rem, calc(100% - 1rem));
     margin-inline: auto;
-    background-color: var(--background-400-old);
+    width: min(100% - 64px, 90rem);
 
-    @media (width < 40rem) {
-      --grid-column-width: 8rem;
+    @media (width < 60em) {
+      width: min(100% - 16px, 90rem);
     }
 
-    form {
+    .page-header {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 0 1rem;
-    }
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 1rem;
 
-    .cards {
-      display: grid;
-      list-style: none;
-      gap: 16px 32px;
-      padding: 0;
-      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-
-      @media (width < 50em) {
+      .toolbar {
+        display: flex;
+        align-items: center;
         gap: 16px;
-        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
-      }
-
-      .media-card {
-        margin-bottom: 5rem;
+        margin-left: auto;
+        flex-shrink: 0;
       }
     }
 
+    .mobile-active-queries {
+      margin-bottom: 1rem;
+
+      &:empty {
+        display: none;
+      }
+    }
   }
 }

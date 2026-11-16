@@ -3,9 +3,7 @@ import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
 import { SortIcon } from "@/assets/icons.jsx";
-
-const DEFAULT_SORT_ID = "popularity";
-const DEFAULT_SORT_VALUE = "popularity_desc";
+import { getDefaultSearchSort } from "@/utils/searchHeaderUtils.js";
 
 const sortIdOf = value => value.replace(/_desc|_plus/g, "");
 const isDescending = value => value.includes("_desc");
@@ -18,7 +16,7 @@ export function MediaSortSelect() {
   // Note: These sort options have been removed because they did not work: format, title_english_desc, title_native,
   // First value is the default direction of the select: numbers are high to low and text is A to Z
   const sortOptions = createMemo(() => {
-    const { type } = params;
+    const { type } = parsedSearchParams();
 
     const options = [
       { description: "Duration", id: "duration", type: "numeric", values: ["duration_desc_plus", "duration_plus",] },
@@ -65,7 +63,7 @@ export function MediaSortSelect() {
   const handleChange = ({ sort: tokens }) => {
     // Without a header the default is left out of the url, but a header has its own default sort that needs to be overridden
     if (!tokens.length) {
-      setSearchParams({ sort: params.header ? DEFAULT_SORT_VALUE : undefined }, { replace: true });
+      setSearchParams({ sort: params.header ? getDefaultSearchSort(params) : undefined }, { replace: true });
       return;
     }
 
@@ -83,6 +81,6 @@ export function MediaSortSelect() {
   };
 
   return (
-    <FilterSelect param="sort" sort defaultValue={DEFAULT_SORT_ID} noEscapeCancel tooltip="Order the results. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" each={sortOptions()} value={sortValues()} setSearchParams={handleChange} icon={<SortIcon />} button="Sort" />
+    <FilterSelect param="sort" sort defaultValue={sortIdOf(getDefaultSearchSort(params))} noEscapeCancel tooltip="Order the results. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" each={sortOptions()} value={sortValues()} setSearchParams={handleChange} icon={<SortIcon />} button="Sort" />
   );
 }

@@ -5,7 +5,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrayUtils";
 import { ParsedSearchParamsContext } from "@/state/providers";
 import { translateInternalApiParams } from "@/api/apiTranslations";
-import { getSearchHeaderParams } from "@/utils/searchHeaderUtils";
+import { getDefaultSearchSort, getSearchHeaderParams, getSearchMediaType } from "@/utils/searchHeaderUtils";
 import { searchPageGroupEntriesByFormat, searchPageGroupSeasonalEntriesByFormat,searchPageGroupTBAEntriesByFormat } from "@/state/globalState";
 
 const [searchStore, setSearchStore] = createStore({});
@@ -15,7 +15,8 @@ export function ParseSearchParams(props) {
   const params = useParams();
 
   const searchObject = createMemo(() => {
-    const { type, header } = params;
+    const { header } = params;
+    const type = getSearchMediaType(params);
 
     const obj = {
       q: decodeURIComponent(wrapToArray(searchParams.q).at(-1) || ""),
@@ -43,7 +44,7 @@ export function ParseSearchParams(props) {
     if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
 
     if (filteredSorts.length) obj.sort = filteredSorts;
-    else if (!obj.sort?.length) obj.sort = ["popularity_desc"];
+    else if (!obj.sort?.length) obj.sort = [getDefaultSearchSort(params)];
     if (filteredAge.length) obj.age = filteredAge;
     else obj.age = ["r"];
 

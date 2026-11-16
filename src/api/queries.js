@@ -39,7 +39,6 @@ export { default as anilistCurrentWachingMedia2 } from "./queries/anilistCurrent
 export { default as anilistUserMediaRelations } from "./queries/anilistUserMediaRelations.graphql";
 export { default as anilistMutateMedia } from "./queries/anilistMutateMedia.graphql";
 export { default as anilistStaffById } from "./queries/anilistStaffById.graphql";
-export { default as anilistStudioById } from "./queries/anilistStudioById.graphql";
 export { default as anilistCharacterById } from "./queries/anilistCharacterById.graphql";
 export { default as anilistBrowseMedia } from "./queries/anilistBrowseMedia.graphql";
 export { default as anilistBrowseManga } from "./queries/anilistBrowseManga.graphql";
@@ -62,6 +61,10 @@ export const anilistGetMediasWithIds = multiPageFetchQueryGenerator(anilistGetMe
 import { default as anilistGetCharacterIdsRaw } from "./queries/anilistGetCharacterIds.graphql";
 export const anilistGetCharacterIds = multiPageFetchQueryGenerator(anilistGetCharacterIdsRaw);
 
+import { default as anilistStudioMediaIdsRaw } from "./queries/anilistStudioMediaIds.graphql";
+// Studio media pages can only have 25 entries
+export const anilistStudioMediaIds = multiPageFetchQueryGenerator(anilistStudioMediaIdsRaw, 25);
+
 // Generic Jikan post request urls
 export const myAnimeListMediaById = ({ type, id }) => `https://api.tenrai.org/v1/${type}/${id}/full`;
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.tenrai.org/v1/${type}/${id}/characters`;
@@ -74,9 +77,10 @@ export const myAnimeListMediaSearch = ({ type, ...rest }) => `https://api.tenrai
 // The expected input contains @1, @2 and @3 texts.
 // We use these to split the text, repeat the right length of text, 
 // and place the page number in the right place
-function multiPageFetchQueryGenerator(query) {
-  return count => query.replace(/@1(.+)@3/, (_, query) => {
-    const callback = i => `page${++i}${query.replace("@2", i)}`;
-    return arrayUtils.ArrayFromRange(callback, Math.ceil(count / 50)).join("");
+// A page is generated for every pageSize entries of the count, starting from the firstPage
+function multiPageFetchQueryGenerator(query, pageSize = 50) {
+  return (count, firstPage = 1) => query.replace(/@1(.+)@3/, (_, query) => {
+    const callback = i => `page${i + firstPage}${query.replace("@2", i + firstPage)}`;
+    return arrayUtils.ArrayFromRange(callback, Math.ceil(count / pageSize)).join("");
   });
 }

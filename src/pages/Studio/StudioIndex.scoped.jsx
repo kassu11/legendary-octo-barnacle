@@ -1,244 +1,144 @@
-import {  useParams, useSearchParams } from "@solidjs/router";
-import { Switch, Match, Show, createSignal, createEffect, For, untrack } from "solid-js";
+import { useParams } from "@solidjs/router";
+import { createEffect, createMemo, createSignal, ErrorBoundary, Show } from "solid-js";
 import "./StudioIndex.scoped.css";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
-import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { queries } from "@/api/api.js";
-import { asserts } from "@/utils/utils.js";
-import { Intersection } from "@/components/utils/Intersection.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { createTimer } from "@/hooks/createTimer.js";
-import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { MediaCard } from "@/components/media/MediaCard.scoped";
+import { useParsedSearchParams, useResponsive } from "@/state/providers";
+import { SearchBar } from "@/components/search/SearchBar.scoped";
+import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
+import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
+import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
+import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
+
+// AniList has no studio filter for the media search, so all the media ids of the studio are fetched first and the search is done inside them.
+// Studio media pages have only 25 entries and their lastPage is capped, so pages are fetched in batches until there is no next page
+const STUDIO_MEDIA_PAGES_PER_FETCH = 40;
+const STUDIO_MEDIA_PAGE_SIZE = 25;
+
+const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id === b[i]);
 
 export function Studio() {
   const params = useParams();
-  const [searchParams, _setSearchParams] = useSearchParams();
-  const triggerSearchParams = leadingAndTrailing(debounce, _setSearchParams, 300);
-  const [variables, setVariables] = createSignal();
-  const [showYears, setShowYears] = createSignal(true);
+  const parsedSearchParams = useParsedSearchParams();
+  const { isMobilLarge } = useResponsive();
+  const [studio, setStudio] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
-  const [anilistStudioMediaTime, startAnilistStudioMediaTimer, stopAnilistStudioMediaTimer] = createTimer();
-  const [anilistStudioMediaData, setAnilistStudioMediaData] = createSignal(undefined, { equals: false });
-
-  const anilistStudioMediaController = createCleanUpAbortController();
-  let anilistStudioMediaFetcher;
-  createEffect(() => {
-    const signal = anilistStudioMediaController.abortAndRenew();
-
-    const vars = variables();
-    if (!vars) return;
-
-    anilistStudioMediaFetcher = createAnilistFetcher(queries.anilistStudioById, { 
-        ...vars,
-        "page": vars.page || 1,
-        "sort": vars.sort || "START_DATE_DESC",
-        "onList": vars.onList,
-        id: params.id
-      }, signal);
-
-    sendAnilistFetcher(anilistStudioMediaFetcher, {
-      name: "Anilist studio media",
-      onFetch: () => anilistStudioMediaController.disable(),
-      onStart: startAnilistStudioMediaTimer,
-      onStop: stopAnilistStudioMediaTimer,
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey !== anilistStudioMediaFetcher.cacheKey) return;
-        setAnilistStudioMediaData(res);
-        setFavourite(res.data.data.Studio.isFavourite ?? false);
-      }
-    });
-  });
-
-  const mutateCache = mutate => {
-    if(isTypeFunction(mutate)) mutate = mutate(untrack(anilistStudioMediaData));
-    setFetcherValueToStorage(mutate);
-  }
+  // Sorted ids of all the studio media, undefined until every batch has loaded
+  const [studioMediaIds, setStudioMediaIds] = createSignal(undefined, { equals: sameIds });
 
   createEffect(() => {
-    setVariables({
-      onList: searchParams.list ? searchParams.list === "true" : undefined,
-      sort: searchParams.sort,
-    });
+    document.title = `${studio()?.data.data.Studio.name || "Studio"} - LOB`;
   });
+
+  const studioMediaIdsController = createCleanUpAbortController();
+  let currentStudioId;
+  createEffect(() => {
+    const signal = studioMediaIdsController.abortAndRenew();
+    const studioId = currentStudioId = params.id;
+    setStudioMediaIds(undefined);
+
+    // Ids of each batch, the cached and the fetched response can both fill the same batch
+    const batches = [];
+    const requestedBatches = new Set();
+    let lastBatchIndex;
+
+    const fetchBatch = batchIndex => {
+      if (requestedBatches.has(batchIndex)) return;
+      requestedBatches.add(batchIndex);
+
+      const firstPage = batchIndex * STUDIO_MEDIA_PAGES_PER_FETCH + 1;
+      const fetcher = createAnilistFetcher(queries.anilistStudioMediaIds(STUDIO_MEDIA_PAGES_PER_FETCH * STUDIO_MEDIA_PAGE_SIZE, firstPage), { id: studioId }, signal);
+
+      sendAnilistFetcher(fetcher, {
+        name: "Anilist studio media ids",
+        onFetch: () => studioMediaIdsController.disable(),
+        setValue: res => {
+          if (studioId !== currentStudioId) return;
+
+          const { info, pages } = splitStudioResponse(res.data.data.Studio);
+          if (batchIndex === 0) {
+            setStudio(res);
+            setFavourite(info.isFavourite ?? false);
+          }
+
+          batches[batchIndex] = pages.flatMap(page => page.nodes.map(node => node.id));
+
+          if (pages.at(-1)?.pageInfo.hasNextPage) {
+            if (lastBatchIndex <= batchIndex) lastBatchIndex = undefined;
+            fetchBatch(batchIndex + 1);
+          } else {
+            // Studio can have less media than before, so the batches after this are left out
+            lastBatchIndex = batchIndex;
+          }
+
+          if (lastBatchIndex === undefined) return;
+          const loadedBatches = Array.from({ length: lastBatchIndex + 1 }, (_, i) => batches[i]);
+          if (loadedBatches.includes(undefined)) return;
+          setStudioMediaIds([...new Set(loadedBatches.flat())].sort((a, b) => a - b));
+        }
+      });
+    };
+
+    fetchBatch(0);
+  });
+
+  const anilistVariables = createMemo(() => {
+    const ids = studioMediaIds();
+    if (!ids) return null;
+    return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
+  });
+
+  const studioInfo = () => studio() && splitStudioResponse(studio().data.data.Studio).info;
+
+  const mutateCache = isFavourite => {
+    const res = studio();
+    res.data.data.Studio.isFavourite = isFavourite;
+    setFetcherValueToStorage(res);
+  };
 
   return (
-    <div class="studio-page">
-      <Show when={anilistStudioMediaData()}>
-        <div class="flex-space-between">
-          <div>
-            <p>{formatMSToString(anilistStudioMediaTime())}</p>
-            <h1>{anilistStudioMediaData()?.data.data.Studio.name}</h1>
+    <ErrorBoundary fallback="Studio page has crashed">
+      <SearchBar />
+      <div class="studio-page">
+        <div class="page-header">
+          <h1>{studioInfo()?.name}</h1>
+          <div class="toolbar">
+            <Show when={studioInfo()}>
+              <FavouriteToggle
+                checked={favourite()}
+                variableId={params.id}
+                idType="STUDIO"
+                anilistValue={studioInfo().favourites}
+                onChange={setFavourite}
+                mutateCache={mutateCache}
+              />
+            </Show>
+            <CardStyleToggle />
           </div>
-          <FavouriteToggle 
-            checked={favourite()} 
-            variableId={params.id} 
-            idType="STUDIO"
-            anilistValue={anilistStudioMediaData()?.data.data.Studio.favourites} 
-            onChange={setFavourite} 
-            mutateCache={(isFavourite) => {
-              mutateCache(res => {
-                res.data.data.Studio.isFavourite = isFavourite;
-                return res;
-              });
-            }} 
-          />
         </div>
-        <form onSubmit={e => e.preventDefault()}>
-          <label> 
-            <input type="checkbox" checked={showYears()} onChange={e => setShowYears(e.target.checked)}/>
-            {" "}Show years
-          </label>
-          <div>
-            <label> 
-              <input type="checkbox" name="list" value="false" checked={searchParams.list === "false"} onChange={e => triggerSearchParams({list: e.target.checked ? e.target.value : undefined})}/>
-              {" "}Hide from my list
-            </label>
-            <br />
-            <label> 
-              <input type="checkbox" name="list" value="true" checked={searchParams.list === "true"} onChange={e => triggerSearchParams({list: e.target.checked ? e.target.value : undefined})}/>
-              {" "}Only show my list
-            </label>
+
+        <Show when={isMobilLarge()}>
+          <div class="mobile-active-queries">
+            <SearchActiveQueries singleRow />
           </div>
-          <select name="sort" value={searchParams.sort || ""} onChange={e => triggerSearchParams({sort: e.target.value})}>
-            <option value="DURATION">DURATION</option>
-            <option value="DURATION_DESC">DURATION_DESC</option>
-            <option value="END_DATE">END_DATE</option>
-            <option value="END_DATE_DESC">END_DATE_DESC</option>
-            <option value="EPISODES">EPISODES</option>
-            <option value="EPISODES_DESC">EPISODES_DESC</option>
-            <option value="FAVOURITES">FAVOURITES</option>
-            <option value="FAVOURITES_DESC">FAVOURITES_DESC</option>
-            <option value="FORMAT">FORMAT</option>
-            <option value="FORMAT_DESC">FORMAT_DESC</option>
-            <option value="ID">ID</option>
-            <option value="ID_DESC">ID_DESC</option>
-            <option value="POPULARITY">POPULARITY</option>
-            <option value="POPULARITY_DESC">POPULARITY_DESC</option>
-            <option value="SCORE">SCORE</option>
-            <option value="SCORE_DESC">SCORE_DESC</option>
-            <option value="START_DATE">START_DATE</option>
-            <option value={searchParams.sort === "START_DATE_DESC" ? "START_DATE_DESC" : ""}>START_DATE_DESC</option>
-            <option value="STATUS">STATUS</option>
-            <option value="STATUS_DESC">STATUS_DESC</option>
-            <option value="TITLE_ENGLISH">TITLE_ENGLISH</option>
-            <option value="TITLE_ENGLISH_DESC">TITLE_ENGLISH_DESC</option>
-            <option value="TITLE_NATIVE">TITLE_NATIVE</option>
-            <option value="TITLE_NATIVE_DESC">TITLE_NATIVE_DESC</option>
-            <option value="TITLE_ROMAJI">TITLE_ROMAJI</option>
-            <option value="TITLE_ROMAJI_DESC">TITLE_ROMAJI_DESC</option>
-            <option value="TRENDING">TRENDING</option>
-            <option value="TRENDING_DESC">TRENDING_DESC</option>
-            <option value="UPDATED_AT">UPDATED_AT</option>
-            <option value="UPDATED_AT_DESC">UPDATED_AT_DESC</option>
-          </select>
-        </form>
-        <ol class="cards">
-          <CharacterMediaPage variables={variables()} showYears={showYears} nestLevel={1} />
-        </ol>
-      </Show>
-    </div>
-  )
-} 
-
-function CharacterMediaPage(props) {
-  const params = useParams();
-  const [variables, setVariables] = createSignal(undefined);
-  const [anilistStudioMediaLoading, setAnilistStudioMediaLoading] = createSignal(false);
-  const [anilistStudioMediaData, setAnilistStudioMediaData] = createSignal(undefined, { equals: false });
-  const anilistStudioMediaController = createCleanUpAbortController();
-  let anilistStudioMediaFetcher;
-
-  createEffect(() => {
-    const signal = anilistStudioMediaController.abortAndRenew();
-
-    const {nestLevel} = props;
-    const vars = nestLevel === 1 ? props.variables : variables();
-    if (!vars) return;
-
-
-    anilistStudioMediaFetcher = createAnilistFetcher(queries.anilistStudioById, { 
-        ...vars,
-        "page": vars.page || 1,
-        "sort": vars.sort || "START_DATE_DESC",
-        "onList": vars.onList,
-        id: params.id
-      }, signal);
-
-    sendAnilistFetcher(anilistStudioMediaFetcher, {
-      name: "Anilist studio media",
-      onFetch: () => anilistStudioMediaController.disable(),
-      onStart: () => setAnilistStudioMediaLoading(true),
-      onStop: () => setAnilistStudioMediaLoading(false),
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === anilistStudioMediaFetcher.cacheKey) setAnilistStudioMediaData(res.data.data.Studio.media);
-      }
-    });
-  });
-
-  return (
-    <>
-      <Intersection onIntersection={() => setVariables(props.variables)}>
-        <Show when={anilistStudioMediaData()?.edges}>
-          <MediaCards edges={anilistStudioMediaData().edges} showYears={props.showYears} lastMediaId={props.lastMediaId} lastYearGroup={props.lastYearGroup} />
         </Show>
-      </Intersection>
-      <Show when={!anilistStudioMediaLoading() && anilistStudioMediaData()?.pageInfo.hasNextPage}>
-        <Show when={anilistStudioMediaData().edges} keyed={props.nestLevel === 1}>
-          <Show when={props.variables}>{vars => (
-            <CharacterMediaPage variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} language={props.language} lastMediaId={anilistStudioMediaData().edges.at(-1)?.node.id} lastYearGroup={anilistStudioMediaData().edges.at(-1)?.node.startDate?.year || "TBA"} />
-          )}</Show>
-        </Show>
-      </Show>
-    </>
+
+        <MediaSearchResults variables={anilistVariables()} type="anime" />
+      </div>
+    </ErrorBoundary>
   );
 }
 
-
-
-function YearHeader(props) {
-  return (
-    <Show when={props.showYears()}>
-      <Switch>
-        <Match when={props.index() === 0}>
-          <Show when={props.lastYearGroup !== (props.edge.node.startDate?.year || "TBA")}>
-            <li class="grid-full-span">
-              <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
-            </li>
-          </Show>
-        </Match>
-        <Match when={true}>
-          <Show when={props.edges[props.index() - 1].node.startDate?.year !== props.edge.node.startDate?.year}>
-            <li class="grid-full-span">
-              <h3>{props.edge.node.startDate?.year || "TBA"}</h3>
-            </li>
-          </Show>
-        </Match>
-      </Switch>
-    </Show>
-  );
-}
-
-
-function MediaCards(props) {
-  asserts.assertTruthy(props.showYears, "showYears signal is missing");
-
-  const merge = (acc, edge) => {
-    if (acc.at(-1)?.node.id !== edge.node.id && props.lastMediaId !== edge.node.id) {
-      acc.push(edge);
-    }
-    return acc;
+// Separates the studio info from the aliased media pages (page1, page2...)
+function splitStudioResponse(studio) {
+  const info = {};
+  const pages = [];
+  for (const [key, value] of Object.entries(studio)) {
+    if (/^page\d+$/.test(key)) pages[+key.slice(4)] = value;
+    else info[key] = value;
   }
-
-  return (
-    <For each={props.edges.reduce(merge, [])}>{(edge, i) => (
-      <>
-        <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
-        <MediaCard scoped class="media-card" cardZoomIn coverFadeIn showScore showStatus quickActions hoverCard media={edge.node} />
-      </>
-    )}</For>
-  );
+  return { info, pages: pages.filter(Boolean) };
 }
