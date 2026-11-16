@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, ErrorBoundary, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import "./StudioIndex.scoped.css";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
@@ -12,11 +12,16 @@ import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.sco
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
+import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
+import { Tooltip } from "@/components/Tooltip.scoped";
+import { formatUsersMediaStatus } from "@/utils/formatUtils.js";
 
 // AniList has no studio filter for the media search, so all the media ids of the studio are fetched first and the search is done inside them.
 // Studio media pages have only 25 entries and their lastPage is capped, so pages are fetched in batches until there is no next page
 const STUDIO_MEDIA_PAGES_PER_FETCH = 40;
 const STUDIO_MEDIA_PAGE_SIZE = 25;
+// Order of the status bar segments
+const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 
 const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id === b[i]);
 
@@ -28,6 +33,8 @@ export function Studio() {
   const [favourite, setFavourite] = createSignal(false);
   // Sorted ids of all the studio media, undefined until every batch has loaded
   const [studioMediaIds, setStudioMediaIds] = createSignal(undefined, { equals: sameIds });
+  // Users list status of each studio media id, set together with the ids
+  const [studioMediaStatuses, setStudioMediaStatuses] = createSignal(undefined);
 
   createEffect(() => {
     document.title = `${studio()?.data.data.Studio.name || "Studio"} - LOB`;
@@ -39,8 +46,9 @@ export function Studio() {
     const signal = studioMediaIdsController.abortAndRenew();
     const studioId = currentStudioId = params.id;
     setStudioMediaIds(undefined);
+    setStudioMediaStatuses(undefined);
 
-    // Ids of each batch, the cached and the fetched response can both fill the same batch
+    // Media nodes of each batch, the cached and the fetched response can both fill the same batch
     const batches = [];
     const requestedBatches = new Set();
     let lastBatchIndex;
@@ -64,7 +72,7 @@ export function Studio() {
             setFavourite(info.isFavourite ?? false);
           }
 
-          batches[batchIndex] = pages.flatMap(page => page.nodes.map(node => node.id));
+          batches[batchIndex] = pages.flatMap(page => page.nodes);
 
           if (pages.at(-1)?.pageInfo.hasNextPage) {
             if (lastBatchIndex <= batchIndex) lastBatchIndex = undefined;
@@ -77,7 +85,9 @@ export function Studio() {
           if (lastBatchIndex === undefined) return;
           const loadedBatches = Array.from({ length: lastBatchIndex + 1 }, (_, i) => batches[i]);
           if (loadedBatches.includes(undefined)) return;
-          setStudioMediaIds([...new Set(loadedBatches.flat())].sort((a, b) => a - b));
+          const statuses = new Map(loadedBatches.flat().map(node => [node.id, node.mediaListEntry?.status]));
+          setStudioMediaStatuses(statuses);
+          setStudioMediaIds([...statuses.keys()].sort((a, b) => a - b));
         }
       });
     };
@@ -89,6 +99,21 @@ export function Studio() {
     const ids = studioMediaIds();
     if (!ids) return null;
     return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
+  });
+
+  const statusSegments = createMemo(() => {
+    const statuses = studioMediaStatuses();
+    if (!statuses?.size) return [];
+
+    const counts = {};
+    for (const status of statuses.values()) {
+      if (status) counts[status] = (counts[status] ?? 0) + 1;
+    }
+    return LIST_STATUSES.filter(status => counts[status]).map(status => ({
+      status,
+      count: counts[status],
+      percentage: counts[status] / statuses.size * 100,
+    }));
   });
 
   const studioInfo = () => studio() && splitStudioResponse(studio().data.data.Studio).info;
@@ -119,6 +144,34 @@ export function Studio() {
             <CardStyleToggle />
           </div>
         </div>
+
+        <Show when={statusSegments().length}>
+          <div class="status-progress">
+            <div class="bar">
+              <For each={statusSegments()}>{segment => (
+                <div
+                  class="segment"
+                  attr:data-status={segment.status}
+                  style={{ width: `${segment.percentage}%` }}
+                >
+                  <Tooltip>{formatUsersMediaStatus(segment.status, "anime")} {segment.count}</Tooltip>
+                </div>
+              )}</For>
+            </div>
+            <ul class="legend">
+              <For each={statusSegments()}>{segment => (
+                <li>
+                  <MediaStatusIcon status={segment.status} />
+                  <span class="status-label">
+                    {formatUsersMediaStatus(segment.status, "anime")}
+                  </span>
+                  {" "}{segment.count}
+                </li>
+              )}</For>
+              <li class="total">{statusSegments().reduce((sum, segment) => sum + segment.count, 0)} / {studioMediaStatuses().size}</li>
+            </ul>
+          </div>
+        </Show>
 
         <Show when={isMobilLarge()}>
           <div class="mobile-active-queries">
