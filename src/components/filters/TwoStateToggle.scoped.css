@@ -1,7 +1,7 @@
 @layer component {
   button {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
     width: var(--select-width, 200px);
     max-width: var(--select-max-width, 300px);
@@ -32,13 +32,20 @@
       font-size: 1.1em;
     }
 
+    /* Stay on one line like the selects, so all filters have the same height */
     p {
       flex-grow: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     /* Checkbox is taller than the text, don't let it grow the button height */
     > .checkbox {
-      margin-block: -.25em;
+      width: 1.25em;
+      height: 1.25em;
+      margin-block: -.125em;
     }
   }
 }

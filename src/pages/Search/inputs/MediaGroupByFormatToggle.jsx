@@ -16,6 +16,6 @@ export function MediaGroupByFormatToggle() {
   };
 
   return (
-    <ToggleButton checked={parsedSearchParams().groupEntriesByFormat} label="Group by Format" icon={<FormatIcon />} onChange={toggle} />
+    <ToggleButton checked={parsedSearchParams().groupEntriesByFormat} label="Group Formats" icon={<FormatIcon />} onChange={toggle} />
   );
 }
