@@ -13,13 +13,49 @@
 
     /* Card can only be empty, when no media data was passed, so this is empty skeleton card */
     &:empty {
-      height: calc(4rem * 8 / 5.5 + 16px);
+      --scoped-padding: 8px;
+      --scoped-cover-width: 4rem;
+      --scoped-cover-height: calc(var(--scoped-cover-width) * 8 / 5.5);
+      --scoped-gap: 16px;
+      /* Same as the content column of a real card: one title line, the gap and the genre list, centered next to the cover */
+      --scoped-content-height: calc(1.36em + 8px + 1.75 * var(--fs-300));
+      position: relative;
+      height: calc(var(--scoped-cover-height) + 2 * var(--scoped-padding));
       border-radius: 8px;
-      background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg) 100px);
-      background-size: calc(100px / sin(45deg));
-      box-shadow: 0 3px 4px 0px #00000042;
-      animation: move-gradient 2s infinite;
+      background-color: var(--bg);
+      box-shadow: inset 0 4px 2px -3px var(--bg-light), inset 0 -3px 2px -3px #000000, 0 3px 4px 0px #00000042;
+      font-weight: 500;
       pointer-events: none;
+      opacity: .5;
+
+      @container (width < 42em) {
+        --scoped-gap: 8px;
+      }
+
+      &::before, &::after {
+        content: "";
+        position: absolute;
+        border-radius: 4px;
+        background: repeating-linear-gradient(45deg, var(--bg-dark), var(--bg-light) 100px);
+        background-size: calc(100px / sin(45deg));
+        animation: move-gradient 2s infinite;
+      }
+
+      /* Cover */
+      &::before {
+        top: var(--scoped-padding);
+        left: var(--scoped-padding);
+        width: var(--scoped-cover-width);
+        height: var(--scoped-cover-height);
+      }
+
+      /* Title, on the first text line of the content column */
+      &::after {
+        top: calc(var(--scoped-padding) + (var(--scoped-cover-height) - var(--scoped-content-height)) / 2 + .18em);
+        left: calc(var(--scoped-padding) + var(--scoped-cover-width) + var(--scoped-gap));
+        width: calc(100% - var(--scoped-cover-width) - var(--scoped-gap) - 2 * var(--scoped-padding));
+        height: 1lh;
+      }
     }
 
     .row {
