@@ -6,7 +6,8 @@ import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/
 import { ParsedSearchParamsContext } from "@/state/providers";
 import { translateInternalApiParams } from "@/api/apiTranslations";
 import { getDefaultSearchSort, getSearchHeaderParams, getSearchMediaType } from "@/utils/searchHeaderUtils";
-import { searchPageGroupEntriesByFormat, searchPageGroupSeasonalEntriesByFormat,searchPageGroupTBAEntriesByFormat } from "@/state/globalState";
+import { searchPageGroupBy, searchPageGroupSeasonalBy, searchPageGroupTBABy } from "@/state/globalState";
+import { MEDIA_GROUPS } from "@/components/search/mediaGroups";
 
 const [searchStore, setSearchStore] = createStore({});
 
@@ -35,9 +36,9 @@ export function ParseSearchParams(props) {
     const filteredAge = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.age).filter(val => translateInternalApiParams.age[val])).sort();
     const filteredSeason = wrapToArray(searchParams.season).findLast(val => val in translateInternalApiParams.season);
 
-    const groupEntriesByFormat = searchPageGroupEntriesByFormat();
-    const groupSeasonalEntriesByFormat =searchPageGroupSeasonalEntriesByFormat();
-    const groupTBAEntriesByFormat = searchPageGroupTBAEntriesByFormat();
+    const groupBy = searchPageGroupBy();
+    const groupSeasonalBy = searchPageGroupSeasonalBy();
+    const groupTBABy = searchPageGroupTBABy();
 
     Object.assign(obj, getSearchHeaderParams(header));
 
@@ -81,12 +82,11 @@ export function ParseSearchParams(props) {
     if (searchParams.lengthGreater) obj.lengthGreater = +wrapToArray(searchParams.lengthGreater).at(-1);
     if (searchParams.length && !obj.lengthLesser && !obj.lengthGreater) obj.length = +wrapToArray(searchParams.length).at(-1);
 
-    // Seasonal and TBA pages remember their own group by format choice, other pages share one
-    if (header === "tba") obj.groupEntriesByFormat = groupTBAEntriesByFormat;
-    else if (obj.seasonPage) obj.groupEntriesByFormat = groupSeasonalEntriesByFormat;
-    else obj.groupEntriesByFormat = groupEntriesByFormat;
-
-    if (obj.groupEntriesByFormat) obj.sort = ["format", ...obj.sort];
+    // Seasonal and TBA pages remember their own grouping, other pages share one
+    // The sort for the grouping is added to the search variables, so it doesn't end up in the url or in the sort select
+    const pageGroupBy = header === "tba" ? groupTBABy : obj.seasonPage ? groupSeasonalBy : groupBy;
+    // Only anime have seasons. The choice is kept, so it comes back when switching back to anime
+    if (Object.hasOwn(MEDIA_GROUPS, pageGroupBy) && (pageGroupBy !== "season" || type === "anime")) obj.groupBy = pageGroupBy;
 
     ["format", "status", "country", "source"].forEach(key => {
       obj[key] = wrapToArray(obj[key]);

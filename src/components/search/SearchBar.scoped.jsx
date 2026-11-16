@@ -17,7 +17,7 @@ import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
 import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
-import { MediaGroupByFormatToggle } from "./inputs/MediaGroupByFormatToggle";
+import { MediaGroupBySelect } from "./inputs/MediaGroupBySelect";
 import { LicensedIcon, OnListIcon } from "@/assets/icons.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
@@ -62,7 +62,7 @@ function SearchFilters(props) {
         </Show>
         <MediaFormatSelect />
         <MediaStatusSelect />
-        <MediaGroupByFormatToggle />
+        <MediaGroupBySelect />
       </FilterGroup>
       <FilterGroup title="Release">
         <Show when={parsedSearchParams().type === "anime"}>

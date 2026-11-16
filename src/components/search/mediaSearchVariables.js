@@ -3,6 +3,7 @@ import { concatMergeObjects } from "@/utils/objectUtils";
 import { isTypeArray } from "@/utils/arrayUtils";
 import { anilistGenresAndTagsData } from "./inputs/MediaGenresAndTagsSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
+import { mediaGroupSort } from "./mediaGroups";
 
 /**
  * Builds the AniList search variables from the parsed search params.
@@ -36,9 +37,9 @@ export function createAnilistMediaQueryVariables(searchParams, { idIn: restricte
   obj.genres = themes.filter(g => genresObject.validGenres.has(g));
   obj.tags   = themes.filter(t => genresObject.validTags  .has(t));
 
-  // Grouping by format needs the format sort first, even when sorting by search match
-  if (sortBySearchMatch) mergeVariables(api, "sort", obj, { sort: rest.groupEntriesByFormat ? ["format", "search_match"] : ["search_match"] });
-  else mergeVariables(api, "sort", obj, rest);
+  // Grouping needs the results sorted by the group first, even when sorting by search match
+  const sorts = sortBySearchMatch ? ["search_match"] : rest.sort;
+  mergeVariables(api, "sort", obj, { sort: [...mediaGroupSort(rest.groupBy, sorts), ...sorts] });
 
   mergeVariables(api, "endDateGreater", obj, rest);
   mergeVariables(api, "status", obj, rest);

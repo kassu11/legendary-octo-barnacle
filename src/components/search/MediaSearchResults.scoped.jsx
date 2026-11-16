@@ -8,15 +8,15 @@ import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/st
 import { searchPageCardStyle, tabTime } from "@/state/globalState";
 import { useParsedSearchParams } from "@/state/providers";
 import { assertTruthy } from "@/utils/asserts";
-import { formatMediaFormat } from "@/utils/formatUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
 import { MediaRowCard } from "@/components/media/MediaRowCard.scoped";
 import { VirtualGrid } from "@/components/VirtualGrid.scoped";
 import { VirtualList } from "@/components/VirtualList.scoped";
+import { MEDIA_GROUPS } from "./mediaGroups";
 
 const cachedResults = new Set();
-// Keeps track of the cards and format group headers the search results contained.
+// Keeps track of the cards and group headers the search results contained.
 // This is used when we go back in history, so we can prerender the right amount of skeleton cards under the right headers.
 // This prevent the browser from scrolling back to the top of the page, or to a wrong position
 const searchPageLayouts = {};
@@ -90,13 +90,12 @@ export function MediaSearchResults(props) {
     }
   });
 
-  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, groupEntriesByFormat, isFallbackSearch) => {
+  const mutatePageless = (media, { currentPage, perPage, hasNextPage }, isFallbackSearch) => {
     const start = (currentPage - 1) * perPage;
     assertTruthy(start <= pagelessCacheData.data.media.length);
     assertTruthy(media.length <= perPage);
 
     media.forEach((m, i) => {
-      m.customSection = groupEntriesByFormat && pagelessCacheData.data.media[start + i - 1]?.format !== m.format ? m.format || "Format TBA" : false;
       if (m.id === pagelessCacheData.data.media[start + i]?.id) setPagelessCacheData("data", "media", start + i, m); // fine grained update
       else setPagelessCacheData("data", "media", produce(data => data[start + i] = m)); // Not fine grained (Replays the @starting-style animations)
     });
@@ -138,7 +137,7 @@ export function MediaSearchResults(props) {
 
         const pageInfo = jikanPagenationToPageInfo(jikanRes.data.pagination);
         if (!jikanRes.data.data.length) {
-          mutatePageless([], pageInfo, false, true);
+          mutatePageless([], pageInfo, true);
           return;
         }
 
@@ -165,7 +164,7 @@ export function MediaSearchResults(props) {
               // media.tabTime = res.modified;
             });
 
-            mutatePageless(aniRes.data.data.page1.media, pageInfo, false, true);
+            mutatePageless(aniRes.data.data.page1.media, pageInfo, true);
           }
         });
       }
@@ -180,7 +179,6 @@ export function MediaSearchResults(props) {
     const signal = anilistSearchController.abortAndRenew();
     let debounce = 400;
 
-    const groupEntriesByFormat = parsedSearchParams().groupEntriesByFormat;
     const aniVariables = anilistVariables();
     const jiVariables = props.jikanVariables;
     const currentPage = page();
@@ -247,7 +245,7 @@ export function MediaSearchResults(props) {
 
         const key = untrack(pagelessCacheKey);
         if (key !== currentPagelessFetcher.cacheKey) return
-        mutatePageless(res.data.data.Page.media, pageInfo, groupEntriesByFormat, false);
+        mutatePageless(res.data.data.Page.media, pageInfo, false);
       }
     });
   });
@@ -262,7 +260,7 @@ export function MediaSearchResults(props) {
     // Padding media are kept, because they are not rendered
     searchPageLayouts[pagelessCacheData.cacheKey] = {
       media: media.map(m => m === MEDIA_PADDING_SPACE ? m : LOADER),
-      sectionTitles: getSectionTitles(media),
+      sectionTitles: getSectionTitles(media, groupBy()),
     };
   });
 
@@ -294,9 +292,8 @@ export function MediaSearchResults(props) {
     const { sort, sortBySearchMatch } = parsedSearchParams();
     const data = pagelessCacheData?.data;
 
-    // The sort param is not the real order when results come from search match or from the jikan fallback
-    // Grouping by format is also left out here, because then the first sort is "format"
-    if (!data || sortBySearchMatch || data.fallback || !props.ranked || !RANKED_SORTS.has(sort?.[0])) return [];
+    // The sort param is not the real order when results come from search match, from the jikan fallback or when they are grouped
+    if (!data || sortBySearchMatch || data.fallback || parsedSearchParams().groupBy || !props.ranked || !RANKED_SORTS.has(sort?.[0])) return [];
 
     // Padding media are not real results, so they can't use up a rank. Loaders are counted because they hold the place of a real media
     let rank = 0;
@@ -305,15 +302,18 @@ export function MediaSearchResults(props) {
 
   const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()?.media || [];
 
-  // Format group header titles by the index of the media that starts the group
+  // Jikan fallback results are not sorted by the group, so they are not grouped
+  const groupBy = () => !pagelessCacheData?.data?.fallback && parsedSearchParams().groupBy;
+
+  // Group header titles by the index of the media that starts the group
   // The dummy history data has only loaders, so its titles were saved when leaving the page
   const sectionTitles = createMemo(() => {
     const media = searchMedia();
     if (media === previousHistoryDummyData()?.media) return previousHistoryDummyData().sectionTitles;
-    return getSectionTitles(media);
+    return getSectionTitles(media, groupBy());
   });
 
-  // Each section starts from the first media or from a media that has a custom section (format group header)
+  // Each section starts from the first media or from a media that starts a group (group header)
   // Sections are keyed by their start index, so the section elements stay the same when more pages are loaded
   const mediaSectionStarts = createMemo(() => {
     if (!searchMedia().length) return [];
@@ -336,7 +336,7 @@ export function MediaSearchResults(props) {
         <div class="search-results">
           <For each={mediaSectionStarts()}>{(start, sectionIndex) => {
             const end = () => mediaSectionStarts()[sectionIndex() + 1] ?? searchMedia().length;
-            const title = () => sectionTitles()[start] || (start === 0 && searchMedia()[0] === LOADER && parsedSearchParams().groupEntriesByFormat && "Loading");
+            const title = () => sectionTitles()[start] || (start === 0 && searchMedia()[0] === LOADER && groupBy() && "Loading");
             // Padding media are never rendered, so they are left out of the grid
             // Their indices are kept, because the index in the whole search result list is used to calculate the page to fetch
             const mediaIndices = createMemo(() => {
@@ -351,7 +351,7 @@ export function MediaSearchResults(props) {
             return (
               <section>
                 <Show when={title()}>
-                  <h2>{formatMediaFormat(title())}</h2>
+                  <h2>{title()}</h2>
                 </Show>
                 <Show when={searchPageCardStyle() === "rows"} fallback={
                   <VirtualGrid scoped class="virtual-grid" each={sectionMedia()}>{(media, i) => {
@@ -383,10 +383,21 @@ export function MediaSearchResults(props) {
   );
 }
 
-function getSectionTitles(media) {
+// A group starts from every media whose group differs from the media before it
+// After a loader the group is not known, so a new group is started there too
+function getSectionTitles(media, groupBy) {
   const titles = {};
+  const group = MEDIA_GROUPS[groupBy];
+  if (!group) return titles;
+
+  let previous;
   media.forEach((m, i) => {
-    if (m?.customSection) titles[i] = m.customSection;
+    if (m === MEDIA_PADDING_SPACE) return;
+    if (m) {
+      const key = group.key(m);
+      if (!previous || group.key(previous) !== key) titles[i] = group.title(key);
+    }
+    previous = m;
   });
   return titles;
 }
