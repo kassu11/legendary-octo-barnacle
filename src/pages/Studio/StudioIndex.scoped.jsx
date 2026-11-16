@@ -136,6 +136,7 @@ export function Studio() {
                 checked={favourite()}
                 variableId={params.id}
                 idType="STUDIO"
+                showAnilist
                 anilistValue={studioInfo().favourites}
                 onChange={setFavourite}
                 mutateCache={mutateCache}

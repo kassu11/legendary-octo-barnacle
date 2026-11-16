@@ -8,6 +8,10 @@
     padding: .5rem;
     justify-items: center;
 
+    .label {
+      overflow-wrap: normal;
+    }
+
     span {
       font-size: 1.75rem;
       font-weight: 700;

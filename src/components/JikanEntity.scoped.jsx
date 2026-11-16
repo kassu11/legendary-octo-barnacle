@@ -1,4 +1,4 @@
-import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
 import "./JikanEntity.scoped.css";
 
 export function JikanEntityHeader(props) {
@@ -11,7 +11,7 @@ export function JikanEntityHeader(props) {
           <h1>{props.name}</h1>
           <p>{props.alternativeNames.join(", ")}</p>
         </div>
-        <FavouriteToggle jikanValue={props.favorites} />
+        <FavouriteToggleOld jikanValue={props.favorites} />
       </div>
       <div>
         {props.children}

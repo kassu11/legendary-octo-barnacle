@@ -9,7 +9,7 @@ export function MediaPageScores() {
   return (
     <div class="scores">
       <div>
-        <p>Mean</p>
+        <p class="label">Mean</p>
         <span>
           <Show when={anilistData()?.data.data.Media?.meanScore > 0} fallback="N/A">
             {((anilistData()?.data.data.Media?.meanScore || 0) / 10).toFixed(1)}
@@ -17,7 +17,7 @@ export function MediaPageScores() {
         </span>
       </div>
       <div>
-        <p>Average</p>
+        <p class="label">Average</p>
         <span>
           <Show when={anilistData()?.data.data.Media?.averageScore > 0} fallback="N/A">
             {((anilistData()?.data.data.Media?.averageScore || 0) / 10).toFixed(1)}
@@ -31,7 +31,7 @@ export function MediaPageScores() {
         {" "}Users
       </p>
       <div>
-        <p>MAL</p>
+        <p class="label">MAL</p>
         <span>
           <Switch fallback="N/A">
             <Match when={jikanData.loading}>...</Match>

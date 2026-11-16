@@ -33,6 +33,13 @@
     text-wrap: balance;
   }
 
+  h1 { font-size: var(--fs-700) }
+  h2 { font-size: var(--fs-600) }
+  h3 { font-size: var(--fs-500) }
+  h4 { font-size: var(--fs-400) }
+  h5 { font-size: var(--fs-300) }
+  h6 { font-size: var(--fs-200) }
+
   #root {
     isolation: isolate;
   }

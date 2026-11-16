@@ -7,7 +7,7 @@ import { arrayUtils, statusUtils, urlUtils } from "@/utils/utils.js";
 import { createEffect, createRenderEffect, createSignal, ErrorBoundary, For, Match, on, Show, Switch } from "solid-js";
 import "./MediaJikanIndex.scoped.css";
 import { Trailer } from "@/pages/Media/Trailer.scoped.jsx";
-import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
 import { Markdown } from "@/components/Markdown.scoped.jsx";
 import { MalCharacterCard, MalStaffCard } from "@/components/Cards/Cards.scoped.jsx";
 import { MediaPageScores } from "@/pages/Media/Scores.scoped.jsx";
@@ -93,7 +93,7 @@ export function MediaInfoWrapperJikan(props) {
               <img src={jikanData().data.data.images.webp.large_image_url} alt="Cover"/>
               <MediaPageApiSwitcher anilistData={anilistData} jikanData={jikanData} />
               <MediaPageScores/>
-              <FavouriteToggle
+              <FavouriteToggleOld
                 checked={isFavourite()}
                 onChange={setIsFavourite}
                 idType={anilistData()?.data.data.Media?.type}

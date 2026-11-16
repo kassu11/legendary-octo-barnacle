@@ -3,7 +3,7 @@ import { Switch, Match, Show, createSignal, createEffect, For, createMemo, untra
 import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import "./EntityIndex.scoped.css";
 import { capitalize, formatAnilistDate, formatTitleToUrl, mediaUrl } from "@/utils/formatUtils.js";
-import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
 import { debounce, leadingAndTrailing } from "@solid-primitives/scheduled";
 import { wrapToArray } from "@/utils/arrayUtils.js";
 import { queries } from "@/api/api.js";
@@ -112,7 +112,7 @@ function Body(props) {
               <h1>{props.entityInfo.name.userPreferred}</h1>
             </div>
             <p class="entity-page-alternative-names">{[...wrapToArray(props.entityInfo.name.native), ...wrapToArray(props.entityInfo.name.alternative)].join(", ")}</p>
-            <FavouriteToggle 
+            <FavouriteToggleOld 
               checked={favourite()} 
               idType={props.type} 
               variableId={props.entityInfo.id} 

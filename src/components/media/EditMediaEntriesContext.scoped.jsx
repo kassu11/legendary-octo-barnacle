@@ -1,6 +1,6 @@
 import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
 import ScoreInput from "@/components/media/ScoreInput.scoped";
-import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
 import "./EditMediaEntriesContext.scoped.css";
 import { EditMediaEntriesContext } from "@/state/providers.js";
 import { queries } from "@/api/api.js";
@@ -287,7 +287,7 @@ export function EditMediaEntriesProvider(props) {
               <img src={mediaListEntry().coverImage?.large} class="cover" alt="Cover" />
               <h2 class="line-clamp header">{mediaListEntry().title?.userPreferred}</h2>
               <div class="container">
-                <FavouriteToggle 
+                <FavouriteToggleOld 
                   checked={state.isFavourite()}
                   idType={mediaListEntry().type}
                   variableId={mediaListEntry().id}

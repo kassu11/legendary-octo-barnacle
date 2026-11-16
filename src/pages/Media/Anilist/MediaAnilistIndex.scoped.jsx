@@ -20,7 +20,7 @@ import { queries } from "@/api/api.js";
 import { formatTitleToUrl } from "@/utils/formatUtils.js";
 import { navigationUtils } from "@/utils/utils.js";
 import { MediaBanner } from "./Banner.scoped.jsx";
-import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
+import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
 import { Trailer } from "@/pages/Media/Trailer.scoped.jsx";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { createAnilistFetcher, createJsonGetFetcher, sendAnilistFetcher, sendFetcher } from "@/api/fetcherUtils.js";
@@ -181,7 +181,7 @@ export function MediaInfoContent(props) {
                     }
                   });
                 }}>{mediaPageAnilistData()?.data.data.Media.mediaListEntry?.status || "Edit"}</button>
-                <FavouriteToggle
+                <FavouriteToggleOld
                   checked={isFavourite()}
                   onChange={setIsFavourite}
                   idType={mediaPageAnilistData()?.data.data.Media.type}

@@ -3,6 +3,10 @@
     display: grid;
     gap: 3rem;
 
+    @media (width < 50em) {
+      gap: 1rem;
+    }
+
     section {
       h2 {
         margin-bottom: 1rem;
