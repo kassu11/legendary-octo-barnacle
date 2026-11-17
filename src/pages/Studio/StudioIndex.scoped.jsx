@@ -29,7 +29,7 @@ export function Studio() {
   const params = useParams();
   const parsedSearchParams = useParsedSearchParams();
   const { isMobilLarge } = useResponsive();
-  const [studio, setStudio] = createSignal(undefined, { equals: false });
+  const [studioData, setStudioData] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
   // Sorted ids of all the studio media, undefined until every batch has loaded
   const [studioMediaIds, setStudioMediaIds] = createSignal(undefined, { equals: sameIds });
@@ -37,7 +37,7 @@ export function Studio() {
   const [studioMediaStatuses, setStudioMediaStatuses] = createSignal(undefined);
 
   createEffect(() => {
-    document.title = `${studio()?.data.data.Studio.name || "Studio"} - LOB`;
+    document.title = `${studioData()?.data.data.Studio.name || "Studio"} - LOB`;
   });
 
   const studioMediaIdsController = createCleanUpAbortController();
@@ -66,15 +66,23 @@ export function Studio() {
         setValue: res => {
           if (studioId !== currentStudioId) return;
 
-          const { info, pages } = splitStudioResponse(res.data.data.Studio);
+          const studio = res.data.data.Studio;
           if (batchIndex === 0) {
-            setStudio(res);
-            setFavourite(info.isFavourite ?? false);
+            setStudioData(res);
+            setFavourite(studio.isFavourite ?? false);
           }
 
-          batches[batchIndex] = pages.flatMap(page => page.nodes);
+          // Pages are aliased as page1, page2... and the pages after the last one are empty
+          const nodes = [];
+          let page;
+          for (let i = firstPage; i < firstPage + STUDIO_MEDIA_PAGES_PER_FETCH; i++) {
+            page = studio[`page${i}`];
+            for (const node of page.nodes) nodes.push(node);
+            if (!page.pageInfo.hasNextPage) break;
+          }
+          batches[batchIndex] = nodes;
 
-          if (pages.at(-1)?.pageInfo.hasNextPage) {
+          if (page.pageInfo.hasNextPage) {
             if (lastBatchIndex <= batchIndex) lastBatchIndex = undefined;
             fetchBatch(batchIndex + 1);
           } else {
@@ -83,9 +91,11 @@ export function Studio() {
           }
 
           if (lastBatchIndex === undefined) return;
-          const loadedBatches = Array.from({ length: lastBatchIndex + 1 }, (_, i) => batches[i]);
-          if (loadedBatches.includes(undefined)) return;
-          const statuses = new Map(loadedBatches.flat().map(node => [node.id, node.mediaListEntry?.status]));
+          const statuses = new Map();
+          for (let i = 0; i <= lastBatchIndex; i++) {
+            if (!batches[i]) return;
+            for (const node of batches[i]) statuses.set(node.id, node.mediaListEntry?.status);
+          }
           setStudioMediaStatuses(statuses);
           setStudioMediaIds([...statuses.keys()].sort((a, b) => a - b));
         }
@@ -101,25 +111,19 @@ export function Studio() {
     return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
   });
 
-  const statusSegments = createMemo(() => {
-    const statuses = studioMediaStatuses();
-    if (!statuses?.size) return [];
-
-    const counts = {};
-    for (const status of statuses.values()) {
-      if (status) counts[status] = (counts[status] ?? 0) + 1;
+  // Number of studio media with each list status, and in the users list overall
+  const statusCounts = createMemo(() => {
+    const counts = { listed: 0 };
+    for (const status of studioMediaStatuses()?.values() || []) {
+      if (!status) continue;
+      counts[status] = (counts[status] || 0) + 1;
+      counts.listed++;
     }
-    return LIST_STATUSES.filter(status => counts[status]).map(status => ({
-      status,
-      count: counts[status],
-      percentage: counts[status] / statuses.size * 100,
-    }));
+    return counts;
   });
 
-  const studioInfo = () => studio() && splitStudioResponse(studio().data.data.Studio).info;
-
   const mutateCache = isFavourite => {
-    const res = studio();
+    const res = studioData();
     res.data.data.Studio.isFavourite = isFavourite;
     setFetcherValueToStorage(res);
   };
@@ -129,15 +133,15 @@ export function Studio() {
       <SearchBar />
       <div class="studio-page">
         <div class="page-header">
-          <h1>{studioInfo()?.name}</h1>
+          <h1>{studioData()?.data.data.Studio.name}</h1>
           <div class="toolbar">
-            <Show when={studioInfo()}>
+            <Show when={studioData()}>
               <FavouriteToggle
                 checked={favourite()}
                 variableId={params.id}
                 idType="STUDIO"
                 showAnilist
-                anilistValue={studioInfo().favourites}
+                anilistValue={studioData().data.data.Studio.favourites}
                 onChange={setFavourite}
                 mutateCache={mutateCache}
               />
@@ -146,30 +150,34 @@ export function Studio() {
           </div>
         </div>
 
-        <Show when={statusSegments().length}>
+        <Show when={statusCounts().listed}>
           <div class="status-progress">
             <div class="bar">
-              <For each={statusSegments()}>{segment => (
-                <div
-                  class="segment"
-                  attr:data-status={segment.status}
-                  style={{ width: `${segment.percentage}%` }}
-                >
-                  <Tooltip>{formatUsersMediaStatus(segment.status, "anime")} {segment.count}</Tooltip>
-                </div>
+              <For each={LIST_STATUSES}>{status => (
+                <Show when={statusCounts()[status]}>
+                  <div
+                    class="segment"
+                    attr:data-status={status}
+                    style={{ width: `${statusCounts()[status] / studioMediaStatuses().size * 100}%` }}
+                  >
+                    <Tooltip>{formatUsersMediaStatus(status, "anime")} {statusCounts()[status]}</Tooltip>
+                  </div>
+                </Show>
               )}</For>
             </div>
             <ul class="legend">
-              <For each={statusSegments()}>{segment => (
-                <li>
-                  <MediaStatusIcon status={segment.status} />
-                  <span class="status-label">
-                    {formatUsersMediaStatus(segment.status, "anime")}
-                  </span>
-                  {" "}{segment.count}
-                </li>
+              <For each={LIST_STATUSES}>{status => (
+                <Show when={statusCounts()[status]}>
+                  <li>
+                    <MediaStatusIcon status={status} />
+                    <span class="status-label">
+                      {formatUsersMediaStatus(status, "anime")}
+                    </span>
+                    {" "}{statusCounts()[status]}
+                  </li>
+                </Show>
               )}</For>
-              <li class="total">{statusSegments().reduce((sum, segment) => sum + segment.count, 0)} / {studioMediaStatuses().size}</li>
+              <li class="total">{statusCounts().listed} / {studioMediaStatuses().size}</li>
             </ul>
           </div>
         </Show>
@@ -186,13 +194,3 @@ export function Studio() {
   );
 }
 
-// Separates the studio info from the aliased media pages (page1, page2...)
-function splitStudioResponse(studio) {
-  const info = {};
-  const pages = [];
-  for (const [key, value] of Object.entries(studio)) {
-    if (/^page\d+$/.test(key)) pages[+key.slice(4)] = value;
-    else info[key] = value;
-  }
-  return { info, pages: pages.filter(Boolean) };
-}
