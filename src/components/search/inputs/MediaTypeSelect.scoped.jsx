@@ -3,13 +3,18 @@ import { arrayUtils } from "@/utils/utils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TypeIcon } from "@/assets/icons.jsx";
 import { useNavigateAndSearch } from "@/utils/urlUtils.js";
-import { useParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { useParsedSearchParams } from "@/state/providers.js";
 
-export function MediaTypeSelect() {
+/**
+ * @param {Object} props
+ * @param {boolean} [props.searchParam] Type is the type search param instead of a part of the path
+ */
+export function MediaTypeSelect(props) {
   const parsedSearchParams = useParsedSearchParams();
   const navigate = useNavigateAndSearch();
   const params = useParams();
+  const [, setSearchParams] = useSearchParams();
 
   const typeOptions = [
     { description: "Anime", id: "anime" },
@@ -18,10 +23,14 @@ export function MediaTypeSelect() {
   ];
 
   const typeValues = createMemo(() => {
-    return arrayUtils.wrapToArray(params.type);
+    return arrayUtils.wrapToArray(parsedSearchParams().type);
   });
 
   const handlePick = id => {
+    if (props.searchParam) {
+      setSearchParams({ type: id === "media" ? undefined : id }, { replace: true });
+      return;
+    }
 
     const { header, type } = params;
     if (type == id) return;

@@ -1,0 +1,58 @@
+@layer component {
+  .media-row-card-character-role {
+    display: grid;
+    gap: 4px;
+    font-size: var(--fs-300);
+    font-weight: 400;
+
+    .voice-actors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      li {
+        .voice-actor {
+          /* Above the title link that covers the whole row card */
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--text);
+          text-decoration: none;
+
+          &:hover .text .name {
+            text-decoration: underline;
+          }
+
+          img {
+            width: 1.75rem;
+            aspect-ratio: 5.5/8;
+            object-fit: cover;
+            border-radius: 4px;
+          }
+
+          .text {
+            display: grid;
+
+            .language {
+              color: var(--text-muted);
+              font-size: var(--fs-200);
+            }
+          }
+
+          .note {
+            color: var(--text-muted);
+          }
+        }
+      }
+    }
+
+    .role {
+      color: var(--text-muted);
+    }
+  }
+}

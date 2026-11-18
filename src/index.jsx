@@ -16,7 +16,8 @@ import { StatsMediaStaff } from "./pages/User/Stats/Staff/UserStatsStaffIndex.sc
 import Artist from "./pages/Artist/ArtistIndex.scoped.jsx";
 import Notifications from "./pages/Notifications/NotificationsIndex.scoped.jsx";
 import { MangaCharacters, AnimeCharacters, MangaStaff, AnimeStaff } from "./pages/Entities/EntitiesIndex.scoped.jsx";
-import { Staff as AnilistStaff, Character as AnilistCharacter } from "./pages/Entity/EntityIndex.scoped.jsx";
+import { Staff as AnilistStaff } from "./pages/Staff/StaffIndex.scoped.jsx";
+import { Character as AnilistCharacter } from "./pages/Character/CharacterIndex.scoped.jsx";
 import { Studio as AnilistStudio } from "./pages/Studio/StudioIndex.scoped.jsx";
 import { ActivityPage } from "./pages/Activity/ActivityIndex.scoped.jsx";
 import { EditMediaEntriesProvider } from "./components/media/EditMediaEntriesContext.scoped.jsx";

@@ -95,6 +95,24 @@ Heavy list processing (user media lists, compare, relations) runs in web workers
 
 2-space indentation (`.editorconfig`), double quotes, semicolons.
 
+### Components
+
+- Components get data and flags, and enable their features from those. Don't pass components, JSX or render callbacks as props (`footer={...}`, `cardFooter={(media) => ...}`) to inject content into another component.
+- A wrapper component is a clear wrapper: it either always takes `children` (a child component or an icon) or never does.
+- If a feature can't be expressed with data and flags, the component is built wrong. Split it into smaller components instead of adding injection points.
+- General components don't read route or search params (`useParams`, `params.sub`) to decide how they behave. Pass whatever changes the behavior as an explicit prop: the media type as `type`, page-specific features behind a flag (e.g. `studioFilters`). The call site then shows what the component does, and the component works outside the page it was written for.
+
+### Code
+
+- Don't write comments in most cases. Structure the code and use descriptive variable and function names so it reads without them. Keep comments for truly weird behavior or code that can't be made clear otherwise.
+- Keep data handling direct. Avoid chains of `map`/`filter`/spread/destructuring that reshape or reparse the same data several times. Shape data once, where it's fetched or where it's used.
+- Loop a list once. When several values come from the same list (filtered ids, counts per role, status counts), keep them in signals and fill all of them from one effect that loops the list once. Don't write a memo per value that loops the same list again, and don't derive one filtered copy of the list for other memos to loop.
+- Don't pass custom `equals` functions to signals or memos. Do the check in the setter instead: `setIds(current => sameValues(current, ids) ? current : ids)`.
+- Let code repeat a few times before abstracting it. Premature abstractions grow to do far more than any one caller needs. Don't create a utility function or file for logic used in only one or two places.
+- Don't write hooks that take one input and return a bag of derived values (`const { a, b, c, d, e } = createSomething(x)`). Write the memos where they're used, so each one is readable on its own.
+- Don't add new fetch helpers or settings on top of `sendFetcher`/`sendAnilistFetcher`. Use the existing fetch pattern directly.
+- Follow the naming already used in the codebase. Fetch state signals are named `[xData, setXData]` and `[xLoading, setXLoading]` (e.g. `setStaffData`, `setMediaIdLoading`).
+
 ### CSS
 
 - Nest selectors to mirror the DOM structure of the component's JSX, as deep as the markup goes, so the CSS reads like the markup. Scoping keeps selectors local, so specificity is almost never a concern; don't flatten rules or invent BEM-style class names to manage it.

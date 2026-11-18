@@ -1,0 +1,21 @@
+query ($id: Int) {
+  Staff(id: $id) {
+    id
+    @1: staffMedia(page: @2, perPage: 25, sort: [ID]) {
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        staffRole
+        node {
+          id
+          type
+          mediaListEntry {
+            status
+          }
+        }
+      }
+    }
+    @3
+  }
+}

@@ -397,6 +397,10 @@ export const CountryIcon = props => (
   <OutlineSvg {...props}><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" /></OutlineSvg>
 );
 
+export const LanguageIcon = props => (
+  <OutlineSvg {...props}><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6" /></OutlineSvg>
+);
+
 export const GenreIcon = props => (
   <OutlineSvg {...props}>
     <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />

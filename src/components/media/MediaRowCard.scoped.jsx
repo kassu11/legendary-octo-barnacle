@@ -7,6 +7,8 @@ import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
 import { MediaQuickActions } from "@/components/media/MediaQuickActions.scoped.jsx";
 import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped.jsx";
+import { MediaRowCardCharacterRole } from "@/components/media/MediaRowCardCharacterRole.scoped.jsx";
+import { MediaRowCardStaffRole } from "@/components/media/MediaRowCardStaffRole.scoped.jsx";
 import { globalEditedMedia } from "@/state/globalState.js";
 import "./MediaRowCard.scoped.css";
 
@@ -18,14 +20,17 @@ import "./MediaRowCard.scoped.css";
  * @param {string} [props.type] Search page type (anime, manga or media) used in the genre links, defaults to the media type
  * @param {boolean} [props.loading] Grays out the card while new data is being fetched
  * @param {boolean} [props.subgrid] Columns come from the parent grid, so they line up with the other row cards. The parent grid has to be a size container
+ * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors under the genres
+ * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
+ * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles under the genres
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "rank", "type", "loading", "subgrid", "class"]);
+  const [local, scoping] = splitProps(props, ["media", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} rank={local.rank} type={local.type} loading={local.loading} />
+        <MediaRowCardContent media={local.media} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} />
       </Show>
     </div>
   );
@@ -64,6 +69,12 @@ function MediaRowCardContent(props) {
               </li>
             )}</For>
           </ol>
+          <Show when={props.characterRole}>
+            <MediaRowCardCharacterRole edge={props.characterRole} languages={props.voiceActorLanguages} media={props.media} />
+          </Show>
+          <Show when={props.staffRole}>
+            <MediaRowCardStaffRole role={props.staffRole} media={props.media} />
+          </Show>
         </div>
         <div class="info">
           <div class="score">

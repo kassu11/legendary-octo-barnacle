@@ -1,0 +1,35 @@
+query ($id: Int) {
+  Character(id: $id) {
+    id
+    @1: media(page: @2, perPage: 25, sort: [ID]) {
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        characterRole
+        voiceActorRoles(sort: [RELEVANCE, ID]) {
+          roleNotes
+          dubGroup
+          voiceActor {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+            language: languageV2
+          }
+        }
+        node {
+          id
+          type
+          mediaListEntry {
+            status
+          }
+        }
+      }
+    }
+    @3
+  }
+}
