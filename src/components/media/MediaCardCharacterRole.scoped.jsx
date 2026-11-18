@@ -2,6 +2,7 @@ import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 import "./MediaCardCharacterRole.scoped.css";
 import { capitalize, formatTitleToUrl } from "@/utils/formatUtils.js";
+import { PersonHoverCard } from "@/components/media/PersonHoverCard.scoped";
 import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
 
 /**
@@ -9,6 +10,7 @@ import { GridReelAutoFill } from "@/components/ui/GridReelAutoFill.scoped.jsx";
  * @param {Object} props
  * @param {Object} props.edge Character media edge
  * @param {string[]} props.languages Languages of the shown voice actors
+ * @param {Object} props.media Anilist media of the card
  */
 export function MediaCardCharacterRole(props) {
   const voiceActorRoles = createMemo(() => props.edge.voiceActorRoles.filter(role => props.languages.includes(role.voiceActor.language)));
@@ -20,6 +22,7 @@ export function MediaCardCharacterRole(props) {
           <Match when={voiceActorRoles().length === 1 && voiceActorRoles()[0]}>{role => (
             <A scoped class="voice-actor" href={"/ani/staff/" + role().voiceActor.id + "/" + formatTitleToUrl(role().voiceActor.name.userPreferred)}>
               <img src={role().voiceActor.image.large} alt="" />
+              <PersonHoverCard name={role().voiceActor.name.userPreferred} image={role().voiceActor.image.large} note={role().roleNotes || role().dubGroup} kind={"Voice actor (" + role().voiceActor.language + ")"} media={props.media} />
               <span class="text">
                 <span class="name line-clamp">{role().voiceActor.name.userPreferred}</span>
                 <span class="language">{role().voiceActor.language}</span>
@@ -34,6 +37,7 @@ export function MediaCardCharacterRole(props) {
               <For each={voiceActorRoles()}>{role => (
                 <A scoped class="voice-actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)} aria-label={role.voiceActor.name.userPreferred}>
                   <img src={role.voiceActor.image.large} alt="" />
+                  <PersonHoverCard name={role.voiceActor.name.userPreferred} image={role.voiceActor.image.large} note={role.roleNotes || role.dubGroup} kind={"Voice actor (" + role.voiceActor.language + ")"} media={props.media} />
                 </A>
               )}</For>
             </GridReelAutoFill>

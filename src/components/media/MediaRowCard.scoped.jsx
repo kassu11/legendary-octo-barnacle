@@ -70,10 +70,10 @@ function MediaRowCardContent(props) {
             )}</For>
           </ol>
           <Show when={props.characterRole}>
-            <MediaRowCardCharacterRole edge={props.characterRole} languages={props.voiceActorLanguages} />
+            <MediaRowCardCharacterRole edge={props.characterRole} languages={props.voiceActorLanguages} media={props.media} />
           </Show>
           <Show when={props.staffRole}>
-            <MediaRowCardStaffRole role={props.staffRole} />
+            <MediaRowCardStaffRole role={props.staffRole} media={props.media} />
           </Show>
         </div>
         <div class="info">

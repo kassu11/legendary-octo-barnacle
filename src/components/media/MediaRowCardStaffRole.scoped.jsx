@@ -2,11 +2,13 @@ import { A } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import "./MediaRowCardStaffRole.scoped.css";
 import { capitalize, formatTitleToUrl } from "@/utils/formatUtils.js";
+import { PersonHoverCard } from "@/components/media/PersonHoverCard.scoped";
 
 /**
  * Voiced characters and staff roles of a staff member under the genres of a media row card
  * @param {Object} props
  * @param {{ characterRole: string, characters: Object[], staffRoles: string[] }} props.role Roles of the staff member in the media
+ * @param {Object} props.media Anilist media of the card
  */
 export function MediaRowCardStaffRole(props) {
   return (
@@ -18,6 +20,7 @@ export function MediaRowCardStaffRole(props) {
               <li>
                 <A scoped class="character" href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
                   <img src={character.image.large} alt="" />
+                  <PersonHoverCard name={character.name.userPreferred} image={character.image.large} note={capitalize(props.role.characterRole)} kind="Character" media={props.media} />
                   <span class="text">
                     <span class="name">{character.name.userPreferred}</span>
                     <Show when={props.role.characterRole}>

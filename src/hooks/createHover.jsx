@@ -11,6 +11,7 @@ import { Portal } from "solid-js/web";
  * @property {number} [offset] Gap between the trigger and the floating element
  * @property {number} [alignOffset] Inset from the aligned edge for "start" and "end" alignments, e.g. "right-start" with 25 moves the floating element 25px down
  * @property {(trigger: HTMLElement, floating: HTMLElement) => void} [place] Custom positioning, replaces placements. placeFirstFit can be used inside it
+ * @property {boolean} [stopPropagation] While this hover is open, the hovers of its ancestor triggers stay closed, e.g. a hover inside a card that has its own hover
  *
  * @typedef {Object} Hover
  * @property {(elem: HTMLElement) => void} triggerRef Ref for the element that opens the hover
@@ -35,6 +36,7 @@ const EDGE_SCROLL_MAX_SPEED = 1.5;
  * @property {HTMLElement} [floating]
  * @property {(open: boolean) => void} setOpen
  * @property {(trigger: HTMLElement, floating: HTMLElement) => void} [place]
+ * @property {boolean} [stopPropagation]
  * @property {boolean} [disposed]
  */
 
@@ -242,15 +244,25 @@ function tick() {
   addAncestorEntries(candidates, touchTarget);
   addAncestorEntries(candidates, document.activeElement);
 
+  const hoveredEntries = new Set();
+  const stoppingTriggers = [];
+  for (const entry of candidates) {
+    const hovered = !!entry.trigger?.isConnected && (touchInput
+      ? entry.trigger.contains(touchTarget) || entry.trigger.matches(FOCUS_SELECTOR)
+      : entry.trigger.matches(HOVER_SELECTOR));
+    if (hovered) {
+      hoveredEntries.add(entry);
+      if (entry.stopPropagation) stoppingTriggers.push(entry.trigger);
+    }
+  }
+
   for (const entry of candidates) {
     // Closing a hover can dispose nested hovers during this loop
     if (entry.disposed) {
       continue;
     }
 
-    const open = !!entry.trigger?.isConnected && (touchInput
-      ? entry.trigger.contains(touchTarget) || entry.trigger.matches(FOCUS_SELECTOR)
-      : entry.trigger.matches(HOVER_SELECTOR));
+    const open = hoveredEntries.has(entry) && !stoppingTriggers.some(trigger => trigger !== entry.trigger && entry.trigger.contains(trigger));
     // setOpen renders the floating element synchronously, so it can be placed in the same frame
     entry.setOpen(open);
 
@@ -345,6 +357,7 @@ export function createHover(options = {}) {
   const entry = {
     setOpen,
     place: options.place ?? (options.placements && placeFirstFit(options)),
+    stopPropagation: options.stopPropagation,
   };
 
   register();

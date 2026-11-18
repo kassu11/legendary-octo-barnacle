@@ -130,10 +130,10 @@ export function MediaCard(props) {
             <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} showAdvancedScores={local.showAdvancedScores} afterProgressMutation={local.afterProgressMutation} />
           </Show>
           <Show when={local.characterRole}>
-            <MediaCardCharacterRole edge={local.characterRole} languages={local.voiceActorLanguages} />
+            <MediaCardCharacterRole edge={local.characterRole} languages={local.voiceActorLanguages} media={local.media} />
           </Show>
           <Show when={local.staffRole}>
-            <MediaCardStaffRole role={local.staffRole} />
+            <MediaCardStaffRole role={local.staffRole} media={local.media} />
           </Show>
         </div>
       </Show>
