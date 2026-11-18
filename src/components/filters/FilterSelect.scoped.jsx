@@ -153,7 +153,9 @@ export function FilterSelect(props) {
   });
   const isCursor = createSelector(() => rows()[cursor()]?.id);
 
-  const canClear = () => (!props.onPick || props.onClear) && selected().length > 0 && !sameIds(selected(), [props.defaultValue]);
+  // Single selects without a default value have nothing to reset to
+  const hasEmptyValue = () => !isSingle() || props.defaultValue !== undefined;
+  const canClear = () => (props.onPick ? !!props.onClear : hasEmptyValue()) && selected().length > 0 && !sameIds(selected(), [props.defaultValue]);
 
   const tokenLabel = token => {
     const { id, alt } = parseToken(token);
@@ -179,6 +181,7 @@ export function FilterSelect(props) {
 
   const updateSelected = tokens => {
     if (props.radio && tokens.length > 1) tokens = tokens.filter(token => token !== props.defaultValue);
+    if (!tokens.length && !hasEmptyValue()) return;
     setSelected(isSingle() && !tokens.length ? [props.defaultValue] : tokens);
     hasPendingWrite = true;
     if (writeTimer === undefined) flushWrite();
