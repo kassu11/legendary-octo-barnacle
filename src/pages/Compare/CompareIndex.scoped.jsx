@@ -523,7 +523,7 @@ function UserRow(props) {
     setEnabled(!e.target.checked);
     setSearchParams({
       disabled: arrayUtils.toggle(searchParams.disabled, props.name, !e.target.checked),
-      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked) 
+      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked || exclude())
     });
   }
 
@@ -531,7 +531,7 @@ function UserRow(props) {
     setExclude(!e.target.checked);
     setSearchParams({
       exclude: arrayUtils.toggle(searchParams.exclude, props.name, !e.target.checked),
-      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked) 
+      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked || !enabled())
     });
   }
 

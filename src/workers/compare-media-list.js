@@ -26,6 +26,7 @@ function includeCompareList(listData, entries, filterObject) {
 
   listData.lists.forEach((list) => {
     list.entries.forEach((entry) => {
+      if (!entry.media) return;
       if (filter(entry, filterObject)) {
         const id = entry.media.id;
         entries[id] ??= entry.media;
@@ -41,6 +42,7 @@ function includeCompareList(listData, entries, filterObject) {
 function excludeCompareList(listData, entries) {
   listData.lists.forEach((list) => {
     list.entries.forEach((entry) => {
+      if (!entry.media) return;
       entries[entry.media.id] ??= entry.media;
       entries[entry.media.id].exclude = true;
     });
