@@ -21,7 +21,10 @@ export function MediaRowCardCharacterRole(props) {
               <li>
                 <A scoped class="voice-actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)}>
                   <img src={role.voiceActor.image.large} alt="" />
-                  <span class="name">{role.voiceActor.name.userPreferred}</span>
+                  <span class="text">
+                    <span class="name">{role.voiceActor.name.userPreferred}</span>
+                    <span class="language">{role.voiceActor.language}</span>
+                  </span>
                   <Show when={role.roleNotes || role.dubGroup}>
                     <span class="note">{role.roleNotes || role.dubGroup}</span>
                   </Show>

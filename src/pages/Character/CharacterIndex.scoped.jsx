@@ -9,13 +9,14 @@ import { formatAnilistDate, formatUsersMediaStatus } from "@/utils/formatUtils.j
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { wrapToArray } from "@/utils/arrayUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
-import { useParsedSearchParams, useResponsive } from "@/state/providers";
+import { ParsedSearchParamsContext, useResponsive } from "@/state/providers";
 import { voiceActorLanguages } from "@/state/globalState";
 import { SearchBar } from "@/components/search/SearchBar.scoped";
 import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
+import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
 import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
 import { Tooltip } from "@/components/Tooltip.scoped";
 
@@ -23,13 +24,18 @@ import { Tooltip } from "@/components/Tooltip.scoped";
 const CHARACTER_MEDIA_PAGES_PER_FETCH = 20;
 const CHARACTER_MEDIA_PAGE_SIZE = 25;
 const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
+const MEDIA_TYPES = ["anime", "manga"];
 
 const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id === b[i]);
 
 export function Character() {
   const params = useParams();
-  const parsedSearchParams = useParsedSearchParams();
   const [searchParams] = useSearchParams();
+  const mediaType = createMemo(() => {
+    const type = wrapToArray(searchParams.type).at(-1);
+    return MEDIA_TYPES.includes(type) ? type : "media";
+  });
+  const parsedSearchParams = createParsedSearchParams({ type: mediaType, defaultSort: "popularity_desc" });
   const { isMobilLarge } = useResponsive();
   const [characterData, setCharacterData] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
@@ -113,14 +119,24 @@ export function Character() {
     fetchBatch(0);
   });
 
+  const shownCharacterRoles = createMemo(() => {
+    if (!characterRoles() || mediaType() === "media") return characterRoles();
+    const mediaTypeName = mediaType().toUpperCase();
+    const roles = new Map();
+    for (const [id, edge] of characterRoles()) {
+      if (edge.node.type === mediaTypeName) roles.set(id, edge);
+    }
+    return roles;
+  });
+
   const characterMediaIds = createMemo(() => {
-    if (!characterRoles()) return undefined;
+    if (!shownCharacterRoles()) return undefined;
     const roleValues = wrapToArray(searchParams.role);
     const includedRoles = roleValues.filter(role => !role.startsWith("-"));
     const excludedRoles = roleValues.filter(role => role.startsWith("-")).map(role => role.substring(1));
 
     const ids = [];
-    for (const [id, edge] of characterRoles()) {
+    for (const [id, edge] of shownCharacterRoles()) {
       const role = edge.characterRole?.toLowerCase();
       if (includedRoles.length && !includedRoles.includes(role)) continue;
       if (excludedRoles.includes(role)) continue;
@@ -132,7 +148,7 @@ export function Character() {
   // Saved languages that the character doesn't have are skipped, so the selection isn't lost on characters without them
   const shownVoiceActorLanguages = createMemo(() => {
     const characterLanguages = new Set();
-    for (const edge of characterRoles()?.values() || []) {
+    for (const edge of shownCharacterRoles()?.values() || []) {
       for (const role of edge.voiceActorRoles) characterLanguages.add(role.voiceActor.language);
     }
 
@@ -150,7 +166,7 @@ export function Character() {
 
   const statusCounts = createMemo(() => {
     const counts = { listed: 0 };
-    for (const edge of characterRoles()?.values() || []) {
+    for (const edge of shownCharacterRoles()?.values() || []) {
       const status = edge.node.mediaListEntry?.status;
       if (!status) continue;
       counts[status] = (counts[status] || 0) + 1;
@@ -169,95 +185,97 @@ export function Character() {
 
   return (
     <ErrorBoundary fallback="Character page has crashed">
-      <SearchBar characterFilters characterRoles={characterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
-      <div class="character-page">
-        <Show when={character()}>
-          <div class="page-header">
-            <img src={character().image.large} class="cover" alt="Character profile" />
-            <div class="details">
-              <div class="title-row">
-                <div class="names">
-                  <h1>{character().name.userPreferred}</h1>
-                  <Show when={alternativeNames()}>
-                    <p class="alternative-names">{alternativeNames()}</p>
+      <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
+        <SearchBar typeSelect typeSearchParam characterFilters characterRoles={shownCharacterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
+        <div class="character-page">
+          <Show when={character()}>
+            <div class="page-header">
+              <img src={character().image.large} class="cover" alt="Character profile" />
+              <div class="details">
+                <div class="title-row">
+                  <div class="names">
+                    <h1>{character().name.userPreferred}</h1>
+                    <Show when={alternativeNames()}>
+                      <p class="alternative-names">{alternativeNames()}</p>
+                    </Show>
+                  </div>
+                  <div class="toolbar">
+                    <FavouriteToggle
+                      checked={favourite()}
+                      variableId={params.id}
+                      idType="CHARACTER"
+                      showAnilist
+                      anilistValue={character().favourites}
+                      onChange={setFavourite}
+                      mutateCache={mutateCache}
+                    />
+                    <CardStyleToggle />
+                  </div>
+                </div>
+                <ul class="info">
+                  <Show when={formatAnilistDate(character().dateOfBirth)}>
+                    <li><strong>Birth:</strong> {formatAnilistDate(character().dateOfBirth)}</li>
                   </Show>
-                </div>
-                <div class="toolbar">
-                  <FavouriteToggle
-                    checked={favourite()}
-                    variableId={params.id}
-                    idType="CHARACTER"
-                    showAnilist
-                    anilistValue={character().favourites}
-                    onChange={setFavourite}
-                    mutateCache={mutateCache}
-                  />
-                  <CardStyleToggle />
-                </div>
-              </div>
-              <ul class="info">
-                <Show when={formatAnilistDate(character().dateOfBirth)}>
-                  <li><strong>Birth:</strong> {formatAnilistDate(character().dateOfBirth)}</li>
-                </Show>
-                <Show when={character().age}>
-                  <li><strong>Age:</strong> {character().age}</li>
-                </Show>
-                <Show when={character().gender}>
-                  <li><strong>Gender:</strong> {character().gender}</li>
-                </Show>
-                <Show when={character().bloodType}>
-                  <li><strong>Blood type:</strong> {character().bloodType}</li>
-                </Show>
-              </ul>
-              <Show when={character().description}>
-                <div class="description">
-                  <OldMarkdownComponent>{character().description}</OldMarkdownComponent>
-                </div>
-              </Show>
-            </div>
-          </div>
-        </Show>
-
-        <Show when={statusCounts().listed}>
-          <div class="status-progress">
-            <div class="bar">
-              <For each={LIST_STATUSES}>{status => (
-                <Show when={statusCounts()[status]}>
-                  <div
-                    class="segment"
-                    attr:data-status={status}
-                    style={{ width: `${statusCounts()[status] / characterRoles().size * 100}%` }}
-                  >
-                    <Tooltip>{formatUsersMediaStatus(status, "media")} {statusCounts()[status]}</Tooltip>
+                  <Show when={character().age}>
+                    <li><strong>Age:</strong> {character().age}</li>
+                  </Show>
+                  <Show when={character().gender}>
+                    <li><strong>Gender:</strong> {character().gender}</li>
+                  </Show>
+                  <Show when={character().bloodType}>
+                    <li><strong>Blood type:</strong> {character().bloodType}</li>
+                  </Show>
+                </ul>
+                <Show when={character().description}>
+                  <div class="description">
+                    <OldMarkdownComponent>{character().description}</OldMarkdownComponent>
                   </div>
                 </Show>
-              )}</For>
+              </div>
             </div>
-            <ul class="legend">
-              <For each={LIST_STATUSES}>{status => (
-                <Show when={statusCounts()[status]}>
-                  <li>
-                    <MediaStatusIcon status={status} />
-                    <span class="status-label">
-                      {formatUsersMediaStatus(status, "media")}
-                    </span>
-                    {" "}{statusCounts()[status]}
-                  </li>
-                </Show>
-              )}</For>
-              <li class="total">{statusCounts().listed} / {characterRoles().size}</li>
-            </ul>
-          </div>
-        </Show>
+          </Show>
 
-        <Show when={isMobilLarge()}>
-          <div class="mobile-active-queries">
-            <SearchActiveQueries singleRow />
-          </div>
-        </Show>
+          <Show when={statusCounts().listed}>
+            <div class="status-progress">
+              <div class="bar">
+                <For each={LIST_STATUSES}>{status => (
+                  <Show when={statusCounts()[status]}>
+                    <div
+                      class="segment"
+                      attr:data-status={status}
+                      style={{ width: `${statusCounts()[status] / shownCharacterRoles().size * 100}%` }}
+                    >
+                      <Tooltip>{formatUsersMediaStatus(status, "media")} {statusCounts()[status]}</Tooltip>
+                    </div>
+                  </Show>
+                )}</For>
+              </div>
+              <ul class="legend">
+                <For each={LIST_STATUSES}>{status => (
+                  <Show when={statusCounts()[status]}>
+                    <li>
+                      <MediaStatusIcon status={status} />
+                      <span class="status-label">
+                        {formatUsersMediaStatus(status, "media")}
+                      </span>
+                      {" "}{statusCounts()[status]}
+                    </li>
+                  </Show>
+                )}</For>
+                <li class="total">{statusCounts().listed} / {shownCharacterRoles().size}</li>
+              </ul>
+            </div>
+          </Show>
 
-        <MediaSearchResults variables={anilistVariables()} type="media" characterRoles={characterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
-      </div>
+          <Show when={isMobilLarge()}>
+            <div class="mobile-active-queries">
+              <SearchActiveQueries singleRow />
+            </div>
+          </Show>
+
+          <MediaSearchResults variables={anilistVariables()} type={mediaType()} characterRoles={shownCharacterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
+        </div>
+      </ParsedSearchParamsContext.Provider>
     </ErrorBoundary>
   );
 }

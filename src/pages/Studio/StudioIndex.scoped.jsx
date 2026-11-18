@@ -6,12 +6,13 @@ import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { useParsedSearchParams, useResponsive } from "@/state/providers";
+import { ParsedSearchParamsContext, useResponsive } from "@/state/providers";
 import { SearchBar } from "@/components/search/SearchBar.scoped";
 import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
+import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
 import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
 import { Tooltip } from "@/components/Tooltip.scoped";
 import { formatUsersMediaStatus } from "@/utils/formatUtils.js";
@@ -27,7 +28,7 @@ const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id ==
 
 export function Studio() {
   const params = useParams();
-  const parsedSearchParams = useParsedSearchParams();
+  const parsedSearchParams = createParsedSearchParams({ type: () => "anime", defaultSort: "start_date_desc" });
   const { isMobilLarge } = useResponsive();
   const [studioData, setStudioData] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
@@ -129,66 +130,68 @@ export function Studio() {
 
   return (
     <ErrorBoundary fallback="Studio page has crashed">
-      <SearchBar />
-      <div class="studio-page">
-        <div class="page-header">
-          <h1>{studioData()?.data.data.Studio.name}</h1>
-          <div class="toolbar">
-            <Show when={studioData()}>
-              <FavouriteToggle
-                checked={favourite()}
-                variableId={params.id}
-                idType="STUDIO"
-                showAnilist
-                anilistValue={studioData().data.data.Studio.favourites}
-                onChange={setFavourite}
-                mutateCache={mutateCache}
-              />
-            </Show>
-            <CardStyleToggle />
-          </div>
-        </div>
-
-        <Show when={statusCounts().listed}>
-          <div class="status-progress">
-            <div class="bar">
-              <For each={LIST_STATUSES}>{status => (
-                <Show when={statusCounts()[status]}>
-                  <div
-                    class="segment"
-                    attr:data-status={status}
-                    style={{ width: `${statusCounts()[status] / studioMediaStatuses().size * 100}%` }}
-                  >
-                    <Tooltip>{formatUsersMediaStatus(status, "anime")} {statusCounts()[status]}</Tooltip>
-                  </div>
-                </Show>
-              )}</For>
+      <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
+        <SearchBar />
+        <div class="studio-page">
+          <div class="page-header">
+            <h1>{studioData()?.data.data.Studio.name}</h1>
+            <div class="toolbar">
+              <Show when={studioData()}>
+                <FavouriteToggle
+                  checked={favourite()}
+                  variableId={params.id}
+                  idType="STUDIO"
+                  showAnilist
+                  anilistValue={studioData().data.data.Studio.favourites}
+                  onChange={setFavourite}
+                  mutateCache={mutateCache}
+                />
+              </Show>
+              <CardStyleToggle />
             </div>
-            <ul class="legend">
-              <For each={LIST_STATUSES}>{status => (
-                <Show when={statusCounts()[status]}>
-                  <li>
-                    <MediaStatusIcon status={status} />
-                    <span class="status-label">
-                      {formatUsersMediaStatus(status, "anime")}
-                    </span>
-                    {" "}{statusCounts()[status]}
-                  </li>
-                </Show>
-              )}</For>
-              <li class="total">{statusCounts().listed} / {studioMediaStatuses().size}</li>
-            </ul>
           </div>
-        </Show>
 
-        <Show when={isMobilLarge()}>
-          <div class="mobile-active-queries">
-            <SearchActiveQueries singleRow />
-          </div>
-        </Show>
+          <Show when={statusCounts().listed}>
+            <div class="status-progress">
+              <div class="bar">
+                <For each={LIST_STATUSES}>{status => (
+                  <Show when={statusCounts()[status]}>
+                    <div
+                      class="segment"
+                      attr:data-status={status}
+                      style={{ width: `${statusCounts()[status] / studioMediaStatuses().size * 100}%` }}
+                    >
+                      <Tooltip>{formatUsersMediaStatus(status, "anime")} {statusCounts()[status]}</Tooltip>
+                    </div>
+                  </Show>
+                )}</For>
+              </div>
+              <ul class="legend">
+                <For each={LIST_STATUSES}>{status => (
+                  <Show when={statusCounts()[status]}>
+                    <li>
+                      <MediaStatusIcon status={status} />
+                      <span class="status-label">
+                        {formatUsersMediaStatus(status, "anime")}
+                      </span>
+                      {" "}{statusCounts()[status]}
+                    </li>
+                  </Show>
+                )}</For>
+                <li class="total">{statusCounts().listed} / {studioMediaStatuses().size}</li>
+              </ul>
+            </div>
+          </Show>
 
-        <MediaSearchResults variables={anilistVariables()} type="anime" />
-      </div>
+          <Show when={isMobilLarge()}>
+            <div class="mobile-active-queries">
+              <SearchActiveQueries singleRow />
+            </div>
+          </Show>
+
+          <MediaSearchResults variables={anilistVariables()} type="anime" />
+        </div>
+      </ParsedSearchParamsContext.Provider>
     </ErrorBoundary>
   );
 }

@@ -55,6 +55,7 @@
           }
         }
 
+        .language,
         .note {
           overflow: hidden;
           white-space: nowrap;

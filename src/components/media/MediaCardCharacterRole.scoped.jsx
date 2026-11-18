@@ -22,6 +22,7 @@ export function MediaCardCharacterRole(props) {
               <img src={role().voiceActor.image.large} alt="" />
               <span class="text">
                 <span class="name line-clamp">{role().voiceActor.name.userPreferred}</span>
+                <span class="language">{role().voiceActor.language}</span>
                 <Show when={role().roleNotes || role().dubGroup}>
                   <span class="note">{role().roleNotes || role().dubGroup}</span>
                 </Show>

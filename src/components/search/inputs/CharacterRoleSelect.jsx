@@ -4,7 +4,7 @@ import { wrapToArray } from "@/utils/arrayUtils.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { UserIcon } from "@/assets/icons.jsx";
 
-const ROLE_OPTIONS = [
+export const ROLE_OPTIONS = [
   { description: "Main",       id: "main"       },
   { description: "Supporting", id: "supporting" },
   { description: "Background", id: "background" },

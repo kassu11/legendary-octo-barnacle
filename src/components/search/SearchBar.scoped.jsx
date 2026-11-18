@@ -28,6 +28,7 @@ import { createMemo, Show } from "solid-js";
 /**
  * @param {Object} props
  * @param {boolean} [props.typeSelect] Media type select
+ * @param {boolean} [props.typeSearchParam] Type select changes the type search param instead of the path
  * @param {boolean} [props.cardStyleToggle] Card style toggle next to the active queries
  * @param {boolean} [props.characterFilters] Role and voice actor language filters of a character page
  * @param {Map<number, Object>} [props.characterRoles] Character media edges by the media id, used by the character filters
@@ -41,7 +42,7 @@ export function SearchBar(props) {
   return (
     <Show when={isMobilLarge()} fallback={
       <div class="search-bar">
-        <SearchFilters typeSelect={props.typeSelect} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages}>
+        <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages}>
           <FilterGroup title="Search" class="search">
             <FilterSearchInput />
           </FilterGroup>
@@ -52,7 +53,7 @@ export function SearchBar(props) {
       <div class="search-bar mobile">
         <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
-          <SearchFilters typeSelect={props.typeSelect} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages} />
+          <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages} />
         </MobileFilters>
       </div>
     </Show>
@@ -76,7 +77,7 @@ function SearchFilters(props) {
       <FilterGroup title="General">
         <MediaSortSelect />
         <Show when={props.typeSelect}>
-          <MediaTypeSelect />
+          <MediaTypeSelect searchParam={props.typeSearchParam} />
         </Show>
         <MediaFormatSelect />
         <MediaStatusSelect />

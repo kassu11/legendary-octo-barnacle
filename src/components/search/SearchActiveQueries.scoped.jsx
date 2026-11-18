@@ -7,9 +7,10 @@ import { useNavigateAndSearch } from "@/utils/urlUtils";
 import { capitalize } from "@/utils/formatUtils.js";
 import { arrayUtils } from "@/utils/utils";
 import { localizeInternalSearchParams } from "@/api/apiTranslations";
-import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, TypeIcon, UserIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
+import { ROLE_OPTIONS } from "./inputs/CharacterRoleSelect";
 import { CardStyleToggle } from "./CardStyleToggle.scoped";
 
 const invalidateHeader = [
@@ -52,6 +53,8 @@ const typeIcons = {
   users: UsersIcon,
   onList: OnListIcon,
   licensed: LicensedIcon,
+  type: TypeIcon,
+  role: UserIcon,
 };
 
 export function useActiveSearchQueries() {
@@ -162,6 +165,16 @@ export function useActiveSearchQueries() {
 
     for (const v of excludedUsers) {
       returnValue.push({ type: "users", description: "Exclude User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "ex-" + v) } });
+    }
+
+    const rawType = arrayUtils.wrapToArray(searchParams.type).at(-1);
+    if (rawType && rawType === parsedSearchParams().type) returnValue.push({ type: "type", description: "Type: " + capitalize(rawType), query: { type: undefined } });
+
+    const rawRoles = arrayUtils.wrapToArray(searchParams.role);
+    for (const v of rawRoles) {
+      const isExcluded = v.startsWith("-");
+      const option = ROLE_OPTIONS.find(o => o.id === (isExcluded ? v.substring(1) : v));
+      if (option) returnValue.push({ type: "role", description: (isExcluded ? "Exclude Role: " : "Role: ") + option.description, query: { role: rawRoles.filter(v2 => v2 !== v) } });
     }
 
     if (onList == "true")  returnValue.push({ type: "onList", description: "On My List", query: { onList: undefined } });

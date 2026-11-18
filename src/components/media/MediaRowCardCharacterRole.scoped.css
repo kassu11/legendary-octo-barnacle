@@ -24,7 +24,7 @@
           color: var(--text);
           text-decoration: none;
 
-          &:hover .name {
+          &:hover .text .name {
             text-decoration: underline;
           }
 
@@ -33,6 +33,15 @@
             aspect-ratio: 5.5/8;
             object-fit: cover;
             border-radius: 4px;
+          }
+
+          .text {
+            display: grid;
+
+            .language {
+              color: var(--text-muted);
+              font-size: var(--fs-200);
+            }
           }
 
           .note {

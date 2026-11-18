@@ -1,18 +1,22 @@
 import "./App.scoped.css"
 import { InstallPWAInfoPanel } from "@/components/InstallPWAInfoPanel.scoped.jsx";
 import { createEffect, Show } from "solid-js";
+import { useParams } from "@solidjs/router";
 import { localizations } from "@/constants/constants";
 import { MainNavigation } from "./MainNavigation.scoped.jsx";
 import { MainFooter } from "./MainFooter.scoped.jsx";
 import { MainLoadingBar } from "./MainLoadingBar.scoped";
 import { ApplicationNotifications } from "./ApplicationNotifications.scoped";
-import { ParseSearchParams } from "./ParseSearchParams";
+import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
+import { ParsedSearchParamsContext } from "@/state/providers";
 import { settingsShowDevBranch } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 
 const portIsOpen = port => fetch("http://localhost:" + port, { signal: AbortSignal.timeout(100) }).then(() => true).catch(() => false);
 
 function App(props) {
+  const params = useParams();
+  const parsedSearchParams = createParsedSearchParams({ type: () => params.type, defaultSort: "popularity_desc" });
   const controller = createCleanUpAbortController();
 
   createEffect(() => {
@@ -21,7 +25,7 @@ function App(props) {
   });
 
   return (
-    <ParseSearchParams>
+    <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
       <MainLoadingBar />
       <MainNavigation />
       <ApplicationNotifications />
@@ -33,7 +37,7 @@ function App(props) {
         {props.children}
       </main>
       <MainFooter />
-    </ParseSearchParams>
+    </ParsedSearchParamsContext.Provider>
   )
 }
 

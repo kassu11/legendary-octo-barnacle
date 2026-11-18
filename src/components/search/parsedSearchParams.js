@@ -1,23 +1,27 @@
 import { useParams, useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
-import "./MainNavigation.scoped.css";
 import { createStore, reconcile } from "solid-js/store";
 import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrayUtils";
-import { ParsedSearchParamsContext } from "@/state/providers";
 import { translateInternalApiParams } from "@/api/apiTranslations";
-import { getDefaultSearchSort, getSearchHeaderParams, getSearchMediaType } from "@/utils/searchHeaderUtils";
+import { getSearchHeaderParams } from "@/utils/searchHeaderUtils";
 import { searchPageGroupBy, searchPageGroupSeasonalBy, searchPageGroupTBABy } from "@/state/globalState";
-import { MEDIA_GROUPS } from "@/components/search/mediaGroups";
+import { MEDIA_GROUPS } from "./mediaGroups";
 
-const [searchStore, setSearchStore] = createStore({});
-
-export function ParseSearchParams(props) {
+/**
+ * Search params parsed for the media filters and the search variables, provided with ParsedSearchParamsContext
+ * @param {Object} options
+ * @param {() => string} options.type Media type: anime, manga or media
+ * @param {string} options.defaultSort Sort used when the url and the header don't have one
+ */
+export function createParsedSearchParams(options) {
   const [searchParams] = useSearchParams();
   const params = useParams();
 
+  const [searchStore, setSearchStore] = createStore({});
+
   const searchObject = createMemo(() => {
     const { header } = params;
-    const type = getSearchMediaType(params);
+    const type = options.type();
 
     const obj = {
       q: decodeURIComponent(wrapToArray(searchParams.q).at(-1) || ""),
@@ -27,6 +31,7 @@ export function ParseSearchParams(props) {
       source: removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.source).filter(val => translateInternalApiParams.source[val])).sort(),
       externalSources: [...wrapToSet(searchParams.externalSources)].map(Number).sort(),
       type,
+      defaultSort: options.defaultSort,
     };
 
     const filteredSorts = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.sort).filter(val => translateInternalApiParams.sort[val]));
@@ -45,7 +50,7 @@ export function ParseSearchParams(props) {
     if (obj.q) obj.sortBySearchMatch = searchParams.skipSortByMatch !== "true";
 
     if (filteredSorts.length) obj.sort = filteredSorts;
-    else if (!obj.sort?.length) obj.sort = [getDefaultSearchSort(params)];
+    else if (!obj.sort?.length) obj.sort = [options.defaultSort];
     if (filteredAge.length) obj.age = filteredAge;
     else obj.age = ["r"];
 
@@ -98,14 +103,8 @@ export function ParseSearchParams(props) {
     return obj;
   });
 
-  const parsedSearchParams = createMemo(() => {
+  return createMemo(() => {
     setSearchStore(reconcile(searchObject()));
     return searchStore;
   });
-
-  return (
-    <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
-      {props.children}
-    </ParsedSearchParamsContext.Provider>
-  )
 }

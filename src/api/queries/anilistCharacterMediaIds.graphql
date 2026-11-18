@@ -23,6 +23,7 @@ query ($id: Int) {
         }
         node {
           id
+          type
           mediaListEntry {
             status
           }
