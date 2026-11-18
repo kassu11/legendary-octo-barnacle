@@ -496,6 +496,14 @@ export const ChevronRightIcon = props => (
   <OutlineSvg {...props}><path d="m9 18 6-6-6-6" /></OutlineSvg>
 );
 
+export const ChevronsLeftIcon = props => (
+  <OutlineSvg {...props}><path d="m11 17-5-5 5-5M18 17l-5-5 5-5" /></OutlineSvg>
+);
+
+export const ChevronsRightIcon = props => (
+  <OutlineSvg {...props}><path d="m6 17 5-5-5-5M13 17l5-5-5-5" /></OutlineSvg>
+);
+
 export const ChevronDownIcon = props => (
   <OutlineSvg {...props}><path d="m6 9 6 6 6-6" /></OutlineSvg>
 );

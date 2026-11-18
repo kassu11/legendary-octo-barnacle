@@ -3,7 +3,7 @@ import { createMemo, For, Show } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers";
 import { capitalize } from "@/utils/formatUtils";
 import { arrayUtils } from "@/utils/utils";
-import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/icons.jsx";
+import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "@/assets/icons.jsx";
 import "./SeasonControls.scoped.css";
 
 export function SeasonControls() {
@@ -41,6 +41,9 @@ export function SeasonControls() {
     <div class="season-controls">
       <Show when={params.type === "anime"}>
         <nav class="season-nav" aria-label="Seasons">
+          <A scoped class="arrow year-arrow" href={headerUrl(seasonHeader(-seasons.length))} aria-label="Previous year">
+            <ChevronsLeftIcon scoped />
+          </A>
           <A scoped class="arrow" href={headerUrl(seasonHeader(-1))} aria-label="Previous season">
             <ChevronLeftIcon scoped />
           </A>
@@ -52,6 +55,9 @@ export function SeasonControls() {
           )}</For>
           <A scoped class="arrow" href={headerUrl(seasonHeader(1))} aria-label="Next season">
             <ChevronRightIcon scoped />
+          </A>
+          <A scoped class="arrow year-arrow" href={headerUrl(seasonHeader(seasons.length))} aria-label="Next year">
+            <ChevronsRightIcon scoped />
           </A>
         </nav>
       </Show>

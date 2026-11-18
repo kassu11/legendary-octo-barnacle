@@ -12,6 +12,10 @@
     gap: 4px;
     padding: 4px;
     border-radius: 8px;
+
+    @media (width < 40em) {
+      gap: 2px;
+    }
     background-color: var(--bg);
 
     @media (width < 40em) {
@@ -34,25 +38,44 @@
     }
 
     .arrow {
+      flex-shrink: 0;
       padding-inline: 4px;
+
+      @media (width < 40em) {
+        padding-inline: 2px;
+      }
+
+      @media (width < 18em) {
+        display: none;
+      }
 
       svg {
         width: 1.25em;
         height: 1.25em;
       }
-      @media (width < 20em) {
+    }
+
+    .year-arrow {
+      @media (width < 23em) {
         display: none;
       }
     }
 
     .season {
-      flex: 1;
-      min-width: 4.5em;
+      flex: 1 0 auto;
       padding: 4px 12px;
       line-height: 1.2;
 
+      @media (width < 40em) {
+        padding: 4px 2px;
+      }
+
       .name {
         font-weight: 600;
+
+        @media (width < 40em) {
+          font-size: var(--fs-300);
+        }
       }
 
       .year {
