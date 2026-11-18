@@ -28,7 +28,7 @@ export function GenreItems(props) {
           <div class="wrapper">
             <div className="flex-space-between">
               <p>User {params.type}</p>
-              <A href={"/user/" + user().name + "/" + params.type + "/list?genre=" + encodeURIComponent(genre.genre)}>Show all</A>
+              <A noScroll href={"/user/" + user().name + "/" + params.type + "/list?genre=" + encodeURIComponent(genre.genre)}>Show all</A>
             </div>
             <GenreMediaCardsScoped store={props.store} setStore={props.setStore} mediaIds={genre.mediaIds} allMediaIds={props.mediaIds()} />
           </div>

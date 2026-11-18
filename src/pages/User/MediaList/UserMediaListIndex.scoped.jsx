@@ -17,6 +17,7 @@ import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { authUserData } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { COMBINED_LIST } from "@/constants/mediaLists.js";
+import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
 
 export function UserMediaList() {
   const { user } = useUser();
@@ -141,6 +142,16 @@ export function UserMediaList() {
   }
 
   const [listBody, setListBody] = createSignal();
+
+  // Skip the profile banner when landing on the page. Waits for the list, so the page is tall enough to scroll
+  let scrolledToList = false;
+  createEffect(() => {
+    const target = listBody();
+    if (scrolledToList || !target) return;
+    scrolledToList = true;
+    const targetY = scrollYBelowNavigation(target);
+    if (window.scrollY < targetY) window.scrollTo(0, targetY);
+  });
 
   return (
     <UserMediaListContext.Provider value={{ isOwnProfile }}>

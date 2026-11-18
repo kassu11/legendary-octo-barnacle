@@ -117,8 +117,8 @@ function Content(props) {
       <nav class="cp-profile-navigation">
         <ul>
           <li><A href="">Overview</A></li>
-          <li><A href="anime/list">Anime list</A></li>
-          <li><A href="manga/list">Manga list</A></li>
+          <li><A noScroll href="anime/list">Anime list</A></li>
+          <li><A noScroll href="manga/list">Manga list</A></li>
           <li><A href="favourites">Favourites</A></li>
           <li><A href="anime/stats/overview">Stats</A></li>
           <li><A href="socials">Socials</A></li>

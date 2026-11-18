@@ -54,10 +54,10 @@ export function ProfileMenu(props) {
         <A scoped href={userUrl()} end class="dropdown-item">
           <UserIcon scoped />Profile
         </A>
-        <A scoped href={userUrl() + "/anime/list"} class="dropdown-item">
+        <A scoped noScroll href={userUrl() + "/anime/list"} class="dropdown-item">
           <TvOutlineIcon scoped />Anime list
         </A>
-        <A scoped href={userUrl() + "/manga/list"} class="dropdown-item">
+        <A scoped noScroll href={userUrl() + "/manga/list"} class="dropdown-item">
           <BookOutlineIcon scoped />Manga list
         </A>
         <A scoped href="/settings" class="dropdown-item">

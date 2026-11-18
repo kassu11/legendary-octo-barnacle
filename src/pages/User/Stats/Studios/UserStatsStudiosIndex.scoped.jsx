@@ -139,7 +139,7 @@ function StatsStudios(props) {
             <div class="wrapper tags">
               <div className="flex-space-between">
                 <p>From user list</p>
-                <A href={"/user/" + user().name + "/" + params.type + "/list?studio=" + genre.studio.name}>Show all</A>
+                <A noScroll href={"/user/" + user().name + "/" + params.type + "/list?studio=" + genre.studio.name}>Show all</A>
               </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>

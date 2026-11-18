@@ -142,7 +142,7 @@ function StatsTags(props) {
             <div class="wrapper tags">
               <div className="flex-space-between">
                 <p>User {params.type}</p>
-                <A href={"/user/" + user().name + "/" + params.type + "/list?tag=" + encodeURIComponent(genre.tag.name)}>Show all</A>
+                <A noScroll href={"/user/" + user().name + "/" + params.type + "/list?tag=" + encodeURIComponent(genre.tag.name)}>Show all</A>
               </div>
               <Cards store={store} setStore={setStore} mediaIds={genre.mediaIds} allMediaIds={mediaIds()} />
             </div>
