@@ -16,7 +16,7 @@ import { asserts, arrayUtils } from "@/utils/utils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { authUserData } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
-import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
+import { COMBINED_LIST } from "@/constants/mediaLists.js";
 
 export function UserMediaList() {
   const { user } = useUser();
@@ -66,8 +66,7 @@ export function UserMediaList() {
   const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
   const search = () => decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
   const listParam = multiParam("list");
-  const list = () => listParam().length ? listParam() : [ALL_LISTS];
-  // Combined list has the same entries as the other lists, so it is only shown when it is selected
+  // "All" list has the same entries as the other lists, so it is only shown when it is selected
   const isListVisible = name => listParam().length ? listParam().includes(name) : name !== COMBINED_LIST;
   // Old links have the list name in the path
   const legacyListUrl = () => {
@@ -153,7 +152,7 @@ export function UserMediaList() {
           listData={listData}
           scrollTarget={listBody()}
           setSearchParams={setSearchParams}
-          list={list}
+          list={listParam}
           format={format}
           status={status}
           genre={genre}

@@ -75,7 +75,7 @@ function SortDirection(props) {
  * @param {boolean} [props.excludable] Rows can also be excluded
  * @param {boolean} [props.sort] Rows are sort fields, at least one is always selected
  * @param {boolean} [props.radio] Click selects only one row, but more can be added to it. At least one is always selected
- * @param {string} [props.defaultValue] Value that is left out of the url. With radio this row can't be selected together with other rows
+ * @param {string} [props.defaultValue] Value that is left out of the url. With radio this row can't be selected together with other rows. Without a row it is an empty selection, and clicking the only selected row deselects it
  * @param {(id: string) => number} [props.countOf] Number shown at the end of the row
  * @param {(id: string) => void} [props.onPick] Use with radio. Row only calls this and props.value decides what is selected, for selections that tokens can't express, like ranges
  * @param {(ids: string[]) => void} [props.onPickRange] Use with onPick. Shift click, Shift + arrows, drag and touch hold pass every row from the previous click to the cursor
@@ -183,7 +183,7 @@ export function FilterSelect(props) {
   const updateSelected = tokens => {
     if (props.radio && tokens.length > 1) tokens = tokens.filter(token => token !== props.defaultValue);
     if (!tokens.length && !hasEmptyValue()) return;
-    setSelected(isSingle() && !tokens.length ? [props.defaultValue] : tokens);
+    setSelected(isSingle() && !tokens.length && optionById().has(props.defaultValue) ? [props.defaultValue] : tokens);
     hasPendingWrite = true;
     if (writeTimer === undefined) flushWrite();
   };
@@ -211,6 +211,7 @@ export function FilterSelect(props) {
 
   const toggleSingle = (id, additive) => {
     if (props.radio) {
+      if (!additive && sameIds(selected(), [id]) && !optionById().has(props.defaultValue)) return updateSelected([]);
       updateSelected(additive && id !== props.defaultValue ? setToken(selected(), id, entries().has(id) ? null : id) : [id]);
       return;
     }

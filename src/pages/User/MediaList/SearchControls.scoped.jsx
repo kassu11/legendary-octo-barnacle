@@ -55,13 +55,12 @@ function toOption(name) {
 
 const toListOption = name => {
   switch (name) {
-    case ALL_LISTS: return { description: "All", id: name, tooltip: "Every list separately" };
     case COMBINED_LIST: return { description: listTitle(name), id: name, tooltip: "Every list as one list, entries that are in many lists are shown once" };
     default: return { description: name, id: name };
   }
 };
 
-export const listTitle = name => name === COMBINED_LIST ? "Combined" : name;
+export const listTitle = name => name === COMBINED_LIST ? "All" : name;
 
 // Every search param that the remove filters button clears, except q these are also counted as active filters
 const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
@@ -103,7 +102,7 @@ export function SearchControlsScoped(props) {
     { description: "Average Score",                                   id: "averageScore", type: "numeric"    },
     { description: "Popularity",                                      id: "popularity",   type: "numeric"    },
     { description: params.type === "anime" ? "Rewatches" : "Rereads", id: "repeat",       type: "numeric"    },
-    { description: "List Order",                                      id: "list",         type: "order",     tooltip: "Order of the lists in the \"All\" view, only changes the combined list" },
+    { description: "List Order",                                      id: "list",         type: "order",     tooltip: "Sorts the \"All\" list by the order of the lists" },
   ]);
 
   // The worker sends new arrays after every filter change. mapArray keeps the same option objects
@@ -112,11 +111,8 @@ export function SearchControlsScoped(props) {
   const tagOptions = createMemo(mapArray(() => props.listData()?.data?.tags, toOption));
   const startedYearOptions = createMemo(mapArray(() => props.listData()?.data?.startedYears, toOption));
   const completedYearOptions = createMemo(mapArray(() => props.listData()?.data?.completedYears, toOption));
-  const listOptions = createMemo(mapArray(() => [ALL_LISTS, ...(props.listData()?.data?.lists.map(list => list.name) ?? [])], toListOption));
-  const listCounts = createMemo(() => {
-    const data = props.listData()?.data;
-    return new Map([[ALL_LISTS, data?.total], ...(data?.lists.map(list => [list.name, list.entries.length]) ?? [])]);
-  });
+  const listOptions = createMemo(mapArray(() => props.listData()?.data?.lists.map(list => list.name), toListOption));
+  const listCounts = createMemo(() => new Map(props.listData()?.data?.lists.map(list => [list.name, list.entries.length])));
 
   return (
     <Show when={isMobilLarge()} fallback={
@@ -138,7 +134,7 @@ export function SearchControlsScoped(props) {
         <FilterGroups>
           {filtersProps.children}
           <FilterGroup title="General">
-            <FilterSelect param="list" radio defaultValue={ALL_LISTS} each={listOptions()} countOf={id => listCounts().get(id)} value={props.list()} icon={<ListIcon />} button="List" tooltip="Which lists to show. Hold Ctrl to add a list to the selection, hold Shift or drag to select every list in between" setSearchParams={setSearchParams} />
+            <FilterSelect param="list" radio defaultValue={ALL_LISTS} each={listOptions()} countOf={id => listCounts().get(id)} value={props.list()} icon={<ListIcon />} button="List" tooltip="Which lists to show, every list separately when none is selected. Hold Ctrl to add a list to the selection, hold Shift or drag to select every list in between" setSearchParams={setSearchParams} />
             <FilterSelect param="sort" sort defaultValue="score" each={sortOptions()} value={props.sort()} icon={<SortIcon />} button="Sort" tooltip="Order of the list. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" setSearchParams={setSearchParams} />
             <Switch>
               <Match when={!isOwnProfile() && authUserData()?.data?.name}>
