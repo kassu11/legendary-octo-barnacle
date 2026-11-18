@@ -111,7 +111,6 @@ export function Studio() {
     return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
   });
 
-  // Number of studio media with each list status, and in the users list overall
   const statusCounts = createMemo(() => {
     const counts = { listed: 0 };
     for (const status of studioMediaStatuses()?.values() || []) {

@@ -1,0 +1,14 @@
+query ($id: Int) {
+  Character(id: $id) {
+    id
+    @1: media(page: @2, perPage: 25, sort: [ID]) {
+      pageInfo {
+        hasNextPage
+      }
+      nodes {
+        id
+      }
+    }
+    @3
+  }
+}

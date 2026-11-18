@@ -65,6 +65,9 @@ import { default as anilistStudioMediaIdsRaw } from "./queries/anilistStudioMedi
 // Studio media pages can only have 25 entries
 export const anilistStudioMediaIds = multiPageFetchQueryGenerator(anilistStudioMediaIdsRaw, 25);
 
+import { default as anilistCharacterMediaIdsRaw } from "./queries/anilistCharacterMediaIds.graphql";
+export const anilistCharacterMediaIds = multiPageFetchQueryGenerator(anilistCharacterMediaIdsRaw, 25);
+
 // Generic Jikan post request urls
 export const myAnimeListMediaById = ({ type, id }) => `https://api.tenrai.org/v1/${type}/${id}/full`;
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.tenrai.org/v1/${type}/${id}/characters`;

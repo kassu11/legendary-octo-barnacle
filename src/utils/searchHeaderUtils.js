@@ -127,7 +127,9 @@ export function getSearchHeaderTitle(header, type, searchParams) {
 
 // Studio pages search only the studio's own anime and list them newest first
 export function getSearchMediaType(params) {
-  return params.type || (params.sub === "studio" ? "anime" : undefined);
+  if (params.type) return params.type;
+  if (params.sub === "studio") return "anime";
+  if (params.sub === "character") return "media";
 }
 
 export function getDefaultSearchSort(params) {

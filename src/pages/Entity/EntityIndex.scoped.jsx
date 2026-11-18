@@ -16,38 +16,6 @@ import { isTypeFunction } from "@/utils/functionUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 
-export function Character() {
-  const params = useParams();
-  const [anilistCharacterInfoTime, startAnilistCharacterInfoTimer, stopAnilistCharacterInfoTimer] = createTimer();
-  const [anilistCharacterInfoData, setAnilistCharacterInfoData] = createSignal(undefined, { equals: false });
-  const anilistCharacterInfoController = createCleanUpAbortController();
-  let anilistCharacterInfoFetcher;
-  createEffect(() => {
-    const signal = anilistCharacterInfoController.abortAndRenew();
-
-    anilistCharacterInfoFetcher = createAnilistFetcher(queries.anilistCharacterById, { id: params.id }, signal);
-
-    sendAnilistFetcher(anilistCharacterInfoFetcher, {
-      name: "Anilist character info",
-      onFetch: () => anilistCharacterInfoController.disable(),
-      onStart: startAnilistCharacterInfoTimer,
-      onStop: stopAnilistCharacterInfoTimer,
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === anilistCharacterInfoFetcher.cacheKey) setAnilistCharacterInfoData(res);
-      }
-    });
-  });
-
-  const mutateCache = mutate => {
-    if(isTypeFunction(mutate)) mutate = mutate(untrack(anilistCharacterInfoData));
-    setFetcherValueToStorage(mutate);
-  }
-
-  return (
-    <Body type="CHARACTER" entityInfo={anilistCharacterInfoData()?.data.data.Character} mutateEntityInfoCache={mutateCache} time={formatMSToString(anilistCharacterInfoTime())} />
-  );
-}
-
 export function Staff() {
   const params = useParams();
   const [anilistStaffInfoTime, startAnilistStaffInfoTimer, stopAnilistStaffInfoTimer] = createTimer();
@@ -189,14 +157,7 @@ function Body(props) {
             <option value="ID">ID</option>
             <option value="ID_DESC">ID_DESC</option>
             <option value="POPULARITY">POPULARITY</option>
-            <option value={
-              (() => {
-                if (props.type === "CHARACTER" && searchParams.sort !== "POPULARITY_DESC") {
-                  return "";
-                }
-                return"POPULARITY_DESC";
-              })()
-            }>POPULARITY_DESC</option>
+            <option value="POPULARITY_DESC">POPULARITY_DESC</option>
             <option value="SCORE">SCORE</option>
             <option value="SCORE_DESC">SCORE_DESC</option>
             <option value="SEARCH_MATCH">SEARCH_MATCH</option>
@@ -234,9 +195,6 @@ function Body(props) {
           <SubSection variables={variables()} type="ANIME" title="Anime staff roles" />
           <SubSection variables={variables()} type="MANGA" title="Manga staff roles" />
         </Match>
-        <Match when={props.type === "CHARACTER"}>
-          <SubSection variables={variables()} type="MEDIA" title="Media entries" />
-        </Match>
       </Switch>
     </div>
   )
@@ -249,16 +207,6 @@ function SubSection(props) {
 
   const [showYears, setShowYears] = createSignal(props.showYears || false);
   const [visible, setVisible] = createSignal(false);
-  const [languages, setLanguages] = createSignal([]);
-  const [language, setLanguage] = createSignal(["Japanese"]);
-
-  if (props.type === "MEDIA") {
-    createEffect(() => {
-      if (languages().length) {
-        setLanguage(languages().find(l => l === "Japanese") || languages().find(l => l === "Chinese") || languages()[0]);
-      }
-    });
-  }
 
   return (
     <details class="entity-page-details" classList={{hidden: !visible()}} open>
@@ -272,13 +220,6 @@ function SubSection(props) {
             }}/>
             {" "}Show years
           </label>
-          <Show when={props.type === "MEDIA" && languages().length}>
-            <select value={language()} onInput={e => setLanguage(e.target.value)}>
-              <For each={languages()}>{lang => (
-                <option value={lang}>{lang}</option>
-              )}</For>
-            </select>
-          </Show>
         </div>
       </summary>
       <ol class="grid-column-auto-fill">
@@ -292,87 +233,9 @@ function SubSection(props) {
           <Match when={props.type === "MANGA"}>
             <StaffMediaRolePage setVisible={setVisible} variables={props.variables} type="MANGA" showYears={showYears} nestLevel={1} />
           </Match>
-          <Match when={props.type === "MEDIA"}>
-            <CharacterMediaPage 
-              setVisible={setVisible} 
-              variables={props.variables} 
-              showYears={showYears} 
-              setLanguages={setLanguages} 
-              language={language} 
-              nestLevel={1} 
-            />
-          </Match>
         </Switch>
       </ol>
     </details>
-  );
-}
-
-function CharacterMediaPage(props) {
-  const params = useParams();
-  const [variables, setVariables] = createSignal(undefined);
-  const [anilistCharacterInfoLoading, setAnilistCharacterInfoLoading] = createSignal(false);
-  const [anilistCharacterInfoData, setAnilistCharacterInfoData] = createSignal(undefined, { equals: false });
-  const anilistCharacterInfoController = createCleanUpAbortController();
-  let anilistCharacterInfoFetcher;
-  createEffect(() => {
-    const signal = anilistCharacterInfoController.abortAndRenew();
-
-    const { nestLevel } = props;
-    const vars = nestLevel === 1 ? props.variables : variables();
-
-    if (!vars) return;
-
-    anilistCharacterInfoFetcher = createAnilistFetcher(queries.anilistCharacterById, {
-      ...vars, 
-      "page": vars.page || 1,
-      "sort": vars.sort || "POPULARITY_DESC",
-      "onList": vars.onList,
-      "withRoles": vars.withRoles || true,
-      id: params.id,
-    }, signal);
-
-    sendAnilistFetcher(anilistCharacterInfoFetcher, {
-      name: "Anilist character info",
-      onFetch: () => anilistCharacterInfoController.disable(),
-      onStart: () => setAnilistCharacterInfoLoading(true),
-      onStop: () => setAnilistCharacterInfoLoading(false),
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey !== anilistCharacterInfoFetcher.cacheKey) return;
-        const { media } = res.data.data.Character;
-        setAnilistCharacterInfoData(media);
-
-        if (nestLevel !== 1) return;
-        props.setVisible(media.edges.length > 0);
-
-        const newLanguages = new Set();
-        for (const { voiceActorRoles } of media.edges) {
-          for (const { voiceActor } of voiceActorRoles) {
-            newLanguages.add(voiceActor.language);
-          }
-        }
-
-        props.setLanguages([...newLanguages]);
-      }
-    });
-  });
-
-
-  return (
-    <>
-      <Intersection onIntersection={() => setVariables(props.variables)}>
-        <Show when={anilistCharacterInfoData()}>
-          <CharacterAndActorCards language={props.language} edges={anilistCharacterInfoData().edges} showYears={props.showYears} lastYearGroup={props.lastYearGroup} />
-        </Show>
-      </Intersection>
-      <Show when={!anilistCharacterInfoLoading() && anilistCharacterInfoData()?.pageInfo.hasNextPage}>
-        <Show when={anilistCharacterInfoData().edges} keyed={props.nestLevel === 1}>
-          <Show when={props.variables}>{vars => (
-            <CharacterMediaPage variables={{ ...vars(), page: (vars()?.page || 1) + 1 }} nestLevel={props.nestLevel + 1} showYears={props.showYears} language={props.language} lastYearGroup={anilistCharacterInfoData().edges.at(-1)?.node.startDate?.year || "TBA"} />
-          )}</Show>
-        </Show>
-      </Show>
-    </>
   );
 }
 
@@ -535,55 +398,6 @@ function YearHeader(props) {
         </Match>
       </Switch>
     </Show>
-  );
-}
-
-function CharacterAndActorCards(props) {
-  asserts.assertTruthy(props.showYears, "showYears signal is missing");
-  asserts.assertTruthy(props.language, "language signal is missing");
-
-  return ( 
-    <For each={props.edges}>{(edge, i) => (
-      <>
-        <YearHeader showYears={props.showYears} lastYearGroup={props.lastYearGroup} edge={edge} edges={props.edges} index={i} />
-        <Show when={edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language())}>{roles => (
-          <li class="entity-page-media-voice-actor">
-            <A scoped href={mediaUrl(edge.node)}>
-              <img src={edge.node.coverImage.large} alt={capitalize(edge.node.type) + " cover"} />
-            </A>
-            <A scoped href={mediaUrl(edge.node)}>
-              <p>
-                <Show when={edge.node.mediaListEntry?.status}>
-                  <div class="list-status" attr:data-status={edge.node.mediaListEntry.status} />
-                </Show>
-                {edge.node.title.userPreferred}
-              </p>
-            </A>
-            <Show when={edge.characterRole}>
-              <p class="entity-page-character-role">{capitalize(edge.characterRole)}</p>
-            </Show>
-            <Show when={roles().length}>
-              <ol>
-                <For each={roles()}>{role => (
-                  <li>
-                    <A scoped class="actor" href={"/ani/staff/" + role.voiceActor.id + "/" + formatTitleToUrl(role.voiceActor.name.userPreferred)}>
-                      <span>{role.voiceActor.name.userPreferred}</span>
-                      <Show when={role.roleNotes}>
-                        <span class="role"> ({role.roleNotes})</span>
-                      </Show>
-                      <Show when={role.dubGroup}>
-                        <span class="role"> ({role.dubGroup})</span>
-                      </Show>
-                      <img src={role.voiceActor.image.large} alt="Staff profile" class="background"/>
-                    </A>
-                  </li>
-                )}</For>
-              </ol>
-            </Show>
-          </li>
-        )}</Show>
-      </>
-    )}</For>
   );
 }
 

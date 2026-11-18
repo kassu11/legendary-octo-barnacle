@@ -100,9 +100,11 @@ Heavy list processing (user media lists, compare, relations) runs in web workers
 - Components get data and flags, and enable their features from those. Don't pass components, JSX or render callbacks as props (`footer={...}`, `cardFooter={(media) => ...}`) to inject content into another component.
 - A wrapper component is a clear wrapper: it either always takes `children` (a child component or an icon) or never does.
 - If a feature can't be expressed with data and flags, the component is built wrong. Split it into smaller components instead of adding injection points.
+- General components don't read route or search params (`useParams`, `params.sub`) to decide how they behave. Pass whatever changes the behavior as an explicit prop: the media type as `type`, page-specific features behind a flag (e.g. `studioFilters`). The call site then shows what the component does, and the component works outside the page it was written for.
 
 ### Code
 
+- Don't write comments in most cases. Structure the code and use descriptive variable and function names so it reads without them. Keep comments for truly weird behavior or code that can't be made clear otherwise.
 - Keep data handling direct. Avoid chains of `map`/`filter`/spread/destructuring that reshape or reparse the same data several times. Shape data once, where it's fetched or where it's used.
 - Let code repeat a few times before abstracting it. Premature abstractions grow to do far more than any one caller needs. Don't create a utility function or file for logic used in only one or two places.
 - Don't write hooks that take one input and return a bag of derived values (`const { a, b, c, d, e } = createSomething(x)`). Write the memos where they're used, so each one is readable on its own.
