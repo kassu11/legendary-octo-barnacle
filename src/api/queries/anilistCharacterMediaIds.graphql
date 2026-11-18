@@ -5,8 +5,28 @@ query ($id: Int) {
       pageInfo {
         hasNextPage
       }
-      nodes {
-        id
+      edges {
+        characterRole
+        voiceActorRoles(sort: [RELEVANCE, ID]) {
+          roleNotes
+          dubGroup
+          voiceActor {
+            id
+            name {
+              userPreferred
+            }
+            image {
+              large
+            }
+            language: languageV2
+          }
+        }
+        node {
+          id
+          mediaListEntry {
+            status
+          }
+        }
       }
     }
     @3

@@ -1,11 +1,11 @@
 import { useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, ErrorBoundary, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import "./CharacterIndex.scoped.css";
 import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { formatAnilistDate } from "@/utils/formatUtils.js";
+import { formatAnilistDate, formatUsersMediaStatus } from "@/utils/formatUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { useParsedSearchParams, useResponsive } from "@/state/providers";
@@ -14,9 +14,13 @@ import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.sco
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
+import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
+import { Tooltip } from "@/components/Tooltip.scoped";
 
-const CHARACTER_MEDIA_PAGES_PER_FETCH = 40;
+// Voice actor fields make the pages heavy, so fewer pages fit under the AniList query complexity limit
+const CHARACTER_MEDIA_PAGES_PER_FETCH = 20;
 const CHARACTER_MEDIA_PAGE_SIZE = 25;
+const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 
 const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id === b[i]);
 
@@ -27,6 +31,7 @@ export function Character() {
   const [characterData, setCharacterData] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
   const [characterMediaIds, setCharacterMediaIds] = createSignal(undefined, { equals: sameIds });
+  const [characterRoles, setCharacterRoles] = createSignal(undefined);
 
   const character = () => characterData()?.data.data.Character;
 
@@ -57,6 +62,7 @@ export function Character() {
     const signal = characterMediaIdsController.abortAndRenew();
     const characterId = currentCharacterId = params.id;
     setCharacterMediaIds(undefined);
+    setCharacterRoles(undefined);
 
     // The cached and the fetched response can both fill the same batch
     const batches = [];
@@ -76,14 +82,14 @@ export function Character() {
         setValue: res => {
           if (characterId !== currentCharacterId) return;
 
-          const nodes = [];
+          const edges = [];
           let page;
           for (let i = firstPage; i < firstPage + CHARACTER_MEDIA_PAGES_PER_FETCH; i++) {
             page = res.data.data.Character[`page${i}`];
-            for (const node of page.nodes) nodes.push(node);
+            for (const edge of page.edges) edges.push(edge);
             if (!page.pageInfo.hasNextPage) break;
           }
-          batches[batchIndex] = nodes;
+          batches[batchIndex] = edges;
 
           if (page.pageInfo.hasNextPage) {
             if (lastBatchIndex <= batchIndex) lastBatchIndex = undefined;
@@ -93,12 +99,13 @@ export function Character() {
           }
 
           if (lastBatchIndex === undefined) return;
-          const ids = [];
+          const roles = new Map();
           for (let i = 0; i <= lastBatchIndex; i++) {
             if (!batches[i]) return;
-            for (const node of batches[i]) ids.push(node.id);
+            for (const edge of batches[i]) roles.set(edge.node.id, edge);
           }
-          setCharacterMediaIds(ids.sort((a, b) => a - b));
+          setCharacterRoles(roles);
+          setCharacterMediaIds([...roles.keys()].sort((a, b) => a - b));
         }
       });
     };
@@ -110,6 +117,17 @@ export function Character() {
     const ids = characterMediaIds();
     if (!ids) return null;
     return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
+  });
+
+  const statusCounts = createMemo(() => {
+    const counts = { listed: 0 };
+    for (const edge of characterRoles()?.values() || []) {
+      const status = edge.node.mediaListEntry?.status;
+      if (!status) continue;
+      counts[status] = (counts[status] || 0) + 1;
+      counts.listed++;
+    }
+    return counts;
   });
 
   const alternativeNames = () => [character().name.native, ...character().name.alternative].filter(Boolean).join(", ");
@@ -171,13 +189,45 @@ export function Character() {
           </div>
         </Show>
 
+        <Show when={statusCounts().listed}>
+          <div class="status-progress">
+            <div class="bar">
+              <For each={LIST_STATUSES}>{status => (
+                <Show when={statusCounts()[status]}>
+                  <div
+                    class="segment"
+                    attr:data-status={status}
+                    style={{ width: `${statusCounts()[status] / characterRoles().size * 100}%` }}
+                  >
+                    <Tooltip>{formatUsersMediaStatus(status, "media")} {statusCounts()[status]}</Tooltip>
+                  </div>
+                </Show>
+              )}</For>
+            </div>
+            <ul class="legend">
+              <For each={LIST_STATUSES}>{status => (
+                <Show when={statusCounts()[status]}>
+                  <li>
+                    <MediaStatusIcon status={status} />
+                    <span class="status-label">
+                      {formatUsersMediaStatus(status, "media")}
+                    </span>
+                    {" "}{statusCounts()[status]}
+                  </li>
+                </Show>
+              )}</For>
+              <li class="total">{statusCounts().listed} / {characterRoles().size}</li>
+            </ul>
+          </div>
+        </Show>
+
         <Show when={isMobilLarge()}>
           <div class="mobile-active-queries">
             <SearchActiveQueries singleRow />
           </div>
         </Show>
 
-        <MediaSearchResults variables={anilistVariables()} type="media" />
+        <MediaSearchResults variables={anilistVariables()} type="media" characterRoles={characterRoles()} voiceActorLanguage="Japanese" />
       </div>
     </ErrorBoundary>
   );

@@ -1,0 +1,108 @@
+@layer component {
+  .media-card-character-role {
+    --scoped-padding: 8px;
+    pointer-events: auto;
+    align-self: stretch;
+    display: grid;
+    gap: 6px;
+    padding-block: var(--scoped-padding);
+    color: var(--text-muted);
+    background-color: color-mix(var(--bg-dark), transparent 15%);
+    box-shadow: 0 8px 0px 8px color-mix(var(--bg-dark), transparent 15%);
+    font-size: var(--fs-300);
+
+    @media (width < 40em) {
+      --scoped-padding: 4px;
+      gap: 4px;
+    }
+
+    > .voice-actor {
+      display: grid;
+      grid-template-columns: 3.5rem 1fr;
+      align-items: center;
+      gap: 8px;
+      padding-inline: var(--scoped-padding);
+      color: inherit;
+      text-decoration: none;
+
+      @media (width < 40em) {
+        grid-template-columns: 2.25rem 1fr;
+        gap: 4px;
+      }
+
+      &:hover .name {
+        text-decoration: underline;
+      }
+
+      img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 5.5/8;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+
+      .text {
+        display: grid;
+        min-width: 0;
+
+        .name {
+          --line-clamp: 3;
+          color: var(--text);
+
+          @media (width < 40em) {
+            --line-clamp: 2;
+          }
+        }
+
+        .note {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-size: var(--fs-200);
+        }
+      }
+    }
+
+    .voice-actors {
+      --column-width: 3rem;
+      --spill-ratio: .4;
+      --gap: 6px;
+      --padding-inline: var(--scoped-padding);
+      background-color: transparent;
+      scrollbar-width: none;
+
+      @media (width < 40em) {
+        --column-width: 2.25rem;
+        --gap: 4px;
+      }
+
+      .voice-actor {
+        border-radius: 4px;
+
+        &:focus-visible {
+          outline: 2px solid var(--text);
+          outline-offset: -2px;
+        }
+
+        img {
+          display: block;
+          width: 100%;
+          aspect-ratio: 5.5/8;
+          object-fit: cover;
+          border-radius: 4px;
+          transition: filter .2s;
+
+          .voice-actor:where(:hover, :focus-visible) & {
+            filter: brightness(1.2);
+          }
+        }
+      }
+    }
+
+    .role {
+      --line-clamp: 2;
+      padding-inline: var(--scoped-padding);
+    }
+  }
+}
