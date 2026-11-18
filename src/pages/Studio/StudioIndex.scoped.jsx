@@ -24,7 +24,7 @@ const STUDIO_MEDIA_PAGE_SIZE = 25;
 // Order of the status bar segments
 const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 
-const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id === b[i]);
+const sameValues = (a, b) => a?.length === b?.length && !!a?.every((value, i) => value === b[i]);
 
 export function Studio() {
   const params = useParams();
@@ -33,7 +33,7 @@ export function Studio() {
   const [studioData, setStudioData] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
   // Sorted ids of all the studio media, undefined until every batch has loaded
-  const [studioMediaIds, setStudioMediaIds] = createSignal(undefined, { equals: sameIds });
+  const [studioMediaIds, setStudioMediaIds] = createSignal(undefined);
   // Users list status of each studio media id, set together with the ids
   const [studioMediaStatuses, setStudioMediaStatuses] = createSignal(undefined);
 
@@ -98,7 +98,8 @@ export function Studio() {
             for (const node of batches[i]) statuses.set(node.id, node.mediaListEntry?.status);
           }
           setStudioMediaStatuses(statuses);
-          setStudioMediaIds([...statuses.keys()].sort((a, b) => a - b));
+          const ids = [...statuses.keys()].sort((a, b) => a - b);
+          setStudioMediaIds(current => sameValues(current, ids) ? current : ids);
         }
       });
     };

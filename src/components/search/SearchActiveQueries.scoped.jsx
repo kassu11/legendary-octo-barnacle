@@ -173,8 +173,9 @@ export function useActiveSearchQueries() {
     const rawRoles = arrayUtils.wrapToArray(searchParams.role);
     for (const v of rawRoles) {
       const isExcluded = v.startsWith("-");
-      const option = ROLE_OPTIONS.find(o => o.id === (isExcluded ? v.substring(1) : v));
-      if (option) returnValue.push({ type: "role", description: (isExcluded ? "Exclude Role: " : "Role: ") + option.description, query: { role: rawRoles.filter(v2 => v2 !== v) } });
+      const role = isExcluded ? v.substring(1) : v;
+      const description = ROLE_OPTIONS.find(o => o.id === role)?.description || role;
+      returnValue.push({ type: "role", description: (isExcluded ? "Exclude Role: " : "Role: ") + description, query: { role: rawRoles.filter(v2 => v2 !== v) } });
     }
 
     if (onList == "true")  returnValue.push({ type: "onList", description: "On My List", query: { onList: undefined } });

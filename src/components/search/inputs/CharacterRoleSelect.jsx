@@ -12,23 +12,14 @@ export const ROLE_OPTIONS = [
 
 /**
  * @param {Object} props
- * @param {Map<number, Object>} [props.characterRoles] Character media edges by the media id, undefined while they are loading
+ * @param {Object} [props.counts] Media counts by the role, undefined while they are loading
  */
 export function CharacterRoleSelect(props) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const roleValues = createMemo(() => wrapToArray(searchParams.role));
 
-  const roleCounts = createMemo(() => {
-    const counts = {};
-    for (const edge of props.characterRoles?.values() || []) {
-      const role = edge.characterRole?.toLowerCase();
-      counts[role] = (counts[role] || 0) + 1;
-    }
-    return counts;
-  });
-
   return (
-    <FilterSelect param="role" excludable noEscapeCancel tooltip="Role of the character in the media" each={ROLE_OPTIONS} value={roleValues()} countOf={id => roleCounts()[id] || 0} setSearchParams={({ role }) => setSearchParams({ role }, { replace: true })} icon={<UserIcon />} button="Role" />
+    <FilterSelect param="role" excludable noEscapeCancel tooltip="Role of the character in the media" each={ROLE_OPTIONS} value={roleValues()} countOf={id => props.counts?.[id] || 0} setSearchParams={({ role }) => setSearchParams({ role }, { replace: true })} icon={<UserIcon />} button="Role" />
   );
 }

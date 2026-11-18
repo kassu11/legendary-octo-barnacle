@@ -11,6 +11,7 @@ import { MediaStatusIcon } from "./MediaStatusIcon.scoped";
 import { MediaBadges } from "./MediaBadges.scoped";
 import { MediaCardFooter } from "./MediaCardFooter.scoped";
 import { MediaCardCharacterRole } from "./MediaCardCharacterRole.scoped";
+import { MediaCardStaffRole } from "./MediaCardStaffRole.scoped";
 
 /**
  * Base media cover card. Every extra feature is opt-in and off by default.
@@ -40,10 +41,11 @@ import { MediaCardCharacterRole } from "./MediaCardCharacterRole.scoped";
  * @param {boolean} [props.showNotes] Users notes badge
  * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors at the bottom of the cover
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
+ * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles at the bottom of the cover
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "children"]);
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "staffRole", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
@@ -119,7 +121,7 @@ export function MediaCard(props) {
         <div class="rank">#{local.rank}</div>
       </Show>
       {/* Quick actions and footer share one column, so the quick actions stack on top of the footer instead of overlapping it */}
-      <Show when={local.media && (local.showFooter || local.quickActions || local.characterRole)}>
+      <Show when={local.media && (local.showFooter || local.quickActions || local.characterRole || local.staffRole)}>
         <div class="bottom">
           <Show when={local.quickActions && hover.isOpen()}>
             <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
@@ -129,6 +131,9 @@ export function MediaCard(props) {
           </Show>
           <Show when={local.characterRole}>
             <MediaCardCharacterRole edge={local.characterRole} languages={local.voiceActorLanguages} />
+          </Show>
+          <Show when={local.staffRole}>
+            <MediaCardStaffRole role={local.staffRole} />
           </Show>
         </div>
       </Show>

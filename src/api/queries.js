@@ -68,6 +68,12 @@ export const anilistStudioMediaIds = multiPageFetchQueryGenerator(anilistStudioM
 import { default as anilistCharacterMediaIdsRaw } from "./queries/anilistCharacterMediaIds.graphql";
 export const anilistCharacterMediaIds = multiPageFetchQueryGenerator(anilistCharacterMediaIdsRaw, 25);
 
+import { default as anilistStaffCharacterMediaIdsRaw } from "./queries/anilistStaffCharacterMediaIds.graphql";
+export const anilistStaffCharacterMediaIds = multiPageFetchQueryGenerator(anilistStaffCharacterMediaIdsRaw, 25);
+
+import { default as anilistStaffMediaIdsRaw } from "./queries/anilistStaffMediaIds.graphql";
+export const anilistStaffMediaIds = multiPageFetchQueryGenerator(anilistStaffMediaIdsRaw, 25);
+
 // Generic Jikan post request urls
 export const myAnimeListMediaById = ({ type, id }) => `https://api.tenrai.org/v1/${type}/${id}/full`;
 export const myAnimeListMediaCharactersById = ({ id, type }) => `https://api.tenrai.org/v1/${type}/${id}/characters`;

@@ -106,6 +106,8 @@ Heavy list processing (user media lists, compare, relations) runs in web workers
 
 - Don't write comments in most cases. Structure the code and use descriptive variable and function names so it reads without them. Keep comments for truly weird behavior or code that can't be made clear otherwise.
 - Keep data handling direct. Avoid chains of `map`/`filter`/spread/destructuring that reshape or reparse the same data several times. Shape data once, where it's fetched or where it's used.
+- Loop a list once. When several values come from the same list (filtered ids, counts per role, status counts), keep them in signals and fill all of them from one effect that loops the list once. Don't write a memo per value that loops the same list again, and don't derive one filtered copy of the list for other memos to loop.
+- Don't pass custom `equals` functions to signals or memos. Do the check in the setter instead: `setIds(current => sameValues(current, ids) ? current : ids)`.
 - Let code repeat a few times before abstracting it. Premature abstractions grow to do far more than any one caller needs. Don't create a utility function or file for logic used in only one or two places.
 - Don't write hooks that take one input and return a bag of derived values (`const { a, b, c, d, e } = createSomething(x)`). Write the memos where they're used, so each one is readable on its own.
 - Don't add new fetch helpers or settings on top of `sendFetcher`/`sendAnilistFetcher`. Use the existing fetch pattern directly.

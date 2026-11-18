@@ -26,7 +26,7 @@ const CHARACTER_MEDIA_PAGE_SIZE = 25;
 const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 const MEDIA_TYPES = ["anime", "manga"];
 
-const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id === b[i]);
+const sameValues = (a, b) => a?.length === b?.length && !!a?.every((value, i) => value === b[i]);
 
 export function Character() {
   const params = useParams();
@@ -119,60 +119,70 @@ export function Character() {
     fetchBatch(0);
   });
 
-  const shownCharacterRoles = createMemo(() => {
-    if (!characterRoles() || mediaType() === "media") return characterRoles();
-    const mediaTypeName = mediaType().toUpperCase();
-    const roles = new Map();
-    for (const [id, edge] of characterRoles()) {
-      if (edge.node.type === mediaTypeName) roles.set(id, edge);
+  const [characterMediaIds, setCharacterMediaIds] = createSignal(undefined);
+  const [roleCounts, setRoleCounts] = createSignal(undefined);
+  const [languageCounts, setLanguageCounts] = createSignal(undefined);
+  const [statusCounts, setStatusCounts] = createSignal({ listed: 0, total: 0 });
+  createEffect(() => {
+    if (!characterRoles()) {
+      setCharacterMediaIds(undefined);
+      setRoleCounts(undefined);
+      setLanguageCounts(undefined);
+      setStatusCounts({ listed: 0, total: 0 });
+      return;
     }
-    return roles;
-  });
 
-  const characterMediaIds = createMemo(() => {
-    if (!shownCharacterRoles()) return undefined;
+    const mediaTypeName = mediaType() === "media" ? undefined : mediaType().toUpperCase();
     const roleValues = wrapToArray(searchParams.role);
     const includedRoles = roleValues.filter(role => !role.startsWith("-"));
     const excludedRoles = roleValues.filter(role => role.startsWith("-")).map(role => role.substring(1));
 
     const ids = [];
-    for (const [id, edge] of shownCharacterRoles()) {
+    const roles = {};
+    const languages = {};
+    const statuses = { listed: 0, total: 0 };
+    for (const [id, edge] of characterRoles()) {
+      if (mediaTypeName && edge.node.type !== mediaTypeName) continue;
+      statuses.total++;
+
       const role = edge.characterRole?.toLowerCase();
+      roles[role] = (roles[role] || 0) + 1;
+
+      const edgeLanguages = new Set();
+      for (const voiceActorRole of edge.voiceActorRoles) edgeLanguages.add(voiceActorRole.voiceActor.language);
+      for (const language of edgeLanguages) languages[language] = (languages[language] || 0) + 1;
+
+      const status = edge.node.mediaListEntry?.status;
+      if (status) {
+        statuses[status] = (statuses[status] || 0) + 1;
+        statuses.listed++;
+      }
+
       if (includedRoles.length && !includedRoles.includes(role)) continue;
       if (excludedRoles.includes(role)) continue;
       ids.push(id);
     }
-    return ids.sort((a, b) => a - b);
-  }, undefined, { equals: sameIds });
+    ids.sort((a, b) => a - b);
+
+    setCharacterMediaIds(current => sameValues(current, ids) ? current : ids);
+    setRoleCounts(roles);
+    setLanguageCounts(languages);
+    setStatusCounts(statuses);
+  });
 
   // Saved languages that the character doesn't have are skipped, so the selection isn't lost on characters without them
-  const shownVoiceActorLanguages = createMemo(() => {
-    const characterLanguages = new Set();
-    for (const edge of shownCharacterRoles()?.values() || []) {
-      for (const role of edge.voiceActorRoles) characterLanguages.add(role.voiceActor.language);
-    }
-
-    const savedLanguages = voiceActorLanguages().filter(language => characterLanguages.has(language));
-    if (savedLanguages.length) return savedLanguages;
-    if (characterLanguages.has("Japanese")) return ["Japanese"];
-    return [...characterLanguages].slice(0, 1);
-  }, undefined, { equals: sameIds });
+  const [shownVoiceActorLanguages, setShownVoiceActorLanguages] = createSignal([]);
+  createEffect(() => {
+    const counts = languageCounts() || {};
+    let languages = voiceActorLanguages().filter(language => counts[language]);
+    if (!languages.length) languages = counts.Japanese ? ["Japanese"] : Object.keys(counts).slice(0, 1);
+    setShownVoiceActorLanguages(current => sameValues(current, languages) ? current : languages);
+  });
 
   const anilistVariables = createMemo(() => {
     const ids = characterMediaIds();
     if (!ids) return null;
     return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
-  });
-
-  const statusCounts = createMemo(() => {
-    const counts = { listed: 0 };
-    for (const edge of shownCharacterRoles()?.values() || []) {
-      const status = edge.node.mediaListEntry?.status;
-      if (!status) continue;
-      counts[status] = (counts[status] || 0) + 1;
-      counts.listed++;
-    }
-    return counts;
   });
 
   const alternativeNames = () => [character().name.native, ...character().name.alternative].filter(Boolean).join(", ");
@@ -186,7 +196,7 @@ export function Character() {
   return (
     <ErrorBoundary fallback="Character page has crashed">
       <ParsedSearchParamsContext.Provider value={parsedSearchParams}>
-        <SearchBar typeSelect typeSearchParam characterFilters characterRoles={shownCharacterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
+        <SearchBar typeSelect typeSearchParam characterFilters roleCounts={roleCounts()} languageCounts={languageCounts()} voiceActorLanguages={shownVoiceActorLanguages()} />
         <div class="character-page">
           <Show when={character()}>
             <div class="page-header">
@@ -243,7 +253,7 @@ export function Character() {
                     <div
                       class="segment"
                       attr:data-status={status}
-                      style={{ width: `${statusCounts()[status] / shownCharacterRoles().size * 100}%` }}
+                      style={{ width: `${statusCounts()[status] / statusCounts().total * 100}%` }}
                     >
                       <Tooltip>{formatUsersMediaStatus(status, "media")} {statusCounts()[status]}</Tooltip>
                     </div>
@@ -262,7 +272,7 @@ export function Character() {
                     </li>
                   </Show>
                 )}</For>
-                <li class="total">{statusCounts().listed} / {shownCharacterRoles().size}</li>
+                <li class="total">{statusCounts().listed} / {statusCounts().total}</li>
               </ul>
             </div>
           </Show>
@@ -273,7 +283,7 @@ export function Character() {
             </div>
           </Show>
 
-          <MediaSearchResults variables={anilistVariables()} type={mediaType()} characterRoles={shownCharacterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
+          <MediaSearchResults variables={anilistVariables()} type={mediaType()} characterRoles={characterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
         </div>
       </ParsedSearchParamsContext.Provider>
     </ErrorBoundary>

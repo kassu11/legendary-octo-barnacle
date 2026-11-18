@@ -20,6 +20,7 @@ import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
 import { MediaGroupBySelect } from "./inputs/MediaGroupBySelect";
 import { CharacterRoleSelect } from "./inputs/CharacterRoleSelect";
 import { VoiceActorLanguageSelect } from "./inputs/VoiceActorLanguageSelect";
+import { StaffRoleSelect } from "./inputs/StaffRoleSelect";
 import { LicensedIcon, OnListIcon } from "@/assets/icons.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
@@ -31,7 +32,9 @@ import { createMemo, Show } from "solid-js";
  * @param {boolean} [props.typeSearchParam] Type select changes the type search param instead of the path
  * @param {boolean} [props.cardStyleToggle] Card style toggle next to the active queries
  * @param {boolean} [props.characterFilters] Role and voice actor language filters of a character page
- * @param {Map<number, Object>} [props.characterRoles] Character media edges by the media id, used by the character filters
+ * @param {boolean} [props.staffFilters] Role filter of a staff page
+ * @param {Object} [props.roleCounts] Media counts by the role, used by the character and staff filters
+ * @param {Object} [props.languageCounts] Media counts by the voice actor language, used by the character filters
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown on the cards, used by the character filters
  */
 export function SearchBar(props) {
@@ -42,7 +45,7 @@ export function SearchBar(props) {
   return (
     <Show when={isMobilLarge()} fallback={
       <div class="search-bar">
-        <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages}>
+        <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} staffFilters={props.staffFilters} roleCounts={props.roleCounts} languageCounts={props.languageCounts} voiceActorLanguages={props.voiceActorLanguages}>
           <FilterGroup title="Search" class="search">
             <FilterSearchInput />
           </FilterGroup>
@@ -53,7 +56,7 @@ export function SearchBar(props) {
       <div class="search-bar mobile">
         <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
-          <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages} />
+          <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} staffFilters={props.staffFilters} roleCounts={props.roleCounts} languageCounts={props.languageCounts} voiceActorLanguages={props.voiceActorLanguages} />
         </MobileFilters>
       </div>
     </Show>
@@ -68,10 +71,15 @@ function SearchFilters(props) {
       {props.children}
       <Show when={props.characterFilters}>
         <FilterGroup title="Roles">
-          <CharacterRoleSelect characterRoles={props.characterRoles} />
+          <CharacterRoleSelect counts={props.roleCounts} />
         </FilterGroup>
         <FilterGroup title="Voice Actors">
-          <VoiceActorLanguageSelect characterRoles={props.characterRoles} languages={props.voiceActorLanguages} />
+          <VoiceActorLanguageSelect counts={props.languageCounts} languages={props.voiceActorLanguages} />
+        </FilterGroup>
+      </Show>
+      <Show when={props.staffFilters}>
+        <FilterGroup title="Roles">
+          <StaffRoleSelect counts={props.roleCounts} />
         </FilterGroup>
       </Show>
       <FilterGroup title="General">

@@ -1,0 +1,54 @@
+@layer component {
+  .media-row-card-staff-role {
+    display: grid;
+    gap: 4px;
+    font-size: var(--fs-300);
+    font-weight: 400;
+
+    .characters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      li {
+        .character {
+          /* Above the title link that covers the whole row card */
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--text);
+          text-decoration: none;
+
+          &:hover .text .name {
+            text-decoration: underline;
+          }
+
+          img {
+            width: 1.75rem;
+            aspect-ratio: 5.5/8;
+            object-fit: cover;
+            border-radius: 4px;
+          }
+
+          .text {
+            display: grid;
+
+            .note {
+              color: var(--text-muted);
+              font-size: var(--fs-200);
+            }
+          }
+        }
+      }
+    }
+
+    .roles {
+      color: var(--text-muted);
+    }
+  }
+}
