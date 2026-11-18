@@ -63,8 +63,8 @@ export function SeasonControls() {
       </Show>
       <Show when={params.type === "anime"}>
         <nav class="quick-links" aria-label="Season shortcuts">
-          <A scoped href="/ani/search/anime/this-season" end>This Season</A>
-          <A scoped href="/ani/search/anime/next-season" end>Next Season</A>
+          <A scoped href="/ani/search/anime/this-season" end>Current Season</A>
+          <A scoped href="/ani/search/anime/next-season" end>Upcoming Season</A>
           <A scoped href="/ani/search/anime/tba" end>TBA</A>
         </nav>
       </Show>
