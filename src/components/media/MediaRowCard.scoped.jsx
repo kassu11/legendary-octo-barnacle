@@ -9,7 +9,7 @@ import { MediaQuickActions } from "@/components/media/MediaQuickActions.scoped.j
 import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped.jsx";
 import { MediaRowCardCharacterRole } from "@/components/media/MediaRowCardCharacterRole.scoped.jsx";
 import { MediaRowCardStaffRole } from "@/components/media/MediaRowCardStaffRole.scoped.jsx";
-import { globalEditedMedia } from "@/state/globalState.js";
+import { globalEditedMedia, setMediaPageAnilistData } from "@/state/globalState.js";
 import "./MediaRowCard.scoped.css";
 
 /**
@@ -41,6 +41,10 @@ function MediaRowCardContent(props) {
   // Session edits override the entry from the response, same as in MediaCard
   const mediaListEntry = createMemo(() => globalEditedMedia[props.media.id] === undefined ? props.media.mediaListEntry : globalEditedMedia[props.media.id]);
 
+  const handleClick = () => {
+    setMediaPageAnilistData({ data: { data: { Media: props.media } } });
+  };
+
   return (
     <div class="row" classList={{ ranked: !!props.rank }} data-status={mediaListEntry()?.status} style={{ "--media-background-color": props.media.coverImage?.color }}>
       <Show when={props.rank}>
@@ -54,7 +58,7 @@ function MediaRowCardContent(props) {
           <img src={props.media.coverImage?.large} class="cover" alt="Cover." />
         </div>
         <div class="content clamp">
-          <A scoped href={mediaUrl(props.media)} class="title line-clamp">
+          <A scoped href={mediaUrl(props.media)} class="title line-clamp" onClick={handleClick}>
             <Show when={mediaListEntry()?.status}>
               <span class="status-icon">
                 <MediaStatusIcon status={mediaListEntry().status} />
