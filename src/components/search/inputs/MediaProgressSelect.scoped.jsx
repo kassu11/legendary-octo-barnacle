@@ -71,6 +71,17 @@ export function MediaProgressSelect() {
 
   };
 
+  // AniList only supports one progress or one continuous range, so searched rows with gaps between them select every progress in between
+  const handlePickRange = ids => {
+    lastProgressSelection = null;
+    const progresses = ids.map(Number);
+    const min = Math.min(...progresses);
+    const max = Math.max(...progresses);
+
+    if (min === max) setSearchParams({ progress: min, progressLesser: undefined, progressGreater: undefined }, { replace: true });
+    else setSearchParams({ progress: undefined, progressLesser: max + 1, progressGreater: min - 1 }, { replace: true });
+  };
+
   const text = () => {
     if (parsedSearchParams().type === "media") return "Chapter / Episodes";
     if (parsedSearchParams().type === "anime") return "Episodes";
@@ -78,6 +89,6 @@ export function MediaProgressSelect() {
   };
 
   return (
-    <FilterSelect radio param="progress" noEscapeCancel tooltip="Filter by episode or chapter count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={progressOptions()} value={progressValues().map(value => "" + value.id)} valueLabel={progressValues()[0]?.toast} onPick={handlePick} onClear={() => setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: undefined }, { replace: true })} icon={<ProgressIcon />} button={text()} />
+    <FilterSelect radio param="progress" noEscapeCancel tooltip="Filter by episode or chapter count. Click a number again to switch between exactly, less and more, or click two numbers to select a range" each={progressOptions()} value={progressValues().map(value => "" + value.id)} valueLabel={progressValues()[0]?.toast} onPick={handlePick} onPickRange={handlePickRange} onClear={() => setSearchParams({ progress: undefined, progressLesser: undefined, progressGreater: undefined }, { replace: true })} icon={<ProgressIcon />} button={text()} />
   );
 }
