@@ -94,49 +94,6 @@
       }
     }
 
-    .status-progress {
-      margin-bottom: 1rem;
-
-      .bar {
-        display: flex;
-        height: 8px;
-        border-radius: 999px;
-        overflow: hidden;
-        background-color: var(--bg-light);
-
-        .segment {
-          background-color: var(--status-color);
-        }
-      }
-
-      .legend {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px 16px;
-        margin: 6px 0 0;
-        padding: 0;
-        list-style: none;
-        font-size: var(--fs-400);
-        color: var(--text-muted);
-
-        li {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-
-          .status-label {
-            @media (width < 50em) {
-              display: none;
-            }
-          }
-        }
-
-        .total {
-          margin-left: auto;
-        }
-      }
-    }
-
     .mobile-active-queries {
       margin-bottom: 1rem;
 

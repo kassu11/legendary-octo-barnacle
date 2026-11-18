@@ -1,11 +1,11 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, ErrorBoundary, For, Match, Show, Switch } from "solid-js";
+import { createEffect, createMemo, createSignal, ErrorBoundary, Match, Show, Switch } from "solid-js";
 import "./StaffIndex.scoped.css";
 import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { formatAnilistDate, formatUsersMediaStatus } from "@/utils/formatUtils.js";
+import { formatAnilistDate } from "@/utils/formatUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { wrapToArray } from "@/utils/arrayUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
@@ -16,15 +16,13 @@ import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
 import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
-import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
-import { Tooltip } from "@/components/Tooltip.scoped";
+import { MediaStatusProgress } from "@/components/media/MediaStatusProgress.scoped";
 
 // Character fields make the voice acting pages heavier, so fewer pages fit under the AniList query complexity limit
 const VOICE_ACTING_PAGES_PER_FETCH = 20;
 const STAFF_MEDIA_PAGES_PER_FETCH = 40;
 const MEDIA_PAGE_SIZE = 25;
 const VOICE_ACTING_ROLE = "Voice Acting";
-const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 const MEDIA_TYPES = ["anime", "manga"];
 
 const sameValues = (a, b) => a?.length === b?.length && !!a?.every((value, i) => value === b[i]);
@@ -285,37 +283,7 @@ export function Staff() {
             </div>
           </Show>
 
-          <Show when={statusCounts().listed}>
-            <div class="status-progress">
-              <div class="bar">
-                <For each={LIST_STATUSES}>{status => (
-                  <Show when={statusCounts()[status]}>
-                    <div
-                      class="segment"
-                      attr:data-status={status}
-                      style={{ width: `${statusCounts()[status] / statusCounts().total * 100}%` }}
-                    >
-                      <Tooltip>{formatUsersMediaStatus(status, "media")} {statusCounts()[status]}</Tooltip>
-                    </div>
-                  </Show>
-                )}</For>
-              </div>
-              <ul class="legend">
-                <For each={LIST_STATUSES}>{status => (
-                  <Show when={statusCounts()[status]}>
-                    <li>
-                      <MediaStatusIcon status={status} />
-                      <span class="status-label">
-                        {formatUsersMediaStatus(status, "media")}
-                      </span>
-                      {" "}{statusCounts()[status]}
-                    </li>
-                  </Show>
-                )}</For>
-                <li class="total">{statusCounts().listed} / {statusCounts().total}</li>
-              </ul>
-            </div>
-          </Show>
+          <MediaStatusProgress counts={statusCounts()} type="media" />
 
           <Show when={isMobilLarge()}>
             <div class="mobile-active-queries">

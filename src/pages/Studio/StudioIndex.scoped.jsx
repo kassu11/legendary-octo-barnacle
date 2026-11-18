@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, ErrorBoundary, Show } from "solid-js";
 import "./StudioIndex.scoped.css";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
@@ -13,16 +13,12 @@ import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
 import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
-import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
-import { Tooltip } from "@/components/Tooltip.scoped";
-import { formatUsersMediaStatus } from "@/utils/formatUtils.js";
+import { MediaStatusProgress } from "@/components/media/MediaStatusProgress.scoped";
 
 // AniList has no studio filter for the media search, so all the media ids of the studio are fetched first and the search is done inside them.
 // Studio media pages have only 25 entries and their lastPage is capped, so pages are fetched in batches until there is no next page
 const STUDIO_MEDIA_PAGES_PER_FETCH = 40;
 const STUDIO_MEDIA_PAGE_SIZE = 25;
-// Order of the status bar segments
-const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 
 const sameValues = (a, b) => a?.length === b?.length && !!a?.every((value, i) => value === b[i]);
 
@@ -34,8 +30,7 @@ export function Studio() {
   const [favourite, setFavourite] = createSignal(false);
   // Sorted ids of all the studio media, undefined until every batch has loaded
   const [studioMediaIds, setStudioMediaIds] = createSignal(undefined);
-  // Users list status of each studio media id, set together with the ids
-  const [studioMediaStatuses, setStudioMediaStatuses] = createSignal(undefined);
+  const [statusCounts, setStatusCounts] = createSignal({ listed: 0, total: 0 });
 
   createEffect(() => {
     document.title = `${studioData()?.data.data.Studio.name || "Studio"} - LOB`;
@@ -47,7 +42,7 @@ export function Studio() {
     const signal = studioMediaIdsController.abortAndRenew();
     const studioId = currentStudioId = params.id;
     setStudioMediaIds(undefined);
-    setStudioMediaStatuses(undefined);
+    setStatusCounts({ listed: 0, total: 0 });
 
     // Media nodes of each batch, the cached and the fetched response can both fill the same batch
     const batches = [];
@@ -92,13 +87,23 @@ export function Studio() {
           }
 
           if (lastBatchIndex === undefined) return;
-          const statuses = new Map();
+          const uniqueIds = new Set();
+          const counts = { listed: 0, total: 0 };
           for (let i = 0; i <= lastBatchIndex; i++) {
             if (!batches[i]) return;
-            for (const node of batches[i]) statuses.set(node.id, node.mediaListEntry?.status);
+            for (const node of batches[i]) {
+              if (uniqueIds.has(node.id)) continue;
+              uniqueIds.add(node.id);
+              counts.total++;
+              const status = node.mediaListEntry?.status;
+              if (status) {
+                counts[status] = (counts[status] || 0) + 1;
+                counts.listed++;
+              }
+            }
           }
-          setStudioMediaStatuses(statuses);
-          const ids = [...statuses.keys()].sort((a, b) => a - b);
+          setStatusCounts(counts);
+          const ids = [...uniqueIds].sort((a, b) => a - b);
           setStudioMediaIds(current => sameValues(current, ids) ? current : ids);
         }
       });
@@ -111,16 +116,6 @@ export function Studio() {
     const ids = studioMediaIds();
     if (!ids) return null;
     return createAnilistMediaQueryVariables(parsedSearchParams(), { idIn: ids });
-  });
-
-  const statusCounts = createMemo(() => {
-    const counts = { listed: 0 };
-    for (const status of studioMediaStatuses()?.values() || []) {
-      if (!status) continue;
-      counts[status] = (counts[status] || 0) + 1;
-      counts.listed++;
-    }
-    return counts;
   });
 
   const mutateCache = isFavourite => {
@@ -152,37 +147,7 @@ export function Studio() {
             </div>
           </div>
 
-          <Show when={statusCounts().listed}>
-            <div class="status-progress">
-              <div class="bar">
-                <For each={LIST_STATUSES}>{status => (
-                  <Show when={statusCounts()[status]}>
-                    <div
-                      class="segment"
-                      attr:data-status={status}
-                      style={{ width: `${statusCounts()[status] / studioMediaStatuses().size * 100}%` }}
-                    >
-                      <Tooltip>{formatUsersMediaStatus(status, "anime")} {statusCounts()[status]}</Tooltip>
-                    </div>
-                  </Show>
-                )}</For>
-              </div>
-              <ul class="legend">
-                <For each={LIST_STATUSES}>{status => (
-                  <Show when={statusCounts()[status]}>
-                    <li>
-                      <MediaStatusIcon status={status} />
-                      <span class="status-label">
-                        {formatUsersMediaStatus(status, "anime")}
-                      </span>
-                      {" "}{statusCounts()[status]}
-                    </li>
-                  </Show>
-                )}</For>
-                <li class="total">{statusCounts().listed} / {studioMediaStatuses().size}</li>
-              </ul>
-            </div>
-          </Show>
+          <MediaStatusProgress counts={statusCounts()} type="anime" />
 
           <Show when={isMobilLarge()}>
             <div class="mobile-active-queries">

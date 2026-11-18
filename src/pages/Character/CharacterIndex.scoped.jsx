@@ -1,11 +1,11 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, ErrorBoundary, Show } from "solid-js";
 import "./CharacterIndex.scoped.css";
 import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { formatAnilistDate, formatUsersMediaStatus } from "@/utils/formatUtils.js";
+import { formatAnilistDate } from "@/utils/formatUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { wrapToArray } from "@/utils/arrayUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
@@ -17,13 +17,11 @@ import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
 import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
-import { MediaStatusIcon } from "@/components/media/MediaStatusIcon.scoped";
-import { Tooltip } from "@/components/Tooltip.scoped";
+import { MediaStatusProgress } from "@/components/media/MediaStatusProgress.scoped";
 
 // Voice actor fields make the pages heavy, so fewer pages fit under the AniList query complexity limit
 const CHARACTER_MEDIA_PAGES_PER_FETCH = 20;
 const CHARACTER_MEDIA_PAGE_SIZE = 25;
-const LIST_STATUSES = ["CURRENT", "REPEATING", "COMPLETED", "PAUSED", "DROPPED", "PLANNING"];
 const MEDIA_TYPES = ["anime", "manga"];
 
 const sameValues = (a, b) => a?.length === b?.length && !!a?.every((value, i) => value === b[i]);
@@ -245,37 +243,7 @@ export function Character() {
             </div>
           </Show>
 
-          <Show when={statusCounts().listed}>
-            <div class="status-progress">
-              <div class="bar">
-                <For each={LIST_STATUSES}>{status => (
-                  <Show when={statusCounts()[status]}>
-                    <div
-                      class="segment"
-                      attr:data-status={status}
-                      style={{ width: `${statusCounts()[status] / statusCounts().total * 100}%` }}
-                    >
-                      <Tooltip>{formatUsersMediaStatus(status, "media")} {statusCounts()[status]}</Tooltip>
-                    </div>
-                  </Show>
-                )}</For>
-              </div>
-              <ul class="legend">
-                <For each={LIST_STATUSES}>{status => (
-                  <Show when={statusCounts()[status]}>
-                    <li>
-                      <MediaStatusIcon status={status} />
-                      <span class="status-label">
-                        {formatUsersMediaStatus(status, "media")}
-                      </span>
-                      {" "}{statusCounts()[status]}
-                    </li>
-                  </Show>
-                )}</For>
-                <li class="total">{statusCounts().listed} / {statusCounts().total}</li>
-              </ul>
-            </div>
-          </Show>
+          <MediaStatusProgress counts={statusCounts()} type="media" />
 
           <Show when={isMobilLarge()}>
             <div class="mobile-active-queries">
