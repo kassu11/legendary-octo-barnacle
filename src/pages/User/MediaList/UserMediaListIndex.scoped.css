@@ -8,7 +8,7 @@
   .user-profile-media-list-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: .75rem;
+    gap: 8px;
   }
 }
 

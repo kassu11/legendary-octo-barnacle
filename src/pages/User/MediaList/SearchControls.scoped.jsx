@@ -4,7 +4,7 @@ import { createMemo, mapArray, Match, Show, Switch } from "solid-js";
 import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
-import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
+import { DesktopFilters, FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
@@ -116,11 +116,9 @@ export function SearchControlsScoped(props) {
 
   return (
     <Show when={isMobilLarge()} fallback={
-      <Filters>
-        <FilterGroup title="Search" class="search">
-          <FilterSearchInput scrollTarget={props.scrollTarget} />
-        </FilterGroup>
-      </Filters>
+      <DesktopFilters scrollTarget={props.scrollTarget} filterCount={activeFilterCount()}>
+        <Filters />
+      </DesktopFilters>
     }>
       <MobileFilters search={<FilterSearchInput scrollTarget={props.scrollTarget} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton scrollTarget={props.scrollTarget} />}>
         <Filters />
@@ -128,11 +126,10 @@ export function SearchControlsScoped(props) {
     </Show>
   );
 
-  function Filters(filtersProps) {
+  function Filters() {
     return (
       <div class="user-list-filters">
         <FilterGroups>
-          {filtersProps.children}
           <FilterGroup title="General">
             <FilterSelect param="list" radio defaultValue={ALL_LISTS} each={listOptions()} countOf={id => listCounts().get(id)} value={props.list()} icon={<ListIcon />} button="List" tooltip="Which lists to show, every list separately when none is selected. Hold Ctrl to add a list to the selection, hold Shift or drag to select every list in between" setSearchParams={setSearchParams} />
             <FilterSelect param="sort" sort defaultValue="score" each={sortOptions()} value={props.sort()} icon={<SortIcon />} button="Sort" tooltip="Order of the list. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" setSearchParams={setSearchParams} />

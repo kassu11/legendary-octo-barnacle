@@ -75,7 +75,6 @@ export function MediaListContainerScoped(props) {
 
   return (
     <div class="list-content">
-      <p>{props.timer}</p>
       <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} />}>
         <For each={props.listData().data.lists}>{list => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>

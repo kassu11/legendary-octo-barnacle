@@ -108,6 +108,32 @@
     }
   }
 
+  .desktop-filters {
+    display: grid;
+    gap: 16px;
+
+    .search-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+
+      .search-input {
+        width: min(100%, 26rem);
+      }
+
+      .filters-button {
+        cursor: pointer;
+        transition: .2s background-color;
+
+        &:hover, &:focus-visible, &.open {
+          outline: none;
+          background-color: color-mix(in oklab, var(--bg), var(--light-blue-400) 25%);
+        }
+      }
+    }
+  }
+
   /* Mobile: search bar is fixed to the bottom of the screen, and filters are inside a modal */
   /* eslint-disable-next-line local-css/no-unscoped-selector */
   _body:has(.bottom-bar) {

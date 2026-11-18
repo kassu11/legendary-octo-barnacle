@@ -1,4 +1,4 @@
-import { Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import { useResponsive } from "@/state/providers.js";
 import { useSearchParams } from "@solidjs/router";
@@ -75,6 +75,35 @@ export function FilterSearchInput(props) {
         </button>
       </Show>
     </label>
+  );
+}
+
+/**
+ * Centered search bar with a button that shows the filters below it
+ *
+ * @param {Object} props
+ * @param {HTMLElement} [props.scrollTarget] Passed to the search input
+ * @param {number} props.filterCount Shown on top of the filters button
+ * @param {import("solid-js").JSX.Element} props.children Filters shown when the filters button is toggled on
+ */
+export function DesktopFilters(props) {
+  const [filtersOpen, setFiltersOpen] = createSignal(false);
+
+  return (
+    <div class="desktop-filters">
+      <div class="search-row">
+        <FilterSearchInput scrollTarget={props.scrollTarget} />
+        <button class="filters-button" classList={{ open: filtersOpen() }} onClick={() => setFiltersOpen(open => !open)} aria-expanded={filtersOpen()} aria-label={filtersOpen() ? "Hide filters" : "Show filters"}>
+          <FiltersIcon scoped />
+          <Show when={props.filterCount}>
+            <span class="count">{props.filterCount}</span>
+          </Show>
+        </button>
+      </div>
+      <Show when={filtersOpen()}>
+        {props.children}
+      </Show>
+    </div>
   );
 }
 
