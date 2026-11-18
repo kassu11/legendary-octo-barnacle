@@ -1,4 +1,4 @@
-import { useParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
 import "./CharacterIndex.scoped.css";
 import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
@@ -7,8 +7,10 @@ import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { formatAnilistDate, formatUsersMediaStatus } from "@/utils/formatUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
+import { wrapToArray } from "@/utils/arrayUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { useParsedSearchParams, useResponsive } from "@/state/providers";
+import { voiceActorLanguages } from "@/state/globalState";
 import { SearchBar } from "@/components/search/SearchBar.scoped";
 import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
@@ -27,10 +29,10 @@ const sameIds = (a, b) => a?.length === b?.length && !!a?.every((id, i) => id ==
 export function Character() {
   const params = useParams();
   const parsedSearchParams = useParsedSearchParams();
+  const [searchParams] = useSearchParams();
   const { isMobilLarge } = useResponsive();
   const [characterData, setCharacterData] = createSignal(undefined, { equals: false });
   const [favourite, setFavourite] = createSignal(false);
-  const [characterMediaIds, setCharacterMediaIds] = createSignal(undefined, { equals: sameIds });
   const [characterRoles, setCharacterRoles] = createSignal(undefined);
 
   const character = () => characterData()?.data.data.Character;
@@ -61,7 +63,6 @@ export function Character() {
   createEffect(() => {
     const signal = characterMediaIdsController.abortAndRenew();
     const characterId = currentCharacterId = params.id;
-    setCharacterMediaIds(undefined);
     setCharacterRoles(undefined);
 
     // The cached and the fetched response can both fill the same batch
@@ -105,13 +106,41 @@ export function Character() {
             for (const edge of batches[i]) roles.set(edge.node.id, edge);
           }
           setCharacterRoles(roles);
-          setCharacterMediaIds([...roles.keys()].sort((a, b) => a - b));
         }
       });
     };
 
     fetchBatch(0);
   });
+
+  const characterMediaIds = createMemo(() => {
+    if (!characterRoles()) return undefined;
+    const roleValues = wrapToArray(searchParams.role);
+    const includedRoles = roleValues.filter(role => !role.startsWith("-"));
+    const excludedRoles = roleValues.filter(role => role.startsWith("-")).map(role => role.substring(1));
+
+    const ids = [];
+    for (const [id, edge] of characterRoles()) {
+      const role = edge.characterRole?.toLowerCase();
+      if (includedRoles.length && !includedRoles.includes(role)) continue;
+      if (excludedRoles.includes(role)) continue;
+      ids.push(id);
+    }
+    return ids.sort((a, b) => a - b);
+  }, undefined, { equals: sameIds });
+
+  // Saved languages that the character doesn't have are skipped, so the selection isn't lost on characters without them
+  const shownVoiceActorLanguages = createMemo(() => {
+    const characterLanguages = new Set();
+    for (const edge of characterRoles()?.values() || []) {
+      for (const role of edge.voiceActorRoles) characterLanguages.add(role.voiceActor.language);
+    }
+
+    const savedLanguages = voiceActorLanguages().filter(language => characterLanguages.has(language));
+    if (savedLanguages.length) return savedLanguages;
+    if (characterLanguages.has("Japanese")) return ["Japanese"];
+    return [...characterLanguages].slice(0, 1);
+  }, undefined, { equals: sameIds });
 
   const anilistVariables = createMemo(() => {
     const ids = characterMediaIds();
@@ -140,7 +169,7 @@ export function Character() {
 
   return (
     <ErrorBoundary fallback="Character page has crashed">
-      <SearchBar />
+      <SearchBar characterFilters characterRoles={characterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
       <div class="character-page">
         <Show when={character()}>
           <div class="page-header">
@@ -227,7 +256,7 @@ export function Character() {
           </div>
         </Show>
 
-        <MediaSearchResults variables={anilistVariables()} type="media" characterRoles={characterRoles()} voiceActorLanguage="Japanese" />
+        <MediaSearchResults variables={anilistVariables()} type="media" characterRoles={characterRoles()} voiceActorLanguages={shownVoiceActorLanguages()} />
       </div>
     </ErrorBoundary>
   );

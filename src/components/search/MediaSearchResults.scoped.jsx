@@ -39,7 +39,7 @@ const RANKED_SORTS = new Set(["popularity_desc", "score_desc", "score_desc_plus"
  * @param {boolean} [props.ranked] Show ranks on the cards, when the sort is a high to low order
  * @param {boolean} [props.debounceInitialFetch] Debounce also the first fetch, for example when the user is still typing
  * @param {Map<number, Object>} [props.characterRoles] Character media edges by the media id, shows the character role and voice actors on the cards
- * @param {string} [props.voiceActorLanguage] Language of the voice actors shown with the character roles
+ * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character roles
  */
 export function MediaSearchResults(props) {
   const parsedSearchParams = useParsedSearchParams();
@@ -364,7 +364,7 @@ export function MediaSearchResults(props) {
                     preventZoomIn.add(media.id);
 
                     return (
-                      <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguage={props.voiceActorLanguage} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                      <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                     );
                   }}</VirtualGrid>
                 }>
@@ -372,7 +372,7 @@ export function MediaSearchResults(props) {
                     const index = () => mediaIndices()[i()];
 
                     return (
-                      <MediaRowCard scoped class="row-card" type={props.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguage={props.voiceActorLanguage} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                      <MediaRowCard scoped class="row-card" type={props.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                     );
                   }}</VirtualList>
                 </Show>

@@ -20,15 +20,15 @@ import "./MediaRowCard.scoped.css";
  * @param {boolean} [props.loading] Grays out the card while new data is being fetched
  * @param {boolean} [props.subgrid] Columns come from the parent grid, so they line up with the other row cards. The parent grid has to be a size container
  * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors under the genres
- * @param {string} [props.voiceActorLanguage] Language of the voice actors shown with the character role
+ * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguage"]);
+  const [local, scoping] = splitProps(props, ["media", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguage={local.voiceActorLanguage} />
+        <MediaRowCardContent media={local.media} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} />
       </Show>
     </div>
   );
@@ -68,7 +68,7 @@ function MediaRowCardContent(props) {
             )}</For>
           </ol>
           <Show when={props.characterRole}>
-            <MediaRowCardCharacterRole edge={props.characterRole} language={props.voiceActorLanguage} />
+            <MediaRowCardCharacterRole edge={props.characterRole} languages={props.voiceActorLanguages} />
           </Show>
         </div>
         <div class="info">

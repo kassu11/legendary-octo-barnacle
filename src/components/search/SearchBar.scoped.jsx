@@ -18,11 +18,21 @@ import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
 import { MediaGroupBySelect } from "./inputs/MediaGroupBySelect";
+import { CharacterRoleSelect } from "./inputs/CharacterRoleSelect";
+import { VoiceActorLanguageSelect } from "./inputs/VoiceActorLanguageSelect";
 import { LicensedIcon, OnListIcon } from "@/assets/icons.jsx";
 import { FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { createMemo, Show } from "solid-js";
 
+/**
+ * @param {Object} props
+ * @param {boolean} [props.typeSelect] Media type select
+ * @param {boolean} [props.cardStyleToggle] Card style toggle next to the active queries
+ * @param {boolean} [props.characterFilters] Role and voice actor language filters of a character page
+ * @param {Map<number, Object>} [props.characterRoles] Character media edges by the media id, used by the character filters
+ * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown on the cards, used by the character filters
+ */
 export function SearchBar(props) {
   const { isMobilLarge } = useResponsive();
   const activeQueries = useActiveSearchQueries();
@@ -31,7 +41,7 @@ export function SearchBar(props) {
   return (
     <Show when={isMobilLarge()} fallback={
       <div class="search-bar">
-        <SearchFilters typeSelect={props.typeSelect}>
+        <SearchFilters typeSelect={props.typeSelect} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages}>
           <FilterGroup title="Search" class="search">
             <FilterSearchInput />
           </FilterGroup>
@@ -42,7 +52,7 @@ export function SearchBar(props) {
       <div class="search-bar mobile">
         <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
-          <SearchFilters typeSelect={props.typeSelect} />
+          <SearchFilters typeSelect={props.typeSelect} characterFilters={props.characterFilters} characterRoles={props.characterRoles} voiceActorLanguages={props.voiceActorLanguages} />
         </MobileFilters>
       </div>
     </Show>
@@ -55,6 +65,14 @@ function SearchFilters(props) {
   return (
     <FilterGroups>
       {props.children}
+      <Show when={props.characterFilters}>
+        <FilterGroup title="Roles">
+          <CharacterRoleSelect characterRoles={props.characterRoles} />
+        </FilterGroup>
+        <FilterGroup title="Voice Actors">
+          <VoiceActorLanguageSelect characterRoles={props.characterRoles} languages={props.voiceActorLanguages} />
+        </FilterGroup>
+      </Show>
       <FilterGroup title="General">
         <MediaSortSelect />
         <Show when={props.typeSelect}>

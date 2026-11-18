@@ -7,10 +7,10 @@ import { capitalize, formatTitleToUrl } from "@/utils/formatUtils.js";
  * Character role and voice actors under the genres of a media row card
  * @param {Object} props
  * @param {Object} props.edge Character media edge
- * @param {string} props.language Language of the shown voice actors
+ * @param {string[]} props.languages Languages of the shown voice actors
  */
 export function MediaRowCardCharacterRole(props) {
-  const voiceActorRoles = createMemo(() => props.edge.voiceActorRoles.filter(role => role.voiceActor.language === props.language));
+  const voiceActorRoles = createMemo(() => props.edge.voiceActorRoles.filter(role => props.languages.includes(role.voiceActor.language)));
 
   return (
     <Show when={voiceActorRoles().length || props.edge.characterRole}>

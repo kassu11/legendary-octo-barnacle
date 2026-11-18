@@ -26,6 +26,7 @@ export const [searchPageGroupSeasonalBy, setSearchPageGroupSeasonalBy] = createL
 export const [searchPageGroupTBABy, setSearchPageGroupTBABy] = createLocalStorageSignal("LOB-group-tba-by", "none");
 // "cards" or "rows"
 export const [searchPageCardStyle, setSearchPageCardStyle] = createLocalStorageSignal("LOB-search-card-style", "cards");
+export const [voiceActorLanguages, setVoiceActorLanguages] = createLocalStorageJsonSignal("LOB-voice-actor-languages", ["Japanese"]);
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 
 export const logoutUser = () => {
