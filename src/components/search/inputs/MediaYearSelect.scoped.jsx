@@ -41,28 +41,33 @@ export function MediaYearSelect() {
 
   const clearYear = () => navigate(path => path.replace(headerRegex, ""), { season: validSeason(), year: undefined, yearLesser: undefined, yearGreater: undefined }, { replace: true });
 
+  // Select one year, clear all other year filters, and keep season state, but remove season headers (these headers add year filtering)
+  const selectYear = target => {
+    const header = params.header;
+    const season = validSeason();
+
+    // We have season page open, don't add year to query, but change the header
+    if (parsedSearchParams().seasonPage && header !== "tba") {
+      navigate(path => path.replace(header, `${season}-${target}`),     { season: undefined, year: undefined, yearLesser: undefined,    yearGreater: undefined    }, { replace: true });
+    }
+    else {
+      navigate(path => path.replace(headerRegex, ""),                   { season,            year: target,    yearLesser: undefined,    yearGreater: undefined    }, { replace: true });
+    }
+  };
+
   let lastYearSelection = null;
   const handlePick = id => {
     const target = +id;
 
-    const header = params.header;
-    const hasSpecialSeasonControlsOpen = parsedSearchParams().seasonPage;
     const { year, yearLesser, yearGreater } = parsedSearchParams();
     const season = validSeason();
 
     // Last year is invalid, probably old click, and history has changed parameters, discard old value
     if (lastYearSelection != yearGreater && lastYearSelection != yearLesser) lastYearSelection = null;
 
-    // 1. Radio selection, select year, clear all other year filters, and keep season state, but remove season headers (these headers add year filtering)
+    // 1. Radio selection
     if (year != target && !yearGreater && !yearLesser || target <= yearGreater || target >= yearLesser) {
-      // 1.2 We have season page open, don't add year to query, but change the header
-      if (hasSpecialSeasonControlsOpen && header !== "tba") {
-        navigate(path => path.replace(header, `${season}-${target}`),   { season: undefined, year: undefined, yearLesser: undefined,    yearGreater: undefined    }, { replace: true });
-      }
-      // 1.3 Just update the year to query
-      else {
-        navigate(path => path.replace(headerRegex, ""),                 { season,            year: target,    yearLesser: undefined,    yearGreater: undefined    }, { replace: true });
-      }
+      selectYear(target);
     }
     // 2. Clicked again at the same year selection, change selection to lesser - 1
     else if (year == target) {
@@ -92,7 +97,18 @@ export function MediaYearSelect() {
 
   };
 
+  // AniList only supports one year or one continuous range, so searched rows with gaps between them select every year in between
+  const handlePickRange = ids => {
+    lastYearSelection = null;
+    const years = ids.map(Number);
+    const min = Math.min(...years);
+    const max = Math.max(...years);
+
+    if (min === max) return selectYear(min);
+    navigate(path => path.replace(headerRegex, ""), { season: validSeason(), year: undefined, yearLesser: max + 1, yearGreater: min - 1 }, { replace: true });
+  };
+
   return (
-    <FilterSelect radio param="year" noEscapeCancel tooltip="Year the media started releasing" each={yearOptions()} value={yearValues().map(value => "" + value.id)} valueLabel={yearValues()[0]?.toast} onPick={handlePick} onClear={clearYear} icon={<YearIcon />} button="Year" />
+    <FilterSelect radio param="year" noEscapeCancel tooltip="Year the media started releasing" each={yearOptions()} value={yearValues().map(value => "" + value.id)} valueLabel={yearValues()[0]?.toast} onPick={handlePick} onPickRange={handlePickRange} onClear={clearYear} icon={<YearIcon />} button="Year" />
   );
 }

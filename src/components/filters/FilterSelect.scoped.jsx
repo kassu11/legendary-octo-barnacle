@@ -47,7 +47,7 @@ function SortDirection(props) {
  * - Delete removes the row under the cursor, Backspace removes the last selection
  * - Esc closes and drops the preview
  * - With noPreview the arrows only move the cursor
- * - With onPick the arrows only move the cursor, Enter picks the row and Delete and Backspace clear the selection
+ * - With onPick the arrows only move the cursor, Enter picks the row and Delete and Backspace clear the selection. With onPickRange Shift + arrows pick a range
  * - Sort and radio: arrows select the row, Ctrl + arrows only move the cursor, Ctrl + Enter adds the row and Shift + arrows or Shift + Enter fill from the previous selection
  * - Sort: Enter reverses the row
  * - Radio: Enter closes
@@ -78,6 +78,7 @@ function SortDirection(props) {
  * @param {string} [props.defaultValue] Value that is left out of the url. With radio this row can't be selected together with other rows
  * @param {(id: string) => number} [props.countOf] Number shown at the end of the row
  * @param {(id: string) => void} [props.onPick] Use with radio. Row only calls this and props.value decides what is selected, for selections that tokens can't express, like ranges
+ * @param {(ids: string[]) => void} [props.onPickRange] Use with onPick. Shift click, Shift + arrows, drag and touch hold pass every row from the previous click to the cursor
  * @param {() => void} [props.onClear] Clears the selection of onPick, without this it can't be cleared
  * @param {string} [props.valueLabel] Replaces the selections in the trigger
  * @param {boolean} [props.noPreview] Moving the cursor doesn't filter, for rows that are expensive to select
@@ -228,6 +229,7 @@ export function FilterSelect(props) {
   const paintRange = () => {
     const { ids, paint, base } = range;
     setPreview(null);
+    if (props.onPick) return props.onPickRange(ids);
     setMarked(new Set(ids.length > 1 && !isSingle() ? ids : []));
     updateSelected(ids.reduce((tokens, id) => {
       // Sort fields keep their direction when a drag passes them
@@ -406,7 +408,11 @@ export function FilterSelect(props) {
     setCursor(to);
     scrollToCursor();
 
-    if (props.onPick) return;
+    if (props.onPick) {
+      if (!props.onPickRange || !e.shiftKey) return clearRange();
+      if (!range) setAnchor(rows()[from === -1 ? to : from].id);
+      return extendRange(to);
+    }
     if (isSingle() && isAdditive(e) && !e.shiftKey) return;
     if (e.shiftKey) {
       if (!range) {
@@ -578,15 +584,17 @@ export function FilterSelect(props) {
     const previousRow = rows()[cursor()];
     setCursor(index);
 
-    if (props.onPick) {
-      props.onPick(row.id);
-      return false;
-    }
-
-    if (e.shiftKey && (range || (isSingle() && previousRow))) {
+    if (e.shiftKey && (!props.onPick || props.onPickRange) && (range || (isSingle() && previousRow))) {
       if (!range) setAnchor(previousRow.id);
       extendRange(index);
       return false;
+    }
+
+    if (props.onPick) {
+      props.onPick(row.id);
+      if (!props.onPickRange) return false;
+      setAnchor(row.id);
+      return true;
     }
 
     if (isSingle()) {
@@ -628,7 +636,9 @@ export function FilterSelect(props) {
     navigator.vibrate?.(10);
     setCursor(rows().indexOf(row));
 
-    if (isSingle()) {
+    if (props.onPick) {
+      startRange(row.id, false);
+    } else if (isSingle()) {
       toggleSingle(row.id, true);
       startRange(row.id, false);
     } else {
@@ -642,7 +652,7 @@ export function FilterSelect(props) {
     cancelHold();
 
     const row = rows()[Array.prototype.indexOf.call(list.children, e.target.closest?.("[role=option]"))];
-    if (!row || e.touches.length > 1 || props.onPick) return;
+    if (!row || e.touches.length > 1 || (props.onPick && !props.onPickRange)) return;
 
     const { clientX, clientY } = e.touches[0];
     hold = { x: clientX, y: clientY, timer: setTimeout(() => startHold(row, clientY), TOUCH_HOLD_MS) };
