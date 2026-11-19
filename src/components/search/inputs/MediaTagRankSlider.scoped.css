@@ -5,6 +5,8 @@
     max-width: var(--select-max-width, 300px);
 
     label {
+      --scoped-thumb-color: var(--text-muted);
+
       display: flex;
       align-items: center;
       gap: 6px;
@@ -18,17 +20,19 @@
       transition: .2s border-color, .2s background-color, .2s opacity;
 
       &.active {
+        --scoped-thumb-color: var(--light-blue-400);
+
         border-style: solid;
         border-color: var(--bg-light);
         background-color: var(--bg);
+
+        .value {
+          color: var(--text);
+        }
       }
 
       &.disabled {
         opacity: .5;
-      }
-
-      &:has(input:focus-visible) {
-        outline: 2px solid currentColor;
       }
 
       .icon {
@@ -47,30 +51,143 @@
         }
       }
 
-      input {
+      .range {
+        --scoped-thumb-size: 14px;
+        --scoped-track-height: 4px;
+        --scoped-fill: calc(var(--scoped-thumb-size) / 2 + (100% - var(--scoped-thumb-size)) * var(--scoped-progress, 0));
+
         flex-grow: 1;
         width: 0;
         min-width: 3rem;
-        height: 1.2em;
+        height: var(--scoped-thumb-size);
         margin: 0;
         outline: none;
-        accent-color: var(--light-blue-400);
+        background: transparent;
+        appearance: none;
         cursor: pointer;
 
         &:disabled {
           cursor: not-allowed;
         }
+
+        &::-webkit-slider-runnable-track {
+          height: var(--scoped-track-height);
+          border-radius: var(--scoped-track-height);
+          background: linear-gradient(to right, var(--light-blue-400) var(--scoped-fill), var(--bg-light) var(--scoped-fill));
+        }
+
+        &::-moz-range-track {
+          height: var(--scoped-track-height);
+          border-radius: var(--scoped-track-height);
+          background-color: var(--bg-light);
+        }
+
+        &::-moz-range-progress {
+          height: var(--scoped-track-height);
+          border-radius: var(--scoped-track-height);
+          background-color: var(--light-blue-400);
+        }
+
+        &::-webkit-slider-thumb {
+          width: var(--scoped-thumb-size);
+          height: var(--scoped-thumb-size);
+          margin-top: calc((var(--scoped-track-height) - var(--scoped-thumb-size)) / 2);
+          border: 3px solid var(--bg-dark);
+          border-radius: 50%;
+          background-color: var(--scoped-thumb-color);
+          appearance: none;
+          transition: .2s background-color, .2s box-shadow;
+        }
+
+        &::-moz-range-thumb {
+          box-sizing: border-box;
+          width: var(--scoped-thumb-size);
+          height: var(--scoped-thumb-size);
+          border: 3px solid var(--bg-dark);
+          border-radius: 50%;
+          background-color: var(--scoped-thumb-color);
+          transition: .2s background-color, .2s box-shadow;
+        }
+
+        &:not(:disabled):is(:hover, :focus-visible, :active)::-webkit-slider-thumb {
+          box-shadow: 0 0 0 4px color-mix(in oklab, var(--light-blue-400), transparent 70%);
+        }
+
+        &:not(:disabled):is(:hover, :focus-visible, :active)::-moz-range-thumb {
+          box-shadow: 0 0 0 4px color-mix(in oklab, var(--light-blue-400), transparent 70%);
+        }
+
+        &:focus-visible::-webkit-slider-thumb {
+          --scoped-thumb-color: var(--text);
+        }
+
+        &:focus-visible::-moz-range-thumb {
+          --scoped-thumb-color: var(--text);
+        }
       }
 
-      output {
+      .value {
+        --scoped-unit-width: 1.5ch;
+
+        position: relative;
         flex-shrink: 0;
-        min-width: 4ch;
-        text-align: right;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
 
-        .active & {
-          color: var(--text);
+        .rank-input {
+          display: block;
+          box-sizing: border-box;
+          width: 5ch;
+          padding: 0 calc(var(--scoped-unit-width) + 2px) 0 2px;
+          border: none;
+          border-bottom: 1px dashed transparent;
+          border-radius: 2px;
+          outline: none;
+          background-color: transparent;
+          color: inherit;
+          font: inherit;
+          text-align: right;
+          cursor: text;
+          transition: .2s border-color, .2s background-color;
+
+          &:placeholder-shown {
+            padding-right: 2px;
+
+            + .unit {
+              display: none;
+            }
+          }
+
+          &::placeholder {
+            color: inherit;
+            opacity: 1;
+          }
+
+          &:hover:not(:disabled) {
+            border-bottom-color: currentColor;
+          }
+
+          &:focus {
+            border-bottom-color: var(--light-blue-400);
+            background-color: var(--bg-dark);
+            color: var(--text);
+          }
+
+          &:focus::placeholder {
+            opacity: .5;
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+          }
+        }
+
+        .unit {
+          position: absolute;
+          top: 0;
+          right: 2px;
+          width: var(--scoped-unit-width);
+          pointer-events: none;
         }
       }
     }
