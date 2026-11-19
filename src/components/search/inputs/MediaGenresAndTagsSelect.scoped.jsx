@@ -62,8 +62,8 @@ export function MediaGenresAndTagsSelect() {
       setValue: res => {
         const genreObject = {
           entries: [
-            ...res.data.data.genres.map(id => ({ description: id, id: id.toLowerCase(), tooltipTitle: "Genre", tooltip: genreDescriptions[id] })),
-            ...res.data.data.tags.map(tag  => ({ description: tag.name, id: tag.name.toLowerCase(), tooltipTitle: tag.category + (tag.isAdult ? " (18+)" : ""), tooltip: tag.description })),
+            ...res.data.data.genres.map(id => ({ description: id, id: id.toLowerCase(), tooltipTitle: "Genre", tooltip: genreDescriptions[id], isAdult: id === "Hentai" })),
+            ...res.data.data.tags.map(tag  => ({ description: tag.name, id: tag.name.toLowerCase(), tooltipTitle: tag.category + (tag.isAdult ? " (18+)" : ""), tooltip: tag.description, isAdult: tag.isAdult })),
           ],
           genres: res.data.data.genres,
           tags: res.data.data.tags,
@@ -73,6 +73,13 @@ export function MediaGenresAndTagsSelect() {
         setAnilistGenresAndTagsData(genreObject);
       }
     });
+  });
+
+  const themeOptions = createMemo(() => {
+    const entries = anilistGenresAndTagsData()?.entries || [];
+    const { age } = parsedSearchParams();
+    if (age.includes("any") || age.includes("rx")) return entries;
+    return entries.filter(entry => !entry.isAdult);
   });
 
   const genresAndTagsValues = createMemo(() => {
@@ -87,7 +94,7 @@ export function MediaGenresAndTagsSelect() {
         excludable
         noEscapeCancel
         tooltip="Genres and tags. Click once to include, twice to exclude. Hover a theme to see its description"
-        each={anilistGenresAndTagsData()?.entries || []}
+        each={themeOptions()}
         value={genresAndTagsValues()}
         setSearchParams={query => setSearchParams(query, { replace: true })}
         icon={<GenreIcon />}
