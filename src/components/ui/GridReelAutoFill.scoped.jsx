@@ -32,6 +32,7 @@ export function GridReelAutoFill(props) {
   let reel;
   let pointerId = null, pointerType, startX, startScrollX, dragging = false, samples = [];
   let preventClick = false;
+  let scrollbarPressed = false;
   let animationFrame = null, animationTarget;
   let scrollEndTimeout;
 
@@ -101,7 +102,8 @@ export function GridReelAutoFill(props) {
   };
 
   const handlePointerDown = e => {
-    if (pointerId != null || e.button !== 0 || !isScrollable() || isOnScrollbar(e)) return;
+    if (e.button === 0 && isOnScrollbar(e)) return pressScrollbar();
+    if (pointerId != null || e.button !== 0 || !isScrollable()) return;
 
     // Catching a moving reel stops it without clicking whatever is under the pointer
     preventClick = animationFrame != null && Math.abs(animationTarget - reel.scrollLeft) > DRAG_THRESHOLD;
@@ -121,7 +123,21 @@ export function GridReelAutoFill(props) {
     if (e.button === 0 && isScrollable() && !isOnScrollbar(e)) e.preventDefault();
   };
 
+  // Snapping while the scrollbar is held would pull the reel away from under the pointer
+  const pressScrollbar = () => {
+    scrollbarPressed = true;
+    stopAnimation();
+    clearTimeout(scrollEndTimeout);
+  };
+
+  const releaseScrollbar = () => {
+    if (!scrollbarPressed) return;
+    scrollbarPressed = false;
+    scheduleSnap();
+  };
+
   const handlePointerMove = e => {
+    if (scrollbarPressed && !(e.buttons & 1)) releaseScrollbar();
     if (e.pointerId !== pointerId) return;
     if (pointerType === "mouse" && e.buttons !== 1) return handlePointerUp(e);
 
@@ -139,6 +155,7 @@ export function GridReelAutoFill(props) {
   };
 
   const handlePointerUp = e => {
+    releaseScrollbar();
     if (e.pointerId !== pointerId) return;
     pointerId = null;
     // The click from this release has been dispatched by the time the timeout runs
@@ -163,13 +180,13 @@ export function GridReelAutoFill(props) {
   const scheduleSnap = () => {
     clearTimeout(scrollEndTimeout);
     scrollEndTimeout = setTimeout(() => {
-      if (pointerId == null && animationFrame == null) animateTo(snapTarget(reel.scrollLeft));
+      if (pointerId == null && animationFrame == null && !scrollbarPressed) animateTo(snapTarget(reel.scrollLeft));
     }, SCROLL_END_DELAY);
   };
 
   // Snap after scrolling that didn't come from this component
   const handleScroll = () => {
-    if (pointerId != null || animationFrame != null) return;
+    if (pointerId != null || animationFrame != null || scrollbarPressed) return;
     scheduleSnap();
   };
 
@@ -182,7 +199,7 @@ export function GridReelAutoFill(props) {
 
   const handleResize = () => {
     updateScrollable();
-    if (pointerId != null || animationFrame != null) return;
+    if (pointerId != null || animationFrame != null || scrollbarPressed) return;
     reel.scrollLeft = snapTarget(reel.scrollLeft);
   };
 
