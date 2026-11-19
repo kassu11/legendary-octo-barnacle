@@ -1,4 +1,5 @@
 import { createEffect, createSignal, Match, onCleanup, Switch } from "solid-js";
+import { useMatch, useResolvedPath } from "@solidjs/router";
 import "./MainNavigation.scoped.css";
 import { queries } from "@/api/api";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
@@ -12,6 +13,7 @@ import { ProfileMenu } from "./navigation/ProfileMenu.scoped.jsx";
 import { LoginButton } from "./navigation/LoginButton.scoped.jsx";
 
 export function MainNavigation() {
+  const onBrowseMediaPage = useMatch(useResolvedPath(() => "/ani/browse/media"));
   const [hidden, setHidden] = createSignal(false);
   let lastScrollY = window.scrollY;
 
@@ -47,7 +49,7 @@ export function MainNavigation() {
         </ul>
 
         <div class="actions">
-          <NavigationIconButton href="/ani/browse/media" state={{ focusSearch: true }} label="Search" icon={SearchIcon} />
+          <NavigationIconButton href="/ani/browse/media" state={{ focusSearch: true }} replace={onBrowseMediaPage() || undefined} label="Search" icon={SearchIcon} />
           <Switch>
             <Match when={token2() && authUserData()}>{userData => (
               <>
