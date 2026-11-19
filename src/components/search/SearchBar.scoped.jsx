@@ -30,6 +30,7 @@ import { createMemo, Show } from "solid-js";
  * @param {Object} props
  * @param {boolean} [props.typeSelect] Media type select
  * @param {boolean} [props.typeSearchParam] Type select changes the type search param instead of the path
+ * @param {boolean} [props.focusSearch] Focuses the search input
  * @param {boolean} [props.cardStyleToggle] Card style toggle next to the active queries
  * @param {boolean} [props.characterFilters] Role and voice actor language filters of a character page
  * @param {boolean} [props.staffFilters] Role filter of a staff page
@@ -47,14 +48,14 @@ export function SearchBar(props) {
       <div class="search-bar">
         <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} staffFilters={props.staffFilters} roleCounts={props.roleCounts} languageCounts={props.languageCounts} voiceActorLanguages={props.voiceActorLanguages}>
           <FilterGroup title="Search" class="search">
-            <FilterSearchInput />
+            <FilterSearchInput autofocus={props.focusSearch} />
           </FilterGroup>
         </SearchFilters>
         <SearchActiveQueries cardStyleToggle={props.cardStyleToggle} />
       </div>
     }>
       <div class="search-bar mobile">
-        <MobileFilters search={<FilterSearchInput />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
+        <MobileFilters search={<FilterSearchInput autofocus={props.focusSearch} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton />}>
           <SearchActiveQueries />
           <SearchFilters typeSelect={props.typeSelect} typeSearchParam={props.typeSearchParam} characterFilters={props.characterFilters} staffFilters={props.staffFilters} roleCounts={props.roleCounts} languageCounts={props.languageCounts} voiceActorLanguages={props.voiceActorLanguages} />
         </MobileFilters>

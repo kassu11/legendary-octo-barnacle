@@ -47,7 +47,7 @@ export function MainNavigation() {
         </ul>
 
         <div class="actions">
-          <NavigationIconButton href="/ani/browse/media" label="Search" icon={SearchIcon} />
+          <NavigationIconButton href="/ani/browse/media" state={{ focusSearch: true }} label="Search" icon={SearchIcon} />
           <Switch>
             <Match when={token2() && authUserData()}>{userData => (
               <>

@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import { useResponsive } from "@/state/providers.js";
 import { useSearchParams } from "@solidjs/router";
@@ -31,12 +31,17 @@ export function FilterGroup(props) {
  * @param {Object} props
  * @param {HTMLElement} [props.scrollTarget] Searching scrolls back up to this element, if the page is scrolled past it. Without it scrolls to the top of the page
  * @param {number} [props.debounce=400] Typing within this many milliseconds replaces the history entry
+ * @param {boolean} [props.autofocus] Focuses the input whenever this turns true
  */
 export function FilterSearchInput(props) {
   const { isTouch } = useResponsive();
   const [searchParams, setSearchParams] = useSearchParams();
   const value = () => decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
   let input;
+
+  createEffect(() => {
+    if (props.autofocus) input.focus();
+  });
 
   // The first input of a search adds a history entry, the rest of the typing replaces it
   let replace = false, timeout;

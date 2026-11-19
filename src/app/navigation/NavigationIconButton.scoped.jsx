@@ -3,7 +3,7 @@ import "./NavigationIconButton.scoped.css";
 
 export function NavigationIconButton(props) {
   return (
-    <A scoped href={props.href} class="icon-button" aria-label={props.ariaLabel ?? props.label} title={props.label}>
+    <A scoped href={props.href} state={props.state} class="icon-button" aria-label={props.ariaLabel ?? props.label} title={props.label}>
       <props.icon scoped />
       {props.children}
     </A>

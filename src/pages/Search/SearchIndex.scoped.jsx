@@ -80,7 +80,7 @@ export function SearchPage() {
 
   return (
     <ErrorBoundary fallback="Search page has crashed">
-      <SearchBar typeSelect cardStyleToggle={!isMobilLarge() && !pageTitle()} />
+      <SearchBar typeSelect cardStyleToggle={!isMobilLarge() && !pageTitle()} focusSearch={location.state?.focusSearch} />
       <Switch>
         <Match when={params.mode === "browse" && error()?.errors}>
           <h2>Bad request error: </h2>
