@@ -1,36 +1,27 @@
 import { useSearchParams } from "@solidjs/router";
 import { createMemo } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
-import { arrayUtils } from "@/utils/utils.js";
-import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
+import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { AgeIcon } from "@/assets/icons.jsx";
 
 export function MediaAgeSelect() {
   const parsedSearchParams = useParsedSearchParams();
   const [, setSearchParams] = useSearchParams();
 
-  const ageOptions = [
-    { description: "Any Rating",                               id: "any" },
-    { description: "R+ - (violence, profanity & mild nudity)", id: "r",  toast: "R+" },
-    { description: "Rx - Hentai",                              id: "rx", toast: "Rx" },
-  ];
-
-  const ageValues = createMemo(() => {
-    const listOfAges = arrayUtils.wrapToArray(parsedSearchParams().age);
-    const firstValidAge = listOfAges.find(age => ageOptions.some(({id}) => id === age));
-    const id = firstValidAge || "r";
-
-    return [id];
+  const toggleValue = createMemo(() => {
+    const age = parsedSearchParams().age;
+    if (age.includes("rx")) return "true";
+    if (age.includes("any")) return undefined;
+    return "false";
   });
 
-  const handlePick = id => {
-
-    if (id === "r") setSearchParams({ age: undefined }, { replace: true });
-    else setSearchParams({ age: id }, { replace: true });
-
+  const handleChange = value => {
+    if (value === "true") setSearchParams({ age: "rx" }, { replace: true });
+    else if (value === "false") setSearchParams({ age: undefined }, { replace: true });
+    else setSearchParams({ age: "any" }, { replace: true });
   };
 
   return (
-    <FilterSelect radio param="age" defaultValue="r" noEscapeCancel tooltip="Include adult content in the results" each={ageOptions} value={ageValues()} onPick={handlePick} onClear={() => handlePick("r")} icon={<AgeIcon />} button="Age" />
+    <TwoStateToggleButton value={toggleValue()} onChange={handleChange} icon={<AgeIcon />} label="R-18" tooltip="R-18 media is hidden by default. Click once to show all media, twice to show only R-18 media" />
   );
 }
