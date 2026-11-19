@@ -14,7 +14,7 @@ import { TwoStateToggle } from "@/components/filters/TwoStateToggle.scoped";
 import { MediaYearSelect } from "./inputs/MediaYearSelect.scoped";
 import { MediaProgressSelect } from "./inputs/MediaProgressSelect.scoped";
 import { MediaLengthSelect } from "./inputs/MediaLengthSelect.scoped";
-import { MediaTagRankSelect } from "./inputs/MediaTagRankSelect.scoped";
+import { MediaTagRankSlider } from "./inputs/MediaTagRankSlider.scoped";
 import { MediaUsersSelect } from "./inputs/MediaUsersSelect.scoped";
 import { MediaTypeSelect } from "./inputs/MediaTypeSelect.scoped";
 import { MediaGroupBySelect } from "./inputs/MediaGroupBySelect";
@@ -108,7 +108,7 @@ function SearchFilters(props) {
       </FilterGroup>
       <FilterGroup title="Content">
         <MediaGenresAndTagsSelect />
-        <MediaTagRankSelect />
+        <MediaTagRankSlider />
         <MediaAgeSelect />
       </FilterGroup>
       <FilterGroup title="Length">

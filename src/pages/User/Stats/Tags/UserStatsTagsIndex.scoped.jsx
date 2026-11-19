@@ -106,7 +106,7 @@ function StatsTags(props) {
             <div class="header">
               <div class="flex-space-between">
                 <h2>
-                  <A href={"/ani/search/" + params.type + "?onList=false&theme=" + encodeURIComponent(genre.tag.name)}>
+                  <A href={"/ani/search/" + params.type + "?onList=false&tag=" + encodeURIComponent(genre.tag.name)}>
                     {genre.tag.name}
                   </A>
                 </h2>

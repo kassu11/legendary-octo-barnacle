@@ -69,7 +69,7 @@ function MediaRowCardContent(props) {
           <ol class="genre-list">
             <For each={props.media.genres}>{genre => (
               <li class="genre">
-                <A scoped href={`/ani/search/${(props.type || props.media.type || "media").toLowerCase()}?theme=${encodeURIComponent(genre)}`}>{genre}</A>
+                <A scoped href={`/ani/search/${(props.type || props.media.type || "media").toLowerCase()}?genre=${encodeURIComponent(genre)}`}>{genre}</A>
               </li>
             )}</For>
           </ol>

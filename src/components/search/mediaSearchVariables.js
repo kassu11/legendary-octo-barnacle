@@ -14,7 +14,7 @@ import { mediaGroupSort } from "./mediaGroups";
  */
 export function createAnilistMediaQueryVariables(searchParams, { idIn: restrictedIds } = {}) {
   const api = "ani";
-  const { q, year, rank, themes, users, excludedUsers, excludedThemes, sortBySearchMatch, externalSources, type, ...rest } = searchParams;
+  const { q, year, rank, genres, excludedGenres, tags, excludedTags, users, excludedUsers, sortBySearchMatch, externalSources, type, ...rest } = searchParams;
 
   const obj = {
     sort: [],
@@ -23,19 +23,22 @@ export function createAnilistMediaQueryVariables(searchParams, { idIn: restricte
     countryOfOriginIn: [],
     licensedBy: [...externalSources],    // Anilist will work with invalid licenseIDs, so no need to validate
     statusIn: [],
-    minimumTagRank: rank,
-    excludedThemes: [...excludedThemes], // Anilist will work with invalid exclusions, so no need to validate
+    // Anilist will work with invalid exclusions, so no need to validate
+    excludedGenres: [...excludedGenres],
+    excludedTags: [...excludedTags],
+    // Rank only filters tags, it doesn't do anything without them
+    minimumTagRank: tags.length || excludedTags.length ? rank : undefined,
     search: q?.toLowerCase().trim() || undefined,
     type: type === "media" ? undefined : type.toUpperCase(),
     isAdult: false,
   };
 
   // Validate genres and tags
-  const genresObject    = themes.length ? anilistGenresAndTagsData() : null;
-  if (themes.length && !genresObject) return null;
+  const genresAndTagsData = genres.length || tags.length ? anilistGenresAndTagsData() : null;
+  if ((genres.length || tags.length) && !genresAndTagsData) return null;
 
-  obj.genres = themes.filter(g => genresObject.validGenres.has(g));
-  obj.tags   = themes.filter(t => genresObject.validTags  .has(t));
+  obj.genres = genres.filter(g => genresAndTagsData.validGenres.has(g));
+  obj.tags   = tags  .filter(t => genresAndTagsData.validTags  .has(t));
 
   // Grouping needs the results sorted by the group first, even when sorting by search match
   const sorts = sortBySearchMatch ? ["search_match"] : rest.sort;

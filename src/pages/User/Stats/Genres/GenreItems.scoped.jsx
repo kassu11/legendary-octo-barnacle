@@ -17,7 +17,7 @@ export function GenreItems(props) {
           <div class="header">
             <div class="flex-space-between">
               <h2>
-                <A href={"/ani/search/" + params.type + "?onList=false&theme=" + encodeURIComponent(genre.genre)}>
+                <A href={"/ani/search/" + params.type + "?onList=false&genre=" + encodeURIComponent(genre.genre)}>
                   {genre.genre}
                 </A>
               </h2>

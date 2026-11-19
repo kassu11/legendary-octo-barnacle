@@ -7,7 +7,7 @@ import { useNavigateAndSearch } from "@/utils/urlUtils";
 import { capitalize } from "@/utils/formatUtils.js";
 import { arrayUtils } from "@/utils/utils";
 import { localizeInternalSearchParams } from "@/api/apiTranslations";
-import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, TypeIcon, UserIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, TagsIcon, TypeIcon, UserIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 import { ROLE_OPTIONS } from "./inputs/CharacterRoleSelect";
@@ -36,7 +36,8 @@ const typeIcons = {
   source: SourceIcon,
   country: CountryIcon,
   externalSources: AvailableIcon,
-  themes: GenreIcon,
+  genres: GenreIcon,
+  tags: TagsIcon,
   age: AgeIcon,
   status: StatusIcon,
   year: YearIcon,
@@ -65,7 +66,7 @@ export function useActiveSearchQueries() {
 
     const returnValue = [];
 
-    const { q, sort, format, themes, excludedThemes, country, status, age, season, year, yearLesser, yearGreater, source, externalSources, progress, progressLesser, progressGreater, length, lengthLesser, lengthGreater, rank, users, excludedUsers, onList, licensed } = parsedSearchParams();
+    const { q, sort, format, genres, excludedGenres, tags, excludedTags, country, status, age, season, year, yearLesser, yearGreater, source, externalSources, progress, progressLesser, progressGreater, length, lengthLesser, lengthGreater, rank, users, excludedUsers, onList, licensed } = parsedSearchParams();
 
     const sortObject = arrayUtils.objectFromArrayEntries(sort);
     if (sortObject["score_plus"     ] || sortObject["score_desc_plus"     ]) returnValue.push({ type: "misc", description: "Must have a score",             query: { sort: sort.map(e => e.includes("score"     ) ? e.replace("_plus", "") : e) } });
@@ -92,13 +93,22 @@ export function useActiveSearchQueries() {
       if (target) returnValue.push({ type: "externalSources", description: "ExternalSources: " + target.site, image: target.icon, imageColor: target.color, query: { externalSources: externalSources.filter(v2 => v2 !== v) } });
     }
 
-    const rawThemes = arrayUtils.wrapToArray(searchParams.theme);
-    for (const v of themes) {
-      returnValue.push({ type: "themes", description: "Theme: " + capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== v) } });
+    const rawGenres = arrayUtils.wrapToArray(searchParams.genre);
+    for (const v of genres) {
+      returnValue.push({ type: "genres", description: "Genre: " + capitalize(v), query: { genre: rawGenres.filter(v2 => v2.toLowerCase() !== v) } });
     }
 
-    for (const v of excludedThemes) {
-      returnValue.push({ type: "themes", description: "Theme: " + capitalize(v), query: { theme: rawThemes.filter(v2 => v2 !== "-" + v) } });
+    for (const v of excludedGenres) {
+      returnValue.push({ type: "genres", description: "Exclude Genre: " + capitalize(v), query: { genre: rawGenres.filter(v2 => v2.toLowerCase() !== "-" + v) } });
+    }
+
+    const rawTags = arrayUtils.wrapToArray(searchParams.tag);
+    for (const v of tags) {
+      returnValue.push({ type: "tags", description: "Tag: " + capitalize(v), query: { tag: rawTags.filter(v2 => v2.toLowerCase() !== v) } });
+    }
+
+    for (const v of excludedTags) {
+      returnValue.push({ type: "tags", description: "Exclude Tag: " + capitalize(v), query: { tag: rawTags.filter(v2 => v2.toLowerCase() !== "-" + v) } });
     }
 
     for (const v of age) {
@@ -156,7 +166,7 @@ export function useActiveSearchQueries() {
       else                              returnValue.push({ type: "lengthGreater", description: "Duration / Volumes>" +    lengthGreater, query: { lengthGreater: undefined } });
     }
 
-    if (rank) returnValue.push({ type: "rank", description: "Tag Rank > " + (+rank - 1) + "%", query: { rank: undefined } });
+    if (rank) returnValue.push({ type: "rank", description: "Tag Rank: " + rank + "%+", query: { rank: undefined } });
 
     const rawUsers = arrayUtils.wrapToArray(searchParams.user);
     for (const v of users) {

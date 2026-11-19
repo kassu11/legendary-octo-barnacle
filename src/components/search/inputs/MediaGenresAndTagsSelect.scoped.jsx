@@ -1,8 +1,8 @@
 import { useSearchParams, useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import { createEffect, createMemo, createSignal } from "solid-js";
 import { useParsedSearchParams } from "@/state/providers.js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
-import { GenreIcon } from "@/assets/icons.jsx";
+import { GenreIcon, TagsIcon } from "@/assets/icons.jsx";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
@@ -60,48 +60,69 @@ export function MediaGenresAndTagsSelect() {
       onStop: () => setGenresAndTagsLoading(false),
       onFetch: () => genresAndTagsController.disable(),
       setValue: res => {
-        const genreObject = {
-          entries: [
-            ...res.data.data.genres.map(id => ({ description: id, id: id.toLowerCase(), tooltipTitle: "Genre", tooltip: genreDescriptions[id], isAdult: id === "Hentai" })),
-            ...res.data.data.tags.map(tag  => ({ description: tag.name, id: tag.name.toLowerCase(), tooltipTitle: tag.category + (tag.isAdult ? " (18+)" : ""), tooltip: tag.description, isAdult: tag.isAdult })),
-          ],
-          genres: res.data.data.genres,
-          tags: res.data.data.tags,
+        setAnilistGenresAndTagsData({
+          genres: res.data.data.genres.map(id => ({ description: id, id: id.toLowerCase(), tooltipTitle: "Genre", tooltip: genreDescriptions[id], isAdult: id === "Hentai" })),
+          tags: res.data.data.tags.map(tag => ({ description: tag.name, id: tag.name.toLowerCase(), tooltipTitle: tag.category + (tag.isAdult ? " (18+)" : ""), tooltip: tag.description, isAdult: tag.isAdult })),
           validGenres: new Set(res.data.data.genres.map(g => g.toLowerCase())),
           validTags: new Set(res.data.data.tags.map(t => t.name.toLowerCase())),
-        };
-        setAnilistGenresAndTagsData(genreObject);
+        });
       }
     });
   });
 
-  const themeOptions = createMemo(() => {
-    const entries = anilistGenresAndTagsData()?.entries || [];
+  const showAdult = () => {
     const { age } = parsedSearchParams();
-    if (age.includes("any") || age.includes("rx")) return entries;
-    return entries.filter(entry => !entry.isAdult);
+    return age.includes("any") || age.includes("rx");
+  };
+
+  const genreOptions = createMemo(() => {
+    const genres = anilistGenresAndTagsData()?.genres || [];
+    return showAdult() ? genres : genres.filter(genre => !genre.isAdult);
   });
 
-  const genresAndTagsValues = createMemo(() => {
-    const { themes, excludedThemes } = parsedSearchParams();
-    return [...themes, ...excludedThemes.map(id => "-" + id)];
+  const tagOptions = createMemo(() => {
+    const tags = anilistGenresAndTagsData()?.tags || [];
+    return showAdult() ? tags : tags.filter(tag => !tag.isAdult);
+  });
+
+  const genreValues = createMemo(() => {
+    const { genres, excludedGenres } = parsedSearchParams();
+    return [...genres, ...excludedGenres.map(id => "-" + id)];
+  });
+
+  const tagValues = createMemo(() => {
+    const { tags, excludedTags } = parsedSearchParams();
+    return [...tags, ...excludedTags.map(id => "-" + id)];
   });
 
   return (
-    <Show when={parsedSearchParams().type !== "media"}>
+    <>
       <FilterSelect
-        param="theme"
+        param="genre"
         excludable
         noEscapeCancel
-        tooltip="Genres and tags. Click once to include, twice to exclude. Hover a theme to see its description"
-        each={themeOptions()}
-        value={genresAndTagsValues()}
+        tooltip="Broad categories of the story. Click once to include, twice to exclude. Hover a genre to see its description"
+        each={genreOptions()}
+        value={genreValues()}
         setSearchParams={query => setSearchParams(query, { replace: true })}
         icon={<GenreIcon />}
-        button="Theme"
+        button="Genre"
         loading={genresAndTagsLoading()}
-        emptyText={genresAndTagsLoading() ? "Loading list" : "Failed to fetch Anilist genres and tags"}
+        emptyText={genresAndTagsLoading() ? "Loading list" : "Failed to fetch Anilist genres"}
       />
-    </Show>
+      <FilterSelect
+        param="tag"
+        excludable
+        noEscapeCancel
+        tooltip="Specific themes, settings and character traits. Click once to include, twice to exclude. Hover a tag to see its description"
+        each={tagOptions()}
+        value={tagValues()}
+        setSearchParams={query => setSearchParams(query, { replace: true })}
+        icon={<TagsIcon />}
+        button="Tag"
+        loading={genresAndTagsLoading()}
+        emptyText={genresAndTagsLoading() ? "Loading list" : "Failed to fetch Anilist tags"}
+      />
+    </>
   );
 }

@@ -59,9 +59,13 @@ export function createParsedSearchParams(options) {
     if (filteredStatus.length) obj.status = filteredStatus;
     if (filteredSeason) obj.season = filteredSeason;
 
-    const themes = wrapToArray(searchParams.theme).map(name => name.toLowerCase()).sort();
-    obj.themes         = themes.filter(val => !val.startsWith("-"));
-    obj.excludedThemes = themes.filter(val =>  val.startsWith("-")).map(val => val.substring(1));
+    const genres = wrapToArray(searchParams.genre).map(name => name.toLowerCase()).sort();
+    obj.genres         = genres.filter(val => !val.startsWith("-"));
+    obj.excludedGenres = genres.filter(val =>  val.startsWith("-")).map(val => val.substring(1));
+
+    const tags = wrapToArray(searchParams.tag).map(name => name.toLowerCase()).sort();
+    obj.tags         = tags.filter(val => !val.startsWith("-"));
+    obj.excludedTags = tags.filter(val =>  val.startsWith("-")).map(val => val.substring(1));
 
     // Filter duplicate and conflicting states
     const usersMap = new Map();
