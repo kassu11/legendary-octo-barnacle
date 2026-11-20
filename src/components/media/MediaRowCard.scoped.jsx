@@ -16,6 +16,10 @@ import "./MediaRowCard.scoped.css";
  * Wide media card that shows the media info on one row
  * @param {Object} props
  * @param {Object} [props.media] Anilist media, card renders as an empty skeleton without it
+ * @param {Object} [props.mediaListEntry] List entry to show, overrides the session edits and media.mediaListEntry
+ * @param {boolean} [props.otherUsersEntry] mediaListEntry belongs to another user, so the quick actions edit the viewers own entry instead
+ * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
+ * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
  * @param {number} [props.rank] Rank shown on the left side of the card
  * @param {string} [props.type] Search page type (anime, manga or media) used in the genre links, defaults to the media type
  * @param {boolean} [props.loading] Grays out the card while new data is being fetched
@@ -25,12 +29,12 @@ import "./MediaRowCard.scoped.css";
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles under the genres
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} />
+        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} />
       </Show>
     </div>
   );
@@ -38,8 +42,31 @@ export function MediaRowCard(props) {
 
 function MediaRowCardContent(props) {
   const hover = createHover({ placements: ["left-center", "bottom", "top"], offset: 25, alignOffset: 25 });
-  // Session edits override the entry from the response, same as in MediaCard
-  const mediaListEntry = createMemo(() => globalEditedMedia[props.media.id] === undefined ? props.media.mediaListEntry : globalEditedMedia[props.media.id]);
+  // A given entry can belong to another user, so session edits only override it when they are for the same entry
+  const mediaListEntry = createMemo(() => {
+    const entry = globalEditedMedia[props.media.id];
+    if (props.mediaListEntry !== undefined) {
+      if (entry && entry.id === props.mediaListEntry?.id) {
+        return { ...props.mediaListEntry, ...entry };
+      }
+
+      return props.mediaListEntry;
+    }
+
+    if (entry === undefined) {
+      return props.media.mediaListEntry;
+    }
+
+    return entry;
+  });
+
+  // Quick actions always edit the viewers own entry, which is only known when it has been edited during this session
+  const quickActionsEntry = createMemo(() => props.otherUsersEntry ? globalEditedMedia[props.media.id] : mediaListEntry());
+
+  // Plain accessors instead of inline ternaries, because the compiler wraps prop ternaries in a memo,
+  // which would be created without an owner when the callbacks are read inside event handlers
+  const quickActionsAfterMutation = () => props.otherUsersEntry ? undefined : props.afterMutation;
+  const quickActionsAfterDelete = () => props.otherUsersEntry ? undefined : props.afterDelete;
 
   const handleClick = () => {
     setMediaPageAnilistData({ data: { data: { Media: props.media } } });
@@ -129,7 +156,7 @@ function MediaRowCardContent(props) {
         </div>
         <Show when={hover.isOpen()}>
           <div class="quick-actions">
-            <MediaQuickActions horizontal media={props.media} mediaListEntry={mediaListEntry()} status={mediaListEntry()?.status} />
+            <MediaQuickActions horizontal media={props.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
           </div>
         </Show>
       </div>
