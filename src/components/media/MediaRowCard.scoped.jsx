@@ -17,6 +17,7 @@ import "./MediaRowCard.scoped.css";
  * @param {Object} props
  * @param {Object} [props.media] Anilist media, card renders as an empty skeleton without it
  * @param {Object} [props.mediaListEntry] List entry to show, overrides the session edits and media.mediaListEntry
+ * @param {boolean} [props.showStatus] Users list status icon next to the title
  * @param {boolean} [props.otherUsersEntry] mediaListEntry belongs to another user, so the quick actions edit the viewers own entry instead
  * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
  * @param {Function} [props.afterDelete] Called after the list entry has been deleted through the quick actions
@@ -29,12 +30,12 @@ import "./MediaRowCard.scoped.css";
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles under the genres
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} />
+        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} />
       </Show>
     </div>
   );
@@ -60,6 +61,8 @@ function MediaRowCardContent(props) {
     return entry;
   });
 
+  const status = createMemo(() => props.showStatus ? mediaListEntry()?.status : undefined);
+
   // Quick actions always edit the viewers own entry, which is only known when it has been edited during this session
   const quickActionsEntry = createMemo(() => props.otherUsersEntry ? globalEditedMedia[props.media.id] : mediaListEntry());
 
@@ -73,7 +76,7 @@ function MediaRowCardContent(props) {
   };
 
   return (
-    <div class="row" classList={{ ranked: !!props.rank }} data-status={mediaListEntry()?.status} style={{ "--media-background-color": props.media.coverImage?.color }}>
+    <div class="row" classList={{ ranked: !!props.rank }} data-status={status()} style={{ "--media-background-color": props.media.coverImage?.color }}>
       <Show when={props.rank}>
         <p class="ranking">
           #
@@ -86,9 +89,9 @@ function MediaRowCardContent(props) {
         </div>
         <div class="content clamp">
           <A scoped href={mediaUrl(props.media)} class="title line-clamp" onClick={handleClick}>
-            <Show when={mediaListEntry()?.status}>
+            <Show when={status()}>
               <span class="status-icon">
-                <MediaStatusIcon status={mediaListEntry().status} />
+                <MediaStatusIcon status={status()} />
               </span>
             </Show>
             {props.media.title.userPreferred}

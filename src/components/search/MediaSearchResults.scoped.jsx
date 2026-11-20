@@ -373,7 +373,7 @@ export function MediaSearchResults(props) {
                     const index = () => mediaIndices()[i()];
 
                     return (
-                      <MediaRowCard scoped class="row-card" type={props.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} staffRole={media && props.staffRoles?.get(media.id)} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                      <MediaRowCard scoped class="row-card" showStatus type={props.type} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} staffRole={media && props.staffRoles?.get(media.id)} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                     );
                   }}</VirtualList>
                 </Show>
