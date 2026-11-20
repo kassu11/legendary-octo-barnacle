@@ -104,5 +104,8 @@ fragment mediaListEntry on MediaList {
       month
       day
     }
+    endDate {
+      year
+    }
   }
 }

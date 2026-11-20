@@ -154,6 +154,9 @@ function MediaRowCardContent(props) {
               <Match when={props.media.season}>
                 <p>{capitalize(props.media.season)} {props.media.seasonYear}</p>
               </Match>
+              <Match when={props.media.type === "MANGA" && props.media.startDate?.year}>
+                <p>{props.media.startDate.year}</p>
+              </Match>
             </Switch>
             <p>{formatMediaStatus(props.media.status)}</p>
           </div>
