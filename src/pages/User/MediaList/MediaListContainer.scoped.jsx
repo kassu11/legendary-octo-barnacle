@@ -97,7 +97,7 @@ export function MediaListContainerScoped(props) {
                 )}</VirtualGrid>
               }>
                 <VirtualList cacheKey={`${params.name}-${params.type}-${list.name}`} each={list.entries}>{entry => (
-                  <MediaRowCard type={params.type} showStatus={list.name === COMBINED_LIST} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)} />
+                  <MediaRowCard type={params.type} showStatus={list.name === COMBINED_LIST} showDates otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)} />
                 )}</VirtualList>
               </Show>
             </section>

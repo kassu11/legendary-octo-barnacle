@@ -28,14 +28,15 @@ import "./MediaRowCard.scoped.css";
  * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors under the genres
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles under the genres
+ * @param {boolean} [props.showDates] Users start and completion dates at the bottom of the hover card
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} />
+        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} />
       </Show>
     </div>
   );
@@ -165,7 +166,7 @@ function MediaRowCardContent(props) {
       </div>
       <Show when={hover.isOpen()}>
         <HoverPortal>
-          <MediaHoverCard media={props.media} loading={props.loading} ref={hover.floatingRef} />
+          <MediaHoverCard media={props.media} entry={mediaListEntry()} showDates={props.showDates} loading={props.loading} ref={hover.floatingRef} />
         </HoverPortal>
       </Show>
     </div>
