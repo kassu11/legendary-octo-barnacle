@@ -2,6 +2,7 @@ import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, formatMediaStatus, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
 import { formatSecondsToLongString } from "@/utils/timeUtils.js";
+import { StarIcon } from "@/assets/icons.jsx";
 import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
@@ -30,14 +31,17 @@ import "./MediaRowCard.scoped.css";
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles under the genres
  * @param {boolean} [props.showDates] Users start and completion dates at the bottom of the hover card
  * @param {boolean} [props.showProgress] Users list progress in place of the episode, chapter and volume counts
+ * @param {boolean} [props.showType] Media type (format) above the episode, chapter and volume counts
+ * @param {boolean} [props.showUserScore] Users list score in place of the media type, takes its place when both are set
+ * @param {string} [props.scoreFormat] Score format of the list entry owner used by showUserScore, defaults to POINT_10_DECIMAL
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates", "showProgress"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates", "showProgress", "showType", "showUserScore", "scoreFormat"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} showProgress={local.showProgress} />
+        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} showProgress={local.showProgress} showType={local.showType} showUserScore={local.showUserScore} scoreFormat={local.scoreFormat} />
       </Show>
     </div>
   );
@@ -123,7 +127,28 @@ function MediaRowCardContent(props) {
             </Show>
           </div>
           <div class="clamp">
-            <p>{formatMediaFormat(props.media.format) || "TBA"}</p>
+            <Switch>
+              <Match when={props.showUserScore}>
+                <Show when={mediaListEntry()?.score}>
+                  <p class="user-score">
+                    <Switch>
+                      <Match when={props.scoreFormat === "POINT_100"}>{mediaListEntry().score}/100</Match>
+                      <Match when={props.scoreFormat === "POINT_5"}>
+                        {mediaListEntry().score}/5
+                        <span class="score-icon"><StarIcon /></span>
+                      </Match>
+                      <Match when={props.scoreFormat === "POINT_3"}>
+                        <span class="score-icon"><EmojiByScore score={[0, 0, 70, 80][mediaListEntry().score]} /></span>
+                      </Match>
+                      <Match when>{mediaListEntry().score}/10</Match>
+                    </Switch>
+                  </p>
+                </Show>
+              </Match>
+              <Match when={props.showType}>
+                <p>{formatMediaFormat(props.media.format) || "TBA"}</p>
+              </Match>
+            </Switch>
             <p>
               <Switch>
                 <Match when={props.media.type === "ANIME" && props.media.format === "MOVIE"}>

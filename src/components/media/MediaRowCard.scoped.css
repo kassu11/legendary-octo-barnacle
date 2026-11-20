@@ -291,6 +291,17 @@
               gap: 16px;
             }
           }
+
+          .user-score {
+            display: flex;
+            align-items: center;
+            gap: .25rem;
+
+            .score-icon {
+              display: grid;
+              width: 1.1em;
+            }
+          }
         }
       }
     }

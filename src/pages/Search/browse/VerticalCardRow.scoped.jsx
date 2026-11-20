@@ -15,7 +15,7 @@ export function VerticalCardRowScoped(props) {
         {/* Empty row cards are skeletons until the data has loaded */}
         <For each={props.data || Array(10).fill(null)}>{(card, i) => (
           <li class="vertical-search-card">
-            <MediaRowCard subgrid showStatus media={card} rank={i() + 1} type={props.type} loading={props.loading} />
+            <MediaRowCard subgrid showStatus showType media={card} rank={i() + 1} type={props.type} loading={props.loading} />
           </li>
         )}</For>
       </ol>

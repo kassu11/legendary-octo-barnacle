@@ -79,6 +79,7 @@ fragment mediaListEntry on MediaList {
     volumes
     chapters
     averageScore
+    duration
     popularity
     isAdult
     countryOfOrigin
