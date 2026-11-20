@@ -35,10 +35,11 @@ export function MediaCardFooter(props) {
           <Match when={local.media.type === "ANIME"}>
             <ProgressInfo {...local} label="Ep" progressKey="progress" maxProgressKey="episodes" />
           </Match>
+          <Match when={local.media.type === "MANGA" && local.media.format === "NOVEL"}>
+            <ProgressInfo {...local} label="Vol" progressKey="progressVolumes" maxProgressKey="volumes" />
+          </Match>
           <Match when={local.media.type === "MANGA"}>
             <ProgressInfo {...local} label="Ch" progressKey="progress" maxProgressKey="chapters" />
-            <br />
-            <ProgressInfo {...local} label="Vol" progressKey="progressVolumes" maxProgressKey="volumes" />
           </Match>
         </Switch>
       </p>

@@ -29,14 +29,15 @@ import "./MediaRowCard.scoped.css";
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles under the genres
  * @param {boolean} [props.showDates] Users start and completion dates at the bottom of the hover card
+ * @param {boolean} [props.showProgress] Users list progress in place of the episode, chapter and volume counts
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates", "showProgress"]);
 
   return (
     <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} />
+        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} showProgress={local.showProgress} />
       </Show>
     </div>
   );
@@ -125,16 +126,26 @@ function MediaRowCardContent(props) {
             <p>{formatMediaFormat(props.media.format) || "TBA"}</p>
             <p>
               <Switch>
-                <Match when={props.media.type === "ANIME"}>
-                  <Switch>
-                    <Match when={props.media.format === "MOVIE"}>{formatSecondsToLongString(props.media.duration)}</Match>
-                    <Match when={props.media.episodes}>
-                      {numberCommas(props.media.episodes)} Episode
-                      <Show when={props.media.episodes > 1}>s</Show>
-                    </Match>
-                  </Switch>
+                <Match when={props.media.type === "ANIME" && props.media.format === "MOVIE"}>
+                  {formatSecondsToLongString(props.media.duration)}
                 </Match>
-                <Match when={props.media.type === "MANGA" && props.media.format === "NOVEL" && props.media.volumes}>
+                <Match when={props.showProgress && props.media.type === "ANIME" && mediaListEntry()}>
+                  Ep {numberCommas(mediaListEntry().progress)}
+                  <Show when={mediaListEntry().progress < props.media.episodes}>/{numberCommas(props.media.episodes)}</Show>
+                </Match>
+                <Match when={props.showProgress && props.media.format === "NOVEL" && mediaListEntry()}>
+                  Vol {numberCommas(mediaListEntry().progressVolumes)}
+                  <Show when={mediaListEntry().progressVolumes < props.media.volumes}>/{numberCommas(props.media.volumes)}</Show>
+                </Match>
+                <Match when={props.showProgress && props.media.type === "MANGA" && mediaListEntry()}>
+                  Ch {numberCommas(mediaListEntry().progress)}
+                  <Show when={mediaListEntry().progress < props.media.chapters}>/{numberCommas(props.media.chapters)}</Show>
+                </Match>
+                <Match when={props.media.type === "ANIME" && props.media.episodes}>
+                  {numberCommas(props.media.episodes)} Episode
+                  <Show when={props.media.episodes > 1}>s</Show>
+                </Match>
+                <Match when={props.media.format === "NOVEL" && props.media.volumes}>
                   {numberCommas(props.media.volumes)} Volume
                   <Show when={props.media.volumes > 1}>s</Show>
                 </Match>
