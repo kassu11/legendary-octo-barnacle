@@ -5,6 +5,7 @@
     padding: 4px;
     border-radius: 8px;
     background-color: var(--bg);
+    flex-shrink: 0;
 
     button {
       display: grid;

@@ -10,6 +10,7 @@ import { ParsedSearchParamsContext, useResponsive } from "@/state/providers";
 import { SearchBar } from "@/components/search/SearchBar.scoped";
 import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
+import { searchPageCardStyle, setSearchPageCardStyle } from "@/state/globalState";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables } from "@/components/search/mediaSearchVariables";
 import { createParsedSearchParams } from "@/components/search/parsedSearchParams";
@@ -143,7 +144,7 @@ export function Studio() {
                   mutateCache={mutateCache}
                 />
               </Show>
-              <CardStyleToggle />
+              <CardStyleToggle cardStyle={searchPageCardStyle()} setCardStyle={setSearchPageCardStyle} />
             </div>
           </div>
 

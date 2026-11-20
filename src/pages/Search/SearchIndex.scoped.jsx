@@ -11,6 +11,7 @@ import { getSearchHeaderTitle, isSeasonPageHeader } from "@/utils/searchHeaderUt
 import { SearchBar } from "@/components/search/SearchBar.scoped";
 import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
+import { searchPageCardStyle, setSearchPageCardStyle } from "@/state/globalState";
 import { MediaSearchResults } from "@/components/search/MediaSearchResults.scoped";
 import { createAnilistMediaQueryVariables, createJikanMediaQueryVariables } from "@/components/search/mediaSearchVariables";
 import { SeasonControls } from "./SeasonControls.scoped";
@@ -105,7 +106,7 @@ export function SearchPage() {
               <div class="page-header">
                 <h1>{pageTitle()}</h1>
                 <div class="toolbar">
-                  <CardStyleToggle />
+                  <CardStyleToggle cardStyle={searchPageCardStyle()} setCardStyle={setSearchPageCardStyle} />
                 </div>
               </div>
             </Show>

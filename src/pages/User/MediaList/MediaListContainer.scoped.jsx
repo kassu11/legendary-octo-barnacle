@@ -8,6 +8,10 @@ import { MediaCard } from "@/components/media/MediaCard.scoped.jsx";
 import { listTitle } from "./SearchControls.scoped.jsx";
 import { COMBINED_LIST } from "@/constants/mediaLists.js";
 import { VirtualGrid } from "@/components/VirtualGrid.scoped.jsx";
+import { VirtualList } from "@/components/VirtualList.scoped.jsx";
+import { MediaRowCard } from "@/components/media/MediaRowCard.scoped.jsx";
+import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped.jsx";
+import { setUserMediaListCardStyle, userMediaListCardStyle } from "@/state/globalState.js";
 
 export function MediaListContainerScoped(props) {
   const params = useParams();
@@ -73,16 +77,29 @@ export function MediaListContainerScoped(props) {
     }));
   });
 
+  const firstVisibleList = createMemo(() => props.listData()?.data?.lists.find(list => list.entries.length && props.isListVisible(list.name)));
+
   return (
     <div class="list-content">
       <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} />}>
         <For each={props.listData().data.lists}>{list => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>
             <section>
-              <h2>{listTitle(list.name)}</h2>
-              <VirtualGrid each={list.entries}>{entry => (
-                <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
-              )}</VirtualGrid>
+              <div class="list-header">
+                <h2>{listTitle(list.name)}</h2>
+                <Show when={list === firstVisibleList()}>
+                  <CardStyleToggle cardStyle={userMediaListCardStyle()} setCardStyle={setUserMediaListCardStyle} />
+                </Show>
+              </div>
+              <Show when={userMediaListCardStyle() === "rows"} fallback={
+                <VirtualGrid each={list.entries}>{entry => (
+                  <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
+                )}</VirtualGrid>
+              }>
+                <VirtualList cacheKey={`${params.name}-${params.type}-${list.name}`} each={list.entries}>{entry => (
+                  <MediaRowCard type={params.type} media={entry.media} />
+                )}</VirtualList>
+              </Show>
             </section>
           </Show>
         )}</For>
@@ -95,15 +112,27 @@ const localListCounts = {};
 function CardsLoading(props) {
   const params = useParams();
   const lists = createMemo(() => localListCounts[params.name] ?? []);
+  const firstVisibleList = createMemo(() => lists().find(list => list.entries.length && props.isListVisible(list.name)));
 
   return (
     <For each={lists()}>{list => (
       <Show when={list.entries.length && props.isListVisible(list.name)}>
         <section>
-          <h2>{listTitle(list.name)}</h2>
-          <VirtualGrid each={list.entries}>{() => (
-            <MediaCard />
-          )}</VirtualGrid>
+          <div class="list-header">
+            <h2>{listTitle(list.name)}</h2>
+            <Show when={list === firstVisibleList()}>
+              <CardStyleToggle cardStyle={userMediaListCardStyle()} setCardStyle={setUserMediaListCardStyle} />
+            </Show>
+          </div>
+          <Show when={userMediaListCardStyle() === "rows"} fallback={
+            <VirtualGrid each={list.entries}>{() => (
+              <MediaCard />
+            )}</VirtualGrid>
+          }>
+            <VirtualList each={list.entries}>{() => (
+              <MediaRowCard />
+            )}</VirtualList>
+          </Show>
         </section>
       </Show>
     )}</For>

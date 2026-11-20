@@ -5,9 +5,17 @@
     align-content: start;
 
     section {
-      h2 {
+      .list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
         margin-top: 2rem;
         margin-bottom: 1rem;
+
+        h2 {
+          margin: 0;
+        }
       }
     }
   }

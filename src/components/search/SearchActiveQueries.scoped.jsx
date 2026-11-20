@@ -12,6 +12,7 @@ import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped"
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 import { ROLE_OPTIONS } from "./inputs/CharacterRoleSelect";
 import { CardStyleToggle } from "./CardStyleToggle.scoped";
+import { searchPageCardStyle, setSearchPageCardStyle } from "@/state/globalState";
 
 const invalidateHeader = [
   { header: "finished",                          params: ["status"] },
@@ -263,7 +264,7 @@ export function SearchActiveQueries(props) {
         {queryList()}
         <Show when={params.mode === "search"}>
           <div class="toolbar">
-            <CardStyleToggle />
+            <CardStyleToggle cardStyle={searchPageCardStyle()} setCardStyle={setSearchPageCardStyle} />
           </div>
         </Show>
       </div>

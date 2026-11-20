@@ -10,7 +10,7 @@ import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { wrapToArray } from "@/utils/arrayUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { ParsedSearchParamsContext, useResponsive } from "@/state/providers";
-import { voiceActorLanguages } from "@/state/globalState";
+import { searchPageCardStyle, setSearchPageCardStyle, voiceActorLanguages } from "@/state/globalState";
 import { SearchBar } from "@/components/search/SearchBar.scoped";
 import { SearchActiveQueries } from "@/components/search/SearchActiveQueries.scoped";
 import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped";
@@ -217,7 +217,7 @@ export function Character() {
                       onChange={setFavourite}
                       mutateCache={mutateCache}
                     />
-                    <CardStyleToggle />
+                    <CardStyleToggle cardStyle={searchPageCardStyle()} setCardStyle={setSearchPageCardStyle} />
                   </div>
                 </div>
                 <ul class="info">

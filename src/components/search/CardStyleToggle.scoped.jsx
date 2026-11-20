@@ -1,14 +1,18 @@
 import { LayoutGridIcon, LayoutListIcon } from "@/assets/icons.jsx";
-import { searchPageCardStyle, setSearchPageCardStyle } from "@/state/globalState";
 import "./CardStyleToggle.scoped.css";
 
-export function CardStyleToggle() {
+/**
+ * @param {object} props
+ * @param {"cards" | "rows"} props.cardStyle Current card style
+ * @param {(style: "cards" | "rows") => void} props.setCardStyle Setter for the card style
+ */
+export function CardStyleToggle(props) {
   return (
     <div class="card-style-toggle" role="group" aria-label="Card style">
-      <button classList={{ selected: searchPageCardStyle() === "cards" }} aria-pressed={searchPageCardStyle() === "cards"} title="Cards" aria-label="Cards" onClick={() => setSearchPageCardStyle("cards")}>
+      <button classList={{ selected: props.cardStyle === "cards" }} aria-pressed={props.cardStyle === "cards"} title="Cards" aria-label="Cards" onClick={() => props.setCardStyle("cards")}>
         <LayoutGridIcon scoped />
       </button>
-      <button classList={{ selected: searchPageCardStyle() === "rows" }} aria-pressed={searchPageCardStyle() === "rows"} title="Rows" aria-label="Rows" onClick={() => setSearchPageCardStyle("rows")}>
+      <button classList={{ selected: props.cardStyle === "rows" }} aria-pressed={props.cardStyle === "rows"} title="Rows" aria-label="Rows" onClick={() => props.setCardStyle("rows")}>
         <LayoutListIcon scoped />
       </button>
     </div>
