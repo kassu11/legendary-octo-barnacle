@@ -8,7 +8,8 @@ import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
 import "./UserOverviewIndex.scoped.css";
 import { queries } from "@/api/api.js";
-import { asserts, arrayUtils } from "@/utils/utils.js";
+import { asserts, arrayUtils, signals } from "@/utils/utils.js";
+import { modes } from "@/constants/constants.js";
 import { ActivityHistoryScoped } from "./ActivityHistory.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
@@ -258,9 +259,14 @@ function UserActivityReel(props) {
     });
   };
 
+  const [isDebug, setIsDebug] = signals.debug();
+
   return (
     <Show when={!pagelessCacheLoading()}>
-      <UserActivityPage cache={pagelessCacheData()?.data?.items || []} updateCache={updateCache} mutateCache={mutateCache} deleteFromCache={deleteFromCache} {...props} />
+      <Show when={modes.debug}>
+        <button onClick={() => setIsDebug(s => !s)}>debug: {"" + isDebug()}</button>
+      </Show>
+      <UserActivityPage cache={pagelessCacheData()?.data?.items || []} updateCache={updateCache} mutateCache={mutateCache} deleteFromCache={deleteFromCache} isDebug={isDebug()} {...props} />
     </Show>
   );
 }
@@ -285,6 +291,8 @@ function UserActivityPage(props) {
     sendAnilistFetcher(anilistActivityFetcher, {
       name: "Anilist activities",
       cache: null,
+      debug: props.isDebug,
+      active: (_, settings) => !settings.debug,
       onFetch: () => anilistActivityController.disable(),
       onStart: () => setAnilistActivityLoading(true),
       onStop: () => setAnilistActivityLoading(false),
