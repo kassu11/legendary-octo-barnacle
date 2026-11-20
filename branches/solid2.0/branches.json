@@ -1,0 +1,16 @@
+[
+  {
+    "name": "main",
+    "path": "main",
+    "commit": "27c82cb00c81417f2bb985e65653e536ea6f5a71",
+    "dirty": false,
+    "updatedAt": "2026-11-19T18:41:59.875Z"
+  },
+  {
+    "name": "solid2.0",
+    "path": "solid2.0",
+    "commit": "d7ed1d89a79d295984df44cb08bfc42a9e17a7d6",
+    "dirty": false,
+    "updatedAt": "2026-11-20T18:19:02.270Z"
+  }
+]
