@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 import { CloseIcon, EditIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import { useResponsive } from "@/state/providers.js";
 import { useSearchParams } from "@solidjs/router";
@@ -32,6 +32,7 @@ export function FilterGroup(props) {
  * @param {HTMLElement} [props.scrollTarget] Searching scrolls back up to this element, if the page is scrolled past it. Without it scrolls to the top of the page
  * @param {number} [props.debounce=400] Typing within this many milliseconds replaces the history entry
  * @param {boolean} [props.autofocus] Focuses the input whenever this turns true
+ * @param {boolean} [props.focusShortcut] Ctrl + F focuses the input. When it's already focused, Ctrl + F opens the browser's find
  */
 export function FilterSearchInput(props) {
   const { isTouch } = useResponsive();
@@ -41,6 +42,19 @@ export function FilterSearchInput(props) {
 
   createEffect(() => {
     if (props.autofocus) input.focus();
+  });
+
+  createEffect(() => {
+    if (!props.focusShortcut) return;
+    const focusOnCtrlF = e => {
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "f") return;
+      if (document.activeElement === input) return;
+      e.preventDefault();
+      input.focus();
+      input.select();
+    };
+    window.addEventListener("keydown", focusOnCtrlF);
+    onCleanup(() => window.removeEventListener("keydown", focusOnCtrlF));
   });
 
   // The first input of a search adds a history entry, the rest of the typing replaces it
@@ -96,6 +110,7 @@ function EditModeButton(props) {
  *
  * @param {Object} props
  * @param {HTMLElement} [props.scrollTarget] Passed to the search input
+ * @param {boolean} [props.searchFocusShortcut] Ctrl + F focuses the search input
  * @param {number} props.filterCount Shown on top of the filters button
  * @param {boolean} [props.editModeButton] Button next to the search input that toggles edit mode
  * @param {boolean} [props.editMode] Use with editModeButton
@@ -108,7 +123,7 @@ export function DesktopFilters(props) {
   return (
     <div class="desktop-filters">
       <div class="search-row">
-        <FilterSearchInput scrollTarget={props.scrollTarget} />
+        <FilterSearchInput scrollTarget={props.scrollTarget} focusShortcut={props.searchFocusShortcut} />
         <Show when={props.editModeButton}>
           <EditModeButton editMode={props.editMode} onEditModeChange={props.onEditModeChange} />
         </Show>
