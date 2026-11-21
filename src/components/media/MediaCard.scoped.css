@@ -296,10 +296,11 @@
         color: inherit;
         text-decoration: none;
         outline: none;
-        transition: translate .2s;
+        transition: padding-top .2s;
 
+        /* Padding instead of translate, because a transform would make the title the containing block of the ::after that makes the whole card clickable */
         .media-card:not(.loading):where(_:hover, :has(_:focus-visible)) & {
-          translate: 0 2px;
+          padding-top: 6px;
         }
 
         &::after {
