@@ -38,7 +38,7 @@ export function createParsedSearchParams(options) {
     const filteredCountry = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.country)).sort();
     const filteredFormats = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.format).filter(val => translateInternalApiParams.format[val])).sort();
     const filteredStatus = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.status).filter(val => translateInternalApiParams.status[val])).sort();
-    const filteredAge = removeDuplicateIgnoreCaseSensitivity(wrapToArray(searchParams.age).filter(val => translateInternalApiParams.age[val])).sort();
+    const filteredAge = wrapToArray(searchParams.age).findLast(val => val in translateInternalApiParams.age);
     const filteredSeason = wrapToArray(searchParams.season).findLast(val => val in translateInternalApiParams.season);
 
     const groupBy = searchPageGroupBy();
@@ -51,8 +51,7 @@ export function createParsedSearchParams(options) {
 
     if (filteredSorts.length) obj.sort = filteredSorts;
     else if (!obj.sort?.length) obj.sort = [options.defaultSort];
-    if (filteredAge.length) obj.age = filteredAge;
-    else obj.age = ["r"];
+    obj.age = filteredAge || "r";
 
     if (filteredFormats.length) obj.format = filteredFormats;
     if (filteredCountry.length) obj.country = filteredCountry;

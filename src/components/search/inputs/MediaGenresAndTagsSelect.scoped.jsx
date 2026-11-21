@@ -72,7 +72,7 @@ export function MediaGenresAndTagsSelect() {
 
   const showAdult = () => {
     const { age } = parsedSearchParams();
-    return age.includes("any") || age.includes("rx");
+    return age === "any" || age === "rx";
   };
 
   const genreOptions = createMemo(() => {

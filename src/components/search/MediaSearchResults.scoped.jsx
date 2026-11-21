@@ -293,7 +293,7 @@ export function MediaSearchResults(props) {
     return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
   });
 
-  const showAdult = () => parsedSearchParams().age.includes("any");
+  const showAdult = () => parsedSearchParams().age === "any";
 
   const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()?.media || [];
 

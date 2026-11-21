@@ -10,8 +10,8 @@ export function MediaAgeSelect() {
 
   const toggleValue = createMemo(() => {
     const age = parsedSearchParams().age;
-    if (age.includes("rx")) return "true";
-    if (age.includes("any")) return undefined;
+    if (age === "rx") return "true";
+    if (age === "any") return undefined;
     return "false";
   });
 

@@ -112,8 +112,8 @@ export function useActiveSearchQueries() {
       returnValue.push({ type: "tags", description: "Exclude Tag: " + capitalize(v), query: { tag: rawTags.filter(v2 => v2.toLowerCase() !== "-" + v) } });
     }
 
-    for (const v of age) {
-      if (v in localizeInternalSearchParams) returnValue.push({ type: "age", description: "Age: " + localizeInternalSearchParams[v], query: { age: age.filter(v2 => v2 !== v) } });
+    if (age in localizeInternalSearchParams) {
+      returnValue.push({ type: "age", description: "Age: " + localizeInternalSearchParams[age], query: { age: undefined } });
     }
 
     for (const v of status) {
