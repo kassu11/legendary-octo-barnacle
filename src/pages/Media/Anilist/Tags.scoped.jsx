@@ -4,6 +4,7 @@ import "./Tags.scoped.css";
 
 export const Tags = (props) => {
   const [showSpoilers, setShowSpoilers] = createSignal(false);
+  const ageQuery = () => props.isAdult ? "&age=any" : "";
 
   createEffect(on(() => props.tags, () => {
     setShowSpoilers(false);
@@ -27,7 +28,7 @@ export const Tags = (props) => {
       <Show when={props.tags?.length}>
         <div class="pg-media-tags" classList={{loading: props.loading}}>
           <div class="flex-space-between">
-            <A href={"/ani/search/" + props.type.toLowerCase() + "?" + nonSpoilerAndHighRankTags().join("&")}>
+            <A href={"/ani/search/" + props.type.toLowerCase() + "?" + nonSpoilerAndHighRankTags().join("&") + ageQuery()}>
               <h2>Tags</h2>
             </A>
             <Show when={props.tags.some(tag => tag.isMediaSpoiler || tag.isGeneralSpoiler)}>
@@ -45,7 +46,7 @@ export const Tags = (props) => {
                 }} 
                 title={tag.description}
               >
-                <A href={ "/ani/search/" + props.type.toLowerCase() + "?tag=" + encodeURIComponent(tag.name) + "&rank=" + tag.rank}>{tag.name} <span>{tag.rank}%</span></A>
+                <A href={ "/ani/search/" + props.type.toLowerCase() + "?tag=" + encodeURIComponent(tag.name) + "&rank=" + tag.rank + ageQuery()}>{tag.name} <span>{tag.rank}%</span></A>
               </li>
             )}</For>
           </ol>

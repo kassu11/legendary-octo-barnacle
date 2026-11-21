@@ -13,6 +13,7 @@ import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js"
 import { getFetcherValueFromStorage, setFetcherValueToStorage } from "@/utils/storageUtils";
 import { isTypeFunction } from "@/utils/functionUtils";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
+import { useMediaInfo } from "@/state/providers";
 
 export function AnimeCharacters() {
   return (
@@ -359,12 +360,14 @@ function StaffPage(props) {
 }
 
 function CharacterCard(props) {
+  const { anilistData } = useMediaInfo();
+  const ageQuery = () => anilistData()?.data.data.Media.isAdult ? "?age=any" : "";
   let ref;
   onMount(() => props.intersectionObserver.observe(ref))
 
   return (
     <li ref={elem => ref = elem} attr:data-page={props.page} class="entities-page-entity">
-      <A scoped href={"/ani/character/" + props.edge.node.id} class="entity-left">
+      <A scoped href={"/ani/character/" + props.edge.node.id + ageQuery()} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Character" />
         <div class="content">
           <p class="line-clamp">{props.edge.node.name.userPreferred}</p>
@@ -372,7 +375,7 @@ function CharacterCard(props) {
         </div>
       </A>
       <Show when={props.actorRole}>
-        <A scoped href={"/ani/staff/" + props.actorRole.voiceActor.id} class="entity-right">
+        <A scoped href={"/ani/staff/" + props.actorRole.voiceActor.id + ageQuery()} class="entity-right">
           <div class="content">
             <Show when={props.actorRole.roleNotes} fallback={
               <p class="line-clamp">{props.actorRole.voiceActor.name.userPreferred}</p>
@@ -390,9 +393,12 @@ function CharacterCard(props) {
 }
 
 function StaffCard(props) {
+  const { anilistData } = useMediaInfo();
+  const ageQuery = () => anilistData()?.data.data.Media.isAdult ? "?age=any" : "";
+
   return (
     <li class="entities-page-entity">
-      <A scoped href={"/ani/staff/" + props.edge.node.id} class="entity-left">
+      <A scoped href={"/ani/staff/" + props.edge.node.id + ageQuery()} class="entity-left">
         <img class="entity-image" src={props.edge.node.image.large} alt="Staff" />
         <div class="content">
           <p class="line-clamp">{props.edge.node.name.userPreferred}</p>

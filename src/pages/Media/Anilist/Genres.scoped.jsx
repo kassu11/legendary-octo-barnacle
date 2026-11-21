@@ -3,19 +3,21 @@ import "./Genres.scoped.css";
 import { A } from "@solidjs/router";
 
 export const Genres = (props) => {
+  const ageQuery = () => props.isAdult ? "&age=any" : "";
+
   return (
     <ErrorBoundary fallback="Genres error">
       <Show when={props.genres?.length}>
         <div class="wrapper" classList={{loading: props.loading}}>
           <h2>
-            <A class="clean-link" href={"/ani/search/" + props.type.toLowerCase() + "?" + props.genres.map(genre => "genre=" + encodeURIComponent(genre)).join("&")}>
+            <A class="clean-link" href={"/ani/search/" + props.type.toLowerCase() + "?" + props.genres.map(genre => "genre=" + encodeURIComponent(genre)).join("&") + ageQuery()}>
               Genres
             </A>
           </h2>
           <ul class="genres">
             <For each={props.genres}>{genre => (
               <li class="genre">
-                <A class="clean-link" href={"/ani/search/" + props.type.toLowerCase() + "?genre=" + encodeURIComponent(genre)}>
+                <A class="clean-link" href={"/ani/search/" + props.type.toLowerCase() + "?genre=" + encodeURIComponent(genre) + ageQuery()}>
                   {genre}
                 </A>
               </li>

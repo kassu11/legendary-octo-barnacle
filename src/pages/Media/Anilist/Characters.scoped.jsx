@@ -15,6 +15,7 @@ const countryOfOriginToLanguage = (characters, country) => {
 
 function Characters(props) {
   const merged = mergeProps({characters: [], countryOfOrigin: "JP"}, props);
+  const ageQuery = () => merged.isAdult ? "?age=any" : "";
   const [language, setLanguage] = createSignal(countryOfOriginToLanguage(merged.characters, merged.countryOfOrigin));
 
   createEffect(() => {
@@ -31,7 +32,7 @@ function Characters(props) {
           <ol class="grid-column-auto-fill">
             <For each={merged.characters}>{char => (
               <li class="character">
-                <A scoped href={"/ani/character/" + char.node.id + "/" + formatTitleToUrl(char.node.name.userPreferred)} class="character-left">
+                <A scoped href={"/ani/character/" + char.node.id + "/" + formatTitleToUrl(char.node.name.userPreferred) + ageQuery()} class="character-left">
                   <img src={char.node.image.large} alt="Character" />
                   <div class="content">
                     <p class="line-clamp">{char.node.name.userPreferred}</p>
@@ -39,7 +40,7 @@ function Characters(props) {
                   </div>
                 </A>
                 <Show when={char.voiceActors.find(actor => actor.language === language())}>{actor => (
-                  <A scoped href={"/ani/staff/" + actor().id + "/" + formatTitleToUrl(actor().name.userPreferred)} class="character-right">
+                  <A scoped href={"/ani/staff/" + actor().id + "/" + formatTitleToUrl(actor().name.userPreferred) + ageQuery()} class="character-right">
                     <div class="content">
                       <p class="line-clamp">{actor().name.userPreferred}</p>
                       <p>{actor().language}</p>

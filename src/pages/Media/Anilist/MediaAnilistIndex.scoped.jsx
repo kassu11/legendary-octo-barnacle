@@ -199,7 +199,7 @@ export function MediaInfoContent(props) {
                     <ol>
                       <For each={edges()}>{edge => (
                         <li>
-                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name) + (mediaPageAnilistData().data.data.Media.isAdult ? "?age=any" : "")}>
                             {edge.node.name}
                           </A>
                         </li>
@@ -215,7 +215,7 @@ export function MediaInfoContent(props) {
                     <ol>
                       <For each={edges()}>{edge => (
                         <li>
-                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name)}>
+                          <A href={"/ani/studio/" + edge.node.id + "/" + formatTitleToUrl(edge.node.name) + (mediaPageAnilistData().data.data.Media.isAdult ? "?age=any" : "")}>
                             {edge.node.name}
                           </A>
                         </li>
@@ -227,8 +227,8 @@ export function MediaInfoContent(props) {
               <ExternalLinks hashtag={mediaPageAnilistData()?.data.data.Media.hashtag} externalLinks={mediaPageAnilistData()?.data.data.Media.externalLinks} />
               <ExtraInfo media={mediaPageAnilistData()?.data.data.Media} loading={loading()} />
               <Rankings rankings={mediaPageAnilistData()?.data.data.Media.rankings} loading={loading()} />
-              <Genres genres={mediaPageAnilistData()?.data.data.Media.genres} type={mediaPageAnilistData()?.data.data.Media.type} loading={loading()} />
-              <Tags tags={mediaPageAnilistData()?.data.data.Media.tags} type={mediaPageAnilistData()?.data.data.Media.type} loading={loading()} />
+              <Genres genres={mediaPageAnilistData()?.data.data.Media.genres} type={mediaPageAnilistData()?.data.data.Media.type} isAdult={mediaPageAnilistData()?.data.data.Media.isAdult} loading={loading()} />
+              <Tags tags={mediaPageAnilistData()?.data.data.Media.tags} type={mediaPageAnilistData()?.data.data.Media.type} isAdult={mediaPageAnilistData()?.data.data.Media.isAdult} loading={loading()} />
             </Show>
           </aside>
           <section class="media-page-main">
@@ -254,8 +254,8 @@ export function MediaInfoHome() {
           </div>
         </Show>
         <AnilistRelationsPreview relations={anilistData().data.data.Media.relations}/>
-        <Characters characters={anilistData().data.data.Media.characterPreview?.edges} countryOfOrigin={anilistData().data.data.Media.countryOfOrigin} />
-        <StaffPreview staff={anilistData().data.data.Media.staffPreview?.edges} />
+        <Characters characters={anilistData().data.data.Media.characterPreview?.edges} countryOfOrigin={anilistData().data.data.Media.countryOfOrigin} isAdult={anilistData().data.data.Media.isAdult} />
+        <StaffPreview staff={anilistData().data.data.Media.staffPreview?.edges} isAdult={anilistData().data.data.Media.isAdult} />
         <Show when={accessToken()}>
           <Friends />
         </Show>

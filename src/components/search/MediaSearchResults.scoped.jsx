@@ -293,6 +293,8 @@ export function MediaSearchResults(props) {
     return data.media.map(media => media === MEDIA_PADDING_SPACE ? null : ++rank);
   });
 
+  const showAdult = () => parsedSearchParams().age.includes("any");
+
   const searchMedia = () => (!pagelessCacheLoading() && pagelessCacheData?.data?.media) || previousHistoryDummyData()?.media || [];
 
   // Jikan fallback results are not sorted by the group, so they are not grouped
@@ -371,7 +373,7 @@ export function MediaSearchResults(props) {
                     preventZoomIn.add(media.id);
 
                     return (
-                      <MediaCard scoped class="media-card" showScore showStatus showHaltedStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} staffRole={media && props.staffRoles?.get(media.id)} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                      <MediaCard scoped class="media-card" showScore showStatus showHaltedStatus showAdult={showAdult()} quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} staffRole={media && props.staffRoles?.get(media.id)} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                     );
                   }}</VirtualGrid>
                 }>
