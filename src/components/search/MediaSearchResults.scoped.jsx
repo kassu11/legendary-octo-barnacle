@@ -257,16 +257,6 @@ export function MediaSearchResults(props) {
   let lastScolledElement, fetchPageTimeout;
   window.addEventListener("scroll", handleScroll, { signal, passive: true });
 
-  onCleanup(() => {
-    const media = pagelessCacheData?.data?.media;
-    if (!media?.length) return;
-    // Padding media are kept, because they are not rendered
-    searchPageLayouts[pagelessCacheData.cacheKey] = {
-      media: media.map(m => m === MEDIA_PADDING_SPACE ? m : LOADER),
-      sectionTitles: getSectionTitles(media, groupBy()),
-    };
-  });
-
   function handleScroll() {
     const perPage = pagelessCacheData?.data?.perPage;
     if (!perPage) return;
@@ -307,6 +297,22 @@ export function MediaSearchResults(props) {
 
   // Jikan fallback results are not sorted by the group, so they are not grouped
   const groupBy = () => !pagelessCacheData?.data?.fallback && parsedSearchParams().groupBy;
+
+  // Reading a stale memo inside onCleanup makes Solid flush the update queue synchronously,
+  // which can clean this owner again in the middle of its cleanups and crash Solid's cleanNode.
+  // The search params change when navigating away, so the group is read here before the cleanup
+  let latestGroupBy;
+  createRenderEffect(() => latestGroupBy = groupBy());
+
+  onCleanup(() => {
+    const media = pagelessCacheData?.data?.media;
+    if (!media?.length) return;
+    // Padding media are kept, because they are not rendered
+    searchPageLayouts[pagelessCacheData.cacheKey] = {
+      media: media.map(m => m === MEDIA_PADDING_SPACE ? m : LOADER),
+      sectionTitles: getSectionTitles(media, latestGroupBy),
+    };
+  });
 
   // Group header titles by the index of the media that starts the group
   // The dummy history data has only loaders, so its titles were saved when leaving the page
