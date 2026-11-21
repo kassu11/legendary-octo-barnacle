@@ -34,7 +34,7 @@ import "./MediaRowCard.scoped.css";
  * @param {boolean} [props.showType] Media type (format) above the episode, chapter and volume counts
  * @param {boolean} [props.showUserScore] Users list score in place of the media type, takes its place when both are set
  * @param {string} [props.scoreFormat] Score format of the list entry owner used by showUserScore, defaults to POINT_10_DECIMAL
- * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links, hover card and quick actions are disabled
+ * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links and quick actions are disabled
  * @param {boolean} [props.selected] Use with selectable
  */
 export function MediaRowCard(props) {
@@ -210,7 +210,7 @@ function MediaRowCardContent(props) {
           </div>
         </Show>
       </div>
-      <Show when={hover.isOpen() && !props.selectable}>
+      <Show when={hover.isOpen()}>
         <HoverPortal>
           <MediaHoverCard media={props.media} entry={mediaListEntry()} showDates={props.showDates} loading={props.loading} ref={hover.floatingRef} />
         </HoverPortal>

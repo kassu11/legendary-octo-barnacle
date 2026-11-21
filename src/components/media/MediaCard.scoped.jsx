@@ -44,7 +44,7 @@ import { CheckIcon } from "@/assets/icons.jsx";
  * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors at the bottom of the cover
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles at the bottom of the cover
- * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links, hover card and quick actions are disabled
+ * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links and quick actions are disabled
  * @param {boolean} [props.selected] Use with selectable
  */
 export function MediaCard(props) {
@@ -149,7 +149,7 @@ export function MediaCard(props) {
             <CheckIcon scoped />
           </div>
         </Show>
-        <Show when={hover?.isOpen() && !local.selectable}>
+        <Show when={hover?.isOpen()}>
           <Show when={local.hoverCard}>
             <HoverPortal>
               <MediaHoverCard media={local.media} entry={mediaListEntry()} showDates={local.showDates} loading={local.loading} ref={hover.floatingRef} />
