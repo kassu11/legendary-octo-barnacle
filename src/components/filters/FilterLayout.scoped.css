@@ -116,7 +116,6 @@
       display: flex;
       justify-content: center;
       gap: 8px;
-      margin-top: 16px;
 
       .search-input {
         width: min(100%, 26rem);

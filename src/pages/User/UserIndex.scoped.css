@@ -63,14 +63,18 @@
     border-radius: .25em;
   }
 
-  .cp-profile-navigation ul {
-    background-color: var(--background-500-old);
-    display: flex;
-    flex-wrap: wrap;
-    list-style: none;
-    padding: 0;
-    justify-content: center;
-    gap: .5rem 2rem;
-    padding: 1rem;
+  .cp-profile-navigation {
+    margin-bottom: 16px;
+
+    ul {
+      background-color: var(--background-500-old);
+      display: flex;
+      flex-wrap: wrap;
+      list-style: none;
+      padding: 0;
+      justify-content: center;
+      gap: .5rem 2rem;
+      padding: 1rem;
+    }
   }
 }

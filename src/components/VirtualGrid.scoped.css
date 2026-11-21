@@ -5,17 +5,17 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     gap: 4.25rem 32px;
-    margin-bottom: 5rem;
+    margin-bottom: 4.25rem;
     --line-clamp: 2;
 
     @media (width < 60em) {
       grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
       gap: 3.5rem 16px;
+      margin-bottom: 3.5rem;
     }
 
     @media (width < 50em) {
       grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-      gap: 3.5rem 16px;
     }
 
     @media (width < 40em) {
@@ -26,6 +26,7 @@
     @media (width < 30em) {
       grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
       gap: 3.25rem 8px;
+      margin-bottom: 3.25rem;
     }
   }
 }
