@@ -87,9 +87,9 @@ export function UserMediaList() {
   const privateFilter = () => searchParams.private;
   const notesFilter = () => searchParams.notes;
   const rewatchedFilter = () => searchParams.repeat;
-  const missingStartFilter = () => searchParams.missingStart;
-  const missingEndFilter = () => searchParams.missingEnd;
-  const missingScoreFilter = () => searchParams.missingScore;
+  const startDateFilter = () => searchParams.startDate;
+  const endDateFilter = () => searchParams.endDate;
+  const scoreFilter = () => searchParams.score;
   const sortParam = multiParam("sort");
   const sort = () => sortParam().length ? sortParam() : ["score"];
   const userStatus = multiParam("userStatus");
@@ -111,9 +111,9 @@ export function UserMediaList() {
         status: status(),
         genre: genre(),
         countryOfOrigin: countryOfOrigin(),
-        missingStart: missingStartFilter(),
-        missingEnd: missingEndFilter(),
-        missingScore: missingScoreFilter(),
+        startDate: startDateFilter(),
+        endDate: endDateFilter(),
+        score: scoreFilter(),
         isAdult: isAdult(),
         year: year(),
         startedYear: startedYear(),
@@ -176,9 +176,9 @@ export function UserMediaList() {
           privateFilter={privateFilter}
           notesFilter={notesFilter}
           rewatchedFilter={rewatchedFilter}
-          missingStartFilter={missingStartFilter}
-          missingEndFilter={missingEndFilter}
-          missingScoreFilter={missingScoreFilter}
+          startDateFilter={startDateFilter}
+          endDateFilter={endDateFilter}
+          scoreFilter={scoreFilter}
           sort={sort}
           userStatus={userStatus}
           studio={studio}

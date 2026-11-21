@@ -10,7 +10,7 @@ import { addClearAllActiveQuery, createActiveQuery, createToggleActiveQueries, c
 import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
-import { AgeIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, CalendarIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, YearIcon } from "@/assets/icons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [
@@ -65,7 +65,7 @@ const toListOption = name => {
 export const listTitle = name => name === COMBINED_LIST ? "All" : name;
 
 // Every search param that the remove filters button clears, together with q
-const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
+const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "score", "startDate", "endDate", "notes", "repeat", "private"];
 
 export function SearchControlsScoped(props) {
   const location = useLocation();
@@ -141,12 +141,12 @@ export function SearchControlsScoped(props) {
     queries.push(...createValueActiveQueries ("userStatus",      props.userStatus(),         excludableValueActiveQuery("User Status", OnListIcon,  optionDescription(userStatusOptions())), setSearchParams));
     queries.push(...createValueActiveQueries ("startedYear",     props.startedYear(),        excludableValueActiveQuery("Start Year",  YearIcon),                                            setSearchParams));
     queries.push(...createValueActiveQueries ("completedYear",   props.completedYear(),      excludableValueActiveQuery("End Year",    YearIcon),                                            setSearchParams));
+    queries.push(...createToggleActiveQueries("score",           props.scoreFilter(),        { included: "Has score",          excluded: "Missing score",                  icon: ScoreIcon         }, setSearchParams));
+    queries.push(...createToggleActiveQueries("startDate",       props.startDateFilter(),    { included: "Has start date",     excluded: "Missing start date",             icon: CalendarIcon      }, setSearchParams));
+    queries.push(...createToggleActiveQueries("endDate",         props.endDateFilter(),      { included: "Has end date",       excluded: "Missing end date",               icon: CalendarIcon      }, setSearchParams));
     queries.push(...createToggleActiveQueries("notes",           props.notesFilter(),        { included: "Has notes",          excluded: "No notes",                       icon: NotesIcon         }, setSearchParams));
     queries.push(...createToggleActiveQueries("repeat",          props.rewatchedFilter(),    { included: watched,              excluded: "Not " + watched.toLowerCase(),   icon: RepeatOutlineIcon }, setSearchParams));
     queries.push(...createToggleActiveQueries("private",         props.privateFilter(),      { included: "Private",            excluded: "Not private",                    icon: PrivateIcon       }, setSearchParams));
-    queries.push(...createToggleActiveQueries("missingStart",    props.missingStartFilter(), { included: "Missing start date", excluded: "Has start date",                 icon: MissingDateIcon   }, setSearchParams));
-    queries.push(...createToggleActiveQueries("missingEnd",      props.missingEndFilter(),   { included: "Missing end date",   excluded: "Has end date",                   icon: MissingDateIcon   }, setSearchParams));
-    queries.push(...createToggleActiveQueries("missingScore",    props.missingScoreFilter(), { included: "Missing score",      excluded: "Has score",                      icon: ScoreIcon         }, setSearchParams));
 
     addClearAllActiveQuery(queries, setSearchParams);
     return queries;
@@ -204,22 +204,22 @@ export function SearchControlsScoped(props) {
           <FilterGroup title="Content">
             <FilterSelect   param="genre"           excludable each={ genreOptions        } value={ props.genre()           } icon={ <GenreIcon />   } button="Genre"       tooltip="Entries need to have all the included genres. Click once to include, twice to exclude"                                      setSearchParams={ setSearchParams } />
             <FilterSelect   param="tag"             excludable each={ tagOptions()        } value={ props.tag()             } icon={ <TagIcon />     } button="Tag"         tooltip="Entries need to have all the included tags, only tags with a rank above 50% count. Click once to include, twice to exclude" setSearchParams={ setSearchParams } />
-            <ListToggle param="isAdult"      value={ props.isAdult() }            icon={ <AgeIcon />         } label="R-18"                                             tooltip="Click once to show only R-18 media, twice to hide R-18 media" />
+            <ListToggle     param="isAdult"                                                 value={ props.isAdult()         } icon={ <AgeIcon />     } label="R-18"         tooltip="Click once to show only R-18 media, twice to hide R-18 media" />
           </FilterGroup>
           <FilterGroup title="List entry">
-            <FilterSelect   param="userStatus"      excludable each={ userStatusOptions() } value={ props.userStatus()      } icon={ <OnListIcon />  } button="User Status" tooltip="Status of the entry on this user's list. Click once to include, twice to exclude"                                           setSearchParams={ setSearchParams } />
-            <FilterSelect   param="startedYear"     excludable each={ startedYearOptions()  } value={ props.startedYear()     } icon={ <YearIcon />    } button="Start Year"  tooltip="Year the user started the entry. Click once to include, twice to exclude"                                                  setSearchParams={ setSearchParams } />
-            <FilterSelect   param="completedYear"   excludable each={ completedYearOptions()} value={ props.completedYear()   } icon={ <YearIcon />    } button="End Year"    tooltip="Year the user completed the entry. Click once to include, twice to exclude"                                                setSearchParams={ setSearchParams } />
-            <ListToggle param="notes"        value={ props.notesFilter() }       icon={ <NotesIcon />       } label="Notes"                                            tooltip="Click once to show only entries with notes, twice to hide entries with notes" />
-            <ListToggle param="repeat"       value={ props.rewatchedFilter() }    icon={ <RepeatOutlineIcon />      } label={params.type === "anime" ? "Rewatched" : "Reread"} tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
-            <Show when={isOwnProfile()}>
-              <ListToggle param="private"    value={ props.privateFilter() }      icon={ <PrivateIcon />     } label="Private"                                          tooltip="Click once to show only private entries, twice to hide private entries" />
-            </Show>
+            <FilterSelect   param="userStatus"      excludable each={ userStatusOptions()    } value={ props.userStatus()    } icon={ <OnListIcon /> } button="User Status" tooltip="Status of the entry on this user's list. Click once to include, twice to exclude"                                          setSearchParams={ setSearchParams } />
+            <FilterSelect   param="startedYear"     excludable each={ startedYearOptions()   } value={ props.startedYear()   } icon={ <YearIcon />   } button="Start Year"  tooltip="Year the user started the entry. Click once to include, twice to exclude"                                                  setSearchParams={ setSearchParams } />
+            <FilterSelect   param="completedYear"   excludable each={ completedYearOptions() } value={ props.completedYear() } icon={ <YearIcon />   } button="End Year"    tooltip="Year the user completed the entry. Click once to include, twice to exclude"                                                setSearchParams={ setSearchParams } />
           </FilterGroup>
-          <FilterGroup title="Missing">
-            <ListToggle param="missingStart" value={ props.missingStartFilter() } icon={ <MissingDateIcon /> } label="Start date"                                       tooltip="Click once to show only entries without a start date, twice to show only entries with a start date" />
-            <ListToggle param="missingEnd"   value={ props.missingEndFilter() }   icon={ <MissingDateIcon /> } label="End date"                                         tooltip="Click once to show only entries without an end date, twice to show only entries with an end date" />
-            <ListToggle param="missingScore" value={ props.missingScoreFilter() } icon={ <ScoreIcon />       } label="Score"                                            tooltip="Click once to show only entries without a score, twice to show only entries with a score" />
+          <FilterGroup title="Entry details">
+            <ListToggle param="score"     value={ props.scoreFilter() }     icon={ <ScoreIcon />         } label="Score"                                            tooltip="Click once to show only entries with a score, twice to show only entries without a score" />
+            <ListToggle param="startDate" value={ props.startDateFilter() } icon={ <CalendarIcon />      } label="Start date"                                       tooltip="Click once to show only entries with a start date, twice to show only entries without a start date" />
+            <ListToggle param="endDate"   value={ props.endDateFilter() }   icon={ <CalendarIcon />      } label="End date"                                         tooltip="Click once to show only entries with an end date, twice to show only entries without an end date" />
+            <ListToggle param="notes"     value={ props.notesFilter() }     icon={ <NotesIcon />         } label="Notes"                                            tooltip="Click once to show only entries with notes, twice to show only entries without notes" />
+            <ListToggle param="repeat"    value={ props.rewatchedFilter() } icon={ <RepeatOutlineIcon /> } label={params.type === "anime" ? "Rewatched" : "Reread"} tooltip={`Click once to show only ${params.type === "anime" ? "rewatched" : "reread"} entries, twice to hide them`} />
+            <Show when={isOwnProfile()}>
+              <ListToggle param="private" value={ props.privateFilter() }   icon={ <PrivateIcon />       } label="Private"                                          tooltip="Click once to show only private entries, twice to hide private entries" />
+            </Show>
           </FilterGroup>
         </FilterGroups>
       </div>

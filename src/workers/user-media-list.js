@@ -188,13 +188,13 @@ function filter(entry, filterObject) {
   if (!matchesToggle(filterObject.repeat, entry.repeat > 0)) {
     return false;
   }
-  if (!matchesToggle(filterObject.missingStart, !entry.startedAt?.year)) {
+  if (!matchesToggle(filterObject.startDate, !!entry.startedAt?.year)) {
     return false;
   }
-  if (!matchesToggle(filterObject.missingEnd, !entry.completedAt?.year)) {
+  if (!matchesToggle(filterObject.endDate, !!entry.completedAt?.year)) {
     return false;
   }
-  if (!matchesToggle(filterObject.missingScore, entry.score === 0)) {
+  if (!matchesToggle(filterObject.score, entry.score > 0)) {
     return false;
   }
   if (!matchesAny(filterObject.studio, name => entry.media.studios.edges.some(studio => studio.isMain && studio.node.name === name))) {
