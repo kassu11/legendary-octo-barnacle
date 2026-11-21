@@ -10,6 +10,7 @@
     box-shadow: 0 3px 8px #0000009e;
     outline-offset: 16px;
     isolation: isolate;
+    outline-color: transparent;
 
     @media (width < 40em) {
       font-size: var(--fs-300);
