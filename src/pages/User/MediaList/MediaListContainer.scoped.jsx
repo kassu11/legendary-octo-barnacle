@@ -84,9 +84,9 @@ export function MediaListContainerScoped(props) {
 
   const firstVisibleList = createMemo(() => props.listData()?.data?.lists.find(list => list.entries.length && props.isListVisible(list.name)));
 
-  // Edit mode selection: click selects only the card, ctrl click, tap or enter adds or removes it, shift click adds every card from the previous click
-  // Dragging selects every card between the start and the pointer in place of the selection. Ctrl drag adds them to the selection instead,
-  // or removes them when the drag starts from a selected card
+  // Edit mode selection happens on mouse down: it selects only the card, ctrl adds or removes it, shift adds every card from the previous selection.
+  // Tap or enter adds or removes the card. Dragging selects every card between the start and the pointer in place of the selection.
+  // Ctrl drag adds them to the selection instead, or removes them when the drag starts from a selected card. Shift drag extends from the previous selection
   let anchor, drag, lastPointerType;
 
   const cardPosition = element => {
@@ -127,14 +127,6 @@ export function MediaListContainerScoped(props) {
     props.setSelectedIds(ids);
   };
 
-  const clickSelection = (e, position) => {
-    const from = validAnchor();
-    if (e.shiftKey && from) props.setSelectedIds(new Set([...props.selectedIds, ...idsBetween(from, position)]));
-    else if (isAdditive(e)) toggleSelection(position);
-    else props.setSelectedIds(new Set([position.id]));
-    anchor = position;
-  };
-
   const paintDrag = position => {
     drag.last = position;
     const ids = new Set(drag.initialIds);
@@ -164,9 +156,8 @@ export function MediaListContainerScoped(props) {
     drag.y = e.clientY;
   };
 
-  const handleDragEnd = e => {
-    if (drag.moved) anchor = drag.last;
-    else clickSelection(e, drag.start);
+  const handleDragEnd = () => {
+    anchor = drag.last;
     stopDrag();
     props.onMouseSelect();
   };
@@ -190,18 +181,20 @@ export function MediaListContainerScoped(props) {
     document.activeElement?.blur();
     stopDrag();
     const controller = new AbortController();
+    const shiftAnchor = e.shiftKey ? validAnchor() : undefined;
     drag = {
-      start: position,
+      start: shiftAnchor ?? position,
       last: position,
       startX: e.clientX,
       startY: e.clientY,
       x: e.clientX,
       y: e.clientY,
       moved: false,
-      initialIds: isAdditive(e) ? props.selectedIds : new Set(),
-      removing: isAdditive(e) && props.selectedIds.has(position.id),
+      initialIds: shiftAnchor || isAdditive(e) ? props.selectedIds : new Set(),
+      removing: !shiftAnchor && isAdditive(e) && props.selectedIds.has(position.id),
       controller,
     };
+    paintDrag(position);
     window.addEventListener("pointermove", handleDragMove, { signal: controller.signal });
     window.addEventListener("pointerup", handleDragEnd, { signal: controller.signal });
     window.addEventListener("pointercancel", stopDrag, { signal: controller.signal });
