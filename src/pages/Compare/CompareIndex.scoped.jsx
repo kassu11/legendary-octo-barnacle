@@ -96,7 +96,7 @@ export default function ComparePage() {
 
     const postObject = {
       includeKeys: wrapToArray(searchParams.user),
-      excludeKeys: wrapToArray(searchParams.exclude),
+      excludeKeys: arrayUtils.remove(searchParams.exclude, ...wrapToArray(searchParams.disabled)),
       data: allAnilistUserMediaData(),
       search: search(),
       format: format(),
@@ -519,7 +519,11 @@ function UserRow(props) {
   });
 
   function remove() {
-    setSearchParams({ user: wrapToArray(searchParams.user).filter(name => name !== props.name) });
+    setSearchParams({
+      user: arrayUtils.remove(searchParams.user, props.name),
+      disabled: arrayUtils.remove(searchParams.disabled, props.name),
+      exclude: arrayUtils.remove(searchParams.exclude, props.name),
+    });
   }
 
   const handleEnabledChange = e => {

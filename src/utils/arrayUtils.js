@@ -47,13 +47,9 @@ export const remove = (array, ...values) => {
 export const toggle = (array, value, condition) => {
   array = wrapToArray(array);
   const state = condition === undefined ? array.includes(value) : condition;
-  if (state) {
-    array = remove(array, value);
-  } else {
-    array.push(value);
-  }
-
-  return array;
+  if (state) return remove(array, value);
+  if (array.includes(value)) return array;
+  return [...array, value];
 }
 
 export function wrapToSet(value) {
