@@ -13,7 +13,7 @@ export function MediaStatusSelect() {
   const navigate = useNavigateAndSearch();
 
   const statusOptions = createMemo(() => {
-    const { type } = params;
+    const { type } = parsedSearchParams();
 
     const options = [
       { description: "Cancelled",        id: "cancelled",        tooltip: "Ended before it was completed and will not continue" },
@@ -23,7 +23,7 @@ export function MediaStatusSelect() {
     ];
 
     if (type === "manga") {
-      options.push({ description: "Hiatus", id: "HIATUS", tooltip: "Publishing is paused, but may continue later" });
+      options.push({ description: "Hiatus", id: "hiatus", tooltip: "Publishing is paused, but may continue later" });
     }
 
     return options.sort((a, b) => a.description.localeCompare(b.description));

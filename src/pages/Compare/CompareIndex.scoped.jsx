@@ -50,20 +50,18 @@ export default function ComparePage() {
 
   createEffect(on(() => searchParams.user, users => {
     const names = wrapToSet(users);
-    if (names > 1 && users.length !== names.size) setSearchParams({ "user": [...names] });
+    if (names.size > 1 && users.length !== names.size) setSearchParams({ "user": [...names] });
   }));
 
-  createEffect(on(() => searchParams.exclude, names => {
+  const removeUsers = names => {
     names = arrayUtils.wrapToSet(names);
-    const users = [...arrayUtils.wrapToSet(searchParams.user)].filter(name => !names.has(name));
-    setSearchParams({ "user": users });
-  }));
+    const users = wrapToArray(searchParams.user);
+    const keptUsers = [...wrapToSet(users)].filter(name => !names.has(name));
+    if (keptUsers.length !== users.length) setSearchParams({ "user": keptUsers });
+  };
 
-  createEffect(on(() => searchParams.disabled, names => {
-    names = arrayUtils.wrapToSet(names);
-    const users = [...arrayUtils.wrapToSet(searchParams.user)].filter(name => !names.has(name));
-    setSearchParams({ "user": users });
-  }));
+  createEffect(on(() => searchParams.exclude, removeUsers));
+  createEffect(on(() => searchParams.disabled, removeUsers));
 
   const [tags, setTags] = createSignal(undefined, { equals: false });
   const search = () => searchParams.search || "";
@@ -131,6 +129,11 @@ export default function ComparePage() {
   }
 
   createEffect(updateCompareScores);
+
+  onCleanup(() => {
+    if (worker instanceof Worker) worker.terminate();
+  });
+
   document.title = `Compare ${params.type} - LOB`;
 
   const navigate = useNavigate();

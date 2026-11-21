@@ -167,7 +167,7 @@ function fetchWrapper(fetcher) {
 async function retryDelay(fetcher, response, iteration) {
   const status = response?.status || "cors";
   const retry = response?.headers?.get("Retry-After");
-  if (retry) return { delay: parseInt(retry) * 1000, message: "Too Many Requests. Wait for: " + Math.ceil(retry / 1000) + " seconds" };
+  if (retry) return { delay: parseInt(retry) * 1000, message: "Too Many Requests. Wait for: " + parseInt(retry) + " seconds" };
 
   const [url] = fetcher;
 
@@ -190,7 +190,7 @@ async function retryDelay(fetcher, response, iteration) {
       case "cors": return { delay: 60_000, message: "You have send too many Anilist requests. Wait for 1 minute" }; // AniList CORS error should last one minute
     }
   }
-  if (url.includes(localizations.jikan)) {
+  if (url.includes("api.tenrai.org")) {
     switch (status) {
       case 429: return { delay: 1_000, message: "Jikan API rate limit hit" }; // Too Many Requests and missing Retry-After
     }
