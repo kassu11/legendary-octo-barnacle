@@ -7,8 +7,6 @@
     gap: 6px;
     padding-block: var(--scoped-padding);
     color: var(--text-muted);
-    background-color: color-mix(var(--bg-dark), transparent 15%);
-    box-shadow: 0 8px 0px 8px color-mix(var(--bg-dark), transparent 15%);
     font-size: var(--fs-300);
 
     @media (width < 40em) {

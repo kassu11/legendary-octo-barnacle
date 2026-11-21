@@ -1,8 +1,7 @@
 @layer component {
   .media-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-rows: 1fr auto 0;
     position: relative;
     aspect-ratio: 5.5/8;
     color: var(--text-muted);
@@ -37,7 +36,7 @@
     }
 
     /* Performance optimization to stop gradient animation */
-    &:not(.loading, :empty):has(.image-loader) {
+    &:not(.loading, :empty):has(.cover) {
       &::before, &::after {
         animation: move-gradient 2s infinite, stop-gradient .5s forwards;
       }
@@ -63,38 +62,100 @@
       }
     }
 
-    .image-loader {
+    .body, .footer {
       isolation: isolate;
       border-radius: inherit;
-      transition: filter .3s;
 
-      .media-card.loading & {
-        filter: grayscale(.8) opacity(.15);
-      }
-
-      &::before, &::after {
-        content: "";
-        position: absolute;
-        inset: 0px;
-        background-size: cover;
-        transition: 0s 1s background allow-discrete, filter .2s, scale .2s;
-        z-index: -1;
+      .cover {
         border-radius: inherit;
-      }
-      &::before {
-        transition: 0s 1s background allow-discrete, filter .4s, scale .4s;
-      }
+        transition: filter .3s;
+        z-index: -1;
 
-      .media-card:not(.loading):where(_:hover, :has(_:focus-visible)) & {
-        &::after, &::before {
-          background: inherit;
+        .media-card.loading & {
+          filter: grayscale(.8) opacity(.15);
+        }
+
+        &::before, &::after {
+          content: "";
+          position: absolute;
+          inset: 0px;
+          background-size: cover;
+          transition: 0s 1s background allow-discrete, filter .2s, scale .2s;
+          border-radius: inherit;
         }
         &::before {
-          transition: 0s 0s background, filter .4s, scale .4s;
-          filter: blur(3px);
+          transition: 0s 1s background allow-discrete, filter .4s, scale .4s;
         }
-        &::after {
-          transition: 0s 0s background, filter .2s, scale .2s;
+
+        .media-card:not(.loading):where(_:hover, :has(_:focus-visible)) & {
+          &::after, &::before {
+            background: inherit;
+          }
+          &::before {
+            transition: 0s 0s background, filter .4s, scale .4s;
+            filter: blur(5px);
+            scale: 1.03;
+          }
+          &::after {
+            transition: 0s 0s background, filter .2s, scale .2s;
+            scale: 1.02;
+          }
+        }
+      }
+    }
+
+    .body {
+      grid-row: 1;
+      grid-column: 1;
+      pointer-events: none;
+      clip-path: inset(-100px -100px 0 -100px);
+
+      .media-card:not(:has(.footer)) & {
+        clip-path: unset;
+      }
+    }
+
+    .footer {
+      grid-row: 2;
+      grid-column: 1;
+      clip-path: inset(0 -100px -100px -100px);
+      border-radius: 0 0 8px 8px;
+
+      &:not(:has(.cover)) {
+        background: var(--shadow-light);
+      }
+
+      .cover {
+        filter: brightness(.2);
+
+        .media-card.loading & {
+          filter: brightness(.2) grayscale(.8) opacity(.15);
+        }
+      }
+
+      .media-card-footer {
+        transition: translate .2s, color .2s;
+
+        .media-card:not(.loading):where(_:hover, :has(_:focus-visible)) & {
+          color: var(--text);
+        }
+      }
+    }
+
+    .actions {
+      grid-row: 1;
+      grid-column: 1;
+      position: relative;
+      pointer-events: none;
+
+      .media-quick-actions {
+        pointer-events: auto;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+
+        .media-card:not(.loading) &:where(_:hover, :has(_:focus-visible)) {
+          background-color: var(--shadow-light);
         }
       }
     }
@@ -170,47 +231,24 @@
       }
     }
 
-    .bottom {
-      pointer-events: none;
-      position: absolute;
-      bottom: 0px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-
-      .media-quick-actions, .media-card-footer {
-        pointer-events: auto;
-      }
-    }
-
-    .media-card-footer {
-      align-self: stretch;
-      transition: translate .2s, color .2s;
-
-      .media-card:not(.loading):where(_:hover, :has(_:focus-visible)) & {
-        color: var(--text);
-      }
-    }
-
-    .media-quick-actions {
-      .media-card:not(.loading) &:where(_:hover, :has(_:focus-visible)) {
-        background-color: var(--shadow-light);
-      }
-    }
-
     /* Zero height keeps the title from growing the cover, and inline size containment keeps long words from widening the card */
     .title-container {
+      grid-row: 3;
+      grid-column: 1;
       height: 0;
       contain: inline-size;
-      margin-bottom: 12px;
 
       .title {
-        padding-top: 16px;
+        padding-top: 4px;
         font-weight: 500;
         color: inherit;
         text-decoration: none;
         outline: none;
+        transition: translate .2s;
+
+        .media-card:not(.loading):where(_:hover, :has(_:focus-visible)) & {
+          translate: 0 2px;
+        }
 
         &::after {
           content: "";
