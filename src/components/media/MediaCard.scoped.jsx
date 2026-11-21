@@ -46,7 +46,6 @@ import { CheckIcon } from "@/assets/icons.jsx";
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles at the bottom of the cover
  * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links, hover card and quick actions are disabled
  * @param {boolean} [props.selected] Use with selectable
- * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
   const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes", "showHaltedStatus"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "staffRole", "selectable", "selected", "children"]);
@@ -103,7 +102,6 @@ export function MediaCard(props) {
 
   return (
     <div {...scoping} ref={hover?.triggerRef} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, "selectable": local.selectable, "selected": local.selected, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }}>
-      <ImageLoader scoped class="image-loader" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media}>
         <div class="title-container">
           <A scoped class="title line-clamp" href={urlUtils.anilistMediaUrl(local.media)} data-status={status()} onClick={handleClick}>
@@ -115,43 +113,48 @@ export function MediaCard(props) {
             </span>
           </A>
         </div>
+        {/* Body and footer both render the whole cover and clip it to their own area, so the hover zoom spills over the card edges but not over the footer */}
+        <div class="body">
+          <ImageLoader scoped class="cover" fadeIn={local.coverFadeIn} src={local.media.coverImage?.extraLarge || local.media.coverImage?.large} />
+        </div>
+        <Show when={(local.showFooter && mediaListEntry()) || local.characterRole || local.staffRole}>
+          <div class="footer">
+            <ImageLoader scoped class="cover" fadeIn={local.coverFadeIn} src={local.media.coverImage?.extraLarge || local.media.coverImage?.large} />
+            <Show when={local.showFooter && mediaListEntry()}>
+              <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} showAdvancedScores={local.showAdvancedScores} afterProgressMutation={local.afterProgressMutation} />
+            </Show>
+            <Show when={local.characterRole}>
+              <MediaCardCharacterRole edge={local.characterRole} languages={local.voiceActorLanguages} media={local.media} />
+            </Show>
+            <Show when={local.staffRole}>
+              <MediaCardStaffRole role={local.staffRole} media={local.media} />
+            </Show>
+          </div>
+        </Show>
+        <Show when={local.quickActions && !local.selectable && hover.isOpen()}>
+          <div class="actions">
+            <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
+          </div>
+        </Show>
         {/* Score is its own badge group, so it stays in the top right while the other badges wrap next to it */}
         <div class="top">
           <MediaBadges {...badges} scoped class="media-badges" media={local.media} entry={mediaListEntry()} />
           <MediaBadges scoped class="media-badges score" media={local.media} showScore={local.showScore} />
         </div>
-      </Show>
-      <Show when={local.media && local.rank}>
-        <div class="rank">#{local.rank}</div>
-      </Show>
-      {/* Quick actions and footer share one column, so the quick actions stack on top of the footer instead of overlapping it */}
-      <Show when={local.media && (local.showFooter || local.quickActions || local.characterRole || local.staffRole)}>
-        <div class="bottom">
-          <Show when={local.quickActions && !local.selectable && hover.isOpen()}>
-            <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
+        <Show when={local.rank}>
+          <div class="rank">#{local.rank}</div>
+        </Show>
+        <Show when={local.selectable}>
+          <div class="selection-check">
+            <CheckIcon scoped />
+          </div>
+        </Show>
+        <Show when={hover?.isOpen() && !local.selectable}>
+          <Show when={local.hoverCard}>
+            <HoverPortal>
+              <MediaHoverCard media={local.media} entry={mediaListEntry()} showDates={local.showDates} loading={local.loading} ref={hover.floatingRef} />
+            </HoverPortal>
           </Show>
-          <Show when={local.showFooter && mediaListEntry()}>
-            <MediaCardFooter scoped class="media-card-footer" media={local.media} entry={mediaListEntry()} scoreFormat={local.scoreFormat} progressIncrement={local.progressIncrement} showAdvancedScores={local.showAdvancedScores} afterProgressMutation={local.afterProgressMutation} />
-          </Show>
-          <Show when={local.characterRole}>
-            <MediaCardCharacterRole edge={local.characterRole} languages={local.voiceActorLanguages} media={local.media} />
-          </Show>
-          <Show when={local.staffRole}>
-            <MediaCardStaffRole role={local.staffRole} media={local.media} />
-          </Show>
-        </div>
-      </Show>
-      <Show when={local.media && local.selectable}>
-        <div class="selection-check">
-          <CheckIcon scoped />
-        </div>
-      </Show>
-      {local.children}
-      <Show when={hover?.isOpen() && local.media && !local.selectable}>
-        <Show when={local.hoverCard}>
-          <HoverPortal>
-            <MediaHoverCard media={local.media} entry={mediaListEntry()} showDates={local.showDates} loading={local.loading} ref={hover.floatingRef} />
-          </HoverPortal>
         </Show>
       </Show>
     </div>
