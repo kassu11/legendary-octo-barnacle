@@ -41,7 +41,7 @@ import { createMemo, Show } from "solid-js";
 export function SearchBar(props) {
   const { isMobilLarge } = useResponsive();
   const activeQueries = useActiveSearchQueries();
-  const activeFilterCount = createMemo(() => activeQueries().filter(entry => entry.type !== "01.search").length);
+  const activeFilterCount = createMemo(() => activeQueries().filter(activeQuery => activeQuery.clearable).length);
 
   return (
     <Show when={isMobilLarge()} fallback={

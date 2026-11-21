@@ -2,13 +2,15 @@ import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/state/providers.js";
 import { createMemo, mapArray, Match, Show, Switch } from "solid-js";
 import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
-import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
 import { DesktopFilters, FilterGroup, FilterGroups, FilterSearchInput, MobileFilters } from "@/components/filters/FilterLayout.scoped.jsx";
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
+import { ActiveQueries } from "@/components/filters/ActiveQueries.scoped.jsx";
+import { addClearAllActiveQuery, createActiveQuery, createToggleActiveQueries, createValueActiveQueries, excludableValueActiveQuery } from "@/utils/activeQueryUtils.js";
+import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
-import { AgeIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SortIcon, StatusIcon, StudioIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, MissingDateIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, YearIcon } from "@/assets/icons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [
@@ -62,7 +64,7 @@ const toListOption = name => {
 
 export const listTitle = name => name === COMBINED_LIST ? "All" : name;
 
-// Every search param that the remove filters button clears, except q these are also counted as active filters
+// Every search param that the remove filters button clears, together with q
 const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "notes", "repeat", "private", "missingStart", "missingEnd", "missingScore"];
 
 export function SearchControlsScoped(props) {
@@ -79,8 +81,6 @@ export function SearchControlsScoped(props) {
     // The mobile search and filters are reachable from anywhere on the page, so the results could be off the screen
     if (isMobilLarge()) window.scrollTo(0, scrollYBelowNavigation(props.scrollTarget));
   };
-
-  const activeFilterCount = createMemo(() => filterParams.reduce((count, name) => count + arrayUtils.wrapToArray(searchParams[name]).filter(Boolean).length, 0));
 
   const userStatusOptions = createMemo(() => [
     { description: "Completed",                                          id: "COMPLETED" },
@@ -114,15 +114,60 @@ export function SearchControlsScoped(props) {
   const listOptions = createMemo(mapArray(() => props.listData()?.data?.lists.map(list => list.name), toListOption));
   const listCounts = createMemo(() => new Map(props.listData()?.data?.lists.map(list => [list.name, list.entries.length])));
 
+  const activeQueries = createMemo(() => {
+    const queries = [];
+    const optionDescription = options => id => options.find(option => option.id === id)?.description ?? id;
+    const watched = params.type === "anime" ? "Rewatched" : "Reread";
+
+    const search = arrayUtils.wrapToArray(searchParams.q).at(-1);
+    if (search) queries.push(createActiveQuery({ description: `Searching "${search}"`, icon: SearchIcon, query: { q: undefined }, clearable: false }, setSearchParams));
+
+    queries.push(...createValueActiveQueries("list", props.list(), name => ({ description: "List: " + listTitle(name), icon: ListIcon }), setSearchParams));
+
+    queries.push(...createValueActiveQueries("sort", arrayUtils.wrapToArray(searchParams.sort).filter(Boolean), value => {
+      const reversed = value.endsWith(SORT_REVERSE_SUFFIX);
+      const id = reversed ? value.slice(0, -SORT_REVERSE_SUFFIX.length) : value;
+      return { description: "Sort: " + optionDescription(sortOptions())(id) + (reversed ? " (reversed)" : ""), icon: SortIcon };
+    }, setSearchParams));
+
+    queries.push(...createValueActiveQueries ("format",          props.format(),             excludableValueActiveQuery("Format",      FormatIcon,  optionDescription(params.type === "anime" ? animeFormatOptions : mangaFormatOptions)), setSearchParams));
+    queries.push(...createValueActiveQueries ("status",          props.status(),             excludableValueActiveQuery("Status",      StatusIcon,  optionDescription(statusOptions)),       setSearchParams));
+    queries.push(...createValueActiveQueries ("countryOfOrigin", props.countryOfOrigin(),    excludableValueActiveQuery("Country",     CountryIcon, optionDescription(countryOptions)),      setSearchParams));
+    queries.push(...createValueActiveQueries ("year",            props.year(),               excludableValueActiveQuery("Year",        YearIcon),                                            setSearchParams));
+    queries.push(...createValueActiveQueries ("studio",          props.studio(),             excludableValueActiveQuery("Studio",      StudioIcon),                                          setSearchParams));
+    queries.push(...createValueActiveQueries ("genre",           props.genre(),              excludableValueActiveQuery("Genre",       GenreIcon),                                           setSearchParams));
+    queries.push(...createValueActiveQueries ("tag",             props.tag(),                excludableValueActiveQuery("Tag",         TagsIcon),                                            setSearchParams));
+    queries.push(...createToggleActiveQueries("isAdult",         props.isAdult(),            { included: "R-18", excluded: "Not R-18", icon: AgeIcon },                                      setSearchParams));
+    queries.push(...createValueActiveQueries ("userStatus",      props.userStatus(),         excludableValueActiveQuery("User Status", OnListIcon,  optionDescription(userStatusOptions())), setSearchParams));
+    queries.push(...createValueActiveQueries ("startedYear",     props.startedYear(),        excludableValueActiveQuery("Start Year",  YearIcon),                                            setSearchParams));
+    queries.push(...createValueActiveQueries ("completedYear",   props.completedYear(),      excludableValueActiveQuery("End Year",    YearIcon),                                            setSearchParams));
+    queries.push(...createToggleActiveQueries("notes",           props.notesFilter(),        { included: "Has notes",          excluded: "No notes",                       icon: NotesIcon         }, setSearchParams));
+    queries.push(...createToggleActiveQueries("repeat",          props.rewatchedFilter(),    { included: watched,              excluded: "Not " + watched.toLowerCase(),   icon: RepeatOutlineIcon }, setSearchParams));
+    queries.push(...createToggleActiveQueries("private",         props.privateFilter(),      { included: "Private",            excluded: "Not private",                    icon: PrivateIcon       }, setSearchParams));
+    queries.push(...createToggleActiveQueries("missingStart",    props.missingStartFilter(), { included: "Missing start date", excluded: "Has start date",                 icon: MissingDateIcon   }, setSearchParams));
+    queries.push(...createToggleActiveQueries("missingEnd",      props.missingEndFilter(),   { included: "Missing end date",   excluded: "Has end date",                   icon: MissingDateIcon   }, setSearchParams));
+    queries.push(...createToggleActiveQueries("missingScore",    props.missingScoreFilter(), { included: "Missing score",      excluded: "Has score",                      icon: ScoreIcon         }, setSearchParams));
+
+    addClearAllActiveQuery(queries, setSearchParams);
+    return queries;
+  });
+
+  const activeFilterCount = createMemo(() => activeQueries().filter(activeQuery => activeQuery.clearable).length);
+
   return (
     <Show when={isMobilLarge()} fallback={
-      <DesktopFilters scrollTarget={props.scrollTarget} filterCount={activeFilterCount()}>
-        <Filters />
-      </DesktopFilters>
+      <>
+        <DesktopFilters scrollTarget={props.scrollTarget} filterCount={activeFilterCount()}>
+          <Filters />
+        </DesktopFilters>
+        <ActiveQueries activeQueries={activeQueries()} />
+      </>
     }>
       <MobileFilters search={<FilterSearchInput scrollTarget={props.scrollTarget} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton scrollTarget={props.scrollTarget} />}>
+        <ActiveQueries activeQueries={activeQueries()} />
         <Filters />
       </MobileFilters>
+      <ActiveQueries activeQueries={activeQueries()} singleRow />
     </Show>
   );
 

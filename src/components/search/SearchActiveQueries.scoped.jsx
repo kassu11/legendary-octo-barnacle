@@ -1,13 +1,14 @@
-import { createMemo, For, Show } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { createMemo, Show } from "solid-js";
 import "./SearchActiveQueries.scoped.css";
 import { useParsedSearchParams } from "@/state/providers";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { useNavigateAndSearch } from "@/utils/urlUtils";
 import { capitalize } from "@/utils/formatUtils.js";
 import { arrayUtils } from "@/utils/utils";
+import { addClearAllActiveQuery, createActiveQuery, createToggleActiveQueries, createValueActiveQueries, excludableValueActiveQuery } from "@/utils/activeQueryUtils.js";
 import { localizeInternalSearchParams } from "@/api/apiTranslations";
-import { AgeIcon, AvailableIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, TagsIcon, TypeIcon, UserIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, AvailableIcon, CountryIcon, FormatIcon, GenreIcon, LengthIcon, LicensedIcon, OnListIcon, ProgressIcon, SearchIcon, SeasonIcon, SortIcon, SourceIcon, StatusIcon, TagRankIcon, TagsIcon, TypeIcon, UserIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
+import { ActiveQueries } from "@/components/filters/ActiveQueries.scoped.jsx";
 import { externalSourcesData } from "./inputs/MediaExternalSourcesSelect.scoped";
 import { usersData } from "./inputs/MediaUsersSelect.scoped";
 import { ROLE_OPTIONS } from "./inputs/CharacterRoleSelect";
@@ -28,240 +29,107 @@ const invalidateHeader = [
   { header: "top",                               params: [] },
   { header: "trending",                          params: [] },
   { header: /^(summer|fall|spring|winter)-\d+$/, params: ["season", "year"] },
-]
+];
 
-const typeIcons = {
-  "01.search": SearchIcon,
-  misc: SortIcon,
-  format: FormatIcon,
-  source: SourceIcon,
-  country: CountryIcon,
-  externalSources: AvailableIcon,
-  genres: GenreIcon,
-  tags: TagsIcon,
-  age: AgeIcon,
-  status: StatusIcon,
-  year: YearIcon,
-  yearLesser: YearIcon,
-  yearGreater: YearIcon,
-  season: SeasonIcon,
-  progress: ProgressIcon,
-  progressLesser: ProgressIcon,
-  progressGreater: ProgressIcon,
-  length: LengthIcon,
-  lengthLesser: LengthIcon,
-  lengthGreater: LengthIcon,
-  rank: TagRankIcon,
-  users: UsersIcon,
-  onList: OnListIcon,
-  licensed: LicensedIcon,
-  type: TypeIcon,
-  role: UserIcon,
-};
+const requiredSortValues = [
+  { sort: "score",      description: "Must have a score"             },
+  { sort: "progress",   description: "Must have known episode count" },
+  { sort: "duration",   description: "Must have known duration"      },
+  { sort: "end_date",   description: "Must have known end date"      },
+  { sort: "start_date", description: "Must have known start date"    },
+  { sort: "volumes",    description: "Must have known volume count"  },
+];
 
 export function useActiveSearchQueries() {
   const parsedSearchParams = useParsedSearchParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const params = useParams();
+  const navigate = useNavigateAndSearch();
+
+  const remove = query => {
+    const header = params.header;
+    const headerThatCouldNeedInvalidating = invalidateHeader.find(h => h.header === header || h.header.test?.(header));
+    if (headerThatCouldNeedInvalidating && Object.keys(query).some(param => headerThatCouldNeedInvalidating.params.includes(param))) {
+      return navigate(path => path.replace("/" + header, ""), query);
+    }
+    setSearchParams(query);
+  };
 
   return createMemo(() => {
+    const activeQueries = [];
+    const { type, q, sort, format, country, status, age, season, year, yearLesser, yearGreater, source, externalSources, progress, progressLesser, progressGreater, length, lengthLesser, lengthGreater, rank, onList, licensed } = parsedSearchParams();
 
-    const returnValue = [];
-
-    const { q, sort, format, genres, excludedGenres, tags, excludedTags, country, status, age, season, year, yearLesser, yearGreater, source, externalSources, progress, progressLesser, progressGreater, length, lengthLesser, lengthGreater, rank, users, excludedUsers, onList, licensed } = parsedSearchParams();
-
-    const sortObject = arrayUtils.objectFromArrayEntries(sort);
-    if (sortObject["score_plus"     ] || sortObject["score_desc_plus"     ]) returnValue.push({ type: "misc", description: "Must have a score",             query: { sort: sort.map(e => e.includes("score"     ) ? e.replace("_plus", "") : e) } });
-    if (sortObject["progress_plus"  ] || sortObject["progress_desc_plus"  ]) returnValue.push({ type: "misc", description: "Must have known episode count", query: { sort: sort.map(e => e.includes("progress"  ) ? e.replace("_plus", "") : e) } });
-    if (sortObject["duration_plus"  ] || sortObject["duration_desc_plus"  ]) returnValue.push({ type: "misc", description: "Must have known duration",      query: { sort: sort.map(e => e.includes("duration"  ) ? e.replace("_plus", "") : e) } });
-    if (sortObject["end_date_plus"  ] || sortObject["end_date_desc_plus"  ]) returnValue.push({ type: "misc", description: "Must have known end date",      query: { sort: sort.map(e => e.includes("end_date"  ) ? e.replace("_plus", "") : e) } });
-    if (sortObject["start_date_plus"] || sortObject["start_date_desc_plus"]) returnValue.push({ type: "misc", description: "Must have known start date",    query: { sort: sort.map(e => e.includes("start_date") ? e.replace("_plus", "") : e) } });
-    if (sortObject["volumes_plus"   ] || sortObject["volumes_desc_plus"   ]) returnValue.push({ type: "misc", description: "Must have known volume count",  query: { sort: sort.map(e => e.includes("volumes"   ) ? e.replace("_plus", "") : e) } });
-
-    for (const v of format) {
-      if (v in localizeInternalSearchParams) returnValue.push({ type: "format", description: "Format: " + localizeInternalSearchParams[v], query: { format: format.filter(v2 => v2 !== v) } });
-    }
-
-    for (const v of source) {
-      if (v in localizeInternalSearchParams) returnValue.push({ type: "source", description: "Source: " + localizeInternalSearchParams[v], query: { source: source.filter(v2 => v2 !== v) } });
-    }
-
-    for (const v of country) {
-      if (v in localizeInternalSearchParams) returnValue.push({ type: "country", description: "Country: " + localizeInternalSearchParams[v], query: { country: country.filter(v2 => v2 !== v) } });
-    }
-
-    for (const v of externalSources) {
-      const target = externalSourcesData()?.sources.find(v2 => v2.id === v);
-      if (target) returnValue.push({ type: "externalSources", description: "ExternalSources: " + target.site, image: target.icon, imageColor: target.color, query: { externalSources: externalSources.filter(v2 => v2 !== v) } });
-    }
-
-    const rawGenres = arrayUtils.wrapToArray(searchParams.genre);
-    for (const v of genres) {
-      returnValue.push({ type: "genres", description: "Genre: " + capitalize(v), query: { genre: rawGenres.filter(v2 => v2.toLowerCase() !== v) } });
-    }
-
-    for (const v of excludedGenres) {
-      returnValue.push({ type: "genres", description: "Exclude Genre: " + capitalize(v), query: { genre: rawGenres.filter(v2 => v2.toLowerCase() !== "-" + v) } });
-    }
-
-    const rawTags = arrayUtils.wrapToArray(searchParams.tag);
-    for (const v of tags) {
-      returnValue.push({ type: "tags", description: "Tag: " + capitalize(v), query: { tag: rawTags.filter(v2 => v2.toLowerCase() !== v) } });
-    }
-
-    for (const v of excludedTags) {
-      returnValue.push({ type: "tags", description: "Exclude Tag: " + capitalize(v), query: { tag: rawTags.filter(v2 => v2.toLowerCase() !== "-" + v) } });
-    }
-
-    if (age in localizeInternalSearchParams) {
-      returnValue.push({ type: "age", description: "Age: " + localizeInternalSearchParams[age], query: { age: undefined } });
-    }
-
-    for (const v of status) {
-      if (v in localizeInternalSearchParams) returnValue.push({ type: "status", description: "Status: " + localizeInternalSearchParams[v], query: { status: status.filter(v2 => v2 !== v) } });
-    }
-
-    if (q?.length) {
-      returnValue.push({ type: "01.search", description: `Searching "${q}"`, query: { q: undefined } });
-    }
-
-    if (year) returnValue.push({ type: "year", description: "Year: " + year,              query: { year: undefined, season } });
-    if (yearLesser) returnValue.push({ type: "yearLesser", description: "Year<" + yearLesser,   query: { yearLesser: undefined } });
-    if (yearGreater) returnValue.push({ type: "yearGreater", description: "Year>" + yearGreater, query: { yearGreater: undefined } });
-
-    if (season) returnValue.push({ type: "season", description: season === "tba" ? "TBA" : capitalize(season), query: { season: undefined, year } });
-
-
-    if (progress) {
-      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "progress", description: "Episodes: " + progress, query: { progress: undefined } });
-      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "progress", description: "Chapters: " + progress, query: { progress: undefined } });
-      else                              returnValue.push({ type: "progress", description: "Ep/Ch: " +    progress, query: { progress: undefined } });
-    }
-
-    if (progressLesser) {
-      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "progressLesser", description: "Episodes<" + progressLesser, query: { progressLesser: undefined } });
-      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "progressLesser", description: "Chapters<" + progressLesser, query: { progressLesser: undefined } });
-      else                              returnValue.push({ type: "progressLesser", description: "Ep/Ch<" +    progressLesser, query: { progressLesser: undefined } });
-    }
-
-    if (progressGreater) {
-      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "progressGreater", description: "Episodes>" + progressGreater, query: { progressGreater: undefined } });
-      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "progressGreater", description: "Chapters>" + progressGreater, query: { progressGreater: undefined } });
-      else                              returnValue.push({ type: "progressGreater", description: "Ep/Ch>" +    progressGreater, query: { progressGreater: undefined } });
-    }
-
-    if (length) {
-      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "length", description: "Duration: " + length, query: { length: undefined } });
-      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "length", description: "Volumes: " + length, query: { length: undefined } });
-      else                              returnValue.push({ type: "length", description: "Duration / Volumes: " +    length, query: { length: undefined } });
-    }
-
-    if (lengthLesser) {
-      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "lengthLesser", description: "Duration<" + lengthLesser, query: { lengthLesser: undefined } });
-      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "lengthLesser", description: "Volumes<" + lengthLesser, query: { lengthLesser: undefined } });
-      else                              returnValue.push({ type: "lengthLesser", description: "Duration / Volumes<" +    lengthLesser, query: { lengthLesser: undefined } });
-    }
-
-    if (lengthGreater) {
-      if      (parsedSearchParams().type === "anime") returnValue.push({ type: "lengthGreater", description: "Duration>" + lengthGreater, query: { lengthGreater: undefined } });
-      else if (parsedSearchParams().type === "manga") returnValue.push({ type: "lengthGreater", description: "Volumes>" + lengthGreater, query: { lengthGreater: undefined } });
-      else                              returnValue.push({ type: "lengthGreater", description: "Duration / Volumes>" +    lengthGreater, query: { lengthGreater: undefined } });
-    }
-
-    if (rank) returnValue.push({ type: "rank", description: "Tag Rank: " + rank + "%+", query: { rank: undefined } });
-
-    const rawUsers = arrayUtils.wrapToArray(searchParams.user);
-    for (const v of users) {
-      returnValue.push({ type: "users", description: "Include User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "in-" + v) } });
-    }
-
-    for (const v of excludedUsers) {
-      returnValue.push({ type: "users", description: "Exclude User: " + v, image: usersData()[v.toLowerCase()]?.avatar, query: { user: rawUsers.filter(v2 => v2 !== "ex-" + v) } });
-    }
+    if (q?.length) activeQueries.push(createActiveQuery({ description: `Searching "${q}"`, icon: SearchIcon, query: { q: undefined }, clearable: false }, remove));
 
     const rawType = arrayUtils.wrapToArray(searchParams.type).at(-1);
-    if (rawType && rawType === parsedSearchParams().type) returnValue.push({ type: "type", description: "Type: " + capitalize(rawType), query: { type: undefined } });
+    if (rawType && rawType === type) activeQueries.push(createActiveQuery({ description: "Type: " + capitalize(rawType), icon: TypeIcon, query: { type: undefined } }, remove));
 
-    const rawRoles = arrayUtils.wrapToArray(searchParams.role);
-    for (const v of rawRoles) {
-      const isExcluded = v.startsWith("-");
-      const role = isExcluded ? v.substring(1) : v;
-      const description = ROLE_OPTIONS.find(o => o.id === role)?.description || role;
-      returnValue.push({ type: "role", description: (isExcluded ? "Exclude Role: " : "Role: ") + description, query: { role: rawRoles.filter(v2 => v2 !== v) } });
+    const sortObject = arrayUtils.objectFromArrayEntries(sort);
+    for (const required of requiredSortValues) {
+      if (sortObject[required.sort + "_plus"] || sortObject[required.sort + "_desc_plus"]) {
+        activeQueries.push(createActiveQuery({ description: required.description, icon: SortIcon, query: { sort: sort.map(e => e.includes(required.sort) ? e.replace("_plus", "") : e) } }, remove));
+      }
     }
 
-    if (onList == "true")  returnValue.push({ type: "onList", description: "On My List", query: { onList: undefined } });
-    if (onList == "false") returnValue.push({ type: "onList", description: "Not in My List", query: { onList: undefined } });
+    activeQueries.push(...createValueActiveQueries("format",  format,  v => v in localizeInternalSearchParams && { description: "Format: "  + localizeInternalSearchParams[v], icon: FormatIcon  }, remove));
+    activeQueries.push(...createValueActiveQueries("status",  status,  v => v in localizeInternalSearchParams && { description: "Status: "  + localizeInternalSearchParams[v], icon: StatusIcon  }, remove));
+    activeQueries.push(...createValueActiveQueries("source",  source,  v => v in localizeInternalSearchParams && { description: "Source: "  + localizeInternalSearchParams[v], icon: SourceIcon  }, remove));
+    activeQueries.push(...createValueActiveQueries("country", country, v => v in localizeInternalSearchParams && { description: "Country: " + localizeInternalSearchParams[v], icon: CountryIcon }, remove));
 
-    if (licensed == "true")  returnValue.push({ type: "licensed", description: "Licensed", query: { licensed: undefined } });
-    if (licensed == "false") returnValue.push({ type: "licensed", description: "Not Licensed", query: { licensed: undefined } });
+    if (season)      activeQueries.push(createActiveQuery({ description: season === "tba" ? "TBA" : capitalize(season), icon: SeasonIcon, query: { season: undefined, year } }, remove));
+    if (year)        activeQueries.push(createActiveQuery({ description: "Year: " + year,                               icon: YearIcon,   query: { year: undefined, season } }, remove));
+    if (yearLesser)  activeQueries.push(createActiveQuery({ description: "Year<" + yearLesser,                          icon: YearIcon,   query: { yearLesser: undefined } }, remove));
+    if (yearGreater) activeQueries.push(createActiveQuery({ description: "Year>" + yearGreater,                         icon: YearIcon,   query: { yearGreater: undefined } }, remove));
 
+    activeQueries.push(...createValueActiveQueries("genre", arrayUtils.wrapToArray(searchParams.genre), excludableValueActiveQuery("Genre", GenreIcon, genre => capitalize(genre.toLowerCase())), remove));
+    activeQueries.push(...createValueActiveQueries("tag",   arrayUtils.wrapToArray(searchParams.tag),   excludableValueActiveQuery("Tag",   TagsIcon,  tag   => capitalize(tag.toLowerCase())),   remove));
 
-    return returnValue.sort((a, b) => a.type.localeCompare(b.type) || a.description.localeCompare(b.description));
+    if (rank) activeQueries.push(createActiveQuery({ description: "Tag Rank: " + rank + "%+", icon: TagRankIcon, query: { rank: undefined } }, remove));
 
+    if (age in localizeInternalSearchParams) activeQueries.push(createActiveQuery({ description: "Age: " + localizeInternalSearchParams[age], icon: AgeIcon, query: { age: undefined } }, remove));
+
+    const progressLabel = type === "anime" ? "Episodes" : type === "manga" ? "Chapters" : "Ep/Ch";
+    if (progress)        activeQueries.push(createActiveQuery({ description: progressLabel + ": " + progress,        icon: ProgressIcon, query: { progress: undefined }        }, remove));
+    if (progressLesser)  activeQueries.push(createActiveQuery({ description: progressLabel + "<" + progressLesser,   icon: ProgressIcon, query: { progressLesser: undefined }  }, remove));
+    if (progressGreater) activeQueries.push(createActiveQuery({ description: progressLabel + ">" + progressGreater,  icon: ProgressIcon, query: { progressGreater: undefined } }, remove));
+
+    const lengthLabel = type === "anime" ? "Duration" : type === "manga" ? "Volumes" : "Duration / Volumes";
+    if (length)        activeQueries.push(createActiveQuery({ description: lengthLabel + ": " + length,        icon: LengthIcon, query: { length: undefined        } }, remove));
+    if (lengthLesser)  activeQueries.push(createActiveQuery({ description: lengthLabel + "<" + lengthLesser,   icon: LengthIcon, query: { lengthLesser: undefined  } }, remove));
+    if (lengthGreater) activeQueries.push(createActiveQuery({ description: lengthLabel + ">" + lengthGreater,  icon: LengthIcon, query: { lengthGreater: undefined } }, remove));
+
+    activeQueries.push(...createValueActiveQueries("externalSources", externalSources, v => {
+      const target = externalSourcesData()?.sources.find(source => source.id === v);
+      return target && { description: "ExternalSources: " + target.site, icon: AvailableIcon, image: target.icon, imageColor: target.color };
+    }, remove));
+
+    activeQueries.push(...createValueActiveQueries("user", arrayUtils.wrapToArray(searchParams.user), v => {
+      const name = v.substring(3);
+      if (v.startsWith("in-")) return { description: "Include User: " + name, icon: UsersIcon, image: usersData()[name.toLowerCase()]?.avatar };
+      if (v.startsWith("ex-")) return { description: "Exclude User: " + name, icon: UsersIcon, image: usersData()[name.toLowerCase()]?.avatar };
+    }, remove));
+
+    activeQueries.push(...createToggleActiveQueries("onList",   onList,   { included: "On My List", excluded: "Not in My List", icon: OnListIcon   }, remove));
+    activeQueries.push(...createToggleActiveQueries("licensed", licensed, { included: "Licensed",   excluded: "Not Licensed",   icon: LicensedIcon }, remove));
+
+    activeQueries.push(...createValueActiveQueries("role", arrayUtils.wrapToArray(searchParams.role), excludableValueActiveQuery("Role", UserIcon, role => ROLE_OPTIONS.find(option => option.id === role)?.description || role), remove));
+
+    addClearAllActiveQuery(activeQueries, remove);
+    return activeQueries;
   });
 }
 
 export function SearchActiveQueries(props) {
-  const [, setSearchParams] = useSearchParams();
   const params = useParams();
-  const navigate = useNavigateAndSearch();
-  const queryButtons = useActiveSearchQueries();
-
-  const removeQuery = query => {
-    const header = params.header;
-    const headerThatCouldNeedInvalidating = invalidateHeader.find(h => h.header === header || h.header.test?.(header));
-    if (headerThatCouldNeedInvalidating) {
-      for (const param of Object.keys(query)) {
-        if (headerThatCouldNeedInvalidating.params.includes(param)) {
-          // Invalidate header and update query
-          return navigate(path => path.replace("/" + header, ""), query);
-        }
-      }
-    }
-
-    // Normal set search params
-    setSearchParams(query);
-  };
-
-  const clearAll = () => {
-    const query = {};
-    for (const entry of queryButtons()) {
-      if (entry.type === "01.search") continue; // Keep the search text, only clear the filters
-      for (const key of Object.keys(entry.query)) query[key] = undefined;
-    }
-    removeQuery(query);
-  };
-
-  const queryList = () => (
-    <Show when={queryButtons().length}>
-      <ul class="active-queries" classList={{ "single-row": props.singleRow }}>
-        <For each={queryButtons()}>{entry => (
-          <li>
-            <button class="query" onClick={() => removeQuery(entry.query)} title="Remove filter">
-              <span class="icon" classList={{ "extra-padding": !!entry.imageColor }} style={{ "background-color": entry.imageColor }}>
-                <Show when={entry.image} fallback={<Dynamic component={typeIcons[entry.type]} />}>
-                  <img src={entry.image} alt="" />
-                </Show>
-              </span>
-              <span>{entry.description}</span>
-              <CloseIcon scoped />
-            </button>
-          </li>
-        )}</For>
-        <Show when={queryButtons().some(entry => entry.type !== "01.search")}>
-          <li>
-            <button class="clear" onClick={clearAll}>Clear all</button>
-          </li>
-        </Show>
-      </ul>
-    </Show>
-  );
+  const activeQueries = useActiveSearchQueries();
 
   // The card style toggle is shown on the same row as the active queries, when the search page doesn't have a header
   return (
-    <Show when={props.cardStyleToggle} fallback={queryList()}>
+    <Show when={props.cardStyleToggle} fallback={<ActiveQueries activeQueries={activeQueries()} singleRow={props.singleRow} />}>
       <div class="active-queries-row" classList={{ "single-row": props.singleRow }}>
-        {queryList()}
+        <div class="queries">
+          <ActiveQueries activeQueries={activeQueries()} singleRow={props.singleRow} />
+        </div>
         <Show when={params.mode === "search"}>
           <div class="toolbar">
             <CardStyleToggle cardStyle={searchPageCardStyle()} setCardStyle={setSearchPageCardStyle} />
