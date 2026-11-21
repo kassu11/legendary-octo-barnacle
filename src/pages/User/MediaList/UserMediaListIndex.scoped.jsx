@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, onCleanup, Show, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, on, onCleanup, Show, untrack } from "solid-js";
 import "./UserMediaListIndex.scoped.css";
 import { capitalize } from "@/utils/formatUtils.js";
 import UserMediaListWorker from "@/workers/user-media-list.js?worker";
@@ -8,6 +8,7 @@ import { debouncer } from "@/utils/scheduleUtils.js";
 import { queries } from "@/api/api.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
+import { EditModeBar } from "./EditModeBar.scoped.jsx";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
@@ -142,6 +143,14 @@ export function UserMediaList() {
     return user().id === authUserData()?.data.id;
   }
 
+  const [editMode, setEditMode] = createSignal(false);
+  const [selectedIds, setSelectedIds] = createSignal(new Set());
+  const changeEditMode = enabled => {
+    setEditMode(enabled);
+    setSelectedIds(new Set());
+  };
+  createEffect(on([name, () => params.type], () => changeEditMode(false), { defer: true }));
+
   const [listBody, setListBody] = createSignal();
 
   // Skip the profile banner when landing on the page. Waits for the list, so the page is tall enough to scroll
@@ -158,6 +167,9 @@ export function UserMediaList() {
     <UserMediaListContext.Provider value={{ isOwnProfile }}>
       <Show when={params.list}>
         <Navigate href={legacyListUrl()} />
+      </Show>
+      <Show when={editMode()}>
+        <EditModeBar selectedCount={selectedIds().size} onClearSelection={() => setSelectedIds(new Set())} onExit={() => changeEditMode(false)} />
       </Show>
       <div ref={setListBody} class="user-profile-media-list-body">
         <SearchControlsScoped
@@ -183,6 +195,8 @@ export function UserMediaList() {
           userStatus={userStatus}
           studio={studio}
           tag={tag}
+          editMode={editMode}
+          setEditMode={changeEditMode}
         />
         <MediaListContainerScoped
           listData={listData}
@@ -190,6 +204,9 @@ export function UserMediaList() {
           mutateMediaListCache={mutateMediaListCache}
           updateListInfo={updateListInfo}
           timer={formatMSToString(userMediaTime())}
+          editMode={editMode()}
+          selectedIds={selectedIds()}
+          setSelectedIds={setSelectedIds}
         />
       </div>
     </UserMediaListContext.Provider>

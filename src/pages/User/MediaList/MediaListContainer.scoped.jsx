@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { useUser, useUserMediaList } from "@/state/providers.js";
-import { createEffect, createMemo, For, Show } from "solid-js";
+import { createEffect, createMemo, For, onCleanup, Show } from "solid-js";
 import "./MediaListContainer.scoped.css";
 import { objectUtils } from "@/utils/utils.js";
 import { converStatusToListName } from "./UserMediaListIndex.scoped.jsx";
@@ -79,10 +79,142 @@ export function MediaListContainerScoped(props) {
 
   const firstVisibleList = createMemo(() => props.listData()?.data?.lists.find(list => list.entries.length && props.isListVisible(list.name)));
 
+  // Edit mode selection: click, tap or enter adds or removes the card, shift click adds every card from the previous click
+  // Dragging selects every card between the start and the pointer in place of the selection. Ctrl drag adds them to the selection instead,
+  // or removes them when the drag starts from a selected card
+  let anchor, drag, lastPointerType;
+
+  const cardPosition = element => {
+    const card = element?.closest("[data-entry-index]");
+    if (!card) return;
+    const listIndex = Number(card.dataset.listIndex);
+    const entryIndex = Number(card.dataset.entryIndex);
+    const id = props.listData()?.data?.lists[listIndex]?.entries[entryIndex]?.media.id;
+    if (id === undefined) return;
+    return { listIndex, entryIndex, id };
+  };
+
+  const samePosition = (a, b) => a.listIndex === b.listIndex && a.entryIndex === b.entryIndex;
+  const isBefore = (a, b) => a.listIndex < b.listIndex || (a.listIndex === b.listIndex && a.entryIndex <= b.entryIndex);
+
+  // Ranges continue from one visible list to the next, in the order the lists are shown
+  const idsBetween = (from, to) => {
+    const [start, end] = isBefore(from, to) ? [from, to] : [to, from];
+    const lists = props.listData().data.lists;
+    const ids = [];
+    for (let listIndex = start.listIndex; listIndex <= end.listIndex; listIndex++) {
+      const list = lists[listIndex];
+      if (!list?.entries.length || !props.isListVisible(list.name)) continue;
+      const first = listIndex === start.listIndex ? start.entryIndex : 0;
+      const last = listIndex === end.listIndex ? Math.min(end.entryIndex, list.entries.length - 1) : list.entries.length - 1;
+      for (let entryIndex = first; entryIndex <= last; entryIndex++) ids.push(list.entries[entryIndex].media.id);
+    }
+    return ids;
+  };
+
+  // The list data is replaced when the filters change, so the anchor only counts while it still points to the same entry
+  const validAnchor = () => anchor && props.listData()?.data?.lists[anchor.listIndex]?.entries[anchor.entryIndex]?.media.id === anchor.id ? anchor : undefined;
+
+  const toggleSelection = position => {
+    const ids = new Set(props.selectedIds);
+    if (ids.has(position.id)) ids.delete(position.id);
+    else ids.add(position.id);
+    props.setSelectedIds(ids);
+  };
+
+  const clickSelection = (e, position) => {
+    const from = validAnchor();
+    if (e.shiftKey && from) props.setSelectedIds(new Set([...props.selectedIds, ...idsBetween(from, position)]));
+    else toggleSelection(position);
+    anchor = position;
+  };
+
+  const paintDrag = position => {
+    drag.last = position;
+    const ids = new Set(drag.initialIds);
+    for (const id of idsBetween(drag.start, position)) {
+      if (drag.removing) ids.delete(id);
+      else ids.add(id);
+    }
+    props.setSelectedIds(ids);
+  };
+
+  // Polls every frame instead of following pointer moves, so the selection keeps up while the page scrolls under a still pointer
+  const dragTick = () => {
+    if (!props.editMode) return stopDrag();
+    if (drag.moved) {
+      if (drag.y < DRAG_SCROLL_ZONE) window.scrollBy(0, -DRAG_SCROLL_SPEED);
+      else if (drag.y > window.innerHeight - DRAG_SCROLL_ZONE) window.scrollBy(0, DRAG_SCROLL_SPEED);
+
+      const position = cardPosition(document.elementFromPoint(drag.x, drag.y));
+      if (position && !samePosition(position, drag.last)) paintDrag(position);
+    }
+    drag.frame = requestAnimationFrame(dragTick);
+  };
+
+  const handleDragMove = e => {
+    drag.moved ||= Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) >= DRAG_START_DISTANCE;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+  };
+
+  const handleDragEnd = e => {
+    if (drag.moved) anchor = drag.last;
+    else clickSelection(e, drag.start);
+    stopDrag();
+  };
+
+  function stopDrag() {
+    if (!drag) return;
+    cancelAnimationFrame(drag.frame);
+    drag.controller.abort();
+    drag = undefined;
+  }
+
+  onCleanup(stopDrag);
+
+  const handlePointerDown = e => {
+    lastPointerType = e.pointerType;
+    if (!props.editMode || e.pointerType !== "mouse" || e.button !== 0) return;
+    const position = cardPosition(e.target);
+    if (!position) return;
+    // Prevents text selection
+    e.preventDefault();
+    stopDrag();
+    const controller = new AbortController();
+    drag = {
+      start: position,
+      last: position,
+      startX: e.clientX,
+      startY: e.clientY,
+      x: e.clientX,
+      y: e.clientY,
+      moved: false,
+      initialIds: isAdditive(e) ? props.selectedIds : new Set(),
+      removing: isAdditive(e) && props.selectedIds.has(position.id),
+      controller,
+    };
+    window.addEventListener("pointermove", handleDragMove, { signal: controller.signal });
+    window.addEventListener("pointerup", handleDragEnd, { signal: controller.signal });
+    window.addEventListener("pointercancel", stopDrag, { signal: controller.signal });
+    drag.frame = requestAnimationFrame(dragTick);
+  };
+
+  const handleClick = e => {
+    if (!props.editMode) return;
+    const position = cardPosition(e.target);
+    if (!position) return;
+    e.preventDefault();
+    // Mouse selection is handled by the pointer events. Keyboard clicks have an empty pointer type
+    if ((e.pointerType ?? lastPointerType) === "mouse") return;
+    toggleSelection(position);
+    anchor = position;
+  };
+
   return (
-    <div class="list-content">
+    <div class="list-content" onPointerDown={handlePointerDown} onClick={handleClick}>
       <Show when={props.listData()?.data} fallback={<CardsLoading isListVisible={props.isListVisible} />}>
-        <For each={props.listData().data.lists}>{list => (
+        <For each={props.listData().data.lists}>{(list, listIndex) => (
           <Show when={list.entries.length && props.isListVisible(list.name)}>
             <section>
               <div class="list-header">
@@ -92,12 +224,12 @@ export function MediaListContainerScoped(props) {
                 </Show>
               </div>
               <Show when={userMediaListCardStyle() === "rows"} fallback={
-                <VirtualGrid each={list.entries}>{entry => (
-                  <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showHaltedStatus showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
+                <VirtualGrid each={list.entries}>{(entry, index) => (
+                  <MediaCard selectable={props.editMode} selected={props.editMode && props.selectedIds.has(entry.media.id)} data-list-index={listIndex()} data-entry-index={index()} showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showHaltedStatus showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
                 )}</VirtualGrid>
               }>
-                <VirtualList cacheKey={`${params.name}-${params.type}-${list.name}`} each={list.entries}>{entry => (
-                  <MediaRowCard type={params.type} showStatus={list.name === COMBINED_LIST} showDates showProgress showUserScore scoreFormat={user().mediaListOptions.scoreFormat} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)} />
+                <VirtualList cacheKey={`${params.name}-${params.type}-${list.name}`} each={list.entries}>{(entry, index) => (
+                  <MediaRowCard selectable={props.editMode} selected={props.editMode && props.selectedIds.has(entry.media.id)} data-list-index={listIndex()} data-entry-index={index()} type={params.type} showStatus={list.name === COMBINED_LIST} showDates showProgress showUserScore scoreFormat={user().mediaListOptions.scoreFormat} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)} />
                 )}</VirtualList>
               </Show>
             </section>
@@ -107,6 +239,13 @@ export function MediaListContainerScoped(props) {
     </div>
   );
 }
+
+const DRAG_START_DISTANCE = 5;
+// Dragging this close to the top or bottom of the screen scrolls the page
+const DRAG_SCROLL_ZONE = 80;
+const DRAG_SCROLL_SPEED = 16;
+// Cmd is the same key on macOS, where Ctrl click opens the context menu
+const isAdditive = e => e.ctrlKey || e.metaKey;
 
 const localListCounts = {};
 function CardsLoading(props) {

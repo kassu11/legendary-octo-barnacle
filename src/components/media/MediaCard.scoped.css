@@ -24,6 +24,23 @@
       animation: .3s linear load-card-in;
     }
 
+    &.selectable {
+      cursor: pointer;
+      user-select: none;
+      outline: 3px solid transparent;
+      outline-offset: 4px;
+      transition: outline-color .15s;
+
+      /* The whole card is the click target, so the title link and footer buttons can't be clicked */
+      .title-container, .bottom .media-card-footer {
+        pointer-events: none;
+      }
+    }
+
+    &.selected {
+      outline-color: var(--light-blue-400);
+    }
+
     &::after {
       content: "";
       animation: move-gradient 2s infinite;
@@ -133,6 +150,40 @@
       &.score {
         flex: none;
         margin-left: auto;
+      }
+    }
+
+    .selection-check {
+      pointer-events: none;
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border: 2px solid var(--text-muted);
+      border-radius: 999px;
+      background-color: color-mix(var(--bg-dark), transparent 15%);
+      color: transparent;
+      box-shadow: 0 1px 4px #0000009e;
+      transition: .15s background-color, .15s border-color, .15s color;
+
+      @media (width < 40em) {
+        top: -6px;
+        left: -6px;
+      }
+
+      svg {
+        width: .9rem;
+        height: .9rem;
+      }
+
+      .media-card.selected & {
+        border-color: var(--light-blue-400);
+        background-color: var(--light-blue-400);
+        color: var(--bg-dark);
       }
     }
 

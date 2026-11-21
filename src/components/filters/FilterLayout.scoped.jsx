@@ -1,5 +1,5 @@
 import { createEffect, createSignal, Show } from "solid-js";
-import { CloseIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
+import { CloseIcon, EditIcon, FiltersIcon, SearchIcon } from "@/assets/icons.jsx";
 import { useResponsive } from "@/state/providers.js";
 import { useSearchParams } from "@solidjs/router";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
@@ -83,12 +83,23 @@ export function FilterSearchInput(props) {
   );
 }
 
+function EditModeButton(props) {
+  return (
+    <button class="edit-mode-button" classList={{ active: props.editMode }} onClick={() => props.onEditModeChange(!props.editMode)} aria-pressed={props.editMode} aria-label="Edit mode" title={props.editMode ? "Exit edit mode" : "Edit mode"}>
+      <EditIcon scoped />
+    </button>
+  );
+}
+
 /**
  * Centered search bar with a button that shows the filters below it
  *
  * @param {Object} props
  * @param {HTMLElement} [props.scrollTarget] Passed to the search input
  * @param {number} props.filterCount Shown on top of the filters button
+ * @param {boolean} [props.editModeButton] Button next to the search input that toggles edit mode
+ * @param {boolean} [props.editMode] Use with editModeButton
+ * @param {(enabled: boolean) => void} [props.onEditModeChange] Use with editModeButton
  * @param {import("solid-js").JSX.Element} props.children Filters shown when the filters button is toggled on
  */
 export function DesktopFilters(props) {
@@ -98,6 +109,9 @@ export function DesktopFilters(props) {
     <div class="desktop-filters">
       <div class="search-row">
         <FilterSearchInput scrollTarget={props.scrollTarget} />
+        <Show when={props.editModeButton}>
+          <EditModeButton editMode={props.editMode} onEditModeChange={props.onEditModeChange} />
+        </Show>
         <button class="filters-button" classList={{ open: filtersOpen() }} onClick={() => setFiltersOpen(open => !open)} aria-expanded={filtersOpen()} aria-label={filtersOpen() ? "Hide filters" : "Show filters"}>
           <FiltersIcon scoped />
           <Show when={props.filterCount}>
@@ -119,6 +133,9 @@ export function DesktopFilters(props) {
  * @param {import("solid-js").JSX.Element} props.search
  * @param {number} props.filterCount Shown on top of the filters button
  * @param {import("solid-js").JSX.Element} [props.action] Absolutely positioned against the bottom bar
+ * @param {boolean} [props.editModeButton] Button next to the search input that toggles edit mode
+ * @param {boolean} [props.editMode] Use with editModeButton
+ * @param {(enabled: boolean) => void} [props.onEditModeChange] Use with editModeButton
  * @param {import("solid-js").JSX.Element} props.children Content of the modal
  */
 export function MobileFilters(props) {
@@ -186,6 +203,9 @@ export function MobileFilters(props) {
       <div class="bottom-bar">
         {props.action}
         {props.search}
+        <Show when={props.editModeButton}>
+          <EditModeButton editMode={props.editMode} onEditModeChange={props.onEditModeChange} />
+        </Show>
         <button class="filters-button" onClick={openFilters} aria-label="Open filters">
           <FiltersIcon scoped />
           <Show when={props.filterCount}>

@@ -121,7 +121,7 @@
         width: min(100%, 26rem);
       }
 
-      .filters-button {
+      .filters-button, .edit-mode-button {
         cursor: pointer;
         transition: .2s background-color;
 
@@ -162,6 +162,28 @@
         font-size: max(16px, 1em);
         padding-block: .75em;
       }
+    }
+  }
+
+  .edit-mode-button {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    aspect-ratio: 1;
+    padding: 0 .9em;
+    border: unset;
+    border-radius: 100px;
+    background-color: var(--bg);
+    color: var(--text);
+
+    svg {
+      width: 1.1em;
+      height: 1.1em;
+    }
+
+    &.active {
+      background-color: var(--light-blue-400);
+      color: var(--bg-dark);
     }
   }
 

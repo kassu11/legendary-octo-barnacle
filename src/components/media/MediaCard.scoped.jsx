@@ -12,6 +12,7 @@ import { MediaBadges } from "./MediaBadges.scoped";
 import { MediaCardFooter } from "./MediaCardFooter.scoped";
 import { MediaCardCharacterRole } from "./MediaCardCharacterRole.scoped";
 import { MediaCardStaffRole } from "./MediaCardStaffRole.scoped";
+import { CheckIcon } from "@/assets/icons.jsx";
 
 /**
  * Base media cover card. Every extra feature is opt-in and off by default.
@@ -43,10 +44,12 @@ import { MediaCardStaffRole } from "./MediaCardStaffRole.scoped";
  * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors at the bottom of the cover
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles at the bottom of the cover
+ * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links, hover card and quick actions are disabled
+ * @param {boolean} [props.selected] Use with selectable
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes", "showHaltedStatus"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "staffRole", "children"]);
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes", "showHaltedStatus"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "staffRole", "selectable", "selected", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;
@@ -99,7 +102,7 @@ export function MediaCard(props) {
   const hover = (local.hoverCard || local.quickActions) && createHover({ placements: ["right-start", "right-end", "left-start", "left-end", "bottom", "top"], offset: 25, alignOffset: 25 });
 
   return (
-    <div {...scoping} ref={hover?.triggerRef} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }}>
+    <div {...scoping} ref={hover?.triggerRef} classList={{ "media-card": true, "zoom-in": cardZoomIn, "loading": local.loading, "selectable": local.selectable, "selected": local.selected, [props.class]: !!props.class }} style={{ "--media-background-color": local.media?.coverImage?.color }}>
       <ImageLoader scoped class="image-loader" fadeIn={local.coverFadeIn} src={local.media?.coverImage?.extraLarge || local.media?.coverImage?.large} />
       <Show when={local.media}>
         <div class="title-container">
@@ -124,7 +127,7 @@ export function MediaCard(props) {
       {/* Quick actions and footer share one column, so the quick actions stack on top of the footer instead of overlapping it */}
       <Show when={local.media && (local.showFooter || local.quickActions || local.characterRole || local.staffRole)}>
         <div class="bottom">
-          <Show when={local.quickActions && hover.isOpen()}>
+          <Show when={local.quickActions && !local.selectable && hover.isOpen()}>
             <MediaQuickActions scoped class="media-quick-actions" media={local.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
           </Show>
           <Show when={local.showFooter && mediaListEntry()}>
@@ -138,8 +141,13 @@ export function MediaCard(props) {
           </Show>
         </div>
       </Show>
+      <Show when={local.media && local.selectable}>
+        <div class="selection-check">
+          <CheckIcon scoped />
+        </div>
+      </Show>
       {local.children}
-      <Show when={hover?.isOpen() && local.media}>
+      <Show when={hover?.isOpen() && local.media && !local.selectable}>
         <Show when={local.hoverCard}>
           <HoverPortal>
             <MediaHoverCard media={local.media} entry={mediaListEntry()} showDates={local.showDates} loading={local.loading} ref={hover.floatingRef} />

@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, splitProps, Switch } from "solid-js";
 import { capitalize, formatMediaFormat, formatMediaStatus, mediaUrl, numberCommas } from "@/utils/formatUtils.js";
 import { formatSecondsToLongString } from "@/utils/timeUtils.js";
-import { StarIcon } from "@/assets/icons.jsx";
+import { CheckIcon, StarIcon } from "@/assets/icons.jsx";
 import EmojiByScore from "@/components/EmojiByScore.scoped.jsx";
 import { createHover, HoverPortal } from "@/hooks/createHover";
 import { MediaHoverCard } from "@/components/media/MediaHoverCard.scoped.jsx";
@@ -34,14 +34,16 @@ import "./MediaRowCard.scoped.css";
  * @param {boolean} [props.showType] Media type (format) above the episode, chapter and volume counts
  * @param {boolean} [props.showUserScore] Users list score in place of the media type, takes its place when both are set
  * @param {string} [props.scoreFormat] Score format of the list entry owner used by showUserScore, defaults to POINT_10_DECIMAL
+ * @param {boolean} [props.selectable] Card is clicked as a whole for selecting it, links, hover card and quick actions are disabled
+ * @param {boolean} [props.selected] Use with selectable
  */
 export function MediaRowCard(props) {
-  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates", "showProgress", "showType", "showUserScore", "scoreFormat"]);
+  const [local, scoping] = splitProps(props, ["media", "mediaListEntry", "showStatus", "otherUsersEntry", "afterMutation", "afterDelete", "rank", "type", "loading", "subgrid", "class", "characterRole", "voiceActorLanguages", "staffRole", "showDates", "showProgress", "showType", "showUserScore", "scoreFormat", "selectable", "selected"]);
 
   return (
-    <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, [local.class]: !!local.class }}>
+    <div {...scoping} classList={{ "media-row-card": true, "subgrid": local.subgrid, "loading": local.loading, "selectable": local.selectable, "selected": local.selected, [local.class]: !!local.class }}>
       <Show when={local.media}>
-        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} showProgress={local.showProgress} showType={local.showType} showUserScore={local.showUserScore} scoreFormat={local.scoreFormat} />
+        <MediaRowCardContent media={local.media} mediaListEntry={local.mediaListEntry} showStatus={local.showStatus} otherUsersEntry={local.otherUsersEntry} afterMutation={local.afterMutation} afterDelete={local.afterDelete} rank={local.rank} type={local.type} loading={local.loading} characterRole={local.characterRole} voiceActorLanguages={local.voiceActorLanguages} staffRole={local.staffRole} showDates={local.showDates} showProgress={local.showProgress} showType={local.showType} showUserScore={local.showUserScore} scoreFormat={local.scoreFormat} selectable={local.selectable} />
       </Show>
     </div>
   );
@@ -90,6 +92,11 @@ function MediaRowCardContent(props) {
         </p>
       </Show>
       <div class="body" ref={hover.triggerRef}>
+        <Show when={props.selectable}>
+          <div class="selection-check">
+            <CheckIcon scoped />
+          </div>
+        </Show>
         <div class="cover-container">
           <img src={props.media.coverImage?.large} class="cover" alt="Cover." />
         </div>
@@ -197,13 +204,13 @@ function MediaRowCardContent(props) {
             <p>{formatMediaStatus(props.media.status)}</p>
           </div>
         </div>
-        <Show when={hover.isOpen()}>
+        <Show when={hover.isOpen() && !props.selectable}>
           <div class="quick-actions">
             <MediaQuickActions horizontal media={props.media} mediaListEntry={quickActionsEntry()} status={quickActionsEntry()?.status} afterMutation={quickActionsAfterMutation()} afterDelete={quickActionsAfterDelete()} />
           </div>
         </Show>
       </div>
-      <Show when={hover.isOpen()}>
+      <Show when={hover.isOpen() && !props.selectable}>
         <HoverPortal>
           <MediaHoverCard media={props.media} entry={mediaListEntry()} showDates={props.showDates} loading={props.loading} ref={hover.floatingRef} />
         </HoverPortal>

@@ -153,13 +153,13 @@ export function SearchControlsScoped(props) {
   return (
     <Show when={isMobilLarge()} fallback={
       <>
-        <DesktopFilters scrollTarget={props.scrollTarget} filterCount={activeFilterCount()}>
+        <DesktopFilters scrollTarget={props.scrollTarget} filterCount={activeFilterCount()} editModeButton={isOwnProfile()} editMode={props.editMode()} onEditModeChange={props.setEditMode}>
           <Filters />
         </DesktopFilters>
         <ActiveQueries activeQueries={activeQueries()} />
       </>
     }>
-      <MobileFilters search={<FilterSearchInput scrollTarget={props.scrollTarget} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton scrollTarget={props.scrollTarget} />}>
+      <MobileFilters search={<FilterSearchInput scrollTarget={props.scrollTarget} />} filterCount={activeFilterCount()} action={<ScrollToListStartButton scrollTarget={props.scrollTarget} />} editModeButton={isOwnProfile()} editMode={props.editMode()} onEditModeChange={props.setEditMode}>
         <ActiveQueries activeQueries={activeQueries()} />
         <Filters />
       </MobileFilters>

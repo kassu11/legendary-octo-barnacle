@@ -128,6 +128,51 @@
           filter: brightness(1.1);
         }
 
+        .media-row-card.selectable & {
+          cursor: pointer;
+          user-select: none;
+          outline: 3px solid transparent;
+          outline-offset: 2px;
+          transition: .2s filter, .15s outline-color;
+
+          /* The whole card is the click target, so the links can't be clicked */
+          > * {
+            pointer-events: none;
+          }
+        }
+
+        .media-row-card.selected & {
+          outline-color: var(--light-blue-400);
+        }
+
+        .selection-check {
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          width: 1.5rem;
+          height: 1.5rem;
+          border: 2px solid var(--text-muted);
+          border-radius: 999px;
+          background-color: color-mix(var(--bg-dark), transparent 15%);
+          color: transparent;
+          box-shadow: 0 1px 4px #0000009e;
+          transition: .15s background-color, .15s border-color, .15s color;
+
+          svg {
+            width: .75rem;
+            height: .75rem;
+          }
+
+          .media-row-card.selected & {
+            border-color: var(--light-blue-400);
+            background-color: var(--light-blue-400);
+            color: var(--bg-dark);
+          }
+        }
+
         .media-row-card.loading & {
           filter: grayscale(.6);
 

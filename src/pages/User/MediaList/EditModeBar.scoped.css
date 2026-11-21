@@ -1,0 +1,90 @@
+@layer layout {
+  /* Covers the main navigation, which has the same height */
+  .edit-mode-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 101;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 48px;
+    padding: 6px 16px;
+    background-color: color-mix(in oklab, var(--bg-dark) 85%, transparent);
+    backdrop-filter: blur(16px) saturate(1.6);
+    border-bottom: 2px solid var(--light-blue-400);
+    box-shadow: 0 4px 24px -12px var(--shadow);
+
+    @media (width < 40em) {
+      padding-inline: 8px;
+    }
+
+    .selection {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      min-width: 0;
+
+      p {
+        margin: 0;
+      }
+
+      .count {
+        color: var(--text);
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .hint {
+        overflow: hidden;
+        color: var(--text-muted);
+        font-size: var(--fs-300);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        @media (width < 40em) {
+          display: none;
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      button {
+        display: grid;
+        place-items: center;
+        border: unset;
+        border-radius: 100px;
+        background-color: var(--bg);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s background-color;
+
+        &:hover, &:focus-visible {
+          outline: none;
+          background-color: color-mix(in oklab, var(--bg), var(--light-blue-400) 25%);
+        }
+      }
+
+      .clear {
+        padding: .4em 1em;
+        white-space: nowrap;
+      }
+
+      .exit {
+        padding: .5em;
+
+        svg {
+          width: 1.1em;
+          height: 1.1em;
+        }
+      }
+    }
+  }
+}
