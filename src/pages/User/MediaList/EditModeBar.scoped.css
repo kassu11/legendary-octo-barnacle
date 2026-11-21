@@ -17,6 +17,11 @@
     border-bottom: 2px solid var(--light-blue-400);
     box-shadow: 0 4px 24px -12px var(--shadow);
 
+    @media (width < 50em) {
+      flex-wrap: wrap;
+      row-gap: 6px;
+    }
+
     @media (width < 40em) {
       padding-inline: 8px;
     }
@@ -35,6 +40,32 @@
         color: var(--text);
         font-weight: 700;
         white-space: nowrap;
+      }
+
+      .score {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        font-weight: 600;
+
+        .score-input {
+          border-radius: 4px;
+
+          &:is(input) {
+            width: 5em;
+            padding: .3em .5em;
+            border: 2px solid var(--bg-light);
+            background-color: var(--bg);
+            color: var(--text);
+            font-weight: 600;
+
+            &:focus-visible {
+              outline: none;
+              border-color: var(--light-blue-400);
+            }
+          }
+        }
       }
 
       .hint {
@@ -75,6 +106,39 @@
       .clear {
         padding: .4em 1em;
         white-space: nowrap;
+      }
+
+      .auto-save {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-muted);
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+
+        input {
+          accent-color: var(--light-blue-400);
+          cursor: pointer;
+        }
+      }
+
+      .save {
+        padding: .4em 1em;
+        background-color: var(--light-blue-400);
+        color: var(--bg-dark);
+        white-space: nowrap;
+
+        &:hover, &:focus-visible {
+          background-color: color-mix(in oklab, var(--light-blue-400), white 20%);
+        }
+
+        &:disabled {
+          background-color: var(--bg);
+          color: var(--text-muted);
+          cursor: default;
+        }
       }
 
       .exit {

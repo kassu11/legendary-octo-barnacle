@@ -27,6 +27,7 @@ export const [searchPageGroupTBABy, setSearchPageGroupTBABy] = createLocalStorag
 // "cards" or "rows"
 export const [searchPageCardStyle, setSearchPageCardStyle] = createLocalStorageSignal("LOB-search-card-style", "cards");
 export const [userMediaListCardStyle, setUserMediaListCardStyle] = createLocalStorageSignal("LOB-user-media-list-card-style", "cards");
+export const [userMediaListAutoSave, setUserMediaListAutoSave] = createLocalStorageBooleanSignal("LOB-user-media-list-auto-save", false);
 export const [voiceActorLanguages, setVoiceActorLanguages] = createLocalStorageJsonSignal("LOB-voice-actor-languages", ["Japanese"]);
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 

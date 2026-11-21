@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useParams, useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, on, onCleanup, Show, untrack } from "solid-js";
+import { batch, createEffect, createMemo, createSignal, on, onCleanup, Show, untrack } from "solid-js";
 import "./UserMediaListIndex.scoped.css";
 import { capitalize } from "@/utils/formatUtils.js";
 import UserMediaListWorker from "@/workers/user-media-list.js?worker";
@@ -9,16 +9,21 @@ import { queries } from "@/api/api.js";
 import { MediaListContainerScoped } from "./MediaListContainer.scoped.jsx";
 import { SearchControlsScoped } from "./SearchControls.scoped.jsx";
 import { EditModeBar } from "./EditModeBar.scoped.jsx";
-import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { createAnilistFetcher, fetcherToFetch, sendAnilistFetcher } from "@/api/fetcherUtils.js";
+import { addApplicationNotification } from "@/state/notifications.js";
 import { createTimer } from "@/hooks/createTimer.js";
 import { formatMSToString } from "@/utils/timeUtils.js";
 import { isTypeFunction } from "@/utils/functionUtils.js";
 import { asserts, arrayUtils } from "@/utils/utils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
-import { authUserData } from "@/state/globalState";
+import { authUserData, globalEditedMedia, setUserMediaListAutoSave, storeGlobalEditedMedia, userMediaListAutoSave } from "@/state/globalState";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { COMBINED_LIST } from "@/constants/mediaLists.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
+
+// Every entry is its own aliased mutation, so big saves are split into many requests
+const SCORE_SAVE_BATCH_SIZE = 50;
+const AUTO_SAVE_DELAY = 15_000;
 
 export function UserMediaList() {
   const { user } = useUser();
@@ -145,11 +150,107 @@ export function UserMediaList() {
 
   const [editMode, setEditMode] = createSignal(false);
   const [selectedIds, setSelectedIds] = createSignal(new Set());
+  // Unsaved scores by media id, shown on the cards until they are saved
+  const [pendingScores, setPendingScores] = createSignal(new Map());
+  const [scoresSaving, setScoresSaving] = createSignal(false);
+
   const changeEditMode = enabled => {
+    if (!enabled && pendingScores().size && !confirm(`Discard ${pendingScores().size} unsaved score changes?`)) return;
     setEditMode(enabled);
     setSelectedIds(new Set());
+    setPendingScores(new Map());
   };
-  createEffect(on([name, () => params.type], () => changeEditMode(false), { defer: true }));
+  createEffect(on([name, () => params.type], () => {
+    setEditMode(false);
+    setSelectedIds(new Set());
+    setPendingScores(new Map());
+  }, { defer: true }));
+
+  const savedScore = mediaId => {
+    const [listIndex, entryIndex] = listData().data?.indecies[mediaId]?.[0] ?? [];
+    return userMediaData()?.data.data.MediaListCollection.lists[listIndex]?.entries[entryIndex]?.score;
+  };
+
+  // Score shown in the score input, empty when the selected entries have different scores
+  const selectedScore = createMemo(() => {
+    let score;
+    for (const mediaId of selectedIds()) {
+      const entryScore = pendingScores().get(mediaId) ?? savedScore(mediaId);
+      if (score === undefined) score = entryScore;
+      else if (score !== entryScore) return "";
+    }
+    return score ?? "";
+  });
+
+  const changeSelectedScores = score => {
+    setPendingScores(current => {
+      const scores = new Map(current);
+      for (const mediaId of selectedIds()) {
+        if (savedScore(mediaId) === score) scores.delete(mediaId);
+        else scores.set(mediaId, score);
+      }
+      return scores;
+    });
+  };
+
+  const saveScores = async () => {
+    if (scoresSaving() || !pendingScores().size) return;
+    setScoresSaving(true);
+    const savingFetcher = userMediaFetcher;
+    const changes = [...pendingScores()];
+    try {
+      for (let i = 0; i < changes.length; i += SCORE_SAVE_BATCH_SIZE) {
+        const batchChanges = changes.slice(i, i + SCORE_SAVE_BATCH_SIZE);
+        const mutation = `mutation{${batchChanges.map(([mediaId, score]) => `m${mediaId}:SaveMediaListEntry(mediaId:${mediaId},score:${score}){mediaId score}`).join(" ")}}`;
+        const res = await fetcherToFetch(createAnilistFetcher(mutation, {}, AbortSignal.timeout(30_000)));
+        if (res?.status !== 200) {
+          addApplicationNotification({ type: "error", message: "Failed to save the scores", duration: 30_000 });
+          return;
+        }
+
+        const json = await res.json();
+        // The user list could have changed while saving
+        if (savingFetcher !== userMediaFetcher) return;
+
+        batch(() => {
+          mutateMediaListCache(cache => {
+            for (const entry of Object.values(json.data ?? {})) {
+              if (!entry) continue;
+              for (const [listIndex, entryIndex] of listData().data.indecies[entry.mediaId] ?? []) {
+                cache.data.data.MediaListCollection.lists[listIndex].entries[entryIndex].score = entry.score;
+              }
+              if (globalEditedMedia[entry.mediaId]) storeGlobalEditedMedia(entry.mediaId, "score", entry.score);
+            }
+            return cache;
+          }, updateListInfo);
+
+          setPendingScores(current => {
+            const scores = new Map(current);
+            // Scores that were changed again during the save stay unsaved
+            for (const [mediaId, score] of batchChanges) {
+              if (scores.get(mediaId) === score) scores.delete(mediaId);
+            }
+            return scores;
+          });
+        });
+      }
+    } finally {
+      setScoresSaving(false);
+    }
+  };
+
+  const autoSaveScores = debouncer(() => {
+    if (userMediaListAutoSave()) saveScores();
+  });
+  createEffect(() => {
+    if (userMediaListAutoSave() && pendingScores().size && !scoresSaving()) autoSaveScores(AUTO_SAVE_DELAY);
+  });
+
+  const warnUnsavedScores = e => {
+    if (pendingScores().size) e.preventDefault();
+  };
+  window.addEventListener("beforeunload", warnUnsavedScores);
+  onCleanup(() => window.removeEventListener("beforeunload", warnUnsavedScores));
 
   const [listBody, setListBody] = createSignal();
 
@@ -169,7 +270,19 @@ export function UserMediaList() {
         <Navigate href={legacyListUrl()} />
       </Show>
       <Show when={editMode()}>
-        <EditModeBar selectedCount={selectedIds().size} onClearSelection={() => setSelectedIds(new Set())} onExit={() => changeEditMode(false)} />
+        <EditModeBar
+          selectedCount={selectedIds().size}
+          unsavedCount={pendingScores().size}
+          score={selectedScore()}
+          scoreFormat={user().mediaListOptions.scoreFormat}
+          saving={scoresSaving()}
+          autoSave={userMediaListAutoSave()}
+          onScoreChange={changeSelectedScores}
+          onSave={saveScores}
+          onAutoSaveChange={setUserMediaListAutoSave}
+          onClearSelection={() => setSelectedIds(new Set())}
+          onExit={() => changeEditMode(false)}
+        />
       </Show>
       <div ref={setListBody} class="user-profile-media-list-body">
         <SearchControlsScoped
@@ -207,6 +320,7 @@ export function UserMediaList() {
           editMode={editMode()}
           selectedIds={selectedIds()}
           setSelectedIds={setSelectedIds}
+          pendingScores={pendingScores()}
         />
       </div>
     </UserMediaListContext.Provider>
