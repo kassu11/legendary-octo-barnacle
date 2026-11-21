@@ -1,4 +1,4 @@
-import { A, useLocation, useParams, useSearchParams } from "@solidjs/router";
+import { A, useParams, useSearchParams } from "@solidjs/router";
 import { useAuthentication, useResponsive, useUser, useUserMediaList } from "@/state/providers.js";
 import { createMemo, mapArray, Match, Show, Switch } from "solid-js";
 import { ALL_LISTS, COMBINED_LIST } from "@/constants/mediaLists.js";
@@ -10,7 +10,7 @@ import { addClearAllActiveQuery, createActiveQuery, createToggleActiveQueries, c
 import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
-import { AgeIcon, CalendarIcon, CloseIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, YearIcon } from "@/assets/icons.jsx";
+import { AgeIcon, CalendarIcon,CountryIcon, FormatIcon, GenreIcon, ListIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, YearIcon } from "@/assets/icons.jsx";
 import "./SearchControls.scoped.css";
 
 const animeFormatOptions = [
@@ -64,11 +64,7 @@ const toListOption = name => {
 
 export const listTitle = name => name === COMBINED_LIST ? "All" : name;
 
-// Every search param that the remove filters button clears, together with q
-const filterParams = ["list", "sort", "format", "status", "countryOfOrigin", "year", "studio", "genre", "tag", "isAdult", "userStatus", "startedYear", "completedYear", "score", "startDate", "endDate", "notes", "repeat", "private"];
-
 export function SearchControlsScoped(props) {
-  const location = useLocation();
   const {authUserData} = useAuthentication();
   const {isOwnProfile} = useUserMediaList();
   const {isMobilLarge} = useResponsive();
@@ -186,10 +182,6 @@ export function SearchControlsScoped(props) {
                 <A scoped class="action" href={"/compare/" + params.type + "?user=" + user().name}>Open in compare page</A>
               </Match>
             </Switch>
-            <button class="action remove-filters" disabled={!location.search} onClick={() => setSearchParams(Object.fromEntries(["q", ...filterParams].map(name => [name, undefined])))}>
-              <CloseIcon />
-              Remove filters
-            </button>
           </FilterGroup>
           {/* Filters that depend on the page are last in their group, so the other filters are always in the same place */}
           <FilterGroup title="Media">
