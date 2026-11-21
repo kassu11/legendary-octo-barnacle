@@ -502,6 +502,7 @@ function UserRow(props) {
 
     sendAnilistFetcher(anilistUserMediaFetcher, {
       name: "Anilist user media list",
+      sessionCache: false,
       onFetch: () => anilistUserMediaController.disable(),
       onStart: () => setAnilistUserMediaLoading(true),
       onStop: () => setAnilistUserMediaLoading(false),

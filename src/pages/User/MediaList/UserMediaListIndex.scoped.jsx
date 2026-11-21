@@ -40,6 +40,7 @@ export function UserMediaList() {
 
     sendAnilistFetcher(userMediaFetcher, {
       name: "Anilist user media page",
+      sessionCache: false,
       onFetch: () => userMediaController.disable(),
       onStart: startUserMediaTimer,
       onStop: stopUserMediaTimer,
@@ -53,7 +54,7 @@ export function UserMediaList() {
 
   const mutateMediaListCache = (mutate, afterCallBack) => {
     if (isTypeFunction(mutate)) mutate = mutate(untrack(userMediaData));
-    setFetcherValueToStorage(mutate);
+    setFetcherValueToStorage(mutate, { sessionCache: false });
     afterCallBack?.();
   }
 

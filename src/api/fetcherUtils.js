@@ -226,10 +226,10 @@ const baseSettings = {
   debug: modes.debug,
   loadingBar: true,
   cache: {
-    get: res => getFetcherValueFromStorage(res, null),
-    set: res => {
+    get: (res, settings) => getFetcherValueFromStorage(res, null, settings),
+    set: (res, { settings }) => {
       allFetchedCacheKeys.add(res.cacheKey);
-      setFetcherValueToStorage(res);
+      setFetcherValueToStorage(res, settings);
     }
   },
   setValue: (res) => console.error("Missing setValue", res),
@@ -316,7 +316,7 @@ export async function sendFetcher(fetcher, settings = {}) {
 
     if (settings.name) res.name = settings.name;
     settings.setValue({ ...res, cache: false }, { fetcher, settings });
-    if (data) settings.cache?.set?.(res, { fetcher });
+    if (data) settings.cache?.set?.(res, { fetcher, settings });
     settings.onStop?.(performance.now() - start);
     return;
   }
@@ -347,7 +347,7 @@ export async function sendFetcher(fetcher, settings = {}) {
         if (settings.name) res.name = settings.name;
 
         settings.setValue({ ...res, cache: false }, { fetcher, settings });
-        if (data) settings.cache?.set?.(res, { fetcher });
+        if (data) settings.cache?.set?.(res, { fetcher, settings });
       } catch (err) {
         if (modes.debug) console.error(err);
         settings.onError?.(err, { fetcher });
