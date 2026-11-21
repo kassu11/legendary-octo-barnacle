@@ -33,12 +33,14 @@ function modifyMediaListData(listData, type, options) {
   const studiosSet = new Set();
   const startedYears = new Set();
   const completedYears = new Set();
+  const maxScore = maxScores[listData.user.mediaListOptions.scoreFormat] ?? 10;
   listData.indecies = {};
   listData.lists.forEach((list, i) => {
     let tail = 0;
     list.entries.forEach((entry, j, arr) => {
       if (entry.startedAt?.year) startedYears.add(entry.startedAt.year);
       if (entry.completedAt?.year) completedYears.add(entry.completedAt.year);
+      entry.scoreDelta = entry.score && entry.media.averageScore ? entry.score * 100 / maxScore - entry.media.averageScore : null;
       listData.indecies[entry.media.id] ??= []
       listData.indecies[entry.media.id].push([i, j]);
       for (const studio of entry.media.studios.edges) {
@@ -120,6 +122,8 @@ function generateSortFunction(sort) {
   };
 }
 
+const maxScores = { POINT_100: 100, POINT_10_DECIMAL: 10, POINT_10: 10, POINT_5: 5, POINT_3: 3 };
+
 const sortFunctions = {
   "score": (a, b) => (b.score || 0) - (a.score || 0),
   "title": (a, b) => a.media.title.userPreferred.localeCompare(b.media.title.userPreferred),
@@ -130,6 +134,7 @@ const sortFunctions = {
   "releaseDate": (a, b) => (b.media.startDate?.year || 0) - (a.media.startDate?.year || 0) || (b.media.startDate?.month || 0) - (a.media.startDate?.month || 0) || (b.media.startDate?.day || 0) - (a.media.startDate?.day || 0),
   "averageScore": (a, b) => (b.media.averageScore || 0) - (a.media.averageScore || 0),
   "popularity": (a, b) => (b.media.popularity || 0) - (a.media.popularity || 0),
+  "scoreDelta": (a, b) => a.scoreDelta === b.scoreDelta ? 0 : (b.scoreDelta ?? -Infinity) - (a.scoreDelta ?? -Infinity),
   "repeat": (a, b) => (b.repeat || 0) - (a.repeat || 0),
 }
 

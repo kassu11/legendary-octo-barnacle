@@ -97,6 +97,7 @@ export function SearchControlsScoped(props) {
     { description: "Release Date",                                    id: "releaseDate",  type: "numeric"    },
     { description: "Average Score",                                   id: "averageScore", type: "numeric"    },
     { description: "Popularity",                                      id: "popularity",   type: "numeric"    },
+    { description: "Score Delta",                                     id: "scoreDelta",   type: "numeric",   tooltip: "Difference between the user's score and the average score" },
     { description: params.type === "anime" ? "Rewatches" : "Rereads", id: "repeat",       type: "numeric"    },
     { description: "List Order",                                      id: "list",         type: "order",     tooltip: "Sorts the \"All\" list by the order of the lists" },
   ]);
