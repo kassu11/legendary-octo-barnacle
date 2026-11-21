@@ -77,14 +77,14 @@ export function MediaListContainerScoped(props) {
     }));
   });
 
-  const entryWithPendingScore = entry => {
-    const score = props.pendingScores.get(entry.media.id);
+  const entryWithShownScore = entry => {
+    const score = props.shownScores.get(entry.media.id);
     return score === undefined ? entry : { ...entry, score };
   };
 
   const firstVisibleList = createMemo(() => props.listData()?.data?.lists.find(list => list.entries.length && props.isListVisible(list.name)));
 
-  // Edit mode selection: click, tap or enter adds or removes the card, shift click adds every card from the previous click
+  // Edit mode selection: click selects only the card, ctrl click, tap or enter adds or removes it, shift click adds every card from the previous click
   // Dragging selects every card between the start and the pointer in place of the selection. Ctrl drag adds them to the selection instead,
   // or removes them when the drag starts from a selected card
   let anchor, drag, lastPointerType;
@@ -130,7 +130,8 @@ export function MediaListContainerScoped(props) {
   const clickSelection = (e, position) => {
     const from = validAnchor();
     if (e.shiftKey && from) props.setSelectedIds(new Set([...props.selectedIds, ...idsBetween(from, position)]));
-    else toggleSelection(position);
+    else if (isAdditive(e)) toggleSelection(position);
+    else props.setSelectedIds(new Set([position.id]));
     anchor = position;
   };
 
@@ -167,6 +168,7 @@ export function MediaListContainerScoped(props) {
     if (drag.moved) anchor = drag.last;
     else clickSelection(e, drag.start);
     stopDrag();
+    props.onMouseSelect();
   };
 
   function stopDrag() {
@@ -183,8 +185,9 @@ export function MediaListContainerScoped(props) {
     if (!props.editMode || e.pointerType !== "mouse" || e.button !== 0) return;
     const position = cardPosition(e.target);
     if (!position) return;
-    // Prevents text selection
+    // Prevents text selection, which also keeps the focus. Blurring commits a score typed for the previous selection
     e.preventDefault();
+    document.activeElement?.blur();
     stopDrag();
     const controller = new AbortController();
     drag = {
@@ -230,11 +233,11 @@ export function MediaListContainerScoped(props) {
               </div>
               <Show when={userMediaListCardStyle() === "rows"} fallback={
                 <VirtualGrid each={list.entries}>{(entry, index) => (
-                  <MediaCard selectable={props.editMode} selected={props.editMode && props.selectedIds.has(entry.media.id)} data-list-index={listIndex()} data-entry-index={index()} showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showHaltedStatus showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entryWithPendingScore(entry)} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
+                  <MediaCard selectable={props.editMode} selected={props.editMode && props.selectedIds.has(entry.media.id)} data-list-index={listIndex()} data-entry-index={index()} showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showHaltedStatus showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entryWithShownScore(entry)} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
                 )}</VirtualGrid>
               }>
                 <VirtualList cacheKey={`${params.name}-${params.type}-${list.name}`} each={list.entries}>{(entry, index) => (
-                  <MediaRowCard selectable={props.editMode} selected={props.editMode && props.selectedIds.has(entry.media.id)} data-list-index={listIndex()} data-entry-index={index()} type={params.type} showStatus={list.name === COMBINED_LIST} showDates showProgress showUserScore scoreFormat={user().mediaListOptions.scoreFormat} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entryWithPendingScore(entry)} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)} />
+                  <MediaRowCard selectable={props.editMode} selected={props.editMode && props.selectedIds.has(entry.media.id)} data-list-index={listIndex()} data-entry-index={index()} type={params.type} showStatus={list.name === COMBINED_LIST} showDates showProgress showUserScore scoreFormat={user().mediaListOptions.scoreFormat} otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entryWithShownScore(entry)} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterDelete={() => deleteEntry(entry)} />
                 )}</VirtualList>
               </Show>
             </section>

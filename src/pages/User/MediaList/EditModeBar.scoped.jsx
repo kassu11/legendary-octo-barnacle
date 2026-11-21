@@ -28,7 +28,7 @@ export function EditModeBar(props) {
           {numberCommas(props.selectedCount)} selected
         </p>
         <Show when={props.selectedCount} fallback={
-          <p class="hint">Click or Shift click cards to select them, drag to select a range and Ctrl drag to add one</p>
+          <p class="hint">Click a card to select it, Ctrl click to add one, Shift click or drag to select a range</p>
         }>
           <div class="score">
             <span aria-hidden="true">Score</span>

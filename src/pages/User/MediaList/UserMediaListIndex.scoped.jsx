@@ -152,10 +152,15 @@ export function UserMediaList() {
   const [selectedIds, setSelectedIds] = createSignal(new Set());
   // Unsaved scores by media id, shown on the cards until they are saved
   const [pendingScores, setPendingScores] = createSignal(new Map());
+  // Auto saved scores are shown on the cards without resorting the list, until the list data is replaced
+  const [autoSavedScores, setAutoSavedScores] = createSignal(new Map());
+  const shownScores = createMemo(() => autoSavedScores().size ? new Map([...autoSavedScores(), ...pendingScores()]) : pendingScores());
   const [scoresSaving, setScoresSaving] = createSignal(false);
 
+  createEffect(on(listData, () => setAutoSavedScores(new Map()), { defer: true }));
+
   const changeEditMode = enabled => {
-    if (!enabled && pendingScores().size && !confirm(`Discard ${pendingScores().size} unsaved score changes?`)) return;
+    if (!enabled && autoSavedScores().size) updateListInfo();
     setEditMode(enabled);
     setSelectedIds(new Set());
     setPendingScores(new Map());
@@ -193,7 +198,7 @@ export function UserMediaList() {
     });
   };
 
-  const saveScores = async () => {
+  const saveScores = async (resortList = true) => {
     if (scoresSaving() || !pendingScores().size) return;
     setScoresSaving(true);
     const savingFetcher = userMediaFetcher;
@@ -213,16 +218,24 @@ export function UserMediaList() {
         if (savingFetcher !== userMediaFetcher) return;
 
         batch(() => {
+          const savedEntries = Object.values(json.data ?? {}).filter(Boolean);
           mutateMediaListCache(cache => {
-            for (const entry of Object.values(json.data ?? {})) {
-              if (!entry) continue;
+            for (const entry of savedEntries) {
               for (const [listIndex, entryIndex] of listData().data.indecies[entry.mediaId] ?? []) {
                 cache.data.data.MediaListCollection.lists[listIndex].entries[entryIndex].score = entry.score;
               }
               if (globalEditedMedia[entry.mediaId]) storeGlobalEditedMedia(entry.mediaId, "score", entry.score);
             }
             return cache;
-          }, updateListInfo);
+          }, resortList ? updateListInfo : undefined);
+
+          if (!resortList) {
+            setAutoSavedScores(current => {
+              const scores = new Map(current);
+              for (const entry of savedEntries) scores.set(entry.mediaId, entry.score);
+              return scores;
+            });
+          }
 
           setPendingScores(current => {
             const scores = new Map(current);
@@ -239,8 +252,15 @@ export function UserMediaList() {
     }
   };
 
+  const focusScoreInput = () => {
+    // Star and smiley scores are radios that share the id with their wrapper, the checked one is the one arrow keys move from
+    const scoreInput = document.querySelector("input#edit-mode-score:checked") ?? document.querySelector("input#edit-mode-score");
+    scoreInput?.focus();
+    if (scoreInput?.type === "number") scoreInput.select();
+  };
+
   const autoSaveScores = debouncer(() => {
-    if (userMediaListAutoSave()) saveScores();
+    if (userMediaListAutoSave()) saveScores(false);
   });
   createEffect(() => {
     if (userMediaListAutoSave() && pendingScores().size && !scoresSaving()) autoSaveScores(AUTO_SAVE_DELAY);
@@ -278,7 +298,7 @@ export function UserMediaList() {
           saving={scoresSaving()}
           autoSave={userMediaListAutoSave()}
           onScoreChange={changeSelectedScores}
-          onSave={saveScores}
+          onSave={() => saveScores()}
           onAutoSaveChange={setUserMediaListAutoSave}
           onClearSelection={() => setSelectedIds(new Set())}
           onExit={() => changeEditMode(false)}
@@ -320,7 +340,8 @@ export function UserMediaList() {
           editMode={editMode()}
           selectedIds={selectedIds()}
           setSelectedIds={setSelectedIds}
-          pendingScores={pendingScores()}
+          shownScores={shownScores()}
+          onMouseSelect={focusScoreInput}
         />
       </div>
     </UserMediaListContext.Provider>
