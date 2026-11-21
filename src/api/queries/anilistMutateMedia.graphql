@@ -68,7 +68,7 @@ mutation (
       }
       type
       format
-      status
+      status(version: 2)
       episodes
       volumes
       chapters

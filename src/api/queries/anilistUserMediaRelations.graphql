@@ -26,7 +26,7 @@ fragment mediaListEntry on MediaList {
           idMal
           synonyms
           averageScore
-          status(version: 3)
+          status(version: 2)
           coverImage {
             extraLarge
           }

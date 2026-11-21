@@ -65,7 +65,7 @@ query (
         media {
           id
           type
-          status
+          status(version: 2)
           isAdult
           title {
             userPreferred
