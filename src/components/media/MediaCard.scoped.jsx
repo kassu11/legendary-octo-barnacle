@@ -39,13 +39,14 @@ import { MediaCardStaffRole } from "./MediaCardStaffRole.scoped";
  * @param {boolean} [props.showAdult] 18+ badge for adult media
  * @param {boolean} [props.showRepeats] Users rewatch / reread count badge
  * @param {boolean} [props.showNotes] Users notes badge
+ * @param {boolean} [props.showHaltedStatus] Hiatus or cancelled release status badge
  * @param {Object} [props.characterRole] Character media edge, shows the role and voice actors at the bottom of the cover
  * @param {string[]} [props.voiceActorLanguages] Languages of the voice actors shown with the character role
  * @param {Object} [props.staffRole] Roles of a staff member in the media, shows the voiced characters and staff roles at the bottom of the cover
  * @param {import("solid-js").JSX.Element} [props.children] Extra content rendered on top of the cover
  */
 export function MediaCard(props) {
-  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "staffRole", "children"]);
+  const [badges, local, scoping] = splitProps(props, ["showAdult", "showRepeats", "showNotes", "showHaltedStatus"], ["media", "mediaListEntry", "coverFadeIn", "loading", "cardZoomIn", "rank", "showScore", "showStatus", "showFooter", "scoreFormat", "progressIncrement", "showAdvancedScores", "afterProgressMutation", "quickActions", "otherUsersEntry", "afterMutation", "afterDelete", "hoverCard", "showDates", "characterRole", "voiceActorLanguages", "staffRole", "children"]);
 
   // We don't want these to be reactive, because if they switch between animation, the animation will stop
   const { cardZoomIn } = local;

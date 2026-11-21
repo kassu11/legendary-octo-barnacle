@@ -30,6 +30,16 @@
         font-weight: 700;
       }
 
+      &.hiatus {
+        background-color: color-mix(var(--gold-400), transparent 15%);
+        color: black;
+      }
+
+      &.cancelled {
+        background-color: color-mix(var(--red-400), transparent 15%);
+        color: white;
+      }
+
       &.score svg {
         color: var(--gold-400);
       }

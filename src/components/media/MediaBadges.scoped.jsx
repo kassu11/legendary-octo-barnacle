@@ -2,6 +2,7 @@ import { Show, splitProps } from "solid-js";
 import "./MediaBadges.scoped.css";
 import { CommentIcon, RepeatIcon, StarIcon } from "@/assets/icons.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
+import { formatMediaStatus } from "@/utils/formatUtils";
 
 /**
  * Small info badges for the media cover. Every badge is opt-in.
@@ -13,14 +14,18 @@ import { Tooltip } from "@/components/Tooltip.scoped";
  * @param {boolean} [props.showRepeats] Rewatch / reread count
  * @param {boolean} [props.showNotes] Users notes, the note text is shown as a tooltip
  * @param {boolean} [props.showScore] Global average score
+ * @param {boolean} [props.showHaltedStatus] Media release status when it is on hiatus or cancelled
  */
 export function MediaBadges(props) {
-  const [local, scoping] = splitProps(props, ["media", "entry", "showAdult", "showRepeats", "showNotes", "showScore"]);
+  const [local, scoping] = splitProps(props, ["media", "entry", "showAdult", "showRepeats", "showNotes", "showScore", "showHaltedStatus"]);
 
   return (
     <div {...scoping} classList={{ "media-badges": true, [props.class]: !!props.class }}>
       <Show when={local.showAdult && local.media?.isAdult}>
         <div class="badge adult">18+</div>
+      </Show>
+      <Show when={local.showHaltedStatus && (local.media?.status === "HIATUS" || local.media?.status === "CANCELLED")}>
+        <div classList={{ badge: true, hiatus: local.media.status === "HIATUS", cancelled: local.media.status === "CANCELLED" }}>{formatMediaStatus(local.media.status)}</div>
       </Show>
       <Show when={local.showRepeats && local.entry?.repeat}>
         <div class="badge">

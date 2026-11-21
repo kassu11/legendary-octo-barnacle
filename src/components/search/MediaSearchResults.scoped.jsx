@@ -371,7 +371,7 @@ export function MediaSearchResults(props) {
                     preventZoomIn.add(media.id);
 
                     return (
-                      <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} staffRole={media && props.staffRoles?.get(media.id)} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
+                      <MediaCard scoped class="media-card" showScore showStatus showHaltedStatus quickActions hoverCard cardZoomIn={animate} coverFadeIn={animate} loading={media?.tabTime < tabTime} media={media} rank={mediaRanks()[index()]} characterRole={media && props.characterRoles?.get(media.id)} voiceActorLanguages={props.voiceActorLanguages} staffRole={media && props.staffRoles?.get(media.id)} data-fetch-index={media?.tabTime < tabTime || media === LOADER ? index() : undefined} />
                     );
                   }}</VirtualGrid>
                 }>

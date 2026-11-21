@@ -13,7 +13,7 @@ export function HorizontalCardRowScoped(props) {
       <BrowsePageHeaderLinks {...props} />
       <GridReelAutoFill scoped class="grid-reel-auto-fill">
         <For each={props.data || Array(7).fill(null)}>{media => (
-          <MediaCard scoped class="media-card" media={media} loading={props.loading} cardZoomIn coverFadeIn showScore showStatus quickActions hoverCard />
+          <MediaCard scoped class="media-card" media={media} loading={props.loading} cardZoomIn coverFadeIn showScore showStatus showHaltedStatus quickActions hoverCard />
         )}</For>
       </GridReelAutoFill>
     </section>

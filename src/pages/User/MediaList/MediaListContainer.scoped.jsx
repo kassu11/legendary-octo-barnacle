@@ -93,7 +93,7 @@ export function MediaListContainerScoped(props) {
               </div>
               <Show when={userMediaListCardStyle() === "rows"} fallback={
                 <VirtualGrid each={list.entries}>{entry => (
-                  <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
+                  <MediaCard showScore showStatus={list.name === COMBINED_LIST} hoverCard showDates showAdult showRepeats showNotes showHaltedStatus showFooter showAdvancedScores scoreFormat={user().mediaListOptions.scoreFormat} progressIncrement={isOwnProfile()} quickActions otherUsersEntry={!isOwnProfile()} media={entry.media} mediaListEntry={entry} afterMutation={responseEntry => mutateEntry(entry, responseEntry)} afterProgressMutation={responseEntry => mutateEntry(entry, responseEntry, false)} afterDelete={() => deleteEntry(entry)} />
                 )}</VirtualGrid>
               }>
                 <VirtualList cacheKey={`${params.name}-${params.type}-${list.name}`} each={list.entries}>{entry => (
