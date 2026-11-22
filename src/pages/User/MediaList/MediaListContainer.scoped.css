@@ -3,6 +3,7 @@
     display: grid;
     min-height: 100vh;
     align-content: start;
+    gap: 16px;
 
     section {
       .list-header {
