@@ -1,4 +1,5 @@
 import { LayoutGridIcon, LayoutListIcon } from "@/assets/icons.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./CardStyleToggle.scoped.css";
 
 /**
@@ -9,11 +10,13 @@ import "./CardStyleToggle.scoped.css";
 export function CardStyleToggle(props) {
   return (
     <div class="card-style-toggle" role="group" aria-label="Card style">
-      <button classList={{ selected: props.cardStyle === "cards" }} aria-pressed={props.cardStyle === "cards"} title="Cards" aria-label="Cards" onClick={() => props.setCardStyle("cards")}>
+      <button classList={{ selected: props.cardStyle === "cards" }} aria-pressed={props.cardStyle === "cards"} aria-label="Cards" onClick={() => props.setCardStyle("cards")}>
         <LayoutGridIcon scoped />
+        <Tooltip placements={["bottom", "top"]}>Cards</Tooltip>
       </button>
-      <button classList={{ selected: props.cardStyle === "rows" }} aria-pressed={props.cardStyle === "rows"} title="Rows" aria-label="Rows" onClick={() => props.setCardStyle("rows")}>
+      <button classList={{ selected: props.cardStyle === "rows" }} aria-pressed={props.cardStyle === "rows"} aria-label="Rows" onClick={() => props.setCardStyle("rows")}>
         <LayoutListIcon scoped />
+        <Tooltip placements={["bottom", "top"]}>Rows</Tooltip>
       </button>
     </div>
   );

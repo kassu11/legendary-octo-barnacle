@@ -1,5 +1,6 @@
 import { createSignal, onCleanup, Match, Switch, splitProps } from "solid-js";
 import { plural } from "@/utils/formatUtils.js";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 
 export function CreatedAt(props) {
   const [local, scoping] = splitProps(props, ["createdAt"]);
@@ -17,8 +18,7 @@ export function CreatedAt(props) {
     <time
       {...scoping}
       class="created-at"
-      dateTime={(new Date(local.createdAt * 1000)).toISOString()}
-      title={(new Date(local.createdAt * 1000)).toLocaleString()}>
+      dateTime={(new Date(local.createdAt * 1000)).toISOString()}>
       <Switch>
         <Match when={Math.floor(time() / 3600 / 24 / 365.25)} children={years => (<>{years} years{plural(years())} ago </>)} />
         <Match when={Math.floor(time() / 3600 / 24 / 30)} children={months => (<>{months} month{plural(months())} ago </>)} />
@@ -28,6 +28,7 @@ export function CreatedAt(props) {
         <Match when={Math.floor((time() % 3600) / 60)} children={minutes => (<>{minutes} minute{plural(minutes())} ago </>)} />
         <Match when={Math.floor((time() % 3600) % 60)} children={seconds => (<>{seconds} second{plural(seconds())} ago </>)} />
       </Switch>
+      <Tooltip>{(new Date(local.createdAt * 1000)).toLocaleString()}</Tooltip>
     </time>
   );
 }

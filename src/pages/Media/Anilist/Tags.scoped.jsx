@@ -1,5 +1,6 @@
 import { createEffect, createSignal, ErrorBoundary, For, on, Show } from "solid-js";
 import { A } from "@solidjs/router";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./Tags.scoped.css";
 
 export const Tags = (props) => {
@@ -43,10 +44,11 @@ export const Tags = (props) => {
                 classList={{
                   spoiler: tag.isMediaSpoiler || tag.isGeneralSpoiler,
                   hidden: (tag.isMediaSpoiler || tag.isGeneralSpoiler) && !showSpoilers()
-                }} 
-                title={tag.description}
-              >
+                }}>
                 <A href={ "/ani/search/" + props.type.toLowerCase() + "?tag=" + encodeURIComponent(tag.name) + "&rank=" + tag.rank + ageQuery()}>{tag.name} <span>{tag.rank}%</span></A>
+                <Show when={tag.description}>
+                  <Tooltip>{tag.description}</Tooltip>
+                </Show>
               </li>
             )}</For>
           </ol>

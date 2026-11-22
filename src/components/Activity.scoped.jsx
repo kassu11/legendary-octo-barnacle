@@ -189,8 +189,9 @@ function DeleteActivityButton(props) {
 
   return (
     <Show when={props.onDelete && props.activity.user.id === authedUserId()}>
-      <button class="cp-activity-delete" title="Delete activity" aria-label="Delete activity" disabled={deleting()} onClick={() => dialog.showModal()}>
+      <button class="cp-activity-delete" aria-label="Delete activity" disabled={deleting()} onClick={() => dialog.showModal()}>
         <TrashIcon scoped />
+        <Tooltip placements={["left", "right", "bottom"]}>Delete activity</Tooltip>
       </button>
       <dialog ref={elem => dialog = elem} class="activity-delete-dialog">
         <p>Are you sure you want to delete this activity</p>

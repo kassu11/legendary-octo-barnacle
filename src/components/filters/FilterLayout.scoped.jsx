@@ -4,6 +4,7 @@ import { useResponsive } from "@/state/providers.js";
 import { useSearchParams } from "@solidjs/router";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
 import { arrayUtils } from "@/utils/utils.js";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./FilterLayout.scoped.css";
 
 export function FilterGroups(props) {
@@ -99,8 +100,9 @@ export function FilterSearchInput(props) {
 
 function EditModeButton(props) {
   return (
-    <button class="edit-mode-button" classList={{ active: props.editMode }} onClick={() => props.onEditModeChange(!props.editMode)} aria-pressed={props.editMode} aria-label="Edit mode" title={props.editMode ? "Exit edit mode" : "Edit mode"}>
+    <button class="edit-mode-button" classList={{ active: props.editMode }} onClick={() => props.onEditModeChange(!props.editMode)} aria-pressed={props.editMode} aria-label="Edit mode">
       <EditIcon scoped />
+      <Tooltip placements={["bottom", "top"]}>{props.editMode ? "Exit edit mode" : "Edit mode"}</Tooltip>
     </button>
   );
 }

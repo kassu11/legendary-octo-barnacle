@@ -101,6 +101,7 @@ Heavy list processing (user media lists, compare, relations) runs in web workers
 - A wrapper component is a clear wrapper: it either always takes `children` (a child component or an icon) or never does.
 - If a feature can't be expressed with data and flags, the component is built wrong. Split it into smaller components instead of adding injection points.
 - General components don't read route or search params (`useParams`, `params.sub`) to decide how they behave. Pass whatever changes the behavior as an explicit prop: the media type as `type`, page-specific features behind a flag (e.g. `studioFilters`). The call site then shows what the component does, and the component works outside the page it was written for.
+- Never use the native `title` attribute for hover text. Use the `Tooltip` component (`src/components/Tooltip.scoped.jsx`) as a child of the element it describes: `<button aria-label="Delete">...<Tooltip placements={["bottom", "top"]}>Delete</Tooltip></button>`. It attaches to its parent element, so it doesn't need a wrapper. Icon-only buttons still need an `aria-label`. (A `title` *prop* on a component, such as a section heading, is fine.)
 
 ### Code
 

@@ -788,8 +788,9 @@ export function FilterSelect(props) {
       </Show>
       {/* Always rendered, so selecting the first row doesn't move the rows under the pointer */}
       <div class="selection-header">
-        <button class="selected-count" title="Show selected first" aria-pressed={!!pinned()} disabled={!selectedIdsWithoutPreview().length} onClick={togglePinned} onKeyDown={handleCountKeyDown}>
+        <button class="selected-count" aria-pressed={!!pinned()} disabled={!selectedIdsWithoutPreview().length} onClick={togglePinned} onKeyDown={handleCountKeyDown}>
           {props.sort ? "Sorted by" : "Selected"} {selected().length}
+          <Tooltip placements={["bottom", "top"]} delay={600}>Show selected first</Tooltip>
         </button>
         <button class="clear" tabindex="-1" disabled={!canClear()} onClick={clearAll}>{isSingle() ? "Reset" : "Clear all"}</button>
       </div>

@@ -2,6 +2,7 @@ import { For, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import "./ActiveQueries.scoped.css";
 import { CloseIcon } from "@/assets/icons.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 
 /**
  * Removable chips of the active search params
@@ -19,7 +20,7 @@ export function ActiveQueries(props) {
             <Show when={!activeQuery.clearAll} fallback={
               <button class="clear" onClick={activeQuery.onRemove}>{activeQuery.description}</button>
             }>
-              <button class="query" onClick={activeQuery.onRemove} title="Remove filter">
+              <button class="query" onClick={activeQuery.onRemove}>
                 <span class="icon" classList={{ "extra-padding": !!activeQuery.imageColor }} style={{ "background-color": activeQuery.imageColor }}>
                   <Show when={activeQuery.image} fallback={<Dynamic component={activeQuery.icon} />}>
                     <img src={activeQuery.image} alt="" />
@@ -27,6 +28,7 @@ export function ActiveQueries(props) {
                 </span>
                 <span>{activeQuery.description}</span>
                 <CloseIcon scoped />
+                <Tooltip placements={["bottom", "top"]}>Remove filter</Tooltip>
               </button>
             </Show>
           </li>

@@ -2,6 +2,7 @@ import { Show } from "solid-js";
 import { CloseIcon } from "@/assets/icons.jsx";
 import { numberCommas } from "@/utils/formatUtils.js";
 import ScoreInput from "@/components/media/ScoreInput.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./EditModeBar.scoped.css";
 
 /**
@@ -40,16 +41,18 @@ export function EditModeBar(props) {
         <Show when={props.selectedCount}>
           <button class="clear" onClick={() => props.onClearSelection()}>Clear selection</button>
         </Show>
-        <label class="auto-save" title="Saves the changes 15 seconds after the last change">
+        <label class="auto-save">
           <input type="checkbox" checked={props.autoSave} onChange={e => props.onAutoSaveChange(e.target.checked)} />
           Auto save
+          <Tooltip placements={["bottom", "top"]}>Saves the changes 15 seconds after the last change</Tooltip>
         </label>
         <button class="save" disabled={!props.unsavedCount || props.saving} onClick={() => props.onSave()}>
           {props.saving ? "Saving..." : "Save"}
           <Show when={props.unsavedCount}> ({numberCommas(props.unsavedCount)})</Show>
         </button>
-        <button class="exit" onClick={() => props.onExit()} aria-label="Exit edit mode" title="Exit edit mode">
+        <button class="exit" onClick={() => props.onExit()} aria-label="Exit edit mode">
           <CloseIcon scoped />
+          <Tooltip placements={["bottom", "top"]}>Exit edit mode</Tooltip>
         </button>
       </div>
     </div>

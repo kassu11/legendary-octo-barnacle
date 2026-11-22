@@ -1,6 +1,7 @@
 import { batch, createSignal, For, Match, Show, Switch } from "solid-js";
 import ScoreInput from "@/components/media/ScoreInput.scoped";
 import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
+import { Tooltip } from "@/components/Tooltip.scoped.jsx";
 import "./EditMediaEntriesContext.scoped.css";
 import { EditMediaEntriesContext } from "@/state/providers.js";
 import { queries } from "@/api/api.js";
@@ -296,7 +297,10 @@ export function EditMediaEntriesProvider(props) {
                     mutates()?.setIsFavourite?.(isFavourite, variables);
                   }} />
                 <button type="submit">Save</button>
-                <button type="submit" value="silent" title="Save without creating an activity post">Save silently</button>
+                <button type="submit" value="silent">
+                  Save silently
+                  <Tooltip placements={["bottom", "top"]}>Save without creating an activity post</Tooltip>
+                </button>
               </div>
             </header>
             <div class="media-editor-body">
