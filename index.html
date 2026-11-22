@@ -8,6 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <title>LOB</title>
     <script type="text/javascript">
+      // A manual reload starts a new session, so cached data is fetched again
+      if (performance.getEntriesByType("navigation")[0]?.type === "reload") window.sessionStorage.removeItem("LOB-session-time");
+    </script>
+    <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
@@ -61,10 +65,10 @@
       })(window.location)
 
     </script>
-    <script type="module" crossorigin src="/legendary-octo-barnacle/assets/index-Dp1XUgZ8.js"></script>
+    <script type="module" crossorigin src="/legendary-octo-barnacle/assets/index-COhy7NLp.js"></script>
     <link rel="stylesheet" crossorigin href="/legendary-octo-barnacle/assets/index-CFIa1esO.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   </body>
 </html>

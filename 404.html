@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <title>Single Page Apps for GitHub Pages</title>
     <script type="text/javascript">
+      // A manual reload starts a new session, so cached data is fetched again
+      if (performance.getEntriesByType("navigation")[0]?.type === "reload") window.sessionStorage.removeItem("LOB-session-time");
+    </script>
+    <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
