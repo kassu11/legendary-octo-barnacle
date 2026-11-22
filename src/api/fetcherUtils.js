@@ -1,7 +1,7 @@
 import { assertTypeArray, assertTypeString } from "@/utils/asserts";
 import { localizations, modes } from "@/constants/constants";
 import { addFetcherToRateLimit, getRateLimitFromFetcher, setFetchResponseToRateLimit } from "@/api/fetchRateLimits";
-import { allActiveTokens, logoutUser, setMainLoadingCount, token2 } from "@/state/globalState";
+import { allActiveTokens, logoutUser, setMainLoadingCount, tabTime, token2 } from "@/state/globalState";
 import { addApplicationNotification } from "@/state/notifications";
 import { isTypeFunction } from "@/utils/functionUtils";
 import { hashKeyFNV32 } from "@/utils/hashUtils";
@@ -221,14 +221,13 @@ const baseSettings = {
   active: (res, settings) => {
     if (!res) return true;
     else if (settings.debug) return false;
-    return !allFetchedCacheKeys.has(res.cacheKey);
+    return !(res.modified >= tabTime);
   },
   debug: modes.debug,
   loadingBar: true,
   cache: {
     get: (res, settings) => getFetcherValueFromStorage(res, null, settings),
     set: (res, { settings }) => {
-      allFetchedCacheKeys.add(res.cacheKey);
       setFetcherValueToStorage(res, settings);
     }
   },
@@ -389,7 +388,6 @@ export async function sendFetcher(fetcher, settings = {}) {
   }
 }
 
-const allFetchedCacheKeys = new Set();
 const anilistBaseFetcherSettings = {
   name: "AniList fetch",
   onError: async res => {

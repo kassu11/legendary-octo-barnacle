@@ -7,8 +7,7 @@ import { queries } from "@/api/api";
 import { setFetcherValueToStorage } from "@/utils/storageUtils";
 import { createStore } from "solid-js/store";
 
-export const tabTime = new Date().getTime();
-export const sessionTime = getOrInsertSessionStorageInt(new Date().getTime());
+export const tabTime = getOrInsertSessionStorageInt("LOB-session-time", new Date().getTime());
 
 export const [mediaWithMalId, storeMediaWithMalId] = createStore({});
 
