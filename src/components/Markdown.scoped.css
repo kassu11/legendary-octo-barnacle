@@ -4,11 +4,13 @@
 
   &:not([open]) {
     background-color: var(--background-500-old);
-    * {
+    /* eslint-disable-next-line local-css/no-unscoped-selector */
+    _* {
       color: transparent;
     }
 
-    summary * {
+    /* eslint-disable-next-line local-css/no-unscoped-selector */
+    summary _* {
       pointer-events: none;
     }
   }
