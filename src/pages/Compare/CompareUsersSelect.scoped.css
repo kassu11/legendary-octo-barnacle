@@ -1,0 +1,25 @@
+@layer component {
+  .user-search {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .profile-wrapper {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    overflow: clip;
+    position: relative;
+    flex-shrink: 0;
+
+    .loader-circle, img {
+      position: absolute;
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      border-radius: 2px;
+      --loader-border-size: 4px;
+    }
+  }
+}

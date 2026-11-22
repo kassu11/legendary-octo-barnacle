@@ -14,7 +14,7 @@ import { addApplicationNotification } from "@/state/notifications";
 import { arrayUtils } from "@/utils/utils.js";
 
 export const [usersData, setUsersData] = createSignal({}, { equals: false });
-const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
+export const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
 
 export function MediaUsersSelect() {
   const parsedSearchParams = useParsedSearchParams();

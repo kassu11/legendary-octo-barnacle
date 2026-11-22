@@ -1,38 +1,36 @@
-import { A, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
-import { batch, createMemo, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
-import { createEffect } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
-import { removeDuplicateIgnoreCaseSensitivity, wrapToArray, wrapToSet } from "@/utils/arrayUtils.js";
+import { A, useParams, useSearchParams } from "@solidjs/router";
+import { batch, createEffect, createMemo, createSignal, For, mapArray, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import { createStore } from "solid-js/store";
 import { CompareMediaListContext, useCompareMediaList } from "@/state/providers.js";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
+import { setCachedUserInfos } from "@/components/search/inputs/MediaUsersSelect.scoped.jsx";
 import CompareMediaListWorker from "@/workers/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formatUtils.js";
 import "./CompareIndex.scoped.css";
 import Score from "@/components/media/Score.scoped.jsx";
 import { RepeatIcon, StarIcon } from "@/assets/icons.jsx";
-import { debounce } from "@solid-primitives/scheduled";
 import { queries } from "@/api/api.js";
 import { translateToInternalSearchParams } from "@/api/apiTranslations.js";
-import { asserts, signals, arrayUtils, numberUtils } from "@/utils/utils.js";
+import { arrayUtils, numberUtils } from "@/utils/utils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { createTimer } from "@/hooks/createTimer.js";
-import { formatMSToString } from "@/utils/timeUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
+import { debouncer } from "@/utils/scheduleUtils.js";
+import { addApplicationNotification } from "@/state/notifications.js";
+import { CompareSearchControls } from "./CompareSearchControls.scoped.jsx";
 
 const initialMediaCompareList = () => {
   const count = numberUtils.parse(sessionStorage.getItem(window.location.href), 0);
   return Array(count).fill({ id: -1, coverImage: {} });
 }
 
-const [allAnilistUserMediaData, setAllAnilistUserMediaData] = createSignal({}, { equals: false });
 export default function ComparePage() {
-  setAllAnilistUserMediaData({});
-  const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const params = useParams();
-  const [names, storeNames] = createStore([]);
   const [users, storeUsers] = createStore({});
+  // Lists by type and lowercase user name
+  const [userListsData, setUserListsData] = createSignal({ anime: {}, manga: {} }, { equals: false });
+  const [listData, setListData] = createSignal(undefined);
   const [compareMediaList, _setCompareMediaList] = createSignal(initialMediaCompareList());
   const setCompareMediaList = list => {
     sessionStorage.setItem(window.location.href, list.length);
@@ -40,565 +38,184 @@ export default function ComparePage() {
   }
   const [loading, setLoading] = createSignal(true);
 
-  const includedUsers = createMemo(() => wrapToArray(searchParams.user));
-
-  createEffect(() => {
-    const { user, disabled, exclude } = searchParams;
-    const names = wrapToSet(disabled).union(wrapToSet(exclude)).union(wrapToSet(user));
-    storeNames(reconcile([...names].sort(), []));
+  const setSearchParams = options => {
+    _setSearchParams(options, { replace: true });
+  };
+  const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
+  const search = () => decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
+  const excludedUsers = multiParam("exclude");
+  const comparedUsers = createMemo(() => {
+    const excludedNames = new Set(excludedUsers().map(name => name.toLowerCase()));
+    const names = new Map();
+    for (const name of multiParam("user")()) {
+      if (!excludedNames.has(name.toLowerCase())) names.set(name.toLowerCase(), name);
+    }
+    return [...names.values()];
   });
+  const usersNeeded = () => Math.min(numberUtils.parse(searchParams.reviewsNeeded, comparedUsers().length) || comparedUsers().length, comparedUsers().length);
+  const format = multiParam("format");
+  const status = multiParam("status");
+  const genre = multiParam("genre");
+  const countryOfOrigin = multiParam("countryOfOrigin");
+  const isAdult = () => searchParams.isAdult;
+  const year = multiParam("year");
+  const startedYear = multiParam("startedYear");
+  const completedYear = multiParam("completedYear");
+  const privateFilter = () => searchParams.private;
+  const notesFilter = () => searchParams.notes;
+  const rewatchedFilter = () => searchParams.repeat;
+  const startDateFilter = () => searchParams.startDate;
+  const endDateFilter = () => searchParams.endDate;
+  const scoreFilter = () => searchParams.score;
+  const sortParam = multiParam("sort");
+  const sort = () => sortParam().length ? sortParam() : ["score"];
+  const userStatus = multiParam("userStatus");
+  const studio = multiParam("studio");
+  const tag = multiParam("tag");
 
-  createEffect(on(() => searchParams.user, users => {
-    const names = wrapToSet(users);
-    if (names.size > 1 && users.length !== names.size) setSearchParams({ "user": [...names] });
+  const fetchedUserNames = createMemo(() => [...new Set([...comparedUsers(), ...excludedUsers()].map(name => name.toLowerCase()))]);
+
+  createMemo(mapArray(fetchedUserNames, userName => {
+    const userListController = createCleanUpAbortController();
+    let userListFetcher;
+    createEffect(() => {
+      const signal = userListController.abortAndRenew();
+      const type = params.type;
+
+      userListFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type: type.toUpperCase() }, signal);
+
+      sendAnilistFetcher(userListFetcher, {
+        name: "Anilist user media list",
+        sessionCache: false,
+        onFetch: () => userListController.disable(),
+        onError: async res => {
+          if (!res || Error.isError(res)) return;
+          const { errors } = await res.json().catch(() => ({}));
+          if (errors?.some(error => error.status === 404)) {
+            addApplicationNotification({ type: "info", message: `Anilist did not find a valid user with a name: "${userName}".`, duration: 10_000 });
+            setSearchParams({
+              user: arrayUtils.wrapToArray(searchParams.user).filter(name => name.toLowerCase() !== userName),
+              exclude: arrayUtils.wrapToArray(searchParams.exclude).filter(name => name.toLowerCase() !== userName),
+            });
+          } else {
+            addApplicationNotification({ type: "error", message: `Anilist errored with a status code: ${res.status}.`, duration: 10_000 });
+          }
+        },
+        setValue: (res, { fetcher: f }) => {
+          if (f.cacheKey !== userListFetcher.cacheKey) return;
+          const collection = res.data.data.MediaListCollection;
+          const { id, name, avatar } = collection.user;
+          batch(() => {
+            storeUsers(name, collection.user);
+            setUserListsData(data => {
+              data[type][userName] = collection;
+              return data;
+            });
+            setCachedUserInfos(infos => {
+              infos[id] = { name, avatar: avatar.large };
+              return infos;
+            });
+          });
+        }
+      });
+    });
   }));
 
-  const removeUsers = names => {
-    names = arrayUtils.wrapToSet(names);
-    const users = wrapToArray(searchParams.user);
-    const keptUsers = [...wrapToSet(users)].filter(name => !names.has(name));
-    if (keptUsers.length !== users.length) setSearchParams({ "user": keptUsers });
-  };
-
-  createEffect(on(() => searchParams.exclude, removeUsers));
-  createEffect(on(() => searchParams.disabled, removeUsers));
-
-  const [tags, setTags] = createSignal(undefined, { equals: false });
-  const search = () => searchParams.search || "";
-  const tag = () => searchParams.tag || "";
-  const format = () => searchParams.format || "";
-  const reviewsNeeded = () => searchParams.reviewsNeeded || wrapToSet(searchParams.user).size;
-  const status = () => searchParams.status || "";
-  const genre = () => searchParams.genre || "";
-  const countryOfOrigin = () => searchParams.countryOfOrigin || "";
-  const year = () => searchParams.year || "";
-  const privateFilter = () => searchParams.private === "true";
-  const notesFilter = () => searchParams.notes === "true";
-  const rewatchedFilter = () => searchParams.repeat === "true";
-  const missingStartFilter = () => searchParams.missingStart === "true";
-  const missingScoreFilter = () => searchParams.missingScore !== "false";
-  const reverse = () => searchParams.reverse === "true";
-  const sort = () => searchParams.sort || "score";
-  const userStatus = () => searchParams.userStatus || "";
-  const isAdult = () => {
-    if (searchParams.isAdult === "true") return true;
-    if (searchParams.isAdult === "false") return false;
-    return undefined;
-  };
-
   let worker;
-  function updateCompareScores() {
-    if (!window.Worker) {
-      return;
-    }
-
+  const postToWorker = debouncer(postObject => {
     worker = worker instanceof Worker ? worker : new CompareMediaListWorker();
+    worker.postMessage(postObject);
+    worker.onmessage = message => {
+      batch(() => {
+        setLoading(false);
+        setListData(message.data);
+        setCompareMediaList(message.data.entries);
+      });
+    };
+  });
 
-    const postObject = {
-      includeKeys: wrapToArray(searchParams.user),
-      excludeKeys: arrayUtils.remove(searchParams.exclude, ...wrapToArray(searchParams.disabled)),
-      data: allAnilistUserMediaData(),
+  createEffect(() => {
+    if (!window.Worker) return;
+
+    const lists = userListsData()[params.type];
+    const includedLists = comparedUsers().map(name => lists[name.toLowerCase()]).filter(Boolean);
+    const excludedLists = excludedUsers().map(name => lists[name.toLowerCase()]).filter(Boolean);
+
+    setLoading(true);
+    postToWorker(100, {
+      includedLists,
+      excludedLists,
+      usersNeeded: usersNeeded(),
       search: search(),
       format: format(),
       status: status(),
       genre: genre(),
-      tag: tag(),
-      reverse: reverse(),
       countryOfOrigin: countryOfOrigin(),
-      missingStart: missingStartFilter(),
-      missingScore: missingScoreFilter(),
+      startDate: startDateFilter(),
+      endDate: endDateFilter(),
+      score: scoreFilter(),
       isAdult: isAdult(),
-      year: +year() || undefined,
+      year: year(),
+      startedYear: startedYear(),
+      completedYear: completedYear(),
       private: privateFilter(),
       notes: notesFilter(),
       repeat: rewatchedFilter(),
-      reviewsNeeded: reviewsNeeded(),
       sort: sort(),
-      type: params.type,
+      studio: studio(),
       userStatus: userStatus(),
-    };
-
-    worker.postMessage(postObject);
-    setLoading(true);
-
-    worker.onmessage = message => {
-      setLoading(false);
-      setTags(message.data.tags);
-      setCompareMediaList(message.data.entries || []);
-    }
-  }
-
-  createEffect(updateCompareScores);
+      tag: tag(),
+    });
+  });
 
   onCleanup(() => {
     if (worker instanceof Worker) worker.terminate();
   });
 
-  document.title = `Compare ${params.type} - LOB`;
+  createEffect(() => document.title = `Compare ${params.type} - LOB`);
 
-  const navigate = useNavigate();
+  const [contentTarget, setContentTarget] = createSignal();
 
   return (
-    <CompareMediaListContext.Provider value={{ compareMediaList, users, storeUsers, loading }}>
+    <CompareMediaListContext.Provider value={{ compareMediaList, users, loading }}>
       <div class="pg-compare">
-        <UserSearch />
-        <div>
-          <ul class="pg-compare-users">
-            <For each={names}>{name => (
-              <UserRow name={name} />
-            )}</For>
-          </ul>
+        <CompareSearchControls
+          listData={listData}
+          scrollTarget={contentTarget()}
+          setSearchParams={setSearchParams}
+          users={comparedUsers}
+          excludedUsers={excludedUsers}
+          usersNeeded={usersNeeded}
+          format={format}
+          status={status}
+          genre={genre}
+          countryOfOrigin={countryOfOrigin}
+          isAdult={isAdult}
+          year={year}
+          startedYear={startedYear}
+          completedYear={completedYear}
+          privateFilter={privateFilter}
+          notesFilter={notesFilter}
+          rewatchedFilter={rewatchedFilter}
+          startDateFilter={startDateFilter}
+          endDateFilter={endDateFilter}
+          scoreFilter={scoreFilter}
+          sort={sort}
+          userStatus={userStatus}
+          studio={studio}
+          tag={tag}
+        />
+        <div ref={setContentTarget} class="pg-compare-body">
+          <CompareMediaListContent hasUsers={comparedUsers().length > 0} />
         </div>
-        <div class="pg-compare-filter-panel">
-          <input type="text" placeholder="Search" onInput={e => setSearchParams({ search: e.target.value || undefined })} value={search()} />
-          <Show when={null?.data}>
-            <ol>
-              <li>
-                <button onClick={() => navigate("")}>
-                  <Show when={params.list === undefined}>{"> "}</Show>
-                  All {null.data.total}
-                </button>
-              </li>
-              <For each={null.data.lists}>{list => (
-                <li>
-                  <button onClick={() => navigate(list.name)}>
-                    <Show when={decodeURI(params.list) === list.name}>{"> "}</Show>
-                    {list.name} {list.entries.length}
-                  </button>
-                </li>
-              )}
-              </For>
-            </ol>
-          </Show>
-          <select name="format" onChange={e => setSearchParams({ format: e.target.value || undefined })} value={format() || ""}>
-            <option value="" hidden>Format</option>
-            <Show when={format()}>
-              <option value="">All formats</option>
-            </Show>
-            <option value="MOVIE">Movie</option>
-            <option value="MUSIC">Music</option>
-            <option value="ONA">Ona</option>
-            <option value="OVA">Ova</option>
-            <option value="SPECIAL">Special</option>
-            <option value="TV">TV</option>
-            <option value="TV_SHORT">TV short</option>
-          </select>
-          <select name="userStatus" onChange={e => setSearchParams({ userStatus: e.target.value || undefined })} value={userStatus() || ""}>
-            <option value="" hidden>User Status</option>
-            <Show when={userStatus()}>
-              <option value="">Any User Status</option>
-            </Show>
-            <option value="COMPLETED">Completed</option>
-            <option value="CURRENT">
-              <Switch>
-                <Match when={params.type === "anime"}>Watching</Match>
-                <Match when={params.type === "manga"}>Reading</Match>
-              </Switch>
-            </option>
-            <option value="DROPPED">Dropped</option>
-            <option value="PAUSED">Paused</option>
-            <option value="PLANNING">Planning</option>
-            <option value="REPEATING">
-              <Switch>
-                <Match when={params.type === "anime"}>Rewatching</Match>
-                <Match when={params.type === "manga"}>Rereading</Match>
-              </Switch>
-            </option>
-          </select>
-          <select name="status" onChange={e => setSearchParams({ status: e.target.value || undefined })} value={status() || ""}>
-            <option value="" hidden>Status</option>
-            <Show when={status()}>
-              <option value="">Any Status</option>
-            </Show>
-            <option value="RELEASING">Releasing</option>
-            <option value="FINISHED">Finished</option>
-            <option value="NOT_YET_RELEASED">Not Yet Released</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-          <select name="genre" onChange={e => setSearchParams({ genre: e.target.value || undefined })} value={genre() || ""}>
-            <option value="" hidden>Genre</option>
-            <Show when={genre()}>
-              <option value="">All genres</option>
-            </Show>
-            <option value="Action">Action</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Comedy">Comedy</option>
-            <option value="Drama">Drama</option>
-            <option value="Ecchi">Ecchi</option>
-            <option value="Fantasy">Fantasy</option>
-            <option value="Hentai">Hentai</option>
-            <option value="Horror">Horror</option>
-            <option value="Mahou Shoujo">Mahou Shoujo</option>
-            <option value="Mecha">Mecha</option>
-            <option value="Music">Music</option>
-            <option value="Mystery">Mystery</option>
-            <option value="Psychological">Psychological</option>
-            <option value="Romance">Romance</option>
-            <option value="Sci-Fi">Sci-Fi</option>
-            <option value="Slice of Life">Slice of Life</option>
-            <option value="Sports">Sports</option>
-            <option value="Supernatural">Supernatural</option>
-            <option value="Thriller">Thriller</option>
-          </select>
-          <select name="tag" onChange={e => setSearchParams({ tag: e.target.value || undefined })} value={tag() || ""}>
-            <option value="" hidden>Tag</option>
-            <Show when={tag()}>
-              <option value="">All tags</option>
-            </Show>
-            <For each={tags()}>{t => (
-              <option value={t} selected={t === tag()}>{t}</option>
-            )}</For>
-          </select>
-          <select name="countryOfOrigin" onChange={e => setSearchParams({ countryOfOrigin: e.target.value || undefined })} value={countryOfOrigin() || ""}>
-            <option value="" hidden>Country</option>
-            <Show when={countryOfOrigin()}>
-              <option value="">All countries</option>
-            </Show>
-            <option value="CN">China</option>
-            <option value="JP">Japan</option>
-            <option value="KR">South Korea</option>
-            <option value="TW">Taiwan</option>
-          </select>
-          <select name="isAdult" onChange={e => setSearchParams({ isAdult: e.target.value || undefined })} value={isAdult() === undefined ? "" : String(isAdult())}>
-            <option value="" hidden>Age rating</option>
-            <Show when={isAdult() !== undefined}>
-              <option value="">All ratings</option>
-            </Show>
-            <option value="false">R-17+</option>
-            <option value="true">R-18</option>
-          </select>
-          <input type="number" name="year" placeholder="Release year" max="9999" min="0" value={year()} onInput={e => setSearchParams({ year: e.target.value || undefined })} />
-          <label htmlFor="repeat">
-            <input type="checkbox" name="repeat" id="repeat" checked={rewatchedFilter()} onChange={e => setSearchParams({ repeat: e.target.checked ? "true" : undefined })} />
-            {" "}
-            <Switch>
-              <Match when={params.type === "anime"}>Rewatched</Match>
-              <Match when={params.type === "manga"}>Reread</Match>
-            </Switch>
-          </label>
-          <label htmlFor="missingScore">
-            <input type="checkbox" name="missingScore" id="missingScore" checked={missingScoreFilter()} onChange={e => setSearchParams({ missingScore: e.target.checked ? undefined : "false" })} />
-            {" "}Allow missing scores
-          </label>
-          <label htmlFor="reverse">
-            <input type="checkbox" name="reverse" id="reverse" checked={reverse()} onChange={e => setSearchParams({ reverse: e.target.checked ? "true" : undefined })} />
-            {" "}Reverse order
-          </label>
-          <select name="sort" value={sort()} onChange={e => setSearchParams({ sort: e.target.value === "score" ? undefined : e.target.value })}>
-            <Show when={params.type === "manga"}>
-              <option value="chapters">Chapters</option>
-            </Show>
-            <option value="completedAt">Completed Date</option>
-            <Show when={params.type === "anime"}>
-              <option value="episodes">Episodes</option>
-            </Show>
-            <option value="averageScore">Global Score</option>
-            <option value="updatedAt">Last updated</option>
-            <option value="popularity">Popularity</option>
-            <option value="releaseDate">Release Date</option>
-            <option value="repeat">
-              <Switch>
-                <Match when={params.type === "anime"}>Rewatches</Match>
-                <Match when={params.type === "manga"}>Rereads</Match>
-              </Switch>
-            </option>
-            <option value="title">Title</option>
-            <option value="score">User score</option>
-            <Show when={params.type === "manga"}>
-              <option value="volumes">Volumes</option>
-            </Show>
-          </select>
-          <label htmlFor="reviewsNeeded">Reviews needed: 
-            <input 
-              type="number" 
-              inputMode="numeric" 
-              onBlur={e => setSearchParams({ reviewsNeeded: Number(e.target.value) >= searchParams.user ? undefined : +e.target.value || "" })} 
-              onBeforeInput={e => {
-                if (e.data?.toLowerCase().includes("e")) {
-                  e.preventDefault();
-                }
-              }}
-              min="1" 
-              max={includedUsers().length} 
-              placeholder={includedUsers().length + " (All)"}
-              value={reviewsNeeded()} 
-              onInput={e => setSearchParams({ reviewsNeeded: e.target.value == searchParams.user ? undefined : e.target.value })} 
-              name="reviewsNeeded" 
-              id="reviewsNeeded"  
-            />
-            <button class="help">?
-              <Tooltip placements={["bottom", "top"]}>
-                Count of how many users need to have the {params.type} on their list <i>(default is all users)</i>
-              </Tooltip>
-            </button>
-          </label>
-          <Switch>
-            <Match when={new URLSearchParams(location.search).keys().some(key => key !== "user")}>
-              <button style={{background: "var(--crimson-400)"}} onClick={() => {
-                setSearchParams({
-                  search: undefined,
-                  format: undefined,
-                  status: undefined,
-                  genre: undefined,
-                  tag: undefined,
-                  countryOfOrigin: undefined,
-                  reviewsNeeded: undefined,
-                  missingStart: undefined,
-                  missingScore: undefined,
-                  isAdult: undefined,
-                  year: undefined,
-                  private: undefined,
-                  notes: undefined,
-                  repeat: undefined,
-                  sort: undefined,
-                  userStatus: undefined
-                });
-              }}>Reset filters</button>
-            </Match>
-          </Switch>
-        </div>
-        <CompareMediaListContent />
       </div>
     </CompareMediaListContext.Provider>
   );
 }
 
-function UserSearch() {
-  const [search, setSearch] = createSignal("");
-  const [index, setIndex] = createSignal(0);
-  const [searchVar, setSearchVar] = createSignal(undefined);
-  const triggerSetSearchVar = debounce(setSearchVar, 300);
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const [anilistUserSearchTime, startAnilistUserSearchTimer, stopAnilistUserSearchTimer] = createTimer();
-  const [anilistUserSearchData, setAnilistUserSearchData] = createSignal(undefined, { equals: false });
-  const anilistUserSearchController = createCleanUpAbortController();
-  let anilistUserSearchFetcher;
-  createEffect(() => {
-    const signal = anilistUserSearchController.abortAndRenew();
-    const search = searchVar();
-    if (!search) return;
-
-    anilistUserSearchFetcher = createAnilistFetcher(queries.anilistUserSearch, { search, page: 1 }, signal);
-
-    sendAnilistFetcher(anilistUserSearchFetcher, {
-      name: "Anilist user search",
-      onFetch: () => anilistUserSearchController.disable(),
-      onStart: startAnilistUserSearchTimer,
-      onStop: stopAnilistUserSearchTimer,
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey === anilistUserSearchFetcher.cacheKey) setAnilistUserSearchData(res.data.data.Page);
-      }
-    });
-  });
-
-  let form;
-
-  createEffect(on(index, i => {
-    const target = form?.querySelectorAll("li")[i];
-    const wrapper = form?.querySelector("ol");
-    if (!target || !wrapper) {
-      return;
-    }
-
-    const { height, top: wrapperTop } = wrapper.getBoundingClientRect();
-    const { top, bottom } = target.getBoundingClientRect();
-    const scrollDown = bottom - wrapperTop - height
-    if (scrollDown > 0) {
-      wrapper.scrollTop += scrollDown;
-    }
-    const scrollUp = top - wrapperTop;
-    if (scrollUp < 0) {
-      wrapper.scrollTop += scrollUp;
-    }
-  }));
-
-  function addUserToSearch(user) {
-    user = user?.trim() || "";
-    if (user) {
-      setSearchParams({user: removeDuplicateIgnoreCaseSensitivity([...wrapToSet(searchParams.user).add(user)])});
-    }
-    batch(() => {
-      triggerSetSearchVar(undefined);
-      setAnilistUserSearchData(undefined);
-      setIndex(0);
-      setSearch("");
-    });
-  }
-
-  const handleKeyDown = e => {
-    const userCount = anilistUserSearchData()?.users?.length || 0;
-    if (!userCount) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setIndex(i => (i + 1) % userCount);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setIndex(i => (userCount + i - 1) % userCount);
-    }
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    addUserToSearch(anilistUserSearchData()?.users?.[index()]?.name || search());
-  };
-
-  const handleInput = e => {
-    batch(() => {
-      setSearch(e.target.value);
-      setIndex(0);
-      triggerSetSearchVar(e.target.value.trim() || undefined);
-      setAnilistUserSearchData(undefined);
-    });
-  };
-
-  return (
-    <form class="pg-compare-user-search" ref={elem => form = elem} onKeyDown={handleKeyDown} onSubmit={handleSubmit}>
-      <input type="search" name="user" id="user" value={search()} placeholder="Search users" onInput={handleInput} />
-      <Switch>
-        <Match when={search() && anilistUserSearchData()?.users.length}>
-          <ol>
-            <For each={anilistUserSearchData()?.users}>{(user, i) => (
-              <li classList={{ selected: index() === i() }} onClick={() => addUserToSearch(user.name)} onMouseEnter={() => setIndex(i())}>
-                <img src={user.avatar.large} alt="Profile picture" />
-                {user.name}
-              </li>
-            )}</For>
-          </ol>
-        </Match>
-        <Match when={search() && anilistUserSearchTime()}>
-          <ol>
-            <li>{formatMSToString(anilistUserSearchTime())}</li>
-          </ol>
-        </Match>
-      </Switch>
-    </form>
-  );
-}
-
-function UserRow(props) {
-  asserts.assertTruthy(props.name, "Name is missing");
-  const params = useParams();
-  const { storeUsers } = useCompareMediaList();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [enabled, setEnabled] = signals.createSignalWithSignal(() => !arrayUtils.includes(searchParams.disabled, props.name));
-  const [exclude, setExclude] = signals.createSignalWithSignal(() => arrayUtils.includes(searchParams.exclude, props.name));;
-
-  const name = createMemo(() => props.name.toLowerCase());
-
-  const [anilistUserMediaLoading, setAnilistUserMediaLoading] = createSignal(false);
-  const [anilistUserMediaData, setAnilistUserMediaData] = createSignal(undefined, { equals: false });
-  const anilistUserMediaController = createCleanUpAbortController();
-  let anilistUserMediaFetcher;
-  createEffect(() => {
-    const signal = anilistUserMediaController.abortAndRenew();
-    const type = params.type.toUpperCase();
-    const userName = name();
-
-    if (!type || !userName);
-
-    anilistUserMediaFetcher = createAnilistFetcher(queries.anilistUserMediaList, { userName, type }, signal);
-
-    sendAnilistFetcher(anilistUserMediaFetcher, {
-      name: "Anilist user media list",
-      sessionCache: false,
-      onFetch: () => anilistUserMediaController.disable(),
-      onStart: () => setAnilistUserMediaLoading(true),
-      onStop: () => setAnilistUserMediaLoading(false),
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey !== anilistUserMediaFetcher.cacheKey) return;
-        const userData = res.data.data.MediaListCollection.user;
-        setAnilistUserMediaData(userData);
-        storeUsers(userData.name, userData);
-        setAllAnilistUserMediaData(data => {
-          data[userData.id] = res.data.data.MediaListCollection;
-          return data;
-        });
-      }
-    });
-  });
-
-  function remove() {
-    setSearchParams({
-      user: arrayUtils.remove(searchParams.user, props.name),
-      disabled: arrayUtils.remove(searchParams.disabled, props.name),
-      exclude: arrayUtils.remove(searchParams.exclude, props.name),
-    });
-  }
-
-  const handleEnabledChange = e => {
-    setEnabled(!e.target.checked);
-    setSearchParams({
-      disabled: arrayUtils.toggle(searchParams.disabled, props.name, !e.target.checked),
-      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked || exclude())
-    });
-  }
-
-  const handleExcludeChange = e => {
-    setExclude(!e.target.checked);
-    setSearchParams({
-      exclude: arrayUtils.toggle(searchParams.exclude, props.name, !e.target.checked),
-      user: arrayUtils.toggle(searchParams.user, props.name, e.target.checked || !enabled())
-    });
-  }
-
-  return (
-    <li classList={{ disabled: !enabled(), exclude: exclude() }}>
-      <Switch>
-        <Match when={anilistUserMediaData() || anilistUserMediaLoading()}>
-          <Show when={anilistUserMediaData()} fallback={
-            <LoaderCircle scoped class="loader-circle">
-              <Tooltip placements={["right", "left", "bottom"]}>
-                <p>Loading user data</p>
-              </Tooltip>
-            </LoaderCircle>
-          }>
-            <img src={anilistUserMediaData().avatar.large} alt={anilistUserMediaData().name + " profile picture"} />
-          </Show>
-          <p>
-            <Show when={anilistUserMediaData()} fallback={props.name}>
-              {anilistUserMediaData().name}
-            </Show>
-          </p>
-          <label>
-            <input type="checkbox" name="enable" checked={!enabled()} onChange={handleEnabledChange} /> Disable <button>?
-              <Tooltip placements={["bottom", "top"]}>
-                Disabling a user removes them from search and filtering, just like removing them.
-              </Tooltip>
-            </button>
-          </label>
-          <label>
-            <input type="checkbox" name="enable" checked={exclude()} onChange={handleExcludeChange} /> Filter out <button>?
-              <Tooltip placements={["bottom", "top"]}>
-                Filters out all {params.type} from user {anilistUserMediaData()?.name || props.name}
-              </Tooltip>
-            </button>
-          </label>
-        </Match>
-        <Match when={!anilistUserMediaData() && !anilistUserMediaLoading()}>
-          <img src="https://s4.anilist.co/file/anilistcdn/user/avatar/large/default.png" alt="User profile not found." />
-          User not found
-        </Match>
-      </Switch>
-      <button onClick={remove}>Remove</button>
-    </li>
-  );
-}
-
-function CompareMediaListContent() {
+function CompareMediaListContent(props) {
   const { compareMediaList, loading } = useCompareMediaList();
-  const [searchParams] = useSearchParams();
   const params = useParams();
-
-  const allDisabled = createMemo(() => {
-    const users = arrayUtils.wrapToArray(searchParams.user);
-    const disabled = arrayUtils.wrapToArray(searchParams.disabled);
-    const exclude = arrayUtils.wrapToArray(searchParams.exclude);
-    const activeUsers = users.filter(name => !disabled.includes(name) && !exclude.includes(name));
-
-    return !activeUsers.length;
-  });
 
   return (
     <>
@@ -612,8 +229,7 @@ function CompareMediaListContent() {
       <Show when={compareMediaList().length === 0}>
         <Switch fallback="No content">
           <Match when={loading()}>Loading content</Match>
-          <Match when={!searchParams.user}>No users selected</Match>
-          <Match when={allDisabled()}>All users are disabled</Match>
+          <Match when={!props.hasUsers}>No users selected</Match>
         </Switch>
       </Show>
     </>

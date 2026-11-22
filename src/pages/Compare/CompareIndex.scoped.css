@@ -1,112 +1,21 @@
 @layer layout {
+  /* Remove this background hack when styling refactoring is done */
+  /* eslint-disable-next-line local-css/no-unscoped-selector */
+  _body:has(*) {
+    background: var(--bg-dark);
+  }
+
   .pg-compare {
     width: min(100% - 1rem, 140rem);
     display: grid;
     gap: 1rem;
     margin-inline: auto;
+    margin-top: 16px;
 
-    .pg-compare-user-search {
-      position: relative;
-      margin: auto;
-      width: min(100% - 1rem, 20rem);
-
-      input {
-        padding: .5rem 1rem;
-        font-size: var(--fs-500);
-        width: 100%;
-      }
-
-      ol {
-        position: absolute;
-        width: 100%;
-        list-style: none;
-        padding: 0;
-        max-height: 20rem;
-        overflow: auto;
-        z-index: 2;
-      }
-
-      li {
-        display: grid;
-        gap: .25rem;
-        grid-template-columns: 2rem 1fr;
-        background-color: var(--background-400-old);
-        align-items: center;
-        cursor: pointer;
-
-        &.selected {
-          background-color: var(--background-700-old);
-        }
-      }
-
-      img {
-        aspect-ratio: 1/1;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        background-color: var(--background-300-old);
-      }
-    }
-  }
-
-  .pg-compare-users {
-    display: grid;
-    grid-template-columns: 3rem auto auto auto auto;
-    justify-content: center;
-    gap: .5rem 1rem;
-    padding: 0;
-
-    li {
+    .pg-compare-body {
       display: grid;
-      grid-template-columns: subgrid;
-      grid-column: 1 / -1;
-      background-color: var(--background-400-old);
-      padding: .5rem 1rem;
-      border-radius: .25rem;
-      align-items: center;
-      --loader-size: 2rem;
-      --loader-border-size: .35rem;
-      transition: opacity .2s, filter .2s, background-color .2s;
-
-      &.disabled {
-        filter: grayscale(1) brightness(.75);
-
-        &::after {
-          content: "";
-          position: absolute;
-          width: calc(100% - 1rem);
-          left: 50%;
-          transform: translateX(-50%);
-          height: .2rem;
-          background-color: var(--background-800-old);
-          pointer-events: none;
-          opacity: .5;
-        }
-      }
-
-      &.exclude:not(.disabled) {
-        background-color: var(--red-100);
-      }
+      gap: 1rem;
     }
-
-
-    img {
-      aspect-ratio: 1/1;
-      width: 100%;
-      border-radius: .25rem;
-    }
-
-    .error {
-      grid-column: 1/-2;
-    }
-  }
-
-  .pg-compare-filter-panel {
-    width: min(100% - 1rem, 40rem);
-    display: grid;
-    align-content: start;
-    gap: 0.25rem;
-    margin: auto;
   }
 
   .pg-compare-content {
