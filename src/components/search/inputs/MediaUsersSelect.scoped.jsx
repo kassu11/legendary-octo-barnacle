@@ -8,13 +8,12 @@ import { createCleanUpAbortController } from "@/utils/abortUtils.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
 import { queries } from "@/api/api.js";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
-import { createLocalStorageJsonSignal } from "@/utils/localStorageUtils.js";
+import { cachedUserInfos, setCachedUserInfos } from "@/state/globalState.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { addApplicationNotification } from "@/state/notifications";
 import { arrayUtils } from "@/utils/utils.js";
 
 export const [usersData, setUsersData] = createSignal({}, { equals: false });
-export const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
 
 export function MediaUsersSelect() {
   const parsedSearchParams = useParsedSearchParams();

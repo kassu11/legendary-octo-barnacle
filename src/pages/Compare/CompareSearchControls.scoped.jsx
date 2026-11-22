@@ -6,11 +6,12 @@ import { DesktopFilters, FilterGroup, FilterGroups, FilterSearchInput, MobileFil
 import { ScrollToListStartButton } from "@/components/filters/ScrollToListStartButton.scoped.jsx";
 import { ActiveQueries } from "@/components/filters/ActiveQueries.scoped.jsx";
 import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
-import { cachedUserInfos } from "@/components/search/inputs/MediaUsersSelect.scoped.jsx";
+import { cachedUserInfos } from "@/state/globalState.js";
 import { addClearAllActiveQuery, createActiveQuery, createToggleActiveQueries, createValueActiveQueries, excludableValueActiveQuery } from "@/utils/activeQueryUtils.js";
 import { arrayUtils } from "@/utils/utils.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
-import { AgeIcon, CalendarIcon, CountryIcon, FormatIcon, GenreIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
+import { AgeIcon, CalendarIcon, CountryIcon, FormatIcon, GenreIcon, NotesIcon, OnListIcon, PrivateIcon, ProgressIcon as TagIcon, RepeatOutlineIcon, ScoreIcon, SearchIcon, SortIcon, StatusIcon, StudioIcon, TagsIcon, TypeIcon, UsersIcon, YearIcon } from "@/assets/icons.jsx";
 import { CompareUsersSelect } from "./CompareUsersSelect.scoped.jsx";
 import "./CompareSearchControls.scoped.css";
 
@@ -49,6 +50,14 @@ const countryOptions = [
   { description: "Taiwan",           id: "TW" },
 ];
 
+const typeOptions = [
+  { description: "Anime",            id: "anime" },
+  { description: "Manga",            id: "manga" },
+];
+
+// Values of these only exist for one of the types
+const typeSpecificSorts = new Set(["episodes", "chapters", "volumes"]);
+
 const yearOptions = [];
 for (let year = new Date().getFullYear() + 2; year >= 1930; year--) yearOptions.push(toOption("" + year));
 
@@ -60,12 +69,19 @@ export function CompareSearchControls(props) {
   const { authUserData } = useAuthentication();
   const { isMobilLarge } = useResponsive();
   const params = useParams();
+  const navigate = useNavigateAndSearch();
   const [searchParams] = useSearchParams();
 
   const setSearchParams = options => {
     props.setSearchParams(options);
     // The mobile search and filters are reachable from anywhere on the page, so the results could be off the screen
     if (isMobilLarge()) window.scrollTo(0, scrollYBelowNavigation(props.scrollTarget));
+  };
+
+  const changeType = type => {
+    if (type === params.type) return;
+    const sort = arrayUtils.wrapToArray(searchParams.sort).filter(value => !typeSpecificSorts.has(value.endsWith(SORT_REVERSE_SUFFIX) ? value.slice(0, -SORT_REVERSE_SUFFIX.length) : value));
+    navigate(`/compare/${type}`, { format: undefined, studio: undefined, sort });
   };
 
   const isAuthUserCompared = () => {
@@ -181,6 +197,7 @@ export function CompareSearchControls(props) {
       <div class="compare-filters">
         <FilterGroups>
           <FilterGroup title="General">
+            <FilterSelect radio param="type" noEscapeCancel each={typeOptions} value={[params.type]} onPick={changeType} icon={<TypeIcon />} button="Type" tooltip="Compare the users' anime or manga lists" />
             <CompareUsersSelect users={props.users()} excludedUsers={props.excludedUsers()} type={params.type} setSearchParams={setSearchParams} />
             <FilterSelect param="sort" sort defaultValue="score" each={sortOptions()} value={props.sort()} icon={<SortIcon />} button="Sort" tooltip="Order of the list. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" setSearchParams={setSearchParams} />
             <Show when={props.users().length > 1}>

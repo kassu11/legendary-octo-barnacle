@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store";
 import { CompareMediaListContext, useCompareMediaList } from "@/state/providers.js";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
 import { Tooltip } from "@/components/Tooltip.scoped";
-import { setCachedUserInfos } from "@/components/search/inputs/MediaUsersSelect.scoped.jsx";
+import { setCachedUserInfos } from "@/state/globalState.js";
 import CompareMediaListWorker from "@/workers/compare-media-list.js?worker";
 import { capitalize, formatMediaFormat, formatUsersMediaStatus, languageFromCountry, mediaUrl } from "@/utils/formatUtils.js";
 import "./CompareIndex.scoped.css";

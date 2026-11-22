@@ -59,31 +59,13 @@ export function useNavigateAndSearch() {
     url = url.replace(/\?.*$/, ""); // Remove search from url, if present
     url = url.replace(/\/$/, ""); // Trim trailing "/" at the end
 
-    let search = window.location.search;
-    Object.entries(query).forEach(([key, value]) => {
-      // 1. Remove all old keys from search
-      const re = new RegExp(`(\\?|&)${key}[^&]*`, "g");
-      search = search.replace(re, "");
+    const searchParams = new URLSearchParams(window.location.search);
+    for (const [key, value] of Object.entries(query)) {
+      searchParams.delete(key);
+      for (const item of arrayUtils.wrapToArray(value)) searchParams.append(key, item);
+    }
 
-      // 2. Make sure search starts with ?
-      if (search[0] !== "?") {
-        search = "?" + search.substring(1);
-      }
-
-
-      if (value == undefined) return;
-
-      // 3. Make sure line ends with &
-      if (search.length > 1 && search.at(-1) != "&") {
-        search += "&";
-      }
-
-      search += arrayUtils.wrapToArray(value).map(v => `${key}=${v}`).join("&");
-
-    });
-
-    if (search.length > 1) navigate(url + search, options);
-    else navigate(url, options);
-
+    const search = searchParams.toString();
+    navigate(search ? `${url}?${search}` : url, options);
   }
 }

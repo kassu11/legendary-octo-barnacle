@@ -28,6 +28,7 @@ export const [searchPageCardStyle, setSearchPageCardStyle] = createLocalStorageS
 export const [userMediaListCardStyle, setUserMediaListCardStyle] = createLocalStorageSignal("LOB-user-media-list-card-style", "cards");
 export const [userMediaListAutoSave, setUserMediaListAutoSave] = createLocalStorageBooleanSignal("LOB-user-media-list-auto-save", false);
 export const [voiceActorLanguages, setVoiceActorLanguages] = createLocalStorageJsonSignal("LOB-voice-actor-languages", ["Japanese"]);
+export const [cachedUserInfos, setCachedUserInfos] = createLocalStorageJsonSignal("LOB-media-search-user-cache", {}, { equals: false });
 export const [settingsShowDevBranch, setSettingsShowDevBranch] = createLocalStorageBooleanSignal("LOB-settings-debug-branch");
 
 export const logoutUser = () => {

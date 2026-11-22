@@ -1,7 +1,7 @@
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import { FilterSelect } from "@/components/filters/FilterSelect.scoped.jsx";
 import { LoaderCircle } from "@/components/LoaderCircle.scoped.jsx";
-import { cachedUserInfos } from "@/components/search/inputs/MediaUsersSelect.scoped.jsx";
+import { cachedUserInfos } from "@/state/globalState.js";
 import { UserSearchIcon, UsersIcon } from "@/assets/icons.jsx";
 import "./CompareUsersSelect.scoped.css";
 
