@@ -9,7 +9,7 @@ import { Tooltip } from "@/components/Tooltip.scoped";
 /**
  * Voiced characters and staff roles of a staff member at the bottom of a media card
  * @param {Object} props
- * @param {{ characterRole: string, characters: Object[], staffRoles: string[] }} props.role Roles of the staff member in the media
+ * @param {{ characters: { character: Object, characterRole: string }[], staffRoles: string[] }} props.role Roles of the staff member in the media
  * @param {Object} props.media Anilist media of the card
  */
 export function MediaCardStaffRole(props) {
@@ -17,24 +17,24 @@ export function MediaCardStaffRole(props) {
     <Show when={props.role.characters.length || props.role.staffRoles.length}>
       <div class="media-card-staff-role">
         <Switch>
-          <Match when={props.role.characters.length === 1 && props.role.characters[0]}>{character => (
-            <A scoped class="character" href={"/ani/character/" + character().id + "/" + formatTitleToUrl(character().name.userPreferred)}>
-              <img src={character().image.large} alt="" />
-              <PersonHoverCard name={character().name.userPreferred} image={character().image.large} note={capitalize(props.role.characterRole)} kind="Character" media={props.media} />
+          <Match when={props.role.characters.length === 1 && props.role.characters[0]}>{voiced => (
+            <A scoped class="character" href={"/ani/character/" + voiced().character.id + "/" + formatTitleToUrl(voiced().character.name.userPreferred)}>
+              <img src={voiced().character.image.large} alt="" />
+              <PersonHoverCard name={voiced().character.name.userPreferred} image={voiced().character.image.large} note={capitalize(voiced().characterRole)} kind="Character" media={props.media} />
               <span class="text">
-                <span class="name line-clamp">{character().name.userPreferred}</span>
-                <Show when={props.role.characterRole}>
-                  <span class="note">{capitalize(props.role.characterRole)}</span>
+                <span class="name line-clamp">{voiced().character.name.userPreferred}</span>
+                <Show when={voiced().characterRole}>
+                  <span class="note">{capitalize(voiced().characterRole)}</span>
                 </Show>
               </span>
             </A>
           )}</Match>
           <Match when={props.role.characters.length > 1}>
             <GridReelAutoFill scoped class="characters">
-              <For each={props.role.characters}>{character => (
+              <For each={props.role.characters}>{({ character, characterRole }) => (
                 <A scoped class="character" href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)} aria-label={character.name.userPreferred}>
                   <img src={character.image.large} alt="" />
-                  <PersonHoverCard name={character.name.userPreferred} image={character.image.large} note={capitalize(props.role.characterRole)} kind="Character" media={props.media} />
+                  <PersonHoverCard name={character.name.userPreferred} image={character.image.large} note={capitalize(characterRole)} kind="Character" media={props.media} />
                 </A>
               )}</For>
             </GridReelAutoFill>

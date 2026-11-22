@@ -5,7 +5,7 @@ import { OldMarkdownComponent } from "@/components/Markdown.scoped.jsx";
 import { FavouriteToggle } from "@/components/FavouriteToggle.scoped.jsx";
 import { queries } from "@/api/api.js";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils.js";
-import { formatAnilistDate } from "@/utils/formatUtils.js";
+import { capitalize, formatAnilistDate } from "@/utils/formatUtils.js";
 import { setFetcherValueToStorage } from "@/utils/storageUtils.js";
 import { wrapToArray } from "@/utils/arrayUtils.js";
 import { createCleanUpAbortController } from "@/utils/abortUtils.js";
@@ -132,16 +132,17 @@ export function Staff() {
 
     const roles = new Map();
     const roleOf = node => {
-      if (!roles.has(node.id)) roles.set(node.id, { node, characterRole: undefined, characters: [], staffRoles: [], filterRoles: new Set() });
+      if (!roles.has(node.id)) roles.set(node.id, { node, characters: [], staffRoles: [], filterRoles: new Set() });
       return roles.get(node.id);
     };
 
+    // Characters with a different role in the same media are separate edges
     for (const edge of voiceActingEdges()) {
       const role = roleOf(edge.node);
-      role.characterRole = edge.characterRole;
       role.filterRoles.add(VOICE_ACTING_ROLE);
+      if (edge.characterRole) role.filterRoles.add(`${capitalize(edge.characterRole)} Character`);
       for (const character of edge.characters) {
-        if (character && !role.characters.some(c => c.id === character.id)) role.characters.push(character);
+        if (character && !role.characters.some(c => c.character.id === character.id)) role.characters.push({ character, characterRole: edge.characterRole });
       }
     }
 

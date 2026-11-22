@@ -7,7 +7,7 @@ import { PersonHoverCard } from "@/components/media/PersonHoverCard.scoped";
 /**
  * Voiced characters and staff roles of a staff member under the genres of a media row card
  * @param {Object} props
- * @param {{ characterRole: string, characters: Object[], staffRoles: string[] }} props.role Roles of the staff member in the media
+ * @param {{ characters: { character: Object, characterRole: string }[], staffRoles: string[] }} props.role Roles of the staff member in the media
  * @param {Object} props.media Anilist media of the card
  */
 export function MediaRowCardStaffRole(props) {
@@ -16,15 +16,15 @@ export function MediaRowCardStaffRole(props) {
       <div class="media-row-card-staff-role">
         <Show when={props.role.characters.length}>
           <ul class="characters">
-            <For each={props.role.characters}>{character => (
+            <For each={props.role.characters}>{({ character, characterRole }) => (
               <li>
                 <A scoped class="character" href={"/ani/character/" + character.id + "/" + formatTitleToUrl(character.name.userPreferred)}>
                   <img src={character.image.large} alt="" />
-                  <PersonHoverCard name={character.name.userPreferred} image={character.image.large} note={capitalize(props.role.characterRole)} kind="Character" media={props.media} />
+                  <PersonHoverCard name={character.name.userPreferred} image={character.image.large} note={capitalize(characterRole)} kind="Character" media={props.media} />
                   <span class="text">
                     <span class="name">{character.name.userPreferred}</span>
-                    <Show when={props.role.characterRole}>
-                      <span class="note">{capitalize(props.role.characterRole)}</span>
+                    <Show when={characterRole}>
+                      <span class="note">{capitalize(characterRole)}</span>
                     </Show>
                   </span>
                 </A>

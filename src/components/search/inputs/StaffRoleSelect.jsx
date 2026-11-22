@@ -20,6 +20,6 @@ export function StaffRoleSelect(props) {
   });
 
   return (
-    <FilterSelect param="role" excludable noEscapeCancel tooltip="Roles of the staff in the media, like voice acting or directing" each={roleOptions()} value={roleValues()} countOf={id => props.counts?.[id] || 0} setSearchParams={({ role }) => setSearchParams({ role }, { replace: true })} loading={!props.counts} emptyText="No roles" icon={<UserIcon />} button="Role" />
+    <FilterSelect param="role" excludable noEscapeCancel tooltip="Roles of the staff in the media, like voice acting, main character or directing" each={roleOptions()} value={roleValues()} countOf={id => props.counts?.[id] || 0} setSearchParams={({ role }) => setSearchParams({ role }, { replace: true })} loading={!props.counts} emptyText="No roles" icon={<UserIcon />} button="Role" />
   );
 }
