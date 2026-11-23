@@ -4,19 +4,27 @@ import { leftJoinObjects } from "@/utils/objectUtils";
 
 const baseLimits = {
   "https://graphql.anilist.co": {
-    limit: 60,
-    remaining: 60,
+    limit: 30,
+    remaining: 30,
     resetTime: 0,
     requests: [],
-    timeToWait: self => {
+    timeToWait: (self, cost) => {
       const now = new Date().getTime();
       // Anilist internal rate limit has been hit, resume only after reset time has passed
       if (self.resetTime > now) return self.resetTime - now;
 
-      if (self.remaining === 0) {
-        const { end, start } = self.requests.at(-self.limit) ?? self.requests.at(-1) ?? {};
-        const time = (end || start || now) + 60_000;
-        return Math.max(time - now, 0);
+      const minuteRequests = self.requests.filter(request => now - request.start < 60_000);
+      let available = self.limit;
+      for (const request of minuteRequests) available -= request.cost ?? 1;
+      const availableNow = available;
+
+      // Anilist rejects queries that cost more than the whole limit, so they don't wait for more than that
+      const neededCost = Math.min(cost, self.limit);
+      let costFreedTime = now;
+      for (const request of minuteRequests) {
+        if (available >= neededCost) break;
+        available += request.cost ?? 1;
+        costFreedTime = request.start + 60_000;
       }
 
       // Only allow 4 request back to back if the requests are from new session.
@@ -31,13 +39,13 @@ const baseLimits = {
       const only6ReqIn5Sec = (self.requests.at(-6)?.start + 5000) || now;
 
       // If 10 or less tokens remain limit requests to one per second
-      const tok10ReqIn1Sec = self.remaining <= 10 ? (self.requests.at(-1)?.start + 2000) || now : now;
+      const tok10ReqIn1Sec = availableNow <= 10 ? (self.requests.at(-1)?.start + 2000) || now : now;
       // If 5 or less tokens remain limit requests to one per two seconds
-      const tok5ReqIn2Sec = self.remaining <= 5 ? (self.requests.at(-1)?.start + 3000) || now : now;
+      const tok5ReqIn2Sec = availableNow <= 5 ? (self.requests.at(-1)?.start + 3000) || now : now;
       // If 2 or less tokens remain limit requests to one per four seconds
-      const tok2ReqIn2Sec = self.remaining <= 2 ? (self.requests.at(-1)?.start + 6000) || now : now;
+      const tok2ReqIn2Sec = availableNow <= 2 ? (self.requests.at(-1)?.start + 6000) || now : now;
 
-      return Math.max(now, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
+      return Math.max(now, costFreedTime, only3ReqIn1Sec, only4ReqIn2Sec, only6ReqIn5Sec, tok10ReqIn1Sec, tok5ReqIn2Sec, tok2ReqIn2Sec) - now;
     }
   },
   "https://rs.animethemes.moe/graphql": {
@@ -87,7 +95,7 @@ export function addFetcherToRateLimit(fetcher) {
   if (!rateLimit) return;
 
   const now = new Date().getTime();
-  rateLimit.requests.push({ start: now });
+  rateLimit.requests.push({ start: now, cost: fetcher.cost ?? 1 });
   // Remove requests if they are over 2 min old
   rateLimit.requests = rateLimit.requests.filter(row => now - row.start < 300_000);
 
@@ -107,7 +115,7 @@ export function setFetchResponseToRateLimit(fetcher, response, delay) {
 
   rateLimit.resetTime = retry + now;
   rateLimit.limit = limit ? limit : rateLimit.limit || 15;
-  rateLimit.remaining = remain ? remain : Math.max(rateLimit.remaining - 1, 0);
+  rateLimit.remaining = Number.isNaN(remain) ? Math.max(rateLimit.remaining - (fetcher.cost ?? 1), 0) : remain;
 
   storeRateLimits();
 }
@@ -135,7 +143,7 @@ export function getRateLimitFromFetcher(fetcher) {
   const rateLimit = getRateLimitRow(fetcher);
   if (!rateLimit) return 0;
 
-  const ms = rateLimit.timeToWait(rateLimit);
+  const ms = rateLimit.timeToWait(rateLimit, fetcher.cost ?? 1);
 
   assertTypeInteger(ms, "Rate limit delay did not return number");
 

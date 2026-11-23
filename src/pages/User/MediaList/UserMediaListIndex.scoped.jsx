@@ -22,7 +22,7 @@ import { COMBINED_LIST } from "@/constants/mediaLists.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
 
 // Every entry is its own aliased mutation, so big saves are split into many requests
-const SCORE_SAVE_BATCH_SIZE = 50;
+const SCORE_SAVE_BATCH_SIZE = 10;
 const AUTO_SAVE_DELAY = 15_000;
 
 export function UserMediaList() {
@@ -198,11 +198,11 @@ export function UserMediaList() {
     });
   };
 
-  const saveScores = async (resortList = true) => {
+  const saveScores = async (resortList = true, firstBatchOnly = false) => {
     if (scoresSaving() || !pendingScores().size) return;
     setScoresSaving(true);
     const savingFetcher = userMediaFetcher;
-    const changes = [...pendingScores()];
+    const changes = [...pendingScores()].slice(0, firstBatchOnly ? SCORE_SAVE_BATCH_SIZE : undefined);
     try {
       for (let i = 0; i < changes.length; i += SCORE_SAVE_BATCH_SIZE) {
         const batchChanges = changes.slice(i, i + SCORE_SAVE_BATCH_SIZE);
@@ -263,7 +263,10 @@ export function UserMediaList() {
     if (userMediaListAutoSave()) saveScores(false);
   });
   createEffect(() => {
-    if (userMediaListAutoSave() && pendingScores().size && !scoresSaving()) autoSaveScores(AUTO_SAVE_DELAY);
+    if (!userMediaListAutoSave() || !pendingScores().size || scoresSaving()) return;
+    // Saving a batch right away keeps the user from waiting on a long rate limited queue after they stop editing
+    if (pendingScores().size > SCORE_SAVE_BATCH_SIZE * 2) saveScores(false, true);
+    else autoSaveScores(AUTO_SAVE_DELAY);
   });
 
   const warnUnsavedScores = e => {
