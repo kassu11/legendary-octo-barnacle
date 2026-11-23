@@ -22,7 +22,7 @@ import { COMBINED_LIST } from "@/constants/mediaLists.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
 
 // Every entry is its own aliased mutation, so big saves are split into many requests
-const SCORE_SAVE_BATCH_SIZE = 50;
+const SCORE_SAVE_BATCH_SIZE = 10;
 const AUTO_SAVE_DELAY = 15_000;
 
 export function UserMediaList() {
@@ -204,14 +204,20 @@ export function UserMediaList() {
     const savingFetcher = userMediaFetcher;
     const changes = [...pendingScores()];
     try {
-      for (let i = 0; i < changes.length; i += SCORE_SAVE_BATCH_SIZE) {
-        const batchChanges = changes.slice(i, i + SCORE_SAVE_BATCH_SIZE);
+      let batchSize = SCORE_SAVE_BATCH_SIZE;
+      for (let savedCount = 0; savedCount < changes.length;) {
+        const batchChanges = changes.slice(savedCount, savedCount + batchSize);
+        savedCount += batchChanges.length;
         const mutation = `mutation{${batchChanges.map(([mediaId, score]) => `m${mediaId}:SaveMediaListEntry(mediaId:${mediaId},score:${score}){mediaId score}`).join(" ")}}`;
         const res = await fetcherToFetch(createAnilistFetcher(mutation, {}, AbortSignal.timeout(30_000)));
         if (res?.status !== 200) {
           addApplicationNotification({ type: "error", message: "Failed to save the scores", duration: 30_000 });
           return;
         }
+
+        // Every aliased mutation costs one request from the rate limit, so the next batch is kept within what remains
+        const remaining = parseInt(res.headers.get("X-RateLimit-Remaining"));
+        batchSize = Number.isNaN(remaining) ? SCORE_SAVE_BATCH_SIZE : Math.max(1, Math.min(SCORE_SAVE_BATCH_SIZE, remaining));
 
         const json = await res.json();
         // The user list could have changed while saving
