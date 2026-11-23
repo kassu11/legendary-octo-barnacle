@@ -42,7 +42,7 @@ export function createAnilistFetcher(query, variables, signal) {
   const headers = { "Content-Type": "application/json" };
   if (t) headers.Authorization = `Bearer ${t}`;
 
-  return createFetcher("https://graphql.anilist.co", {
+  const fetcher = createFetcher("https://graphql.anilist.co", {
     method: "POST",
     headers,
     signal,
@@ -51,6 +51,39 @@ export function createAnilistFetcher(query, variables, signal) {
       variables
     },
   }, removeTokenFromEncode);
+  fetcher.cost = anilistQueryCost(query);
+
+  return fetcher;
+}
+
+// Every top-level field costs one request from the AniList rate limit, aliased or not. Nested fields are free
+function anilistQueryCost(query) {
+  let depth = 0;
+  let parentheses = 0;
+  let cost = 0;
+  let inFragment = false;
+  for (let i = 0; i < query.length; i++) {
+    const char = query[i];
+    if (char === "\"") {
+      do i = query.indexOf("\"", i + 1); while (i > 0 && query[i - 1] === "\\");
+      if (i < 0) break;
+    }
+    else if (char === "(") parentheses++;
+    else if (char === ")") parentheses--;
+    else if (parentheses) continue;
+    else if (char === "{") depth++;
+    else if (char === "}" && --depth === 0) {
+      if (!inFragment) break;
+      inFragment = false;
+    }
+    else if (depth <= 1 && /[_A-Za-z]/.test(char) && !/[\w@.$]/.test(query[i - 1] ?? " ")) {
+      const name = query.slice(i).match(/^\w+/)[0];
+      i += name.length - 1;
+      if (depth === 0 && name === "fragment") inFragment = true;
+      else if (depth === 1 && !inFragment && !query.slice(i + 1).trimStart().startsWith(":")) cost++;
+    }
+  }
+  return Math.max(cost, 1);
 }
 
 export function createAnimeThemesFetcher(query, variables, signal) {
@@ -105,6 +138,10 @@ const fetchRequests = {};
 async function fetcherToFetchRetry(fetcher) {
   const signal = fetcher?.[1]?.signal;
   for (let i = 0; i < 3 && !signal?.aborted; i++) {
+    for (let wait = getRateLimitFromFetcher(fetcher); wait > 0 && !signal?.aborted; wait = getRateLimitFromFetcher(fetcher)) {
+      await new Promise(res => setTimeout(res, wait));
+    }
+
     try {
       const fetchRequest = fetchRequests[fetcher.cacheKey] ??= fetchWrapper(fetcher);
       var response = await fetchRequest;
@@ -117,7 +154,10 @@ async function fetcherToFetchRetry(fetcher) {
     }
 
     // Response was valid return response
-    if (response?.ok) break;
+    if (response?.ok) {
+      setFetchResponseToRateLimit(fetcher, response);
+      break;
+    }
 
     // Check if error status can be handled by just waiting it out
     const { delay, message } = await retryDelay(fetcher, response, i);
@@ -330,8 +370,6 @@ export async function sendFetcher(fetcher, settings = {}) {
       settings.onFetch?.(performance.now() - start, { fetcher });
       try {
         const response = await fetcherToFetch(fetcher);
-
-        setFetchResponseToRateLimit(fetcher, response);
 
         if (!response?.ok) throw response;
 
