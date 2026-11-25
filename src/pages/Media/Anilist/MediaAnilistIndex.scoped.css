@@ -134,6 +134,17 @@
         order: -1;
       }
     }
+
+    .media-page-view {
+      display: contents;
+
+      &.sub-page {
+        @media (width < 50em) {
+          display: block;
+          order: -1;
+        }
+      }
+    }
   }
 
   h1 {

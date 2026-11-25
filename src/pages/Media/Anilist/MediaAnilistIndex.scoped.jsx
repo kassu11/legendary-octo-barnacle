@@ -19,6 +19,7 @@ import "./MediaAnilistIndex.scoped.css";
 import { queries } from "@/api/api.js";
 import { formatTitleToUrl } from "@/utils/formatUtils.js";
 import { navigationUtils } from "@/utils/utils.js";
+import { MediaNavigation } from "./MediaNavigation.scoped.jsx";
 import { MediaBanner } from "./Banner.scoped.jsx";
 import { FavouriteToggleOld } from "@/components/FavouriteToggleOld.scoped.jsx";
 import { Trailer } from "@/pages/Media/Trailer.scoped.jsx";
@@ -233,7 +234,19 @@ export function MediaInfoContent(props) {
           </aside>
           <section class="media-page-main">
             <AnilistMediaInfo scoped class="anilist-media-info" time={time} />
-            {props.children}
+            <Show when={mediaPageAnilistData()?.data.data.Media}>{media => (
+              <>
+                <Show when={media().description}>
+                  <div class="media-page-description">
+                    <Markdown text={media().description} />
+                  </div>
+                </Show>
+                <MediaNavigation media={media()} sub={params.sub} />
+              </>
+            )}</Show>
+            <div class="media-page-view" classList={{ "sub-page": params.sub }}>
+              {props.children}
+            </div>
           </section>
         </div>
       </MediaInfoContext.Provider>
@@ -248,11 +261,6 @@ export function MediaInfoHome() {
   return (
     <ErrorBoundary fallback="Media page home content error">
       <Show when={anilistData()?.data.data.Media}>
-        <Show when={anilistData().data.data.Media.description}>
-          <div class="media-page-description">
-            <Markdown text={anilistData().data.data.Media.description} />
-          </div>
-        </Show>
         <AnilistRelationsPreview relations={anilistData().data.data.Media.relations}/>
         <Characters characters={anilistData().data.data.Media.characterPreview?.edges} countryOfOrigin={anilistData().data.data.Media.countryOfOrigin} isAdult={anilistData().data.data.Media.isAdult} />
         <StaffPreview staff={anilistData().data.data.Media.staffPreview?.edges} isAdult={anilistData().data.data.Media.isAdult} />

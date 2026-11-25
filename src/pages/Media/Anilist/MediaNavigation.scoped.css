@@ -1,0 +1,41 @@
+@layer component {
+  .media-navigation {
+    @media (width < 50em) {
+      order: -1;
+    }
+
+    ul {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 8px;
+      background-color: var(--bg);
+      list-style: none;
+
+      li {
+        flex: 1;
+
+        .navigation-link {
+          display: block;
+          padding: 4px;
+          border-radius: 4px;
+          color: var(--text-muted);
+          font-weight: 600;
+          text-align: center;
+          text-decoration: none;
+          transition: .2s background-color, .2s color;
+
+          &:hover {
+            background-color: color-mix(in oklab, var(--bg), var(--bg-light) 50%);
+            color: var(--text);
+          }
+
+          &.selected {
+            background-color: var(--bg-light);
+            color: var(--text);
+          }
+        }
+      }
+    }
+  }
+}
