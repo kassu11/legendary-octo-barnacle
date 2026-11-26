@@ -1,8 +1,6 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { useParsedSearchParams, useUser } from "@/state/providers";
-import { createEffect, createMemo, createRenderEffect, createSignal, For, onCleanup, Show } from "solid-js";
-import { createTimer } from "@/hooks/createTimer";
-import { formatMSToString } from "@/utils/timeUtils";
+import { useUser } from "@/state/providers";
+import { createEffect, createMemo, createRenderEffect, createSignal, onCleanup, Show } from "solid-js";
 import { createCleanUpAbortController } from "@/utils/abortUtils";
 import { createAnilistFetcher, sendAnilistFetcher } from "@/api/fetcherUtils";
 import { queries } from "@/api/api";
@@ -14,29 +12,30 @@ import { safeStringifyJson } from "@/utils/jsonUtils";
 import { hashKeyFNV32 } from "@/utils/hashUtils";
 import { createStore, reconcile } from "solid-js/store";
 import { MediaCard } from "@/components/media/MediaCard.scoped";
-import { tabTime } from "@/state/globalState";
-import { useIntersectionVisible } from "@/hooks/useIntersectionVisible";
+import { MediaRowCard } from "@/components/media/MediaRowCard.scoped.jsx";
+import { VirtualGrid } from "@/components/VirtualGrid.scoped.jsx";
+import { VirtualList } from "@/components/VirtualList.scoped.jsx";
+import { CardStyleToggle } from "@/components/search/CardStyleToggle.scoped.jsx";
+import { setUserMediaListCardStyle, tabTime, userMediaListCardStyle } from "@/state/globalState";
+import { arrayUtils } from "@/utils/utils.js";
+import { RelationSearchControls } from "./RelationSearchControls.scoped.jsx";
 
 const mediaIds = new Set();
 const [store, setStore] = createStore({});
 
-// Keeps track of how many cards search results contained.
-// This is used when we go back in history, so we can prerender the right amount of skeleton cards.
-// This prevent the browser from scrolling back to the top of the page
+// Number of results by the filters, so going back in history renders as many skeleton cards and keeps the scroll position
 const relationPageSizes = {}
 export function UserRelations() {
   const { user } = useUser();
   const params = useParams();
   const name = createMemo(() => user().name?.toLowerCase());
-  const parsedSearchParams = useParsedSearchParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [previousHistoryDataCount, setPreviousHistoryDataCount] = createSignal();
 
-  const [userRelationsTime, startUserRelationsTimer, stopUserRelationsTimer] = createTimer();
   const [userRelationsLoading, setUserRelationsLoading] = createSignal(false);
   const [userRelationsData, setUserRelationsData] = createSignal(undefined, { equals: false });
   const [listData, setListData] = createStore({});
-  const setListDataDebounced = debounce(setListData, 300);
+  const setListDataDebounced = debounce(setListData, 100);
   const userRelationsController = createCleanUpAbortController();
   let userRelationsFetcher;
   createRenderEffect(() => {
@@ -53,14 +52,8 @@ export function UserRelations() {
       name: "Anilist user media relations",
       // debug: false,
       onFetch: () => userRelationsController.disable(),
-      onStart: t => {
-        startUserRelationsTimer(t);
-        setUserRelationsLoading(true);
-      },
-      onStop: t => {
-        stopUserRelationsTimer(t);
-        setUserRelationsLoading(false);
-      },
+      onStart: () => setUserRelationsLoading(true),
+      onStop: () => setUserRelationsLoading(false),
       setValue: (res, { fetcher: f }) => {
         if (f.cacheKey !== userRelationsFetcher.cacheKey) return;
         setUserRelationsData(res);
@@ -117,18 +110,37 @@ export function UserRelations() {
     });
   });
 
-  const preventZoomIn = new Set();
+  const setSearchParams = options => {
+    _setSearchParams(options, { replace: true });
+  };
+  const multiParam = name => () => arrayUtils.wrapToArray(searchParams[name]).filter(Boolean);
+  const search = () => decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
+  const sortParam = multiParam("sort");
+  const sort = () => sortParam().length ? sortParam() : ["averageScore"];
+  const relationType = multiParam("relationType");
+  const userStatus = multiParam("userStatus");
+  const matchFormat = () => searchParams.matchFormat;
+  const format = multiParam("format");
+  const status = multiParam("status");
+  const countryOfOrigin = multiParam("countryOfOrigin");
+  const year = multiParam("year");
+  const genre = multiParam("genre");
+  const isAdult = () => searchParams.isAdult;
+
   let worker;
   const updateListInfo = () => {
     const postObject = {
-      search: parsedSearchParams().q,
-      matchFormat: searchParams.matchFormat === "true",
-      allowCompleted: searchParams.allowCompleted === "true",
-      allowDropped: searchParams.allowDropped === "true",
-      allowPlanning: searchParams.allowPlanning === "true",
-      allowCurrent: searchParams.allowCurrent === "true",
-      allowPaused: searchParams.allowPaused === "true",
-      allowNotYetReleased: searchParams.allowNotYetReleased === "true",
+      search: search(),
+      sort: sort(),
+      relationType: relationType(),
+      userStatus: userStatus(),
+      matchFormat: matchFormat(),
+      format: format(),
+      status: status(),
+      countryOfOrigin: countryOfOrigin(),
+      year: year(),
+      genre: genre(),
+      isAdult: isAdult(),
     };
 
     const key = hashKeyFNV32(safeStringifyJson(postObject) + userRelationsFetcher?.cacheKey);
@@ -140,9 +152,6 @@ export function UserRelations() {
     worker = worker instanceof Worker ? worker : new UserMediaRelationsWorker();
 
     postObject.data = userRelationsData()?.data.data.MediaListCollection;
-
-    // Animate all cards again
-    preventZoomIn.clear();
 
     worker.postMessage(postObject);
     worker.onmessage = ({ data }) => {
@@ -158,61 +167,49 @@ export function UserRelations() {
     if (worker instanceof Worker) worker.terminate();
   });
 
-  const handleInput = e => {
-    setSearchParams({ q: encodeURIComponent(e.target.value) || undefined, skipSortByMatch: undefined }, { replace: true });
-  };
+  const [relationsBody, setRelationsBody] = createSignal();
+  const skeletons = createMemo(() => Array(previousHistoryDataCount() ?? 0).fill(null));
+  const loading = media => listData.loading || !store[media.id]?.loaded;
 
-
-  const generateVisibilityRef = useIntersectionVisible();
   return (
-    <div class="relations">
-      <p>{formatMSToString(userRelationsTime())}</p>
-      <input type="search" onInput={handleInput} value={parsedSearchParams().q} />
-      <br />
-      <Checkbox label="Match Format" name="matchFormat" /><br />
-      <Checkbox label="Allow Completed" name="allowCompleted" /><br />
-      <Checkbox label="Allow Dropped" name="allowDropped" /><br />
-      <Checkbox label="Allow Planning" name="allowPlanning" /><br />
-      <Checkbox label="Allow Paused" name="allowPaused" /><br />
-      <Checkbox label="Allow Watching/Reading" name="allowCurrent" /><br />
-      <Checkbox label="Show not yeat released" name="allowNotYetReleased" /><br />
-
-      <h1>Relations {listData.data?.length}</h1>
-      <div class="grid">
-        <For each={listData.data} fallback={<FallbackCardsTokeepScrollPosition />}>{media => {
-
-          const [handleVisibilityRef, isVisible] = generateVisibilityRef();
-
-          return (
-            <div class="wrapper" ref={handleVisibilityRef}>
-              <Show when={isVisible()}>
-                <MediaCard scoped class="media-card" showScore showStatus quickActions hoverCard cardZoomIn={!preventZoomIn.has(media.id)} coverFadeIn={!preventZoomIn.has(media.id)} loading={listData.loading || !store[media.id]?.loaded} media={store[media.id] ?? media} />
-                { /* Animate card zoom in once, per query. When you search or change filters, we will reanimate cards again */ }
-                {preventZoomIn.add(media.id) && true} 
-              </Show>
-            </div>
-          )
-        }}</For>
-      </div>
+    <div ref={setRelationsBody} class="relations">
+      <RelationSearchControls
+        scrollTarget={relationsBody()}
+        setSearchParams={setSearchParams}
+        sort={sort}
+        relationType={relationType}
+        userStatus={userStatus}
+        matchFormat={matchFormat}
+        format={format}
+        status={status}
+        countryOfOrigin={countryOfOrigin}
+        year={year}
+        genre={genre}
+        isAdult={isAdult}
+      />
+      <section class="relations-content">
+        <div class="list-header">
+          <h2>Relations <Show when={listData.data}><span class="count">{listData.data.length}</span></Show></h2>
+          <CardStyleToggle cardStyle={userMediaListCardStyle()} setCardStyle={setUserMediaListCardStyle} />
+        </div>
+        <Show when={listData.data} fallback={
+          <Show when={userMediaListCardStyle() === "rows"} fallback={
+            <VirtualGrid each={skeletons()}>{() => <MediaCard />}</VirtualGrid>
+          }>
+            <VirtualList each={skeletons()}>{() => <MediaRowCard />}</VirtualList>
+          </Show>
+        }>
+          <Show when={userMediaListCardStyle() === "rows"} fallback={
+            <VirtualGrid each={listData.data}>{media => (
+              <MediaCard showScore showStatus quickActions hoverCard loading={loading(media)} media={store[media.id] ?? media} />
+            )}</VirtualGrid>
+          }>
+            <VirtualList cacheKey={`relations-${name()}-${params.type}`} each={listData.data}>{media => (
+              <MediaRowCard type={params.type} showStatus loading={loading(media)} media={store[media.id]} />
+            )}</VirtualList>
+          </Show>
+        </Show>
+      </section>
     </div>
   );
-
-  function FallbackCardsTokeepScrollPosition() {
-    return (
-      <For each={Array(previousHistoryDataCount())}>{() => (
-        <div class="wrapper" />
-      )}</For>
-    );
-  }
-
-  function Checkbox(props) {
-    return (
-      <label>
-        <input type="checkbox" name={props.name} id={props.name} checked={searchParams[props.name] === "true"} onChange={e => setSearchParams({ [props.name]: e.target.checked })} />
-        {" "}{props.label}
-      </label>
-    );
-  }
 }
-
-

@@ -26,6 +26,15 @@ fragment mediaListEntry on MediaList {
           idMal
           synonyms
           averageScore
+          popularity
+          genres
+          isAdult
+          countryOfOrigin
+          startDate {
+            year
+            month
+            day
+          }
           status(version: 2)
           coverImage {
             extraLarge

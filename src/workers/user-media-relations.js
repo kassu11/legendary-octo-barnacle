@@ -1,182 +1,122 @@
 import { fuse } from "@/utils/stringUtils.js";
 
 onmessage = ({ data: { data, ...filtering } }) => {
-  modifyMediaListData(data, filtering);
+  postMessage(findRelations(data, filtering));
 }
 
-function modifyMediaListData(listData, options) {
+const tokenFilters = ["format", "status", "countryOfOrigin", "year", "genre", "relationType", "userStatus"];
 
+// Excluded values have a "-" prefix
+function parseTokens(tokens) {
+  const parsed = { include: [], exclude: [] };
+  for (const token of tokens) {
+    if (token[0] === "-") parsed.exclude.push(token.slice(1));
+    else parsed.include.push(token);
+  }
+  return parsed;
+}
+
+const matchesAny = ({ include, exclude }, test) => (!include.length || include.some(test)) && !exclude.some(test);
+const matchesAll = ({ include, exclude }, test) => include.every(test) && !exclude.some(test);
+// "true" keeps the entries that match, "false" keeps the ones that don't and any other value doesn't filter
+const matchesToggle = (value, matches) => (value !== "true" && value !== "false") || matches === (value === "true");
+
+function findRelations(listData, options) {
   options.searchRegex = fuse(options.search);
+  for (const name of tokenFilters) {
+    options[name] = parseTokens(options[name]);
+  }
 
-  const blackList = new Set();
-  const relations = {};
-  listData.lists.forEach(list => {
-    list.entries.forEach(entry => {
-      blackList.add(entry.media.id);
+  // Media that is already on the list, or is only a different version of media on the list
+  const hiddenMedia = new Set();
+  const relations = new Map();
+  for (const list of listData.lists) {
+    for (const entry of list.entries) {
+      hiddenMedia.add(entry.media.id);
+      const entryMatches = matchesAny(options.userStatus, status => status === entry.status);
 
-      if (!options.allowCompleted && entry.status === "COMPLETED") return;
-      if (!options.allowCurrent && entry.status === "CURRENT") return;
-      if (!options.allowDropped && entry.status === "DROPPED") return;
-      if (!options.allowPaused && entry.status === "PAUSED") return;
-      if (!options.allowPlanning && entry.status === "PLANNING") return;
-
-      entry.media.relations.edges.forEach(edge => {
-        // Skip summary movies / ovas. For example: https://anilist.co/anime/184694/Solo-Leveling-ReAwakening-/
-        if (edge.relationType === "SUMMARY") {
-          blackList.add(edge.node.id);
-          return;
+      for (const edge of entry.media.relations.edges) {
+        // Summaries and alternative versions retell the same story. For example:
+        // https://anilist.co/anime/184694/Solo-Leveling-ReAwakening-/
+        // https://anilist.co/anime/129874/Demon-Slayer-Kimetsu-no-Yaiba-Mugen-Train-Arc/
+        if (edge.relationType === "SUMMARY" || edge.relationType === "ALTERNATIVE") {
+          hiddenMedia.add(edge.node.id);
+          continue;
         }
 
-        // Skip alternative versions. For example: https://anilist.co/anime/129874/Demon-Slayer-Kimetsu-no-Yaiba-Mugen-Train-Arc/
-        if (edge.relationType === "ALTERNATIVE") {
-          blackList.add(edge.node.id);
-          return;
-        }
+        if (!entryMatches) continue;
+        if (edge.relationType !== "SEQUEL" && edge.relationType !== "PREQUEL") continue;
+        if (edge.node.status === "CANCELLED") continue;
+        if (!matchesAny(options.relationType, type => type === edge.relationType)) continue;
+        if (options.matchFormat === "true" && edge.node.format !== "MOVIE" && edge.node.format !== entry.media.format) continue;
 
-        if (edge.relationType !== "SEQUEL" && edge.relationType !== "PREQUEL") return;
-        if (options.matchFormat && edge.node.format !== "MOVIE" && edge.node.format !== entry.media.format) return;
-        if (!options.allowNotYetReleased && edge.node.status === "NOT_YET_RELEASED") return;
-        if (edge.node.status === "CANCELLED") return;
-
-        relations[edge.node.id] = edge.node;
-      });
-    });
-  });
+        relations.set(edge.node.id, edge.node);
+      }
+    }
+  }
 
   const data = [];
-  Object.values(relations).forEach(entry => {
-    if (blackList.has(entry.id)) return;
-    if (filter({ media: entry }, options)) {
-      data.push(entry);
-    }
-  });
+  for (const media of relations.values()) {
+    if (!hiddenMedia.has(media.id) && filter(media, options)) data.push(media);
+  }
 
-
-  // const mediaSet = new Set();
-  // const tagsSet = new Set();
-  // const studiosSet = new Set();
-  // listData.indecies = {};
-  // listData.lists.forEach((list, i) => {
-  //   let tail = 0;
-  //   list.entries.forEach((entry, j, arr) => {
-  //     listData.indecies[entry.media.id] ??= []
-  //     listData.indecies[entry.media.id].push([i, j]);
-  //     for (const studio of entry.media.studios.edges) {
-  //       if (studio.isMain) {
-  //         studiosSet.add(studio.node.name);
-  //       } else {
-  //         break;
-  //       }
-  //     }
-  //     for (const tag of entry.media.tags) {
-  //       if (tag.rank > 50) {
-  //         tagsSet.add(tag.name);
-  //       } else {
-  //         break;
-  //       }
-  //     }
-  //
-  //     if (filter(entry, options)) {
-  //       mediaSet.add(entry.media.id);
-  //
-  //       if (tail++ < j) {
-  //         arr[tail - 1] = entry;
-  //       }
-  //     }
-  //   });
-  //
-  //   list.entries.length = tail;
-  // });
-  // listData.total = mediaSet.size;
-  // listData.studios = Array.from(studiosSet).sort();
-  // listData.tags = Array.from(tagsSet).sort();
-
-  const sortFunction = generateSortFunction(options.sort, options.reverse ? -1 : 1);
-  data.sort(sortFunction);
-
-  // postMessage(Array(50).fill(data).flat());
-  postMessage(data);
+  data.sort(generateSortFunction(options.sort));
+  return data;
 }
 
-function generateSortFunction(sort, direction = 1) {
-  switch (sort) {
-    case "title":
-      return (a, b) => (sortFunctions.title(a, b) * direction) || sortFunctions.averageScore(a, b);
-    case "format":
-      return (a, b) => (sortFunctions.format(a, b) * direction) || sortFunctions.averageScore(a, b) || sortFunctions.title(a, b);
-    case "averageScore":
-      return (a, b) => (sortFunctions.averageScore(a, b) * direction) || sortFunctions.title(a, b);
-    default:
-      return (a, b) => (sortFunctions.averageScore(a, b) * direction) || sortFunctions.title(a, b);
+// Sort values are "field" or "field_reverse", later fields settle the ties of the earlier ones
+function generateSortFunction(sort) {
+  const comparators = sort.flatMap(value => {
+    const reversed = value.endsWith("_reverse");
+    const compare = sortFunctions[reversed ? value.slice(0, -"_reverse".length) : value];
+    if (!compare) return [];
+    return reversed ? (a, b) => compare(b, a) : compare;
+  });
+  comparators.push(sortFunctions.averageScore, sortFunctions.title);
+
+  return (a, b) => {
+    for (const compare of comparators) {
+      const result = compare(a, b);
+      if (result) return result;
+    }
+    return 0;
   };
 }
 
 const sortFunctions = {
-  "format": (a, b) => a.format.localeCompare(b.format),
-  "title": (a, b) => a.title.userPreferred.localeCompare(b.title.userPreferred),
   "averageScore": (a, b) => (b.averageScore || 0) - (a.averageScore || 0),
+  "popularity": (a, b) => (b.popularity || 0) - (a.popularity || 0),
+  "releaseDate": (a, b) => (b.startDate?.year || 0) - (a.startDate?.year || 0) || (b.startDate?.month || 0) - (a.startDate?.month || 0) || (b.startDate?.day || 0) - (a.startDate?.day || 0),
+  "title": (a, b) => a.title.userPreferred.localeCompare(b.title.userPreferred),
 }
 
-function filter(entry, filterObject) {
+function filter(media, filterObject) {
   if (filterObject.searchRegex) search: {
-    if ((entry.searchMatch = entry.media.title.userPreferred.match(filterObject.searchRegex))) { break search; }
-    if ((entry.searchMatch = entry.media.title.native?.match(filterObject.searchRegex))) { break search; }
-    if ((entry.searchMatch = entry.media.title.english?.match(filterObject.searchRegex))) { break search; }
-    if ((entry.searchMatch = entry.media.title.romaji?.match(filterObject.searchRegex))) { break search; }
-    if ((entry.searchMatch = entry.media.synonyms?.some(synonym => synonym.match(filterObject.searchRegex)))) { break search; }
+    if (media.title.userPreferred.match(filterObject.searchRegex)) { break search; }
+    if (media.title.native?.match(filterObject.searchRegex)) { break search; }
+    if (media.title.english?.match(filterObject.searchRegex)) { break search; }
+    if (media.title.romaji?.match(filterObject.searchRegex)) { break search; }
+    if (media.synonyms?.some(synonym => synonym.match(filterObject.searchRegex))) { break search; }
     return false;
   }
 
-  if (filterObject.format && entry.media.format !== filterObject.format) {
+  if (!matchesAny(filterObject.format, format => format === media.format)) {
     return false;
   }
-  if (filterObject.status && entry.media.status !== filterObject.status) {
+  if (!matchesAny(filterObject.status, status => status === media.status)) {
     return false;
   }
-  if (filterObject.countryOfOrigin && entry.media.countryOfOrigin !== filterObject.countryOfOrigin) {
+  if (!matchesAny(filterObject.countryOfOrigin, country => country === media.countryOfOrigin)) {
     return false;
   }
-  if (filterObject.year && entry.media.startDate?.year !== filterObject.year) {
+  if (!matchesAny(filterObject.year, year => year === String(media.startDate?.year))) {
     return false;
   }
-  if (typeof filterObject.isAdult === "boolean" && entry.media.isAdult !== filterObject.isAdult) {
+  if (!matchesToggle(filterObject.isAdult, !!media.isAdult)) {
     return false;
   }
-  if (filterObject.genre && entry.media.genres.every(genre => genre !== filterObject.genre)) {
-    return false;
-  }
-  if (filterObject.userStatus && entry.status !== filterObject.userStatus) {
-    return false;
-  }
-  if (filterObject.private && !entry.private) {
-    return false;
-  }
-  if (filterObject.notes && !entry.notes) {
-    return false;
-  }
-  if (filterObject.repeat && !(entry.repeat > 0)) {
-    return false;
-  }
-  if (filterObject.missingStart && entry.startedAt?.year) {
-    return false;
-  }
-  if (filterObject.missingScore && entry.score !== 0) {
-    return false;
-  }
-  if (filterObject.studio) studio: {
-    for (const studio of entry.media.studios.edges) {
-      if (studio.isMain && studio.node.name === filterObject.studio) {
-        break studio;
-      }
-    }
-    return false;
-  }
-  if (filterObject.tag) tag: {
-    for (const tag of entry.media.tags) {
-      if (tag.rank > 50 && tag.name=== filterObject.tag) {
-        break tag;
-      }
-    }
+  // Media needs to have all the included genres
+  if (!matchesAll(filterObject.genre, genre => media.genres?.includes(genre))) {
     return false;
   }
 
