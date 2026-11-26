@@ -35,7 +35,7 @@ import { MediaInfoContent, MediaInfoHome, MediaPageRedirect } from "./pages/Medi
 import { Socials } from "./pages/User/Socials/UserSocialsIndex.scoped.jsx";
 import { SettingsPage } from "./pages/Settings/SettingsIndex.scoped";
 import { SearchPage } from "./pages/Search/SearchIndex.scoped";
-import { UserRelations } from "./pages/User/Relations/UserRelationsIndex.scoped";
+import { UserSequels } from "./pages/User/Sequels/UserSequelsIndex.scoped";
 import { isSearchHeaderForType } from "./utils/searchHeaderUtils";
 
 const root = document.getElementById("root")
@@ -117,7 +117,7 @@ render(
                 {/* Default to list view */}
                 <Route path="/" component={() => <Navigate href="list" />} />
                 <Route path="/list/:list?" component={UserMediaList} />
-                <Route path="/relations" component={UserRelations} />
+                <Route path="/sequels" component={UserSequels} />
 
                 {/* User stats page */}
                 <Route path="/stats" component={Stats}>

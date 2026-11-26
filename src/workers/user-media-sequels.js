@@ -1,10 +1,10 @@
 import { fuse } from "@/utils/stringUtils.js";
 
 onmessage = ({ data: { data, ...filtering } }) => {
-  postMessage(findRelations(data, filtering));
+  postMessage(findSequels(data, filtering));
 }
 
-const tokenFilters = ["format", "status", "countryOfOrigin", "year", "genre", "relationType", "userStatus"];
+const tokenFilters = ["format", "status", "countryOfOrigin", "year", "genre", "sequelStatus", "prequelStatus"];
 
 // Excluded values have a "-" prefix
 function parseTokens(tokens) {
@@ -21,7 +21,7 @@ const matchesAll = ({ include, exclude }, test) => include.every(test) && !exclu
 // "true" keeps the entries that match, "false" keeps the ones that don't and any other value doesn't filter
 const matchesToggle = (value, matches) => (value !== "true" && value !== "false") || matches === (value === "true");
 
-function findRelations(listData, options) {
+function findSequels(listData, options) {
   options.searchRegex = fuse(options.search);
   for (const name of tokenFilters) {
     options[name] = parseTokens(options[name]);
@@ -29,11 +29,12 @@ function findRelations(listData, options) {
 
   // Media that is already on the list, or is only a different version of media on the list
   const hiddenMedia = new Set();
-  const relations = new Map();
+  // Relation types of the media by its id, the same media can be a sequel of one entry and a prequel of another
+  const relationTypes = new Map();
+  const relatedMedia = [];
   for (const list of listData.lists) {
     for (const entry of list.entries) {
       hiddenMedia.add(entry.media.id);
-      const entryMatches = matchesAny(options.userStatus, status => status === entry.status);
 
       for (const edge of entry.media.relations.edges) {
         // Summaries and alternative versions retell the same story. For example:
@@ -44,24 +45,28 @@ function findRelations(listData, options) {
           continue;
         }
 
-        if (!entryMatches) continue;
         if (edge.relationType !== "SEQUEL" && edge.relationType !== "PREQUEL") continue;
+        if (!matchesAny(edge.relationType === "SEQUEL" ? options.sequelStatus : options.prequelStatus, status => status === entry.status)) continue;
         if (edge.node.status === "CANCELLED") continue;
-        if (!matchesAny(options.relationType, type => type === edge.relationType)) continue;
         if (options.matchFormat === "true" && edge.node.format !== "MOVIE" && edge.node.format !== entry.media.format) continue;
 
-        relations.set(edge.node.id, edge.node);
+        if (!relationTypes.has(edge.node.id)) {
+          relationTypes.set(edge.node.id, new Set());
+          relatedMedia.push(edge.node);
+        }
+        relationTypes.get(edge.node.id).add(edge.relationType);
       }
     }
   }
 
-  const data = [];
-  for (const media of relations.values()) {
-    if (!hiddenMedia.has(media.id) && filter(media, options)) data.push(media);
-  }
+  const all = relatedMedia.filter(media => !hiddenMedia.has(media.id) && filter(media, options));
+  all.sort(generateSortFunction(options.sort));
 
-  data.sort(generateSortFunction(options.sort));
-  return data;
+  const lists = { ALL: all, SEQUEL: [], PREQUEL: [] };
+  for (const media of all) {
+    for (const type of relationTypes.get(media.id)) lists[type].push(media);
+  }
+  return lists;
 }
 
 // Sort values are "field" or "field_reverse", later fields settle the ties of the earlier ones

@@ -1,5 +1,5 @@
 @layer layout {
-  .relation-filters {
+  .sequel-filters {
     --select-padding: .35em .5em;
   }
 }

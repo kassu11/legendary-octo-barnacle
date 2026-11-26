@@ -1,4 +1,5 @@
 import { useParams, useSearchParams } from "@solidjs/router";
+import { useNavigateAndSearch } from "@/utils/urlUtils.js";
 import { createMemo, Show } from "solid-js";
 import { useResponsive } from "@/state/providers.js";
 import { ToggleButton, TwoStateToggleButton } from "@/components/filters/TwoStateToggle.scoped.jsx";
@@ -9,8 +10,8 @@ import { addClearAllActiveQuery, createActiveQuery, createToggleActiveQueries, c
 import { FilterSelect, SORT_REVERSE_SUFFIX } from "@/components/filters/FilterSelect.scoped.jsx";
 import { arrayUtils } from "@/utils/utils.js";
 import { scrollYBelowNavigation } from "@/utils/scrollUtils.js";
-import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, GitBranchIcon, OnListIcon, SearchIcon, SortIcon, StatusIcon, YearIcon } from "@/assets/icons.jsx";
-import "./RelationSearchControls.scoped.css";
+import { AgeIcon, CountryIcon, FormatIcon, GenreIcon, ListIcon, OnListIcon, SearchIcon, SortIcon, StatusIcon, TypeIcon, YearIcon } from "@/assets/icons.jsx";
+import "./SequelSearchControls.scoped.css";
 
 const animeFormatOptions = [
   { description: "Movie",            id: "MOVIE"    },
@@ -47,9 +48,24 @@ const countryOptions = [
   { description: "Taiwan",           id: "TW" },
 ];
 
-const relationTypeOptions = [
-  { description: "Sequel",           id: "SEQUEL"  },
-  { description: "Prequel",          id: "PREQUEL" },
+// Status of the entry on the list that the sequel or prequel is related to.
+// Sequels are for the entries the user has finished, prequels for every entry the user hasn't given up on
+export const SEQUEL_STATUS_DEFAULT = ["COMPLETED", "REPEATING"];
+export const PREQUEL_STATUS_DEFAULT = ["COMPLETED", "CURRENT", "PAUSED", "PLANNING", "REPEATING"];
+// The status params use the defaults when they are empty, so this token is used for showing every status
+export const ANY_STATUS = "ANY";
+
+const typeOptions = [
+  { description: "Anime",            id: "anime" },
+  { description: "Manga",            id: "manga" },
+];
+
+// In the order the lists are shown. "All" is the default and can't be selected together with the other lists
+export const ALL_RELATIONS = "ALL";
+export const relationListOptions = [
+  { description: "All",              id: ALL_RELATIONS, title: "Sequels and prequels", tooltip: "Sequels and prequels as one list" },
+  { description: "Sequels",          id: "SEQUEL",      title: "Sequels"              },
+  { description: "Prequels",         id: "PREQUEL",     title: "Prequels"             },
 ];
 
 const sortOptions = [
@@ -66,15 +82,27 @@ function toOption(name) {
   return { description: name, id: name };
 }
 
-export function RelationSearchControls(props) {
+export function SequelSearchControls(props) {
   const { isMobilLarge } = useResponsive();
   const params = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigateAndSearch();
 
   const setSearchParams = options => {
     props.setSearchParams(options);
     // The mobile search and filters are reachable from anywhere on the page, so the results could be off the screen
     if (isMobilLarge()) window.scrollTo(0, scrollYBelowNavigation(props.scrollTarget));
+  };
+
+  const changeType = type => {
+    if (type !== params.type) navigate(`/user/${params.name}/${type}/sequels`, { format: undefined });
+  };
+
+  // Selecting the defaults removes the param, and an empty selection shows every status
+  const setStatusParam = (param, defaults) => query => {
+    const tokens = query[param];
+    const isDefault = tokens.length === defaults.length && defaults.every(token => tokens.includes(token));
+    setSearchParams({ [param]: !tokens.length ? ANY_STATUS : isDefault ? undefined : tokens });
   };
 
   const userStatusOptions = createMemo(() => [
@@ -99,8 +127,15 @@ export function RelationSearchControls(props) {
       return { description: "Sort: " + optionDescription(sortOptions)(id) + (reversed ? " (reversed)" : ""), icon: SortIcon };
     }, setSearchParams));
 
-    queries.push(...createValueActiveQueries ("relationType",    props.relationType(),    id => ({ description: "Relation: " + optionDescription(relationTypeOptions)(id), icon: GitBranchIcon }), setSearchParams));
-    queries.push(...createValueActiveQueries ("userStatus",      props.userStatus(),      excludableValueActiveQuery("User Status", OnListIcon,    optionDescription(userStatusOptions())), setSearchParams));
+    queries.push(...createValueActiveQueries ("list",            props.list().filter(id => id !== ALL_RELATIONS), id => ({ description: "List: " + optionDescription(relationListOptions)(id), icon: ListIcon }), setSearchParams));
+    // One query per status filter, removing it returns the filter to its defaults
+    const statusQuery = (param, label, tokens) => {
+      if (!arrayUtils.wrapToArray(searchParams[param]).filter(Boolean).length) return;
+      const statuses = tokens.map(token => token[0] === "-" ? "not " + optionDescription(userStatusOptions())(token.slice(1)) : optionDescription(userStatusOptions())(token));
+      queries.push(createActiveQuery({ description: label + ": " + (statuses.join(", ") || "Any status"), icon: OnListIcon, query: { [param]: undefined } }, setSearchParams));
+    };
+    statusQuery("sequelStatus", "Sequels of", props.sequelStatus());
+    statusQuery("prequelStatus", "Prequels of", props.prequelStatus());
     if (props.matchFormat() === "true") queries.push(createActiveQuery({ description: "Same format", icon: FormatIcon, query: { matchFormat: undefined } }, setSearchParams));
     queries.push(...createValueActiveQueries ("format",          props.format(),          excludableValueActiveQuery("Format",      FormatIcon,    optionDescription(params.type === "anime" ? animeFormatOptions : mangaFormatOptions)), setSearchParams));
     queries.push(...createValueActiveQueries ("status",          props.status(),          excludableValueActiveQuery("Status",      StatusIcon,    optionDescription(statusOptions)),       setSearchParams));
@@ -134,14 +169,20 @@ export function RelationSearchControls(props) {
 
   function Filters() {
     return (
-      <div class="relation-filters">
+      <div class="sequel-filters">
         <FilterGroups>
           <FilterGroup title="General">
-            <FilterSelect param="sort" sort defaultValue="averageScore" each={sortOptions} value={props.sort()} icon={<SortIcon />} button="Sort" tooltip="Order of the relations. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" setSearchParams={setSearchParams} />
+            <FilterSelect radio param="type" noEscapeCancel each={typeOptions} value={[params.type]} onPick={changeType} icon={<TypeIcon />} button="Type" tooltip="Sequels of the user's anime or manga list" />
+            <FilterSelect param="list" radio defaultValue={ALL_RELATIONS} each={relationListOptions} countOf={props.listCount} value={props.list()} icon={<ListIcon />} button="List" tooltip="Which lists to show, sequels and prequels as one list by default. Hold Ctrl to show sequels and prequels as separate lists" setSearchParams={setSearchParams} />
+            <FilterSelect param="sort" sort defaultValue="averageScore" each={sortOptions} value={props.sort()} icon={<SortIcon />} button="Sort" tooltip="Order of the media. Click a sort again to reverse it, hold Ctrl to sort by multiple fields, hold Shift to add every field in between" setSearchParams={setSearchParams} />
           </FilterGroup>
           <FilterGroup title="Relation">
-            <FilterSelect param="relationType" radio defaultValue="" each={relationTypeOptions} value={props.relationType()} icon={<GitBranchIcon />} button="Relation" tooltip="How the media is related to the entry on the list, both when none is selected" setSearchParams={setSearchParams} />
-            <FilterSelect param="userStatus" excludable each={userStatusOptions()} value={props.userStatus()} icon={<OnListIcon />} button="User Status" tooltip="Status of the related entry on this user's list. Click once to include, twice to exclude" setSearchParams={setSearchParams} />
+            <Show when={props.list().includes(ALL_RELATIONS) || props.list().includes("SEQUEL")}>
+              <FilterSelect param="sequelStatus" excludable each={userStatusOptions()} value={props.sequelStatus()} icon={<OnListIcon />} button="Sequels of" tooltip={`Show sequels of the entries with these statuses on the list, completed and ${params.type === "anime" ? "rewatching" : "rereading"} entries by default. Click once to include, twice to exclude`} setSearchParams={setStatusParam("sequelStatus", SEQUEL_STATUS_DEFAULT)} />
+            </Show>
+            <Show when={props.list().includes(ALL_RELATIONS) || props.list().includes("PREQUEL")}>
+              <FilterSelect param="prequelStatus" excludable each={userStatusOptions()} value={props.prequelStatus()} icon={<OnListIcon />} button="Prequels of" tooltip="Show prequels of the entries with these statuses on the list, every status except dropped by default. Click once to include, twice to exclude" setSearchParams={setStatusParam("prequelStatus", PREQUEL_STATUS_DEFAULT)} />
+            </Show>
             <ToggleButton checked={props.matchFormat() === "true"} icon={<FormatIcon />} label="Same format" tooltip="Show only relations with the same format as the entry on the list. Movies are always shown" onChange={() => setSearchParams({ matchFormat: props.matchFormat() === "true" ? undefined : "true" })} />
           </FilterGroup>
           <FilterGroup title="Media">
