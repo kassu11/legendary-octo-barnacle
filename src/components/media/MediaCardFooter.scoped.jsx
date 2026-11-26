@@ -43,7 +43,7 @@ export function MediaCardFooter(props) {
           </Match>
         </Switch>
       </p>
-      <Score score={local.entry.score} format={local.scoreFormat || "POINT_10_DECIMAL"}>
+      <Score highlight score={local.entry.score} format={local.scoreFormat || "POINT_10_DECIMAL"}>
         <Show when={local.showAdvancedScores && advancedScores().length}>
           <Tooltip placements={["top", "bottom"]}>
             <For each={advancedScores()}>{([name, score]) => (
