@@ -22,7 +22,6 @@ export function MediaUsersSelect() {
   const [input, setInput] = createSignal("");
 
   const anilistUserSearchController = createCleanUpAbortController();
-  let anilistUserSearchFetcher;
 
   createEffect(() => {
     const userName = searchUser();
@@ -47,9 +46,9 @@ export function MediaUsersSelect() {
     const userName = searchUser();
     if (!userName) return;
 
-    anilistUserSearchFetcher = createAnilistFetcher(queries.anilistAllUserMediaIds, { userName, statusNotIn: ["PLANNING"] }, signal);
+    const fetcher = createAnilistFetcher(queries.anilistAllUserMediaIds, { userName, statusNotIn: ["PLANNING"] }, signal);
 
-    sendAnilistFetcher(anilistUserSearchFetcher, {
+    sendAnilistFetcher(fetcher, {
       name: "Anilist All User Media IDs",
       onFetch: () => anilistUserSearchController.disable(),
       // TODO: Change erros better
@@ -74,8 +73,8 @@ export function MediaUsersSelect() {
           addApplicationNotification({ type: "error", message: `Anilist errored with a status code: ${res.status || "404"}.`, duration: 10_000 });
         }
       },
-      setValue: (res, { fetcher: f }) => {
-        if (f.cacheKey !== anilistUserSearchFetcher.cacheKey) return;
+      setValue: res => {
+        anilistUserSearchController.disable();
 
         const entries = res.data.data;
         const name = entries.anime.user.name || entries.manga.user.name;
