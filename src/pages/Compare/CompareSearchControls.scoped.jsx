@@ -134,7 +134,7 @@ export function CompareSearchControls(props) {
     const avatars = new Map();
     for (const user of Object.values(cachedUserInfos())) avatars.set(user.name.toLowerCase(), user.avatar);
 
-    const search = arrayUtils.wrapToArray(searchParams.q).at(-1);
+    const search = decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
     if (search) queries.push(createActiveQuery({ description: `Searching "${search}"`, icon: SearchIcon, query: { q: undefined }, clearable: false }, setSearchParams));
 
     // Users aren't cleared with the filters, the page would be empty without them

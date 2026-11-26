@@ -116,7 +116,7 @@ export function SearchControlsScoped(props) {
     const optionDescription = options => id => options.find(option => option.id === id)?.description ?? id;
     const watched = params.type === "anime" ? "Rewatched" : "Reread";
 
-    const search = arrayUtils.wrapToArray(searchParams.q).at(-1);
+    const search = decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
     if (search) queries.push(createActiveQuery({ description: `Searching "${search}"`, icon: SearchIcon, query: { q: undefined }, clearable: false }, setSearchParams));
 
     queries.push(...createValueActiveQueries("list", props.list(), name => ({ description: "List: " + listTitle(name), icon: ListIcon }), setSearchParams));

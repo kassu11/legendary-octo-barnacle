@@ -118,7 +118,7 @@ export function SequelSearchControls(props) {
     const queries = [];
     const optionDescription = options => id => options.find(option => option.id === id)?.description ?? id;
 
-    const search = arrayUtils.wrapToArray(searchParams.q).at(-1);
+    const search = decodeURIComponent(arrayUtils.wrapToArray(searchParams.q).at(-1) || "");
     if (search) queries.push(createActiveQuery({ description: `Searching "${search}"`, icon: SearchIcon, query: { q: undefined }, clearable: false }, setSearchParams));
 
     queries.push(...createValueActiveQueries("sort", arrayUtils.wrapToArray(searchParams.sort).filter(Boolean), value => {
