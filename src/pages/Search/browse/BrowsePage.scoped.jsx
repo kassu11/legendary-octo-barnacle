@@ -21,7 +21,7 @@ export function BrowsePage(props) {
         </Match>
         <Match when={params.type === "manga"}>
           <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.trending?.media} loading={props.loading} href="/ani/search/manga/trending" title="Trending Now" />
-          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.novel?.media} loading={props.loading} href="/ani/search/manga/novel" title="Popular Light Lovels" />
+          <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.novel?.media} loading={props.loading} href="/ani/search/manga/novel" title="Popular Light Novels" />
           <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.manhwa?.media} loading={props.loading} href="/ani/search/manga/manhwa" title="Popular Manhwas" />
           <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedManga?.media} loading={props.loading} href="/ani/search/manga/finished-manga" title="Recently Finished Mangas" />
           <HorizontalCardRowScoped data={props.cards?.novel && props.cards?.finishedNovel?.media} loading={props.loading} href="/ani/search/manga/finished-novel" title="Recently Finished Light Novels" />
