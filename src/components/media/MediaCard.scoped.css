@@ -165,6 +165,7 @@
       grid-column: 1;
       position: relative;
       pointer-events: none;
+      z-index: 1;
 
       .media-quick-actions {
         pointer-events: auto;
