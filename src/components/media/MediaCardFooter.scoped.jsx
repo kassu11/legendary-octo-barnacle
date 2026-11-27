@@ -7,6 +7,7 @@ import { addApplicationNotification } from "@/state/notifications";
 import { storeGlobalEditedMedia } from "@/state/globalState";
 import { leadingAndTrailingDebounce } from "@/utils/scheduleUtils";
 import { Tooltip } from "@/components/Tooltip.scoped";
+import { PlusIcon } from "@/assets/icons.jsx";
 
 /**
  * Users list progress and score for the bottom of the media cover.
@@ -15,7 +16,7 @@ import { Tooltip } from "@/components/Tooltip.scoped";
  * @param {Object} props.media Anilist media
  * @param {Object} props.entry Users media list entry
  * @param {string} [props.scoreFormat] Score format of the entry owner, defaults to POINT_10_DECIMAL
- * @param {boolean} [props.progressIncrement] "+" buttons to increase the progress
+ * @param {boolean} [props.progressIncrement] Makes the progress a button that increases it by one
  * @param {boolean} [props.showAdvancedScores] Users advanced scores as a tooltip when hovering the score, shown in the same score format
  * @param {Function} [props.afterProgressMutation] Called with the saved list entry after the progress has been increased
  */
@@ -82,21 +83,32 @@ function ProgressInfo(props) {
     });
   }, 250, 2);
 
-  return (
+  const canIncrement = () => props.progressIncrement && (max() === null || count() < max());
+  const countText = () => (
     <>
-      {props.label}
       <Show when={props.label !== "Movie" || count() !== 1}> {count()}</Show>
-      <Show when={count() < max()}>
-        /{max()}
-      </Show>
-      <Show when={props.progressIncrement && (max() === null || count() < max())}>
-        <button onClick={e => {
+      <Show when={count() < max()}>/{max()}</Show>
+    </>
+  );
+
+  return (
+    <Show when={canIncrement()} fallback={<span class="progress">{props.label}{countText()}</span>}>
+      <button
+        class="progress increment"
+        aria-label={`Increase progress, ${props.label} ${count()}`}
+        onClick={e => {
           e.preventDefault();
           const progress = Math.min(max() || count() + 1, count() + 1);
           setCount(progress);
           saveProgress(progress);
-        }}>+</button>
-      </Show>
-    </>
+        }}
+      >
+        <span class="label">
+          <span class="text">{props.label}</span>
+          <PlusIcon scoped class="plus" />
+        </span>
+        {countText()}
+      </button>
+    </Show>
   );
 }

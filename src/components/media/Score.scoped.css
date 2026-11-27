@@ -2,7 +2,6 @@ div {
   --scoped-score-color: rgb(232,93,117);
   display: flex;
   gap: .25rem;
-  padding-left: 1.25rem;
 
   &.average {
     --scoped-score-color: rgb(247,154,99);
@@ -24,7 +23,6 @@ div {
 
   &.badge {
     padding: 2px 8px;
-    margin-left: 1.25rem;
     border-radius: 6px;
     background-color: color-mix(var(--scoped-score-color), transparent 75%);
     box-shadow: inset 0 0 0 1px color-mix(var(--scoped-score-color), transparent 35%);

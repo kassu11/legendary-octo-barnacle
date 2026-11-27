@@ -30,7 +30,7 @@ import { CheckIcon } from "@/assets/icons.jsx";
  * @param {boolean} [props.otherUsersEntry] mediaListEntry belongs to another user, so the quick actions edit the viewers own entry instead
  * @param {boolean} [props.showFooter] Users list progress and score at the bottom of the cover
  * @param {string} [props.scoreFormat] Score format used by the footer, defaults to POINT_10_DECIMAL
- * @param {boolean} [props.progressIncrement] "+" buttons in the footer to increase the progress
+ * @param {boolean} [props.progressIncrement] Footer progress becomes a button that increases it by one
  * @param {boolean} [props.showAdvancedScores] Users advanced scores as a tooltip when hovering the footer score
  * @param {Function} [props.afterProgressMutation] Called with the saved list entry after the progress has been increased through the footer
  * @param {Function} [props.afterMutation] Called with the saved list entry after the media has been edited through the quick actions
